@@ -3,7 +3,8 @@
 import type { Species } from '../../core/types';
 
 type Pair = [string, string];
-const SKIN: Record<'human' | 'fish' | 'mink' | 'sky', Pair[]> = {
+const SKIN: Record<'human' | 'fish' | 'mink' | 'sky' | 'luna', Pair[]> = {
+  luna: [['#7a4a32', '#5a3220'], ['#8a5a3c', '#6a4028']],
   human: [['#f6c89a', '#d99a6c'], ['#eab183', '#c98458'], ['#c98a5c', '#a0643c'], ['#fbd9b5', '#e0aa80']],
   fish: [['#8cc8d8', '#5a9ab0'], ['#9ad0b0', '#62a084'], ['#a8b4e0', '#7482b8']],
   mink: [['#f0dcc0', '#c8ac88'], ['#e8b070', '#b87c40'], ['#d8d8e0', '#a0a0b0']],
@@ -14,14 +15,27 @@ const HAIR: Pair[] = [['#2a2430', '#16121c'], ['#5a3a22', '#3a2412'], ['#c8742a'
 const GRAY: Pair = ['#dcdfe6', '#a8acb8'];
 const CIVIL: Pair[] = [['#4a8ac8', '#2f6498'], ['#58a070', '#3a7850'], ['#c89040', '#98682a'], ['#a868b0', '#7a4884']];
 
+/** 들고 있는 무기. 평소 모습(칼집 · 권총집 · 붕대 감은 주먹)과 공격 자세 · 공격 효과가 달라진다 */
+export type Weapon = 'sword' | 'fist' | 'gun';
 export interface Who {
   key: string;                // 고정 무작위의 씨앗 (id나 이름)
   gender?: 'm' | 'f'; age?: number; species?: Species;
   faction?: 'civil' | 'pirate' | 'marine' | 'rev';
   form?: 'seaking';
+  weapon?: Weapon;
+}
+
+/** 기술 목록에서 무기를 정한다: 검술 기술이 있으면 칼, 사격이면 총, 아니면 맨주먹 */
+export function weaponOfSkills(skills: readonly string[]): Weapon {
+  const sword = skills.filter((k) => k.startsWith('sword_')).length;
+  const gun = skills.filter((k) => k.startsWith('gun_')).length;
+  const fist = skills.filter((k) => k.startsWith('fist_')).length;
+  if (sword && sword >= gun && sword >= fist) return 'sword';
+  if (gun && gun >= fist) return 'gun';
+  return 'fist';
 }
 interface Desc {
-  seed: number; gender: 'm' | 'f'; species: 'human' | 'fish' | 'mink' | 'sky'; faction: NonNullable<Who['faction']>;
+  seed: number; gender: 'm' | 'f'; species: 'human' | 'fish' | 'mink' | 'sky' | 'luna'; faction: NonNullable<Who['faction']>;
   stage: 'child' | 'adult' | 'old'; skin: Pair; hair: Pair; style: number; civil: Pair; smile: number; key: string;
 }
 
@@ -35,14 +49,14 @@ export function describe(w: Who): Desc {
   const seed = hash(w.key);
   const age = w.age ?? 25;
   const gender = w.gender ?? (seed % 2 ? 'f' : 'm');
-  const species = w.species === 'fishman' || w.species === 'merfolk' ? 'fish' : w.species === 'mink' ? 'mink' : w.species === 'skypiean' ? 'sky' : 'human';
+  const species = w.species === 'fishman' || w.species === 'merfolk' ? 'fish' : w.species === 'mink' ? 'mink' : w.species === 'skypiean' ? 'sky' : w.species === 'lunarian' ? 'luna' : 'human';
   const faction = w.faction ?? 'civil';
   const stage = age <= 14 ? 'child' : age >= 55 ? 'old' : 'adult';
   const styles = gender === 'f' ? [2, 3, 5, 2, 3] : [0, 1, 0, 4, 1];
   return {
     seed, gender, species, faction, stage,
     skin: SKIN[species][(seed >>> 3) % SKIN[species].length],
-    hair: stage === 'old' ? GRAY : HAIR[(seed >>> 6) % HAIR.length],
+    hair: stage === 'old' || species === 'luna' ? GRAY : HAIR[(seed >>> 6) % HAIR.length],
     style: styles[(seed >>> 10) % styles.length],
     civil: CIVIL[(seed >>> 13) % CIVIL.length],
     smile: (seed >>> 16) % 3,
@@ -181,7 +195,8 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
     const c = seakingBody(w, frame); bodyCache.set(k, c); return c;
   }
   const d = describe(w);
-  const key = d.key + '|' + frame + '|' + (pose ?? '');
+  const wp = w.weapon ?? null;
+  const key = d.key + '|' + frame + '|' + (pose ?? '') + '|' + (wp ?? '');
   const hit = bodyCache.get(key);
   if (hit) return hit;
   const [c, x] = makeCanvas(20, 24);
@@ -197,11 +212,26 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
   r(4, torsoTop + torsoH - 2, 8, 1, d.faction === 'pirate' && !child ? '#e8c040' : clS);
   if (d.faction === 'pirate' && !child) r(7, torsoTop, 2, 4, sk);
   if (d.faction === 'marine' && !child) r(6, torsoTop, 4, 2, '#2a4a8a');
-  r(2, torsoTop, 2, torsoH - 2, cl); r(2, torsoTop + torsoH - 2, 2, 1, sk);
-  if (pose === 'attack') {
+  // 붕대 감은 주먹 (맨주먹 무술)
+  const wrap = wp === 'fist' && !child ? '#f0ece0' : sk;
+  r(2, torsoTop, 2, torsoH - 2, cl); r(2, torsoTop + torsoH - 2, 2, 1, wrap);
+  // 평소 모습: 등 뒤 칼집 · 허벅지 권총집
+  if (pose !== 'attack' && !child) {
+    if (wp === 'sword') { r(1, torsoTop - 2, 1, 2, '#c8a040'); r(1, torsoTop, 1, torsoH + 3, '#3a2a40'); r(0, torsoTop + 1, 1, torsoH + 1, '#5a4466'); }
+    if (wp === 'gun') { r(11, legsTop, 2, 3, '#4a3020'); r(11, legsTop - 1, 1, 1, '#7a7a88'); }
+  }
+  if (pose === 'attack' && wp === 'fist') {
+    // 곧게 뻗은 주먹
+    r(12, torsoTop + 1, 4, 2, cl); r(16, torsoTop, 3, 4, wrap === sk ? sk : '#f0ece0'); r(18, torsoTop + 1, 1, 2, skS); r(16, torsoTop + 1, 1, 1, skS);
+  } else if (pose === 'attack' && wp === 'gun') {
+    // 팔을 뻗어 권총을 겨눈다
+    r(12, torsoTop + 1, 3, 2, cl); r(15, torsoTop + 1, 1, 2, sk);
+    r(15, torsoTop + 2, 1, 2, '#5a3a22'); r(15, torsoTop, 4, 2, '#4a4a56'); r(16, torsoTop, 3, 1, '#8a8a96');
+  } else if (pose === 'attack') {
+    // 칼을 치켜든다 (무기가 정해지지 않았으면 칼)
     r(12, torsoTop + 1, 3, 2, cl); r(15, torsoTop + 1, 1, 2, sk);
     r(15, torsoTop + 3, 3, 1, '#c8a040'); r(16, torsoTop - 5, 1, 8, '#e4ecf4'); r(17, torsoTop - 4, 1, 6, '#b0bccc');
-  } else { r(12, torsoTop, 2, torsoH - 2, clS); r(12, torsoTop + torsoH - 2, 2, 1, sk); }
+  } else { r(12, torsoTop, 2, torsoH - 2, clS); r(12, torsoTop + torsoH - 2, 2, 1, wrap); }
   r(4, headTop, 8, 7, sk); r(3, headTop + 1, 10, 5, sk); r(11, headTop + 2, 2, 4, skS);
   r(6, headTop + 3, 1, 2, '#1c1420'); r(10, headTop + 3, 1, 2, '#1c1420');
   if (old && d.gender === 'm') r(6, headTop + 5, 5, 2, hc);
@@ -295,14 +325,44 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t
     if (flip) { bx.save(); bx.translate(Math.round(cx) + 20, py); bx.scale(-1, 1); bx.drawImage(sp, 0, 0); bx.restore(); }
     else bx.drawImage(sp, Math.round(cx), py);
   };
-  sc.crew.slice(0, 3).forEach((c, i) => put(c, W * (0.10 + i * 0.085), null, false));
+  const crew = sc.crew.slice(0, 3);
+  if (sc.sailing) {
+    // 배 위: 갑판(폭의 20~80%) 안에 세운다. 싸우지 않을 때는 셋째를 돛대 오른쪽에
+    const deckL = Math.floor(W * 0.2) + 2, heroX = W * 0.36;
+    const behind = !fighting && crew.length === 3 ? crew.slice(0, 2) : crew;
+    const span = Math.max(0, heroX - 14 - deckL);
+    behind.forEach((c, i) => put(c, deckL + (behind.length > 1 ? (span * i) / (behind.length - 1) : span / 2), null, false));
+    if (behind.length < crew.length) put(crew[2], W * 0.56, null, false);
+  } else {
+    crew.forEach((c, i) => put(c, W * (0.10 + i * 0.085), null, false));
+  }
   const lunge = fighting ? Math.round(Math.sin(t * 0.13) * 4) : 0;
   put(sc.hero, W * 0.36 + lunge, fighting && tt % 4 < 2 ? 'attack' : null, false);
   if (sc.foe) {
     put(sc.foe, W * 0.58 - lunge, tt % 4 >= 2 ? 'attack' : null, true);
     if (tt % 4 === 1 || tt % 4 === 3) {
-      const fx = Math.floor(W * 0.5), fy = ground - 14;
-      r(fx, fy - 4, 2, 10, '#fff8c0'); r(fx - 4, fy, 10, 2, '#fff8c0'); r(fx - 2, fy - 2, 6, 6, '#ffffff');
+      // 공격하는 쪽의 무기에 맞는 효과: 칼은 베는 자국, 주먹은 충격파, 총은 총구 불꽃과 탄도
+      const heroTurn = tt % 4 === 1;
+      const wp = (heroTurn ? sc.hero.weapon : sc.foe.weapon) ?? 'sword';
+      const heroX = W * 0.36 + lunge, foeX = W * 0.58 - lunge;
+      const tx = heroTurn ? foeX + 10 : heroX + 10;          // 맞는 쪽 몸통
+      const fy = ground - 14;
+      if (wp === 'sword') {
+        for (let i = 0; i < 11; i++) { r(tx - 6 + i, fy - 7 + i, 2, 1, '#ffffff'); r(tx - 5 + i, fy - 7 + i, 1, 1, '#bfe0ff'); }
+        r(tx - 7, fy - 8, 2, 1, '#fff8c0'); r(tx + 5, fy + 4, 2, 1, '#fff8c0');
+      } else if (wp === 'gun') {
+        const mx = heroTurn ? heroX + 19 : foeX + 1, my = ground - 12;
+        const hx = heroTurn ? foeX + 5 : heroX + 14;          // 맞는 쪽 몸의 앞면
+        r(heroTurn ? mx : mx - 2, my - 1, 2, 3, '#fff8c0');
+        const a = Math.min(mx, hx), b = Math.max(mx, hx);
+        for (let x = a + 3; x < b - 2; x += 3) r(x, my, 2, 1, '#ffe080');
+        r(hx, my - 1, 1, 1, '#ffd060'); r(hx + (heroTurn ? -1 : 1), my + 1, 1, 1, '#ffd060');
+      } else {
+        // 맞는 쪽 몸의 앞면, 가슴 높이에 작은 충격파
+        const hx = heroTurn ? W * 0.58 - lunge + 4 : W * 0.36 + lunge + 15, cy = ground - 11;
+        r(hx, cy - 3, 1, 7, '#fff8c0'); r(hx - 3, cy, 7, 1, '#fff8c0'); r(hx, cy, 1, 1, '#ffffff');
+        [[-3, -3], [3, -3], [-3, 3], [3, 3]].forEach(([ox, oy]) => r(hx + ox, cy + oy, 1, 1, '#ffd890'));
+      }
     }
   }
   if (sc.aura) {

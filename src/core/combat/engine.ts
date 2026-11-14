@@ -77,14 +77,14 @@ function tacticDeal(u: CUnit, sk: Skill | null, round: number) {
   return m;
 }
 
-function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skill | null, power: number, extra: { seastone?: boolean; helper?: boolean } = {}) {
+function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skill | null, power: number, extra: { seastone?: boolean; helper?: boolean; proc?: boolean; element?: string; name?: string } = {}) {
   const a = b.units[ai], t = b.units[ti];
   const area = sk?.tags.includes('area');
   // 회피
   let dodge = C.dodge.base + (t.st.spd - a.st.spd) * C.dodge.perSpd;
   dodge = Math.max(0, Math.min(C.dodge.max, dodge)) + t.observation * C.dodge.perObs + t.pDodge + (t.evadeTurns > 0 ? t.evade : 0);
   if (area) dodge *= C.dodge.areaMult;
-  const name = sk ? sk.name : extra.seastone ? '해루석 탄환' : extra.helper ? '협공' : '기본 공격';
+  const name = extra.name ?? (sk ? sk.name : extra.seastone ? '해루석 탄환' : extra.helper ? '협공' : '기본 공격');
   if (r() < Math.min(0.95, dodge)) {
     b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg: 0, crit: false, dodge: true });
     if (t.evadeTurns > 0) t.evadeTurns = 0;
@@ -95,25 +95,51 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   const mastery = sk ? C.mastery.min + C.mastery.span * (a.skills.find((k) => k.id === sk.id)?.mastery ?? 50) / 100 : 1;
   const weapon = a.weapon && sk && a.weapon.branch === sk.branch ? a.weapon.mult : 1;
   const rand = C.rand[0] + (C.rand[1] - C.rand[0]) * r();
-  const crit = r() < C.crit.base + a.st.luk * C.crit.perLuk;
+  const am = a.mods, tm = t.mods;
+  const crit = r() < C.crit.base + a.st.luk * C.crit.perLuk + (am.crit ?? 0);
   const lg = logiaMult(a, t, sk, extra);
   const logia = lg.mult;
   const guard = (t.guardTurns > 0 ? t.guard : 0) + t.pGuard;
+  // 패시브: 공격하는 쪽
+  const allyDown = b.units.some((u) => u.side === a.side && u.hp <= 0);
+  const passive = (am.dmg ?? 1) * (!sk || sk.branch !== 'fruit' ? am.phys ?? 1 : 1)
+    * (1 + (am.lowHpPower ?? 0) * (1 - ratio(a)))
+    * (b.round <= 2 ? 1 + (am.opening ?? 0) : 1)
+    * (b.atSea ? 1 + (am.atSea ?? 0) : 1)
+    * (allyDown ? 1 + (am.allyDown ?? 0) : 1)
+    * (sk?.when === 'afterEnemyBig' ? 1 + (am.counter ?? 0) : 1);
+  // 패시브: 맞는 쪽 (속성 저항)
+  const element = (extra.element ?? am.element) as keyof NonNullable<typeof tm.resist> | undefined;
+  const resist = element && tm.resist?.[element] !== undefined ? tm.resist[element]! : 1;
   let dmg = stat * power * mastery * weapon * tacticDeal(a, sk, b.round) * rand
     * 100 / (100 + t.def * C.defenseK)
-    * (crit ? C.crit.mult : 1) * logia * Math.max(0.1, 1 - guard)
-    * C.tactic[t.tactic].take * (1 + a.pBuff + (a.buffTurns > 0 ? a.buff : 0));
-  dmg = Math.max(1, Math.round(dmg));
+    * (crit ? am.critMult ?? C.crit.mult : 1) * logia * Math.max(0.1, 1 - guard)
+    * C.tactic[t.tactic].take * (1 + a.pBuff + (a.buffTurns > 0 ? a.buff : 0))
+    * passive * (tm.take ?? 1) * resist;
+  dmg = Math.max(resist === 0 ? 0 : 1, Math.round(dmg));
+  // 불굴: 쓰러질 공격을 한 번 버틴다
+  let stood = false;
+  if (dmg >= t.hp && tm.lastStand && !t.stood && t.hp > 1) { t.stood = true; dmg = t.hp - 1; stood = true; }
   t.hp = Math.max(0, t.hp - dmg);
   if (t.guardTurns > 0) t.guardTurns -= 1;
-  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note: lg.why ?? undefined });
+  const note = stood ? '쓰러지지 않고 버텼다!' : resist === 0 ? '전혀 통하지 않는다' : resist < 1 ? '잘 안 먹힌다' : lg.why ?? undefined;
+  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note, proc: extra.proc });
+  // 패시브: 흡수 · 묶기 · 봉인 · 추가 공격
+  if (am.drain && dmg > 0 && a.hp < a.maxHp) {
+    const amount = Math.min(a.maxHp - a.hp, Math.max(1, Math.round(dmg * am.drain)));
+    a.hp += amount;
+    b.events.push({ k: 'heal', d, who: ai, target: ai, amount, name: '흡수' });
+  }
+  if (am.bindOnHit && t.hp > 0 && r() < am.bindOnHit) t.bound = Math.max(t.bound, 1);
+  if (am.sealOnHit && t.fruitClass && t.hp > 0 && r() < am.sealOnHit) t.sealed = Math.max(t.sealed, 1);
+  if (!extra.proc && am.proc && t.hp > 0 && r() < am.proc.p) hit(b, r, d, ai, ti, null, am.proc.power, { proc: true, element: am.proc.element, name: am.proc.name });
   if (a.hero) {
     const key = sk?.id ?? 'basic';
     const u = (b.usage[key] ??= { uses: 0, damage: 0 });
     u.uses += 1; u.damage += dmg;
   }
   // 열매의 대가: 바다 위에서 체력이 낮을 때 큰 기술을 맞으면 빠질 수 있다
-  if (b.atSea && t.hero && t.fruitClass && t.hp > 0 && ratio(t) < C.drown.hpBelow && power >= C.bigPower) {
+  if (b.atSea && t.hero && t.fruitClass && !t.mods.noDrown && t.hp > 0 && ratio(t) < C.drown.hpBelow && power >= C.bigPower) {
     if (r() < (b.navigator ? C.drown.navigatorP : C.drown.p)) {
       b.events.push({ k: 'drown', who: ti });
       t.hp = 0;
@@ -318,6 +344,13 @@ function round(b: BattleState, r: Rng, autoIntervene: boolean) {
   b.round += 1;
   b.events.push({ k: 'round', n: b.round });
   medics(b);
+  // 패시브: 재생
+  for (const [i, u] of b.units.entries()) {
+    if (u.hp <= 0 || !u.mods.regen || u.hp >= u.maxHp) continue;
+    const amount = Math.max(1, Math.round(u.maxHp * u.mods.regen));
+    u.hp = Math.min(u.maxHp, u.hp + amount);
+    b.events.push({ k: 'heal', d: -1, who: i, target: i, amount, name: '재생' });
+  }
   const h = heroIndex(b);
   if (b.resting) {
     const hu = b.units[h];

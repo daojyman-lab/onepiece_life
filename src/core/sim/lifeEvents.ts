@@ -2,9 +2,12 @@
 // 예) "로그타운 뒷산에서 뛰어다니며 놀았다. 체력 소폭 상승"
 import { B } from '../../data/balance';
 import { LIFE_EVENTS, type LifeEvent } from '../../data/lifeEvents';
+import { DAILY_LINES, seasonOf } from '../../data/dailyLines';
+import { CANON_LIFE_EVENTS } from '../../data/canonEvents';
+import { BIRTHDAY_LINES } from '../../data/birthdays';
 import { checkAll } from '../conditions';
 import { applyEffects } from '../effects';
-import { crewOf } from '../people';
+import { crewOf, traitOf } from '../people';
 import { pick, rngOf, weighted, type Rng } from '../rng';
 import type { Effect, LifeState, StatKey } from '../types';
 import { absMonth, fill, findPerson, log } from '../util';
@@ -22,6 +25,9 @@ function vars(s: LifeState, r: Rng): Record<string, string> {
     port: active?.port ?? pick(r, sea(s).ports),
     father: by('아버지') ?? '아버지', mother: by('어머니') ?? '어머니',
     rival: rival?.name ?? '라이벌', crew: crew.length ? pick(r, crew).name : '동료',
+    spouse: s.people.find((p) => p.alive && p.relation === '배우자')?.name ?? '배우자',
+    lover: s.people.find((p) => p.alive && p.relation === '연인')?.name ?? '연인',
+    child: (() => { const k = s.people.filter((p) => p.alive && (p.relation === '아들' || p.relation === '딸')); return k.length ? pick(r, k).name.split(' ').pop()! : '아이'; })(),
   };
 }
 
@@ -52,7 +58,7 @@ function run(s: LifeState, effects: Effect[], r: Rng, out: string[]) {
 
 function candidates(s: LifeState): LifeEvent[] {
   const now = absMonth(s);
-  return LIFE_EVENTS.filter((ev) => {
+  return [...LIFE_EVENTS, ...CANON_LIFE_EVENTS].filter((ev) => {
     const last = s.choice.seen[`ev:${ev.id}`];
     return (last === undefined || now - last >= ev.cooldown) && checkAll(s, ev.when);
   });
@@ -73,9 +79,51 @@ export function fireLifeEvent(s: LifeState): boolean {
   return true;
 }
 
-/** 달마다: 확률로 작은 사건 */
+/** 일상 한 줄. 능력치는 바뀌지 않는다 */
+export function fireDailyLine(s: LifeState): boolean {
+  const r = rngOf(s.rng);
+  // 동료가 있으면 가끔 그 동료의 성격이 드러나는 한 줄
+  const crew = crewOf(s);
+  if (crew.length && r() < B.lifeEvents.crewTraitShare) {
+    const p = pick(r, crew);
+    log(s, pick(r, traitOf(p).lines).replace(/\{name\}/g, p.name), 'day');
+    return true;
+  }
+  const now = absMonth(s);
+  const season = seasonOf(s.time.month);
+  const cands = DAILY_LINES.map((d, i) => ({ d, i })).filter(({ d, i }) => {
+    const last = s.choice.seen[`day:${i}`];
+    return (!d.season || d.season === season) && (last === undefined || now - last >= B.lifeEvents.dailyCooldown) && checkAll(s, d.when);
+  });
+  if (!cands.length) return false;
+  const { d, i } = pick(r, cands);
+  s.choice.seen[`day:${i}`] = now;
+  log(s, fill(d.text, vars(s, r)), 'day');
+  return true;
+}
+
+/** 하루를 그리는 한 줄: 능력치가 오르는 작은 사건이나 일상 한 줄 */
+export function fireNarrative(s: LifeState) {
+  const r = rngOf(s.rng);
+  if (r() < B.lifeEvents.statShare) { if (fireLifeEvent(s)) return; }
+  if (!fireDailyLine(s)) fireLifeEvent(s);
+}
+
+/** 생일 한 줄 */
+export function fireBirthday(s: LifeState) {
+  const r = rngOf(s.rng);
+  const cands = BIRTHDAY_LINES.filter((b) => checkAll(s, b.when));
+  const b = weighted(r, cands, (x) => x.weight ?? 1);
+  if (!b) return;
+  const v = { ...vars(s, r), age: String(s.hero.age) };
+  const out: string[] = [];
+  run(s, b.effects ?? [], r, out);
+  const tail = [...new Set(out)].join(', ');
+  log(s, `🎂 ${fill(b.text, v)}${tail ? ` ${tail}` : ''}`, 'good');
+}
+
+/** 달마다 한 줄 */
 export function monthlyLifeEvent(s: LifeState) {
   if (s.pending || !s.hero.alive) return;
-  const r = rngOf(s.rng);
-  if (r() < B.lifeEvents.monthly) fireLifeEvent(s);
+  fireNarrative(s);
 }

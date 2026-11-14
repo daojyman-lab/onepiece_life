@@ -44,9 +44,8 @@ export function getSkill(id: string): Skill | undefined {
 /** 한 갈래의 기술 목록. 열매는 주인공이 먹은 열매의 것 */
 export function branchSkills(branch: BranchId, fruitId: string | null): Skill[] {
   if (branch !== 'fruit') return SKILLS.filter((s) => s.branch === branch);
-  if (!fruitId) return [];
-  const f = FRUIT_BY_ID[fruitId];
-  return f ? f.skills.map((_, i) => getSkill(fruitSkillId(fruitId, i))!) : [];
+  void fruitId;
+  return [];   // 열매는 기술이 아니라 패시브다 (data/passives.ts)
 }
 
 export function armamentLevel(s: LifeState): 0 | 1 | 2 | 3 {
@@ -74,6 +73,37 @@ export function effectiveStats(s: LifeState): Stats {
 
 export function heavyInjured(s: LifeState) {
   return s.hero.injuries.some((i) => i.severity === 'heavy');
+}
+
+const WHEN_TEXT: Record<Skill['when'], string> = {
+  always: '', opening: '첫 2합에만', hpBelow50: '내 체력이 절반 아래일 때', enemyHpBelow30: '상대 체력이 30% 아래일 때',
+  afterEnemyBig: '상대가 큰 기술을 쓴 직후', allyDown: '우리 편이 쓰러졌을 때',
+};
+
+/** 기술이 무엇을 하는지 한 줄로: "공격 · 위력 1.8배 · 기력 14 · 2합마다 · 여럿에게(피하기 어려움)" */
+export function skillSummary(sk: Skill): string {
+  const parts: string[] = [];
+  const statName = { str: '힘', spd: '속도', int: '지능', wil: '정신' }[sk.stat];
+  if (sk.kind === 'attack') parts.push(`공격 · 위력 ${sk.power}배 (${statName})`);
+  else if (sk.kind === 'passive') {
+    const e = sk.effect;
+    parts.push(e?.type === 'guard' ? `늘 받는 피해 −${Math.round(e.value * 100)}%` : e?.type === 'dodge' ? `늘 회피 +${Math.round(e.value * 100)}%` : e?.type === 'buff' ? `늘 피해 +${Math.round(e.value * 100)}%` : '늘 효과');
+  } else {
+    const e = sk.effect;
+    if (e?.type === 'guard') parts.push(`방어 · ${e.turns}합 동안 받는 피해 −${Math.round(e.value * 100)}%`);
+    else if (e?.type === 'dodge') parts.push(`회피 · ${e.turns}합 동안 회피 +${Math.round(e.value * 100)}%`);
+    else if (e?.type === 'heal') parts.push(`회복 · 체력 ${Math.round(e.value * 100)}%`);
+    else if (e?.type === 'bind') parts.push(`묶기 · ${Math.round(e.value * 100)}% 확률로 상대가 한 합 못 움직임`);
+    else parts.push('보조');
+  }
+  if (sk.kind !== 'passive') {
+    parts.push(`기력 ${sk.cost}`);
+    if (sk.cooldown > 0) parts.push(`${sk.cooldown + 1}합에 한 번`);
+  }
+  if (WHEN_TEXT[sk.when]) parts.push(WHEN_TEXT[sk.when]);
+  if (sk.tags.includes('area')) parts.push('여럿에게 · 피하기 어려움');
+  if (sk.tags.includes('pierce')) parts.push('자연계에 한 단계 더 닿음');
+  return parts.join(' · ');
 }
 
 /** 한 갈래의 숙련 측정: 배운 기술 수, 전체 기술 수, 배운 기술의 평균 숙련 */

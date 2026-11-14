@@ -4,7 +4,10 @@ import type { BranchId, StatKey, Tactic } from '../core/types';
 export const B = {
   log: { max: 300 },
   // 한 달에 걸리는 시간(ms). 1배속은 1년이 18초. 기록을 읽을 수 있는 속도 (2026-11-14 600 → 1500)
-  clock: { speeds: { 1: 1500, 2: 750, 4: 375 } as Record<number, number> },
+  // 이야기 한 줄이 떠오르는 간격(ms)과 한 달 사이의 쉼. 배속으로 나눈다. 1배속이면 1년이 약 40초 (2026-11-14)
+  clock: { lineMs: 2200, quickLineMs: 700, monthMs: 1000, quickTypes: ['money', 'growth'] as string[] },
+  // 전투 기록 한 줄의 간격(ms). 배속으로 나눈다 (1배속 1120 = 예전 4배 느리게)
+  battleLineMs: 1120,
 
   // ---- 시간 · 유년기
   childhood: { ages: [3, 6, 9], startTickAge: 10 },
@@ -35,6 +38,18 @@ export const B = {
     eliteWinStat: 0.6,        // 강적을 이기면 오르는 능력치 (상대 힘 비율에 곱함)
   },
 
+  // ---- 해군: 이 계급(하사)부터 자기 분대를 꾸린다. 정원 = base + (계급 − squadRank) ÷ 2
+  marine: { squadRank: 3, squadBase: 2, squadMax: 10 },
+
+  // ---- 집중 수련: 그동안 벌이가 없고 임무를 쉬는 대신 능력치 · 숙련이 mult배로 자란다
+  training: { mult: 2, options: [3, 6], minAge: 15 },   // 유년기 · 수련기 초반에는 못 한다
+
+  // ---- 스승 찾기: 최대 months개월. 찾을 확률 = base + 운 × perLuk + 항해사 동료, 찾는 달은 2~months. 여비 × 해역 단계
+  seek: { months: 12, base: 0.45, perLuk: 0.004, navigator: 0.1, max: 0.85, cost: 8000 },
+
+  // ---- 배신의 기미: 의심받는 동료가 진짜 배신자일 확률, 몰래 지켜볼 때 알아챌 확률(기본 + 지능마다)
+  betrayal: { traitorP: 0.5, watchBase: 0.4, watchPerInt: 0.01, watchMax: 0.95, hurtLeaveP: 0.4, stealPct: 0.25, duelLoseStealPct: 0.2 },
+
   // ---- 패기 · 열매를 얻는 확률 (2026-11-14 낮춤)
   haki: { awakenP: 0.35, awakenNeedP: 0.4, awakenConquerorP: 0.5, conquerorSeed: 0.3, conquerorOther: 0.02 },
 
@@ -42,7 +57,8 @@ export const B = {
   // perYear: 한 해에 멈추는 수(중대한 선택 + 강적 준비)의 상한. randomCap: 그중 무작위 선택이 뜰 수 있는 한도
   choice: { gapMin: 2, gapMax: 4, perYear: 5, randomCap: 4, fruitAskWithin: 6, retrainYears: 3 },
   // 작은 사건: 달마다 일어날 확률, 유년기에 건너뛰는 해마다 일어나는 수
-  lifeEvents: { monthly: 0.45, childPerYear: 2 },
+  // 달마다 한 줄씩 하루를 그린다. 그중 statShare는 능력치가 오르는 작은 사건, 나머지는 일상 한 줄
+  lifeEvents: { statShare: 0.4, childPerYear: 4, dailyCooldown: 24, crewTraitShare: 0.3 },
   // 임무 강적의 승률이 이 값 이상이면 준비 화면 없이 자동으로 싸운다
   autoElite: { minRate: 0.7, runs: 60 },
 
@@ -67,6 +83,7 @@ export const B = {
   // ---- 돈 (03 문서 8장)
   money: {
     living: 300,              // × 해역 단계
+    spouse: 250, child: 200,  // 가족 부양 (× 해역 단계, 달마다). 아이는 18세까지
     pirateIncome: 450,        // × 해역 단계. 해적 · 혁명군의 달마다 벌이 (약탈, 잡일)
     marineSalary: 900,        // × (계급+1) × 해역 단계
     pirateLoot: [800, 3000],  // × 해역 단계, 평소 교전 승리 때
@@ -133,5 +150,9 @@ export const B = {
   },
 
   // ---- 동료
-  crew: { powerPerLevel: 6, levelEveryMonths: 12, maxLevel: 30, shipwrightDiscount: 0.8 },
+  // fruitPowerMult · fruitPowerAdd: 동료가 열매를 먹으면 힘 × (1 + 배율 × 등급) + 더함 × 등급
+  crew: { powerPerLevel: 6, levelEveryMonths: 12, maxLevel: 30, shipwrightDiscount: 0.8, fruitPowerMult: 0.06, fruitPowerAdd: 3,
+    // 부선장: 본인 피해 +15% · 받는 피해 −5%, 다른 동료 피해 +5%. 회식: 동료 피해 +10%가 feastMonths 동안, 값은 1인당 × 해역 단계
+    mateBuff: 0.15, mateGuard: 0.05, mateLead: 0.05, feastBuff: 0.1, feastMonths: 6, feastCostPer: 3000, feastBond: 8,
+    recallCost: 2000 },   // 흩어진 옛 동료를 전보벌레로 부르는 여비 (× 해역 단계)
 };

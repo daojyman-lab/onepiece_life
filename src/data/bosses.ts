@@ -70,9 +70,9 @@ export const BOSSES: Boss[] = [
     drops: [{ op: 'money', add: 150000 }, { op: 'item', id: 'ch4', count: 1 }, { op: 'chance', p: 0.1, then: [{ op: 'findFruit', pool: 'gradeMin3' }] }] }),
 
   // ---- 4단계
-  boss({ id: 'b_darc', name: '뇌격 다르크', title: '해군 본부 중장', p: 92, bias: { spd: 1.2, wil: 1 }, faction: 'marine', armament: 2, observation: 1, skills: ['sword_cut', 'sword_wave', 'sword_finish', 'arm_strike', 'arm_hard', 'obs_read'], tactic: 'counter',
-    officers: [enemy({ id: 'o_pacifista1', name: '퍼시피스타 PX-3', p: 72, faction: 'marine', skills: ['gun_snipe', 'gun_volley'] }), enemy({ id: 'o_pacifista2', name: '퍼시피스타 PX-5', p: 72, faction: 'marine', skills: ['gun_snipe', 'gun_volley'] })],
-    sea: ['sabaody'], stage: 4, route: 'pirate', intro: '샤본디를 봉쇄한 본부 중장과 인간 병기들.',
+  boss({ id: 'b_darc', name: '키자루', title: '해군 대장', canon: 'kizaru', p: 94, bias: { spd: 1.4, wil: 1 }, faction: 'marine', fruitClass: 'logia', armament: 2, observation: 2, skills: ['fruit:pika:0', 'fruit:pika:1', 'fruit:pika:2', 'arm_strike', 'obs_read'], tactic: 'counter',
+    officers: [enemy({ id: 'o_sentomaru', name: '전투환', p: 74, faction: 'marine', armament: 2, skills: ['fist_guard', 'fist_iron', 'arm_hard'] }), enemy({ id: 'o_pacifista1', name: '퍼시피스타 PX-4', p: 72, faction: 'marine', skills: ['gun_snipe', 'gun_volley'] })],
+    sea: ['sabaody'], stage: 4, route: 'pirate', intro: '샤본디를 빛으로 휩쓴 해군 대장과 인간 병기들. 빛보다 빠른 발차기가 날아온다.',
     drops: [{ op: 'money', add: 350000 }, { op: 'item', id: 'ar3', count: 1 }] }),
   boss({ id: 'b_hody', name: '호디 존스', title: '신어인 해적단 선장', canon: 'hody', p: 90, bias: { str: 1.3, vit: 1.2, int: 0.4 }, species: 'fishman', armament: 1, skills: ['fist_jab', 'fist_combo', 'fist_quake', 'fist_secret'], tactic: 'offense',
     officers: [enemy({ id: 'o_zeo', name: '제오', p: 66, species: 'fishman', skills: ['fist_jab', 'gun_smoke'] }), enemy({ id: 'o_daruma', name: '다루마', p: 64, species: 'fishman', skills: ['fist_combo'] })],
@@ -90,7 +90,7 @@ export const BOSSES: Boss[] = [
 
   // ---- 6단계
   boss({ id: 'b_akainu', name: '아카이누', title: '해군 원수', canon: 'akainu', p: 178, bias: { str: 1.2, wil: 1.2 }, faction: 'marine', fruitClass: 'logia', armament: 3, observation: 2, skills: ['fruit:magu:0', 'fruit:magu:1', 'fruit:magu:2', 'fruit:magu:3', 'arm_flow'], tactic: 'offense',
-    officers: [enemy({ id: 'o_kizaru', name: '키자루', p: 150, faction: 'marine', fruitClass: 'logia', armament: 2, skills: ['fruit:pika:0', 'fruit:pika:1', 'fruit:pika:2'] })],
+    officers: [enemy({ id: 'o_ryokugyu', name: '녹우 아라마키', p: 150, faction: 'marine', fruitClass: 'logia', armament: 2, skills: ['arm_flow', 'fist_quake', 'fist_secret'] })],
     sea: ['nw_late'], stage: 6, route: 'pirate', intro: '철저한 정의의 원수. 이 산을 넘으면 해적왕이다.',
     drops: [{ op: 'money', add: 3000000 }] }),
   boss({ id: 'b_kaido', name: '백수 카이도', title: '사황', canon: 'kaido', p: 182, bias: { vit: 1.5, str: 1.3 }, fruitClass: 'zoan', armament: 3, observation: 2, skills: ['fist_combo', 'fist_secret', 'arm_flow', 'con_wave', 'con_coat'], tactic: 'endurance',

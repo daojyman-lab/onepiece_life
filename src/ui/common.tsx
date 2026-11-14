@@ -1,6 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import type { LifeState, Person, StatKey } from '../core/types';
-import { faceURL, type Who } from './pixel/pixelArt';
+import { faceURL, hash, type Weapon, type Who } from './pixel/pixelArt';
+import { faceKeyOf } from '../core/people';
 
 export const STAT_NAMES: Record<StatKey, string> = { str: '힘', spd: '속도', vit: '체력', int: '지능', wil: '정신', luk: '운' };
 export const STAT_KEYS: StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -20,10 +21,22 @@ export const absToDate = (t: number) => `${Math.floor(t / 12)}.${(t % 12) + 1}`;
 
 export function heroWho(s: LifeState): Who {
   const f = s.hero.route === 'marine' ? 'marine' : s.hero.route === 'pirate' ? 'pirate' : s.hero.route === 'revolution' ? 'rev' : 'civil';
-  return { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.hero.age, species: s.hero.species, faction: f };
+  const focus = s.growth.focus;
+  const weapon: Weapon = focus === 'martial.sword' ? 'sword' : focus === 'martial.gun' ? 'gun' : 'fist';
+  return { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.hero.age, species: s.hero.species, faction: f, weapon };
+}
+// 원작 동료의 무기
+const NAMED_WEAPON: Record<string, Weapon> = { coby: 'fist', helmeppo: 'sword', tashigi: 'sword', bartolomeo: 'fist', cavendish: 'sword', ideo: 'fist', koala: 'fist', hack: 'fist' };
+/** 동료의 무기: 원작 인물은 정해진 것, 저격수는 총, 돌격대는 사람마다 칼 또는 주먹 */
+function crewWeapon(p: Person): Weapon | undefined {
+  if (p.canon && NAMED_WEAPON[p.canon]) return NAMED_WEAPON[p.canon];
+  if (!p.crew) return undefined;
+  if (p.crew.role === 'support') return 'gun';
+  if (p.crew.role === 'vanguard') return hash(p.id) % 2 ? 'sword' : 'fist';
+  return undefined;
 }
 export function personWho(p: Person): Who {
-  return { key: p.canon ?? p.id + p.name, gender: p.gender, age: p.age, species: p.species, faction: p.faction };
+  return { key: faceKeyOf(p), gender: p.gender, age: p.age, species: p.species, faction: p.faction, weapon: crewWeapon(p) };
 }
 
 export function Face({ who, size = '', title }: { who: Who; size?: '' | 'big' | 'sm' | 'xs'; title?: string }) {
@@ -53,9 +66,9 @@ export function Modal({ title, children, onClose, wide }: { title: string; child
   );
 }
 
-export function Panel({ title, children, extra }: { title: string; children: ComponentChildren; extra?: ComponentChildren }) {
+export function Panel({ title, children, extra, cls = '' }: { title: string; children: ComponentChildren; extra?: ComponentChildren; cls?: string }) {
   return (
-    <section class="frame frame-pad">
+    <section class={`frame frame-pad ${cls}`}>
       <div class="row between" style={{ marginBottom: 6 }}>
         <span class="sign">{title}</span>
         {extra}

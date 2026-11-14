@@ -1,4 +1,4 @@
-// 해역 임무. {port}는 임무가 뽑힐 때 그 해역의 항구로 채운다.
+// 해역 임무. {port}은(는) 임무가 뽑힐 때 그 해역의 항구로 채운다.
 // 강적전 단계의 적: 'gen:elite'는 우두머리 한 명, 'gen:captain'은 간부를 거느린 우두머리.
 import type { Mission } from '../core/types';
 
@@ -54,7 +54,7 @@ export const MISSIONS: Mission[] = [
     reward: [{ op: 'fame', add: 8 }, { op: 'money', add: 6000 }] }),
   m({ id: 'n_escort', stages: 'any', route: 'marine', title: '{port} 상선 호위',
     steps: [
-      { kind: 'story', months: 5, text: '{port}로 가는 상선단을 호위한다.', effects: [{ op: 'money', add: 4000 }] },
+      { kind: 'story', months: 5, text: '{port}(으)로 가는 상선단을 호위한다.', effects: [{ op: 'money', add: 4000 }] },
       { kind: 'battle', enemy: 'gen:captain:pirate_captain', elite: true, atSea: true, text: '해적단이 상선을 덮쳤다.' },
     ],
     reward: [{ op: 'fame', add: 10 }, { op: 'money', add: 10000 }] }),
@@ -105,7 +105,6 @@ export const MISSION_BY_ID = Object.fromEntries(MISSIONS.map((x) => [x.id, x])) 
 export const ENEMY_NAMES = {
   first: ['바르토', '그린', '크로우', '도노반', '레오', '마르코스', '세이지', '로렌', '가스파', '자크', '말코', '오스카', '테오', '하겐', '브루노', '카를로', '유진', '렉스'],
   firstF: ['라일라', '엘사', '모네', '카렌', '셀린', '도나', '이리스'],
-  epithet: ['쇠주먹', '독사', '피바다', '외눈', '광견', '검은 돛', '천둥', '해골', '붉은 칼', '모래', '철갑', '사냥개', '해일', '그림자'],
   pirateTitle: ['해적 선장', '해적단 두목', '현상수배범'],
   marineTitle: ['해군 대령', '해군 중령', '지부 대령'],
   villainTitle: ['현상금 사냥꾼', '무법자 두목', '인신매매 조직 보스'],

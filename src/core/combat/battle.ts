@@ -3,6 +3,7 @@ import { B } from '../../data/balance';
 import { hashString } from '../rng';
 import type { BattleState, CUnit, Encounter, LifeState, Loadout, Risk } from '../types';
 import { crewUnit, enemyUnit, heroUnit } from './units';
+import { feastLeft, firstMateOf } from '../people';
 import { runBattle, startBattle } from './engine';
 import { observationLevel } from '../growth/skillbook';
 
@@ -31,12 +32,18 @@ function fighters(s: LifeState, lo: Loadout) {
 export function buildUnits(s: LifeState, enc: Encounter, lo: Loadout, assign: Assign) {
   const units: CUnit[] = [heroUnit(s, lo)];
   const idxOf: Record<string, number> = { hero: 0 };
-  if (!enc.spar && enc.source !== 'routine') {
+  const mate = firstMateOf(s);
+  const feast = feastLeft(s) > 0;
+  if (!enc.spar && !enc.solo && enc.source !== 'routine') {
     for (const c of lo.crew) {
       const p = s.people.find((x) => x.id === c.personId && x.alive && x.kind === 'crew');
       if (!p || !p.crew || p.crew.injuredMonths > 0) continue;
       idxOf[p.id] = units.length;
-      units.push(crewUnit(p, s.world.stage));
+      const u = crewUnit(p, s.world.stage);
+      // 부선장은 더 강하고, 다른 동료를 이끈다. 회식 뒤에는 사기가 오른다
+      if (mate) { if (p.id === mate.id) { u.pBuff += B.crew.mateBuff; u.pGuard += B.crew.mateGuard; } else u.pBuff += B.crew.mateLead; }
+      if (feast) u.pBuff += B.crew.feastBuff;
+      units.push(u);
     }
   }
   const enemyStart = units.length;
@@ -49,6 +56,10 @@ export function buildUnits(s: LifeState, enc: Encounter, lo: Loadout, assign: As
 
 export function createBattle(s: LifeState, enc: Encounter, lo: Loadout, assign: Assign, seed: number): BattleState {
   const { units, asg } = buildUnits(s, enc, lo, assign);
+  // 갑판 대포: 바다 위 강적전이면 적이 체력 10%를 잃고 시작한다
+  if (enc.atSea && !enc.spar && enc.source !== 'routine' && s.world.shipParts?.includes('cannon')) {
+    for (const u of units) if (u.side === 'R') u.hp = Math.round(u.hp * 0.9);
+  }
   return startBattle(units, asg, seed, enc.atSea);
 }
 
@@ -81,7 +92,8 @@ export function riskOf(rate: number): Risk {
 /** 정찰로 보이는 정보의 깊이: 0 이름 · 계통 · 간부 수 / 1 전법 · 주력 기술 / 2 전부 */
 export function scoutLevel(s: LifeState, knownInCodex: boolean): 0 | 1 | 2 {
   const hasNav = s.people.some((p) => p.alive && p.kind === 'crew' && p.crew?.role === 'navigator');
+  const nest = s.world.shipParts?.includes('crowsnest') ? 1 : 0;
   if (s.hero.base.int >= C.scout.fullInt || knownInCodex || observationLevel(s) >= 2) return 2;
-  if (s.hero.base.int >= C.scout.midInt || hasNav) return 1;
-  return 0;
+  const lv = (s.hero.base.int >= C.scout.midInt || hasNav ? 1 : 0) + nest;
+  return Math.min(2, lv) as 0 | 1 | 2;
 }

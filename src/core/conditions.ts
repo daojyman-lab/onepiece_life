@@ -22,6 +22,7 @@ export function check(s: LifeState, c: Condition): boolean {
     case 'flag': return s.choice.flags.includes(c.id) === c.has;
     case 'trait': return h.traits.includes(c.id) === c.has;
     case 'money': return h.money >= c.min;
+    case 'fame': return h.fame >= c.min;
     case 'crew': {
       const n = crewCount(s);
       return (c.min === undefined || n >= c.min) && (c.max === undefined || n <= c.max);
@@ -32,6 +33,9 @@ export function check(s: LifeState, c: Condition): boolean {
     case 'focus': return c.is.includes(s.growth.focus);
     case 'species': return c.is.includes(h.species);
     case 'person': return s.people.some((p) => p.alive && p.kind === c.kind) === c.has;
+    case 'rank': return (c.min === undefined || h.rank >= c.min) && (c.max === undefined || h.rank <= c.max);
+    case 'place': return c.is.includes(h.birth.place);
+    case 'sea': return c.is.includes(s.world.seaId);
   }
 }
 
@@ -52,6 +56,7 @@ export function reason(c: Condition): string {
     case 'flag': return '조건이 맞지 않는다';
     case 'trait': return '자질이 없다';
     case 'money': return `돈 ${fmtMoney(c.min)} 필요`;
+    case 'fame': return `명성 ${c.min} 필요`;
     case 'crew': return c.max !== undefined ? '배에 자리가 없다' : `동료 ${c.min}명 필요`;
     case 'injured': return c.is ? '다쳤을 때만' : '다친 몸으로는 안 된다';
     case 'ill': return c.is ? '아플 때만' : '아픈 몸으로는 안 된다';
@@ -59,6 +64,9 @@ export function reason(c: Condition): string {
     case 'focus': return `주력: ${c.is.map((b) => (b ? BRANCH_NAMES[b] : '없음')).join('/')}`;
     case 'species': return '종족이 다르다';
     case 'person': return c.has ? '그런 사람이 없다' : '이미 있다';
+    case 'rank': return c.min !== undefined ? '계급이 모자라다' : '계급이 너무 높다';
+    case 'place': return '고향이 다르다';
+    case 'sea': return '이 바다에서는 안 된다';
   }
 }
 

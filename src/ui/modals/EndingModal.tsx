@@ -1,4 +1,5 @@
 import { actions } from '../../app/store';
+import { josa } from '../../core/josa';
 import { summary } from '../../core/meta/meta';
 import type { LifeState } from '../../core/types';
 import { SEA_BY_ID } from '../../data/seas';
@@ -14,7 +15,7 @@ export function EndingModal({ s }: { s: LifeState }) {
           <div class="wanted">{h.route === 'marine' ? 'MARINE' : 'WANTED'}</div>
           <Face who={heroWho(s)} size="big" />
           <div class="t14"><b>{h.surname} {h.name}</b></div>
-          <div>{h.age}세 · {s.ended?.cause === '은퇴' ? '은퇴' : `${s.ended?.cause}(으)로 세상을 떠남`}</div>
+          <div>{h.age}세 · {s.ended?.cause === '은퇴' ? '은퇴' : josa(`${s.ended?.cause}(으)로 세상을 떠남`)}</div>
           <div class="row" style={{ justifyContent: 'center', marginTop: 6 }}>
             <span class="tag">{ROUTE_NAMES[h.route]}</span><span class="tag gold">{sm.title}</span>
           </div>
@@ -23,6 +24,7 @@ export function EndingModal({ s }: { s: LifeState }) {
           <div class="t9">열매: {sm.fruit ?? '없음'}</div>
           <div class="t9">넘은 보스: {sm.bosses.join(', ') || '없음'}</div>
           <div class="t9">강적전 {s.stats.eliteWins}승 {s.stats.eliteLosses}패 · 중대한 선택 {s.stats.choices}번</div>
+          <div class="t9">가족: {s.people.filter((p) => p.alive && ['배우자', '아들', '딸'].includes(p.relation)).map((p) => `${p.relation} ${p.name}`).join(', ') || '없음'}</div>
           <div class="hr" />
           <div class="t9"><b>주력 기술</b></div>
           {sm.skills.map((x) => <div class="t9">{x.name} · 숙련 {x.mastery}</div>)}

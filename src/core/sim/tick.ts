@@ -1,7 +1,7 @@
 // 한 달의 처리 (docs/02_설계/03_진행과_선택.md 3장).
 import { B } from '../../data/balance';
 import { MISSION_BY_ID } from '../../data/missions';
-import { maybeRaiseChoice } from '../choice/choice';
+import { maybeRaiseChoice, resolveChoice } from '../choice/choice';
 import { createBattle, defaultAssign, winRate } from '../combat/battle';
 import { runBattle } from '../combat/engine';
 import { applyBattle, tryAdvanceSea } from '../combat/outcome';
@@ -10,9 +10,13 @@ import { monthlyGrowth } from '../growth/growth';
 import { crewOf } from '../people';
 import { chance, int, pick, rngOf } from '../rng';
 import type { LifeState, StatKey } from '../types';
-import { absMonth, fill, log } from '../util';
-import { genEnemy, missionTitle, refillFailed, resolveEnemy, sea } from '../world/world';
-import { monthlyLifeEvent } from './lifeEvents';
+import { absMonth, fill, log, talentMult } from '../util';
+import { canonizeFoe, genEnemy, missionTitle, refillFailed, resolveEnemy, sea, sideEnemy } from '../world/world';
+import { SIDE_BY_ID } from '../../data/sideStories';
+import { finishSide } from '../combat/outcome';
+import { fireBirthday, monthlyLifeEvent } from './lifeEvents';
+import { prisonTick } from './prison';
+import { trialTick } from './trial';
 import type { Encounter } from '../types';
 
 const BD = B.body;
@@ -29,9 +33,68 @@ function calendar(s: LifeState): { newYear: boolean; birthday: boolean } {
   return { newYear, birthday };
 }
 
+/** 곁가지 이야기를 한 달 나아간다 */
+function side(s: LifeState) {
+  const sd = s.world.side;
+  if (!sd || s.pending || s.world.training || s.world.seeking) return;
+  const st = SIDE_BY_ID[sd.id];
+  if (!st) { s.world.side = undefined; return; }
+  const step = st.steps[sd.step];
+  if (!step) { finishSide(s); return; }
+  if (step.kind === 'story') {
+    sd.months += 1;
+    if (sd.months >= step.months) {
+      log(s, step.text, 'world');
+      if (step.effects) applyEffects(s, step.effects);
+      sd.step += 1; sd.months = 0;
+      if (sd.step >= st.steps.length) finishSide(s);
+    }
+    return;
+  }
+  log(s, step.text, 'battle');
+  s.pending = { kind: 'prep', encounter: { source: 'side', enemy: sideEnemy(s, st.id, sd.step, step.foe), elite: true, lethal: false, spar: false, atSea: !!step.atSea } };
+}
+
+/** 집중 수련 중이면 한 달 줄인다 */
+function training(s: LifeState) {
+  const t = s.world.training;
+  if (!t) return;
+  const r = rngOf(s.rng);
+  t.left -= 1;
+  if (t.left <= 0) {
+    s.world.training = undefined;
+    log(s, `${t.total}개월의 집중 수련을 마쳤다. 몸이 한결 가볍다.`, 'good');
+    return;
+  }
+  if (r() < 0.5) log(s, pick(r, ['동이 트기 전부터 해가 질 때까지 수련만 했다.', '폭포 아래에서 버티며 정신을 단련했다.', '같은 동작을 수천 번 되풀이했다. 손이 저절로 움직인다.', '돈 한 푼 벌지 못했지만 몸은 확실히 달라지고 있다.', '무인도에 틀어박혀 바위를 상대로 싸웠다.']), 'growth');
+}
+
+/** 스승을 찾아 나선 중이면 한 달 나아간다 */
+function seeking(s: LifeState) {
+  const sk = s.world.seeking;
+  if (!sk || s.pending) return;
+  sk.month += 1;
+  const r = rngOf(s.rng);
+  if (sk.foundAt !== null && sk.month >= sk.foundAt) {
+    s.world.seeking = undefined;
+    log(s, `${sk.month}개월을 헤맨 끝에 소문의 주인공을 찾아냈다!`, 'good');
+    const p = resolveChoice(s, 'ms_seek');
+    if (p) s.pending = p;
+    return;
+  }
+  if (sk.month >= B.seek.months) {
+    s.world.seeking = undefined;
+    log(s, '1년을 헤맸지만 스승을 찾지 못했다. 빈손으로 돌아왔다.', 'danger');
+    return;
+  }
+  if (r() < 0.5) log(s, pick(r, ['스승의 소문을 따라 낯선 섬에 내렸다. 헛소문이었다.', '산꼭대기 은자를 찾아갔지만 그냥 약초꾼이었다.', '항구 술집에서 강자의 행방을 물었다.', '길을 잃고 사흘을 헤맸다.', '"그 사람이라면 지난달 떠났다"는 말을 들었다.']), 'world');
+}
+
 function missions(s: LifeState) {
-  if (s.hero.route === 'none' || s.hero.age < B.world.routeAge || s.pending) return;
+  if (s.hero.route === 'none' || s.hero.age < B.world.routeAge || s.pending || s.world.seeking || s.world.training || s.world.side) return;
   const now = absMonth(s);
+  // 실패한 임무가 남아 있는데 교체 시각이 없으면 다시 잡는다 (예전 저장 · 실패가 겹친 경우)
+  if (s.world.refillAt === null && s.world.missions.some((m) => m.state === 'failed')) s.world.refillAt = now + B.world.refillMonths;
   if (s.world.refillAt !== null && now >= s.world.refillAt) { refillFailed(s); s.world.refillAt = null; }
   // 무거운 부상 중에는 임무가 멈춘다
   if (s.hero.injuries.some((i) => i.severity === 'heavy')) return;
@@ -59,7 +122,7 @@ function missions(s: LifeState) {
   }
   // 강적전 단계
   log(s, fill(step.text, v), 'battle');
-  const enc: Encounter = { source: 'mission', enemy: resolveEnemy(s, step.enemy), elite: step.elite, lethal: true, spar: false, atSea: !!step.atSea, missionIdx: idx };
+  const enc: Encounter = { source: 'mission', enemy: canonizeFoe(s, resolveEnemy(s, step.enemy), mp.port), elite: step.elite, lethal: true, spar: false, atSea: !!step.atSea, missionIdx: idx };
   // 넉넉히 이길 상대면 멈추지 않고 저장된 편성으로 싸운다. 위험한 상대만 준비 화면을 띄운다
   const assign = defaultAssign(s, enc, s.loadout);
   if (winRate(s, enc, s.loadout, assign, B.autoElite.runs) >= B.autoElite.minRate) {
@@ -92,7 +155,8 @@ function body(s: LifeState, newYear: boolean, birthday: boolean) {
   const hasMedic = crewOf(s).some((p) => p.crew?.role === 'medic');
   const hasCook = crewOf(s).some((p) => p.crew?.role === 'cook');
   // 부상
-  for (const inj of h.injuries) if (inj.monthsLeft > 0) inj.monthsLeft -= 1;
+  const infirmary = s.world.shipParts?.includes('infirmary') ? 2 : 1;
+  for (const inj of h.injuries) if (inj.monthsLeft > 0) inj.monthsLeft = Math.max(0, inj.monthsLeft - infirmary);
   const healed = h.injuries.filter((i) => i.severity !== 'scar' && i.monthsLeft <= 0);
   if (healed.length) { h.injuries = h.injuries.filter((i) => !healed.includes(i)); log(s, '상처가 아물었다.', 'info'); }
   for (const p of crewOf(s)) if (p.crew && p.crew.injuredMonths > 0) p.crew.injuredMonths -= 1;
@@ -122,6 +186,7 @@ function body(s: LifeState, newYear: boolean, birthday: boolean) {
     let yearly = BD.illness.yearly + Math.max(0, h.age - BD.illness.ageFrom) * BD.illness.agePerYear;
     if (h.injuries.some((i) => i.severity === 'heavy')) yearly += BD.illness.heavyInjuryAdd;
     if (hasMedic) yearly *= BD.illness.medicMult;
+    yearly *= talentMult(s, 'illness');
     if (chance(r, yearly / 12)) applyEffects(s, [{ op: 'illness', id: pick(r, ['열병', '괴혈병', '풍토병', '폐병']) }]);
   }
   // 노화
@@ -134,7 +199,7 @@ function body(s: LifeState, newYear: boolean, birthday: boolean) {
   else if (h.illness) h.hp = Math.max(5, h.hp - 3 * h.illness.stage);
   // 노환
   if (newYear && h.age >= BD.oldAge.from) {
-    const p = (h.age - BD.oldAge.from + 1) ** 2 * BD.oldAge.k;
+    const p = (h.age - BD.oldAge.from + 1) ** 2 * BD.oldAge.k * talentMult(s, 'oldAge');
     if (chance(r, p)) kill(s, '노환');
   }
 }
@@ -143,7 +208,13 @@ function money(s: LifeState) {
   const h = s.hero;
   if (h.age < 16) return;
   const hasCook = crewOf(s).some((p) => p.crew?.role === 'cook');
-  h.money -= B.money.living * s.world.stage * (hasCook ? 0.5 : 1);
+  const galley = s.world.shipParts?.includes('galley') ? 0.7 : 1;
+  h.money -= B.money.living * s.world.stage * (hasCook ? 0.5 : 1) * galley;
+  // 가족을 부양한다: 배우자와 18세 미만의 아이
+  const spouse = s.people.some((p) => p.alive && p.relation === '배우자') ? 1 : 0;
+  const kids = s.people.filter((p) => p.alive && (p.relation === '아들' || p.relation === '딸') && p.age < 18).length;
+  h.money -= (spouse * B.money.spouse + kids * B.money.child) * s.world.stage;
+  if (s.world.training) { if (h.money < -50000) h.money = -50000; return; }   // 수련 중에는 벌이가 없다
   if (h.route === 'marine') h.money += B.money.marineSalary * (h.rank + 1) * s.world.stage;
   else if (h.route !== 'none') h.money += B.money.pirateIncome * s.world.stage * (1 + Math.min(1, h.fame / 2000));
   if (h.money < -50000) h.money = -50000;
@@ -153,15 +224,11 @@ function yearly(s: LifeState) {
   const r = rngOf(s.rng);
   s.choice.thisYear = 0;
   s.choice.pauses = 0;
-  // 주력을 3년 넘게 이어 왔으면 갈림길이 후보가 된다
-  if (s.growth.focus && s.hero.age - s.growth.focusSince >= B.choice.retrainYears && !s.choice.flags.includes('rethink_ready')) {
-    s.choice.flags.push('rethink_ready');
-  }
   // 동료 레벨
   for (const p of crewOf(s)) {
     if (!p.crew || p.crew.level >= B.crew.maxLevel) continue;
     p.crew.level += 1;
-    p.crew.power += B.crew.powerPerLevel * 0.5 + s.world.stage;
+    p.crew.power += (B.crew.powerPerLevel * 0.5 + s.world.stage) * (p.crew.growth ?? 1);
   }
   // 라이벌도 자란다
   for (const p of s.people) if (p.kind === 'rival' && p.alive && p.power) p.power = Math.round(p.power * (1.04 + r() * 0.05));
@@ -184,15 +251,22 @@ function yearly(s: LifeState) {
 export function tick(s: LifeState): boolean {
   if (s.pending || !s.hero.alive) return false;
   const { newYear, birthday } = calendar(s);
+  const jailed = prisonTick(s);
+  if (birthday) { if (jailed) log(s, '차가운 감방에서 생일을 맞았다. 아무도 몰랐다.', 'danger'); else fireBirthday(s); }
+  if (!jailed) monthlyLifeEvent(s);
   monthlyGrowth(s);
-  missions(s);
-  routineBattle(s);
+  if (!jailed) {
+    training(s);
+    seeking(s);
+    const onTrial = trialTick(s);
+    if (!onTrial) { side(s); missions(s); }
+    routineBattle(s);
+  }
   body(s, newYear, birthday);
   if (!s.hero.alive) return true;
-  money(s);
-  monthlyLifeEvent(s);
+  if (!jailed) money(s);
   if (s.choice.flags.includes('need_ship')) tryAdvanceSea(s);
-  if (!s.pending) maybeRaiseChoice(s);
+  if (!s.pending && !s.world.prison) maybeRaiseChoice(s);
   if (newYear) yearly(s);
   return true;
 }

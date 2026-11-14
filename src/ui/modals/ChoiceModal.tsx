@@ -7,7 +7,7 @@ const CAT_NAMES = { childhood: '유년기', entry: '입문', master: '스승', f
 export function ChoiceModal({ s, p }: { s: LifeState; p: Extract<Pending, { kind: 'choice' }> }) {
   const sp = p.speaker;
   const who = sp
-    ? { key: sp.personId ? (s.people.find((x) => x.id === sp.personId)?.canon ?? sp.personId + sp.name) : sp.name, gender: sp.gender, age: sp.age, species: sp.species, faction: sp.faction }
+    ? { key: sp.faceKey ?? (sp.personId ? (s.people.find((x) => x.id === sp.personId)?.canon ?? sp.personId + sp.name) : sp.name), gender: sp.gender, age: sp.age, species: sp.species, faction: sp.faction }
     : heroWho(s);
   return (
     <Modal title={`${CAT_NAMES[p.category]} · ${p.title}`}>

@@ -4,6 +4,78 @@ import { B } from '../../data/balance';
 import { ITEMS, ITEM_BY_ID } from '../../data/items';
 import { BRANCH_NAMES } from '../../data/skills';
 import { fmt, Modal } from '../common';
+import { crewOf, traitOf } from '../../core/people';
+import { CREW_GEAR, INTEL_PRICE, SHIP_PARTS, SURGERY_PRICE } from '../../data/upgrades';
+import { BOSS_BY_ID } from '../../data/bosses';
+import { STAT_NAMES } from '../common';
+
+/** 돈을 쓸 곳: 배 개조, 동료 장비, 정보상, 후유증 수술 */
+function UpgradeSections({ s }: { s: LifeState }) {
+  const parts = s.world.shipParts ?? [];
+  const pirateShip = s.hero.route !== 'marine' && !!s.world.ship;
+  const crew = crewOf(s);
+  const boss = s.world.boss.state === 'revealed' ? BOSS_BY_ID[s.world.boss.id] : null;
+  const intel = INTEL_PRICE * s.world.stage;
+  const surgery = SURGERY_PRICE * s.world.stage;
+  const scar = s.hero.injuries.find((i) => i.severity === 'scar');
+  return (
+    <>
+      {pirateShip && (
+        <div class="paper">
+          <b>배 개조</b> <span class="t9 soft">한 번 달면 배를 바꿔도 옮겨 단다</span>
+          <table class="px" style={{ marginTop: 4 }}><tbody>
+            {SHIP_PARTS.map((pt) => {
+              const has = parts.includes(pt.id);
+              const locked = s.world.stage < pt.minStage;
+              return (
+                <tr>
+                  <td>{pt.name}<div class="t9 soft">{locked ? `${pt.minStage}단계 해역부터` : pt.text}</div></td>
+                  <td class="num">{fmt(pt.price)}</td>
+                  <td>{has ? <span class="tag green">달았다</span> : <button class="btn small" disabled={locked || s.hero.money < pt.price} onClick={() => dispatch({ type: 'buyPart', id: pt.id })}>달기</button>}</td>
+                </tr>
+              );
+            })}
+          </tbody></table>
+        </div>
+      )}
+      {crew.length > 0 && (
+        <div class="paper">
+          <b>{s.hero.route === 'marine' ? '분대원 장비' : '동료 장비'}</b> <span class="t9 soft">장비가 좋을수록 싸울 때 힘이 세진다</span>
+          <table class="px" style={{ marginTop: 4 }}><tbody>
+            {crew.map((p) => {
+              const g = p.crew!.gear ?? 0;
+              const next = CREW_GEAR[g + 1];
+              return (
+                <tr>
+                  <td>{p.name}<div class="t9 soft">{CREW_GEAR[g].name}{next ? ` → ${next.name} (힘 ×${next.mult})` : ' · 최고'}</div></td>
+                  <td class="num">{next ? fmt(next.price) : '—'}</td>
+                  <td>{next && <button class="btn small" disabled={s.hero.money < next.price} onClick={() => dispatch({ type: 'crewGear', who: p.id })}>맞춰 주기</button>}</td>
+                </tr>
+              );
+            })}
+          </tbody></table>
+        </div>
+      )}
+      {(boss || scar) && (
+        <div class="paper">
+          <b>정보상 · 명의</b>
+          {boss && (
+            <div class="row between" style={{ marginTop: 4 }}>
+              <span class="t9">{boss.name}의 능력치 · 기술 전부 {s.known.people.includes(boss.id) ? '(이미 안다)' : ''}</span>
+              <button class="btn small" disabled={s.known.people.includes(boss.id) || s.hero.money < intel} onClick={() => dispatch({ type: 'buyIntel' })}>{fmt(intel)}</button>
+            </div>
+          )}
+          {scar && (
+            <div class="row between" style={{ marginTop: 4 }}>
+              <span class="t9">후유증 수술 ({STAT_NAMES[scar.stat ?? 'str']} −3 되돌림)</span>
+              <button class="btn small" disabled={s.hero.money < surgery} onClick={() => dispatch({ type: 'surgery' })}>{fmt(surgery)}</button>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
 
 export function ShopModal({ s }: { s: LifeState }) {
   const forSale = ITEMS.filter((i) => i.price > 0 && i.grade <= s.world.stage + 1);
@@ -46,6 +118,7 @@ export function ShopModal({ s }: { s: LifeState }) {
             </table>
             <div class="t9 soft">무기 · 방어구 · 소모품은 편성 창에서 챙긴다.</div>
           </div>
+          <UpgradeSections s={s} />
           <div class="paper">
             <b>정체 모를 열매</b>
             {s.inventory.unknownFruits.length === 0 && <div class="soft t9">없다.</div>}
@@ -56,6 +129,11 @@ export function ShopModal({ s }: { s: LifeState }) {
                   <button class="btn small red" disabled={!!s.hero.fruit || !!s.pending} onClick={() => { if (confirm('먹으면 되돌릴 수 없다. 평생 헤엄칠 수 없다. 먹을까?')) dispatch({ type: 'eatFruit', uid: u.uid }); }}>먹는다</button>
                   <button class="btn small" disabled={u.hints.length >= 3 || s.hero.money < fee} onClick={() => dispatch({ type: 'appraise', uid: u.uid })}>감정 ({fmt(fee)})</button>
                   <button class="btn small" onClick={() => dispatch({ type: 'sellFruit', uid: u.uid })}>판다</button>
+                  {s.people.filter((p) => p.alive && p.kind === 'crew' && p.crew && !p.crew.fruit).map((p) => (
+                    <button class="btn small" disabled={!!s.pending} onClick={() => { if (confirm(`${p.name}에게 먹일까? 되돌릴 수 없다.`)) dispatch({ type: 'feedFruit', uid: u.uid, who: p.id }); }}>
+                      {p.name}에게 먹인다 ({traitOf(p).name})
+                    </button>
+                  ))}
                 </div>
               </div>
             ))}

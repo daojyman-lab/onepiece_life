@@ -15,7 +15,7 @@ export type BranchId =
 export type Tactic = 'offense' | 'defense' | 'counter' | 'endurance';
 export type CrewRole = 'vanguard' | 'support' | 'medic' | 'navigator' | 'cook' | 'shipwright';
 export type FruitClass = 'paramecia' | 'zoan' | 'logia';
-export type Species = 'human' | 'fishman' | 'merfolk' | 'mink' | 'giant' | 'longarm' | 'longleg' | 'threeeye' | 'tontatta' | 'celestial' | 'skypiean';
+export type Species = 'human' | 'fishman' | 'merfolk' | 'mink' | 'giant' | 'longarm' | 'longleg' | 'threeeye' | 'tontatta' | 'skypiean' | 'buccaneer' | 'lunarian';
 
 // ---------------------------------------------------------------- 주인공
 
@@ -37,6 +37,7 @@ export interface Hero {
   illness: Illness | null;
   traits: string[];
   fruit: { id: string; eatenAt: number } | null;
+  persona?: string;           // 특성 (data/passives.ts HERO_TRAITS)
   alive: boolean;
 }
 
@@ -50,6 +51,7 @@ export interface Growth {
   gates: string[];
   master: { personId: string; name: string; branch: BranchId; gate: string; monthsLeft: number } | null;
   focusSince: number;         // 주력이 정해진 나이
+  fruitMastery?: number;      // 열매 숙련 0~100. 패시브의 세기와 각성 조건
 }
 
 export interface Loadout {
@@ -63,6 +65,10 @@ export interface Loadout {
 
 export interface CrewInfo {
   role: CrewRole; level: number; power: number; skills: string[]; injuredMonths: number;
+  trait?: string;             // 성격 (data/crewTraits.ts). 없으면 id에서 정한다 (예전 저장)
+  fruit?: string | null;      // 먹은 악마의 열매
+  gear?: number;              // 장비 단계 0~3 (data/upgrades.ts CREW_GEAR)
+  growth?: number;            // 잠재력: 해마다 자라는 힘 배율 (원작 인물은 1보다 크다)
 }
 
 export interface Person {
@@ -74,6 +80,7 @@ export interface Person {
   faction: 'civil' | 'pirate' | 'marine' | 'rev';
   species: Species;
   crew?: CrewInfo;
+  epithet?: string;           // 이명 (동료). 없으면 성격에서 정한다
   power?: number;             // 라이벌 같은 비동료의 대략적 힘
   alive: boolean;
 }
@@ -92,6 +99,19 @@ export interface WorldProgress {
   defeated: string[];
   news: { year: number; text: string }[];
   apex: boolean;               // 6단계 보스를 넘었다
+  usedEpithets?: string[];
+  usedPortFoes?: string[];     // 이번 인생에서 이미 만난 원작 항구의 인물     // 이번 인생에서 이미 쓴 적의 이명 (겹치지 않게)
+  shipParts?: string[];        // 배 개조 (data/upgrades.ts)
+  firstMate?: string;          // 부선장 (부분대장) personId
+  feastUntil?: number;         // 회식 버프가 끝나는 달 (절대 달)
+  seeking?: { month: number; foundAt: number | null };
+  training?: { left: number; total: number };   // 집중 수련: 남은 달, 전체 달
+  prison?: { left: number; total: number; level: number; asked: boolean };
+  lostShip?: string;
+  trial?: { master: string; branch: BranchId; gate: string; next: string; months: number; step: number };   // 스승의 시험 임무 중
+  masterPromise?: { master: string; gate: string };   // 시험을 통과한 스승이 나중에 다시 와서 가르칠 단계           // 붙잡힐 때 해군에 압수된 배 (옛 동료가 되찾아 올 수 있다)   // 임펠 다운 수감: 남은 달, 형기, 층, 탈옥 제안 여부
+  side?: { id: string; step: number; months: number };   // 진행 중인 곁가지 이야기
+  sideDone?: string[];         // 마친 곁가지 이야기   // 스승을 찾아 나선 중: 몇 달째, 찾게 되는 달 (null이면 못 찾는다)
 }
 
 export interface Inventory {
@@ -108,8 +128,8 @@ export interface ChoiceTracker {
   pauses?: number;             // 올해 멈춘 수 (선택 + 강적 준비). 해가 바뀌면 0
 }
 
-export type LogType = 'info' | 'growth' | 'battle' | 'choice' | 'danger' | 'world' | 'money' | 'good' | 'life';
-export interface LogEntry { t: number; text: string; type: LogType }
+export type LogType = 'info' | 'growth' | 'battle' | 'choice' | 'danger' | 'world' | 'money' | 'good' | 'life' | 'day';
+export interface LogEntry { t: number; text: string; type: LogType; id?: number }
 export interface TimelineEntry { t: number; age: number; text: string }
 
 export interface LifeStats {
@@ -129,17 +149,21 @@ export interface EnemySpec {
   faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
   title?: string;
   form?: 'seaking';            // 사람이 아닌 모습 (그림을 다르게 그린다)
+  faceKey?: string;            // 얼굴 그림의 씨앗. 아는 사람이면 사람들 패널과 같은 얼굴이 나오게 한다
+  fruitId?: string;            // 먹은 열매 (없으면 기술 id에서 찾는다)
 }
 
 export interface Encounter {
-  source: 'mission' | 'boss' | 'rival' | 'choice' | 'routine';
+  source: 'mission' | 'boss' | 'rival' | 'choice' | 'routine' | 'side';
   enemy: EnemySpec;
   elite: boolean;
   lethal: boolean;
   spar: boolean;
   atSea: boolean;
   missionIdx?: number;
-  reward?: Effect[];
+  reward?: Effect[];           // 이기면
+  onLose?: Effect[];           // 지거나 물러나면
+  solo?: boolean;              // 동료 없이 혼자 싸운다 (1대1)
 }
 
 export interface CUnit {
@@ -158,13 +182,16 @@ export interface CUnit {
   lastBig: boolean;
   personId?: string; faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
   form?: 'seaking';
+  faceKey: string;             // 얼굴 그림의 씨앗 (화면 어디서나 같은 얼굴)
+  mods: import('../data/passives').Mods;   // 특성 · 열매 패시브
+  stood?: boolean;             // 불굴로 한 번 버텼다
 }
 
 export interface Duel { id: number; l: number; r: number; helpersL: number[]; helpersR: number[]; over: boolean; winner: 'L' | 'R' | null }
 
 export type BattleEvent =
   | { k: 'round'; n: number }
-  | { k: 'act'; d: number; who: number; target: number; skill: string; name: string; dmg: number; crit: boolean; dodge: boolean; note?: string }
+  | { k: 'act'; d: number; who: number; target: number; skill: string; name: string; dmg: number; crit: boolean; dodge: boolean; note?: string; proc?: boolean }
   | { k: 'heal'; d: number; who: number; target: number; amount: number; name: string }
   | { k: 'guard'; d: number; who: number; name: string }
   | { k: 'down'; d: number; who: number }
@@ -197,7 +224,7 @@ export interface ResolvedOption {
 
 export type Pending =
   | { kind: 'choice'; choiceId: string; category: Choice['category']; title: string; body: string;
-      speaker: { name: string; personId?: string; faction?: Person['faction']; species?: Species; gender?: 'm' | 'f'; age?: number } | null;
+      speaker: { name: string; personId?: string; faceKey?: string; faction?: Person['faction']; species?: Species; gender?: 'm' | 'f'; age?: number } | null;
       options: ResolvedOption[] }
   | { kind: 'prep'; encounter: Encounter }
   | { kind: 'battle'; encounter: Encounter; battle: BattleState; risk: Risk }
@@ -230,6 +257,7 @@ export interface LifeState {
   metaEvents: MetaEvent[];    // 인생 밖 기록(도감)에 반영할 일. app 층이 MetaState에 옮기고 비운다
   ended: { cause: string; age: number } | null;
   known: { fruits: string[]; people: string[] };   // 새 인생을 만들 때 도감에서 옮겨 온 것
+  logSeq?: number;                                  // 기록 번호 발급기. 화면이 한 줄씩 보여 줄 때 쓴다
 }
 
 export type MetaEvent =
@@ -342,8 +370,8 @@ export interface Choice {
   weight: number;
   repeat: 'once' | 'cooldown';
   cooldownYears?: number;
-  template?: 'fruit' | 'master' | 'challenge' | 'ship' | 'focus' | 'haki';
-  speaker: 'hero' | { person: string } | { canon: string; faction?: Person['faction']; gender?: 'm' | 'f'; age?: number };
+  template?: 'fruit' | 'master' | 'challenge' | 'ship' | 'focus' | 'haki' | 'betrayal' | 'child' | 'side' | 'persona' | 'reunion' | 'shipwright';
+  speaker: 'hero' | { person: string } | { canon: string; faction?: Person['faction']; gender?: 'm' | 'f'; age?: number; face?: string; species?: Species };
   title: string; body: string;
   options: ChoiceOption[];
 }
@@ -361,19 +389,23 @@ export type Condition =
   | { c: 'flag'; id: string; has: boolean }
   | { c: 'trait'; id: string; has: boolean }
   | { c: 'money'; min: number }
+  | { c: 'fame'; min: number }
   | { c: 'crew'; min?: number; max?: number }
   | { c: 'injured'; is: boolean }
   | { c: 'ill'; is: boolean }
   | { c: 'birthSea'; is: SeaId[] }
   | { c: 'focus'; is: (BranchId | null)[] }
   | { c: 'species'; is: Species[] }
-  | { c: 'person'; kind: Person['kind']; has: boolean };
+  | { c: 'person'; kind: Person['kind']; has: boolean }
+  | { c: 'rank'; min?: number; max?: number }
+  | { c: 'place'; is: string[] }                  // 고향
+  | { c: 'sea'; is: SeaId[] };                    // 지금 있는 해역
 
 export interface PersonSeed {
   kind: Person['kind']; relation: string; name?: string; gender?: 'm' | 'f'; age?: number;
   faction?: Person['faction']; bond?: number; power?: number; tag?: string; canon?: string | null;
 }
-export interface CrewSeed { role: CrewRole; name?: string; gender?: 'm' | 'f'; power?: number }
+export interface CrewSeed { role: CrewRole; name?: string; gender?: 'm' | 'f'; power?: number; named?: string }
 
 export type Effect =
   | { op: 'base'; key: StatKey | 'all'; add: number }
@@ -391,20 +423,38 @@ export type Effect =
   | { op: 'flag'; id: string }
   | { op: 'unflag'; id: string }
   | { op: 'trait'; id: string }
+  | { op: 'persona'; id: string }
   | { op: 'person'; add: PersonSeed }
   | { op: 'bond'; who: string; add: number }
   | { op: 'recruit'; crew: CrewSeed }
   | { op: 'item'; id: string; count: number }
   | { op: 'findFruit'; pool: 'any' | 'gradeMin3' | string }
   | { op: 'eatFruit'; uid: string }
+  | { op: 'feedFruit'; uid: string; who: string }
+  | { op: 'family'; act: 'lover' | 'marry' | 'child' | 'breakup'; name?: string; gender?: 'm' | 'f' }
+  | { op: 'crewBond'; add: number }
+  | { op: 'startSide'; id: string }
   | { op: 'sellFruit'; uid: string }
   | { op: 'appraise'; uid: string; fee: number }
   | { op: 'injury'; severity: Injury['severity'] }
   | { op: 'heal' }
   | { op: 'sellBest' }
   | { op: 'illness'; id: string }
-  | { op: 'battle'; enemy: string; elite: boolean; lethal: boolean; spar?: boolean }
+  | { op: 'battle'; enemy: string; elite: boolean; lethal: boolean; spar?: boolean; solo?: boolean; win?: Effect[]; lose?: Effect[] }
+  | { op: 'leaveCrew'; who: string; why: 'betray' | 'hurt' | 'expelled' | 'exposed'; takeMoneyPct?: number }
   | { op: 'ship'; id: string; price: number }
+  | { op: 'hunt'; flee: boolean }
+  | { op: 'capture'; tier: number }
+  | { op: 'release'; broke: boolean }
+  | { op: 'prisonExtend'; months: number }
+  | { op: 'jailbreak' }
+  | { op: 'masterTrial'; master: string; branch: BranchId; gate: string; next: string }
+  | { op: 'trialDone'; ok: boolean }
+  | { op: 'rejoin'; who: string; ship: boolean }
+  | { op: 'partWays'; who: string }
+  | { op: 'loot'; base: number; text: string }      // base × 해역 단계 × 0.7~1.3 베리. text의 {money}에 액수
+  | { op: 'davyBack' }
+  | { op: 'dbfRound'; won: boolean }
   | { op: 'bossLater'; months: number }
   | { op: 'queue'; choice: string }
   | { op: 'log'; text: string; type: LogType }

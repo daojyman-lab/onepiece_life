@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { actions, dispatch, useStore } from '../../app/store';
+import { B } from '../../data/balance';
+import { sfx } from '../../app/sound';
 import { getSkill } from '../../core/growth/skillbook';
 import type { BattleEvent, BattleState, CUnit, LifeState, Pending } from '../../core/types';
 import { Face, Gauge, heroWho, Modal, RISK_NAMES } from '../common';
-import { drawScene, type Who } from '../pixel/pixelArt';
+import { drawScene, weaponOfSkills, type Who } from '../pixel/pixelArt';
+import { josa } from '../../core/josa';
 
 type BP = Extract<Pending, { kind: 'battle' | 'intervene' }>;
 
-const unitWho = (s: LifeState, u: CUnit): Who => u.hero ? heroWho(s) : { key: u.personId ? (s.people.find((p) => p.id === u.personId)?.canon ?? u.personId + u.name) : u.key + u.name, gender: u.gender, age: u.age, species: u.species, faction: u.faction, form: u.form };
+const unitWho = (s: LifeState, u: CUnit): Who => u.hero ? heroWho(s) : { key: u.faceKey ?? u.key + u.name, gender: u.gender, age: u.age, species: u.species, faction: u.faction, form: u.form, weapon: weaponOfSkills(u.skills.map((k) => k.id)) };
 
 function hpAt(b: BattleState, upto: number) {
   const hp = b.units.map((u) => u.maxHp);
@@ -22,18 +25,21 @@ function hpAt(b: BattleState, upto: number) {
 }
 
 function line(b: BattleState, e: BattleEvent): string {
+  return josa(rawLine(b, e));
+}
+function rawLine(b: BattleState, e: BattleEvent): string {
   const n = (i: number) => b.units[i]?.name ?? '?';
   switch (e.k) {
     case 'round': return `── ${e.n}합 ──`;
     case 'act': return e.skill === 'bound' ? `${n(e.who)}: ${e.name}` : `${n(e.who)} ▶ ${n(e.target)} 「${e.name}」 ${e.dodge ? (e.note ?? '빗나갔다') : e.dmg > 0 ? `${e.dmg}${e.crit ? ' 치명타!' : ''}${e.note ? ` (${e.note})` : ''}` : (e.note ?? '')}`;
     case 'heal': return `${n(e.who)} 「${e.name}」 ${n(e.target)} 체력 +${e.amount}`;
     case 'guard': return `${n(e.who)} 「${e.name}」`;
-    case 'down': return `${n(e.who)} 쓰러졌다!`;
+    case 'down': return `${n(e.who)}이(가) 쓰러졌다!`;
     case 'join': return `${n(e.who)}이(가) ${e.side === 'L' ? '우리 편 싸움에 합세했다' : '적의 싸움에 합세했다'}`;
-    case 'retreat': return e.ok ? `${n(e.who)} 물러났다` : `${n(e.who)} 물러나려다 실패했다`;
-    case 'item': return `${n(e.who)} ${e.name} 사용`;
-    case 'drown': return `${n(e.who)} 바다에 빠졌다! 힘이 빠진다…`;
-    case 'rest': return `${n(e.who)} 숨을 고른다`;
+    case 'retreat': return e.ok ? `${n(e.who)}이(가) 물러났다` : `${n(e.who)}이(가) 물러나려다 실패했다`;
+    case 'item': return `${n(e.who)}이(가) ${e.name}을(를) 썼다`;
+    case 'drown': return `${n(e.who)}이(가) 바다에 빠졌다! 힘이 빠진다…`;
+    case 'rest': return `${n(e.who)}이(가) 숨을 고른다`;
     case 'end': return e.result === 'win' ? '★ 승리 ★' : e.result === 'retreat' ? '물러났다' : '패배…';
   }
 }
@@ -43,13 +49,22 @@ export function BattleModal({ s, p }: { s: LifeState; p: BP }) {
   const b = p.battle;
   const [idx, setIdx] = useState(0);
   const total = b.events.length;
-  const ms = 280 / st.settings.battleSpeed;
+  const ms = B.battleLineMs / st.settings.battleSpeed;
   useEffect(() => {
     if (idx >= total) return;
     const id = setTimeout(() => setIdx((i) => Math.min(total, i + 1)), b.events[idx]?.k === 'round' ? ms * 0.6 : ms);
     return () => clearTimeout(id);
   }, [idx, total, ms]);
   const hp = useMemo(() => hpAt(b, idx), [b, idx]);
+  // 한 줄이 재생될 때마다 소리
+  useEffect(() => {
+    const e = b.events[idx - 1];
+    if (!e) return;
+    if (e.k === 'act') sfx(e.dodge ? 'miss' : e.crit ? 'crit' : e.dmg > 0 ? 'hit' : 'tick');
+    else if (e.k === 'down') sfx('danger');
+    else if (e.k === 'heal' || e.k === 'item') sfx('treasure');
+    else if (e.k === 'end') sfx(e.result === 'win' ? 'win' : 'lose');
+  }, [idx]);
   const logRef = useRef<HTMLDivElement>(null);
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [idx]);
   const done = idx >= total;

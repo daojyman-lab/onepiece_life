@@ -38,7 +38,7 @@ function LogiaCounter({ s, lo }: { s: LifeState; lo: Loadout }) {
   );
 }
 
-const foeWho = (e: EnemySpec) => ({ key: e.canon ?? e.id + e.name, gender: e.gender, age: e.age, species: e.species, faction: e.faction, form: e.form });
+const foeWho = (e: EnemySpec) => ({ key: e.faceKey ?? e.canon ?? e.id + e.name, gender: e.gender, age: e.age, species: e.species, faction: e.faction, form: e.form });
 
 function Scout({ s, e, level }: { s: LifeState; e: EnemySpec; level: 0 | 1 | 2 }) {
   const strongest = e.skills.map((id) => getSkill(id)).filter(Boolean).sort((a, b) => b!.power - a!.power);

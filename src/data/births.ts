@@ -6,25 +6,63 @@ import type { SeaId, Species, Stats } from '../core/types';
 export interface Hometown {
   name: string; sea: SeaId; text: string;
   households: { text: string; father?: 'marine' | 'pirate' }[];
+  teachers: { label: string; hint: string; branch: 'martial.fist' | 'martial.sword' | 'martial.gun' }[];   // 10세에 배울 수 있는 곳
 }
 
 export const HOMETOWNS: Hometown[] = [
   { name: '후샤 마을', sea: 'east', text: '고아 왕국 변두리, 풍차가 도는 작은 어촌',
-    households: [{ text: '술집 단골 어부의 집' }, { text: '풍차 방앗간' }, { text: '촌장 댁 이웃' }, { text: '해군 영웅의 먼 친척 집', father: 'marine' }] },
+    households: [{ text: '술집 단골 어부의 집' }, { text: '풍차 방앗간' }, { text: '촌장 댁 이웃' }, { text: '해군 영웅의 먼 친척 집', father: 'marine' }],
+    teachers: [
+      { label: '코르보 산 산적들에게 맨주먹 싸움을 배운다', hint: '체술 · 거칠지만 실전이다', branch: 'martial.fist' },
+      { label: '숲의 사냥꾼에게 활 대신 총을 배운다', hint: '사격 · 짐승을 쫓으며 눈이 밝아진다', branch: 'martial.gun' },
+      { label: '항구의 늙은 선원에게 칼 쓰는 법을 배운다', hint: '검술 · 배 위에서 쓰던 막칼', branch: 'martial.sword' },
+    ] },
   { name: '고아 왕국 그레이 터미널', sea: 'east', text: '왕국 성벽 밖의 쓰레기 산',
-    households: [{ text: '쓰레기 산 판잣집' }, { text: '산적 일가의 이웃', father: 'pirate' }] },
+    households: [{ text: '쓰레기 산 판잣집' }, { text: '산적 일가의 이웃', father: 'pirate' }],
+    teachers: [
+      { label: '쓰레기 산 형들과 쇠파이프로 싸운다', hint: '검술 · 막대기도 칼이다', branch: 'martial.sword' },
+      { label: '산적 일가에게 맨주먹을 배운다', hint: '체술 · 살아남는 싸움', branch: 'martial.fist' },
+      { label: '고철로 만든 새총으로 새를 잡는다', hint: '사격 · 굶지 않으려면 맞혀야 한다', branch: 'martial.gun' },
+    ] },
   { name: '셸스 타운', sea: 'east', text: '해군 지부가 내려다보는 마을',
-    households: [{ text: '해군 기지 하사관의 집', father: 'marine' }, { text: '마을 식당' }, { text: '어부의 집' }] },
+    households: [{ text: '해군 기지 하사관의 집', father: 'marine' }, { text: '마을 식당' }, { text: '어부의 집' }],
+    teachers: [
+      { label: '해군 기지 담장 너머로 사격 훈련을 훔쳐본다', hint: '사격 · 병사들의 자세를 따라 한다', branch: 'martial.gun' },
+      { label: '기지 검술 교관에게 졸라서 배운다', hint: '검술 · 정석대로', branch: 'martial.sword' },
+      { label: '마을 식당 요리사에게 발차기를 배운다', hint: '체술 · 손은 요리에 쓰라더라', branch: 'martial.fist' },
+    ] },
   { name: '오렌지 마을', sea: 'east', text: '애완동물 가게와 시장이 있는 항구 마을',
-    households: [{ text: '애완동물 가게' }, { text: '시장 가판대 집' }, { text: '촌장 댁' }] },
+    households: [{ text: '애완동물 가게' }, { text: '시장 가판대 집' }, { text: '촌장 댁' }],
+    teachers: [
+      { label: '시장 경비대 아저씨에게 칼을 배운다', hint: '검술 · 마을을 지키는 칼', branch: 'martial.sword' },
+      { label: '항구 짐꾼들과 씨름하며 몸을 단련한다', hint: '체술 · 힘이 붙는다', branch: 'martial.fist' },
+    ] },
   { name: '시럽 마을', sea: 'east', text: '언덕 위 저택이 있는 조용한 시골',
-    households: [{ text: '저택 하인의 집' }, { text: '양치기 집안' }, { text: '마을 의사 댁' }, { text: '해적이 되어 떠난 아버지의 집', father: 'pirate' }] },
+    households: [{ text: '저택 하인의 집' }, { text: '양치기 집안' }, { text: '마을 의사 댁' }, { text: '해적이 되어 떠난 아버지의 집', father: 'pirate' }],
+    teachers: [
+      { label: '언덕의 사냥꾼에게 저격을 배운다', hint: '사격 · 멀리서 정확하게', branch: 'martial.gun' },
+      { label: '저택 경비병에게 칼을 배운다', hint: '검술 · 저택을 지키던 칼', branch: 'martial.sword' },
+      { label: '양치기 형들과 들판에서 몸싸움을 한다', hint: '체술 · 하루 종일 뛰어다닌다', branch: 'martial.fist' },
+    ] },
   { name: '코코야시 마을', sea: 'east', text: '코노미 제도의 귤 농장 마을',
-    households: [{ text: '귤 농장' }, { text: '주재소 경관의 집' }, { text: '어부의 집' }] },
+    households: [{ text: '귤 농장' }, { text: '주재소 경관의 집' }, { text: '어부의 집' }],
+    teachers: [
+      { label: '주재소 경관에게 총 쏘는 법을 배운다', hint: '사격 · 마을을 지키는 총', branch: 'martial.gun' },
+      { label: '해군 출신이라는 귤 농장 주인에게 맨주먹을 배운다', hint: '체술 · 해군식 격투', branch: 'martial.fist' },
+    ] },
   { name: '시모츠키 마을', sea: 'east', text: '이름난 검술 도장이 있는 마을',
-    households: [{ text: '검술 도장 문하생 집' }, { text: '대장간' }, { text: '쌀집' }] },
+    households: [{ text: '검술 도장 문하생 집' }, { text: '대장간' }, { text: '쌀집' }],
+    teachers: [
+      { label: '코우시로 도장에 들어간다', hint: '검술 · 이스트 블루에서 이름난 도장', branch: 'martial.sword' },
+      { label: '대장장이에게 망치질부터 배운다', hint: '체술 · 쇠를 두드리며 팔이 굵어진다', branch: 'martial.fist' },
+    ] },
   { name: '로그타운', sea: 'east', text: '해적왕이 태어나고 죽은 시작과 끝의 마을',
-    households: [{ text: '선술집' }, { text: '무기점' }, { text: '항구 짐꾼의 집' }, { text: '해군 지부 근처 하숙집', father: 'marine' }] },
+    households: [{ text: '선술집' }, { text: '무기점' }, { text: '항구 짐꾼의 집' }, { text: '해군 지부 근처 하숙집', father: 'marine' }],
+    teachers: [
+      { label: '해군 지부 사격장을 드나든다', hint: '사격 · 해군 지부의 표적', branch: 'martial.gun' },
+      { label: '무기점 주인에게 칼 다루는 법을 배운다', hint: '검술 · 명검을 보는 눈도 생긴다', branch: 'martial.sword' },
+      { label: '선술집 싸움꾼들 틈에서 주먹을 배운다', hint: '체술 · 술집 싸움은 실전이다', branch: 'martial.fist' },
+    ] },
 ];
 
 export interface SurnameDef {
@@ -102,19 +140,21 @@ export const FIRST_NAMES = {
 export const PARENT_NAMES = { m: ['가렛', '도널', '레온', '헨릭', '오웬', '바실', '로드'], f: ['마르타', '에바', '리타', '셀마', '노라', '한나', '이다'] };
 
 export const SPECIES_NAMES: Record<Species, string> = {
-  human: '인간', fishman: '어인족', merfolk: '인어족', mink: '밍크족', giant: '거인족', longarm: '팔긴족', longleg: '다리긴족',
-  threeeye: '삼목족', tontatta: '소인족', celestial: '천룡인', skypiean: '하늘섬 주민',
+  human: '인간', fishman: '어인족', merfolk: '인어족', mink: '밍크족', giant: '거인족', longarm: '수장족', longleg: '족장족',
+  threeeye: '삼목족', tontatta: '소인족', skypiean: '하늘섬 주민', buccaneer: '버커니어족', lunarian: '루나리아족',
 };
 
 /** 평범한 집안에서 가끔 사람이 아닌 아이가 거둬진다. 이스트 블루에 없는 종족이라 고아가 된다 */
 export const SPECIES_REROLL = {
   p: 0.12,
-  weights: [['fishman', 4], ['mink', 4], ['merfolk', 2], ['skypiean', 2], ['longarm', 2], ['longleg', 2], ['giant', 1], ['threeeye', 1], ['tontatta', 1]] as [Species, number][],
+  // 버커니어족 · 루나리아족은 거의 남지 않은 종족이라 아주 드물다
+  weights: [['fishman', 4], ['mink', 4], ['merfolk', 2], ['skypiean', 2], ['longarm', 2], ['longleg', 2], ['giant', 1], ['threeeye', 1], ['tontatta', 1], ['buccaneer', 0.6], ['lunarian', 0.3]] as [Species, number][],
 };
 
 export const SPECIES_BONUS: Partial<Record<Species, Partial<Stats>>> = {
   fishman: { str: 2, vit: 1 }, merfolk: { spd: 2, luk: 1 }, mink: { spd: 2 }, giant: { str: 3, vit: 3, spd: -2 },
   longarm: { spd: 1, luk: 1 }, longleg: { spd: 2 }, threeeye: { int: 1, wil: 2 }, tontatta: { spd: 3, str: 1, vit: -2 }, skypiean: { luk: 2 },
+  buccaneer: { str: 4, vit: 3, spd: -1 }, lunarian: { vit: 3, wil: 2 },
 };
 
 export const ORPHAN_STORIES = [

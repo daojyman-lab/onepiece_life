@@ -1,10 +1,28 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { drawFlag, FLAG_SIZE } from '../pixel/flag';
 import { actions, getState, useStore } from '../../app/store';
 import { exportFile, importFile } from '../../app/save';
 import { HOMETOWNS, SURNAMES } from '../../data/births';
 import { FRUIT_BY_ID } from '../../data/fruits';
-import { Face, Modal, ROUTE_NAMES } from '../common';
+import { Modal, ROUTE_NAMES } from '../common';
 import { CodexBody } from '../modals/CodexModal';
+
+/** 바람에 펄럭이는 해적 깃발 */
+function JollyRoger() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let raf = 0, t = 0;
+    const loop = () => { t++; drawFlag(ctx, 4, reduce ? 0 : t); if (!reduce) raf = requestAnimationFrame(loop); };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return <canvas ref={ref} class="jolly-roger" width={FLAG_SIZE.w * 4} height={FLAG_SIZE.h * 4} role="img" aria-label="해적 깃발" />;
+}
 
 export function Start() {
   const st = useStore();
@@ -26,16 +44,11 @@ export function Start() {
   }
 
   return (
-    <div class="app" style={{ maxWidth: 640 }}>
-      <div class="frame frame-pad" style={{ textAlign: 'center', marginTop: 24 }}>
-        <div class="en" style={{ color: 'var(--wood-d)', fontSize: 11 }}>GRAND TREASURE</div>
-        <div class="t30" style={{ color: 'var(--gold)', textShadow: '3px 3px 0 var(--wood-dd)', margin: '6px 0' }}>그랜드 트레저</div>
-        <div class="t9 soft">v4.0.0 · 원피스 세계관 비영리 팬게임 · 한 사람의 일생을 따라가는 항해</div>
-        <div class="row" style={{ justifyContent: 'center', margin: '12px 0' }}>
-          <Face who={{ key: 'title-a', age: 8, faction: 'civil', gender: 'm' }} size="big" />
-          <Face who={{ key: 'title-b', age: 30, faction: 'pirate', gender: 'f' }} size="big" />
-          <Face who={{ key: 'title-c', age: 40, faction: 'marine', gender: 'm' }} size="big" />
-        </div>
+    <div class="app start-screen">
+      <div class="frame frame-pad" style={{ textAlign: 'center', width: '100%' }}>
+        <h1 class="game-title">GRAND TREASURE</h1>
+        <div class="t9 soft">v4.0.0 · 원피스 세계관 비영리 팬게임</div>
+        <JollyRoger />
 
         {life && (
           <div class="paper" style={{ marginBottom: 10 }}>

@@ -13,7 +13,7 @@ export interface LifeEvent {
 }
 
 const e = (x: LifeEvent) => x;
-const child: Condition = { c: 'age', max: 9 };
+const child: Condition = { c: 'age', min: 3, max: 9 };
 const teen: Condition = { c: 'age', min: 10, max: 15 };
 const adult: Condition = { c: 'age', min: 16 };
 const atSea: Condition = { c: 'route', is: ['pirate', 'marine', 'revolution'] };
@@ -41,7 +41,7 @@ export const LIFE_EVENTS: LifeEvent[] = [
   e({ id: 't_study', when: [teen], weight: 5, cooldown: 8, text: ['밤늦게 항해술 책을 읽었다.', '별자리로 방향 찾는 법을 익혔다.'], effects: [{ op: 'base', key: 'int', add: 0.6 }] }),
   e({ id: 't_festival', when: [teen], weight: 4, cooldown: 12, text: ['{place}의 축제에서 밤새 춤을 췄다.', '마을 씨름 대회에 나가 3등을 했다.'], effects: [{ op: 'base', key: 'luk', add: 0.4 }, { op: 'base', key: 'wil', add: 0.3 }] }),
   e({ id: 't_news', when: [teen], weight: 4, cooldown: 12, text: ['신문에 실린 대해적의 현상금 기사를 오려 두었다.', '해군 함대가 수평선을 지나가는 것을 지켜봤다.'], effects: [{ op: 'base', key: 'wil', add: 0.4 }] }),
-  e({ id: 't_letter', when: [teen], weight: 3, cooldown: 12, text: ['{mother}가 수련복을 새로 지어 주었다.', '{father}가 말없이 등을 두드려 주었다.'], effects: [{ op: 'bond', who: '아버지', add: 3 }, { op: 'base', key: 'wil', add: 0.3 }] }),
+  e({ id: 't_letter', when: [teen], weight: 3, cooldown: 12, text: ['{mother}이(가) 수련복을 새로 지어 주었다.', '{father}이(가) 말없이 등을 두드려 주었다.'], effects: [{ op: 'bond', who: '아버지', add: 3 }, { op: 'base', key: 'wil', add: 0.3 }] }),
   e({ id: 't_scrape', when: [teen], weight: 4, cooldown: 10, text: ['절벽에서 뛰어내리다 무릎이 까졌다.', '목검에 손가락을 찧었다.'], effects: [{ op: 'hp', add: -4 }, { op: 'base', key: 'wil', add: 0.3 }] }),
 
   // ======================================================== 바다로 나간 뒤

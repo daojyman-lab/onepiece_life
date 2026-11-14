@@ -3,27 +3,38 @@ import { B } from '../data/balance';
 import { FRUITS, FRUIT_BY_ID, fruitHints, GRADE_NAMES } from '../data/fruits';
 import { ITEM_BY_ID } from '../data/items';
 import { MASTER_BY_ID } from '../data/masters';
+import { FRUIT_PASSIVES, HERO_TRAIT_BY_ID } from '../data/passives';
+import { SIDE_BY_ID } from '../data/sideStories';
 import { SHIP_BY_ID } from '../data/seas';
-import { addPerson, crewOf, recruit } from './people';
+import { addPerson, crewLabel, crewOf, recruit, roleName } from './people';
+import { SPECIES_NAMES } from '../data/births';
+import { NAMED_CREW_BY_ID } from '../data/namedCrew';
+import { capture, jailbreak, prisonExtend, release, startHunt } from './sim/prison';
+import { davyBack, dbfFinal } from './sim/davyback';
+import { startTrial, trialDone } from './sim/trial';
 import { rngOf, weighted, pick } from './rng';
 import type { Effect, LifeState, StatKey } from './types';
-import { absMonth, clamp, findPerson, fmtMoney, log, timeline, uid } from './util';
+import { absMonth, clamp, findPerson, fmtMoney, log, talentMult, talentsOf, timeline, uid } from './util';
 import { learn, openGate, setFocus } from './growth/growth';
-import { branchSkills, fruitSkillId } from './growth/skillbook';
+import { branchSkills } from './growth/skillbook';
 import { enterSea, resolveEnemy, sea } from './world/world';
 
 const STATS: StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const STAT_NAMES: Record<StatKey, string> = { str: '힘', spd: '속도', vit: '체력', int: '지능', wil: '정신', luk: '운' };
 
 export function crewCapacity(s: LifeState) {
-  if (s.hero.route === 'marine') return 2 + Math.floor(s.hero.rank / 2);
+  if (s.hero.route === 'marine') {
+    // 분대장(하사)이 되어야 자기 분대를 꾸린다
+    const M = B.marine;
+    return s.hero.rank < M.squadRank ? 0 : Math.min(M.squadMax, M.squadBase + Math.floor((s.hero.rank - M.squadRank) / 2));
+  }
   const ship = s.world.ship ? SHIP_BY_ID[s.world.ship] : null;
   return ship ? ship.crew : 0;
 }
 
 export const RANKS = {
   pirate: ['풋내기 해적', '해적 선장', '이름난 선장', '대형 루키', '초신성', '사황 후보', '사황', '해적왕'],
-  marine: ['이등병', '병장', '소위', '대위', '소령', '중령', '대령', '준장', '중장', '대장', '원수'],
+  marine: ['이등병', '일등병', '상등병', '하사 (분대장)', '중사', '상사', '소위', '중위', '대위', '소령', '중령', '대령', '준장', '중장', '대장', '원수'],
   revolution: ['혁명군 병사', '혁명군 간부', '군대장', '참모', '참모총장', '혁명의 영웅'],
   none: ['민간인'],
 };
@@ -63,8 +74,10 @@ function eatFruit(s: LifeState, fuid: string) {
   log(s, `열매를 먹었다. 끔찍한 맛… 그것은 ${f.name}이었다! (${GRADE_NAMES[f.grade]})`, f.grade >= 4 ? 'good' : 'growth');
   timeline(s, `${f.name}을(를) 먹었다 (${GRADE_NAMES[f.grade]})`);
   log(s, '이제 헤엄칠 수 없다. 해루석에 약해졌다.', 'danger');
-  learn(s, fruitSkillId(f.id, 0));
-  log(s, '열매 칸에 들어갔다. 주력 · 보조와 따로 저절로 자란다.', 'growth');
+  s.growth.fruitMastery = 0;
+  const fp = FRUIT_PASSIVES[f.id];
+  if (fp) log(s, `열매의 힘: ${fp.text}`, 'growth');
+  log(s, '열매 칸에 들어갔다. 열매 숙련이 오를수록 힘이 세진다.', 'growth');
 }
 
 export function applyEffects(s: LifeState, effects: Effect[]) {
@@ -117,10 +130,19 @@ function apply(s: LifeState, e: Effect) {
       if (was === 'none') enterSea(s, s.world.seaId);
       return;
     }
-    case 'rank': h.rank = Math.max(0, h.rank + e.add); return;
+    case 'rank': promote(s, e.add); return;
     case 'flag': if (!s.choice.flags.includes(e.id)) s.choice.flags.push(e.id); return;
     case 'unflag': s.choice.flags = s.choice.flags.filter((f) => f !== e.id); return;
     case 'trait': if (!h.traits.includes(e.id)) h.traits.push(e.id); return;
+    case 'persona': {
+      const t = HERO_TRAIT_BY_ID[e.id];
+      if (!t) return;
+      const had = h.persona;
+      h.persona = t.id;
+      log(s, had ? `특성이 「${t.name}」(으)로 바뀌었다. ${t.desc}.` : `특성 「${t.name}」이(가) 몸에 배었다. ${t.desc}.`, 'good');
+      timeline(s, `특성 「${t.name}」`);
+      return;
+    }
     case 'person': {
       const seed = { ...e.add };
       if (seed.kind === 'rival' && seed.power === undefined) {
@@ -132,11 +154,20 @@ function apply(s: LifeState, e: Effect) {
     case 'bond': { const p = findPerson(s, e.who); if (p) p.bond = clamp(p.bond + e.add, 0, 100); return; }
     case 'recruit': {
       const cap = crewCapacity(s);
-      if (crewOf(s).length >= cap) { log(s, '배에 자리가 없어 동료로 받지 못했다.', 'info'); return; }
+      const navy = h.route === 'marine';
+      if (crewOf(s).length >= cap) {
+        log(s, navy ? (cap === 0 ? '아직 분대를 꾸릴 계급이 아니다. 하사(분대장)가 되어야 한다.' : '분대에 빈자리가 없다.') : '배에 자리가 없어 동료로 받지 못했다.', 'info');
+        return;
+      }
       const p = recruit(s, e.crew);
       if (!p) return;
-      log(s, `${p.name}이(가) 동료가 되었다!`, 'good');
-      timeline(s, `${p.name}이(가) 동료가 되었다`);
+      const extra = talentsOf(s).reduce((x, t) => x + (t.crewLevel ?? 0), 0);
+      if (p.crew && extra) { p.crew.level += extra; p.crew.power += extra * B.crew.powerPerLevel * 0.5; }
+      const named = e.crew.named ? NAMED_CREW_BY_ID[e.crew.named] : undefined;
+      if (named) log(s, named.joinLog, 'good');
+      const sp = p.species !== 'human' ? ` ${SPECIES_NAMES[p.species]}이다.` : '';
+      log(s, (navy ? `${crewLabel(p)}을(를) 내 분대로 데려왔다!` : `${crewLabel(p)}이(가) 동료가 되었다!`) + sp, 'good');
+      timeline(s, navy ? `${p.name}이(가) 분대원이 되었다` : `${p.name}이(가) 동료가 되었다`);
       if (s.loadout.crew.length < cap) s.loadout.crew.push({ personId: p.id, role: p.crew!.role });
       return;
     }
@@ -149,6 +180,60 @@ function apply(s: LifeState, e: Effect) {
     }
     case 'findFruit': findFruit(s, e.pool); return;
     case 'eatFruit': eatFruit(s, e.uid); return;
+    case 'startSide': {
+      const st = SIDE_BY_ID[e.id];
+      if (!st || s.world.side) return;
+      s.world.side = { id: st.id, step: 0, months: 0 };
+      log(s, `곁가지 이야기 「${st.title}」를 맡았다. 그동안 해역 임무는 쉰다.`, 'world');
+      return;
+    }
+    case 'crewBond':
+      for (const p of crewOf(s)) p.bond = Math.min(100, Math.max(0, p.bond + e.add));
+      return;
+    case 'family': {
+      if (e.act === 'lover') {
+        const g: 'm' | 'f' = h.gender === 'm' ? 'f' : 'm';
+        const p = addPerson(s, { kind: 'family', relation: '연인', gender: g, age: h.age + Math.round(r() * 6 - 3), bond: 70, faction: 'civil' });
+        if (!s.choice.flags.includes('has_lover')) s.choice.flags.push('has_lover');
+        log(s, `${p.name}와(과) 연인이 되었다.`, 'good');
+        timeline(s, `${p.name}와(과) 사랑에 빠졌다`);
+      } else if (e.act === 'marry') {
+        const p = s.people.find((x) => x.alive && x.relation === '연인');
+        if (!p) return;
+        p.relation = '배우자'; p.bond = Math.min(100, p.bond + 20);
+        s.choice.flags = s.choice.flags.filter((f) => f !== 'has_lover');
+        if (!s.choice.flags.includes('married')) s.choice.flags.push('married');
+        log(s, `${p.name}와(과) 결혼했다. ${h.birth.place}에 작은 집을 마련했다.`, 'good');
+        timeline(s, `${p.name}와(과) 결혼했다`);
+      } else if (e.act === 'breakup') {
+        const p = s.people.find((x) => x.alive && x.relation === '연인');
+        if (!p) return;
+        p.kind = 'ally'; p.relation = '옛 연인'; p.bond = Math.max(0, p.bond - 40);
+        s.choice.flags = s.choice.flags.filter((f) => f !== 'has_lover');
+        log(s, `${p.name}와(과) 헤어졌다.`, 'danger');
+      } else if (e.act === 'child') {
+        const g = e.gender ?? (r() < 0.5 ? 'm' : 'f');
+        const p = addPerson(s, { kind: 'family', relation: g === 'm' ? '아들' : '딸', gender: g, age: 0, bond: 90, faction: 'civil', name: `${h.surname} ${e.name ?? '아기'}` });
+        log(s, `${g === 'm' ? '아들' : '딸'}이 태어났다! 이름은 ${p.name}.`, 'good');
+        timeline(s, `${g === 'm' ? '아들' : '딸'} ${p.name}이(가) 태어났다`);
+        if (!s.choice.flags.includes('has_child')) s.choice.flags.push('has_child');
+      }
+      return;
+    }
+    case 'feedFruit': {
+      const i = s.inventory.unknownFruits.findIndex((u) => u.uid === e.uid);
+      const p = s.people.find((x) => x.id === e.who && x.alive && x.kind === 'crew' && x.crew);
+      if (i < 0 || !p || p.crew!.fruit) return;
+      const f = FRUIT_BY_ID[s.inventory.unknownFruits[i].fruitId];
+      s.inventory.unknownFruits.splice(i, 1);
+      p.crew!.fruit = f.id;
+      p.crew!.power = Math.round(p.crew!.power * (1 + B.crew.fruitPowerMult * f.grade) + B.crew.fruitPowerAdd * f.grade);
+      p.bond = Math.min(100, p.bond + 10);
+      log(s, `${p.name}이(가) 열매를 먹었다. 끔찍한 맛에 몸서리치더니… ${f.name}이었다! (${GRADE_NAMES[f.grade]})`, f.grade >= 4 ? 'good' : 'growth');
+      log(s, `${p.name}은(는) 이제 헤엄칠 수 없다. 대신 ${FRUIT_PASSIVES[f.id]?.text ?? '열매의 힘을 얻었다'}.`, 'growth');
+      timeline(s, `동료 ${p.name}이(가) ${f.name}을(를) 먹었다`);
+      return;
+    }
     case 'sellFruit': {
       const i = s.inventory.unknownFruits.findIndex((u) => u.uid === e.uid);
       if (i < 0) return;
@@ -176,7 +261,7 @@ function apply(s: LifeState, e: Effect) {
         h.injuries.push({ severity: 'scar', monthsLeft: -1, stat: k });
         log(s, `평생 남을 후유증을 얻었다. (${STAT_NAMES[k]} −${B.body.injury.scar.amount})`, 'danger');
       } else {
-        const months = B.body.injury[e.severity].months;
+        const months = Math.max(1, Math.round(B.body.injury[e.severity].months * talentMult(s, 'injury')));
         h.injuries.push({ severity: e.severity, monthsLeft: months });
         log(s, e.severity === 'heavy' ? '크게 다쳤다. 한동안 제대로 움직일 수 없다.' : '가볍게 다쳤다.', 'danger');
       }
@@ -211,8 +296,35 @@ function apply(s: LifeState, e: Effect) {
         encounter: {
           source: e.enemy === 'rival' ? 'rival' : e.enemy.startsWith('b_') ? 'boss' : 'choice',
           enemy, elite: e.elite, lethal: e.lethal && !e.spar, spar: !!e.spar, atSea: false,
+          solo: e.solo, reward: e.win, onLose: e.lose,
         },
       };
+      return;
+    }
+    case 'leaveCrew': {
+      const p = s.people.find((x) => x.id === e.who);
+      if (!p || !p.alive || p.kind !== 'crew') return;
+      s.loadout.crew = s.loadout.crew.filter((c) => c.personId !== p.id);
+      if (s.world.firstMate === p.id) s.world.firstMate = undefined;
+      if (e.why === 'betray') {
+        p.kind = 'enemy'; p.relation = '배신자'; p.bond = 0; p.faction = 'pirate';
+        let lost = 0;
+        if (e.takeMoneyPct) { lost = Math.round(Math.max(0, h.money) * e.takeMoneyPct); h.money -= lost; }
+        log(s, `${p.name}이(가) 배를 버리고 달아났다${lost ? `. 금고에서 ${fmtMoney(lost)} 베리가 사라졌다` : ''}. 자리 하나가 비었다.`, 'danger');
+        timeline(s, `동료 ${p.name}이(가) 배신하고 달아났다`);
+      } else if (e.why === 'hurt') {
+        p.kind = 'ally'; p.relation = '떠나간 동료'; p.bond = Math.max(0, p.bond - 30);
+        log(s, `의심받은 ${p.name}은(는) 말없이 짐을 싸서 배를 떠났다. 자리 하나가 비었다.`, 'danger');
+        timeline(s, `동료 ${p.name}이(가) 배를 떠났다`);
+      } else if (e.why === 'exposed') {
+        p.kind = 'enemy'; p.relation = '배신자'; p.bond = 0;
+        log(s, `${p.name}의 정체가 드러났다. 이제 동료가 아니다.`, 'danger');
+        timeline(s, `동료 ${p.name}의 배신이 드러났다`);
+      } else {
+        p.kind = 'enemy'; p.relation = '쫓아낸 배신자'; p.bond = 0;
+        log(s, `${p.name}을(를) 배에서 내쫓았다. 자리 하나가 비었다.`, 'world');
+        timeline(s, `배신자 ${p.name}을(를) 쫓아냈다`);
+      }
       return;
     }
     case 'ship': {
@@ -220,6 +332,63 @@ function apply(s: LifeState, e: Effect) {
       h.money -= e.price;
       s.world.ship = e.id;
       if (e.price > 0) { log(s, `${ship.name}을(를) 손에 넣었다!`, 'good'); timeline(s, `${ship.name}을(를) 샀다`); }
+      // 임펠 다운에서 나온 뒤 새 배를 샀다: 흩어진 동료들이 소식을 듣고 돌아온다
+      if (s.choice.flags.includes('lost_ship') && e.id !== 'raft') {
+        s.choice.flags = s.choice.flags.filter((f) => f !== 'lost_ship');
+        const r = rngOf(s.rng);
+        const old = s.people.filter((p) => p.alive && p.relation === '흩어진 옛 동료' && p.crew).sort((a, z) => z.bond - a.bond);
+        const back: string[] = [];
+        for (const p of old) {
+          if (crewOf(s).length >= crewCapacity(s)) break;
+          if (r() < 0.6 + p.bond / 250) {
+            p.kind = 'crew'; p.relation = `동료 · ${p.crew!.role === 'vanguard' ? '돌격대' : '동료'}`;
+            if (s.loadout.crew.length < crewCapacity(s)) s.loadout.crew.push({ personId: p.id, role: p.crew!.role });
+            back.push(p.name);
+          }
+        }
+        if (back.length) { log(s, `소식을 듣고 옛 동료들이 돌아왔다: ${back.join(', ')}. "늦었잖아, 선장."`, 'good'); timeline(s, '흩어졌던 동료들이 돌아왔다'); }
+      }
+      return;
+    }
+    case 'hunt': startHunt(s, e.flee); return;
+    case 'capture': capture(s, e.tier); return;
+    case 'release': release(s, e.broke); return;
+    case 'prisonExtend': prisonExtend(s, e.months); return;
+    case 'jailbreak': jailbreak(s); return;
+    case 'masterTrial': startTrial(s, e.master, e.branch, e.gate, e.next); return;
+    case 'trialDone': trialDone(s, e.ok); return;
+    case 'loot': {
+      const r = rngOf(s.rng);
+      const add = Math.round(e.base * s.world.stage * (0.7 + r() * 0.6) / 100) * 100;
+      h.money += add;
+      log(s, e.text.replace('{money}', fmtMoney(add)), 'money');
+      return;
+    }
+    case 'davyBack': davyBack(s); return;
+    case 'dbfRound': dbfFinal(s, e.won); return;
+    case 'rejoin': {
+      const p = s.people.find((x) => x.id === e.who);
+      if (e.ship && s.world.lostShip) {
+        const ship = SHIP_BY_ID[s.world.lostShip];
+        s.world.ship = s.world.lostShip;
+        s.world.lostShip = undefined;
+        s.choice.flags = s.choice.flags.filter((f) => f !== 'lost_ship');
+        log(s, `${p ? p.name + '이(가) ' : ''}해군 창고에서 빼낸 ${ship.name}이(가) 항구에 들어왔다. 우리 배가 돌아왔다!`, 'good');
+        timeline(s, `압수된 ${ship.name}을(를) 되찾았다`);
+      }
+      if (!p || !p.alive || !p.crew) return;
+      if (crewOf(s).length >= crewCapacity(s)) { log(s, '배에 자리가 없어 함께 가지 못했다.', 'info'); return; }
+      p.kind = 'crew'; p.relation = `동료 · ${roleName(p.crew.role)}`; p.bond = Math.min(100, p.bond + 15);
+      if (s.loadout.crew.length < crewCapacity(s)) s.loadout.crew.push({ personId: p.id, role: p.crew.role });
+      log(s, `${p.name}이(가) 다시 배에 올랐다. "이번엔 끝까지 간다, 선장."`, 'good');
+      timeline(s, `흩어졌던 ${p.name}이(가) 돌아왔다`);
+      return;
+    }
+    case 'partWays': {
+      const p = s.people.find((x) => x.id === e.who);
+      if (!p) return;
+      p.relation = '제 길을 간 옛 동료';
+      log(s, `${p.name}은(는) 고개를 끄덕이고 자기 바다로 떠났다.`, 'info');
       return;
     }
     case 'bossLater': s.world.boss.nextAskAt = absMonth(s) + e.months; return;
@@ -233,6 +402,21 @@ function apply(s: LifeState, e: Effect) {
       else if (e.else) applyEffects(s, e.else);
       return;
   }
+}
+
+/** 진급 (해적은 이름이 오른다). 해군은 하사가 되면 분대를 꾸린다 */
+export function promote(s: LifeState, add: number) {
+  const h = s.hero;
+  const before = h.rank;
+  h.rank = Math.max(0, Math.min(RANKS[h.route].length - 1, h.rank + add));
+  if (h.rank <= before) return;
+  if (h.route === 'marine') {
+    log(s, `${rankName(s)}(으)로 진급했다!`, 'good');
+    if (before < B.marine.squadRank && h.rank >= B.marine.squadRank) {
+      log(s, '분대장이 되었다. 이제 눈에 띄는 병사를 골라 내 분대를 꾸릴 수 있다.', 'good');
+      timeline(s, '분대장이 되었다');
+    }
+  } else log(s, `${rankName(s)}(으)로 이름이 올랐다.`, 'good');
 }
 
 /** 인생을 끝낸다. 결산 창은 sim이 띄운다 */

@@ -6,6 +6,11 @@ import { SEA_BY_ID } from '../../data/seas';
 import { SKILLS } from '../../data/skills';
 import { FRUITS } from '../../data/fruits';
 import { ARCHETYPES } from '../../data/enemies';
+import { EPITHETS } from '../../data/epithets';
+import type { SideFoe } from '../../data/sideStories';
+import { PORT_FOES, type PortFoe } from '../../data/portFoes';
+import { crewUnit } from '../combat/units';
+import { faceKeyOf } from '../people';
 import { int, pick, rngOf, shuffle, type Rng } from '../rng';
 import type { BranchId, EnemySpec, LifeState, MissionProgress, SeaId, Stage } from '../types';
 import { absMonth, findPerson, log } from '../util';
@@ -53,12 +58,12 @@ export function missionDoneCount(s: LifeState) {
   return s.world.missions.filter((m) => m.state === 'done').length;
 }
 
+/** 실패한 임무를 모두 새 임무로 바꾼다 (새로 뽑을 게 없으면 같은 임무를 다시 연다) */
 export function refillFailed(s: LifeState) {
-  const idx = s.world.missions.findIndex((m) => m.state === 'failed');
-  if (idx < 0) return;
-  const mp = drawMission(s, s.world.missions.map((x) => x.id));
-  if (mp) s.world.missions[idx] = mp;
-  else s.world.missions[idx] = { ...s.world.missions[idx], state: 'open', step: 0, monthsInStep: 0 };
+  for (let idx = s.world.missions.findIndex((m) => m.state === 'failed'); idx >= 0; idx = s.world.missions.findIndex((m) => m.state === 'failed')) {
+    const mp = drawMission(s, s.world.missions.map((x) => x.id));
+    s.world.missions[idx] = mp ?? { ...s.world.missions[idx], state: 'open', step: 0, monthsInStep: 0 };
+  }
 }
 
 export function missionTitle(mp: MissionProgress) {
@@ -92,8 +97,14 @@ function genSkills(r: Rng, p: number, armament: number): string[] {
   return shuffle(r, list).slice(0, Math.min(6, 2 + tier));
 }
 
-function genName(r: Rng, gender: 'm' | 'f') {
-  return `「${pick(r, ENEMY_NAMES.epithet)}」 ${pick(r, gender === 'f' ? ENEMY_NAMES.firstF : ENEMY_NAMES.first)}`;
+/** 「이명」 이름. 이명은 한 인생 안에서 겹치지 않는다. 200개를 다 쓰면 처음부터 다시 */
+function genName(s: LifeState, r: Rng, gender: 'm' | 'f') {
+  const used = (s.world.usedEpithets ??= []);
+  let pool = EPITHETS.filter((x) => !used.includes(x));
+  if (!pool.length) { used.length = 0; pool = EPITHETS; }
+  const ep = pick(r, pool);
+  used.push(ep);
+  return `「${ep}」 ${pick(r, gender === 'f' ? ENEMY_NAMES.firstF : ENEMY_NAMES.first)}`;
 }
 
 /** 지금 해역의 적. kind: grunt 잡졸, elite 우두머리, officer 간부, captain 간부를 거느린 우두머리 */
@@ -121,8 +132,8 @@ export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'ca
   }
   const titles = faction === 'marine' ? ENEMY_NAMES.marineTitle : heroMarine ? ENEMY_NAMES.pirateTitle : ENEMY_NAMES.villainTitle;
   const e: EnemySpec = {
-    id: `gen_${s.rng.cursor}_${kind}`, name: ar?.names ? pick(r, ar.names) : genName(r, gender), canon: null,
-    title: ar ? ar.title : kind === 'grunt' ? '무법자' : kind === 'officer' ? '간부' : pick(r, titles),
+    id: `gen_${s.rng.cursor}_${kind}`, name: ar?.names ? pick(r, ar.names) : genName(s, r, gender), canon: null,
+    title: ar ? ar.title : kind === 'grunt' ? (faction === 'marine' ? '해군 병사' : '무법자') : kind === 'officer' ? '간부' : pick(r, titles),
     base: statsAround(p, ar?.bias ?? { str: 0.8 + r() * 0.4, spd: 0.8 + r() * 0.4, vit: 0.8 + r() * 0.4 }),
     fruitClass, armament: sx.armament as EnemySpec['armament'], observation: Math.max(0, sx.armament - 1) as EnemySpec['observation'],
     skills, tactic: pick(r, ['offense', 'defense', 'counter', 'endurance'] as const), officers: [],
@@ -138,6 +149,77 @@ export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'ca
   return e;
 }
 
+/** 원작 항구의 임무 강적이면 무작위 이름 대신 그 항구의 원작 인물로 바꾼다 (간부도) */
+export function canonizeFoe(s: LifeState, e: EnemySpec, port: string): EnemySpec {
+  const list = PORT_FOES[port];
+  if (!list || !list.length || e.form === 'seaking') return e;
+  const r = rngOf(s.rng);
+  const used = (s.world.usedPortFoes ??= []);
+  const want = e.faction === 'marine' ? 'marine' : e.faction === 'pirate' ? 'pirate' : 'civil';
+  const fresh = list.filter((x) => !used.includes(x.name));
+  const pool = fresh.length ? fresh : list;
+  const pickOne = (exclude: string[]) => {
+    const cand = pool.filter((x) => !exclude.includes(x.name));
+    const same = cand.filter((x) => x.f === want);
+    return (same.length ? pick(r, same) : cand.length ? pick(r, cand) : null);
+  };
+  const lead = pickOne([]);
+  if (!lead) return e;
+  used.push(lead.name);
+  const apply = (u: EnemySpec, f: PortFoe) => {
+    u.name = f.name; u.title = f.title; u.canon = f.canon ?? null; u.faceKey = f.canon ?? `port:${f.name}`;
+    if (f.species) u.species = f.species;
+    if (f.gender) u.gender = f.gender;
+  };
+  apply(e, lead);
+  const taken = [lead.name];
+  for (const o of e.officers) {
+    const f = pickOne(taken);
+    if (!f) break;
+    taken.push(f.name);
+    apply(o, f);
+  }
+  return e;
+}
+
+/** 곁가지 이야기의 이름 있는 적. 힘은 지금 해역 강적의 배율로 정한다 */
+export function sideEnemy(s: LifeState, storyId: string, step: number, foe: SideFoe): EnemySpec {
+  const r = rngOf(s.rng);
+  const [lo, hi] = sea(s).enemyPower;
+  const base = lo + (hi - lo) * 0.8;
+  const mk = (name: string, mult: number, skills: string[] | undefined, bias: SideFoe['bias'] | undefined, fruitId: string | undefined, idx: number): EnemySpec => {
+    const p = Math.max(5, Math.round(base * mult));
+    let sk = skills ? [...skills] : genSkills(r, p, sea(s).armament);
+    const f = fruitId ? FRUITS.find((x) => x.id === fruitId) : undefined;
+    if (f) sk = [...f.skills.slice(0, Math.min(f.skills.length, 3)).map((_, i) => `fruit:${f.id}:${i}`), ...sk].slice(0, 6);
+    return {
+      id: `side_${storyId}_${step}_${idx}`, name, canon: idx === 0 ? foe.canon ?? null : null, title: idx === 0 ? foe.title : '간부',
+      base: statsAround(p, bias ?? {}), fruitClass: f?.cls ?? null,
+      armament: sea(s).armament as EnemySpec['armament'], observation: Math.max(0, sea(s).armament - 1) as EnemySpec['observation'],
+      skills: sk, tactic: idx === 0 ? 'offense' : 'defense', officers: [],
+      faction: foe.faction, species: 'human', gender: 'm', age: 35,
+    };
+  };
+  const e = mk(foe.name, foe.mult, foe.skills, foe.bias, foe.fruit, 0);
+  e.officers = (foe.officers ?? []).map((o, i) => mk(o.name, o.mult, o.skills, undefined, undefined, i + 1));
+  return e;
+}
+
+/** 동료였던 사람과 싸울 때의 전투 값 (배신자) */
+export function crewAsEnemy(s: LifeState, id: string): EnemySpec {
+  const p = s.people.find((x) => x.id === id);
+  const power = p?.crew?.power ?? p?.power ?? 20;
+  const u = p?.crew ? crewUnit(p, s.world.stage) : null;
+  const skills = u?.skills.map((k) => k.id) ?? ['fist_jab'];
+  return {
+    id: `crew_${id}`, name: p?.name ?? '배신자', canon: null, title: '배신자', faceKey: p ? faceKeyOf(p) : undefined,
+    base: u ? { ...u.st } : statsAround(power), fruitClass: null,
+    armament: (u?.armament ?? 0) as EnemySpec['armament'], observation: 0,
+    skills: skills.length ? skills : ['fist_jab', 'fist_combo'], tactic: 'offense', officers: [],
+    faction: p?.faction ?? 'pirate', species: p?.species ?? 'human', gender: p?.gender ?? 'm', age: p?.age ?? 30,
+  };
+}
+
 /** 라이벌의 전투 값. 주인공 나이와 라이벌의 힘에서 만든다 */
 export function rivalEnemy(s: LifeState): EnemySpec {
   const rv = findPerson(s, 'rival');
@@ -147,7 +229,7 @@ export function rivalEnemy(s: LifeState): EnemySpec {
   const p = Math.round(Math.max(rv?.power ?? 0, avg * (1.05 + r() * 0.2)));
   if (rv) rv.power = Math.round(p * 1.08);
   return {
-    id: 'rival', name: rv?.name ?? '라이벌', canon: null, title: '라이벌',
+    id: 'rival', name: rv?.name ?? '라이벌', canon: null, title: '라이벌', faceKey: rv ? faceKeyOf(rv) : undefined,
     base: statsAround(p, { int: 0.7, wil: 0.8 }), fruitClass: null, armament: s.world.stage >= 3 ? 1 : 0, observation: 0,
     skills: genSkills(r, p, 0), tactic: pick(r, ['offense', 'counter'] as const), officers: [],
     faction: rv?.faction ?? 'civil', species: rv?.species ?? 'human', gender: rv?.gender ?? 'm', age: rv?.age ?? s.hero.age,
@@ -156,6 +238,7 @@ export function rivalEnemy(s: LifeState): EnemySpec {
 
 export function resolveEnemy(s: LifeState, ref: string): EnemySpec {
   if (ref === 'rival') return rivalEnemy(s);
+  if (ref.startsWith('crew:')) return crewAsEnemy(s, ref.slice(5));
   // 'gen:<elite|captain|grunt>[:원형]'
   const m = /^gen:(elite|captain|grunt)(?::(\w+))?$/.exec(ref);
   if (m) return genEnemy(s, m[1] as 'elite' | 'captain' | 'grunt', rngOf(s.rng), m[2]);

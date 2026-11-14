@@ -5,8 +5,8 @@ import type { LifeState, MetaState } from '../core/types';
 
 const K = { life: 'gt4.life', meta: 'gt4.meta', settings: 'gt4.settings' };
 
-export interface Settings { speed: 0 | 1 | 2 | 4; battleSpeed: 1 | 2 | 4 }
-export const defaultSettings = (): Settings => ({ speed: 1, battleSpeed: 1 });
+export interface Settings { speed: 0 | 1 | 2 | 4 | 8; battleSpeed: 1 | 2 | 4; sfx: boolean; bgm: boolean }
+export const defaultSettings = (): Settings => ({ speed: 1, battleSpeed: 1, sfx: true, bgm: true });
 
 function read<T>(key: string): T | null {
   try {

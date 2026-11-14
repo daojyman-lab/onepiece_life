@@ -1,6 +1,6 @@
 // 편성 편집기. 강적 준비 화면과 편성 창이 함께 쓴다.
 import { crewCapacity } from '../../core/effects';
-import { getSkill } from '../../core/growth/skillbook';
+import { getSkill, skillSummary } from '../../core/growth/skillbook';
 import { crewOf, roleName } from '../../core/people';
 import type { EnemySpec, LifeState, Loadout } from '../../core/types';
 import { ITEM_BY_ID } from '../../data/items';
@@ -33,9 +33,9 @@ export function LoadoutEditor({ s, lo, setLo, enemy, assign, setAssign }: {
           {learned.map(({ id, sk, m }) => {
             const on = lo.skills.includes(id);
             return (
-              <button class={`btn small ${on ? 'on' : ''}`} style={{ justifyContent: 'space-between' }} onClick={() => toggleSkill(id)} title={sk.text} aria-pressed={on}>
-                <span>{sk.name}</span>
-                <span class="t9">{sk.kind === 'attack' ? `×${sk.power}` : sk.kind === 'passive' ? '상시' : sk.kind === 'guard' ? '방어' : '보조'} · {Math.floor(m)}</span>
+              <button class={`btn small ${on ? 'on' : ''}`} style={{ flexDirection: 'column', alignItems: 'stretch', textAlign: 'left' }} onClick={() => toggleSkill(id)} title={sk.text} aria-pressed={on}>
+                <span class="row between"><span>{sk.name}</span><span class="t9">숙련 {Math.floor(m)}</span></span>
+                <span class="t9" style={{ opacity: 0.85 }}>{skillSummary(sk)}</span>
               </button>
             );
           })}
