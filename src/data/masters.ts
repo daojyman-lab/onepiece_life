@@ -1,0 +1,50 @@
+// 스승. 큰 단계(gate)는 스승의 수련이 끝나면 열린다.
+import type { Master } from '../core/types';
+
+export const MASTERS: Master[] = [
+  { id: 'm_koshiro', name: '코우시로', canon: 'koshiro', title: '시모츠키 도장 사범', seas: ['east'], minStage: 1, route: ['any'],
+    teaches: [{ branch: 'martial.sword', gate: 'martial.sword.master', months: 18 }],
+    accepts: [{ c: 'skill', id: 'sword_wave', mastery: 40 }], fee: 0, faction: 'civil', gender: 'm', age: 50, species: 'human' },
+  { id: 'm_zeff', name: '붉은 다리 제프', canon: 'zeff', title: '전직 해적 · 요리장', seas: ['east'], minStage: 1, route: ['any'],
+    teaches: [{ branch: 'martial.fist', gate: 'martial.fist.master', months: 18 }],
+    accepts: [{ c: 'skill', id: 'fist_quake', mastery: 40 }], fee: 0, faction: 'civil', gender: 'm', age: 60, species: 'human' },
+  { id: 'm_vance', name: '늙은 저격수 반스', canon: null, title: '은퇴한 현상금 사냥꾼', seas: ['west', 'north', 'south'], minStage: 1, route: ['any'],
+    teaches: [{ branch: 'martial.gun', gate: 'martial.gun.master', months: 18 }],
+    accepts: [{ c: 'skill', id: 'gun_snipe', mastery: 50 }], fee: 20000, faction: 'civil', gender: 'm', age: 62, species: 'human' },
+  { id: 'm_ronin', name: '떠돌이 검객 하쿠', canon: null, title: '이름 없는 낭인', seas: ['west', 'north', 'south'], minStage: 1, route: ['any'],
+    teaches: [{ branch: 'martial.sword', gate: 'martial.sword.master', months: 20 }, { branch: 'martial.fist', gate: 'martial.fist.master', months: 20 }],
+    accepts: [{ c: 'age', min: 14 }], fee: 30000, faction: 'civil', gender: 'm', age: 55, species: 'human' },
+  { id: 'm_nyon', name: '니온 할멈', canon: 'gloriosa', title: '아마존 릴리의 원로', seas: ['sabaody', 'gl_first'], minStage: 3, route: ['any'],
+    teaches: [{ branch: 'haki.observation', gate: 'haki.observation.sharp', months: 12 }],
+    accepts: [{ c: 'gate', id: 'haki.observation.awaken', has: true }], fee: 50000, faction: 'civil', gender: 'f', age: 80, species: 'human' },
+  { id: 'm_rayleigh', name: '실버즈 레일리', canon: 'rayleigh', title: '명왕', seas: ['sabaody'], minStage: 4, route: ['pirate'],
+    teaches: [
+      { branch: 'haki.armament', gate: 'haki.armament.hard', months: 24 },
+      { branch: 'haki.observation', gate: 'haki.observation.sharp', months: 18 },
+      { branch: 'haki.conqueror', gate: 'haki.conqueror.coat', months: 24 },
+    ],
+    accepts: [{ c: 'base', key: 'wil', min: 30 }], fee: 0, faction: 'pirate', gender: 'm', age: 76, species: 'human' },
+  { id: 'm_garp', name: '주먹의 가프', canon: 'garp', title: '해군 영웅', seas: ['gl_first', 'sabaody', 'nw_first'], minStage: 3, route: ['marine'],
+    teaches: [
+      { branch: 'haki.armament', gate: 'haki.armament.hard', months: 18 },
+      { branch: 'martial.fist', gate: 'martial.fist.grand', months: 24 },
+    ],
+    accepts: [{ c: 'route', is: ['marine'] }], fee: 0, faction: 'marine', gender: 'm', age: 72, species: 'human' },
+  { id: 'm_mihawk', name: '매의 눈 미호크', canon: 'mihawk', title: '세계 최강의 검사', seas: ['sabaody', 'nw_first'], minStage: 4, route: ['any'],
+    teaches: [{ branch: 'martial.sword', gate: 'martial.sword.grand', months: 30 }],
+    accepts: [{ c: 'skill', id: 'sword_secret', mastery: 50 }], fee: 0, faction: 'pirate', gender: 'm', age: 43, species: 'human' },
+  { id: 'm_hyogoro', name: '꽃의 효고로', canon: 'hyogoro', title: '와노쿠니의 옛 협객', seas: ['nw_first', 'nw_late'], minStage: 5, route: ['any'],
+    teaches: [{ branch: 'haki.armament', gate: 'haki.armament.flow', months: 18 }],
+    accepts: [{ c: 'gate', id: 'haki.armament.hard', has: true }], fee: 0, faction: 'civil', gender: 'm', age: 78, species: 'human' },
+  { id: 'm_seo', name: '예지의 은자 세오', canon: null, title: '산속의 수도승', seas: ['nw_first', 'nw_late'], minStage: 5, route: ['any'],
+    teaches: [{ branch: 'haki.observation', gate: 'haki.observation.future', months: 24 }],
+    accepts: [{ c: 'gate', id: 'haki.observation.sharp', has: true }], fee: 100000, faction: 'civil', gender: 'f', age: 90, species: 'human' },
+  { id: 'm_yasopp', name: '저격왕 야솝', canon: 'yasopp', title: '빨간 머리 해적단 저격수', seas: ['nw_late'], minStage: 6, route: ['pirate', 'any'],
+    teaches: [{ branch: 'martial.gun', gate: 'martial.gun.grand', months: 24 }],
+    accepts: [{ c: 'skill', id: 'gun_secret', mastery: 50 }], fee: 0, faction: 'pirate', gender: 'm', age: 50, species: 'human' },
+  { id: 'm_vegapunk', name: '베가펑크의 제자', canon: null, title: '열매 연구자', seas: ['sabaody', 'nw_first', 'nw_late'], minStage: 4, route: ['any'],
+    teaches: [{ branch: 'fruit', gate: 'fruit.awaken', months: 24 }],
+    accepts: [{ c: 'fruit', has: true }, { c: 'base', key: 'int', min: 60 }], fee: 300000, faction: 'civil', gender: 'f', age: 40, species: 'human' },
+];
+
+export const MASTER_BY_ID = Object.fromEntries(MASTERS.map((m) => [m.id, m])) as Record<string, Master>;

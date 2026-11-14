@@ -1,0 +1,28 @@
+{
+  "name": "grand-treasure",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "그랜드 트레저 v4 — 비영리 팬게임",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "simulate": "vite-node tools/simulate.ts",
+    "validate-data": "vite-node tools/validate-data.ts"
+  },
+  "dependencies": {
+    "@fontsource/press-start-2p": "^5.3.0",
+    "galmuri": "^2.40.3",
+    "preact": "^11.2.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-node": "^6.0.0",
+    "vitest": "^5.1.0"
+  }
+}
