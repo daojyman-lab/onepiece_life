@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import { actions, getState, useStore } from '../../app/store';
 import { exportFile, importFile } from '../../app/save';
-import { SURNAMES } from '../../data/births';
+import { HOMETOWNS, SURNAMES } from '../../data/births';
 import { FRUIT_BY_ID } from '../../data/fruits';
 import { Face, Modal, ROUTE_NAMES } from '../common';
 import { CodexBody } from '../modals/CodexModal';
@@ -10,6 +10,10 @@ export function Start() {
   const st = useStore();
   const [surname, setSurname] = useState('');
   const [gender, setGender] = useState<'' | 'm' | 'f'>('');
+  const [name, setName] = useState('');
+  const [place, setPlace] = useState('');
+  const sur = SURNAMES.find((x) => x.name === surname);
+  const cleanName = name.replace(/\s+/g, ' ').trim().slice(0, 10);
   const [show, setShow] = useState<null | 'hall' | 'codex' | 'info'>(null);
   const life = st.life;
 
@@ -44,24 +48,36 @@ export function Start() {
 
         <div class="paper stack" style={{ textAlign: 'left' }}>
           <b>새 인생</b>
+          <label class="stack t9">이름 <span class="soft">(비우면 무작위 · 10자까지)</span>
+            <input type="text" value={name} maxLength={10} placeholder="예: 루카" aria-label="주인공 이름"
+              onInput={(e) => setName((e.target as HTMLInputElement).value)} />
+          </label>
           <div class="grid2">
             <label class="stack t9">성씨
               <select value={surname} onChange={(e) => setSurname((e.target as HTMLSelectElement).value)}>
                 <option value="">무작위</option>
-                {SURNAMES.map((x) => <option value={x.name}>{x.name}{x.d ? ' (D)' : ''} — {x.lore}</option>)}
+                <optgroup label="평범한 집안">{SURNAMES.filter((x) => x.kind === 'common').map((x) => <option value={x.name}>{x.name} — {x.lore}</option>)}</optgroup>
+                <optgroup label="이스트 블루의 이름난 집안">{SURNAMES.filter((x) => x.kind === 'local').map((x) => <option value={x.name}>{x.name}{x.d ? ' (D)' : ''} — {x.lore}</option>)}</optgroup>
+                <optgroup label="희귀한 성씨 (고아로 태어난다)">{SURNAMES.filter((x) => x.kind === 'rare').map((x) => <option value={x.name}>{x.name}{x.d ? ' (D)' : ''} — {x.lore}</option>)}</optgroup>
               </select>
             </label>
-            <label class="stack t9">성별
-              <select value={gender} onChange={(e) => setGender((e.target as HTMLSelectElement).value as '' | 'm' | 'f')}>
+            <label class="stack t9">성별{sur && sur.gender !== 'any' ? <span class="soft"> ({sur.name} 가문은 {sur.gender === 'f' ? '여성' : '남성'}만)</span> : null}
+              <select value={gender} disabled={!!sur && sur.gender !== 'any'} onChange={(e) => setGender((e.target as HTMLSelectElement).value as '' | 'm' | 'f')}>
                 <option value="">무작위</option><option value="m">남성</option><option value="f">여성</option>
               </select>
             </label>
           </div>
+          <label class="stack t9">고향{sur?.kind === 'local' ? <span class="soft"> ({sur.name} 집안은 {sur.homes!.join(' · ')})</span> : sur?.kind === 'rare' ? <span class="soft"> (이 마을 바닷가에서 거둬진다)</span> : null}
+            <select value={place} onChange={(e) => setPlace((e.target as HTMLSelectElement).value)}>
+              <option value="">무작위</option>
+              {HOMETOWNS.filter((h) => sur?.kind !== 'local' || sur.homes!.includes(h.name)).map((h) => <option value={h.name}>{h.name} — {h.text}</option>)}
+            </select>
+          </label>
           <button class="btn gold block" onClick={() => {
             if (life && !confirm('진행 중인 인생을 버리고 새로 시작할까? (되돌릴 수 없다)')) return;
-            actions.newLife({ surname: surname || undefined, gender: gender || undefined });
+            actions.newLife({ surname: surname || undefined, gender: gender || undefined, name: cleanName || undefined, place: place && (sur?.kind !== 'local' || sur.homes!.includes(place)) ? place : undefined });
           }}>
-            {life ? '새 인생 시작 (지금 인생을 버린다)' : '새 인생 시작'}
+            {life ? '새 인생 시작 (지금 인생을 버린다)' : '새 인생 시작'}{cleanName ? ` — ${surname || '?'} ${cleanName}` : ''}
           </button>
         </div>
 

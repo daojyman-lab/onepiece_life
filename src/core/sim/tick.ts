@@ -2,7 +2,7 @@
 import { B } from '../../data/balance';
 import { MISSION_BY_ID } from '../../data/missions';
 import { maybeRaiseChoice } from '../choice/choice';
-import { createBattle, defaultAssign } from '../combat/battle';
+import { createBattle, defaultAssign, winRate } from '../combat/battle';
 import { runBattle } from '../combat/engine';
 import { applyBattle, tryAdvanceSea } from '../combat/outcome';
 import { applyEffects, kill } from '../effects';
@@ -12,6 +12,8 @@ import { chance, int, pick, rngOf } from '../rng';
 import type { LifeState, StatKey } from '../types';
 import { absMonth, fill, log } from '../util';
 import { genEnemy, missionTitle, refillFailed, resolveEnemy, sea } from '../world/world';
+import { monthlyLifeEvent } from './lifeEvents';
+import type { Encounter } from '../types';
 
 const BD = B.body;
 
@@ -57,10 +59,18 @@ function missions(s: LifeState) {
   }
   // 강적전 단계
   log(s, fill(step.text, v), 'battle');
-  s.pending = {
-    kind: 'prep',
-    encounter: { source: 'mission', enemy: resolveEnemy(s, step.enemy), elite: step.elite, lethal: true, spar: false, atSea: !!step.atSea, missionIdx: idx },
-  };
+  const enc: Encounter = { source: 'mission', enemy: resolveEnemy(s, step.enemy), elite: step.elite, lethal: true, spar: false, atSea: !!step.atSea, missionIdx: idx };
+  // 넉넉히 이길 상대면 멈추지 않고 저장된 편성으로 싸운다. 위험한 상대만 준비 화면을 띄운다
+  const assign = defaultAssign(s, enc, s.loadout);
+  if (winRate(s, enc, s.loadout, assign, B.autoElite.runs) >= B.autoElite.minRate) {
+    const r = rngOf(s.rng);
+    const b = createBattle(s, enc, s.loadout, assign, int(r, 1, 2 ** 30));
+    runBattle(b, true);
+    s.stats.autoElite = (s.stats.autoElite ?? 0) + 1;
+    applyBattle(s, enc, b, 'safe');
+    return;
+  }
+  s.pending = { kind: 'prep', encounter: enc };
 }
 
 function routineBattle(s: LifeState) {
@@ -142,6 +152,7 @@ function money(s: LifeState) {
 function yearly(s: LifeState) {
   const r = rngOf(s.rng);
   s.choice.thisYear = 0;
+  s.choice.pauses = 0;
   // 주력을 3년 넘게 이어 왔으면 갈림길이 후보가 된다
   if (s.growth.focus && s.hero.age - s.growth.focusSince >= B.choice.retrainYears && !s.choice.flags.includes('rethink_ready')) {
     s.choice.flags.push('rethink_ready');
@@ -179,6 +190,7 @@ export function tick(s: LifeState): boolean {
   body(s, newYear, birthday);
   if (!s.hero.alive) return true;
   money(s);
+  monthlyLifeEvent(s);
   if (s.choice.flags.includes('need_ship')) tryAdvanceSea(s);
   if (!s.pending) maybeRaiseChoice(s);
   if (newYear) yearly(s);

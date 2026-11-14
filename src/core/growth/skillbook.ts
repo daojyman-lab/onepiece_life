@@ -76,6 +76,14 @@ export function heavyInjured(s: LifeState) {
   return s.hero.injuries.some((i) => i.severity === 'heavy');
 }
 
+/** 한 갈래의 숙련 측정: 배운 기술 수, 전체 기술 수, 배운 기술의 평균 숙련 */
+export function branchProgress(s: LifeState, branch: BranchId) {
+  const list = branchSkills(branch, s.hero.fruit?.id ?? null);
+  const learned = list.filter((k) => s.growth.skills[k.id]);
+  const avg = learned.length ? learned.reduce((x, k) => x + s.growth.skills[k.id].mastery, 0) / learned.length : 0;
+  return { learned: learned.length, total: list.length, mastery: avg };
+}
+
 /** 전투력 (화면 표시와 대략적 비교용). 능력치 평균 × 배운 기술의 깊이 */
 export function powerRating(s: LifeState) {
   const st = effectiveStats(s);

@@ -31,6 +31,17 @@ const ROLE_NAMES: Record<CrewRole, string> = {
 };
 export const roleName = (r: CrewRole) => ROLE_NAMES[r];
 
+/** 역할이 하는 일 (화면 설명용). 규칙은 전투 · 몸 · 돈 · 배 모듈에 있다 */
+export const ROLE_DESC: Record<CrewRole, string> = {
+  vanguard: '강적전에서 적 하나를 맡아 싸운다',
+  support: '적을 맡아 싸운다. 다른 싸움을 도울 때 위력 70%',
+  medic: '싸우지 않는다. 편성하면 전투에서 3합마다 체력 15% 회복. 병에 덜 걸리고 치료비 절반',
+  navigator: '싸우지 않는다. 정찰이 좋아지고, 편성하면 바다에 빠질 확률 절반',
+  cook: '싸우지 않는다. 생활비 절반, 건강 회복 1.5배',
+  shipwright: '싸우지 않는다. 배 값 20% 할인',
+};
+export const isFighter = (r: CrewRole) => r === 'vanguard' || r === 'support';
+
 /** 동료의 힘. 해역 단계와 레벨에서 나온다 */
 export function crewPowerFor(stage: number, level: number) {
   return Math.round(10 + stage * 10 + level * B.crew.powerPerLevel * 0.5);

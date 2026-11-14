@@ -7,7 +7,7 @@ import { SEA_BY_ID, SHIPS, SHIP_BY_ID, nextSea } from '../../data/seas';
 import { BRANCH_NAMES, GATE_NAMES } from '../../data/skills';
 import { checkAll, firstFailReason } from '../conditions';
 import { applyEffects, crewCapacity } from '../effects';
-import { blockedGates } from '../growth/growth';
+import { activeBranches, blockedGates, MARTIAL } from '../growth/growth';
 import { int, rngOf, weighted } from '../rng';
 import type { BranchId, Choice, ChoiceCategory, LifeState, Pending, ResolvedOption } from '../types';
 import { absMonth, fill, findPerson, fmtMoney, log, timeline } from '../util';
@@ -16,8 +16,8 @@ import { sea } from '../world/world';
 type ChoicePending = Extract<Pending, { kind: 'choice' }>;
 
 function vars(s: LifeState): Record<string, string> {
-  const father = s.people.find((p) => p.relation === '아버지');
-  const mother = s.people.find((p) => p.relation === '어머니');
+  const father = findPerson(s, '아버지');
+  const mother = findPerson(s, '어머니');
   const rival = s.people.find((p) => p.kind === 'rival' || p.relation.startsWith('라이벌'));
   const active = s.world.missions.find((m) => m.state === 'active') ?? s.world.missions[0];
   return {
@@ -39,7 +39,6 @@ function speakerOf(s: LifeState, ch: Choice): ChoicePending['speaker'] {
 
 // ---------------------------------------------------------------- 틀
 
-const MARTIAL: BranchId[] = ['martial.fist', 'martial.sword', 'martial.gun'];
 const ENTRY_LABEL: Record<BranchId, [string, string]> = {
   'martial.fist': ['체술 사범을 따른다', '힘과 체력. 맨손으로 싸운다'],
   'martial.sword': ['검술 도장에 들어간다', '힘과 속도. 칼로 벤다'],
@@ -50,23 +49,14 @@ const ENTRY_LABEL: Record<BranchId, [string, string]> = {
   'fruit': ['열매의 힘을 파고든다', '지능과 정신. 열매 기술이 자란다'],
 };
 
-function availableBranches(s: LifeState): BranchId[] {
-  const out: BranchId[] = [...MARTIAL];
-  if (s.growth.gates.includes('haki.observation.awaken')) out.push('haki.observation');
-  if (s.growth.gates.includes('haki.armament.awaken')) out.push('haki.armament');
-  if (s.growth.gates.includes('haki.conqueror.awaken')) out.push('haki.conqueror');
-  if (s.hero.fruit) out.push('fruit');
-  return out;
-}
-
 function talentHint(s: LifeState, b: BranchId) {
   if (b === 'martial.sword' && s.hero.traits.includes('swordTalent')) return ' (검술 재능!)';
   if (b === 'martial.gun' && s.hero.traits.includes('gunTalent')) return ' (사격 재능!)';
   return '';
 }
 
+/** 입문 · 보조 · 갈림길: 주력과 보조는 무술 3유파 중에서만 고른다 */
 function focusOptions(s: LifeState, ch: Choice): ResolvedOption[] {
-  const avail = availableBranches(s);
   if (ch.id === 'en_dojo') {
     return MARTIAL.map((b) => ({
       label: ENTRY_LABEL[b][0], hint: ENTRY_LABEL[b][1] + talentHint(s, b), disabled: null,
@@ -74,45 +64,54 @@ function focusOptions(s: LifeState, ch: Choice): ResolvedOption[] {
     }));
   }
   if (ch.id === 'en_secondary') {
-    return avail.filter((b) => b !== s.growth.focus).slice(0, 4).map((b) => ({
-      label: ENTRY_LABEL[b][0].replace('따른다', '틈틈이 배운다').replace('들어간다', '다닌다'),
+    return MARTIAL.filter((b) => b !== s.growth.focus).map((b) => ({
+      label: ({ 'martial.fist': '체술 사범에게 틈틈이 배운다', 'martial.sword': '검술 도장에 틈틈이 다닌다', 'martial.gun': '사냥꾼에게 틈틈이 총을 배운다' } as Record<string, string>)[b],
       hint: `보조 갈래. 절반 속도로 자란다. ${ENTRY_LABEL[b][1]}`, disabled: null,
       effects: [{ op: 'focus', branch: b, slot: 'secondary' }],
     }));
   }
-  // 갈림길: 지금 길을 계속 / 다른 갈래로
+  // 갈림길: 지금 길을 계속 / 다른 무술로
   const keep: ResolvedOption = { label: '지금 길을 계속 간다', hint: `주력 「${s.growth.focus ? BRANCH_NAMES[s.growth.focus] : '없음'}」 유지`, disabled: null, effects: [{ op: 'unflag', id: 'rethink_ready' }] };
-  const prefer = (b: BranchId) => (b === 'fruit' ? 0 : b === 'haki.armament' && s.choice.flags.includes('need_armament') ? 1 : b === s.growth.secondary ? 2 : 3);
-  const alts = avail.filter((b) => b !== s.growth.focus).sort((a, z) => prefer(a) - prefer(z)).slice(0, 3);
+  const alts = MARTIAL.filter((b) => b !== s.growth.focus).sort((a) => (a === s.growth.secondary ? -1 : 1));
   return [keep, ...alts.map((b) => ({
-    label: `주력을 「${BRANCH_NAMES[b]}」(으)로 바꾼다`, hint: ENTRY_LABEL[b][1], disabled: null,
-    effects: [{ op: 'focus', branch: b, slot: 'focus' } as const, { op: 'unflag', id: 'need_armament' } as const],
+    label: `주력을 「${BRANCH_NAMES[b]}」(으)로 바꾼다`, hint: `${ENTRY_LABEL[b][1]}${b === s.growth.secondary ? ' (지금 보조와 맞바꾼다)' : ''}`, disabled: null,
+    effects: [{ op: 'focus', branch: b, slot: 'focus' } as const],
   }))];
 }
 
+/** 패기 눈뜸: 붙잡으면 패기 칸에 든다. 칸이 차 있으면 바꿀지 고른다 */
 function hakiOptions(s: LifeState, ch: Choice): ResolvedOption[] | null {
-  const kind = ch.id === 'hk_observation' ? 'observation' : ch.id === 'hk_armament' ? 'armament' : 'conqueror';
+  const kind = ch.id === 'hk_observation' ? 'observation' : ch.id.startsWith('hk_armament') ? 'armament' : 'conqueror';
   const gate = `haki.${kind}.awaken`;
   const branch = `haki.${kind}` as BranchId;
-  const p = kind === 'conqueror' ? 1 : 0.7;
-  const success = (slot: 'focus' | 'secondary') => [{ op: 'gate', id: gate } as const, { op: 'focus', branch, slot } as const];
-  return [
-    { label: '보조로 익힌다', hint: `「${BRANCH_NAMES[branch]}」을(를) 보조 갈래로. 실패할 수도 있다`, disabled: null,
-      effects: [{ op: 'chance', p, then: success('secondary'), else: [{ op: 'base', key: 'wil', add: 2 }, { op: 'log', text: '감각을 붙잡지 못했다. 다음 기회를 기다린다.', type: 'info' }] }] },
-    { label: '모든 것을 걸고 수련한다', hint: `「${BRANCH_NAMES[branch]}」을(를) 주력 갈래로. 실패할 수도 있다`, disabled: null,
-      effects: [{ op: 'chance', p, then: success('focus'), else: [{ op: 'base', key: 'wil', add: 3 }, { op: 'log', text: '감각을 붙잡지 못했다.', type: 'info' }] }] },
-    { label: '지금은 흘려보낸다', hint: '지금 갈래에 집중한다', disabled: null, effects: [] },
-  ];
+  const p = ch.id === 'hk_armament_need' ? B.haki.awakenNeedP : kind === 'conqueror' ? B.haki.awakenConquerorP : B.haki.awakenP;
+  const fail = [{ op: 'base', key: 'wil', add: 2 } as const, { op: 'log', text: '감각을 붙잡지 못했다. 다음 기회를 기다린다.', type: 'info' } as const];
+  const cur = s.growth.haki ?? null;
+  const pct = `성공 ${Math.round(p * 100)}%`;
+  const opts: ResolvedOption[] = [];
+  if (!cur) {
+    opts.push({ label: '감각을 붙잡는다', hint: `「${BRANCH_NAMES[branch]}」이(가) 패기 칸에 든다. 주력 · 보조와 따로 자란다 · ${pct}`, disabled: null,
+      effects: [{ op: 'chance', p, then: [{ op: 'gate', id: gate }], else: fail }] });
+  } else {
+    opts.push({ label: '감각을 붙잡고, 패기 칸을 바꾼다', hint: `패기 칸: 「${BRANCH_NAMES[cur]}」 → 「${BRANCH_NAMES[branch]}」 · ${pct}`, disabled: null,
+      effects: [{ op: 'chance', p, then: [{ op: 'gate', id: gate }, { op: 'focus', branch, slot: 'haki' }], else: fail }] });
+    opts.push({ label: '감각만 붙잡아 둔다', hint: `패기 칸은 「${BRANCH_NAMES[cur]}」 그대로. 눈뜸 기술만 익힌다 · ${pct}`, disabled: null,
+      effects: [{ op: 'chance', p, then: [{ op: 'gate', id: gate }], else: fail }] });
+  }
+  opts.push({ label: '지금은 흘려보낸다', hint: '지금 수련에 집중한다', disabled: null, effects: [] });
+  return opts;
 }
 
 function masterOffer(s: LifeState): { body: string; options: ResolvedOption[]; speaker: ChoicePending['speaker'] } | null {
   const route = s.hero.route === 'revolution' ? 'pirate' : s.hero.route;
   const blocked = blockedGates(s).map((x) => x.gate);
-  const active = [s.growth.focus, s.growth.secondary];
+  const needArmament = s.choice.flags.includes('need_armament') && !s.growth.gates.includes('haki.armament.awaken');
+  const active = activeBranches(s);
   const cands = MASTERS.filter((m) =>
     m.seas.includes(s.world.seaId) && m.minStage <= s.world.stage &&
     (m.route.includes('any') || m.route.includes(route as 'pirate' | 'marine')) &&
-    m.teaches.some((t) => !s.growth.gates.includes(t.gate) && (blocked.includes(t.gate) || active.includes(t.branch))));
+    m.teaches.some((t) => !s.growth.gates.includes(t.gate) && (blocked.includes(t.gate) || active.includes(t.branch)
+      || (t.gate === 'haki.armament.awaken' && needArmament))));
   if (!cands.length || s.growth.master) return null;
   const r = rngOf(s.rng);
   const m = cands.find((x) => x.teaches.some((t) => blocked.includes(t.gate))) ?? cands[int(r, 0, cands.length - 1)];
@@ -171,14 +170,23 @@ function shipOffer(s: LifeState): { body: string; options: ResolvedOption[] } | 
   return {
     body: `${SEA_BY_ID[next].name}(으)로 가려면 ${SHIPS.find((x) => x.tier === need)?.name} 이상의 배가 필요하다. 지금 가진 돈은 ${fmtMoney(s.hero.money)} 베리.`,
     options: [
-      ...ships.map((x) => ({
-        label: `${x.name}을(를) 산다`, hint: `${fmtMoney(x.price)} 베리 · 동료 ${x.crew}명`,
-        disabled: s.hero.money < x.price ? `돈 ${fmtMoney(x.price)} 필요` : null,
-        effects: [{ op: 'ship', id: x.id, price: x.price } as const],
-      })),
+      ...ships.map((x) => {
+        const price = shipPrice(s, x.price);
+        return {
+          label: `${x.name}을(를) 산다`, hint: `${fmtMoney(price)} 베리 · 동료 ${x.crew}명${price < x.price ? ' · 목수 할인' : ''}`,
+          disabled: s.hero.money < price ? `돈 ${fmtMoney(price)} 필요` : null,
+          effects: [{ op: 'ship', id: x.id, price } as const],
+        };
+      }),
       { label: '돈을 더 모은다', hint: '임무와 교전으로 돈을 번다', disabled: null, effects: [] },
     ],
   };
+}
+
+/** 배 값. 목수 동료가 있으면 깎아 준다 */
+export function shipPrice(s: LifeState, price: number) {
+  const wright = s.people.some((p) => p.alive && p.kind === 'crew' && p.crew?.role === 'shipwright' && p.crew.injuredMonths <= 0);
+  return Math.round(price * (wright ? B.crew.shipwrightDiscount : 1));
 }
 
 // ---------------------------------------------------------------- 펼치기
@@ -224,22 +232,29 @@ function treatCost(s: LifeState) {
 }
 
 /** 지금 필요한 선택 (03 문서 5장의 표) */
-function urgent(s: LifeState): string | null {
+/** 지금 필요한 선택들 (03 문서 5장의 표). 앞에 있는 것부터 띄울 수 있는 것을 띄운다 */
+function urgent(s: LifeState): string[] {
   const now = absMonth(s);
   const h = s.hero;
-  if (h.age >= 10 && !s.growth.focus) return 'en_dojo';
-  if (s.inventory.unknownFruits.some((u) => !u.asked && now - u.foundAt <= B.choice.fruitAskWithin)) return 'fr_found';
-  if (s.world.boss.state === 'revealed' && now >= s.world.boss.nextAskAt) return 'bo_challenge';
-  if (blockedGates(s).length && !s.growth.master && cooledDown(s, CHOICE_BY_ID.ms_offer)) return 'ms_offer';
-  if (h.age >= B.world.routeAge && h.route === 'none' && cooledDown(s, CHOICE_BY_ID.cr_route)) return 'cr_route';
-  if ((h.illness || h.injuries.some((i) => i.severity === 'heavy')) && h.money < treatCost(s) && cooledDown(s, { ...CHOICE_BY_ID.cs_no_money_ill, cooldownYears: 1 })) return 'cs_no_money_ill';
+  const out: string[] = [];
+  if (h.age >= 10 && !s.growth.focus) out.push('en_dojo');
+  if (h.age >= B.world.routeAge && h.route === 'none' && cooledDown(s, CHOICE_BY_ID.cr_route)) out.push('cr_route');
+  if (s.inventory.unknownFruits.some((u) => !u.asked && now - u.foundAt <= B.choice.fruitAskWithin)) out.push('fr_found');
+  if (s.world.boss.state === 'revealed' && now >= s.world.boss.nextAskAt) out.push('bo_challenge');
   if (s.choice.flags.includes('need_ship')) {
     const next = nextSea(s.world.seaId);
     const need = next ? SEA_BY_ID[next].shipRequired : 99;
     const cheapest = SHIPS.find((x) => x.tier >= need);
-    if (cheapest && h.money >= cheapest.price && cooledDown(s, { ...CHOICE_BY_ID.sh_buy, cooldownYears: 1 })) return 'sh_buy';
+    if (cheapest && h.money >= shipPrice(s, cheapest.price) && cooledDown(s, { ...CHOICE_BY_ID.sh_buy, cooldownYears: 1 })) out.push('sh_buy');
   }
-  return null;
+  if ((h.illness || h.injuries.some((i) => i.severity === 'heavy')) && h.money < treatCost(s) && cooledDown(s, { ...CHOICE_BY_ID.cs_no_money_ill, cooldownYears: 1 })) out.push('cs_no_money_ill');
+  // 자연계에 막혔다: 무장색을 가르쳐 줄 스승, 없으면 스스로 깨우치는 선택
+  if (s.choice.flags.includes('need_armament') && !s.growth.gates.includes('haki.armament.awaken') && h.age >= 14) {
+    if (!s.growth.master && cooledDown(s, { ...CHOICE_BY_ID.ms_offer, cooldownYears: 1 })) out.push('ms_offer');
+    if (cooledDown(s, CHOICE_BY_ID.hk_armament_need)) out.push('hk_armament_need');
+  }
+  if (blockedGates(s).length && !s.growth.master && cooledDown(s, CHOICE_BY_ID.ms_offer)) out.push('ms_offer');
+  return [...new Set(out)];
 }
 
 /** 이번 달에 선택을 띄운다. 띄웠으면 true */
@@ -247,6 +262,16 @@ export function maybeRaiseChoice(s: LifeState): boolean {
   if (s.pending) return false;
   const now = absMonth(s);
   if (now < s.choice.nextAt) return false;
+  const pauses = s.choice.pauses ?? 0;
+  // 한 해에 멈추는 수의 상한. 출발에 꼭 필요한 선택만 넘을 수 있다
+  const critical = s.hero.age >= 10 && !s.growth.focus ? 'en_dojo'
+    : s.hero.age >= B.world.routeAge && s.hero.route === 'none' ? 'cr_route' : null;
+  if (pauses >= B.choice.perYear) {
+    if (!critical || !cooledDown(s, CHOICE_BY_ID[critical])) return false;
+    const p = resolveChoice(s, critical);
+    if (p) { s.pending = p; return true; }
+    return false;
+  }
   // 1. 예약된 것
   while (s.choice.queue.length) {
     const id = s.choice.queue.shift()!;
@@ -254,9 +279,11 @@ export function maybeRaiseChoice(s: LifeState): boolean {
     if (p) { s.pending = p; return true; }
   }
   // 2. 지금 필요한 것 (한 해 상한을 넘어도 뜬다)
-  const u = urgent(s);
-  if (u) { const p = resolveChoice(s, u); if (p) { s.pending = p; return true; } }
-  if (s.choice.thisYear >= B.choice.perYear) return false;
+  for (const u of urgent(s)) {
+    const p = resolveChoice(s, u);
+    if (p) { s.pending = p; return true; }
+  }
+  if (pauses >= B.choice.randomCap) return false;
   // 3. 나머지: 가중치로 뽑기
   const r = rngOf(s.rng);
   const pool = CHOICES.filter((ch) => ch.weight > 0 && ch.category !== 'childhood' && cooledDown(s, ch) && checkAll(s, ch.when));

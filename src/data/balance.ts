@@ -3,7 +3,8 @@ import type { BranchId, StatKey, Tactic } from '../core/types';
 
 export const B = {
   log: { max: 300 },
-  clock: { speeds: { 1: 600, 2: 300, 4: 150 } as Record<number, number> },
+  // 한 달에 걸리는 시간(ms). 1배속은 1년이 18초. 기록을 읽을 수 있는 속도 (2026-11-14 600 → 1500)
+  clock: { speeds: { 1: 1500, 2: 750, 4: 375 } as Record<number, number> },
 
   // ---- 시간 · 유년기
   childhood: { ages: [3, 6, 9], startTickAge: 10 },
@@ -16,6 +17,8 @@ export const B = {
     ],
     noFocusEach: 0.2 / 6,     // 주력이 없으면 여섯 능력치가 고르게 (월 0.2를 나눔)
     secondaryMult: 0.5,
+    // 패기 칸 · 열매 칸은 주력 · 보조와 따로 자란다. 능력치는 조금, 숙련은 꾸준히
+    slot: { hakiStat: 0.3, hakiMastery: 0.6, fruitStat: 0.35, fruitMastery: 0.7 },
     masterMult: 2,
     heavyInjuryMult: 0.5,
     split: {
@@ -32,8 +35,16 @@ export const B = {
     eliteWinStat: 0.6,        // 강적을 이기면 오르는 능력치 (상대 힘 비율에 곱함)
   },
 
+  // ---- 패기 · 열매를 얻는 확률 (2026-11-14 낮춤)
+  haki: { awakenP: 0.35, awakenNeedP: 0.4, awakenConquerorP: 0.5, conquerorSeed: 0.3, conquerorOther: 0.02 },
+
   // ---- 선택 (03 문서 5장)
-  choice: { gapMin: 3, gapMax: 6, perYear: 3, fruitAskWithin: 6, retrainYears: 3 },
+  // perYear: 한 해에 멈추는 수(중대한 선택 + 강적 준비)의 상한. randomCap: 그중 무작위 선택이 뜰 수 있는 한도
+  choice: { gapMin: 2, gapMax: 4, perYear: 5, randomCap: 4, fruitAskWithin: 6, retrainYears: 3 },
+  // 작은 사건: 달마다 일어날 확률, 유년기에 건너뛰는 해마다 일어나는 수
+  lifeEvents: { monthly: 0.45, childPerYear: 2 },
+  // 임무 강적의 승률이 이 값 이상이면 준비 화면 없이 자동으로 싸운다
+  autoElite: { minRate: 0.7, runs: 60 },
 
   // ---- 몸 (03 문서 7장)
   body: {
@@ -92,12 +103,12 @@ export const B = {
     restSp: 0.2,
     retreat: { base: 0.5, perSpd: 0.01, min: 0.2, max: 0.9 },
     drown: { hpBelow: 0.3, p: 0.2, navigatorP: 0.1 },
-    seastoneSeal: 2,
+    seastoneSeal: 3,
     preview: { runs: 200, noiseBase: 15, noisePerInt: 0.1 },
     risk: { safe: 0.7, danger: 0.35 },
     deathP: { safe: 0, danger: 0.05, lethal: 0.25 },
     deathLukReduce: 0.003,
-    nearDeathGateP: 0.15,
+    nearDeathGateP: 0.08,
     result: {
       win: { light: 0.1 },
       retreat: { light: 0.3 },
@@ -122,5 +133,5 @@ export const B = {
   },
 
   // ---- 동료
-  crew: { powerPerLevel: 6, levelEveryMonths: 12, maxLevel: 30 },
+  crew: { powerPerLevel: 6, levelEveryMonths: 12, maxLevel: 30, shipwrightDiscount: 0.8 },
 };

@@ -132,7 +132,13 @@ b, strong { font-weight: 700; }
 @media (max-width: 760px) { .scene { height: 170px; } }
 
 /* ---------- 기록 ---------- */
-.log { max-height: 360px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 2px; }
+.log { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; overflow-anchor: auto; }
+.log .l.new { box-shadow: inset 0 0 0 2px var(--gold); }
+.nowbox { background: var(--paper); border-top: var(--px) solid var(--wood); padding: 6px 10px; min-height: 76px; }
+.nowbox .now { font-size: 12px; color: var(--ink-soft); padding: 1px 0; }
+.nowbox .now.first { font-family: 'Galmuri14', 'Galmuri11', sans-serif; font-size: 15px; color: var(--ink); }
+.nowbox .now.danger { color: var(--red); }
+.nowbox .when { margin-right: 6px; color: var(--ink-soft); }
 .log .l { padding: 2px 6px; border-left: 4px solid var(--tan-d); background: var(--paper); }
 .log .l.growth { border-color: var(--blue); }
 .log .l.battle { border-color: var(--wood); }
@@ -141,6 +147,7 @@ b, strong { font-weight: 700; }
 .log .l.world { border-color: var(--green); }
 .log .l.good { border-color: var(--gold); background: #fff2c0; }
 .log .l.money { border-color: var(--gold-d); }
+.log .l.life { border-color: var(--tan-d); background: var(--paper-l); color: var(--ink-soft); }
 .log .when { color: var(--ink-soft); margin-right: 6px; }
 
 /* ---------- 모달 ---------- */
@@ -187,6 +194,7 @@ table.px th { background: var(--wood-d); color: var(--paper); font-weight: 400; 
 
 /* ---------- 입력 ---------- */
 select, input[type="text"] {
+  width: 100%;
   background: var(--paper-l); border: 2px solid var(--wood-d); padding: 3px 6px; min-height: 28px; max-width: 100%;
   box-shadow: inset 2px 2px 0 var(--paper-d);
 }

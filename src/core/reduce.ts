@@ -76,6 +76,18 @@ function afterChildhoodAnswer(s: LifeState) {
 }
 
 export function reduce(prev: LifeState, cmd: Command): LifeState {
+  const next = reduceInner(prev, cmd);
+  // 멈춤 세기: 새로 선택이나 강적 준비가 떴으면 한 번
+  const was = prev.pending?.kind;
+  const now = next.pending?.kind;
+  if (next !== prev && (now === 'choice' || now === 'prep') && was !== now && next.hero.age >= 10) {
+    next.choice.pauses = (next.choice.pauses ?? 0) + 1;
+    next.stats.pauses = (next.stats.pauses ?? 0) + 1;
+  }
+  return next;
+}
+
+function reduceInner(prev: LifeState, cmd: Command): LifeState {
   const s = clone(prev);
   const p = s.pending;
   switch (cmd.type) {

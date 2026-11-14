@@ -15,7 +15,7 @@ export type BranchId =
 export type Tactic = 'offense' | 'defense' | 'counter' | 'endurance';
 export type CrewRole = 'vanguard' | 'support' | 'medic' | 'navigator' | 'cook' | 'shipwright';
 export type FruitClass = 'paramecia' | 'zoan' | 'logia';
-export type Species = 'human' | 'fishman' | 'mink' | 'giant' | 'longarm' | 'celestial' | 'skypiean';
+export type Species = 'human' | 'fishman' | 'merfolk' | 'mink' | 'giant' | 'longarm' | 'longleg' | 'threeeye' | 'tontatta' | 'celestial' | 'skypiean';
 
 // ---------------------------------------------------------------- 주인공
 
@@ -43,8 +43,9 @@ export interface Hero {
 // ---------------------------------------------------------------- 성장
 
 export interface Growth {
-  focus: BranchId | null;
-  secondary: BranchId | null;
+  focus: BranchId | null;                 // 주력: 무술 3유파 중 하나
+  secondary: BranchId | null;             // 보조: 무술 3유파 중 하나 (절반 속도)
+  haki?: BranchId | null;                 // 패기 칸: 깨우친 패기 중 하나를 둔다. 주력 · 보조와 따로 자란다
   skills: Record<string, { mastery: number }>;
   gates: string[];
   master: { personId: string; name: string; branch: BranchId; gate: string; monthsLeft: number } | null;
@@ -104,9 +105,10 @@ export interface ChoiceTracker {
   seen: Record<string, number>;   // id → 마지막으로 본 절대 달
   flags: string[];
   queue: string[];
+  pauses?: number;             // 올해 멈춘 수 (선택 + 강적 준비). 해가 바뀌면 0
 }
 
-export type LogType = 'info' | 'growth' | 'battle' | 'choice' | 'danger' | 'world' | 'money' | 'good';
+export type LogType = 'info' | 'growth' | 'battle' | 'choice' | 'danger' | 'world' | 'money' | 'good' | 'life';
 export interface LogEntry { t: number; text: string; type: LogType }
 export interface TimelineEntry { t: number; age: number; text: string }
 
@@ -114,6 +116,7 @@ export interface LifeStats {
   routineWins: number; routineLosses: number;
   eliteWins: number; eliteLosses: number;
   choices: number; maxStage: number; nearDeaths: number;
+  pauses?: number; lifeEvents?: number; autoElite?: number;
 }
 
 // ---------------------------------------------------------------- 전투 (직렬화 가능)
@@ -125,6 +128,7 @@ export interface EnemySpec {
   officers: EnemySpec[];
   faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
   title?: string;
+  form?: 'seaking';            // 사람이 아닌 모습 (그림을 다르게 그린다)
 }
 
 export interface Encounter {
@@ -146,13 +150,14 @@ export interface CUnit {
   fruitClass: FruitClass | null;
   skills: { id: string; mastery: number; cd: number }[];
   tactic: Tactic; retreatAt: number;
-  weapon: { branch: BranchId; mult: number } | null;
+  weapon: { branch: BranchId; mult: number; seastone: boolean } | null;
   consumables: string[];
   guard: number; guardTurns: number; evade: number; evadeTurns: number; buff: number; buffTurns: number;
   bound: number; sealed: number;
   pGuard: number; pDodge: number; pBuff: number;   // 장착한 패시브 기술의 상시 효과
   lastBig: boolean;
   personId?: string; faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
+  form?: 'seaking';
 }
 
 export interface Duel { id: number; l: number; r: number; helpersL: number[]; helpersR: number[]; over: boolean; winner: 'L' | 'R' | null }
@@ -317,7 +322,8 @@ export interface Item {
   mult?: number;              // 무기 배율
   armor?: number;             // 방어구 방어
   bonus?: Partial<Stats>;     // 장신구
-  use?: 'heal' | 'sp' | 'seastone' | 'smoke';
+  use?: 'heal' | 'sp' | 'seastone' | 'smoke' | 'net';
+  seastone?: boolean;         // 해루석 무기: 이 무기로 하는 공격은 자연계에 무장색 한 단계만큼 더 닿는다
   price: number;
   text: string;
 }
@@ -375,7 +381,7 @@ export type Effect =
   | { op: 'money'; add: number }
   | { op: 'moneyPct'; pct: number }
   | { op: 'fame'; add: number }
-  | { op: 'focus'; branch: BranchId | null; slot: 'focus' | 'secondary' }
+  | { op: 'focus'; branch: BranchId | null; slot: 'focus' | 'secondary' | 'haki' }
   | { op: 'learn'; skill: string }
   | { op: 'mastery'; skill: string | 'focus'; add: number }
   | { op: 'gate'; id: string }

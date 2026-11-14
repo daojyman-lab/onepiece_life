@@ -16,6 +16,7 @@ export interface AppState {
   settings: Settings;
   modal: ManageModal;
   toasts: { id: number; text: string }[];
+  reading: boolean;            // 항해 일지 위에 마우스를 올려 읽는 중이면 시간이 멈춘다
 }
 
 let state: AppState = {
@@ -25,6 +26,7 @@ let state: AppState = {
   settings: save.loadSettings(),
   modal: null,
   toasts: [],
+  reading: false,
 };
 const subs = new Set<() => void>();
 let toastSeq = 0;
@@ -100,6 +102,7 @@ export const actions = {
     toast('불러왔다.');
   },
   toast,
+  setReading(reading: boolean) { if (state.reading !== reading) set({ reading }); },
 };
 
 // ---------------------------------------------------------------- 자동 진행
@@ -109,7 +112,7 @@ let timerMs = 0;
 
 function shouldRun() {
   const s = state;
-  return s.screen === 'main' && !!s.life && !s.life.pending && s.life.hero.alive && s.modal === null && s.settings.speed > 0
+  return s.screen === 'main' && !!s.life && !s.life.pending && s.life.hero.alive && s.modal === null && s.settings.speed > 0 && !s.reading
     && (typeof document === 'undefined' || !document.hidden);
 }
 

@@ -47,8 +47,13 @@ export function blockedGates(s: LifeState): { branch: BranchId; gate: string }[]
   return out;
 }
 
+export const MARTIAL: BranchId[] = ['martial.fist', 'martial.sword', 'martial.gun'];
+export const isHaki = (b: BranchId | null | undefined) => !!b && b.startsWith('haki.');
+
+/** 지금 자라는 갈래: 주력 · 보조(무술), 패기 칸, 열매 칸(먹었으면) */
 export function activeBranches(s: LifeState): BranchId[] {
-  return [s.growth.focus, s.growth.secondary].filter((x): x is BranchId => !!x);
+  const out = [s.growth.focus, s.growth.secondary, s.growth.haki ?? null, s.hero.fruit ? 'fruit' as BranchId : null];
+  return out.filter((x): x is BranchId => !!x);
 }
 
 /** 주력 · 보조 갈래에서 조건을 채운 기술을 저절로 배운다 */
@@ -65,7 +70,17 @@ export function autoLearn(s: LifeState) {
   }
 }
 
-export function setFocus(s: LifeState, branch: BranchId | null, slot: 'focus' | 'secondary') {
+export function setFocus(s: LifeState, branch: BranchId | null, slot: 'focus' | 'secondary' | 'haki') {
+  // 패기는 패기 칸, 열매는 먹으면 저절로 열매 칸에 든다. 주력 · 보조는 무술만
+  if (isHaki(branch)) slot = 'haki';
+  if (branch === 'fruit') { autoLearn(s); return; }
+  if (slot === 'haki') {
+    if (s.growth.haki === branch) return;
+    s.growth.haki = branch;
+    if (branch) log(s, `패기 칸에 「${BRANCH_NAMES[branch]}」을(를) 두었다.`, 'growth');
+    autoLearn(s);
+    return;
+  }
   if (slot === 'focus') {
     if (s.growth.secondary === branch) s.growth.secondary = s.growth.focus;
     s.growth.focus = branch;
@@ -87,6 +102,10 @@ export function setFocus(s: LifeState, branch: BranchId | null, slot: 'focus' | 
 export function openGate(s: LifeState, gate: string) {
   if (s.growth.gates.includes(gate)) return;
   s.growth.gates.push(gate);
+  if (gate === 'haki.armament.awaken') s.choice.flags = s.choice.flags.filter((f) => f !== 'need_armament');
+  // 처음 깨우친 패기는 빈 패기 칸에 저절로 들어간다
+  const color = (['observation', 'armament', 'conqueror'] as const).find((c) => gate === `haki.${c}.awaken`);
+  if (color && !s.growth.haki) { s.growth.haki = `haki.${color}` as BranchId; log(s, `패기 칸에 「${BRANCH_NAMES[s.growth.haki]}」이(가) 들어갔다.`, 'growth'); }
   log(s, `큰 단계 「${GATE_NAMES[gate] ?? gate}」을(를) 열었다!`, 'good');
   timeline(s, `「${GATE_NAMES[gate] ?? gate}」을(를) 열었다`);
   autoLearn(s);
@@ -111,20 +130,32 @@ export function monthlyGrowth(s: LifeState) {
   if (h.illness && h.illness.stage >= 2) return;
   const mult = heavyInjured(s) ? G.heavyInjuryMult : 1;
   const rate = rateForAge(h.age) * mult;
+  // 패기 칸이 생기기 전의 저장: 깨우친 패기가 있으면 칸에 넣는다
+  if (s.growth.haki === undefined) {
+    const c = (['armament', 'observation', 'conqueror'] as const).find((x) => s.growth.gates.includes(`haki.${x}.awaken`));
+    s.growth.haki = c ? (`haki.${c}` as BranchId) : null;
+    if (s.growth.focus && isHaki(s.growth.focus)) s.growth.focus = null;
+    if (s.growth.secondary && (isHaki(s.growth.secondary) || s.growth.secondary === 'fruit')) s.growth.secondary = null;
+    if (s.growth.focus === 'fruit') s.growth.focus = null;
+  }
   const m = s.growth.master;
-  const focusMult = m && m.branch === s.growth.focus ? G.masterMult : 1;
-  const secMult = m && m.branch === s.growth.secondary ? G.masterMult : 1;
+  const by = (b: BranchId | null | undefined) => (m && b && m.branch === b ? G.masterMult : 1);
+  const haki = s.growth.haki ?? null;
+  const fruit: BranchId | null = s.hero.fruit ? 'fruit' : null;
 
   if (!s.growth.focus && !s.growth.secondary) {
     if (rate > 0) for (const k of Object.keys(h.base) as StatKey[]) h.base[k] += G.noFocusEach * mult;
   } else {
-    addStats(s, s.growth.focus, rate * focusMult);
-    addStats(s, s.growth.secondary, rate * G.secondaryMult * secMult);
+    addStats(s, s.growth.focus, rate * by(s.growth.focus));
+    addStats(s, s.growth.secondary, rate * G.secondaryMult * by(s.growth.secondary));
   }
-  if (s.growth.focus) addMastery(s, s.growth.focus, mult * focusMult);
-  if (s.growth.secondary) addMastery(s, s.growth.secondary, mult * G.secondaryMult * secMult);
-  // 스승이 가르치는 갈래가 주력 · 보조가 아니어도 그 갈래는 자란다
-  if (m && m.branch !== s.growth.focus && m.branch !== s.growth.secondary) {
+  if (s.growth.focus) addMastery(s, s.growth.focus, mult * by(s.growth.focus));
+  if (s.growth.secondary) addMastery(s, s.growth.secondary, mult * G.secondaryMult * by(s.growth.secondary));
+  // 패기 칸 · 열매 칸: 주력 · 보조와 따로 자란다
+  if (haki) { addStats(s, haki, rate * G.slot.hakiStat * by(haki)); addMastery(s, haki, mult * G.slot.hakiMastery * by(haki)); }
+  if (fruit) { addStats(s, fruit, rate * G.slot.fruitStat * by(fruit)); addMastery(s, fruit, mult * G.slot.fruitMastery * by(fruit)); }
+  // 스승이 가르치는 갈래가 어느 칸에도 없어도 그 갈래는 자란다
+  if (m && !activeBranches(s).includes(m.branch)) {
     addStats(s, m.branch, rate);
     addMastery(s, m.branch, mult * G.masterMult * 0.5);
   }

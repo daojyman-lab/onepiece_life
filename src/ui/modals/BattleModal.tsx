@@ -7,7 +7,7 @@ import { drawScene, type Who } from '../pixel/pixelArt';
 
 type BP = Extract<Pending, { kind: 'battle' | 'intervene' }>;
 
-const unitWho = (s: LifeState, u: CUnit): Who => u.hero ? heroWho(s) : { key: u.personId ? (s.people.find((p) => p.id === u.personId)?.canon ?? u.personId + u.name) : u.key + u.name, gender: u.gender, age: u.age, species: u.species, faction: u.faction };
+const unitWho = (s: LifeState, u: CUnit): Who => u.hero ? heroWho(s) : { key: u.personId ? (s.people.find((p) => p.id === u.personId)?.canon ?? u.personId + u.name) : u.key + u.name, gender: u.gender, age: u.age, species: u.species, faction: u.faction, form: u.form };
 
 function hpAt(b: BattleState, upto: number) {
   const hp = b.units.map((u) => u.maxHp);

@@ -8,8 +8,37 @@ import { B } from '../../data/balance';
 import { CLASS_NAMES } from '../../data/fruits';
 import { Face, Modal, RISK_NAMES, STAT_KEYS, STAT_NAMES, TACTIC_NAMES } from '../common';
 import { LoadoutEditor } from './LoadoutEditor';
+import { logiaMult } from '../../core/combat/engine';
+import { armamentLevel } from '../../core/growth/skillbook';
+import { ITEM_BY_ID } from '../../data/items';
 
-const foeWho = (e: EnemySpec) => ({ key: e.canon ?? e.id + e.name, gender: e.gender, age: e.age, species: e.species, faction: e.faction });
+/** 자연계 대책: 지금 편성으로 얼마나 닿는지, 무엇으로 뚫을 수 있는지 */
+function LogiaCounter({ s, lo }: { s: LifeState; lo: Loadout }) {
+  const arm = armamentLevel(s);
+  const w = lo.weapon ? ITEM_BY_ID[lo.weapon] : null;
+  const me = { armament: arm, weapon: w?.branch ? { branch: w.branch, mult: w.mult ?? 1, seastone: !!w.seastone } : null };
+  const foe = { fruitClass: 'logia' as const, sealed: 0, bound: 0 };
+  const skills = lo.skills.map((id) => getSkill(id)).filter((k): k is NonNullable<typeof k> => !!k);
+  const attacks = skills.filter((k) => k.kind === 'attack');
+  const best = Math.max(logiaMult(me, foe, null).mult, ...attacks.map((k) => logiaMult(me, foe, k).mult));
+  const pierce = attacks.filter((k) => k.tags.includes('pierce'));
+  const binds = skills.filter((k) => k.effect?.type === 'bind');
+  const ss = lo.consumables.filter((x) => x === 'seastone').length;
+  const nets = lo.consumables.filter((x) => x === 'net').length;
+  const ok = (b: boolean) => <span class={b ? 'green' : 'red'}>{b ? '✓' : '✕'}</span>;
+  return (
+    <div class="paper t9" style={{ borderColor: best < 0.5 ? 'var(--red)' : undefined }}>
+      <div class="row between"><b>자연계 대책</b><span>지금 공격이 들어가는 비율 <b class={best < 0.5 ? 'red' : 'green'}>{Math.round(best * 100)}%</b></span></div>
+      <div>{ok(arm > 0)} 무장색 {arm}단계 — 단계마다 25%씩 더 닿는다{arm === 0 ? ' (스승 · 사건으로 연다)' : ''}</div>
+      <div>{ok(!!w?.seastone)} 해루석 무기 — 같은 갈래 기술이 한 단계 더 닿는다{!w?.seastone ? ' (상점: 해루석 십수 · 장갑 · 작살총)' : ''}</div>
+      <div>{ok(pierce.length > 0)} 관통 기술 — 한 단계 더 닿는다{pierce.length ? `: ${pierce.map((k) => k.name).join(', ')}` : ''}</div>
+      <div>{ok(ss > 0)} 해루석 탄환 {ss}개 — 맞히면 3합 동안 실체가 잡혀 모든 공격이 100%</div>
+      <div>{ok(nets > 0 || binds.length > 0)} 묶기 — 묶인 동안 실체가 드러나 100%{binds.length ? `: ${binds.map((k) => k.name).join(', ')}` : ''}{nets ? ` · 해루석 그물 ${nets}개` : ''}</div>
+    </div>
+  );
+}
+
+const foeWho = (e: EnemySpec) => ({ key: e.canon ?? e.id + e.name, gender: e.gender, age: e.age, species: e.species, faction: e.faction, form: e.form });
 
 function Scout({ s, e, level }: { s: LifeState; e: EnemySpec; level: 0 | 1 | 2 }) {
   const strongest = e.skills.map((id) => getSkill(id)).filter(Boolean).sort((a, b) => b!.power - a!.power);
@@ -61,6 +90,7 @@ export function PrepModal({ s, p }: { s: LifeState; p: Extract<Pending, { kind: 
       <div class="grid2" style={{ alignItems: 'start' }}>
         <div class="stack">
           <Scout s={s} e={enc.enemy} level={level} />
+          {(enc.enemy.fruitClass === 'logia' || enc.enemy.officers.some((o) => o.fruitClass === 'logia')) && <LogiaCounter s={s} lo={lo} />}
           <div class="paper">
             <div class="row between">
               <b>미리 본 승률</b>

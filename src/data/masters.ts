@@ -2,6 +2,9 @@
 import type { Master } from '../core/types';
 
 export const MASTERS: Master[] = [
+  { id: 'm_jen', name: '철벽의 젠', canon: null, title: '은퇴한 해군 본부 교관', seas: ['gl_entry'], minStage: 2, route: ['any'],
+    teaches: [{ branch: 'haki.armament', gate: 'haki.armament.awaken', months: 12 }],
+    accepts: [{ c: 'age', min: 16 }, { c: 'base', key: 'wil', min: 25 }], fee: 40000, faction: 'marine', gender: 'm', age: 66, species: 'human' },
   { id: 'm_koshiro', name: '코우시로', canon: 'koshiro', title: '시모츠키 도장 사범', seas: ['east'], minStage: 1, route: ['any'],
     teaches: [{ branch: 'martial.sword', gate: 'martial.sword.master', months: 18 }],
     accepts: [{ c: 'skill', id: 'sword_wave', mastery: 40 }], fee: 0, faction: 'civil', gender: 'm', age: 50, species: 'human' },

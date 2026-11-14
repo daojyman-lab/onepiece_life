@@ -11,6 +11,7 @@ const ages: number[] = [];
 const stages: Record<number, number> = {};
 const causes: Record<string, number> = {};
 const routes: Record<string, number> = {};
+let pauses = 0, lifeEv = 0, autoE = 0, yrs = 0;
 let stuck = 0, viol = 0, fruitEaters = 0, fruitStageSum = 0, noFruitStageSum = 0, choices = 0, elite = 0, eliteWin = 0;
 const examples: string[] = [];
 for (let i = 0; i < N; i++) {
@@ -25,6 +26,7 @@ for (let i = 0; i < N; i++) {
   routes[s.hero.route] = (routes[s.hero.route] ?? 0) + 1;
   if (s.hero.fruit) { fruitEaters++; fruitStageSum += s.stats.maxStage; } else noFruitStageSum += s.stats.maxStage;
   choices += s.stats.choices;
+  pauses += s.stats.pauses ?? 0; lifeEv += s.stats.lifeEvents ?? 0; autoE += s.stats.autoElite ?? 0; yrs += Math.max(1, s.hero.age - 10);
   elite += s.stats.eliteWins + s.stats.eliteLosses; eliteWin += s.stats.eliteWins;
   void FRUIT_BY_ID;
 }
@@ -38,4 +40,5 @@ console.log('사인:', causes);
 console.log('길:', routes);
 console.log(`열매 먹은 비율 ${(fruitEaters / N * 100).toFixed(0)}%, 평균 해역 (먹음 ${(fruitStageSum / Math.max(1, fruitEaters)).toFixed(2)} / 안 먹음 ${(noFruitStageSum / Math.max(1, N - fruitEaters)).toFixed(2)})`);
 console.log(`인생당 선택 ${(choices / N).toFixed(0)}번, 강적전 ${(elite / N).toFixed(1)}번 (승률 ${(eliteWin / Math.max(1, elite) * 100).toFixed(0)}%)`);
+console.log(`10세 이후 한 해에: 멈춤 ${(pauses / yrs).toFixed(2)}번, 작은 사건 ${(lifeEv / yrs).toFixed(1)}번 · 자동 처리한 임무 강적 인생당 ${(autoE / N).toFixed(1)}번`);
 for (const e of examples) console.log(' ', e);

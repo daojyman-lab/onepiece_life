@@ -24,11 +24,18 @@ export function autoplay(seed: number, policy: 'random' | 'smart' = 'random', ma
       const ok = p.options.map((o, i) => ({ o, i })).filter((x) => !x.o.disabled);
       let i = ok[int(r, 0, ok.length - 1)].i;
       if (policy === 'smart') {
-        const prefer = ok.find((x) => /먹는다|지금 도전|배운다|받아들인다|동료로|산다|모든 것을 걸고|해적이 된다|해군에 지원/.test(x.o.label));
+        const prefer = ok.find((x) => /먹는다|지금 도전|배운다|받아들인다|동료로|산다|감각을 붙잡|해적이 된다|해군에 지원/.test(x.o.label));
         if (prefer && (p.category !== 'challenge' || r() < 0.7)) i = prefer.i;
       }
       next = reduce(s, { type: 'answerChoice', index: i });
     } else if (p.kind === 'prep') {
+      // 똑똑한 정책: 자연계 앞에서는 해루석 탄환 · 그물을 사서 챙긴다
+      if (policy === 'smart' && [p.encounter.enemy, ...p.encounter.enemy.officers].some((e) => e.fruitClass === 'logia')) {
+        for (const id of ['seastone', 'seastone', 'net']) s = reduce(s, { type: 'buy', id });
+        const owned = (id: string) => s.inventory.items.find((x) => x.id === id)?.count ?? 0;
+        const cons = ['seastone', 'seastone', 'net'].filter((id, i, a) => a.slice(0, i + 1).filter((x) => x === id).length <= owned(id));
+        s = reduce(s, { type: 'saveLoadout', loadout: { ...s.loadout, consumables: cons } });
+      }
       const assign = defaultAssign(s, p.encounter, s.loadout);
       // 똑똑한 정책: 보스가 너무 강하면 미룬다
       if (policy === 'smart' && p.encounter.source === 'boss' && winRate(s, p.encounter, s.loadout, assign, 60) < 0.45) {

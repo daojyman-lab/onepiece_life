@@ -50,6 +50,23 @@ function heroIndex(b: BattleState) { return b.units.findIndex((u) => u.hero); }
 function heroDuel(b: BattleState) { const h = heroIndex(b); return b.duels.find((d) => !d.over && d.l === h) ?? null; }
 function leaderIdx(b: BattleState) { return b.units.findIndex((u) => u.side === 'R' && u.leader); }
 
+// ---------------------------------------------------------------- 자연계
+
+/**
+ * 자연계 상대에게 들어가는 피해의 비율과 그 이유. 규칙은 여기 한 곳에만 둔다.
+ * - 상대가 해루석에 닿아 있거나(봉인) 묶여 있으면 실체가 잡혀 그대로 들어간다
+ * - 아니면 단계 = 무장색 + 관통 기술 + 해루석 무기 + 해루석 탄환, 단계별 배율
+ */
+export function logiaMult(a: Pick<CUnit, 'armament' | 'weapon'>, t: Pick<CUnit, 'fruitClass' | 'sealed' | 'bound'>, sk: Skill | null, extra: { seastone?: boolean } = {}): { mult: number; why: string | null } {
+  if (t.fruitClass !== 'logia') return { mult: 1, why: null };
+  if (t.sealed > 0) return { mult: 1, why: '해루석에 닿아 실체가 잡혔다' };
+  if (t.bound > 0) return { mult: 1, why: '묶여서 실체가 드러났다' };
+  const weaponHit = a.weapon?.seastone && (!sk || sk.branch === a.weapon.branch);
+  const lv = Math.min(3, a.armament + (sk?.tags.includes('pierce') ? 1 : 0) + (weaponHit ? 1 : 0) + (extra.seastone ? 1 : 0));
+  const mult = C.logia[lv];
+  return { mult, why: mult < 1 ? '자연계라 잘 안 먹힌다' : null };
+}
+
 // ---------------------------------------------------------------- 피해
 
 function tacticDeal(u: CUnit, sk: Skill | null, round: number) {
@@ -79,11 +96,8 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   const weapon = a.weapon && sk && a.weapon.branch === sk.branch ? a.weapon.mult : 1;
   const rand = C.rand[0] + (C.rand[1] - C.rand[0]) * r();
   const crit = r() < C.crit.base + a.st.luk * C.crit.perLuk;
-  let logia = 1;
-  if (t.fruitClass === 'logia') {
-    const lv = Math.min(3, a.armament + (sk?.tags.includes('pierce') ? 1 : 0) + (extra.seastone ? 1 : 0));
-    logia = C.logia[lv];
-  }
+  const lg = logiaMult(a, t, sk, extra);
+  const logia = lg.mult;
   const guard = (t.guardTurns > 0 ? t.guard : 0) + t.pGuard;
   let dmg = stat * power * mastery * weapon * tacticDeal(a, sk, b.round) * rand
     * 100 / (100 + t.def * C.defenseK)
@@ -92,7 +106,7 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   dmg = Math.max(1, Math.round(dmg));
   t.hp = Math.max(0, t.hp - dmg);
   if (t.guardTurns > 0) t.guardTurns -= 1;
-  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note: logia < 1 ? '자연계라 잘 안 먹힌다' : undefined });
+  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note: lg.why ?? undefined });
   if (a.hero) {
     const key = sk?.id ?? 'basic';
     const u = (b.usage[key] ??= { uses: 0, damage: 0 });
@@ -168,6 +182,13 @@ function act(b: BattleState, r: Rng, d: Duel, ai: number, ti: number) {
   };
   if (ratio(a) < 0.5 && use('potion')) { a.hp = Math.min(a.maxHp, a.hp + Math.round(a.maxHp * 0.3)); a.lastBig = false; tickDown(a); return; }
   if (a.sp < 15 && use('meat')) { a.sp = Math.min(a.maxSp, a.sp + 40); a.lastBig = false; tickDown(a); return; }
+  if (b.round <= 2 && t.bound === 0 && a.consumables.includes('net')) {
+    use('net');
+    const caught = r() < 0.7 + Math.max(0, (a.st.spd - t.st.spd) * 0.01);
+    if (caught) t.bound = 1;
+    b.events.push({ k: 'act', d: d.id, who: ai, target: ti, skill: 'net', name: '해루석 그물', dmg: 0, crit: false, dodge: !caught, note: caught ? (t.fruitClass === 'logia' ? '그물에 걸렸다! 실체가 드러났다' : '그물에 걸렸다!') : '빗나갔다' });
+    a.lastBig = false; tickDown(a); return;
+  }
   if (t.fruitClass && t.sealed === 0 && a.consumables.includes('seastone')) {
     use('seastone');
     hit(b, r, d.id, ai, ti, null, 1.2, { seastone: true });

@@ -18,7 +18,7 @@ export function ShopModal({ s }: { s: LifeState }) {
             <tbody>
               {forSale.map((it) => (
                 <tr>
-                  <td>{it.name}<div class="t9 soft">{it.branch ? `${BRANCH_NAMES[it.branch]} 무기 ×${it.mult}` : it.armor ? `방어 +${it.armor}` : it.text}</div></td>
+                  <td>{it.name}<div class="t9 soft">{it.branch ? `${BRANCH_NAMES[it.branch]} 무기 ×${it.mult}${it.seastone ? ' · 해루석: 자연계에 닿는다' : ''}` : it.armor ? `방어 +${it.armor}` : it.text}</div></td>
                   <td class="num">{fmt(it.price)}</td>
                   <td><button class="btn small" disabled={s.hero.money < it.price} onClick={() => dispatch({ type: 'buy', id: it.id })}>사기</button></td>
                 </tr>

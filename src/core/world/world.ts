@@ -5,6 +5,7 @@ import { ENEMY_NAMES, MISSIONS, MISSION_BY_ID } from '../../data/missions';
 import { SEA_BY_ID } from '../../data/seas';
 import { SKILLS } from '../../data/skills';
 import { FRUITS } from '../../data/fruits';
+import { ARCHETYPES } from '../../data/enemies';
 import { int, pick, rngOf, shuffle, type Rng } from '../rng';
 import type { BranchId, EnemySpec, LifeState, MissionProgress, SeaId, Stage } from '../types';
 import { absMonth, findPerson, log } from '../util';
@@ -71,6 +72,10 @@ export function maybeRevealBoss(s: LifeState) {
     s.world.boss.nextAskAt = absMonth(s);
     const b = BOSS_BY_ID[s.world.boss.id];
     log(s, `${sea(s).name}의 벽, ${b.title} ${b.name}이(가) 모습을 드러냈다.`, 'world');
+    if (b.fruitClass === 'logia' && !s.growth.gates.includes('haki.armament.awaken')) {
+      log(s, '자연계 능력자라는 소문이다. 무장색, 해루석 무기 · 탄환 · 그물, 관통 기술이 있어야 몸에 닿는다고 한다.', 'danger');
+      if (!s.choice.flags.includes('need_armament')) s.choice.flags.push('need_armament');
+    }
   }
 }
 
@@ -92,7 +97,8 @@ function genName(r: Rng, gender: 'm' | 'f') {
 }
 
 /** 지금 해역의 적. kind: grunt 잡졸, elite 우두머리, officer 간부, captain 간부를 거느린 우두머리 */
-export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'captain', r: Rng = rngOf(s.rng)): EnemySpec {
+export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'captain', r: Rng = rngOf(s.rng), archetype?: string): EnemySpec {
+  const ar = archetype ? ARCHETYPES[archetype] : undefined;
   const sx = sea(s);
   const [lo, hi] = sx.enemyPower;
   const mult = kind === 'grunt' ? 0.7 : kind === 'officer' ? 0.85 : kind === 'captain' ? 1.05 : 1.0;
@@ -100,11 +106,12 @@ export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'ca
   const p = Math.max(5, Math.round(base * mult));
   const gender: 'm' | 'f' = r() < 0.25 ? 'f' : 'm';
   const heroMarine = s.hero.route === 'marine';
-  const faction = heroMarine ? 'pirate' : (r() < 0.6 ? 'marine' : 'pirate');
+  const opposite = heroMarine ? 'pirate' : (r() < 0.6 ? 'marine' : 'pirate');
+  const faction: EnemySpec['faction'] = !ar || ar.faction === 'opposite' ? opposite : ar.faction;
   const fruitRoll = r();
-  const hasFruit = kind !== 'grunt' && fruitRoll < (kind === 'officer' ? 0.15 : 0.3);
+  const hasFruit = kind !== 'grunt' && (ar?.fruitAllowed ?? true) && fruitRoll < (kind === 'officer' ? 0.15 : 0.3);
   let fruitClass: EnemySpec['fruitClass'] = null;
-  let skills = genSkills(r, p, sx.armament);
+  let skills = ar?.skills ? [...ar.skills] : genSkills(r, p, sx.armament);
   if (hasFruit) {
     const pool = FRUITS.filter((f) => f.grade <= Math.min(5, s.world.stage + 1));
     const f = pick(r, pool);
@@ -114,16 +121,19 @@ export function genEnemy(s: LifeState, kind: 'grunt' | 'elite' | 'officer' | 'ca
   }
   const titles = faction === 'marine' ? ENEMY_NAMES.marineTitle : heroMarine ? ENEMY_NAMES.pirateTitle : ENEMY_NAMES.villainTitle;
   const e: EnemySpec = {
-    id: `gen_${s.rng.cursor}_${kind}`, name: genName(r, gender), canon: null,
-    title: kind === 'grunt' ? '무법자' : kind === 'officer' ? '간부' : pick(r, titles),
-    base: statsAround(p, { str: 0.8 + r() * 0.4, spd: 0.8 + r() * 0.4, vit: 0.8 + r() * 0.4 }),
+    id: `gen_${s.rng.cursor}_${kind}`, name: ar?.names ? pick(r, ar.names) : genName(r, gender), canon: null,
+    title: ar ? ar.title : kind === 'grunt' ? '무법자' : kind === 'officer' ? '간부' : pick(r, titles),
+    base: statsAround(p, ar?.bias ?? { str: 0.8 + r() * 0.4, spd: 0.8 + r() * 0.4, vit: 0.8 + r() * 0.4 }),
     fruitClass, armament: sx.armament as EnemySpec['armament'], observation: Math.max(0, sx.armament - 1) as EnemySpec['observation'],
     skills, tactic: pick(r, ['offense', 'defense', 'counter', 'endurance'] as const), officers: [],
-    faction, species: r() < 0.15 ? 'fishman' : 'human', gender, age: int(r, 20, 50),
+    faction, species: ar?.species ?? (r() < 0.15 ? 'fishman' : 'human'), gender, age: int(r, 20, 50),
+    form: ar?.form,
   };
-  if (kind === 'captain') {
+  if (ar?.form) e.armament = 0;
+  if (kind === 'captain' && !ar?.noOfficers) {
     const n = int(r, 1, 2);
-    for (let i = 0; i < n; i++) e.officers.push(genEnemy(s, 'officer', r));
+    // 간부는 우두머리와 같은 편이다
+    for (let i = 0; i < n; i++) { const o = genEnemy(s, 'officer', r); o.faction = e.faction; e.officers.push(o); }
   }
   return e;
 }
@@ -146,9 +156,9 @@ export function rivalEnemy(s: LifeState): EnemySpec {
 
 export function resolveEnemy(s: LifeState, ref: string): EnemySpec {
   if (ref === 'rival') return rivalEnemy(s);
-  if (ref === 'gen:elite') return genEnemy(s, 'elite');
-  if (ref === 'gen:captain') return genEnemy(s, 'captain');
-  if (ref === 'gen:grunt') return genEnemy(s, 'grunt');
+  // 'gen:<elite|captain|grunt>[:원형]'
+  const m = /^gen:(elite|captain|grunt)(?::(\w+))?$/.exec(ref);
+  if (m) return genEnemy(s, m[1] as 'elite' | 'captain' | 'grunt', rngOf(s.rng), m[2]);
   const b = BOSS_BY_ID[ref];
   if (b) return structuredClone(b);
   return genEnemy(s, 'elite');

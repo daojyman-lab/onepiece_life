@@ -67,7 +67,7 @@ export const BOSSES: Boss[] = [
   boss({ id: 'b_crocodile', name: '크로커다일', title: '칠무해 · 사막의 왕', canon: 'crocodile', p: 68, bias: { int: 1.1, wil: 1 }, fruitClass: 'logia', armament: 1, skills: ['fruit:suna:0', 'fruit:suna:1', 'fruit:suna:2', 'fruit:suna:3'], tactic: 'counter',
     officers: [enemy({ id: 'o_bon', name: '봉 클레이', p: 48, skills: ['fist_jab', 'fist_combo', 'fist_counter'] })],
     sea: ['gl_first'], stage: 3, route: 'marine', intro: '왕국을 노리는 모래의 사내. 물에 젖으면 몸이 굳는다.',
-    drops: [{ op: 'money', add: 150000 }, { op: 'item', id: 'ch4', count: 1 }, { op: 'chance', p: 0.2, then: [{ op: 'findFruit', pool: 'gradeMin3' }] }] }),
+    drops: [{ op: 'money', add: 150000 }, { op: 'item', id: 'ch4', count: 1 }, { op: 'chance', p: 0.1, then: [{ op: 'findFruit', pool: 'gradeMin3' }] }] }),
 
   // ---- 4단계
   boss({ id: 'b_darc', name: '뇌격 다르크', title: '해군 본부 중장', p: 92, bias: { spd: 1.2, wil: 1 }, faction: 'marine', armament: 2, observation: 1, skills: ['sword_cut', 'sword_wave', 'sword_finish', 'arm_strike', 'arm_hard', 'obs_read'], tactic: 'counter',

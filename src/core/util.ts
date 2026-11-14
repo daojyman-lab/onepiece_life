@@ -24,6 +24,10 @@ export function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v));
 }
 export function findPerson(s: LifeState, who: string): Person | undefined {
+  // 고아는 부모 대신 보호자가 그 자리를 맡는다
+  if ((who === '아버지' || who === '어머니') && !s.people.some((p) => p.alive && p.relation === who)) {
+    return s.people.find((p) => p.alive && p.relation === '보호자');
+  }
   return s.people.find((p) => p.alive && (p.id === who || p.relation === who || p.kind === who))
     ?? s.people.find((p) => p.alive && p.relation.includes(who));
 }

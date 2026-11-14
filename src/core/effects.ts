@@ -64,9 +64,7 @@ function eatFruit(s: LifeState, fuid: string) {
   timeline(s, `${f.name}을(를) 먹었다 (${GRADE_NAMES[f.grade]})`);
   log(s, '이제 헤엄칠 수 없다. 해루석에 약해졌다.', 'danger');
   learn(s, fruitSkillId(f.id, 0));
-  // 주력을 열매로 옮길지 묻는다
-  if (!s.choice.queue.includes('en_rethink')) s.choice.queue.unshift('en_rethink');
-  if (!s.choice.flags.includes('rethink_ready')) s.choice.flags.push('rethink_ready');
+  log(s, '열매 칸에 들어갔다. 주력 · 보조와 따로 저절로 자란다.', 'growth');
 }
 
 export function applyEffects(s: LifeState, effects: Effect[]) {

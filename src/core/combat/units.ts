@@ -42,7 +42,7 @@ export function heroUnit(s: LifeState, lo: Loadout): CUnit {
     fruitClass: s.hero.fruit ? FRUIT_BY_ID[s.hero.fruit.id]?.cls ?? null : null,
     skills: lo.skills.filter((id) => s.growth.skills[id]).map((id) => ({ id, mastery: s.growth.skills[id].mastery, cd: 0 })),
     tactic: lo.tactic, retreatAt: lo.retreatAt,
-    weapon: w && w.branch ? { branch: w.branch, mult: w.mult ?? 1 } : null,
+    weapon: w && w.branch ? { branch: w.branch, mult: w.mult ?? 1, seastone: !!w.seastone } : null,
     consumables: [...lo.consumables],
     faction: s.hero.route === 'marine' ? 'marine' : s.hero.route === 'pirate' ? 'pirate' : s.hero.route === 'revolution' ? 'rev' : 'civil',
     species: s.hero.species, gender: s.hero.gender, age: s.hero.age,
@@ -92,7 +92,7 @@ export function enemyUnit(e: EnemySpec, leader: boolean, idx: number): CUnit {
     st, def: st.vit * C.defPerVit, armament: e.armament, observation: e.observation, fruitClass: e.fruitClass,
     skills: e.skills.filter((id) => getSkill(id)).map((id) => ({ id, mastery, cd: 0 })),
     tactic: e.tactic, retreatAt: 0, weapon: null, consumables: [],
-    faction: e.faction, species: e.species, gender: e.gender, age: e.age,
+    faction: e.faction, species: e.species, gender: e.gender, age: e.age, form: e.form,
   };
   applyPassives(u);
   return u;

@@ -25,11 +25,11 @@ export function GrowthModal({ s, meta }: { s: LifeState; meta: MetaState }) {
       <div class="row" style={{ marginBottom: 8 }}>
         {BRANCHES.map((b) => (
           <button class={`btn small ${br === b ? 'on' : ''}`} onClick={() => setBr(b)}>
-            {BRANCH_NAMES[b]}{s.growth.focus === b ? ' ★' : s.growth.secondary === b ? ' ☆' : ''}
+            {BRANCH_NAMES[b]}{s.growth.focus === b ? ' ★' : s.growth.secondary === b ? ' ☆' : s.growth.haki === b ? ' ◆' : b === 'fruit' && s.hero.fruit ? ' ●' : ''}
           </button>
         ))}
       </div>
-      <div class="t9 soft" style={{ marginBottom: 6 }}>★ 주력 (저절로 는다) · ☆ 보조 (절반 속도). 갈래는 중대한 선택에서만 바뀐다. 다음 단계와 도감에 있는 기술은 미리 보인다.</div>
+      <div class="t9 soft" style={{ marginBottom: 6 }}>★ 주력 · ☆ 보조 (무술 중에서 고른다) · ◆ 패기 칸 · ● 열매 칸. 네 칸은 따로 자란다. 칸은 중대한 선택에서만 바뀐다. 다음 단계와 도감에 있는 기술은 미리 보인다.</div>
       {br === 'fruit' && !s.hero.fruit && <div class="empty">열매를 먹지 않았다. 먹지 않으면 그만큼 무술과 패기를 더 깊이 올릴 수 있다.</div>}
       {br === 'haki.conqueror' && !s.hero.traits.includes('conqueror') && <div class="paper t9" style={{ marginBottom: 6 }}>패왕색은 타고난 자질이 있어야 한다.</div>}
       <div class="tree">

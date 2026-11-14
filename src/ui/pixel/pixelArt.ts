@@ -18,6 +18,7 @@ export interface Who {
   key: string;                // 고정 무작위의 씨앗 (id나 이름)
   gender?: 'm' | 'f'; age?: number; species?: Species;
   faction?: 'civil' | 'pirate' | 'marine' | 'rev';
+  form?: 'seaking';
 }
 interface Desc {
   seed: number; gender: 'm' | 'f'; species: 'human' | 'fish' | 'mink' | 'sky'; faction: NonNullable<Who['faction']>;
@@ -34,7 +35,7 @@ export function describe(w: Who): Desc {
   const seed = hash(w.key);
   const age = w.age ?? 25;
   const gender = w.gender ?? (seed % 2 ? 'f' : 'm');
-  const species = w.species === 'fishman' ? 'fish' : w.species === 'mink' ? 'mink' : w.species === 'skypiean' ? 'sky' : 'human';
+  const species = w.species === 'fishman' || w.species === 'merfolk' ? 'fish' : w.species === 'mink' ? 'mink' : w.species === 'skypiean' ? 'sky' : 'human';
   const faction = w.faction ?? 'civil';
   const stage = age <= 14 ? 'child' : age >= 55 ? 'old' : 'adult';
   const styles = gender === 'f' ? [2, 3, 5, 2, 3] : [0, 1, 0, 4, 1];
@@ -77,8 +78,47 @@ function clothOf(d: Desc): Pair {
   return d.civil;
 }
 
+// ---------------- 해왕류: 사람이 아닌 모습
+const SEAKING: Pair[] = [['#3f9a6a', '#2a6a48'], ['#3a7ac0', '#24508a'], ['#9a5ab0', '#6a3a80'], ['#c0703a', '#8a4a24']];
+function seakingFace(w: Who): string {
+  const seed = hash(w.key);
+  const [c1, c2] = SEAKING[seed % SEAKING.length];
+  const [c, x] = makeCanvas(24, 24);
+  const r = (px: number, py: number, ww: number, hh: number, col: string) => { x.fillStyle = col; x.fillRect(px, py, ww, hh); };
+  r(8, 0, 3, 4, c2); r(13, 0, 3, 4, c2); r(10, 1, 4, 3, c2);           // 등지느러미
+  r(4, 4, 16, 14, c1); r(3, 6, 18, 10, c1); r(5, 18, 14, 4, c1);        // 머리
+  r(4, 14, 16, 2, c2); r(6, 20, 12, 4, c2);                             // 턱 그림자
+  r(5, 8, 5, 4, '#f6e04a'); r(14, 8, 5, 4, '#f6e04a');                   // 눈
+  r(7, 8, 1, 4, '#1c1420'); r(16, 8, 1, 4, '#1c1420');
+  r(6, 15, 12, 3, '#5a1a1a'); for (let i = 0; i < 6; i++) r(6 + i * 2, 15, 1, 1, '#ffffff');   // 입과 이빨
+  r(1, 9, 2, 1, c2); r(0, 10, 2, 1, c2); r(21, 9, 2, 1, c2); r(22, 10, 2, 1, c2);              // 수염
+  outline(x, 24, 24);
+  return c.toDataURL('image/png');
+}
+function seakingBody(w: Who, frame: number): HTMLCanvasElement {
+  const seed = hash(w.key);
+  const [c1, c2] = SEAKING[seed % SEAKING.length];
+  const [c, x] = makeCanvas(20, 24);
+  const r = (px: number, py: number, ww: number, hh: number, col: string) => { x.fillStyle = col; x.fillRect(px, py, ww, hh); };
+  const sw = frame ? 1 : 0;
+  r(2, 18, 16, 5, c1); r(1, 19, 18, 3, c2);                              // 물에 잠긴 똬리
+  r(12 - sw, 10, 5, 9, c1); r(10 - sw, 6, 7, 6, c1); r(9 - sw, 2, 8, 6, c1); // 목과 머리
+  r(10 - sw, 0, 2, 2, c2); r(14 - sw, 0, 2, 2, c2);
+  r(10 - sw, 3, 2, 2, '#f6e04a'); r(10 - sw, 3, 1, 2, '#1c1420');
+  r(9 - sw, 6, 4, 1, '#ffffff');
+  r(3, 14, 3, 5, c1); r(4, 12, 2, 2, c2);                                // 꼬리 끝
+  outline(x, 20, 24);
+  return c;
+}
+
 const faceCache = new Map<string, string>();
 export function faceURL(w: Who): string {
+  if (w.form === 'seaking') {
+    const k = 'seaking|' + w.key;
+    const hit = faceCache.get(k);
+    if (hit) return hit;
+    const url = seakingFace(w); faceCache.set(k, url); return url;
+  }
   const d = describe(w);
   const hit = faceCache.get(d.key);
   if (hit) return hit;
@@ -134,6 +174,12 @@ export function faceURL(w: Who): string {
 
 const bodyCache = new Map<string, HTMLCanvasElement>();
 export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCanvasElement {
+  if (w.form === 'seaking') {
+    const k = 'seaking|' + w.key + '|' + frame;
+    const hit = bodyCache.get(k);
+    if (hit) return hit;
+    const c = seakingBody(w, frame); bodyCache.set(k, c); return c;
+  }
   const d = describe(w);
   const key = d.key + '|' + frame + '|' + (pose ?? '');
   const hit = bodyCache.get(key);

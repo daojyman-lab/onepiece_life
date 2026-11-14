@@ -44,7 +44,7 @@ export const CHOICES: Choice[] = [
   c({ id: 'ch_chest', category: 'childhood', when: [{ c: 'age', min: 5, max: 9 }], weight: 6, repeat: 'once', speaker: 'hero',
     title: '해변의 상자', body: '썰물 뒤 모래톱에 낡은 상자가 묻혀 있다.',
     options: [
-      { label: '열어 본다', hint: '무엇이 나올지 모른다', effects: [{ op: 'chance', p: 0.25, then: [{ op: 'findFruit', pool: 'any' }], else: [{ op: 'money', add: 2000 }] }] },
+      { label: '열어 본다', hint: '무엇이 나올지 모른다', effects: [{ op: 'chance', p: 0.08, then: [{ op: 'findFruit', pool: 'any' }], else: [{ op: 'money', add: 2000 }] }] },
       { label: '어른에게 알린다', hint: '착한 아이라는 말을 듣는다', effects: [{ op: 'base', key: 'wil', add: 1 }, { op: 'base', key: 'luk', add: 1 }] },
     ] }),
   c({ id: 'ch_fever', category: 'childhood', when: [{ c: 'age', max: 9 }], weight: 6, repeat: 'once', speaker: { person: '어머니' },
@@ -69,10 +69,12 @@ export const CHOICES: Choice[] = [
     title: '틈틈이 익힐 것', body: '주력 수련과 함께 틈틈이 익힐 것을 하나 정한다.', options: [] }),
 
   // ======================================================== 패기
-  c({ id: 'hk_observation', category: 'master', template: 'haki', when: [{ c: 'age', min: 15 }, { c: 'gate', id: 'haki.observation.awaken', has: false }, { c: 'base', key: 'wil', min: 18 }], weight: 10, repeat: 'cooldown', cooldownYears: 2, speaker: 'hero',
+  c({ id: 'hk_observation', category: 'master', template: 'haki', when: [{ c: 'age', min: 15 }, { c: 'gate', id: 'haki.observation.awaken', has: false }, { c: 'base', key: 'wil', min: 18 }], weight: 5, repeat: 'once', speaker: 'hero',
     title: '기척이 느껴진다', body: '눈을 감았는데 등 뒤의 사람이 보이는 것 같았다. 이 감각을 붙잡을까?', options: [] }),
-  c({ id: 'hk_armament', category: 'master', template: 'haki', when: [{ c: 'age', min: 16 }, { c: 'gate', id: 'haki.armament.awaken', has: false }, { c: 'stage', min: 2 }], weight: 12, repeat: 'cooldown', cooldownYears: 2, speaker: 'hero',
+  c({ id: 'hk_armament', category: 'master', template: 'haki', when: [{ c: 'age', min: 16 }, { c: 'gate', id: 'haki.armament.awaken', has: false }, { c: 'stage', min: 2 }], weight: 6, repeat: 'once', speaker: 'hero',
     title: '보이지 않는 갑옷', body: '위대한 항로의 강자들은 팔을 검게 물들인다. 그 힘을 손에 넣고 싶다.', options: [] }),
+  c({ id: 'hk_armament_need', category: 'master', template: 'haki', when: [{ c: 'age', min: 14 }, { c: 'gate', id: 'haki.armament.awaken', has: false }, { c: 'flag', id: 'need_armament', has: true }], weight: 0, repeat: 'cooldown', cooldownYears: 6, speaker: 'hero',
+    title: '닿지 않는 주먹', body: '몸이 연기처럼 흩어지는 상대에게 주먹이 빠져나갔다. 그 몸을 붙잡으려면 보이지 않는 힘, 무장색이 필요하다.', options: [] }),
   c({ id: 'hk_conqueror', category: 'master', template: 'haki', when: [{ c: 'trait', id: 'conqueror', has: true }, { c: 'gate', id: 'haki.conqueror.awaken', has: false }, { c: 'age', min: 16 }], weight: 10, repeat: 'cooldown', cooldownYears: 3, speaker: 'hero',
     title: '왕의 자질', body: '분노가 치밀자 주위 사람들이 픽픽 쓰러졌다. 이 힘은 무엇인가?', options: [] }),
 
@@ -93,13 +95,6 @@ export const CHOICES: Choice[] = [
       { label: '받아들인다', hint: '첫 강적전. 준비와 관전을 배운다. 죽지 않는다', effects: [{ op: 'battle', enemy: 'rival', elite: true, lethal: false, spar: true }] },
       { label: '아직은 때가 아니다', hint: '라이벌이 실망한다', effects: [{ op: 'bond', who: '라이벌', add: -10 }, { op: 'base', key: 'int', add: 1 }] },
     ] }),
-  c({ id: 'tr_secret_train', category: 'bond', when: [{ c: 'age', min: 10, max: 15 }], weight: 10, repeat: 'cooldown', cooldownYears: 2, speaker: 'hero',
-    title: '비밀 수련터', body: '{place} 뒷산에서 아무도 모르는 공터를 찾았다.',
-    options: [
-      { label: '해 질 때까지 수련한다', hint: '주력 숙련이 크게 오른다. 다칠 수 있다', effects: [{ op: 'mastery', skill: 'focus', add: 10 }, lightHurt] },
-      { label: '바위를 들어 올린다', hint: '힘과 체력', effects: [{ op: 'base', key: 'str', add: 2 }, { op: 'base', key: 'vit', add: 1 }] },
-      { label: '명상한다', hint: '정신과 지능', effects: [{ op: 'base', key: 'wil', add: 2 }, { op: 'base', key: 'int', add: 1 }] },
-    ] }),
   c({ id: 'tr_bully', category: 'crisis', when: [{ c: 'age', min: 10, max: 15 }], weight: 8, repeat: 'once', speaker: 'hero',
     title: '항구의 불량배', body: '항구의 불량배들이 어린아이의 돈을 빼앗고 있다.',
     options: [
@@ -110,7 +105,7 @@ export const CHOICES: Choice[] = [
   c({ id: 'tr_wanderer', category: 'master', when: [{ c: 'age', min: 11, max: 15 }, { c: 'base', key: 'wil', min: 12 }], weight: 6, repeat: 'once', speaker: { canon: '떠돌이 무인', faction: 'civil', age: 60 },
     title: '지나가던 강자', body: '허름한 차림의 노인이 너를 한참 바라보더니 말했다. "눈이 좋구나. 한 수 보여 주마."',
     options: [
-      { label: '한 수 배운다', hint: '견문색의 실마리를 얻을지도 모른다', effects: [{ op: 'chance', p: 0.35, then: [{ op: 'gate', id: 'haki.observation.awaken' }, { op: 'log', text: '노인의 한 수 끝에, 기척이 느껴지기 시작했다.', type: 'growth' }], else: [{ op: 'base', key: 'wil', add: 3 }] }] },
+      { label: '한 수 배운다', hint: '견문색의 실마리를 얻을지도 모른다', effects: [{ op: 'chance', p: 0.2, then: [{ op: 'gate', id: 'haki.observation.awaken' }, { op: 'log', text: '노인의 한 수 끝에, 기척이 느껴지기 시작했다.', type: 'growth' }], else: [{ op: 'base', key: 'wil', add: 3 }] }] },
       { label: '대련을 청한다', hint: '숙련이 크게 오른다. 다칠 수 있다', effects: [{ op: 'mastery', skill: 'focus', add: 15 }, { op: 'chance', p: 0.5, then: [{ op: 'injury', severity: 'light' }] }] },
     ] }),
   c({ id: 'tr_debt', category: 'crisis', when: [{ c: 'age', min: 11, max: 15 }, { c: 'flag', id: 'family_poor', has: true }], weight: 20, repeat: 'once', speaker: { person: '아버지' },
@@ -155,7 +150,7 @@ export const CHOICES: Choice[] = [
   c({ id: cr('marine_promo'), category: 'career', when: [{ c: 'route', is: ['marine'] }, { c: 'age', min: 18 }], weight: 6, repeat: 'cooldown', cooldownYears: 3, speaker: { canon: '해군 상관', faction: 'marine', age: 50 },
     title: '상관의 제안', body: '상관이 너를 불렀다. "어려운 임무가 하나 있다. 맡아 보겠나?"',
     options: [
-      { label: '맡는다', hint: '강적과 싸운다. 이기면 진급한다', effects: [{ op: 'battle', enemy: 'gen:elite', elite: true, lethal: true }, { op: 'flag', id: 'promo_mission' }] },
+      { label: '맡는다', hint: '강적과 싸운다. 이기면 진급한다', effects: [{ op: 'battle', enemy: 'gen:elite:pirate_captain', elite: true, lethal: true }, { op: 'flag', id: 'promo_mission' }] },
       { label: '정중히 거절한다', hint: '평판이 조금 깎인다', effects: [{ op: 'fame', add: -3 }] },
     ] }),
 
@@ -197,12 +192,6 @@ export const CHOICES: Choice[] = [
       { label: '술잔을 기울인다', hint: '인연이 깊어진다', effects: [{ op: 'bond', who: '라이벌', add: 15 }, { op: 'base', key: 'wil', add: 1 }] },
       { label: '함께 가자고 한다', hint: '인연이 깊으면 동료가 된다', when: [{ c: 'crew', max: 8 }], effects: [{ op: 'chance', p: 0.5, then: [{ op: 'recruit', crew: { role: 'vanguard', name: '{rival}' } }], else: [{ op: 'bond', who: '라이벌', add: 5 }] }] },
     ] }),
-  c({ id: 'bd_family_letter', category: 'bond', when: [{ c: 'age', min: 17 }], weight: 5, repeat: 'cooldown', cooldownYears: 4, speaker: { person: '어머니' },
-    title: '고향에서 온 편지', body: '{mother}의 편지가 왔다. 돈이 필요하다는 이야기가 조심스럽게 적혀 있다.',
-    options: [
-      { label: '돈을 보낸다', hint: '돈이 줄고 마음이 편하다', when: [{ c: 'money', min: 5000 }], effects: [{ op: 'money', add: -5000 }, { op: 'bond', who: '어머니', add: 15 }, { op: 'base', key: 'wil', add: 1 }] },
-      { label: '답장만 쓴다', hint: '마음이 무겁다', effects: [{ op: 'bond', who: '어머니', add: 3 }] },
-    ] }),
 
   // ======================================================== 위기
   c({ id: 'cs_no_money_ill', category: 'crisis', when: [], weight: 0, repeat: 'cooldown', cooldownYears: 0, speaker: 'hero',
@@ -215,7 +204,7 @@ export const CHOICES: Choice[] = [
   c({ id: 'cs_bounty_hunters', category: 'crisis', when: [{ c: 'route', is: ['pirate', 'revolution'] }, { c: 'age', min: 17 }], weight: 7, repeat: 'cooldown', cooldownYears: 3, speaker: 'hero',
     title: '현상금 사냥꾼', body: '현상금이 오르자 사냥꾼들이 몰려든다. 잠든 사이 포위당했다.',
     options: [
-      { label: '정면으로 돌파한다', hint: '강적전. 이기면 명성이 오른다', effects: [{ op: 'battle', enemy: 'gen:elite', elite: true, lethal: true }] },
+      { label: '정면으로 돌파한다', hint: '강적전. 이기면 명성이 오른다', effects: [{ op: 'battle', enemy: 'gen:elite:bounty_hunter', elite: true, lethal: true }] },
       { label: '돈을 쥐여 주고 빠져나간다', hint: '돈의 20%를 잃는다', effects: [{ op: 'moneyPct', pct: -0.2 }] },
       { label: '바다로 뛰어든다', hint: '능력자는 위험하다', danger: true, effects: [{ op: 'chance', p: 0.7, then: [{ op: 'base', key: 'vit', add: 1 }], else: [{ op: 'injury', severity: 'heavy' }] }] },
     ] }),
@@ -224,7 +213,7 @@ export const CHOICES: Choice[] = [
     options: [
       { label: '고발한다', hint: '공적이 오르지만 적이 생긴다', effects: [{ op: 'fame', add: 10 }, { op: 'person', add: { kind: 'enemy', relation: '원한을 품은 상관', faction: 'marine', age: 48, bond: 0 } }] },
       { label: '입을 다문다', hint: '돈을 받는다', effects: [{ op: 'money', add: 15000 }, { op: 'base', key: 'wil', add: -1 }] },
-      { label: '직접 혼낸다', hint: '강적전. 지면 위험하다', effects: [{ op: 'battle', enemy: 'gen:elite', elite: true, lethal: true }] },
+      { label: '직접 혼낸다', hint: '강적전. 지면 위험하다', effects: [{ op: 'battle', enemy: 'gen:elite:corrupt_officer', elite: true, lethal: true }] },
     ] }),
   c({ id: 'cs_betrayal', category: 'crisis', when: [{ c: 'crew', min: 2 }], weight: 5, repeat: 'cooldown', cooldownYears: 5, speaker: 'hero',
     title: '배신의 기미', body: '동료 하나가 몰래 적과 연락하는 것 같다.',
@@ -242,13 +231,13 @@ export const CHOICES: Choice[] = [
     title: '난파', body: '거대한 해왕류가 배를 들이받았다. 배가 기운다.',
     options: [
       { label: '배를 고친다', hint: '돈이 든다', effects: [{ op: 'moneyPct', pct: -0.25 }] },
-      { label: '해왕류와 싸운다', hint: '강적전', effects: [{ op: 'battle', enemy: 'gen:elite', elite: true, lethal: true }] },
+      { label: '해왕류와 싸운다', hint: '강적전', effects: [{ op: 'battle', enemy: 'gen:elite:seaking', elite: true, lethal: true }] },
     ] }),
-  c({ id: 'cs_treasure_rumor', category: 'crisis', when: [{ c: 'age', min: 16 }], weight: 6, repeat: 'cooldown', cooldownYears: 3, speaker: 'hero',
+  c({ id: 'cs_treasure_rumor', category: 'crisis', when: [{ c: 'age', min: 16 }], weight: 2, repeat: 'cooldown', cooldownYears: 8, speaker: 'hero',
     title: '보물의 소문', body: '{port}의 경매장에 정체 모를 열매가 나왔다는 소문이 돈다.',
     options: [
-      { label: '경매에 참가한다', hint: '돈 5만 필요. 열매를 손에 넣는다', when: [{ c: 'money', min: 50000 }], effects: [{ op: 'money', add: -50000 }, { op: 'findFruit', pool: 'any' }] },
-      { label: '훔치러 간다', hint: '위험하다', danger: true, effects: [{ op: 'chance', p: 0.4, then: [{ op: 'findFruit', pool: 'any' }, { op: 'fame', add: 5 }], else: [{ op: 'injury', severity: 'heavy' }] }] },
+      { label: '경매에 참가한다', hint: '돈 20만 필요. 낙찰받을 수 있을지는 모른다', when: [{ c: 'money', min: 200000 }], effects: [{ op: 'chance', p: 0.4, then: [{ op: 'money', add: -200000 }, { op: 'findFruit', pool: 'any' }], else: [{ op: 'log', text: '더 큰 손에게 밀려 낙찰받지 못했다.', type: 'info' }] }] },
+      { label: '훔치러 간다', hint: '위험하다', danger: true, effects: [{ op: 'chance', p: 0.15, then: [{ op: 'findFruit', pool: 'any' }, { op: 'fame', add: 5 }], else: [{ op: 'injury', severity: 'heavy' }] }] },
       { label: '관심 없다', hint: '그냥 지나간다', effects: [] },
     ] }),
 ];
