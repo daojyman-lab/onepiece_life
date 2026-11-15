@@ -329,7 +329,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_retire', kind: 'door', when: at(age(65), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright', 'settled', 'civil')),
+    id: 'path_retire', kind: 'door', when: at(age(68), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright', 'settled', 'civil')),
     weight: 5, repeat: { years: 8 }, speaker: 'hero',
     title: '칼을 내려놓다', body: '거울 속의 {name}은(는) 어느새 희끗한 머리다. 무릎도 예전 같지 않다. 이제 물러날 때가 되었는지도 모른다.',
     doors: [

@@ -80,6 +80,22 @@ export interface Report {
   limbLost: number;                            // 신체를 잃은 인생의 비율
   limbLived10: number;                         // 그중 잃은 뒤 열 해 넘게 산 비율
   youngRiskDeath: number;                      // 40세 전에 병 · 사고 · 굶주림으로 죽은 비율
+  /** 이름 있는 상대와의 싸움: 모두 합한 수와 이긴 비율, 상대의 바다별 */
+  named: { fights: number; winRate: number; bySea: Record<string, { fights: number; winRate: number }> };
+}
+
+function namedOf(lives: Life5[]): Report['named'] {
+  const by: Record<string, { fights: number; wins: number }> = {};
+  for (const s of lives) for (const [sea, x] of Object.entries(s.stats.named)) {
+    const b = (by[sea] ??= { fights: 0, wins: 0 });
+    b.fights += x.fights; b.wins += x.wins;
+  }
+  const all = Object.values(by).reduce((a, x) => ({ fights: a.fights + x.fights, wins: a.wins + x.wins }), { fights: 0, wins: 0 });
+  const rate = (x: { fights: number; wins: number }) => x.wins / Math.max(1, x.fights);
+  return {
+    fights: all.fights, winRate: rate(all),
+    bySea: Object.fromEntries(Object.entries(by).map(([k, x]) => [k, { fights: x.fights, winRate: rate(x) }])),
+  };
 }
 
 /** 끝난 인생들의 지표 (설계 7장) */
@@ -109,5 +125,6 @@ export function summarize(lives: Life5[]): Report {
     limbLost: lost.length / n,
     limbLived10: lost.filter((s) => (s.ended?.age ?? s.age) - lostAt(s) > 10).length / Math.max(1, lost.length),
     youngRiskDeath: lives.filter((s) => s.ended && s.ended.age < YOUNG_AGE && RISK_CAUSES.includes(s.ended.cause)).length / n,
+    named: namedOf(lives),
   };
 }

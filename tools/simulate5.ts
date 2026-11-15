@@ -36,6 +36,9 @@ console.log('집안 형편(끝)별 4단계 · 6단계 도달률:');
 for (const [w, x] of Object.entries(rep.tierByWealth)) console.log(`  ${w.padEnd(12)} ${String(x.n).padStart(5)}명  4단계 ${pc(x.t4)}  6단계 ${pc(x.t6)}`);
 console.log(`신체를 잃은 인생 ${pc(rep.limbLost)} (그중 열 해 넘게 더 산 인생 ${pc(rep.limbLived10)})`);
 console.log(`40세 전 병 · 사고 · 굶주림 사망 ${pc(rep.youngRiskDeath)}`);
+const namedLine = (r: typeof rep.named) => `${r.fights}번, 이긴 비율 ${pc(r.winRate)}`
+  + Object.entries(r.bySea).map(([sea, x]) => `\n  ${sea.padEnd(10)} ${String(x.fights).padStart(5)}번  이긴 비율 ${pc(x.winRate)}`).join('');
+console.log(`이름 있는 상대와의 싸움 (${arg}): ${namedLine(rep.named)}`);
 
 const t1 = Date.now();
 const cohort = (wealth: 'noble' | 'poor', lineage: 'commoner' | 'orphan') =>
@@ -50,3 +53,4 @@ const pea = Array.from({ length: m }, (_, i) => autoplay5(SEED + i, { value: 'pe
 const avg = (xs: Life5[], f: (s: Life5) => number) => xs.reduce((a, s) => a + f(s), 0) / Math.max(1, xs.length);
 console.log(`같은 출생 ${m}명: 야망 평균 최고 단계 ${avg(amb, topTier).toFixed(2)} · 끝난 나이 ${avg(amb, (s) => s.ended?.age ?? s.age).toFixed(1)}`
   + ` / 평온 ${avg(pea, topTier).toFixed(2)} · ${avg(pea, (s) => s.ended?.age ?? s.age).toFixed(1)}`);
+console.log(`이름 있는 상대와의 싸움 (야망 ${m}명): ${namedLine(summarize(amb).named)}`);

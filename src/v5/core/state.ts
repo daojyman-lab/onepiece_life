@@ -55,7 +55,7 @@ export function emptyLife(seed: number): Life5 {
     unchosen: [], tried: [], known: [],
     log: [], timeline: [],
     pending: null,
-    stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0 },
+    stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {} },
     seq: 0,
     ended: null,
   };

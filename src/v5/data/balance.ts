@@ -8,7 +8,8 @@ export const V = {
   growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
             masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,
             tierUp: 100, maxTier: 6, noMasterCap: 3,
-            tierPower: 0.25,                   // 힘 = 능력치 합 × (1 + 가장 높은 단계 × tierPower)
+            // 단계의 힘 배율 (0~6단계). 힘 = 능력치 합 × tierCurve[가장 높은 단계]. 전투에서도 주인공의 능력치에 곱한다
+            tierCurve: [1, 1.3, 1.7, 2.2, 2.8, 3.6, 4.6],
             studyObs: 0.5,                     // study가 견문색 숙련에 주는 몫 (perPart의 배수)
             // 활동마다 능력치가 1 오를 확률 (나이 배율을 곱한다)
             statP: { train: 0.9, study: 0.6, roam: 0.6 },
@@ -32,7 +33,7 @@ export const V = {
   fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16 },
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
   fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25,
-           injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 1.1,
+           injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 0.6,
            minPower: 1,                       // 힘이 0이어도 나누기가 되도록
            officerShare: 0.5,                 // 상대의 힘에 더하는 간부의 몫
            hakiTier: 2, fruitTier: 1,         // 상대의 패기 1레벨 = 단계 2, 열매 = 단계 1 (힘을 셀 때)
@@ -40,7 +41,10 @@ export const V = {
            passiveScale: { base: 0.7, span: 0.6 },   // 패시브 기술의 효과 = 값 × (base + span × 숙련/100), v4와 같다
            hakiLevelPer: 2, hakiLevelMax: 3,  // 전투의 패기 레벨 = min(3, ⌊단계 / 2⌋)
            retreat: { calm: 0.5, usual: 0.3, never: 0 },
+           retreatDeath: 0.5,                 // 목숨을 건 싸움에서 몸을 빼낸 사람이 죽을 확률 = 죽을 확률 × 이것
            famePerPower: 0.1, minorFame: 1,
+           // 이름 있는 상대의 능력치(간부 포함)에 곱하는 배율, 상대가 나오는 바다별 (v4 보스는 v4의 레벨 성장에 맞춰져 있다)
+           foeScale: { east: 0.4, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.2, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },
            dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
            minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다

@@ -12,13 +12,13 @@ import { branchSkills, getSkill } from '../../core/growth/skillbook';
 import { chance, hashString, int, pick, rngOf, type Rng } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
-import { FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
+import { FOE_SEA, FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
 import { HOMES } from '../data/homes';
 import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
 import { canUse, effectiveStats5, loseLimb } from './body';
 import { applyFx } from './fx';
-import { BRANCH_ID, power5 } from './power';
+import { BRANCH_ID, power5, tierMult, topTier } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
 import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats } from './types';
@@ -45,10 +45,21 @@ const FACTION: Partial<Record<Standing, Person['faction']>> = {
 
 // ---------------------------------------------------------------- 힘과 위험
 
-/** 간부를 빼고 한 사람의 힘. 패기 · 열매를 단계로 바꿔 주인공의 힘(power5)과 같은 잣대로 센다 */
+/** 간부를 빼고 한 사람의 힘. 패기 · 열매를 단계로 바꿔 주인공의 힘(power5)과 같은 잣대(단계의 배율)로 센다 */
 function soloPower(e: EnemySpec): number {
   const tier = Math.max(e.armament * F.hakiTier, e.observation * F.hakiTier, e.fruitClass ? F.fruitTier : 0);
-  return sum(e.base) * (1 + tier * V.growth.tierPower);
+  return sum(e.base) * tierMult(tier);
+}
+
+/** 이름 있는 상대를 v5의 잣대로: 상대가 나오는 바다의 배율(V.fight.foeScale)을 우두머리와 간부의 능력치에 곱한다 */
+export function scaleFoe(e: EnemySpec, id: string): EnemySpec {
+  const k = F.foeScale[FOE_SEA[id] as keyof typeof F.foeScale] ?? 1;
+  const scale = (st: Stats): Stats => {
+    const out = { ...st };
+    for (const key of Object.keys(out) as (keyof Stats)[]) out[key] = Math.round(out[key] * k);
+    return out;
+  };
+  return { ...e, base: scale(e.base), officers: e.officers.map((o) => ({ ...o, base: scale(o.base) })) };
 }
 
 /** 상대의 힘: 우두머리 + 간부의 몫 */
@@ -125,10 +136,15 @@ function applyPassives(u: CUnit): void {
   u.pGuard += m.guard ?? 0;
 }
 
-/** v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다 */
+/**
+ * v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다.
+ * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
+ */
 export function heroUnit5(s: Life5): CUnit {
   const h = s.hero;
   const st: Stats = effectiveStats5(s);
+  const m = tierMult(topTier(s));
+  for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
   const health = C.hp.healthFloor + (1 - C.hp.healthFloor) * h.hp / V.hp.max;
   const maxHp = Math.round((C.hp.base + st.vit * C.hp.perVit) * health);
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
@@ -187,7 +203,7 @@ function startFight(s: Life5, foe: EnemySpec, lethal: boolean): void {
 export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean): void {
   const known = FOES[foeId];
   if (!known) return;
-  const foe = structuredClone(known);
+  const foe = scaleFoe(structuredClone(known), foeId);
   if (forced) { startFight(s, foe, lethal); return; }
   s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal) };
 }
@@ -215,6 +231,12 @@ export function ackBattle(s: Life5): void {
   const grudge = `lostTo:${foe.id}`;
 
   s.stats.fights += 1;
+  const sea = FOE_SEA[foe.id];
+  if (sea) {
+    const n = (s.stats.named[sea] ??= { fights: 0, wins: 0 });
+    n.fights += 1;
+    if (won) n.wins += 1;
+  }
   if (won) {
     s.stats.wins += 1;
     s.hero.fame += Math.round(foePower(foe) * F.famePerPower);
@@ -235,7 +257,8 @@ export function ackBattle(s: Life5): void {
     if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
     return;
   }
-  if (p.result === 'lose' && chance(r, risk.death)) {
+  // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
+  if (chance(r, risk.death * (p.result === 'lose' ? 1 : F.retreatDeath))) {
     applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
     return;
   }

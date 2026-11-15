@@ -1,6 +1,6 @@
 // tests/v5/sim.test.ts
 import { beforeAll, describe, expect, it } from 'vitest';
-import { autoplay5 } from '../../src/v5/core/autoplay';
+import { autoplay5, summarize } from '../../src/v5/core/autoplay';
 import { topValues } from '../../src/v5/core/values';
 import { VALUE_IDS } from '../../src/v5/data/values';
 import type { Life5 } from '../../src/v5/core/types';
@@ -8,9 +8,11 @@ import type { Life5 } from '../../src/v5/core/types';
 const N = 600;
 let runs: ReturnType<typeof autoplay5>[] = [];
 let lives: Life5[] = [];
+let ambitious: Life5[] = [];
 beforeAll(() => {
   runs = Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'random'));
   lives = runs.map((r) => r.s);
+  ambitious = Array.from({ length: 300 }, (_, i) => autoplay5(9000 + i, { value: 'ambition' }).s);
 }, 300_000);
 const avg = (f: (s: Life5) => number, xs = lives) => xs.reduce((a, s) => a + f(s), 0) / xs.length;
 const topTier = (s: Life5) => Math.max(...Object.values(s.growth.tier));
@@ -51,6 +53,12 @@ describe('시뮬레이터 (설계 7장)', () => {
     const poor = Array.from({ length: 400 }, (_, i) => autoplay5(20000 + i, { value: 'ambition' }, { wealth: 'poor', lineage: 'orphan' }).s);
     expect(rate(rich, (s) => topTier(s) >= 4)).toBeGreaterThan(rate(poor, (s) => topTier(s) >= 4));
     expect(rate(poor, (s) => topTier(s) >= 6)).toBeGreaterThan(rate(rich, (s) => topTier(s) >= 6));
+  });
+  it('야망을 좇는 인생은 이름 있는 상대와 싸워 20~70%를 이긴다', () => {
+    const named = summarize(ambitious).named;
+    expect(named.fights).toBeGreaterThanOrEqual(30);
+    expect(named.winRate).toBeGreaterThanOrEqual(0.2);
+    expect(named.winRate).toBeLessThanOrEqual(0.7);
   });
   it('신체를 잃는 인생은 절반 이하이고, 잃은 뒤에도 열 해 넘게 사는 인생이 그중 절반 이상이다', () => {
     const lost = lives.filter((s) => s.stats.limbsLost > 0);

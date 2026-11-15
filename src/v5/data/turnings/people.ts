@@ -221,22 +221,22 @@ export const PEOPLE: Turning[] = [
 
   // ---------------------------------------------------------------- 이름 있는 상대 (바다마다)
   {
-    id: 'meet_morgan', kind: 'door', when: at(age(15, 18), st(...HUNTED), sea('east')),
+    id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '도끼손 모건' },
     title: '도끼손 대령', body: '셸스 마을의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}의 배를 노려본다.',
     doors: [
-      fightDoor('대령에게 맞선다', '목숨을 건 싸움이 된다', { freedom: D }, 'b_morgan'),
+      fightDoor('대령에게 맞선다', '목숨을 건 싸움이 된다', { freedom: D }, 'b_morgan', READY(1)),
       { label: '마을 사람들을 먼저 빼돌린다', hint: '싸움은 피하지만 쫓긴다', values: { devotion: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 5 }, { op: 'log', text: '밤새 마을 사람들을 배에 태워 옆 섬으로 옮겼다.', weight: 'heavy' }] },
       { label: '닻을 올려 달아난다', hint: '오늘은 등을 보인다', values: { peace: D }, fx: [] },
     ],
   },
   {
-    id: 'meet_arlong', kind: 'door', when: at(age(15, 18), st(...LAWFUL), sea('east')),
+    id: 'meet_arlong', kind: 'door', when: at(age(15, 24), st(...LAWFUL), sea('east')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '톱상어 아론' },
     title: '톱상어의 섬', body: '코노미 제도의 마을들이 어인 해적에게 공물을 바치고 있다. 톱니 코의 선장이 {name}을(를) 보고 이빨을 드러낸다.',
     doors: [
-      fightDoor('어인 해적에게 맞선다', '목숨을 건 싸움이 된다', { justice: D }, 'b_arlong'),
+      fightDoor('어인 해적에게 맞선다', '목숨을 건 싸움이 된다', { justice: D }, 'b_arlong', READY(2)),
       { label: '뇌물을 받고 눈을 감는다', hint: '주머니는 두둑해지고 마을은 그대로다', values: { ambition: D },
         fx: [{ op: 'money', add: 50000 }, { op: 'flag', id: 'tookBribe' }] },
       { label: '본부에 지원을 요청하고 물러난다', hint: '지원은 언제 올지 모른다', values: { peace: D }, fx: [] },
@@ -247,17 +247,17 @@ export const PEOPLE: Turning[] = [
     weight: 4, repeat: { years: 5 }, speaker: { canon: '스모커' },
     title: '연기의 추격자', body: '흰 연기가 {island}의 거리를 뒤덮는다. 시가 두 대를 문 해군이 {name}의 앞을 막아선다. 이 바다까지 쫓아왔다.',
     doors: [
-      fightDoor('연기 속으로 뛰어든다', '맨손으로는 닿지 않을지도 모른다', { ambition: D }, 'b_smoker', READY(1)),
-      duelDoor('목숨은 걸지 않고 겨뤄 본다', '실력만 가늠한다', { loyalty: D }, 'b_smoker'),
+      fightDoor('연기 속으로 뛰어든다', '맨손으로는 닿지 않을지도 모른다', { ambition: D }, 'b_smoker', READY(3)),
+      duelDoor('목숨은 걸지 않고 겨뤄 본다', '실력만 가늠한다', { loyalty: D }, 'b_smoker', READY(2)),
       { label: '뒷골목으로 달아난다', hint: '연기가 끈질기게 따라온다', values: { freedom: D }, fx: [{ op: 'hp', add: -5 }] },
     ],
   },
   {
-    id: 'meet_mr1', kind: 'door', when: at(age(16, 19), st(...LAWFUL, 'revolution'), sea('gl_entry')),
+    id: 'meet_mr1', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_entry')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '미스터 1' },
     title: '칼날의 사내', body: '{island}의 어둠 속에서 민머리의 사내가 팔을 칼날로 바꾼다. 비밀 결사의 사냥꾼이 {name}을(를) 다음 목표로 정했다.',
     doors: [
-      fightDoor('칼날에 맞선다', '온몸이 칼인 상대다', { justice: D }, 'b_mr1', READY(1)),
+      fightDoor('칼날에 맞선다', '온몸이 칼인 상대다', { justice: D }, 'b_mr1', READY(2)),
       { label: '결사의 비밀을 캐내고 빠진다', hint: '싸움 대신 정보를 얻는다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'baroqueSecret' }] },
       { label: '숨을 죽이고 지나가길 기다린다', hint: '오늘 밤만 넘기면 된다', values: { peace: D }, fx: [] },
@@ -268,7 +268,7 @@ export const PEOPLE: Turning[] = [
     weight: 4, repeat: { years: 5 }, speaker: { canon: '롭 루치' },
     title: '정부의 암살자', body: '{island}의 다리 위, 비둘기를 어깨에 얹은 사내가 길을 막는다. 정부의 이름으로 {name}을(를) 처리하러 왔다고 한다.',
     doors: [
-      fightDoor('암살자에게 맞선다', '사람을 죽이는 기술의 끝을 상대한다', { loyalty: D }, 'b_lucci', READY(2)),
+      fightDoor('암살자에게 맞선다', '사람을 죽이는 기술의 끝을 상대한다', { loyalty: D }, 'b_lucci', READY(3)),
       { label: '다리에서 바다로 뛰어내린다', hint: '살아남는 것이 먼저다', values: { freedom: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'log', text: '다리에서 뛰어내려 물살에 몸을 숨겼다.', weight: 'heavy' }] },
       { label: '가진 것을 내주고 흥정한다', hint: '정부도 돈은 좋아한다', when: [{ c: 'money', min: BRIBE }], values: { peace: D }, fx: [{ op: 'money', add: -BRIBE }] },
@@ -277,11 +277,11 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_crocodile', kind: 'door', when: at(age(16, 19), st(...LAWFUL, 'revolution'), sea('gl_first')),
+    id: 'meet_crocodile', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_first')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '크로커다일' },
     title: '사막의 왕', body: '모래폭풍 너머, 갈고리 손의 칠무해가 왕국을 삼키려 한다. 그가 {name}을(를) 내려다보며 시가 연기를 내뿜는다.',
     doors: [
-      fightDoor('모래의 사내에게 맞선다', '물이 없으면 닿지 않는다', { justice: D }, 'b_crocodile', READY(2)),
+      fightDoor('모래의 사내에게 맞선다', '물이 없으면 닿지 않는다', { justice: D }, 'b_crocodile', READY(3)),
       { label: '그의 음모를 왕국에 알린다', hint: '싸우지 않고 판을 뒤집는다', values: { inquiry: D },
         fx: [{ op: 'fame', add: 15 }, { op: 'log', text: '비밀 결사의 계획을 왕국에 알렸다. 반란은 한 발 늦게 터졌다.', weight: 'heavy' }] },
       { label: '모래바람을 피해 떠난다', hint: '이 나라의 일은 이 나라에 맡긴다', values: { peace: D }, fx: [] },
@@ -292,19 +292,19 @@ export const PEOPLE: Turning[] = [
     weight: 4, repeat: { years: 5 }, speaker: { canon: '키자루' },
     title: '빛의 대장', body: '{island}의 하늘이 눈부시게 번쩍인다. 느릿한 말투의 해군 대장이 {name} 앞에 빛으로 내려선다. 빛보다 빠른 발차기가 날아온다.',
     doors: [
-      fightDoor('빛에 맞선다', '해군 대장이다. 살아남을 수 있을지 모른다', { ambition: D }, 'b_darc', READY(3)),
+      fightDoor('빛에 맞선다', '해군 대장이다. 살아남을 수 있을지 모른다', { ambition: D }, 'b_darc', READY(4)),
       { label: '동료들을 흩어지게 하고 달아난다', hint: '다시 모일 수 있을지는 모른다', values: { loyalty: D },
         fx: [{ op: 'hp', add: -25 }, { op: 'hardship', add: 6 }, { op: 'log', text: '빛이 쏟아지는 섬에서 동료들과 흩어져 달아났다.', weight: 'heavy' }] },
       { label: '숨어서 대장이 떠나기를 기다린다', hint: '숨소리도 내지 않는다', values: { peace: D }, fx: [{ op: 'hp', add: -5 }] },
     ],
   },
   {
-    id: 'meet_hody', kind: 'door', when: at(age(18, 21), st(...SEAFARING), sea('sabaody')),
+    id: 'meet_hody', kind: 'door', when: at(age(18, 26), st(...SEAFARING), sea('sabaody')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '호디 존스' },
     title: '바다 밑의 증오', body: '어인섬의 광장. 붉은 약에 취한 어인이 인간을 몰아내자고 외친다. 핏발 선 눈이 {name}에게 꽂힌다.',
     doors: [
       fightDoor('광장 한가운데서 맞선다', '섬 사람들이 지켜본다', { justice: D }, 'b_hody', READY(3)),
-      duelDoor('목숨은 걸지 않고 막아선다', '쓰러뜨리기보다 멈추게 한다', { devotion: D }, 'b_hody'),
+      duelDoor('목숨은 걸지 않고 막아선다', '쓰러뜨리기보다 멈추게 한다', { devotion: D }, 'b_hody', READY(2)),
       { label: '섬을 빠져나간다', hint: '바다 밑의 일은 바다 밑에 맡긴다', values: { peace: D }, fx: [] },
     ],
   },
@@ -313,7 +313,7 @@ export const PEOPLE: Turning[] = [
     weight: 4, repeat: { years: 5 }, speaker: { canon: '후지토라' },
     title: '눈 감은 대장', body: '{island}의 하늘에서 운석이 떨어진다. 눈을 감은 해군 대장이 지팡이 칼을 짚고 {name}의 기척을 읽는다.',
     doors: [
-      fightDoor('운석 아래서 맞선다', '하늘을 끌어내리는 상대다', { ambition: D }, 'b_fujitora', READY(4)),
+      fightDoor('운석 아래서 맞선다', '하늘을 끌어내리는 상대다', { ambition: D }, 'b_fujitora', READY(5)),
       { label: '주사위 한 판으로 승부를 청한다', hint: '대장은 도박을 좋아한다', values: { romance: D },
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'fame', add: 20 }, { op: 'log', text: '주사위가 {name}의 편을 들었다. 대장은 웃으며 칼을 거두었다.', weight: 'heavy' }],
@@ -322,11 +322,11 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_doflamingo', kind: 'door', when: at(age(17, 22), st('civil', 'shipwright', 'settled', ...SEAFARING), sea('nw_first')),
+    id: 'meet_doflamingo', kind: 'door', when: at(age(17, 26), st('civil', 'shipwright', 'settled', ...SEAFARING), sea('nw_first')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '돈키호테 도플라밍고' },
     title: '하늘의 악마', body: '드레스로자의 하늘에 실로 엮은 새장이 내려온다. 분홍 깃털 외투의 왕이 웃으며 {name}을(를) 꼭두각시로 만들려 한다.',
     doors: [
-      fightDoor('새장 안에서 왕에게 맞선다', '실이 온몸을 노린다', { justice: D }, 'b_doflamingo', READY(4)),
+      fightDoor('새장 안에서 왕에게 맞선다', '실이 온몸을 노린다', { justice: D }, 'b_doflamingo', READY(5)),
       { label: '지하의 저항군과 손잡는다', hint: '싸움보다 사람들을 빼내는 쪽을 맡는다', values: { devotion: D },
         fx: [{ op: 'hp', add: -15 }, { op: 'person', kind: 'ally', relation: '지하 저항군' }, { op: 'fame', add: 10 }] },
       { label: '실이 닿기 전에 섬을 떠난다', hint: '새장 밖으로 빠져나간다', values: { peace: D }, fx: [{ op: 'hp', add: -10 }] },
@@ -337,7 +337,7 @@ export const PEOPLE: Turning[] = [
     weight: 4, repeat: { years: 5 }, speaker: { canon: '아카이누' },
     title: '마그마의 원수', body: '바다가 끓어오른다. 철저한 정의를 외치는 해군의 정점이 마그마의 주먹을 들고 {name}의 배를 막아선다.',
     doors: [
-      fightDoor('마그마에 맞선다', '이 산을 넘으면 바다의 정점이 보인다', { ambition: D }, 'b_akainu', READY(5)),
+      fightDoor('마그마에 맞선다', '이 산을 넘으면 바다의 정점이 보인다', { ambition: D }, 'b_akainu', READY(6)),
       { label: '배를 버리고 바다 밑으로 피한다', hint: '배는 잃어도 목숨은 남는다', values: { peace: D },
         fx: [{ op: 'hp', add: -25 }, { op: 'money', add: -100000 }, { op: 'log', text: '배가 불기둥에 삼켜졌다. 바다 밑으로 숨어 겨우 살아남았다.', weight: 'heavy' }] },
       { label: '동료들을 먼저 보내고 혼자 시간을 번다', hint: '돌아오지 못할 수도 있다', values: { loyalty: D }, danger: true,
@@ -345,12 +345,12 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_kaido', kind: 'door', when: at(age(17, 22), st(...LAWFUL, 'pirate', 'revolution'), sea('nw_late')),
+    id: 'meet_kaido', kind: 'door', when: at(age(17, 30), st(...LAWFUL, 'pirate', 'revolution'), sea('nw_late')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '백수 카이도' },
     title: '가장 강한 생물', body: '와노쿠니의 하늘을 푸른 용이 가른다. 세상에서 가장 강하다는 사황이 술병을 기울이며 {name}을(를) 내려다본다.',
     doors: [
-      fightDoor('용에게 맞선다', '세상에서 가장 강한 상대다', { dominion: D }, 'b_kaido', READY(5)),
-      duelDoor('목숨은 걸지 않고 한 수 청한다', '사황은 강한 자를 반긴다', { ambition: D }, 'b_kaido', READY(3)),
+      fightDoor('용에게 맞선다', '세상에서 가장 강한 상대다', { dominion: D }, 'b_kaido', READY(6)),
+      duelDoor('목숨은 걸지 않고 한 수 청한다', '사황은 강한 자를 반긴다', { ambition: D }, 'b_kaido', READY(5)),
       { label: '사무라이들 사이에 숨는다', hint: '때가 올 때까지 기다린다', values: { peace: D }, fx: [] },
     ],
   },

@@ -11,6 +11,7 @@ import { addValues } from '../../src/v5/core/values';
 import { FOES } from '../../src/v5/data/foes';
 import { V } from '../../src/v5/data/balance';
 import { applyFx } from '../../src/v5/core/fx';
+import { tierMult } from '../../src/v5/core/power';
 import type { Life5 } from '../../src/v5/core/types';
 
 const weak = Object.keys(FOES)[0];
@@ -129,5 +130,34 @@ describe('싸움', () => {
     expect(s.hero.injuries).toHaveLength(1);
     for (let i = 0; i < Math.ceil(V.injury.months.light / V.injury.monthsPerPart); i++) s = reduce5({ ...s, pending: null }, { type: 'step' });
     expect(s.hero.injuries).toHaveLength(0);
+  });
+});
+
+describe('경지와 상대의 세기', () => {
+  it('단계의 배율은 단계마다 커지고, 주인공의 전투 능력치에 곱해진다', () => {
+    const c = V.growth.tierCurve;
+    for (let i = 1; i < c.length; i++) expect(c[i]).toBeGreaterThan(c[i - 1]);
+    const s = fighter(1, 400); const u0 = heroUnit5(s);
+    s.growth.tier.sword = 4;
+    expect(heroUnit5(s).st.str / u0.st.str).toBeCloseTo(tierMult(4), 1);
+  });
+  it('이름 있는 상대는 제 바다의 배율만큼 능력치가 줄어 나온다', () => {
+    const s = fighter(1); askFight(s, 'b_kaido', true, false);
+    const p = s.pending as Extract<Life5['pending'], { kind: 'fight' }>;
+    expect(p.foe.base.str).toBe(Math.round(FOES.b_kaido.base.str * V.fight.foeScale.nw_late));
+    expect(p.foe.officers[0].base.vit).toBe(Math.round(FOES.b_kaido.officers[0].base.vit * V.fight.foeScale.nw_late));
+    expect(FOES.b_kaido.base.str).toBeGreaterThan(p.foe.base.str);   // 원본(v4 보스)은 그대로다
+  });
+  it('맞서는 문의 경지 문턱은 바다가 깊을수록 높고, 가장 센 상대는 6단계에서야 열린다', () => {
+    const gate = (turning: string) => {
+      const d = TURNING_BY_ID[turning].doors.find((x) => x.danger && x.fx.some((f) => f.op === 'fight'))!;
+      const c = d.when?.find((x) => x.c === 'tier');
+      return c && c.c === 'tier' ? c.min : 0;
+    };
+    expect(gate('meet_morgan')).toBeLessThan(gate('meet_smoker'));
+    expect(gate('meet_smoker')).toBeLessThan(gate('meet_kizaru'));
+    expect(gate('meet_kizaru')).toBeLessThan(gate('meet_fujitora'));
+    expect(gate('meet_akainu')).toBe(V.growth.maxTier);
+    expect(gate('meet_kaido')).toBe(V.growth.maxTier);
   });
 });

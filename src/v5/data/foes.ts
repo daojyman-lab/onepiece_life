@@ -1,9 +1,11 @@
 // 싸움의 상대. 이름 있는 상대는 v4의 해역 보스를 그대로 가리키고, 이름 없는 상대는 바다의 세기에 맞춰 만든다.
 import { BOSSES } from '../../data/bosses';
-import type { EnemySpec, Standing, Values } from '../core/types';
+import type { EnemySpec, SeaId, Standing, Values } from '../core/types';
 
 /** 이름 있는 상대: id → 상대. 약한 바다의 상대부터 */
 export const FOES: Record<string, EnemySpec> = Object.fromEntries(BOSSES.map((b) => [b.id, b]));
+/** 이름 있는 상대의 바다 (v4 보스가 나오는 첫 바다) */
+export const FOE_SEA: Record<string, SeaId> = Object.fromEntries(BOSSES.map((b) => [b.id, b.sea[0]]));
 
 /** 이름 없는 상대의 이름 */
 export const MINOR_FOE_NAMES: string[] = ['술 취한 깡패', '떠돌이 해적', '현상금 사냥꾼', '해군 졸병', '항구의 건달', '좀도둑 무리'];

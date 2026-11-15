@@ -10,8 +10,21 @@ export const BRANCH_ID: Record<Branch, BranchId> = {
   observation: 'haki.observation', armament: 'haki.armament', conqueror: 'haki.conqueror', fruit: 'fruit',
 };
 
-/** 대략의 힘: (상처와 몸을 반영한) 능력치 합 × (1 + 가장 높은 단계 × tierPower) */
+/** 단계의 힘 배율. 단계는 0~maxTier로 자르고, 소수 단계(상대의 패기를 단계로 바꾼 것)는 사이를 잇는다 */
+export function tierMult(tier: number): number {
+  const c = V.growth.tierCurve;
+  const t = Math.min(c.length - 1, Math.max(0, tier));
+  const lo = Math.floor(t);
+  return lo >= c.length - 1 ? c[c.length - 1] : c[lo] + (c[lo + 1] - c[lo]) * (t - lo);
+}
+
+/** 가장 높은 단계 */
+export function topTier(s: Life5): number {
+  return Math.max(...Object.values(s.growth.tier));
+}
+
+/** 대략의 힘: (상처와 몸을 반영한) 능력치 합 × 가장 높은 단계의 배율 */
 export function power5(s: Life5): number {
   const sum = Object.values(effectiveStats5(s)).reduce((a, b) => a + b, 0);
-  return sum * (1 + Math.max(...Object.values(s.growth.tier)) * V.growth.tierPower);
+  return sum * tierMult(topTier(s));
 }

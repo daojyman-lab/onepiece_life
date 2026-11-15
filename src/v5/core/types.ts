@@ -116,7 +116,10 @@ export type Pending5 =
   | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat' }
   | { kind: 'ending'; cause: string }
   | null;
-export interface Stats5 { stops: number; fights: number; wins: number; fortunes: number; limbsLost: number; years: number }
+export interface Stats5 {
+  stops: number; fights: number; wins: number; fortunes: number; limbsLost: number; years: number;
+  named: Record<string, { fights: number; wins: number }>;   // 이름 있는 상대와의 싸움, 상대의 바다(v4 보스의 sea)별
+}
 export interface Life5 {
   schema: 5;
   rng: { seed: number; cursor: number };
