@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, peopleView, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
 import type { BattleEvent } from '../../src/core/types';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { askFight } from '../../src/v5/core/fight';
@@ -141,12 +141,13 @@ describe('자동 전투 창', () => {
     const end = hpAt(b, b.events.length);
     expect(end.some((h) => h === 0) || s.pending.result === 'retreat').toBe(true);
     for (const e of b.events) { const t = battleLine(b, e); expect(t).not.toMatch(/undefined|\(이\)가|을\(를\)/); }
-    expect(resultLine(s.pending.result, false).length).toBeGreaterThan(0);
+    expect(resultLine(s.pending.result).length).toBeGreaterThan(0);
   });
   it('결과 줄과 모든 사건의 글', () => {
-    expect(resultLine('win', false)).toBe('이겼다.');
-    expect(resultLine('lose', true)).toBe('졌다.');
-    expect(resultLine('retreat', false)).toBe('물러났다.');
+    expect(resultLine.length).toBe(1);                                   // 결과 하나만 받는다
+    expect(resultLine('win')).toBe('이겼다.');
+    expect(resultLine('lose')).toBe('졌다.');
+    expect(resultLine('retreat')).toBe('물러났다.');
     const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
     askFight(s, Object.keys(FOES)[0], false, true);
     if (s.pending?.kind !== 'battle') throw new Error();
@@ -176,6 +177,13 @@ describe('말하는 사람', () => {
     if (s.pending?.kind !== 'door') throw new Error('문이 떠 있어야 한다');
     const sp = speakerOf(s, s.pending);
     expect(sp.name.length).toBeGreaterThan(0); expect(sp.who.key.length).toBeGreaterThan(0);
+  });
+  it('인연 목록의 줄은 사람마다 다른 id를 가진다', () => {
+    const s = autoplay5(3, 'random').s;
+    const v = peopleView(s);
+    expect(v.length).toBeGreaterThan(1);
+    expect(v.map((p) => p.id)).toEqual(s.people.map((p) => p.id));
+    expect(new Set(v.map((p) => p.id)).size).toBe(v.length);
   });
   it('주인공의 겉모습 열쇠는 인생마다 같다', () => {
     expect(heroWho5(newLife5(9)).key).toBe(heroWho5(newLife5(9)).key);
@@ -213,6 +221,13 @@ describe('도감과 명예의 전당', () => {
     expect(v.newCodex.length).toBeGreaterThan(0);                       // 첫 인생이면 새로 채운 것이 있다
     expect(endingView(s, recordLife(emptyMeta5(), s)).newCodex).toEqual([]);   // 이미 든 도감이면 없다
     for (const x of Object.values(s.values)) if (x > 0 && !Number.isInteger(x)) expect(JSON.stringify(v)).not.toContain(String(x));
+  });
+  it('엔딩 기록: 끝난 까닭이 없으면 그 줄을 뺀다', () => {
+    const s = autoplay5(21, 'random').s;
+    s.ended = { age: s.ended?.age ?? s.age, cause: '' };
+    const v = endingView(s, emptyMeta5());
+    expect(v.record.map((r) => r.value)).not.toContain('-');
+    expect(v.record.map((r) => r.label)).not.toContain('까닭');
   });
   it('엔딩의 끝은 명예의 전당과 같은 꼴이다', () => {
     const s = autoplay5(21, 'random').s;

@@ -198,6 +198,7 @@ function StoryPanel({ s }: { s: Life5 }) {
   const [onlyHeavy, setOnlyHeavy] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
+  const lastTop = useRef(0);
   const items = storyLines(s, st.shownId, onlyHeavy);
   const waiting = s.log.filter((l) => l.id > st.shownId).length;
   const newest = items.length ? items[items.length - 1].id : undefined;
@@ -210,7 +211,11 @@ function StoryPanel({ s }: { s: Life5 }) {
   const onScroll = () => {
     const el = box.current;
     if (!el) return;   // 휴대폰에서 탭을 바꾸는 순간 이야기 칸이 사라질 수 있다
-    stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    // 맨 아래 가까이면 다시 따라가고, 읽는 사람이 위로 올렸을 때만 따라가기를 멈춘다.
+    // (빠른 배속에서는 스크롤 사건이 오기 전에 새 줄이 붙어 틈이 벌어질 수 있으니 틈만 보고 멈추지 않는다)
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) stick.current = true;
+    else if (el.scrollTop < lastTop.current) stick.current = false;
+    lastTop.current = el.scrollTop;
   };
   const idle = st.settings.speed !== 0 && !st.reading && waiting === 0 && !s.pending;
   const status = st.settings.speed === 0 ? '❚❚ 정지 중 — ▶ 를 누르면 이야기가 이어진다'
@@ -266,8 +271,8 @@ function PeoplePanel({ s }: { s: Life5 }) {
     <Panel title="인연">
       <div class="stack">
         {people.length === 0 && <div class="soft">아무도 없다.</div>}
-        {people.map((p, i) => (
-          <div key={i} class={`row ${p.gone ? 'gone' : ''}`} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
+        {people.map((p) => (
+          <div key={p.id} class={`row ${p.gone ? 'gone' : ''}`} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Face who={p.who} size="sm" />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div><b>{p.name}</b></div>

@@ -84,7 +84,7 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
       </div>
       {done ? (
         <div class="battle5-end">
-          <div class="t14" style={{ textAlign: 'center' }}><b class={p.result === 'win' ? 'gold' : 'red'}>{resultLine(p.result, p.lethal)}</b> <span class="t9 soft">{b.round}합</span></div>
+          <div class="t14" style={{ textAlign: 'center' }}><b class={p.result === 'win' ? 'gold' : 'red'}>{resultLine(p.result)}</b> <span class="t9 soft">{b.round}합</span></div>
           <button class="btn gold block" onClick={() => dispatch({ type: 'answer', index: 0 })}>확인</button>
         </div>
       ) : (

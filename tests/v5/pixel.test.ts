@@ -1,6 +1,6 @@
 // tests/v5/pixel.test.ts
 import { describe as group, expect, it } from 'vitest';
-import { describe as desc } from '../../src/ui/pixel/pixelArt';
+import { attackArm, describe as desc } from '../../src/ui/pixel/pixelArt';
 import { heroWho5 } from '../../src/v5/ui/view';
 import { newLife5 } from '../../src/v5/core/state';
 
@@ -18,5 +18,12 @@ group('신체 손실의 겉모습', () => {
     const s = newLife5(1); const before = desc(heroWho5(s));
     s.hero.limbs.eyeL = 'lost'; const after = desc(heroWho5(s));
     expect({ ...after, body: undefined }).toEqual({ ...before, body: undefined });
+  });
+  it('공격하는 팔: 왼팔이 있으면 왼팔, 왼팔만 잃으면 오른팔, 둘 다 잃으면 없다', () => {
+    expect(attackArm({})).toBe('armL');
+    expect(attackArm({ armL: 'basic' })).toBe('armL');
+    expect(attackArm({ armL: 'lost' })).toBe('armR');
+    expect(attackArm({ armL: 'lost', armR: 'superior' })).toBe('armR');
+    expect(attackArm({ armL: 'lost', armR: 'lost' })).toBeNull();
   });
 });

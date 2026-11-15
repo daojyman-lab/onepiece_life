@@ -222,6 +222,12 @@ export function faceURL(w: Who): string {
 }
 
 const bodyCache = new Map<string, HTMLCanvasElement>();
+/** 공격 자세에서 뻗는 팔: 왼팔(armL)이 있으면 왼팔, 왼팔만 잃었으면 오른팔, 두 팔을 다 잃었으면 없다 */
+export function attackArm(body: BodyMark): 'armL' | 'armR' | null {
+  if (body.armL !== 'lost') return 'armL';
+  return body.armR !== 'lost' ? 'armR' : null;
+}
+
 export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCanvasElement {
   if (w.form === 'seaking') {
     const k = 'seaking|' + w.key + '|' + frame;
@@ -270,32 +276,37 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
     if (st === 'superior') r(ax, torsoTop + 2, 2, 1, GOLD);                                          // 금색 테
     r(ax, torsoTop + torsoH - 2, 2, 1, m[0]);
   };
-  arm(2, cl, body.armR);
-  const armL = body.armL, mL = metal(armL);
+  const armL = body.armL;
+  const atk = pose === 'attack' ? attackArm(body) : null;
+  // 왼팔을 잃으면 오른팔이 가슴을 가로질러 뻗는다: 오른팔은 옆에 그리지 않고, 한 줄 낮게 몸 앞을 지난다
+  const cross = atk === 'armR';
+  if (!cross) arm(2, cl, body.armR);
+  const atkSt = cross ? body.armR : armL, mL = metal(atkSt);
   const handL = mL ? mL[0] : sk;
+  const ay = cross ? torsoTop + 2 : torsoTop;          // 뻗은 팔의 높이
+  const sx = cross ? 3 : 12, sleeve = cross ? clS : cl; // 소매가 시작하는 곳 · 몸 앞을 지나는 소매는 그늘색
   /** 뻗은 팔의 손목 쪽 한 칸: 의수는 팔 색, 강철 팔은 금색 테 */
-  const wristL = (wx: number) => { if (mL) r(wx, torsoTop + 1, 1, 2, armL === 'superior' ? GOLD : mL[1]); };
+  const wristL = (wx: number) => { if (mL) r(wx, ay + 1, 1, 2, atkSt === 'superior' ? GOLD : mL[1]); };
   // 평소 모습: 등 뒤 칼집 · 허벅지 권총집
   if (pose !== 'attack' && !child) {
     if (wp === 'sword') { r(1, torsoTop - 2, 1, 2, '#c8a040'); r(1, torsoTop, 1, torsoH + 3, '#3a2a40'); r(0, torsoTop + 1, 1, torsoH + 1, '#5a4466'); }
     if (wp === 'gun') { r(11, legsTop, 2, 3, '#4a3020'); r(11, legsTop - 1, 1, 1, '#7a7a88'); }
   }
-  if (armL === 'lost') {
-    // 공격하는 팔이 없다: 자세와 상관없이 빈 소매 끝만 (공격 효과는 장면이 그린다)
-    arm(12, clS, armL);
-  } else if (pose === 'attack' && wp === 'fist') {
+  // 잃은 왼팔은 자세와 상관없이 빈 소매 끝만 (두 팔을 다 잃으면 공격 효과는 장면이 그린다)
+  if (armL === 'lost') arm(12, clS, armL);
+  if (atk && wp === 'fist') {
     // 곧게 뻗은 주먹
-    r(12, torsoTop + 1, 4, 2, cl); wristL(15);
-    r(16, torsoTop, 3, 4, mL ? mL[0] : wrap); r(18, torsoTop + 1, 1, 2, mL ? mL[1] : skS); r(16, torsoTop + 1, 1, 1, mL ? mL[1] : skS);
-  } else if (pose === 'attack' && wp === 'gun') {
+    r(sx, ay + 1, 16 - sx, 2, sleeve); wristL(15);
+    r(16, ay, 3, 4, mL ? mL[0] : wrap); r(18, ay + 1, 1, 2, mL ? mL[1] : skS); r(16, ay + 1, 1, 1, mL ? mL[1] : skS);
+  } else if (atk && wp === 'gun') {
     // 팔을 뻗어 권총을 겨눈다
-    r(12, torsoTop + 1, 3, 2, cl); wristL(14); r(15, torsoTop + 1, 1, 2, handL);
-    r(15, torsoTop + 2, 1, 2, '#5a3a22'); r(15, torsoTop, 4, 2, '#4a4a56'); r(16, torsoTop, 3, 1, '#8a8a96');
-  } else if (pose === 'attack') {
+    r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);
+    r(15, ay + 2, 1, 2, '#5a3a22'); r(15, ay, 4, 2, '#4a4a56'); r(16, ay, 3, 1, '#8a8a96');
+  } else if (atk) {
     // 칼을 치켜든다 (무기가 정해지지 않았으면 칼)
-    r(12, torsoTop + 1, 3, 2, cl); wristL(14); r(15, torsoTop + 1, 1, 2, handL);
-    r(15, torsoTop + 3, 3, 1, '#c8a040'); r(16, torsoTop - 5, 1, 8, '#e4ecf4'); r(17, torsoTop - 4, 1, 6, '#b0bccc');
-  } else arm(12, clS, armL);
+    r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);
+    r(15, ay + 3, 3, 1, '#c8a040'); r(16, ay - 5, 1, 8, '#e4ecf4'); r(17, ay - 4, 1, 6, '#b0bccc');
+  } else if (armL !== 'lost') arm(12, clS, armL);
   r(4, headTop, 8, 7, sk); r(3, headTop + 1, 10, 5, sk); r(11, headTop + 2, 2, 4, skS);
   r(6, headTop + 3, 1, 2, '#1c1420'); r(10, headTop + 3, 1, 2, '#1c1420');
   // 눈: 오른눈(eyeR)은 보는 이의 왼쪽(x=6), 왼눈(eyeL)은 보는 이의 오른쪽(x=10)

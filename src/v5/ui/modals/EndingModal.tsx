@@ -46,7 +46,12 @@ export function EndingModal({ s, meta }: { s: Life5; meta: Meta5 }) {
             <b>가지 않은 길</b>
             {v.unchosen.map((u, i) => <div key={i} class="t9">{u}</div>)}
             {v.secret && <div class="t9">{v.secret}</div>}
-            {v.newCodex.length > 0 && <div class="t9"><span class="soft">도감에 새로 채운 것 ({v.newCodex.length}):</span> {v.newCodex.join(', ')}</div>}
+            {v.newCodex.length > 0 && (
+              <details class="t9">
+                <summary><span class="soft">도감에 새로 채운 것</span> {v.newCodex.length}가지</summary>
+                {v.newCodex.map((c, i) => <div key={i}>{c}</div>)}
+              </details>
+            )}
           </section>
         )}
         <details>
