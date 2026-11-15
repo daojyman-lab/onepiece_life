@@ -85,7 +85,8 @@ describe('싸움', () => {
     let s = fighter(7, 6); addValues(s, { dominion: 90 });
     for (let i = 0; i < 200; i++) { s = reduce5({ ...s, pending: null }, { type: 'step' }); s.hero.standing = 'pirate'; }
     expect(s.stats.fights).toBeGreaterThan(0);
-    expect(s.hero.alive).toBe(true);
+    // 50년을 돌리므로 노환이나 병으로 끝날 수는 있다. 싸움으로 끝나서는 안 된다.
+    if (s.ended) expect(s.ended.cause).not.toMatch(/에게 쓰러졌다/);
     expect(s.stats.limbsLost).toBe(0);
     expect(Object.values(s.hero.limbs).every((l) => l === 'ok')).toBe(true);
   });
