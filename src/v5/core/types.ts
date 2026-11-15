@@ -61,6 +61,7 @@ export type Fx =
   | { op: 'fame'; add: number }
   | { op: 'rank'; add: number }
   | { op: 'standing'; to: Standing }
+  | { op: 'wealth'; to: Wealth }                         // 집안 형편이 바뀐다 (몰락 등)
   | { op: 'move'; island: string; sea: SeaId }
   | { op: 'mastery'; branch: Branch; add: number }
   | { op: 'tier'; branch: Branch; to: number }

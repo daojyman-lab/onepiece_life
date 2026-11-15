@@ -1,7 +1,8 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { FIRST_NAMES } from '../../data/births';
+import { FRUIT_BY_ID, FRUITS } from '../../data/fruits';
 import { BRANCH_NAMES } from '../../data/skills';
-import { chance, pick, rngOf } from '../../core/rng';
+import { chance, pick, rngOf, weighted } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { STRENGTHS } from '../data/strengths';
@@ -107,8 +108,20 @@ function applyOne(s: Life5, e: Fx): void {
     case 'prosthetic': fitProsthetic(s, e.grade); return;
     // 이미 앓는 병이 있으면 새로 걸리지 않는다. 진행과 치료는 risk.ts의 partRisks가 맡는다
     case 'illness': if (!h.illness) h.illness = { id: e.id, stage: 1, months: 0 }; return;
-    // 뒤 과제가 채운다 (열매). 그때까지는 아무 일도 없다
-    case 'eatFruit':
-      return;
+    case 'wealth': h.wealth = e.to; return;
+    case 'eatFruit': eatFruit(s, e.id); return;
   }
+}
+
+/** 악마의 열매를 먹는다. 'random'이면 낮은 등급 쪽으로 기울여 원작 인물의 것이 아닌 열매를 고른다. 이미 능력자면 아무 일도 없다 */
+function eatFruit(s: Life5, id: string): void {
+  if (s.hero.fruit) return;
+  const W = V.fruit.gradeWeight;
+  const f = id === 'random'
+    ? weighted(rngOf(s.rng), FRUITS.filter((x) => x.canonUser === null), (x) => W[x.grade])
+    : FRUIT_BY_ID[id];
+  if (!f) return;
+  s.hero.fruit = { id: f.id, eatenAt: s.age };
+  s.growth.tier.fruit = Math.max(s.growth.tier.fruit, 1);
+  logLine(s, `${f.name}을(를) 삼켰다. 몸속에서 낯선 힘이 꿈틀거린다. 다시는 헤엄칠 수 없다.`, 'heavy', 'growth');
 }

@@ -38,15 +38,20 @@ export const V = {
            passiveScale: { base: 0.7, span: 0.6 },   // 패시브 기술의 효과 = 값 × (base + span × 숙련/100), v4와 같다
            hakiLevelPer: 2, hakiLevelMax: 3,  // 전투의 패기 레벨 = min(3, ⌊단계 / 2⌋)
            retreat: { calm: 0.5, usual: 0.3, never: 0 },
-           famePerPower: 0.1, minorFame: 1 },
+           famePerPower: 0.1, minorFame: 1,
+           dangerKidAge: 15 },                // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
+  adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
+  fame: { bounty: 1000000 },                   // 명성 1 = 현상금(해군은 공적) 100만 베리
+  // 아무 열매나 먹을 때 등급(1 쓰레기 ~ 5 전설)마다 뽑힐 가중치. 원작 인물의 열매는 뽑지 않는다
+  fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 } },
   injury: { months: { light: 3, heavy: 9, scar: 0 }, monthsPerPart: 3,   // 흉터(scar)는 낫지 않는다
             statMult: { light: 0.95, heavy: 0.8 },   // 낫지 않은 상처 하나마다 모든 능력치에 곱한다
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
-  risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 3000,
+  risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0025, oldFrom: 60, oldK: 0.0015, treatCost: 3000,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
-          monthsPerPart: 3, worsenMonths: 6,   // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
+          monthsPerPart: 3, worsenMonths: 9,   // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
           maxStage: 3,
           // 사고는 바다 위의 처지에서만
           seaStandings: ['pirate', 'marine', 'revolution', 'bountyHunter', 'warlord'],

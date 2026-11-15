@@ -178,7 +178,15 @@ function nextPart(s: Life5): void {
   s.stopsThisYear = 0;
   s.stats.years += 1;
   logLine(s, `── ${s.age}살 ──`, 'year', 'info');
+  comeOfAge(s);
   masterYear(s);
+}
+
+/** 아직 아이로 남은 사람은 어른이 되는 해에 저절로 뭍의 어른(civil)이 된다. 이제 제 밥벌이는 스스로 한다 */
+function comeOfAge(s: Life5): void {
+  if (s.hero.standing !== 'child' || s.age < V.adultAge) return;
+  s.hero.standing = 'civil';
+  logLine(s, `${s.hero.name}은(는) 어느덧 어른이 되었다. 이제 제 앞가림은 스스로 해야 한다.`, 'heavy', 'life');
 }
 
 /** 스승과 함께한 해를 하나 줄인다. 다 채우면 스승은 떠난다. */

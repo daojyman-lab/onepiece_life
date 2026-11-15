@@ -4,12 +4,16 @@ import { CHILDHOOD } from './childhood';
 import { FORTUNES } from './fortunes';
 import { MISFORTUNES } from './misfortunes';
 import { MOMENTS } from './moments';
+import { PATHS } from './paths';
+import { PEOPLE } from './people';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
   FORTUNES,
   MISFORTUNES,
   MOMENTS,
+  PATHS,
+  PEOPLE,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();
