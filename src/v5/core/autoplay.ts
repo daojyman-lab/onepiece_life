@@ -5,11 +5,15 @@ import { TURNING_BY_ID } from '../data/turnings';
 import { BACK_OFF, ENGAGE } from './fight';
 import { apply5, invariants5 } from './reduce';
 import { newLife5 } from './state';
-import { topValues } from './values';
+import { leanPick, topValues } from './values';
+import { VALUE_IDS } from '../data/values';
 import type { Life5, Lineage, ValueId, Wealth } from './types';
 
-/** random 열린 문 가운데 고르게, first 첫 번째 열린 문, value 그 가치관을 올리는 문을 먼저 */
-export type Policy = 'random' | 'first' | { value: ValueId };
+/**
+ * random 열린 문 가운데 고르게, first 첫 번째 열린 문, value 그 가치관을 올리는 문을 먼저,
+ * lean 사람처럼: 열린 문마다 V.value.leanBase + Σ(그 문의 가치관 점수 × 지금 내 점수)의 가중치로 뽑는다. 싸움은 반반.
+ */
+export type Policy = 'random' | 'first' | 'lean' | { value: ValueId };
 
 const MAX_STEPS = 20000;
 /** 정책의 난수 씨앗을 인생의 씨앗과 갈라놓는 수 */
@@ -17,20 +21,21 @@ const POLICY_SALT = 0x5eed;
 const FIGHTERS: readonly ValueId[] = ['dominion', 'ambition'];
 
 /** 떠 있는 일에 정책이 내놓는 답 */
-function choose(s: Life5, policy: Policy, r: Rng): number {
+export function choose(s: Life5, policy: Policy, r: Rng): number {
   const p = s.pending;
   if (p?.kind === 'door') {
     const open = p.doors.map((d, i) => (d.locked ? -1 : i)).filter((i) => i >= 0);
     if (policy === 'first') return open[0];
     if (policy === 'random') return pick(r, open);
     const doors = TURNING_BY_ID[p.turning]?.doors;
+    if (policy === 'lean') return leanPick(s, r, open, (i) => doors?.[i]?.values ?? {}) ?? pick(r, open);
     const gain = (i: number) => doors?.[i]?.values?.[policy.value] ?? 0;
     const best = Math.max(...open.map(gain));
     return pick(r, best > 0 ? open.filter((i) => gain(i) === best) : open);
   }
   if (p?.kind === 'fight') {
     if (policy === 'first') return ENGAGE;
-    if (policy !== 'random') {
+    if (typeof policy === 'object') {
       if (FIGHTERS.includes(policy.value)) return ENGAGE;
       if (policy.value === 'peace') return BACK_OFF;
     }
@@ -82,6 +87,45 @@ export interface Report {
   youngRiskDeath: number;                      // 40세 전에 병 · 사고 · 굶주림으로 죽은 비율
   /** 이름 있는 상대와의 싸움: 모두 합한 수와 이긴 비율, 상대의 바다별 */
   named: { fights: number; winRate: number; bySea: Record<string, { fights: number; winRate: number }> };
+  stopsByBand: { kid: number; youth: number; later: number };   // 한 해의 멈춤: 3~15살, 16~35살, 36살 이후
+  maxSeen: { p50: number; p95: number; max: number };            // 한 인생에서 같은 전환점이 가장 많이 열린 횟수
+  distinct: number;                                              // 한 인생에 열린 서로 다른 전환점의 평균
+  emptyPool: number;                                             // 멈추려 했는데 띄울 전환점이 없던 비율
+  namedLives: number;                                            // 이름 있는 상대와 한 번이라도 마주친 인생의 비율
+  ruined: number;                                                // 가난하지 않게 태어난 인생 가운데 집안이 몰락한 비율
+  topShare: Record<ValueId, number>;                             // 1위 가치관의 비율
+  quietYears: number;                                            // 16살 이후 멈춤이 한 번도 없던 해의 비율
+}
+
+/** 나이대 [lo, hi]. 인생이 끝난 나이까지(그 해도 넣어) 센다 */
+const BANDS = { kid: [3, 15], youth: [16, 35], later: [36, Infinity] } as const;
+const WEALTH_ORDER: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
+const endAge = (s: Life5) => s.ended?.age ?? s.age;
+const yearsIn = (s: Life5, lo: number, hi: number) => Math.max(0, Math.min(hi, endAge(s)) - lo + 1);
+
+function stopsByBandOf(lives: Life5[]): Report['stopsByBand'] {
+  const out = { kid: 0, youth: 0, later: 0 };
+  for (const k of Object.keys(BANDS) as (keyof typeof BANDS)[]) {
+    const [lo, hi] = BANDS[k];
+    let stops = 0, years = 0;
+    for (const s of lives) {
+      years += yearsIn(s, lo, hi);
+      for (const a of s.stats.stopsAt) if (a >= lo && a <= hi) stops += 1;
+    }
+    out[k] = stops / Math.max(1, years);
+  }
+  return out;
+}
+
+function quietYearsOf(lives: Life5[]): number {
+  const lo = BANDS.youth[0];
+  let quiet = 0, years = 0;
+  for (const s of lives) {
+    const y = yearsIn(s, lo, Infinity);
+    years += y;
+    quiet += y - new Set(s.stats.stopsAt.filter((a) => a >= lo)).size;
+  }
+  return quiet / Math.max(1, years);
 }
 
 function namedOf(lives: Life5[]): Report['named'] {
@@ -113,6 +157,10 @@ export function summarize(lives: Life5[]): Report {
   for (const w of Object.values(tierByWealth)) { w.t4 /= w.n; w.t6 /= w.n; }
   const lost = lives.filter((s) => s.stats.limbsLost > 0);
   const lostAt = (s: Life5) => s.timeline.find((t) => /잃었다/.test(t.text))?.age ?? 0;
+  const maxSeen = lives.map((s) => Math.max(0, ...Object.values(s.seenCount))).sort((a, b) => a - b);
+  const notPoor = lives.filter((s) => s.hero.bornWealth !== 'poor');
+  const tops = lives.map((s) => topValues(s, 1)[0]);
+  const sum = (f: (s: Life5) => number) => lives.reduce((a, s) => a + f(s), 0);
   return {
     n: lives.length,
     ages: { p10: pct(ages, 0.1), p50: pct(ages, 0.5), p90: pct(ages, 0.9) },
@@ -126,5 +174,14 @@ export function summarize(lives: Life5[]): Report {
     limbLived10: lost.filter((s) => (s.ended?.age ?? s.age) - lostAt(s) > 10).length / Math.max(1, lost.length),
     youngRiskDeath: lives.filter((s) => s.ended && s.ended.age < YOUNG_AGE && RISK_CAUSES.includes(s.ended.cause)).length / n,
     named: namedOf(lives),
+    stopsByBand: stopsByBandOf(lives),
+    maxSeen: { p50: pct(maxSeen, 0.5), p95: pct(maxSeen, 0.95), max: maxSeen[maxSeen.length - 1] ?? 0 },
+    distinct: avg((s) => Object.values(s.seenCount).filter((c) => c > 0).length),
+    emptyPool: sum((s) => s.stats.emptyStops) / Math.max(1, sum((s) => s.stats.stopTries)),
+    namedLives: lives.filter((s) => s.stats.namedMet > 0).length / n,
+    ruined: notPoor.filter((s) => WEALTH_ORDER.indexOf(s.hero.wealth) < WEALTH_ORDER.indexOf(s.hero.bornWealth)).length
+      / Math.max(1, notPoor.length),
+    topShare: Object.fromEntries(VALUE_IDS.map((id) => [id, tops.filter((t) => t === id).length / n])) as Record<ValueId, number>,
+    quietYears: quietYearsOf(lives),
   };
 }

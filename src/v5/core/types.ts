@@ -28,6 +28,7 @@ export interface Hero5 {
   money: number; fame: number; rank: number;
   standing: Standing; island: string; sea: SeaId;
   alive: boolean;
+  bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
 }
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
@@ -131,6 +132,10 @@ export type Pending5 =
 export interface Stats5 {
   stops: number; fights: number; wins: number; fortunes: number; limbsLost: number; years: number;
   named: Record<string, { fights: number; wins: number }>;   // 이름 있는 상대와의 싸움, 상대의 바다(v4 보스의 sea)별
+  stopsAt: number[];                           // 문을 고른(멈춘) 나이들, 멈출 때마다 하나씩
+  stopTries: number;                           // 한 해의 진행이 멈추려 한 횟수
+  emptyStops: number;                          // 그 가운데 띄울 전환점이 없던 횟수
+  namedMet: number;                            // 이름 있는 상대와 마주친 횟수 (싸웠든 물러났든)
 }
 export interface Life5 {
   schema: 5;

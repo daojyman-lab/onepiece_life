@@ -202,6 +202,7 @@ function startFight(s: Life5, foe: EnemySpec, lethal: boolean): void {
 export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean): void {
   const known = FOES[foeId];
   if (!known) return;
+  if (FOE_SEA[foeId]) s.stats.namedMet += 1;   // 마주친 것만으로 센다 (물러나도)
   const foe = scaleFoe(structuredClone(known), foeId);
   if (forced) { startFight(s, foe, lethal); return; }
   s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal) };

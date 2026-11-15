@@ -29,6 +29,16 @@ describe('저장 읽기', () => {
     expect(fixed.stats.named).toEqual({});
     expect(() => reduce5(fixed, { type: 'answer', index: 0 })).not.toThrow();
   });
+  it('시뮬레이터의 칸이 없는 옛 저장: 멈춘 나이 · 횟수는 비우고, 태어난 형편은 지금의 형편으로', () => {
+    const s = JSON.parse(JSON.stringify(newLife5(1)));
+    s.hero.wealth = 'noble';
+    delete s.stats.stopsAt; delete s.stats.stopTries; delete s.stats.emptyStops; delete s.stats.namedMet; delete s.hero.bornWealth;
+    const f = normalizeLife5(s)!;
+    expect(f.stats.stopsAt).toEqual([]);
+    expect(f.stats.stopTries).toBe(0); expect(f.stats.emptyStops).toBe(0); expect(f.stats.namedMet).toBe(0);
+    expect(f.hero.bornWealth).toBe('noble');
+    expect(() => reduce5(f, { type: 'answer', index: 0 })).not.toThrow();
+  });
   it('인생이 아닌 것과 깨진 것은 null', () => {
     for (const x of [null, 3, 'x', {}, { schema: 1 }, { schema: 6 }]) expect(normalizeLife5(x)).toBeNull();
     const bad = JSON.parse(JSON.stringify(newLife5(1))); bad.hero.hp = -5;

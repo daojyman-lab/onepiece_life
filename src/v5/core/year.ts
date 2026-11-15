@@ -64,8 +64,9 @@ function yearTurn(s: Life5, r: Rng): void {
 /** 멈출 차례면 전환점 하나를 띄운다 */
 function turningPoint(s: Life5, r: Rng): void {
   if (s.pending || !wantsStop(s, r)) return;
+  s.stats.stopTries += 1;
   const t = pickTurning(s, r);
-  if (t) openTurning(s, t);
+  if (!(t && openTurning(s, t))) s.stats.emptyStops += 1;   // 멈추려 했는데 띄울 것이 없었다
 }
 
 /** 이 토막에 인물이 한 일. 기본 가중치에 가치관(점수 × 계수)과 처지가 더한다. */

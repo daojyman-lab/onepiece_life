@@ -166,6 +166,7 @@ export function answerDoor(s: Life5, index: number): void {
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
   s.stats.stops += 1;
+  s.stats.stopsAt.push(s.age);
   s.stopsThisYear += 1;
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다

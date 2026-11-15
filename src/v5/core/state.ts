@@ -46,6 +46,7 @@ export function emptyLife(seed: number): Life5 {
       money: 0, fame: 0, rank: 0,
       standing: 'child', island: '', sea: 'east',
       alive: true,
+      bornWealth: 'common',
     },
     growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null },
     values, strengths: [], marks: {},
@@ -56,7 +57,7 @@ export function emptyLife(seed: number): Life5 {
     unchosen: [], tried: [], known: [],
     log: [], timeline: [],
     pending: null,
-    stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {} },
+    stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {}, stopsAt: [], stopTries: 0, emptyStops: 0, namedMet: 0 },
     seq: 0,
     ended: null,
   };
@@ -73,6 +74,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   s.known = [...(opt.known ?? [])];
   rollBirth(s, opt);
   const h = s.hero;
+  h.bornWealth = h.wealth;
   const r = rngOf(s.rng);
   const born = h.lineage === 'orphan'
     ? `${pick(r, ORPHAN_STORIES).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
