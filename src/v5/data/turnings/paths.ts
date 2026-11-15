@@ -122,7 +122,7 @@ export const PATHS: Turning[] = [
       { label: '말단 수병으로 지원한다', hint: '바닥부터 구른다', values: { justice: D },
         fx: [{ op: 'standing', to: 'marine' }, { op: 'log', text: '흰 제복을 받았다. 말단 수병의 하루가 시작되었다.', weight: 'heavy' }, { op: 'timeline', text: '해군에 입대했다' }] },
       { label: '입학금을 내고 사관학교에 들어간다', hint: '장교의 길이 열린다', when: [{ c: 'money', min: ACADEMY_FEE }], values: { ambition: D },
-        fx: [{ op: 'money', add: -ACADEMY_FEE }, { op: 'standing', to: 'marine' }, { op: 'rank', add: 1 },
+        fx: [{ op: 'money', add: -ACADEMY_FEE }, { op: 'standing', to: 'marine' }, { op: 'rank', add: 1 }, { op: 'flag', id: 'mnOfficer' }, { op: 'flag', id: 'mnBoot' },
              { op: 'master', name: '사관학교 교관', branch: 'sword', cap: V.growth.paidCap, years: 3, paid: true }, { op: 'timeline', text: '해군 사관학교에 들어갔다' }] },
       { label: '지원서를 구겨 버린다', hint: '누구의 명령도 받지 않는다', values: { freedom: D }, fx: [] },
     ],
@@ -135,7 +135,7 @@ export const PATHS: Turning[] = [
     title: '가문의 추천장', body: '모병관이 {name}의 집을 따로 찾아왔다. 해군에 몸담았던 집안의 이름으로 사관학교 추천장을 써 주겠다고 한다.',
     doors: [
       { label: '가문의 추천장으로 사관학교에 들어간다', hint: '아버지의 이름이 문을 열어 준다', when: [{ c: 'lineage', is: ['marineFamily'] }], values: { loyalty: D },
-        fx: [{ op: 'standing', to: 'marine' }, { op: 'rank', add: 1 },
+        fx: [{ op: 'standing', to: 'marine' }, { op: 'rank', add: 1 }, { op: 'flag', id: 'mnOfficer' }, { op: 'flag', id: 'mnBoot' },
              { op: 'master', name: '사관학교 교관', branch: 'sword', cap: V.growth.paidCap, years: 3, paid: true }, { op: 'timeline', text: '가문의 추천으로 사관학교에 들어갔다' }] },
       { label: '추천장을 돌려보낸다', hint: '집안의 이름에 기대지 않고 제 길을 찾는다', values: { freedom: D }, fx: [], closes: true },
     ],
@@ -188,7 +188,7 @@ export const PATHS: Turning[] = [
     title: '존재하지 않는 기관', body: '이름 없는 감찰관이 {name}을(를) 밀실로 부른다. 존재하지 않는 기관에서 일해 보지 않겠느냐고, 무엇을 보든 입을 다물 수 있겠느냐고.',
     doors: [
       { label: '어둠 속의 첩보원이 된다', hint: '이름을 지우고 명령만 따른다', values: { ambition: D },
-        fx: [{ op: 'standing', to: 'cp' }, { op: 'master', name: '첩보 기관의 교관', branch: 'fist', cap: 4, years: 4, paid: false },
+        fx: [{ op: 'standing', to: 'cp' }, { op: 'flag', id: 'cpNew' }, { op: 'master', name: '첩보 기관의 교관', branch: 'fist', cap: 4, years: 4, paid: false },
              { op: 'timeline', text: '정부의 첩보 기관에 들어갔다' }] },
       { label: '바다의 해군으로 남는다', hint: '제복을 입은 채로 싸운다', values: { justice: D }, fx: [] },
       { label: '밀실에서 들은 것을 신문사에 흘린다', hint: '정부의 눈 밖에 난다', values: { freedom: D }, danger: true,
@@ -202,7 +202,7 @@ export const PATHS: Turning[] = [
     title: '정의의 정점', body: '{name}의 공적이 해군 역사상 가장 높은 자리에 닿았다. 본부의 전령이 원수의 망토를 들고 찾아온다.',
     doors: [
       { label: '원수의 망토를 걸친다', hint: '바다의 모든 해군이 그 명령을 따른다', values: { justice: D },
-        fx: [{ op: 'flag', id: 'apex' }, { op: 'rank', add: 3 }, { op: 'fame', add: 500 },
+        fx: [{ op: 'flag', id: 'apex' }, { op: 'rank', add: 3 }, { op: 'flag', id: 'mnOfficer' }, { op: 'fame', add: 500 },
              { op: 'log', text: '{name}은(는) 해군의 정점에 섰다.', weight: 'heavy' }, { op: 'timeline', text: '해군 원수가 되었다' }] },
       { label: '망토를 돌려보내고 현장에 남는다', hint: '자리는 사양해도 이름은 남는다', values: { loyalty: D },
         fx: [{ op: 'flag', id: 'apex' }, { op: 'log', text: '원수의 자리를 사양했다. 그래도 바다는 {name}을(를) 해군의 정점으로 기억했다.', weight: 'heavy' },
