@@ -17,6 +17,7 @@ import { CANON_EAST } from './canon';
 import { CANON_SEA } from './canon-2';
 import { SEA_LEAVE, SEA_RETURN } from './sea';
 import { SEA_GRAND_LINE, SEA_NEW_WORLD } from './sea-2';
+import { LATE } from './late';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -38,6 +39,7 @@ const GROUPS: Turning[][] = [
   SEA_RETURN,
   SEA_GRAND_LINE,
   SEA_NEW_WORLD,
+  LATE,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();

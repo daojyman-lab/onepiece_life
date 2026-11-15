@@ -118,4 +118,70 @@ export const FORTUNES: Turning[] = [
       decline('가르침을 받지 않는다', '바람 소리는 혼자서도 들을 수 있다'),
     ],
   }),
+
+  // ---------------------------------------------------------------- 과제 11: 가치관마다 둘 (서른여섯 이후에도 온다)
+  fortune('fortune_wronged_officer', 'justice', {
+    speaker: { relation: '누명 쓴 장교의 후손' },
+    title: '가라앉은 증거', body: '오래전 누명을 쓰고 처형된 해군 장교의 후손이 {name}을(를) 찾아왔다. 바다에 가라앉은 전함에 그 일을 뒤집을 장부가 있다고, 옳은 일에서 물러선 적 없는 사람에게만 부탁한다고 한다.',
+    doors: [
+      { label: '장부를 건져 달라는 부탁을 받는다', hint: '세상이 묻어 둔 일을 바로잡는다. 그 장교가 남긴 검술 비망록도 함께 나온다', values: { justice: D },
+        fx: [{ op: 'fame', add: 40 }, { op: 'tier', branch: 'sword', to: LEAP }, { op: 'timeline', text: '누명 쓴 장교의 장부를 건져 세상에 알렸다' }] },
+      decline('부탁을 받지 않는다', '가라앉은 것은 가라앉은 대로 둔다'),
+    ],
+  }),
+  fortune('fortune_legend_duel', 'ambition', {
+    speaker: { relation: '전설의 검객' },
+    title: '정점의 초대', body: '세상에 이름이 자자한 늙은 검객이 {name}의 승부 기록을 품에 넣고 찾아왔다. 제 검을 완성할 마지막 상대를 찾고 있다고, 이기든 지든 가진 것을 모두 보여 주겠다고 한다.',
+    doors: [
+      { label: '검객의 초대를 받는다', hint: '사흘 밤낮을 겨루며 정점의 검을 몸으로 익힌다. 돈으로는 들일 수 없는 스승이다', values: { ambition: D },
+        fx: [{ op: 'master', name: '전설의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'hp', add: -20 }] },
+      decline('초대를 받지 않는다', '제 검은 제가 완성하겠다고 답한다'),
+    ],
+  }),
+  fortune('fortune_troupe', 'romance', {
+    speaker: { relation: '유랑 악단의 단장' },
+    title: '꿈의 무대', body: '오래 사라졌던 유랑 악단의 단장이 {name}을(를) 찾아왔다. 바다를 떠돌며 꿈을 좇던 사람들의 노래를 모으고 있다며, 마지막 노래의 주인공이 되어 달라고 한다.',
+    doors: [
+      { label: '노래의 주인공 자리를 받는다', hint: '악단과 한 철을 떠돈다. 노래가 온 바다에 퍼지고, 이상하게 운이 따른다', values: { romance: D },
+        fx: [{ op: 'fame', add: 60 }, { op: 'base', key: 'luk', add: 4 }, { op: 'base', key: 'wil', add: 2 }, { op: 'timeline', text: '유랑 악단의 노래 속 주인공이 되었다' }] },
+      decline('주인공 자리를 받지 않는다', '제 이야기는 아직 끝나지 않았다'),
+    ],
+  }),
+  fortune('fortune_oath_witness', 'loyalty', {
+    speaker: { relation: '옛 전우의 후손' },
+    title: '맹세의 증인', body: '오래전 함께 싸운 전우의 후손들이 {name}을(를) 섬 하나로 안내했다. 전우가 남긴 수련장이 있다고, 약속을 끝까지 지킨 사람에게만 열어 주라는 유언이 있었다고 한다.',
+    doors: [
+      { label: '수련장의 열쇠를 받는다', hint: '전우가 평생 다듬은 기운을 물려받는다', values: { loyalty: D },
+        fx: [{ op: 'tier', branch: 'armament', to: LEAP }, { op: 'base', key: 'vit', add: 2 }, { op: 'log', text: '수련장 벽에 새겨진 이름들 맨 끝에 {name}의 이름이 새겨졌다.', weight: 'heavy' }] },
+      decline('열쇠를 받지 않는다', '그 수련장은 후손들의 것으로 둔다'),
+    ],
+  }),
+  fortune('fortune_unnamed_route', 'freedom', {
+    speaker: { relation: '정체 모를 항해사' },
+    title: '기록되지 않은 항로', body: '어느 깃발 아래에도 없는 항해사가 {name}의 배에 올라 해도 한 장을 펼친다. 해군의 눈도 사황의 손도 닿지 않는 항로라고, 누구에게도 매이지 않는 사람에게만 준다고 한다.',
+    doors: [
+      { label: '해도를 받는다', hint: '바다를 읽는 눈이 단번에 트인다. 쫓는 자들을 따돌릴 수 있다', values: { freedom: D },
+        fx: [{ op: 'tier', branch: 'observation', to: LEAP }, { op: 'flag', id: 'secretRoute' }, { op: 'base', key: 'spd', add: 2 }] },
+      decline('해도를 받지 않는다', '길은 제 눈으로 찾겠다'),
+    ],
+  }),
+  fortune('fortune_kings_heir', 'dominion', {
+    when: [{ c: 'secret', known: false }],
+    speaker: { relation: '옛 왕가의 가신' },
+    title: '왕의 유산', body: '늙은 가신이 {name} 앞에 무릎을 꿇었다. 바다를 다스렸던 옛 왕가의 피가 흐른다고, 그 증표를 오래 찾아왔다고 한다. 가신이 낡은 문장을 내민다.',
+    doors: [
+      { label: '옛 왕가의 증표를 받는다', hint: '잃어버린 성을 알게 된다. 그 피를 따르는 자들이 생긴다', values: { dominion: D },
+        fx: [{ op: 'reveal' }, { op: 'fame', add: 50 }, { op: 'person', kind: 'ally', relation: '옛 왕가의 가신', age: { older: 30 } }, { op: 'timeline', text: '옛 왕가의 피를 이었음을 알았다' }] },
+      decline('내력을 받지 않는다', '피보다 제가 걸어온 길이 제 이름이다'),
+    ],
+  }),
+  fortune('fortune_quiet_island', 'peace', {
+    speaker: { relation: '고요한 섬의 촌장' },
+    title: '고요한 섬', body: '전쟁도 약탈도 비켜 간 작은 섬의 사람들이 {name}에게만 그 섬의 자리를 내주겠다고 한다. 그곳에서는 사람이 오래 산다고, 바다를 다툼 없이 바라본 사람에게만 허락한다고.',
+    doors: [
+      { label: '고요한 섬에 자리를 받는다', hint: '몸과 마음이 다시 젊어진다. 바깥의 다툼에서 멀어진다', values: { peace: D },
+        fx: [{ op: 'hp', add: 50 }, { op: 'base', key: 'vit', add: 3 }, { op: 'base', key: 'wil', add: 2 }, { op: 'flag', id: 'quietIsland' }, { op: 'timeline', text: '고요한 섬에 자리를 받았다' }] },
+      decline('섬의 자리를 받지 않는다', '고요함은 제 안에서 찾겠다'),
+    ],
+  }),
 ];

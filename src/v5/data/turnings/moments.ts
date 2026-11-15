@@ -59,4 +59,22 @@ export const MOMENTS: Turning[] = [
       { label: '가진 것 없이 바다로 나간다', hint: '잃을 것이 없으니 어디든 갈 수 있다', values: { romance: D }, fx: [] },
     ],
   }),
+
+  // ---------------------------------------------------------------- 과제 11
+  moment('moment_child', {
+    title: '먼저 간 아이', body: '{name}은(는) 먼저 간 아이가 쓰던 방의 문을 오래 열지 못한다. 순서가 바뀌었다. 바다가 무엇을 가져갔는지, 아직 실감이 나지 않는다.',
+    doors: [
+      { label: '그 아이가 가려던 바다로 대신 나간다', hint: '못다 한 항해를 잇는다', values: { romance: D }, fx: [] },
+      { label: '남은 식구와 아이들 곁을 떠나지 않는다', hint: '다시는 아무도 혼자 바다에 보내지 않는다', values: { devotion: D }, mark: 'fellowship', fx: [] },
+      { label: '그 아이를 삼킨 바다의 일을 끝까지 캐묻는다', hint: '그날 무슨 일이 있었는지 알아낸다', values: { inquiry: D }, fx: [] },
+    ],
+  }),
+  moment('moment_demoted', {
+    title: '외딴 초소', body: '바람만 부는 초소에서 {name}은(는) 떨어진 계급장을 손바닥에 올려놓는다. 덮어쓴 죄는 끝내 벗겨지지 않았다.',
+    doors: [
+      { label: '여기서부터 다시 올라간다', hint: '누구보다 먼저 일어나 누구보다 늦게 잔다', values: { ambition: D }, mark: 'unyielding', fx: [] },
+      { label: '죄를 씌운 윗선을 끝까지 밝힌다', hint: '제복 안의 썩은 곳을 들춘다', values: { justice: D }, mark: 'rebel', fx: [] },
+      { label: '초소의 사람들과 조용히 산다', hint: '자리를 다투는 일에서 물러난다', values: { peace: D }, fx: [] },
+    ],
+  }),
 ];

@@ -91,7 +91,7 @@ describe('고를 수 없는 불행', () => {
     expect(found).not.toBeNull();
   });
   it('불행이 예약하는 큰 계기는 정해진 목록 안에 있다', () => {
-    const allowed = ['moment_loss', 'moment_ruin', 'moment_betrayed', 'moment_defeat', 'moment_saved', 'moment_limb'];
+    const allowed = ['moment_loss', 'moment_ruin', 'moment_betrayed', 'moment_defeat', 'moment_saved', 'moment_limb', 'moment_child', 'moment_demoted'];   // 과제 11이 둘을 더했다
     for (const t of TURNINGS.filter((x) => x.kind === 'misfortune'))
       for (const e of t.fx ?? []) if (e.op === 'queue') expect(allowed, t.id).toContain(e.turning);
   });
