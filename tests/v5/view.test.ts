@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, codexView, hallView, heroWho5, matchWord, profileView, riskWords, speakerOf, storyLines, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, codexView, hallView, heroWho5, matchWord, profileView, riskWords, sceneOf, speakerOf, storyLines, timelineView, valueWords, yearLabel } from '../../src/v5/ui/view';
 import { newLife5 } from '../../src/v5/core/state';
 import { addValues } from '../../src/v5/core/values';
 import { autoplay5 } from '../../src/v5/core/autoplay';
@@ -102,5 +102,35 @@ describe('도감과 명예의 전당', () => {
     meta = recordLife(meta, autoplay5(1, 'random').s); meta = recordLife(meta, autoplay5(2, 'random').s);
     const h = hallView(meta);
     expect(h.length).toBe(2); expect(h[0].name).toBe(meta.hall[1].name);
+  });
+});
+
+describe('연표', () => {
+  it('나이를 말로, 같은 나이 · 같은 글이 연달아 나오면 한 번만', () => {
+    const s = newLife5(1);
+    s.timeline = [
+      { age: 0, text: '태어났다' },
+      { age: 17, text: '바다로 나갔다' },
+      { age: 17, text: '바다로 나갔다' },
+      { age: 18, text: '바다로 나갔다' },
+      { age: 17, text: '바다로 나갔다' },
+    ];
+    expect(timelineView(s)).toEqual([
+      { age: '0살', text: '태어났다' },
+      { age: '열일곱 살', text: '바다로 나갔다' },
+      { age: '열여덟 살', text: '바다로 나갔다' },
+      { age: '열일곱 살', text: '바다로 나갔다' },
+    ]);
+  });
+});
+
+describe('장면', () => {
+  it('장면에 그리는 동료는 셋까지 (v4 장면이 그리던 만큼)', () => {
+    const s = newLife5(1);
+    const base = s.people[0];
+    s.people = Array.from({ length: 6 }, (_, i) => ({ ...base, id: `c${i}`, name: `동료${i}`, kind: 'crew' as const, alive: true }));
+    expect(sceneOf(s).crew.length).toBe(3);
+    s.people = s.people.slice(0, 2);
+    expect(sceneOf(s).crew.length).toBe(2);
   });
 });

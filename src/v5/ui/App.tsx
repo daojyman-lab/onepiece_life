@@ -3,17 +3,24 @@ import { useEffect } from 'preact/hooks';
 import { music } from '../../app/sound';
 import { caughtUp } from '../app/flow';
 import { actions, useStore } from '../app/store';
+import type { Standing } from '../core/types';
 import { CodexModal } from './modals/CodexModal';
+import { MenuModal } from './modals/MenuModal';
 import { Main } from './screens/Main';
 import { Start } from './screens/Start';
+
+/** 바다의 처지: 이 처지에서는 바다 음악이 흐른다 */
+const SEA_STANDINGS: readonly Standing[] = ['pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp'];
 
 export function App() {
   const st = useStore();
   const s = st.life;
   const p = s?.pending ?? null;
   const ready = !!s && caughtUp(s, st.shownId);
-  // 배경음악: 시작 화면은 잔잔한 곡, 싸움이 뜨면 전투곡, 그 밖에는 바다
-  const bgm = st.screen !== 'main' || !s ? 'home' : ready && p && (p.kind === 'fight' || p.kind === 'battle') ? 'battle' : 'sea';
+  // 배경음악: 싸움 창이 떠 있으면 전투곡, 바다의 처지는 바다, 시작 화면과 뭍의 처지는 잔잔한 곡
+  const bgm = st.screen !== 'main' || !s ? 'home'
+    : ready && p && (p.kind === 'fight' || p.kind === 'battle') ? 'battle'
+    : SEA_STANDINGS.includes(s.hero.standing) ? 'sea' : 'home';
   useEffect(() => { music(bgm); }, [bgm]);
   if (st.screen === 'start' || !s) return <><Start /><SoundToggles /><Toasts /></>;
   // 떠 있는 일(문 · 싸움 · 엔딩)의 창: 기록이 다 떠오른 뒤에 뜬다. 과제 7~9에서 붙인다
@@ -22,6 +29,7 @@ export function App() {
   let manage = null;
   if (!pendingView) {
     if (st.modal === 'codex') manage = <CodexModal meta={st.meta} />;
+    else if (st.modal === 'menu') manage = <MenuModal />;
   }
   return (
     <>
@@ -48,5 +56,5 @@ function SoundToggles() {
 
 function Toasts() {
   const st = useStore();
-  return <div class="toasts" aria-live="polite">{st.toasts.map((t) => <div class="paper t9">{t.text}</div>)}</div>;
+  return <div class="toasts" aria-live="polite">{st.toasts.map((t) => <div key={t.id} class="paper t9">{t.text}</div>)}</div>;
 }

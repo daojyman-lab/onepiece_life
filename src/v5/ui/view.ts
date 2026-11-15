@@ -172,6 +172,8 @@ export function matchWord(s: Life5, foe: EnemySpec): string {
 
 // ── 장면 ──
 const ISLAND_COLORS = ['#70b582', '#c8b070', '#8ab0d0', '#b0d890', '#d0a0a0', '#90c0a0'];
+/** 장면에 그리는 동료 수 (v4 drawScene이 그리는 만큼) */
+const SCENE_CREW = 3;
 
 export function sceneOf(s: Life5): SceneInput {
   const h = s.hero, p = s.pending;
@@ -180,7 +182,7 @@ export function sceneOf(s: Life5): SceneInput {
   const hero = heroWho5(s);
   return {
     hero,
-    crew: s.people.filter((x) => x.alive && x.kind === 'crew').map(personWho5),
+    crew: s.people.filter((x) => x.alive && x.kind === 'crew').slice(0, SCENE_CREW).map(personWho5),
     foe,
     sailing: false,
     place: h.island ? `${sea.name} · ${h.island}` : sea.name,
@@ -194,6 +196,13 @@ export function sceneOf(s: Life5): SceneInput {
 /** 떠오른 줄(id ≤ shownId) 가운데 마지막 160줄. onlyHeavy면 가벼운 줄을 뺀다 (해 구분선은 남긴다) */
 export function storyLines(s: Life5, shownId: number, onlyHeavy: boolean): LogLine[] {
   return s.log.filter((l) => l.id <= shownId && (!onlyHeavy || HEAVY.has(l.weight))).slice(-STORY_KEEP);
+}
+
+/** 연표: 나이 말과 글. 같은 나이 · 같은 글이 연달아 나오면 한 번만 */
+export function timelineView(s: Life5): { age: string; text: string }[] {
+  return s.timeline
+    .filter((e, i, a) => i === 0 || a[i - 1].age !== e.age || a[i - 1].text !== e.text)
+    .map((e) => ({ age: ageWord(e.age), text: e.text }));
 }
 
 // ── 도감 · 명예의 전당 ──

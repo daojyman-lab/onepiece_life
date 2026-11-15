@@ -87,7 +87,8 @@ export const actions = {
     set({ life, screen: 'main', modal: null, shownId: -1, settings });   // 태어난 이야기부터 한 줄씩
   },
   continueLife() { if (state.life) set({ screen: 'main' }); },
-  toStart() { set({ screen: 'start', modal: null }); },
+  /** 인생은 저장된 채 시작 화면으로 */
+  toStart() { if (state.life) save.saveLife(state.life); set({ screen: 'start', modal: null }); },
   /** 엔딩을 확인하고 도감에 남긴 뒤 시작 화면으로 */
   endLife() {
     const life = state.life;

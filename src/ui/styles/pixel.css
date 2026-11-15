@@ -308,3 +308,23 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
   .shop-cat { width: auto; border-left: 0; border-bottom: 3px solid transparent; }
   .shop-cat.on { border-bottom-color: var(--gold-d); }
 }
+
+/* v5 */
+/* 이야기의 무게: heavy는 굵고 눈에 띄게, light는 보통 */
+.story .line.heavy { font-weight: 700; border-left-color: var(--gold-d); background: #fff2c0; }
+/* 맨 아래 줄이 해 구분선이어도 떠오른다 */
+.story .story-year.rise { animation: rise 900ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .story .story-year.rise { animation: none; } }
+/* 인연: 떠난 사람은 흐리게 */
+.row.gone { opacity: .5; }
+.timeline-row { padding: 2px 4px; border-bottom: 1px dashed var(--tan-d); }
+.timeline-row b { margin-right: 6px; }
+/* 휴대폰(v5): 페이지는 스크롤되지 않고 탭 몸통 안에서만 스크롤한다 */
+.app.mobile.m5 { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.app.mobile.m5 > .m-topbar { flex: none; position: static; }
+.m5-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.m5-body.fill { display: flex; flex-direction: column; overflow: hidden; }
+.m5-body.fill > .frame:first-child { flex: none; }
+.app.mobile.m5 .story-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.app.mobile.m5 .story-panel .story { flex: 1; height: auto; min-height: 120px; }
+.m-nav.four { grid-template-columns: repeat(4, 1fr); }
