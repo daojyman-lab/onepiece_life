@@ -192,7 +192,12 @@ describe('고향으로 · 조건', () => {
   });
   it('어떤 사건도 로그타운으로 못 박아 돌려보내지 않는다', () => {
     const all = (fx: Fx[]): Fx[] => fx.flatMap((e) => e.op === 'chance' ? [e, ...all(e.then), ...all(e.else ?? [])] : [e]);
+    // 고향으로 돌아가는 일은 moveHome이다. 로그타운을 적어도 되는 것은 다른 마을에서 태어난 아이가 그 마을을 떠나 로그타운으로 가는 문뿐이다 (과제 6의 go_*)
+    const leavingOtherTown = (t: (typeof TURNINGS)[number]) => {
+      const town = t.when.find((c) => c.c === 'town');
+      return town?.c === 'town' && !town.is.includes('로그타운');
+    };
     for (const t of TURNINGS) for (const e of all([...(t.fx ?? []), ...t.doors.flatMap((d) => d.fx)]))
-      if (e.op === 'move') expect(e.island, t.id).not.toBe('로그타운');
+      if (e.op === 'move' && !leavingOtherTown(t)) expect(e.island, t.id).not.toBe('로그타운');
   });
 });
