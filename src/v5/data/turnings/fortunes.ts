@@ -57,7 +57,7 @@ export const FORTUNES: Turning[] = [
     speaker: 'hero',
     title: '떠오른 보물선', body: '폭풍이 지나간 아침, 수면 위로 오래된 보물선이 떠올랐다. 선장실 상자 안에 소용돌이 무늬의 열매가 하나 놓여 있다.',
     doors: [
-      { label: '바다가 내민 열매를 받는다', hint: '한 번 먹으면 다시는 헤엄칠 수 없다', values: { romance: D },
+      { label: '바다가 내민 열매를 받는다', hint: '한 번 먹으면 다시는 헤엄칠 수 없다', needs: ['swim'], values: { romance: D },
         fx: [{ op: 'eatFruit', id: 'random' }, { op: 'fame', add: 50 }] },
       decline('열매를 받지 않는다', '상자를 닫고 보물선이 가라앉는 것을 지켜본다'),
     ],
@@ -83,11 +83,11 @@ export const FORTUNES: Turning[] = [
   }),
   fortune('fortune_fist_master', 'loyalty', {
     speaker: { relation: '늙은 권법가' },
-    title: '늙은 권법가', body: '동료를 등지지 않고 끝까지 버티는 {name}을(를) 지켜보던 늙은 권법가가 다가온다. 그런 사람에게만 가르친다고 한다.',
+    title: '늙은 권법가', body: '곁의 사람들을 등지지 않고 끝까지 버티는 {name}을(를) 지켜보던 늙은 권법가가 다가온다. 그런 사람에게만 가르친다고 한다.',
     doors: [
       { label: '권법가의 가르침을 받는다', hint: '돈으로는 들일 수 없는 스승이다', values: { loyalty: D },
         fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 15, paid: false }] },
-      decline('가르침을 받지 않는다', '지금의 동료들과 함께 자라겠다'),
+      decline('가르침을 받지 않는다', '지금 곁의 사람들과 함께 자라겠다'),
     ],
   }),
   fortune('fortune_drifting_ship', 'freedom', {

@@ -6,6 +6,7 @@ import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { checkAll } from './cond';
 import { applyFx, fillText } from './fx';
+import { needsOk } from './needs';
 import { logLine } from './state';
 import { openTurning, repeatAllows, resolveDoors } from './turning';
 import { topValues } from './values';
@@ -27,7 +28,7 @@ export function rollFortune(s: Life5, r: Rng): boolean {
   if (s.pending || !chance(r, fortuneP(s))) return false;
   const top = topValues(s, 1)[0];
   const pool = TURNINGS.filter((t) => t.kind === 'fortune' && (top === undefined || t.fortuneOf === top)
-    && checkAll(s, t.when) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));
+    && checkAll(s, t.when) && needsOk(s, t.needs) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));
   const t = weighted(r, pool, (x) => x.weight);
   if (!t || !openTurning(s, t)) return false;
   s.stats.fortunes += 1;
@@ -40,7 +41,7 @@ export function rollFortune(s: Life5, r: Rng): boolean {
  * (한 해에 많아야 하나). 일어나면 무겁게 기록하고 효과를 적용한다. 문은 띄우지 않는다.
  */
 export function rollMisfortune(s: Life5, r: Rng): boolean {
-  const pool = TURNINGS.filter((t) => t.kind === 'misfortune' && checkAll(s, t.when) && repeatAllows(s, t));
+  const pool = TURNINGS.filter((t) => t.kind === 'misfortune' && checkAll(s, t.when) && needsOk(s, t.needs) && repeatAllows(s, t));
   let u = r();
   for (const t of pool) {
     u -= t.weight;
@@ -51,6 +52,7 @@ export function rollMisfortune(s: Life5, r: Rng): boolean {
 
 function strike(s: Life5, t: Turning): void {
   s.seen[t.id] = s.age;
+  s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
   logLine(s, fillText(s, t.body), 'heavy', 'danger');
   s.timeline.push({ age: s.age, text: t.title });
   applyFx(s, t.fx ?? []);

@@ -79,8 +79,9 @@ describe('길과 바다의 데이터', () => {
     for (const f of masters) if (f.op === 'master' && f.paid) expect(f.cap).toBe(V.growth.paidCap);
   });
   it('사관학교는 돈으로 잠기고, 해군 가문은 조건 없이 들어간다', () => {
-    const t = TURNINGS.find((x) => x.id === 'path_marine_join')!;
-    const academy = t.doors.filter((d) => d.fx.some((f) => f.op === 'rank'));
+    // 가문의 추천장은 문이 셋을 넘지 않도록 따로 오는 전환점(path_marine_family)에 있다
+    const doors = TURNINGS.filter((x) => x.id === 'path_marine_join' || x.id === 'path_marine_family').flatMap((t) => t.doors);
+    const academy = doors.filter((d) => d.fx.some((f) => f.op === 'rank'));
     expect(academy.some((d) => d.when?.some((c) => c.c === 'money'))).toBe(true);
     expect(academy.some((d) => d.when?.some((c) => c.c === 'lineage' && c.is.includes('marineFamily')) && !d.when.some((c) => c.c === 'money'))).toBe(true);
   });

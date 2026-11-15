@@ -7,6 +7,7 @@ import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
 import { VALUE_DEEPEN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
+import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep } from './values';
 import { isQuiet } from './year';
@@ -31,21 +32,33 @@ function speakerOf(s: Life5, t: Turning): string {
   return s.people.find((p) => p.alive && p.relation === sp.relation)?.name ?? sp.relation;
 }
 
-/** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생이나 이번 인생에 골라 본 적이 있는지 */
+/** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
-    let locked = whyNot(s, d.when);
+    let locked = whyNot(s, d.when) ?? whyNeed(s, d.needs);
     if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
       label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,
-      special: d.special !== undefined, tried: s.known.includes(key) || s.tried.includes(key), danger: d.danger ?? false,
+      special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
 }
 
-/** 전환점을 띄운다. 열린 문이 하나도 없으면 false를 돌려주고 아무것도 하지 않는다. */
+/** 한 인생에 이 전환점이 열릴 수 있는 횟수 */
+const capOf = (t: Turning): number => t.max ?? (t.repeat === 'once' ? 1 : V.turning.maxRepeat);
+
+/** 이 인생에서 아직 열릴 수 있는가: 거절해 닫히지 않았고, 열린 횟수가 상한에 닿지 않았다 */
+export function stillOpen(s: Life5, t: Turning): boolean {
+  return !s.closed.includes(t.id) && (s.seenCount[t.id] ?? 0) < capOf(t);
+}
+
+/**
+ * 전환점을 띄운다. 닫혔거나 상한에 닿았거나, 글이 전제하는 것(needs)이 없거나, 열린 문이 하나도 없으면
+ * false를 돌려주고 아무것도 하지 않는다.
+ */
 export function openTurning(s: Life5, t: Turning): boolean {
+  if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
   if (TURNING_BY_ID[t.id] !== t) OPENED_ELSEWHERE.set(t.id, t);
@@ -54,6 +67,7 @@ export function openTurning(s: Life5, t: Turning): boolean {
     title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
   };
   s.seen[t.id] = s.age;
+  s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
   return true;
 }
 
@@ -70,15 +84,25 @@ export function wantsStop(s: Life5, r: Rng): boolean {
   return chance(r, n / V.partsPerYear);
 }
 
-/** 한 번뿐이면 본 적이 없어야, 되풀이되면 마지막으로 본 뒤 그만큼 해가 지나야 한다 */
+/**
+ * 한 번뿐이면 본 적이 없어야, 되풀이되면 마지막으로 본 뒤 그만큼 해가 지나야 한다.
+ * 어느 쪽이든 닫히지 않았고 한 인생의 상한(max, 없으면 V.turning.maxRepeat)에 닿지 않아야 한다.
+ */
 export function repeatAllows(s: Life5, t: Turning): boolean {
+  if (!stillOpen(s, t)) return false;
   const last = s.seen[t.id];
   if (last === undefined) return true;
   return t.repeat !== 'once' && s.age - last >= t.repeat.years;
 }
 
+/** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
+function fits(s: Life5, t: Turning): boolean {
+  return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
+}
+
 /**
  * 줄에서 지금 열 수 있는(조건이 맞고 열린 문이 있는) 첫 전환점을 꺼낸다. 앞의 것이 막혀 있으면 건너뛴다.
+ * 닫혔거나 한 인생의 상한에 닿은 전환점은 열지 않고 바로 버린다.
  * count면 열지 못한 것의 횟수를 세고, V.queue.maxTries번 못 열면 버린다. 데이터에 없는 id는 조용히 버린다.
  * 한 토막에 한 번만 세도록 openQueued만 센다(같은 토막의 pickTurning은 세지 않는다).
  */
@@ -86,7 +110,8 @@ export function takeQueued(s: Life5, count = true): Turning | null {
   for (let i = 0; i < s.queue.length;) {
     const id = s.queue[i];
     const t = TURNING_BY_ID[id];
-    if (t && checkAll(s, t.when) && resolveDoors(s, t).some((d) => !d.locked)) {
+    if (t && !stillOpen(s, t)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
+    if (t && fits(s, t)) {
       s.queue.splice(i, 1); delete s.queueTries[id];
       return t;
     }
@@ -110,8 +135,7 @@ export function openQueued(s: Life5): boolean {
 export function pickTurning(s: Life5, r: Rng): Turning | null {
   const queued = takeQueued(s, false);
   if (queued) return queued;
-  const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment')
-    && checkAll(s, t.when) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));
+  const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
   return weighted(r, pool, (t) => t.weight);
 }
 
@@ -133,6 +157,7 @@ export function answerDoor(s: Life5, index: number): void {
   });
   const key = `${t.id}#${index}`;
   if (!s.tried.includes(key)) s.tried.push(key);
+  if (door.closes && !s.closed.includes(t.id)) s.closed.push(t.id);
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
   s.stats.stops += 1;

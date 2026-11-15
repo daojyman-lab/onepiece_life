@@ -188,6 +188,7 @@ function nextPart(s: Life5): void {
 function comeOfAge(s: Life5): void {
   if (s.hero.standing !== 'child' || s.age < V.adultAge) return;
   s.hero.standing = 'civil';
+  s.standingSince = s.age;
   logLine(s, `${s.hero.name}은(는) 어느덧 어른이 되었다. 이제 제 앞가림은 스스로 해야 한다.`, 'heavy', 'life');
 }
 

@@ -4,6 +4,7 @@ export const V = {
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.5 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
+  turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3 },
   growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
             masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,

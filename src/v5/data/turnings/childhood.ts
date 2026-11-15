@@ -41,7 +41,7 @@ export const CHILDHOOD: Turning[] = [
     title: '해군의 행진', body: '{island} 항구에 군함이 들어왔다. 흰 제복의 수병들이 줄을 맞춰 광장을 지나간다.',
     doors: [
       { label: '수병에게 경례하는 법을 배운다', hint: '언젠가 저 제복을 입고 싶어진다', values: { justice: D }, fx: [] },
-      { label: '아버지의 옛 동료를 찾아간다', hint: '해군 집안의 연줄로 군함에 올라 본다', when: [{ c: 'lineage', is: ['marineFamily'] }], values: { loyalty: D, justice: D }, fx: [{ op: 'flag', id: 'marineContact' }] },
+      { label: '아버지의 옛 전우를 찾아간다', hint: '해군 집안의 연줄로 군함에 올라 본다', when: [{ c: 'lineage', is: ['marineFamily'] }], values: { loyalty: D, justice: D }, fx: [{ op: 'flag', id: 'marineContact' }] },
       { label: '행진 대열 뒤에서 수병 흉내를 내며 놀린다', hint: '어른들에게 꾸중을 듣는다', values: { freedom: D }, mark: 'rebel', fx: [] },
     ],
   },

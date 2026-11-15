@@ -61,6 +61,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'standing':
       if (h.standing === e.to) return;
       h.standing = e.to;
+      s.standingSince = s.age;
       s.timeline.push({ age: s.age, text: STANDING_PHRASE[e.to], standing: e.to });
       return;
     case 'move': h.island = e.island; h.sea = e.sea; return;

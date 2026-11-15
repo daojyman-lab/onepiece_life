@@ -34,3 +34,14 @@ export const INJURY_NAME: Record<Injury['severity'], string> = { light: '가벼�
 
 /** 병의 이름 (모르는 id는 '병') */
 export const ILLNESS_NAME: Record<string, string> = { cough: '기침병', fever: '열병' };
+
+/**
+ * 사람의 관계(Person.relation) 가운데 가족의 갈래. 사건 데이터가 이 갈래의 사람을 만들 때는 이 낱말만 쓴다
+ * (needs.ts가 이 낱말로 배우자 · 자식 · 형제 · 부모를 센다. tests/v5/content.test.ts가 확인한다).
+ */
+export const RELATION_KIND: Record<'spouse' | 'child' | 'sibling' | 'parent', string[]> = {
+  spouse: ['배우자', '아내', '남편'],
+  child: ['자식', '아들', '딸'],
+  sibling: ['형', '누나', '오빠', '언니', '남동생', '여동생'],
+  parent: ['아버지', '어머니'],
+};

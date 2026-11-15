@@ -14,7 +14,6 @@ const DOJO_FEE = 250000;
 const HAKI_FEE = 300000;
 const PROSTHETIC_COST = 40000;
 const ALL_IN_MIN = 50000;
-const BRIBE = 100000;
 
 /** 경지가 이만큼은 되어야 그 바다의 이름 있는 상대에게 맞서는 문이 열린다 */
 const READY = (min: number): Cond[] => [{ c: 'tier', branch: 'any', min }];
@@ -36,8 +35,6 @@ export const PEOPLE: Turning[] = [
         fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 검술 사범', branch: 'sword', cap: PAID_CAP, years: 8, paid: true }] },
       { label: '총포 교관에게 수업료를 낸다', hint: '먼 곳을 맞히는 눈을 기른다', when: [{ c: 'money', min: DOJO_FEE }], values: { inquiry: D },
         fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 총포 교관', branch: 'gun', cap: PAID_CAP, years: 8, paid: true }] },
-      { label: '권법 사범에게 수업료를 낸다', hint: '맨몸으로 버티고 때리는 법을 배운다', when: [{ c: 'money', min: DOJO_FEE }], values: { dominion: D },
-        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 권법 사범', branch: 'fist', cap: PAID_CAP, years: 8, paid: true }] },
       { label: '담 너머로 수련을 훔쳐본다', hint: '돈 없이 눈으로만 배운다', values: { inquiry: D }, fx: [{ op: 'mastery', branch: 'fist', add: 8 }] },
     ],
   },
@@ -70,7 +67,7 @@ export const PEOPLE: Turning[] = [
     weight: 8, repeat: { years: 4 }, speaker: { relation: '낯선 떠돌이' },
     title: '태워 달라는 자', body: '{island} 부두에서 낡은 짐 보따리를 멘 떠돌이가 {name}을(를) 막아선다. 배에 태워 주면 무엇이든 하겠다고 한다.',
     doors: [
-      { label: '동료로 받아들인다', hint: '등을 맡길 사람이 하나 는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'crew', relation: '동료' }] },
+      { label: '동료로 맞는다', hint: '등을 맡길 사람이 하나 는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'crew', relation: '동료' }] },
       { label: '돌려보낸다', hint: '믿을 수 없는 사람은 태우지 않는다', values: { peace: D }, fx: [] },
       { label: '한판 붙어 보고 정한다', hint: '실력을 보고 받는다', values: { dominion: D },
         fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'crew', relation: '시험을 통과한 동료' }] },
@@ -79,7 +76,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'pp_traitor', kind: 'door', when: at(st(...GROWN), { c: 'flag', id: 'betrayed', has: true }),
     weight: 8, repeat: 'once', speaker: { relation: '배신한 옛 동료' },
-    title: '배신자와의 재회', body: '몇 해 만에 {island}의 술집에서 그 얼굴을 다시 보았다. {name}을(를) 팔아넘긴 옛 동료가 들고 있던 잔을 떨어뜨린다.',
+    title: '배신자와의 재회', body: '몇 해 만에 {island}의 술집에서 그 얼굴을 다시 보았다. {name}을(를) 팔아넘겼던 그자가 들고 있던 잔을 떨어뜨린다.',
     doors: [
       { label: '용서하고 잔을 채워 준다', hint: '오래 묵은 것을 내려놓는다', values: { peace: D },
         fx: [{ op: 'hardship', add: -5 }, { op: 'log', text: '말없이 잔을 채워 주었다. 옛 동료는 고개를 들지 못했다.', weight: 'heavy' }] },
@@ -97,7 +94,7 @@ export const PEOPLE: Turning[] = [
     doors: [
       { label: '약속대로 같은 배에 오른다', hint: '어릴 적 약속을 지킨다', values: { loyalty: D },
         fx: [{ op: 'person', kind: 'crew', relation: '어릴 적 동무' }, { op: 'timeline', text: '어릴 적 약속대로 동무와 같은 배에 올랐다' }] },
-      { label: '서로 다른 길을 걷고 있음을 받아들인다', hint: '웃으며 다시 헤어진다', values: { peace: D }, fx: [] },
+      { label: '서로 다른 길을 걷고 있음을 인정한다', hint: '웃으며 다시 헤어진다', values: { peace: D }, fx: [] },
       { label: '서로 칼을 겨눌 사이가 되었음을 안다', hint: '평생의 맞수가 생긴다', values: { ambition: D },
         fx: [{ op: 'person', kind: 'rival', relation: '맞수가 된 동무' }] },
     ],
@@ -109,7 +106,7 @@ export const PEOPLE: Turning[] = [
     weight: 5, repeat: 'once', speaker: { relation: '마음에 둔 사람' },
     title: '청혼', body: '{island}의 바닷가에서, 오래 곁에 있던 사람이 {name}의 손을 잡는다. 함께 살자고, 이번에는 대답을 듣고 싶다고.',
     doors: [
-      { label: '청혼을 받아들인다', hint: '평생을 함께할 사람이 생긴다', values: { devotion: D },
+      { label: '청혼을 받는다', hint: '평생을 함께할 사람이 생긴다', values: { devotion: D },
         fx: [{ op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' }, { op: 'timeline', text: '혼인했다' }] },
       { label: '바다를 택한다', hint: '그 사람은 기다려 주지 않는다', values: { freedom: D }, fx: [{ op: 'hardship', add: 3 }] },
       { label: '돌아올 때까지 기다려 달라고 한다', hint: '약속 하나를 품고 떠난다', values: { romance: D }, fx: [{ op: 'flag', id: 'waitingLove' }] },
@@ -156,7 +153,7 @@ export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 누구를 구할지 · 쓰러진 적
   {
     id: 'pp_rescue', kind: 'door', when: at(age(16), st(...ACTIVE)),
-    weight: 3, repeat: 'once', speaker: 'hero',
+    weight: 3, repeat: 'once', needs: ['crew'], speaker: 'hero',
     title: '불타는 배', body: '포격을 맞은 배가 불길에 휩싸였다. 한쪽에선 동료가 기둥에 깔려 있고, 다른 쪽에선 아이들이 갇혀 울고 있다. 둘 다 구할 시간은 없다.',
     doors: [
       { label: '동료를 먼저 구한다', hint: '아이들의 울음이 귀에 남는다', values: { loyalty: D },
@@ -203,7 +200,7 @@ export const PEOPLE: Turning[] = [
     weight: 2, repeat: 'once', speaker: 'hero',
     title: '소용돌이 무늬의 열매', body: '{island} 시장의 노점 구석에 소용돌이 무늬가 새겨진 열매 하나가 굴러다닌다. 상인은 그게 무엇인지도 모르는 눈치다.',
     doors: [
-      { label: '헐값에 사서 그 자리에서 먹는다', hint: '한 번 먹으면 다시는 헤엄칠 수 없다', values: { romance: D }, fx: [{ op: 'eatFruit', id: 'random' }] },
+      { label: '헐값에 사서 그 자리에서 먹는다', hint: '한 번 먹으면 다시는 헤엄칠 수 없다', needs: ['swim'], values: { romance: D }, fx: [{ op: 'eatFruit', id: 'random' }] },
       { label: '사 두었다가 비싸게 판다', hint: '아는 사람에게는 큰돈이 된다', values: { ambition: D }, fx: [{ op: 'money', add: 100000 }] },
       { label: '모른 척 지나간다', hint: '수상한 것은 건드리지 않는다', values: { peace: D }, fx: [] },
     ],
@@ -215,7 +212,7 @@ export const PEOPLE: Turning[] = [
     doors: [
       { label: '값을 치르고 의수나 의족을 단다', hint: '예전만은 못해도 다시 움직일 수 있다', when: [{ c: 'money', min: PROSTHETIC_COST }], values: { ambition: D },
         fx: [{ op: 'money', add: -PROSTHETIC_COST }, { op: 'prosthetic', grade: 'basic' }, { op: 'log', text: '쇠와 가죽으로 만든 것을 달았다. 처음 몇 걸음은 남의 몸 같았다.', weight: 'heavy' }] },
-      { label: '잃은 채로 산다', hint: '남은 몸에 익숙해진다', values: { peace: D }, fx: [] },
+      { label: '잃은 채로 산다', hint: '남은 몸에 익숙해진다', values: { peace: D }, fx: [], closes: true },
     ],
   },
 
@@ -269,9 +266,8 @@ export const PEOPLE: Turning[] = [
     title: '정부의 암살자', body: '{island}의 다리 위, 비둘기를 어깨에 얹은 사내가 길을 막는다. 정부의 이름으로 {name}을(를) 처리하러 왔다고 한다.',
     doors: [
       fightDoor('암살자에게 맞선다', '사람을 죽이는 기술의 끝을 상대한다', { loyalty: D }, 'b_lucci', READY(3)),
-      { label: '다리에서 바다로 뛰어내린다', hint: '살아남는 것이 먼저다', values: { freedom: D }, danger: true,
+      { label: '다리에서 바다로 뛰어내린다', hint: '살아남는 것이 먼저다', needs: ['swim'], values: { freedom: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'log', text: '다리에서 뛰어내려 물살에 몸을 숨겼다.', weight: 'heavy' }] },
-      { label: '가진 것을 내주고 흥정한다', hint: '정부도 돈은 좋아한다', when: [{ c: 'money', min: BRIBE }], values: { peace: D }, fx: [{ op: 'money', add: -BRIBE }] },
       { label: '항복하고 끌려간다', hint: '목숨만은 건진다', values: { peace: D },
         fx: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '두 손을 들었다. 쇠고랑이 채워졌다.', weight: 'heavy' }] },
     ],
@@ -293,7 +289,7 @@ export const PEOPLE: Turning[] = [
     title: '빛의 대장', body: '{island}의 하늘이 눈부시게 번쩍인다. 느릿한 말투의 해군 대장이 {name} 앞에 빛으로 내려선다. 빛보다 빠른 발차기가 날아온다.',
     doors: [
       fightDoor('빛에 맞선다', '해군 대장이다. 살아남을 수 있을지 모른다', { ambition: D }, 'b_darc', READY(4)),
-      { label: '동료들을 흩어지게 하고 달아난다', hint: '다시 모일 수 있을지는 모른다', values: { loyalty: D },
+      { label: '동료들을 흩어지게 하고 달아난다', hint: '다시 모일 수 있을지는 모른다', needs: ['crew'], values: { loyalty: D },
         fx: [{ op: 'hp', add: -25 }, { op: 'hardship', add: 6 }, { op: 'log', text: '빛이 쏟아지는 섬에서 동료들과 흩어져 달아났다.', weight: 'heavy' }] },
       { label: '숨어서 대장이 떠나기를 기다린다', hint: '숨소리도 내지 않는다', values: { peace: D }, fx: [{ op: 'hp', add: -5 }] },
     ],
@@ -301,7 +297,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'meet_hody', kind: 'door', when: at(age(18, 26), st(...SEAFARING), sea('sabaody')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: '호디 존스' },
-    title: '바다 밑의 증오', body: '어인섬의 광장. 붉은 약에 취한 어인이 인간을 몰아내자고 외친다. 핏발 선 눈이 {name}에게 꽂힌다.',
+    title: '바다 밑의 증오', body: '어인섬의 광장. 붉은 약에 취한 어인이 인간을 내쫓자고 외친다. 핏발 선 눈이 {name}에게 꽂힌다.',
     doors: [
       fightDoor('광장 한가운데서 맞선다', '섬 사람들이 지켜본다', { justice: D }, 'b_hody', READY(3)),
       duelDoor('목숨은 걸지 않고 막아선다', '쓰러뜨리기보다 멈추게 한다', { devotion: D }, 'b_hody', READY(2)),
@@ -340,7 +336,7 @@ export const PEOPLE: Turning[] = [
       fightDoor('마그마에 맞선다', '이 산을 넘으면 바다의 정점이 보인다', { ambition: D }, 'b_akainu', READY(6)),
       { label: '배를 버리고 바다 밑으로 피한다', hint: '배는 잃어도 목숨은 남는다', values: { peace: D },
         fx: [{ op: 'hp', add: -25 }, { op: 'money', add: -100000 }, { op: 'log', text: '배가 불기둥에 삼켜졌다. 바다 밑으로 숨어 겨우 살아남았다.', weight: 'heavy' }] },
-      { label: '동료들을 먼저 보내고 혼자 시간을 번다', hint: '돌아오지 못할 수도 있다', values: { loyalty: D }, danger: true,
+      { label: '동료들을 먼저 보내고 혼자 시간을 번다', hint: '돌아오지 못할 수도 있다', needs: ['crew'], values: { loyalty: D }, danger: true,
         fx: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -40 }, { op: 'fame', add: 50 }, { op: 'chance', p: 0.3, then: [{ op: 'loseLimb', limb: 'random' }] }] },
     ],
   },

@@ -15,7 +15,7 @@ export const MOMENTS: Turning[] = [
     doors: [
       { label: '남은 몸으로 다시 일어선다', hint: '처음부터 다시 단련한다. 전보다 더 독하게', values: { ambition: D }, mark: 'unyielding', fx: [] },
       { label: '이 몸을 만든 자에게 갚아 준다', hint: '잃은 만큼 되갚기 전에는 멈추지 않는다', values: { dominion: D }, fx: [] },
-      { label: '바다를 떠나 뭍에 자리를 잡는다', hint: '칼 대신 다른 일로 남은 날을 산다', values: { peace: D },
+      { label: '바다를 떠나 뭍에 자리를 잡는다', hint: '싸움 대신 다른 일로 남은 날을 산다', values: { peace: D },
         fx: [{ op: 'standing', to: 'settled' }, { op: 'log', text: '바다를 등지고 {island}에 눌러앉았다.', weight: 'heavy' }] },
     ],
   }),
@@ -32,7 +32,7 @@ export const MOMENTS: Turning[] = [
     doors: [
       { label: '더 강해져서 다시 찾아간다', hint: '이 패배를 잊지 않는다', values: { ambition: D }, mark: 'unyielding', fx: [] },
       { label: '왜 졌는지 처음부터 되짚는다', hint: '힘보다 앎이 모자랐다고 여긴다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
-      { label: '싸움에서 한 걸음 물러선다', hint: '이기고 지는 것이 다가 아니라고 받아들인다', values: { peace: D }, fx: [] },
+      { label: '싸움에서 한 걸음 물러선다', hint: '이기고 지는 것이 다가 아니라고 여긴다', values: { peace: D }, fx: [] },
     ],
   }),
   moment('moment_saved', {
@@ -47,7 +47,7 @@ export const MOMENTS: Turning[] = [
     title: '등 뒤의 칼', body: '가장 믿었던 이가 등을 돌렸다. {name}은(는) 함께 웃던 날들을 하나씩 떠올리며 이를 악문다.',
     doors: [
       { label: '배신자를 끝까지 쫓는다', hint: '빚은 반드시 받아 낸다', values: { dominion: D }, fx: [] },
-      { label: '그래도 남은 동료를 믿는다', hint: '한 사람 때문에 모두를 버리지 않는다', values: { loyalty: D }, mark: 'fellowship', fx: [] },
+      { label: '그래도 남은 동료를 믿는다', hint: '한 사람 때문에 모두를 버리지 않는다', needs: ['crew'], values: { loyalty: D }, mark: 'fellowship', fx: [] },
       { label: '누구에게도 기대지 않고 홀로 선다', hint: '앞으로는 혼자 길을 정한다', values: { freedom: D }, fx: [] },
     ],
   }),

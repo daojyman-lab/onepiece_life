@@ -12,6 +12,8 @@ export type Limb = 'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR';
 export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
 export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
 export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
+/** 사건의 글이 전제하는 것. 맞지 않으면 그 전환점은 오지 않고, 그 문은 잠긴다 (needs.ts) */
+export type Need = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' | 'swim' | 'sword' | 'gun' | 'fist' | 'arms' | 'ship';
 
 export interface Hero5 {
   name: string; surname: string | null;        // 고아는 null (성을 모름)
@@ -55,7 +57,9 @@ export type Cond =
   | { c: 'limbLost'; min: number }
   | { c: 'sea'; is: SeaId[] }
   | { c: 'hardship'; min: number }
-  | { c: 'secret'; known: boolean };
+  | { c: 'secret'; known: boolean }
+  | { c: 'town'; is: string[] }                 // 태어난 마을 (hero.town)
+  | { c: 'standingYears'; min: number };        // 지금의 처지가 된 지 몇 해
 
 export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
@@ -95,6 +99,8 @@ export interface Door {
   mark?: string;                               // 정신적 강점으로 가는 표시
   fx: Fx[];
   danger?: boolean;
+  needs?: Need[];                              // 안 맞으면 잠기고 까닭이 보인다
+  closes?: boolean;                            // 이 문을 고르면 이 전환점은 그 인생에서 다시 오지 않는다
 }
 export interface Turning {
   id: string;
@@ -105,6 +111,8 @@ export interface Turning {
   title: string; body: string;
   doors: Door[];                               // misfortune은 빈 배열
   fx?: Fx[];                                   // misfortune이 일으키는 일
+  needs?: Need[];                              // 안 맞으면 뽑히지 않는다
+  max?: number;                                // 한 인생에 많아야 이만큼. 없으면 once는 1, 되풀이는 V.turning.maxRepeat
 }
 export interface Minor {
   id: string; when: Cond[]; weight: number; cooldownYears: number;
@@ -130,6 +138,9 @@ export interface Life5 {
   hardship: number;
   people: Person[];
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
+  seenCount: Record<string, number>;           // 전환점 id → 이번 인생에 열린 횟수
+  closed: string[];                            // closes 문으로 닫힌 전환점 id
+  standingSince: number;                       // 지금의 처지가 된 나이
   queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
   stopsThisYear: number;
   unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)

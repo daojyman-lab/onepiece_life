@@ -13,6 +13,13 @@ describe('저장 읽기', () => {
     const s = JSON.parse(JSON.stringify(newLife5(1)));
     expect(normalizeLife5(s)).toEqual(s);
   });
+  it('되풀이 막기의 칸이 없는 옛 저장: 열린 횟수 · 닫힌 전환점은 비우고, 처지가 된 나이는 지금 나이로', () => {
+    const s = JSON.parse(JSON.stringify(newLife5(1)));
+    s.age = 30;
+    delete s.seenCount; delete s.closed; delete s.standingSince;
+    const f = normalizeLife5(s)!;
+    expect(f.seenCount).toEqual({}); expect(f.closed).toEqual([]); expect(f.standingSince).toBe(30);
+  });
   it('칸이 빠진 옛 저장은 기본값으로 채워 살린다', () => {
     const s = JSON.parse(JSON.stringify(newLife5(1)));
     delete s.queueTries; delete s.known; delete s.stats.named;
@@ -65,8 +72,8 @@ describe('저장 읽기', () => {
     for (const p of bad) expect(normalizeLife5({ ...life(), pending: p }), JSON.stringify(p)?.slice(0, 80)).toBeNull();
   });
   it('인생의 큰 칸이 엉뚱한 모양이면 null', () => {
-    const arrays = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known'];
-    const objects = ['hero', 'growth', 'values', 'stats'];
+    const arrays = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed'];
+    const objects = ['hero', 'growth', 'values', 'stats', 'seenCount'];
     for (const k of arrays) for (const v of [{}, 'x', 3, null]) {
       const s = JSON.parse(JSON.stringify(newLife5(1))); s[k] = v;
       expect(normalizeLife5(s), `${k}=${JSON.stringify(v)}`).toBeNull();

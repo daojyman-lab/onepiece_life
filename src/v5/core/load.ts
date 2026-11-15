@@ -9,8 +9,8 @@ type Obj = Record<string, unknown>;
 const isObj = (x: unknown): x is Obj => typeof x === 'object' && x !== null && !Array.isArray(x);
 
 /** 인생의 맨 위 칸 가운데 목록이어야 하는 것과 객체여야 하는 것 */
-const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known'] as const;
-const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats'] as const;
+const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed'] as const;
+const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats', 'seenCount'] as const;
 
 /**
  * 떠 있는 일의 모양이 맞는가: null이거나, 종류(door · fight · battle · ending)에 따라 화면이 읽는 칸을 갖춘 객체.
@@ -43,7 +43,8 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (!isObj(x) || x.schema !== 5) return null;
   const seed = isObj(x.rng) && typeof x.rng.seed === 'number' ? x.rng.seed : 0;
   const def = emptyLife(seed);
-  const s = withDefaults(x, def);
+  // 처지가 된 나이를 모르는 옛 저장은 지금부터 센다
+  const s = withDefaults(x, { ...def, standingSince: typeof x.age === 'number' ? x.age : def.standingSince });
   // 큰 칸의 모양이 틀리면(목록이어야 할 곳에 객체가 있는 등) 고쳐 읽지 않는다
   if (LIFE_ARRAYS.some((k) => !Array.isArray(s[k])) || LIFE_OBJECTS.some((k) => !isObj(s[k]))) return null;
   if (!pendingOk(s.pending)) return null;      // 손으로 고친 파일의 깨진 창이 화면을 무너뜨리지 않게

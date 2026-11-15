@@ -37,6 +37,8 @@ export function check(s: Life5, c: Cond): boolean {
     case 'hardship': return s.hardship >= c.min;
     // 밝혀졌다 = 'surnameKnown' 표시가 있다. 모른다 = 아직 숨은 성이 남아 있다 (숨은 성이 없는 사람은 둘 다 아니다)
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
+    case 'town': return c.is.includes(h.town);
+    case 'standingYears': return s.age - s.standingSince >= c.min;
   }
 }
 
@@ -63,6 +65,8 @@ function reason(s: Life5, c: Cond): string {
     case 'sea': return '이 바다에서는 할 수 없다';
     case 'hardship': return '아직 겪은 것이 모자란다';
     case 'secret': return c.known ? '아직 밝혀지지 않았다' : '숨은 것이 없다';
+    case 'town': return '태어난 마을이 다르다';
+    case 'standingYears': return '지금 처지가 된 지 얼마 되지 않았다';
   }
 }
 
