@@ -59,6 +59,19 @@ describe('한 해의 진행', () => {
   it('불변 조건을 지킨다', () => {
     expect(invariants5(flow({ ...newLife5(11), pending: null }, 60))).toEqual([]);
   });
+  it('살아 있는 사람은 주인공과 함께 나이를 먹고, 죽은 사람의 나이는 멈춘다', () => {
+    const s0 = { ...newLife5(3), pending: null };
+    applyFx(s0, [{ op: 'person', kind: 'ally', relation: '산 벗', name: '산이' }, { op: 'person', kind: 'ally', relation: '죽은 벗', name: '죽이' }]);
+    const live = s0.people.find((p) => p.relation === '산 벗')!;
+    const dead = s0.people.find((p) => p.relation === '죽은 벗')!;
+    dead.alive = false;
+    const s = flow(s0, 4 * 3);
+    expect(s.age).toBe(s0.age + 3);
+    const live1 = s.people.find((p) => p.id === live.id)!;
+    expect(live1.alive).toBe(true);
+    expect(live1.age).toBe(live.age + 3);
+    expect(s.people.find((p) => p.id === dead.id)!.age).toBe(dead.age);
+  });
 });
 
 describe('조건과 효과', () => {

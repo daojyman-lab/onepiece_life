@@ -14,8 +14,7 @@ import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
-import { yearDivider } from './log';
-import { logLine } from './state';
+import { logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -177,6 +176,7 @@ function nextPart(s: Life5): void {
   if (part < V.partsPerYear) { s.part = part as Life5['part']; return; }
   s.part = 0;
   s.age += 1;
+  for (const p of s.people) if (p.alive) p.age += 1;   // 이름난 사람도, 곁의 사람도 주인공과 함께 나이를 먹는다
   s.stopsThisYear = 0;
   s.stats.years += 1;
   yearDivider(s);
