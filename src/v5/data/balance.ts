@@ -44,7 +44,18 @@ export const V = {
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
-  risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 30000 },
+  risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 3000,
+          medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
+          monthsPerPart: 3, worsenMonths: 6,   // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
+          maxStage: 3,
+          // 사고는 바다 위의 처지에서만
+          seaStandings: ['pirate', 'marine', 'revolution', 'bountyHunter', 'warlord'],
+          wreckDeathP: 0.5, navigatorMult: 0.5,  // 폭풍에서 난파해 죽을 확률, 항해사 동료가 있으면 곱한다
+          lukPer: 0.01, lukFloor: 0.3,           // 운 1마다 난파 확률을 이만큼 줄이되, 이 배율 아래로는 내려가지 않는다
+          stormHp: 20,                           // 폭풍을 넘기며 잃는 체력
+          // 가난: 이 처지는 벌이가 없다 (굶주림을 판정한다)
+          idleStandings: ['child', 'retired'],
+          kidAge: 15, kidHp: 30 },             // 이 나이 이하는 병 · 사고 · 굶주림으로 죽지 않고 체력만 잃는다
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },
   birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
   hp: { max: 100 },

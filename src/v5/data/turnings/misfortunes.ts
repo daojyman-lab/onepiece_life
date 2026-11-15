@@ -24,5 +24,5 @@ export const MISFORTUNES: Turning[] = [
     [{ op: 'money', add: -30000 }, { op: 'hardship', add: 12 }, { op: 'queue', turning: 'moment_betrayed' }]),
   mis('mis_fever', '큰 병', [{ c: 'age', min: 12 }], 0.012, { years: 20 },
     '이름 모를 열병에 쓰러졌다. 몇 달을 앓아누운 끝에 겨우 자리에서 일어났다.',
-    [{ op: 'hp', add: -40 }, { op: 'base', key: 'vit', add: -1 }, { op: 'hardship', add: 10 }]),
+    [{ op: 'hp', add: -40 }, { op: 'base', key: 'vit', add: -1 }, { op: 'hardship', add: 10 }, { op: 'illness', id: 'fever' }]),
 ];

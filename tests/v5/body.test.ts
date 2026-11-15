@@ -63,6 +63,18 @@ describe('신체 손실', () => {
     }
     expect(s.age).toBeGreaterThanOrEqual(startAge + 40);
   });
+  it('여섯 부위를 모두 잃은 인생도 끝에 닿는다', () => {
+    let s = adult(5);
+    for (const l of LIMBS) loseLimb(s, l, rngOf(s.rng));
+    for (let i = 0; i < 6000 && s.pending?.kind !== 'ending'; i++) {
+      if (!s.pending) s = reduce5(s, { type: 'step' });
+      else if (s.pending.kind === 'door') s = reduce5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
+      else s = reduce5(s, { type: 'answer', index: s.pending.kind === 'fight' ? 1 : 0 });
+      expect(invariants5(s)).toEqual([]);
+    }
+    expect(s.pending?.kind).toBe('ending');
+    expect(s.ended).toBeTruthy();
+  });
 });
 
 describe('신체 손실의 세부', () => {

@@ -13,6 +13,7 @@ import { canUse } from './body';
 import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
+import { partRisks, yearRisks } from './risk';
 import { logLine } from './state';
 import { openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
@@ -34,24 +35,27 @@ export function stepPart(s: Life5): void {
   if (!s.hero.alive) { endIfDead(s); return; }
 
   const r = rngOf(s.rng);
+  partRisks(s, r);
+  if (!s.hero.alive) return;
   const act = activityOf(s, r);
   dailyLine(s, act, r);
   growPart(s, act, r);
   healInjuries(s);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
   if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
-  // 뒤 과제가 여기에 차례로 끼운다: 병과 사고 → 기연 → (전환점은 맨 끝)
   if (s.part === V.partsPerYear - 1) yearTurn(s, r);
   turningPoint(s, r);
-  nextPart(s);
+  if (s.hero.alive) nextPart(s);
   endIfDead(s);
 }
 
 /**
- * 해가 바뀌는 자리(한 해의 마지막 토막)에서 한 번: 고를 수 없는 불행 → 기연.
+ * 해가 바뀌는 자리(한 해의 마지막 토막)에서 한 번: 병 · 사고 · 노환 → 고를 수 없는 불행 → 기연.
  * 전환점보다 먼저 굴려서, 기연이 뜨면 그 토막의 전환점이 기연에게 자리를 내준다.
  */
 function yearTurn(s: Life5, r: Rng): void {
+  yearRisks(s, r);
+  if (!s.hero.alive) return;
   rollMisfortune(s, r);
   rollFortune(s, r);
 }

@@ -16,9 +16,9 @@ import type { Branch, Fx, Life5, StatKey } from './types';
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
-/** 문장의 자리표시 {town} {island}를 지금 주인공의 것으로 채우고 조사를 고른다 */
+/** 문장의 자리표시 {name} {town} {island}를 지금 주인공의 것으로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string): string {
-  return fill(text, { town: s.hero.town, island: s.hero.island });
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island });
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
@@ -105,8 +105,10 @@ function applyOne(s: Life5, e: Fx): void {
     case 'fight': askFight(s, e.foe, e.lethal, e.forced); return;
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;
-    // 뒤 과제가 채운다 (병, 열매). 그때까지는 아무 일도 없다
-    case 'illness': case 'eatFruit':
+    // 이미 앓는 병이 있으면 새로 걸리지 않는다. 진행과 치료는 risk.ts의 partRisks가 맡는다
+    case 'illness': if (!h.illness) h.illness = { id: e.id, stage: 1, months: 0 }; return;
+    // 뒤 과제가 채운다 (열매). 그때까지는 아무 일도 없다
+    case 'eatFruit':
       return;
   }
 }

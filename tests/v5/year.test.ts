@@ -86,4 +86,10 @@ describe('죽음과 끝', () => {
     expect(s.log).toHaveLength(400);
     expect(s.log.at(-1)!.text).toBe(`${s.hero.town}에서 하루를 보냈다.`);
   });
+  it('기록 효과는 {name}을 주인공의 이름으로 채운다', () => {
+    const s = newLife5(2);
+    applyFx(s, [{ op: 'log', text: '{name}은(는) 주먹을 쥐었다.', weight: 'light' }]);
+    expect(s.log.at(-1)!.text).not.toContain('{name}');
+    expect(s.log.at(-1)!.text).toContain(s.hero.name);
+  });
 });
