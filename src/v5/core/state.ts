@@ -1,18 +1,18 @@
 import { ORPHAN_STORIES, SPECIES_NAMES } from '../../data/births';
 import { TALENT_BY_ID } from '../../data/talents';
-import { josa } from '../../core/josa';
 import { pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth } from './birth';
+import { LIMBS } from './body';
+import { logLine } from './log';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
-import type { LogType } from '../../core/types';
-import type { Branch, Life5, Limb, LimbState, LogWeight, Stats, Values, Wealth } from './types';
+import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
 
 export { fullName } from './birth';
-const LIMBS: readonly Limb[] = ['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'];
+export { logLine } from './log';
 const BRANCHES: readonly Branch[] = ['fist', 'sword', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
 function fill<K extends string, T>(keys: readonly K[], v: T): Record<K, T> {
@@ -59,12 +59,6 @@ export function emptyLife(seed: number): Life5 {
     seq: 0,
     ended: null,
   };
-}
-
-/** 기록 한 줄을 남긴다. 조사를 고르고, 최근 V.log.keep줄만 남긴다. */
-export function logLine(s: Life5, text: string, weight: LogWeight = 'light', type: LogType = 'life'): void {
-  s.log.push({ id: s.seq++, age: s.age, text: josa(text), weight, type });
-  if (s.log.length > V.log.keep) s.log.splice(0, s.log.length - V.log.keep);
 }
 
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };

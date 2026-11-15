@@ -9,8 +9,10 @@ import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { checkAll } from './cond';
 import { minorFight } from './fight';
 import { rollFortune, rollMisfortune } from './fortune';
-import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
+import { canUse } from './body';
+import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
+import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
@@ -18,6 +20,8 @@ import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
 const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
 const LEAN: Record<ValueId, Partial<Record<Activity, number>>> = V.activity.lean;
+
+export { power5 } from './power';
 
 /** 정점에 올랐거나 은퇴해 조용히 사는 때 */
 export function isQuiet(s: Life5): boolean {
@@ -73,20 +77,19 @@ export function activityOf(s: Life5, r: Rng): Activity {
   return weighted(r, ACTIVITIES, (a) => w[a])!;
 }
 
-/** 스승이 있으면 스승의 갈래, 없으면 가장 멀리 간(단계와 숙련) 갈래. 아무것도 익히지 않았으면 null */
+/**
+ * 스승이 있으면 스승의 갈래, 없으면 가장 멀리 간(단계와 숙련) 갈래. 몸이 허락하지 않는 갈래는 고르지 않는다.
+ * 아무것도 익히지 않았으면 null
+ */
 export function mainBranch(s: Life5): Branch | null {
-  if (s.growth.master) return s.growth.master.branch;
+  const m = s.growth.master;
+  if (m && canUse(s, m.branch)) return m.branch;
   const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
   let best: Branch | null = null;
-  // BRANCH_ID는 fx ↔ fight ↔ year 순환 때문에 모듈을 읽는 때에는 아직 비어 있을 수 있어, 쓸 때 읽는다
-  for (const b of Object.keys(BRANCH_ID) as Branch[]) if (progress(b) > (best ? progress(best) : 0)) best = b;
+  for (const b of Object.keys(BRANCH_ID) as Branch[]) {
+    if (canUse(s, b) && progress(b) > (best ? progress(best) : 0)) best = b;
+  }
   return best;
-}
-
-/** 대략의 힘: 능력치 합 × (1 + 가장 높은 단계 × tierPower) */
-export function power5(s: Life5): number {
-  const sum = Object.values(s.hero.base).reduce((a, b) => a + b, 0);
-  return sum * (1 + Math.max(...Object.values(s.growth.tier)) * V.growth.tierPower);
 }
 
 /** 한 토막만큼 상처가 아문다. 다 나은 상처는 지운다. 흉터는 낫지 않는다. */

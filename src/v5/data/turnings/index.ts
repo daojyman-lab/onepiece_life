@@ -3,11 +3,13 @@ import type { Turning } from '../../core/types';
 import { CHILDHOOD } from './childhood';
 import { FORTUNES } from './fortunes';
 import { MISFORTUNES } from './misfortunes';
+import { MOMENTS } from './moments';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
   FORTUNES,
   MISFORTUNES,
+  MOMENTS,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();

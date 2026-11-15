@@ -82,7 +82,19 @@ describe('싸움', () => {
     for (let i = 0; i < 200; i++) { s = reduce5({ ...s, pending: null }, { type: 'step' }); s.hero.standing = 'pirate'; }
     expect(s.stats.fights).toBeGreaterThan(0);
     expect(s.hero.alive).toBe(true);
-    expect(s.flags).not.toContain('limbPending');
+    expect(s.stats.limbsLost).toBe(0);
+    expect(Object.values(s.hero.limbs).every((l) => l === 'ok')).toBe(true);
+  });
+  it('강한 상대에게 지면 몸을 잃을 수 있고, 잃으면 큰 계기가 줄을 선다', () => {
+    let lost: Life5 | null = null;
+    for (let i = 0; i < 200 && !lost; i++) {
+      let s = fighter(i, 5); askFight(s, weak, false, true);
+      s = reduce5(s, { type: 'answer', index: 0 });
+      if (s.stats.limbsLost > 0) lost = s;
+    }
+    expect(lost).not.toBeNull();
+    expect(Object.values(lost!.hero.limbs)).toContain('lost');
+    expect(lost!.queue).toContain('moment_limb');
   });
   it('졌던 상대를 다시 붙어 이기면 불굴의 표시가 쌓인다', () => {
     let s = fighter(1, 80); s.flags.push(`lostTo:${weak}`); askFight(s, weak, false, true);

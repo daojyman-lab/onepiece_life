@@ -15,10 +15,11 @@ import { V } from '../data/balance';
 import { FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
 import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
-import { applyFx, BRANCH_ID } from './fx';
+import { canUse, effectiveStats5, loseLimb } from './body';
+import { applyFx } from './fx';
+import { BRANCH_ID, power5 } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
-import { power5 } from './year';
 import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats } from './types';
 import type { CUnit, Skill } from '../../core/types';
 
@@ -80,12 +81,12 @@ function hakiLevel(tier: number): number {
   return Math.min(F.hakiLevelMax, Math.floor(tier / F.hakiLevelPer));
 }
 
-/** 연 갈래의 기술 가운데 그 갈래의 단계까지 닿은 것. 높은 단계부터 최대 maxSkills개 */
+/** 연 갈래(몸이 허락하는 것만)의 기술 가운데 그 갈래의 단계까지 닿은 것. 높은 단계부터 최대 maxSkills개 */
 function heroSkills(s: Life5): CUnit['skills'] {
   const got: { sk: Skill; b: Branch }[] = [];
   for (const b of Object.keys(BRANCH_ID) as Branch[]) {
     const tier = s.growth.tier[b];
-    if (tier <= 0) continue;
+    if (tier <= 0 || !canUse(s, b)) continue;
     for (const sk of branchSkills(BRANCH_ID[b], s.hero.fruit?.id ?? null)) if (sk.tier <= tier) got.push({ sk, b });
   }
   return got.sort((x, y) => y.sk.tier - x.sk.tier).slice(0, F.maxSkills)
@@ -113,7 +114,7 @@ function applyPassives(u: CUnit): void {
 /** v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다 */
 export function heroUnit5(s: Life5): CUnit {
   const h = s.hero;
-  const st: Stats = { ...h.base };            // 과제 10의 effectiveStats5가 오면 그것을 쓴다
+  const st: Stats = effectiveStats5(s);
   const health = C.hp.healthFloor + (1 - C.hp.healthFloor) * h.hp / V.hp.max;
   const maxHp = Math.round((C.hp.base + st.vit * C.hp.perVit) * health);
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
@@ -215,8 +216,7 @@ export function ackBattle(s: Life5): void {
     applyFx(s, [{ op: 'injury', severity: won ? 'light' : 'heavy' }]);
     logLine(s, won ? '싸움에서 가벼운 상처를 입었다.' : '싸움에서 크게 다쳤다.', 'light', 'danger');
   }
-  // 과제 10이 이 표시를 실제 신체 손실로 바꾼다
-  if (chance(r, risk.limb * mult) && !s.flags.includes('limbPending')) s.flags.push('limbPending');
+  if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) return;
   if (p.result === 'lose' && chance(r, risk.death)) {
     applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);

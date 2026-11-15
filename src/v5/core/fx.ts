@@ -5,11 +5,12 @@ import { chance, pick, rngOf } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { STRENGTHS } from '../data/strengths';
+import { fitProsthetic, loseLimb } from './body';
 import { askFight } from './fight';
 import { revealSurname } from './fortune';
+import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
-import type { BranchId } from '../../core/types';
 import type { Branch, Fx, Life5, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -19,12 +20,6 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 export function fillText(s: Life5, text: string): string {
   return fill(text, { town: s.hero.town, island: s.hero.island });
 }
-
-/** v5 갈래 → v4 갈래 id (재능의 숙련 배율과 갈래 이름이 v4 id로 적혀 있다) */
-export const BRANCH_ID: Record<Branch, BranchId> = {
-  fist: 'martial.fist', sword: 'martial.sword', gun: 'martial.gun',
-  observation: 'haki.observation', armament: 'haki.armament', conqueror: 'haki.conqueror', fruit: 'fruit',
-};
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
 export function tierCap(s: Life5, b: Branch): number {
@@ -108,8 +103,10 @@ function applyOne(s: Life5, e: Fx): void {
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
     case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
     case 'fight': askFight(s, e.foe, e.lethal, e.forced); return;
-    // 뒤 과제가 채운다 (몸과 병, 열매). 그때까지는 아무 일도 없다
-    case 'loseLimb': case 'prosthetic': case 'illness': case 'eatFruit':
+    case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
+    case 'prosthetic': fitProsthetic(s, e.grade); return;
+    // 뒤 과제가 채운다 (병, 열매). 그때까지는 아무 일도 없다
+    case 'illness': case 'eatFruit':
       return;
   }
 }
