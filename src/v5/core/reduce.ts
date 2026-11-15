@@ -1,6 +1,7 @@
 // 명령 처리와 불변 조건. 입력 상태는 바꾸지 않는다.
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
+import { ackBattle, answerFight } from './fight';
 import { answerDoor } from './turning';
 import { stepPart } from './year';
 import type { Command5, Life5 } from './types';
@@ -9,9 +10,18 @@ export function reduce5(prev: Life5, cmd: Command5): Life5 {
   const s = structuredClone(prev);
   switch (cmd.type) {
     case 'step': if (s.pending === null) stepPart(s); break;
-    case 'answer': if (s.pending?.kind === 'door') answerDoor(s, cmd.index); break;   // 싸움의 답은 뒤 과제가 채운다
+    case 'answer': answer(s, cmd.index); break;
   }
   return s;
+}
+
+/** 떠 있는 일에 따라 답을 나눈다. 엔딩에서는 아무것도 하지 않는다. */
+function answer(s: Life5, index: number): void {
+  switch (s.pending?.kind) {
+    case 'door': answerDoor(s, index); return;
+    case 'fight': answerFight(s, index); return;
+    case 'battle': ackBattle(s); return;
+  }
 }
 
 /** 어긴 불변 조건의 목록. 비어 있으면 건강한 상태다. */

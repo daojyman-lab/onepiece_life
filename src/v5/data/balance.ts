@@ -29,7 +29,17 @@ export const V = {
   hardship: { poor: 10, orphan: 15, outcast: 10, limb: 20, loss: 12, defeat: 6, afterFortune: 0.5 },
   fortune: { baseP: 0.004, perHardship: 0.0003, capP: 0.06, minAge: 12 },
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
-  fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25 },
+  fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25,
+           injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 1.1,
+           minPower: 1,                       // 힘이 0이어도 나누기가 되도록
+           officerShare: 0.5,                 // 상대의 힘에 더하는 간부의 몫
+           hakiTier: 2, fruitTier: 1,         // 상대의 패기 1레벨 = 단계 2, 열매 = 단계 1 (힘을 셀 때)
+           maxSkills: 6, skillMastery: { base: 60, span: 40, max: 100 },   // 기술 숙련 = base + span × 단계/최대단계
+           passiveScale: { base: 0.7, span: 0.6 },   // 패시브 기술의 효과 = 값 × (base + span × 숙련/100), v4와 같다
+           hakiLevelPer: 2, hakiLevelMax: 3,  // 전투의 패기 레벨 = min(3, ⌊단계 / 2⌋)
+           retreat: { calm: 0.5, usual: 0.3, never: 0 },
+           famePerPower: 0.1, minorFame: 1 },
+  injury: { months: { light: 3, heavy: 9, scar: 0 }, monthsPerPart: 3 },   // 흉터(scar)는 낫지 않는다
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2 },
   risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 30000 },
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },

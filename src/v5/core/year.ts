@@ -5,7 +5,9 @@ import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { LINES } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
+import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { checkAll } from './cond';
+import { minorFight } from './fight';
 import { rollFortune, rollMisfortune } from './fortune';
 import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
@@ -15,7 +17,6 @@ import { leanPick } from './values';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
 const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
-const BRANCHES = Object.keys(BRANCH_ID) as Branch[];
 const LEAN: Record<ValueId, Partial<Record<Activity, number>>> = V.activity.lean;
 
 /** 정점에 올랐거나 은퇴해 조용히 사는 때 */
@@ -32,7 +33,9 @@ export function stepPart(s: Life5): void {
   const act = activityOf(s, r);
   dailyLine(s, act, r);
   growPart(s, act, r);
+  healInjuries(s);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
+  if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
   // 뒤 과제가 여기에 차례로 끼운다: 병과 사고 → 기연 → (전환점은 맨 끝)
   if (s.part === V.partsPerYear - 1) yearTurn(s, r);
   turningPoint(s, r);
@@ -75,7 +78,8 @@ export function mainBranch(s: Life5): Branch | null {
   if (s.growth.master) return s.growth.master.branch;
   const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
   let best: Branch | null = null;
-  for (const b of BRANCHES) if (progress(b) > (best ? progress(best) : 0)) best = b;
+  // BRANCH_ID는 fx ↔ fight ↔ year 순환 때문에 모듈을 읽는 때에는 아직 비어 있을 수 있어, 쓸 때 읽는다
+  for (const b of Object.keys(BRANCH_ID) as Branch[]) if (progress(b) > (best ? progress(best) : 0)) best = b;
   return best;
 }
 
@@ -83,6 +87,13 @@ export function mainBranch(s: Life5): Branch | null {
 export function power5(s: Life5): number {
   const sum = Object.values(s.hero.base).reduce((a, b) => a + b, 0);
   return sum * (1 + Math.max(...Object.values(s.growth.tier)) * V.growth.tierPower);
+}
+
+/** 한 토막만큼 상처가 아문다. 다 나은 상처는 지운다. 흉터는 낫지 않는다. */
+function healInjuries(s: Life5): void {
+  const h = s.hero;
+  for (const inj of h.injuries) if (inj.severity !== 'scar') inj.monthsLeft -= V.injury.monthsPerPart;
+  h.injuries = h.injuries.filter((inj) => inj.severity === 'scar' || inj.monthsLeft > 0);
 }
 
 /** 한 토막의 활동만큼 자란다: 숙련과 능력치, 단계, 정체와 돌파 */

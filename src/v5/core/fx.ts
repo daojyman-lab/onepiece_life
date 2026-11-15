@@ -5,6 +5,7 @@ import { chance, pick, rngOf } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { STRENGTHS } from '../data/strengths';
+import { askFight } from './fight';
 import { revealSurname } from './fortune';
 import { logLine } from './state';
 import { addMark } from './strengths';
@@ -104,9 +105,11 @@ function applyOne(s: Life5, e: Fx): void {
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
       return;
     case 'reveal': revealSurname(s); return;
-    // 뒤 과제가 채운다 (몸과 병, 열매, 싸움). 그때까지는 아무 일도 없다
-    case 'injury': case 'loseLimb': case 'prosthetic': case 'illness':
-    case 'eatFruit': case 'fight':
+    // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
+    case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
+    case 'fight': askFight(s, e.foe, e.lethal, e.forced); return;
+    // 뒤 과제가 채운다 (몸과 병, 열매). 그때까지는 아무 일도 없다
+    case 'loseLimb': case 'prosthetic': case 'illness': case 'eatFruit':
       return;
   }
 }
