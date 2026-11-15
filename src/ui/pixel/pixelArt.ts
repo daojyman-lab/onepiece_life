@@ -17,12 +17,15 @@ const CIVIL: Pair[] = [['#4a8ac8', '#2f6498'], ['#58a070', '#3a7850'], ['#c89040
 
 /** 들고 있는 무기. 평소 모습(칼집 · 권총집 · 붕대 감은 주먹)과 공격 자세 · 공격 효과가 달라진다 */
 export type Weapon = 'sword' | 'fist' | 'gun';
+/** 멀쩡하지 않은 부위. L/R은 인물 자신의 왼쪽/오른쪽 (앞을 보는 그림에서 L은 보는 이의 오른쪽) */
+export type BodyMark = Partial<Record<'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR', 'lost' | 'basic' | 'superior'>>;
 export interface Who {
   key: string;                // 고정 무작위의 씨앗 (id나 이름)
   gender?: 'm' | 'f'; age?: number; species?: Species;
   faction?: 'civil' | 'pirate' | 'marine' | 'rev';
   form?: 'seaking';
   weapon?: Weapon;
+  body?: BodyMark;            // 안대 · 빈 소매 · 의족 (v5)
 }
 
 /** 기술 목록에서 무기를 정한다: 검술 기술이 있으면 칼, 사격이면 총, 아니면 맨주먹 */
@@ -37,7 +40,20 @@ export function weaponOfSkills(skills: readonly string[]): Weapon {
 interface Desc {
   seed: number; gender: 'm' | 'f'; species: 'human' | 'fish' | 'mink' | 'sky' | 'luna'; faction: NonNullable<Who['faction']>;
   stage: 'child' | 'adult' | 'old'; skin: Pair; hair: Pair; style: number; civil: Pair; smile: number; key: string;
+  body?: BodyMark;
 }
+
+/** 캐시 열쇠에 붙일 몸의 표시 (잃기 전의 그림이 다시 나오지 않게) */
+function bodyKey(b: BodyMark | undefined): string {
+  if (!b) return '';
+  return (['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'] as const).map((k) => (b[k] ?? '').charAt(0) || '-').join('');
+}
+const PATCH = '#1c1420';
+const GLASS_EYE: Pair = ['#b8bcc6', '#8a8e9a'];
+const GOLD = '#ffd030';
+const IRON: Pair = ['#c4c8d0', '#9a9ea8'];     // 돈으로 단 의수: 손, 팔
+const STEEL: Pair = ['#c8d4e0', '#6a7484'];    // 기연으로 얻은 강철 팔다리: 밝은 면, 어두운 면
+const PEG = '#8a5a2a';
 
 export function hash(str: string) {
   let h = 2166136261;
@@ -61,6 +77,7 @@ export function describe(w: Who): Desc {
     civil: CIVIL[(seed >>> 13) % CIVIL.length],
     smile: (seed >>> 16) % 3,
     key: [seed, gender, species, faction, stage].join('|'),
+    ...(w.body ? { body: w.body } : {}),
   };
 }
 
@@ -134,7 +151,8 @@ export function faceURL(w: Who): string {
     const url = seakingFace(w); faceCache.set(k, url); return url;
   }
   const d = describe(w);
-  const hit = faceCache.get(d.key);
+  const fkey = d.key + '|' + bodyKey(d.body);
+  const hit = faceCache.get(fkey);
   if (hit) return hit;
   const [c, x] = makeCanvas(24, 24);
   const r = (px: number, py: number, ww: number, hh: number, col: string) => { x.fillStyle = col; x.fillRect(px, py, ww, hh); };
@@ -162,6 +180,23 @@ export function faceURL(w: Who): string {
   else { r(10, 14, 4, 2, '#8a3a2a'); r(11, 14, 2, 1, '#ffffff'); }
   if (child) { r(6, 13, 2, 1, '#f09a8a'); r(16, 13, 2, 1, '#f09a8a'); }
   if (d.gender === 'f' && !child) { r(7, 9, 1, 1, '#1c1420'); r(16, 9, 1, 1, '#1c1420'); }
+  // 눈: 오른눈(eyeR)은 보는 이의 왼쪽(x=8), 왼눈(eyeL)은 보는 이의 오른쪽(x=14)
+  for (const [part, ex, inward] of [['eyeR', 8, 1], ['eyeL', 14, -1]] as const) {
+    const st = d.body?.[part];
+    if (st === 'lost') {
+      // 검은 안대와 끈 (끈은 이마 쪽으로 올라가고 귀 쪽으로 내려간다)
+      r(ex - 1, ey - 1, 4, eyeH + 2, PATCH);
+      const top = inward > 0 ? ex + 3 : ex - 2;
+      r(top, ey - 2, 1, 1, PATCH); r(top + inward, ey - 3, 1, 1, PATCH);
+      r(inward > 0 ? ex - 2 : ex + 3, ey + eyeH, 1, 1, PATCH);
+    } else if (st === 'basic') {
+      // 회색 의안: 눈동자가 없다
+      r(ex, ey, 2, eyeH, GLASS_EYE[0]); r(ex + 1, ey + eyeH - 1, 1, 1, GLASS_EYE[1]);
+    } else if (st === 'superior') {
+      // 빛나는 눈: 하이라이트 자리에 금색 한 점
+      r(ex, ey, 1, 1, GOLD);
+    }
+  }
   if (old) {
     r(7, 12, 1, 1, skS); r(16, 12, 1, 1, skS);
     if (d.gender === 'm') { r(8, 15, 8, 3, hc); r(9, 18, 6, 1, hs); r(9, 13, 6, 1, hc); r(10, 14, 4, 1, '#8a3a2a'); }
@@ -182,7 +217,7 @@ export function faceURL(w: Who): string {
   }
   outline(x, 24, 24);
   const url = c.toDataURL('image/png');
-  faceCache.set(d.key, url);
+  faceCache.set(fkey, url);
   return url;
 }
 
@@ -196,7 +231,7 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
   }
   const d = describe(w);
   const wp = w.weapon ?? null;
-  const key = d.key + '|' + frame + '|' + (pose ?? '') + '|' + (wp ?? '');
+  const key = d.key + '|' + frame + '|' + (pose ?? '') + '|' + (wp ?? '') + '|' + bodyKey(d.body);
   const hit = bodyCache.get(key);
   if (hit) return hit;
   const [c, x] = makeCanvas(20, 24);
@@ -206,34 +241,70 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
   const pants = d.faction === 'marine' ? '#2a4a8a' : child ? '#5a4634' : '#2c3a58';
   const legH = (child ? 2 : 4) - frame, torsoH = child ? 5 : 7;
   const legsTop = 21 - legH, torsoTop = legsTop - torsoH, headTop = torsoTop - 7;
-  r(5, legsTop, 2, legH, pants); r(9, legsTop, 2, legH, pants);
-  r(4, 21, 3, 1, '#3a2414'); r(9, 21, 3, 1, '#3a2414');
+  const body = d.body ?? {};
+  // 다리: 오른다리(legR)는 보는 이의 왼쪽(x=5), 왼다리(legL)는 보는 이의 오른쪽(x=9)
+  const leg = (lx: number, shoeX: number, st: BodyMark['legL']) => {
+    const thigh = Math.max(1, legH - 2);
+    if (st === 'lost') { r(lx, legsTop, 2, thigh, pants); return; }                 // 짧은 그루터기, 신발 없음
+    if (st === 'basic') { r(lx, legsTop, 2, thigh, pants); r(lx, legsTop + thigh, 1, 22 - legsTop - thigh, PEG); return; }  // 나무 의족
+    if (st === 'superior') {                                                       // 강철 다리
+      r(lx, legsTop, 2, thigh, pants); r(lx, legsTop + thigh, 2, 21 - legsTop - thigh, STEEL[1]);
+      r(lx, legsTop + thigh, 1, 21 - legsTop - thigh, STEEL[0]); r(shoeX, 21, 3, 1, STEEL[1]); return;
+    }
+    r(lx, legsTop, 2, legH, pants); r(shoeX, 21, 3, 1, '#3a2414');
+  };
+  leg(5, 4, body.legR); leg(9, 9, body.legL);
   r(4, torsoTop, 8, torsoH, cl); r(10, torsoTop + 1, 2, torsoH - 1, clS);
   r(4, torsoTop + torsoH - 2, 8, 1, d.faction === 'pirate' && !child ? '#e8c040' : clS);
   if (d.faction === 'pirate' && !child) r(7, torsoTop, 2, 4, sk);
   if (d.faction === 'marine' && !child) r(6, torsoTop, 4, 2, '#2a4a8a');
   // 붕대 감은 주먹 (맨주먹 무술)
   const wrap = wp === 'fist' && !child ? '#f0ece0' : sk;
-  r(2, torsoTop, 2, torsoH - 2, cl); r(2, torsoTop + torsoH - 2, 2, 1, wrap);
+  // 팔: 오른팔(armR)은 보는 이의 왼쪽(x=2), 왼팔(armL)은 보는 이의 오른쪽(x=12, 공격하는 팔)
+  const metal = (st: BodyMark['armL']): Pair | null => st === 'basic' ? IRON : st === 'superior' ? STEEL : null;
+  const arm = (ax: number, sleeve: string, st: BodyMark['armL']) => {
+    if (st === 'lost') { r(ax, torsoTop, 2, 2, sleeve); r(ax, torsoTop + 2, 1, 1, sleeve); return; }   // 빈 소매 끝만
+    const m = metal(st);
+    if (!m) { r(ax, torsoTop, 2, torsoH - 2, sleeve); r(ax, torsoTop + torsoH - 2, 2, 1, wrap); return; }
+    r(ax, torsoTop, 2, 2, sleeve); r(ax, torsoTop + 2, 2, torsoH - 4, m[1]);                          // 회색 팔 · 강철 팔
+    if (st === 'superior') r(ax, torsoTop + 2, 2, 1, GOLD);                                          // 금색 테
+    r(ax, torsoTop + torsoH - 2, 2, 1, m[0]);
+  };
+  arm(2, cl, body.armR);
+  const armL = body.armL, mL = metal(armL);
+  const handL = mL ? mL[0] : sk;
+  /** 뻗은 팔의 손목 쪽 한 칸: 의수는 팔 색, 강철 팔은 금색 테 */
+  const wristL = (wx: number) => { if (mL) r(wx, torsoTop + 1, 1, 2, armL === 'superior' ? GOLD : mL[1]); };
   // 평소 모습: 등 뒤 칼집 · 허벅지 권총집
   if (pose !== 'attack' && !child) {
     if (wp === 'sword') { r(1, torsoTop - 2, 1, 2, '#c8a040'); r(1, torsoTop, 1, torsoH + 3, '#3a2a40'); r(0, torsoTop + 1, 1, torsoH + 1, '#5a4466'); }
     if (wp === 'gun') { r(11, legsTop, 2, 3, '#4a3020'); r(11, legsTop - 1, 1, 1, '#7a7a88'); }
   }
-  if (pose === 'attack' && wp === 'fist') {
+  if (armL === 'lost') {
+    // 공격하는 팔이 없다: 자세와 상관없이 빈 소매 끝만 (공격 효과는 장면이 그린다)
+    arm(12, clS, armL);
+  } else if (pose === 'attack' && wp === 'fist') {
     // 곧게 뻗은 주먹
-    r(12, torsoTop + 1, 4, 2, cl); r(16, torsoTop, 3, 4, wrap === sk ? sk : '#f0ece0'); r(18, torsoTop + 1, 1, 2, skS); r(16, torsoTop + 1, 1, 1, skS);
+    r(12, torsoTop + 1, 4, 2, cl); wristL(15);
+    r(16, torsoTop, 3, 4, mL ? mL[0] : wrap); r(18, torsoTop + 1, 1, 2, mL ? mL[1] : skS); r(16, torsoTop + 1, 1, 1, mL ? mL[1] : skS);
   } else if (pose === 'attack' && wp === 'gun') {
     // 팔을 뻗어 권총을 겨눈다
-    r(12, torsoTop + 1, 3, 2, cl); r(15, torsoTop + 1, 1, 2, sk);
+    r(12, torsoTop + 1, 3, 2, cl); wristL(14); r(15, torsoTop + 1, 1, 2, handL);
     r(15, torsoTop + 2, 1, 2, '#5a3a22'); r(15, torsoTop, 4, 2, '#4a4a56'); r(16, torsoTop, 3, 1, '#8a8a96');
   } else if (pose === 'attack') {
     // 칼을 치켜든다 (무기가 정해지지 않았으면 칼)
-    r(12, torsoTop + 1, 3, 2, cl); r(15, torsoTop + 1, 1, 2, sk);
+    r(12, torsoTop + 1, 3, 2, cl); wristL(14); r(15, torsoTop + 1, 1, 2, handL);
     r(15, torsoTop + 3, 3, 1, '#c8a040'); r(16, torsoTop - 5, 1, 8, '#e4ecf4'); r(17, torsoTop - 4, 1, 6, '#b0bccc');
-  } else { r(12, torsoTop, 2, torsoH - 2, clS); r(12, torsoTop + torsoH - 2, 2, 1, wrap); }
+  } else arm(12, clS, armL);
   r(4, headTop, 8, 7, sk); r(3, headTop + 1, 10, 5, sk); r(11, headTop + 2, 2, 4, skS);
   r(6, headTop + 3, 1, 2, '#1c1420'); r(10, headTop + 3, 1, 2, '#1c1420');
+  // 눈: 오른눈(eyeR)은 보는 이의 왼쪽(x=6), 왼눈(eyeL)은 보는 이의 오른쪽(x=10)
+  for (const [part, ex, inward] of [['eyeR', 6, 1], ['eyeL', 10, -1]] as const) {
+    const st = body[part];
+    if (st === 'lost') { r(inward > 0 ? ex - 1 : ex, headTop + 3, 2, 2, PATCH); r(ex + inward, headTop + 2, 1, 1, PATCH); r(ex + 2 * inward, headTop + 1, 1, 1, PATCH); }
+    else if (st === 'basic') r(ex, headTop + 3, 1, 2, GLASS_EYE[0]);
+    else if (st === 'superior') r(ex, headTop + 3, 1, 1, GOLD);
+  }
   if (old && d.gender === 'm') r(6, headTop + 5, 5, 2, hc);
   if (d.style === 2 || d.style === 5) { r(2, headTop + 2, 2, d.style === 2 ? 8 : 5, hs); r(3, headTop + 1, 1, 3, hc); }
   if (d.style === 3) { r(1, headTop + 1, 2, 2, hc); r(1, headTop + 3, 1, 4, hc); }

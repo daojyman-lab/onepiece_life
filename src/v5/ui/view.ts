@@ -126,7 +126,11 @@ function heroWeapon(s: Life5): Weapon {
 }
 
 export function heroWho5(s: Life5): Who {
-  return { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.age, species: s.hero.species, faction: factionOf(s.hero.standing), weapon: heroWeapon(s) };
+  const who: Who = { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.age, species: s.hero.species, faction: factionOf(s.hero.standing), weapon: heroWeapon(s) };
+  const body: NonNullable<Who['body']> = {};
+  for (const k of LIMBS) { const st = s.hero.limbs[k]; if (st !== 'ok') body[k] = st; }
+  if (Object.keys(body).length) who.body = body;
+  return who;
 }
 
 /** 떠 있는 문의 말하는 사람: 주인공, 원작 인물, 곁의 사람(없으면 관계 이름) */
