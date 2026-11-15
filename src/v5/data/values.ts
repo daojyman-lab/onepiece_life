@@ -22,6 +22,19 @@ export const VALUE_DEEPEN: Record<ValueId, string> = {
   peace: '평온이 깊어졌다.',
 };
 
+/** 엔딩의 "어떤 사람이었나" 앞 구절. 한두 개를 이어 "~ 살았고"로 맺는다. 가치관 이름이 들어간다 */
+export const VALUE_PERSONA: Record<ValueId, string> = {
+  justice: '정의를 좇아',
+  devotion: '헌신으로 남을 돌보며',
+  ambition: '야망을 품고',
+  romance: '낭만을 따라',
+  inquiry: '탐구에 몸을 바쳐',
+  loyalty: '의리를 지키며',
+  freedom: '자유를 찾아',
+  dominion: '패도를 걸으며',
+  peace: '평온을 바라며',
+};
+
 /** 가치관이 싸움에서 기우는 전술 */
 export const VALUE_TACTIC: Record<ValueId, Tactic> = {
   dominion: 'offense', ambition: 'offense',

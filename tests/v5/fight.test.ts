@@ -2,7 +2,11 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { askFight, riskOf, heroUnit5, gapOf } from '../../src/v5/core/fight';
+import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe } from '../../src/v5/core/fight';
+import { openTurning } from '../../src/v5/core/turning';
+import { TURNING_BY_ID } from '../../src/v5/data/turnings';
+import { crewPowerFor } from '../../src/core/people';
+import { rngOf } from '../../src/core/rng';
 import { addValues } from '../../src/v5/core/values';
 import { FOES } from '../../src/v5/data/foes';
 import { V } from '../../src/v5/data/balance';
@@ -102,6 +106,22 @@ describe('싸움', () => {
     s = reduce5(s, { type: 'answer', index: 0 });
     expect(s.marks.unyielding).toBe(1);
     expect(s.flags).not.toContain(`lostTo:${weak}`);
+  });
+  it('사소한 싸움의 상대는 지금 사는 곳의 위험을 가운데로 뽑힌다: 고향 섬의 아이는 약한 상대를 만난다', () => {
+    const kid = fighter(1); kid.age = V.fight.dangerKidAge; kid.hero.sea = 'nw_late';   // 고향 섬에 있다
+    const away = fighter(1); away.hero.sea = 'nw_late'; away.hero.island = '와노쿠니';
+    const mean = (s: Life5) => { let t = 0; for (let i = 0; i < 50; i++) t += foePower(minorFoe(s, rngOf(s.rng))); return t / 50; };
+    expect(mean(kid) * 3).toBeLessThan(mean(away));
+  });
+  it('쓰러진 적을 동료로 받으면 그 동료는 다음 싸움에 함께 나선다', () => {
+    let s = fighter(2); s.hero.sea = 'gl_first';
+    openTurning(s, TURNING_BY_ID.after_fight);
+    s = reduce5(s, { type: 'answer', index: 2 });
+    const mate = s.people.find((p) => p.kind === 'crew')!;
+    expect(mate.crew).toEqual({ role: V.person.crew.role, level: V.person.crew.level, power: crewPowerFor(3, V.person.crew.level), skills: [], injuredMonths: 0 });
+    askFight(s, weak, false, true);
+    const b = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
+    expect(b.battle.units.some((u) => u.personId === mate.id && u.side === 'L')).toBe(true);
   });
   it('부상은 기록되고 시간이 지나면 낫는다', () => {
     let s = fighter(1); applyFx(s, [{ op: 'injury', severity: 'light' }]);

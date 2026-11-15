@@ -1,10 +1,13 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { FIRST_NAMES } from '../../data/births';
 import { FRUIT_BY_ID, FRUITS } from '../../data/fruits';
+import { SEA_BY_ID } from '../../data/seas';
 import { BRANCH_NAMES } from '../../data/skills';
+import { crewPowerFor } from '../../core/people';
 import { chance, pick, rngOf, weighted } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
+import { STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
 import { askFight } from './fight';
@@ -12,7 +15,7 @@ import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
-import type { Branch, Fx, Life5, StatKey } from './types';
+import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
@@ -54,7 +57,12 @@ function applyOne(s: Life5, e: Fx): void {
     case 'money': h.money = Math.max(0, h.money + e.add); return;
     case 'fame': h.fame = Math.max(0, h.fame + e.add); return;
     case 'rank': h.rank = Math.max(0, h.rank + e.add); return;
-    case 'standing': h.standing = e.to; return;
+    // 처지가 실제로 바뀔 때만 연표에 짧게 남긴다 (한 줄 인생이 이 줄들을 잇는다)
+    case 'standing':
+      if (h.standing === e.to) return;
+      h.standing = e.to;
+      s.timeline.push({ age: s.age, text: STANDING_PHRASE[e.to], standing: e.to });
+      return;
     case 'move': h.island = e.island; h.sea = e.sea; return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); return;
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
@@ -68,11 +76,17 @@ function applyOne(s: Life5, e: Fx): void {
     case 'person': {
       const r = rngOf(s.rng);
       const gender = pick(r, ['m', 'f'] as const);
-      s.people.push({
+      const p: Person = {
         id: `p${s.seq++}`, name: e.name ?? pick(r, FIRST_NAMES[gender]), gender, age: s.age,
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
         bond: V.person.bond, faction: 'civil', species: 'human', alive: true,
-      });
+      };
+      // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
+      if (e.kind === 'crew') {
+        const { role, level } = V.person.crew;
+        p.crew = { role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
+      }
+      s.people.push(p);
       return;
     }
     case 'losePerson': {
@@ -122,6 +136,6 @@ function eatFruit(s: Life5, id: string): void {
     : FRUIT_BY_ID[id];
   if (!f) return;
   s.hero.fruit = { id: f.id, eatenAt: s.age };
-  s.growth.tier.fruit = Math.max(s.growth.tier.fruit, 1);
+  s.growth.tier.fruit = Math.max(s.growth.tier.fruit, V.fruit.startTier);
   logLine(s, `${f.name}을(를) 삼켰다. 몸속에서 낯선 힘이 꿈틀거린다. 다시는 헤엄칠 수 없다.`, 'heavy', 'growth');
 }

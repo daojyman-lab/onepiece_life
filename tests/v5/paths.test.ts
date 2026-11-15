@@ -76,7 +76,7 @@ describe('길과 바다의 데이터', () => {
   it('돈으로 들이는 스승은 넉 단계까지만 가르친다', () => {
     const masters = [...paths, ...people].flatMap((t) => t.doors.flatMap((d) => d.fx)).filter((f) => f.op === 'master');
     expect(masters.some((f) => f.op === 'master' && f.paid)).toBe(true);
-    for (const f of masters) if (f.op === 'master' && f.paid) expect(f.cap).toBeLessThanOrEqual(V.growth.paidCap);
+    for (const f of masters) if (f.op === 'master' && f.paid) expect(f.cap).toBe(V.growth.paidCap);
   });
   it('사관학교는 돈으로 잠기고, 해군 가문은 조건 없이 들어간다', () => {
     const t = TURNINGS.find((x) => x.id === 'path_marine_join')!;
@@ -176,7 +176,7 @@ describe('규칙', () => {
       const f = FRUIT_BY_ID[s.hero.fruit!.id];
       expect(f.canonUser).toBeNull();
       expect(s.hero.fruit!.eatenAt).toBe(20);
-      expect(s.growth.tier.fruit).toBeGreaterThanOrEqual(1);
+      expect(s.growth.tier.fruit).toBe(V.fruit.startTier);
       expect(s.log.at(-1)!.weight).toBe('heavy');
       expect(s.log.at(-1)!.text).toContain(f.name);
       grades.push(f.grade);

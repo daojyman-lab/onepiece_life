@@ -4,7 +4,8 @@ import { V } from '../balance';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
-const kid = (min: number, max: number): Cond[] => [{ c: 'age', min, max }, { c: 'home', is: ['loguetown'] }];
+/** 아직 아이(처지 child)인 로그타운 사람, 이 나이 사이. 열다섯 살이라도 죄수나 해적이면 열리지 않는다 */
+const kid = (min: number, max: number): Cond[] => [{ c: 'age', min, max }, { c: 'home', is: ['loguetown'] }, { c: 'standing', is: ['child'] }];
 
 export const CHILDHOOD: Turning[] = [
   {

@@ -125,6 +125,8 @@ describe('해가 바뀔 때', () => {
       let s = newLife5(seed);
       for (let i = 0; i < 4 * 50 && s.hero.alive; i++) {
         if (s.pending?.kind === 'door') s = reduce5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
+        else if (s.pending?.kind === 'fight') s = reduce5(s, { type: 'answer', index: 1 });   // 물러난다
+        else if (s.pending?.kind === 'battle') s = reduce5(s, { type: 'answer', index: 0 });
         else if (s.pending) break;
         s = reduce5(s, { type: 'step' });
       }

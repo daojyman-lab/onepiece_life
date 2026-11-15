@@ -245,6 +245,13 @@ export function ackBattle(s: Life5): void {
 
 // ---------------------------------------------------------------- 사소한 싸움
 
+/** 이름 없는 상대. 힘은 지금 사는 곳의 위험(dangerOf)을 가운데로 그 위아래 minorSpread만큼에서 뽑는다 */
+export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAMES)): EnemySpec {
+  const mid = dangerOf(s);
+  const half = mid * F.minorSpread;
+  return makeEnemy({ id: 'minor', name, p: int(r, Math.round(mid - half), Math.round(mid + half)) });
+}
+
 /**
  * 이름 없는 상대와의 사소한 싸움. 묻지 않는다: 붙을지는 가치관이 정하고, 화면 없이 돌려 기록 한 줄로 끝난다.
  * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
@@ -254,8 +261,7 @@ export function minorFight(s: Life5, r: Rng): void {
   const line = (k: keyof typeof MINOR_FIGHT_TEXT) => fill(pick(r, MINOR_FIGHT_TEXT[k]), { foe: name });
   const choice = leanPick(s, r, MINOR_FIGHT_CHOICE, (c) => c.lean)!;
   if (!choice.engage) { logLine(s, line('avoid'), 'light', 'battle'); return; }
-  const [lo, hi] = SEA_BY_ID[s.hero.sea].enemyPower;
-  const foe = makeEnemy({ id: 'minor', name, p: int(r, lo, hi) });
+  const foe = minorFoe(s, r, name);
   const won = fightBattle(s, foe).result === 'win';
   s.stats.fights += 1;
   if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }

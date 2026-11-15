@@ -111,7 +111,8 @@ export function answerDoor(s: Life5, index: number): void {
   });
   const key = `${t.id}#${index}`;
   if (!s.tried.includes(key)) s.tried.push(key);
-  s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}` });
+  const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
+  s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
   s.stats.stops += 1;
   s.stopsThisYear += 1;
 

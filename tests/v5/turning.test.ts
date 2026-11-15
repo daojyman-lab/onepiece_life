@@ -92,6 +92,15 @@ describe('전환점 데이터', () => {
     const seen = new Set(kids.flatMap((t) => t.doors.flatMap((d) => Object.keys(d.values ?? {}))));
     expect(seen.size).toBe(9);
   });
+  it('유년기 전환점은 아이에게만 열린다: 열다섯 살 죄수나 뭍의 어른에게는 오지 않는다', () => {
+    for (const t of TURNINGS.filter((x) => x.id.startsWith('kid_'))) expect(t.when, t.id).toContainEqual({ c: 'standing', is: ['child'] });
+    for (let seed = 0; seed < 60; seed++) {
+      for (const standing of ['prisoner', 'civil'] as const) {
+        const s = newLife5(seed); s.pending = null; s.age = 12; s.hero.standing = standing;
+        expect(pickTurning(s, rngOf(s.rng))?.id.startsWith('kid_') ?? false, `${seed} ${standing}`).toBe(false);
+      }
+    }
+  });
 });
 
 describe('전환점의 흐름', () => {

@@ -39,11 +39,13 @@ export const V = {
            hakiLevelPer: 2, hakiLevelMax: 3,  // 전투의 패기 레벨 = min(3, ⌊단계 / 2⌋)
            retreat: { calm: 0.5, usual: 0.3, never: 0 },
            famePerPower: 0.1, minorFame: 1,
-           dangerKidAge: 15 },                // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
+           dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
+           minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
   fame: { bounty: 1000000 },                   // 명성 1 = 현상금(해군은 공적) 100만 베리
   // 아무 열매나 먹을 때 등급(1 쓰레기 ~ 5 전설)마다 뽑힐 가중치. 원작 인물의 열매는 뽑지 않는다
-  fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 } },
+  fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 },
+           startTier: 1 },                     // 열매를 먹으면 열매 갈래가 적어도 이 단계에서 시작한다
   injury: { months: { light: 3, heavy: 9, scar: 0 }, monthsPerPart: 3,   // 흉터(scar)는 낫지 않는다
             statMult: { light: 0.95, heavy: 0.8 },   // 낫지 않은 상처 하나마다 모든 능력치에 곱한다
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
@@ -65,5 +67,10 @@ export const V = {
   birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
   hp: { max: 100 },
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
-  person: { bond: 50, bondMax: 100 },          // 새로 만난 사람의 처음 유대, 유대의 끝
+  person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝
+            // 새 동료의 싸움 자리와 레벨. 힘은 v4 crewPowerFor(지금 바다의 단계, level)
+            crew: { role: 'vanguard', level: 1 } },
+  ending: { knownFame: 10,                     // 이 명성(현상금 1,000만)부터 신문 1면에 실린다. 아래는 고향의 소문
+            bondHigh: 70,                      // 원작 인물의 한마디: 유대가 이만큼이면 가까운 사이의 말
+            canonWords: 3, unchosen: 3, oneLine: 3 },   // 엔딩에 꼽는 원작 인물 · 가지 않은 길 · 한 줄 인생의 처지 변화 수
 } as const;
