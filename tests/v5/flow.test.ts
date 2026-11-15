@@ -1,6 +1,8 @@
 // tests/v5/flow.test.ts
 import { describe, expect, it } from 'vitest';
-import { CLOCK, caughtUp, estimateMinutes, lastLogId, nextHidden, nextTick, type FlowInput } from '../../src/v5/app/flow';
+import { CLOCK, READ_GRACE_MS, caughtUp, estimateMinutes, lastLogId, nextHidden, nextTick, shouldRead, shouldSave, windowReady, type FlowInput } from '../../src/v5/app/flow';
+import { reduce5 } from '../../src/v5/core/reduce';
+import type { Life5 } from '../../src/v5/core/types';
 import { parseImport } from '../../src/v5/app/save';
 import { autoplay5 } from '../../src/v5/core/autoplay';
 import { newLife5 } from '../../src/v5/core/state';
@@ -55,6 +57,67 @@ describe('흐름', () => {
     const avg = lives.reduce((a, s) => a + estimateMinutes(s.seq, s.stats.stops), 0) / lives.length;
     expect(avg).toBeGreaterThan(25); expect(avg).toBeLessThan(45);
   }, 120000);
+});
+
+describe('읽는 동안 멈춤', () => {
+  const free = READ_GRACE_MS + 1;
+  it('마우스가 이야기 칸 안에서 실제로 움직여야 멈춘다', () => {
+    expect(shouldRead({ pointerType: 'mouse', moved: true, msSinceWindowClosed: free })).toBe(true);
+    expect(shouldRead({ pointerType: 'mouse', moved: false, msSinceWindowClosed: free })).toBe(false);   // 창이 닫혀 커서가 그 자리에 놓였을 뿐
+  });
+  it('창이 닫힌 뒤 잠깐은 움직여도 멈추지 않는다', () => {
+    expect(READ_GRACE_MS).toBe(600);
+    expect(shouldRead({ pointerType: 'mouse', moved: true, msSinceWindowClosed: 0 })).toBe(false);
+    expect(shouldRead({ pointerType: 'mouse', moved: true, msSinceWindowClosed: READ_GRACE_MS - 1 })).toBe(false);
+    expect(shouldRead({ pointerType: 'mouse', moved: true, msSinceWindowClosed: READ_GRACE_MS })).toBe(true);
+    expect(shouldRead({ pointerType: 'mouse', moved: true, msSinceWindowClosed: Infinity })).toBe(true);   // 창이 닫힌 적이 없다
+  });
+  it('손가락과 펜으로는 멈추지 않는다', () => {
+    for (const pointerType of ['touch', 'pen', ''])
+      expect(shouldRead({ pointerType, moved: true, msSinceWindowClosed: free })).toBe(false);
+  });
+});
+
+describe('창이 뜨는 때', () => {
+  const life = newLife5(1);                       // 첫 문이 떠 있다
+  const last = lastLogId(life);
+  it('마지막 줄이 떠오르고 잠깐 뒤에 창이 뜬다', () => {
+    expect(CLOCK.windowDelayMs).toBe(700);
+    expect(windowReady(life, last, 0, 1)).toBe(false);
+    expect(windowReady(life, last, CLOCK.windowDelayMs - 1, 1)).toBe(false);
+    expect(windowReady(life, last, CLOCK.windowDelayMs, 1)).toBe(true);
+  });
+  it('기다리는 시간은 배속만큼 준다', () => {
+    expect(windowReady(life, last, CLOCK.windowDelayMs / 4, 4)).toBe(true);
+    expect(windowReady(life, last, CLOCK.windowDelayMs / 4 - 1, 4)).toBe(false);
+    expect(windowReady(life, last, CLOCK.windowDelayMs, 0)).toBe(true);    // 정지 중이면 1배속만큼
+  });
+  it('기록이 다 떠오르지 않았으면 뜨지 않는다', () => {
+    expect(windowReady(life, last - 1, Infinity, 1)).toBe(false);
+    expect(windowReady(null, -1, Infinity, 1)).toBe(false);
+  });
+  it('불러온 인생(불러온 뒤 떠오른 줄이 없다)은 곧바로 뜬다', () => {
+    expect(windowReady(life, last, Infinity, 1)).toBe(true);
+  });
+});
+
+describe('저장하는 때', () => {
+  it('답한 뒤에는 저장한다', () => {
+    const prev = newLife5(1);
+    const next = reduce5(prev, { type: 'answer', index: 0 });
+    expect(shouldSave(prev, next, { type: 'answer', index: 0 })).toBe(true);
+  });
+  it('나이가 바뀌었거나 떠 있는 일이 생긴 토막 뒤에는 저장한다', () => {
+    const prev: Life5 = { ...newLife5(1), pending: null };
+    expect(shouldSave(prev, { ...prev, age: prev.age + 1 }, { type: 'step' })).toBe(true);
+    expect(shouldSave(prev, { ...prev, pending: { kind: 'ending', cause: '시험' } }, { type: 'step' })).toBe(true);
+  });
+  it('그저 흐른 토막 뒤에는 저장하지 않는다', () => {
+    const prev: Life5 = { ...newLife5(1), pending: null };
+    expect(shouldSave(prev, { ...prev, part: 1 }, { type: 'step' })).toBe(false);
+    const waiting = newLife5(1);                  // 이미 떠 있던 일은 새로 생긴 것이 아니다
+    expect(shouldSave(waiting, waiting, { type: 'step' })).toBe(false);
+  });
 });
 
 describe('가져오기', () => {

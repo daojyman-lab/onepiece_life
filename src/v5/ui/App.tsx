@@ -1,7 +1,7 @@
 // v5 화면의 뿌리. 시작 화면이거나 인생이 없으면 Start, 아니면 Main. (v4 src/ui/App.tsx와 같은 짜임)
 import { useEffect } from 'preact/hooks';
 import { music, sfx } from '../../app/sound';
-import { caughtUp } from '../app/flow';
+import { windowReady } from '../app/flow';
 import { actions, useStore } from '../app/store';
 import type { Standing } from '../core/types';
 import { BattleModal } from './modals/BattleModal';
@@ -20,7 +20,8 @@ export function App() {
   const st = useStore();
   const s = st.life;
   const p = s?.pending ?? null;
-  const ready = !!s && caughtUp(s, st.shownId);
+  // 창은 기록이 다 떠오르고, 마지막 줄을 읽을 틈(CLOCK.windowDelayMs ÷ 배속)이 지난 뒤에 뜬다. 그때 store가 다시 그리게 한다
+  const ready = windowReady(s, st.shownId, performance.now() - st.revealedAt, st.settings.speed);
   // 배경음악: 싸움 창이 떠 있으면 전투곡, 바다의 처지는 바다, 시작 화면과 뭍의 처지는 잔잔한 곡
   const bgm = st.screen !== 'main' || !s ? 'home'
     : ready && p && (p.kind === 'fight' || p.kind === 'battle') ? 'battle'
@@ -33,7 +34,7 @@ export function App() {
     else if (popup && p?.kind === 'ending') sfx('lose');
   }, [popup]);
   if (st.screen === 'start' || !s) return <><Start /><SoundToggles /><Toasts /></>;
-  // 떠 있는 일(문 · 싸움 · 엔딩)의 창: 기록이 다 떠오른 뒤에 뜬다. 창을 닫는 길은 답하는 것뿐이다
+  // 떠 있는 일(문 · 싸움 · 엔딩)의 창: 기록이 다 떠오르고 잠깐 뒤에 뜬다. 창을 닫는 길은 답하는 것뿐이다
   let pendingView = null;
   if (!ready) { /* 기다린다 */ }
   else if (p?.kind === 'door') pendingView = <DoorModal key={popup} s={s} p={p} />;

@@ -1,8 +1,8 @@
 // v5 본 화면: 데스크톱은 세 칸(인물 · 장면과 이야기 · 인연과 연표), 휴대폰(760px 이하)은 탭 넷. (v4 src/ui/screens/Main.tsx와 같은 마크업 · 클래스)
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { drawScene, type SceneInput } from '../../../ui/pixel/pixelArt';
-import { caughtUp } from '../../app/flow';
-import { actions, useStore } from '../../app/store';
+import { caughtUp, shouldRead } from '../../app/flow';
+import { actions, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
 import { Face, Gauge, Panel } from '../common';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, timelineView, yearLabel } from '../view';
@@ -217,6 +217,12 @@ function StoryPanel({ s }: { s: Life5 }) {
     else if (el.scrollTop < lastTop.current) stick.current = false;
     lastTop.current = el.scrollTop;
   };
+  // 마우스가 칸 안에서 실제로 움직일 때만 멈춘다(flow.ts shouldRead). 창이 닫혀 커서가 그 자리에 놓였을 뿐이면 흐름은 이어진다
+  const onPointerMove = (e: PointerEvent) => {
+    if (st.reading) return;
+    const moved = e.movementX !== 0 || e.movementY !== 0;   // 화면이 바뀌어 생긴 가짜 움직임은 0이다
+    if (shouldRead({ pointerType: e.pointerType, moved, msSinceWindowClosed: msSinceWindowClosed() })) actions.setReading(true);
+  };
   const idle = st.settings.speed !== 0 && !st.reading && waiting === 0 && !s.pending;
   const status = st.settings.speed === 0 ? '❚❚ 정지 중 — ▶ 를 누르면 이야기가 이어진다'
     : st.reading ? '❚❚ 읽는 동안 멈춰 있다'
@@ -232,7 +238,7 @@ function StoryPanel({ s }: { s: Life5 }) {
       </div>
     }>
       <div class="story" ref={box} onScroll={onScroll} aria-live="polite"
-        onPointerEnter={(e) => { if (e.pointerType === 'mouse') actions.setReading(true); }} onPointerLeave={() => actions.setReading(false)}>
+        onPointerMove={onPointerMove} onPointerLeave={() => actions.setReading(false)}>
         {items.map((l) => l.weight === 'year'
           ? <div key={l.id} class={`story-year ${l.id === newest ? 'rise' : ''}`}>{yearLabel(l)}</div>
           : <div key={l.id} class={`line ${l.weight} ${l.id === newest ? 'rise' : ''}`}>{l.text}</div>)}

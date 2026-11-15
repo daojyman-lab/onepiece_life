@@ -11,8 +11,10 @@ export function MenuModal() {
     if (!f) return;
     const res = await importFile(f);
     input.value = '';
-    if (res.error) actions.toast(res.error);
-    else actions.replace(res.life, res.meta);
+    if (res.error) { actions.toast(res.error); return; }
+    // 진행 중인 인생을 갈아 끼우기 전에 묻는다 (도감은 물음 없이 통째로 바뀐다)
+    if (res.life && getState().life && !confirm('진행 중인 인생을 버리고 가져온 인생으로 바꿀까? (되돌릴 수 없다)')) return;
+    actions.replace(res.life, res.meta);
   }
   return (
     <Modal title="메뉴" onClose={() => actions.close()}>
