@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, codexView, hallView, heroWho5, matchWord, profileView, riskWords, sceneOf, speakerOf, storyLines, timelineView, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, codexView, doorView, fightView, hallView, heroWho5, matchWord, profileView, riskWords, sceneOf, speakerOf, storyLines, timelineView, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { askFight } from '../../src/v5/core/fight';
+import { VALUE_NAME } from '../../src/v5/data/values';
+import type { Pending5 } from '../../src/v5/core/types';
 import { newLife5 } from '../../src/v5/core/state';
 import { addValues } from '../../src/v5/core/values';
 import { autoplay5 } from '../../src/v5/core/autoplay';
@@ -14,6 +17,10 @@ describe('나이를 말로', () => {
   it('해 구분선', () => {
     expect(yearLabel({ age: 17, island: '로그타운' })).toBe('열일곱 살 · 로그타운');
     expect(yearLabel({ age: 17 })).toBe('열일곱 살');
+  });
+  it('0살은 갓난아기', () => {
+    expect(ageWord(0)).toBe('갓난아기');
+    expect(yearLabel({ age: 0, island: '푸샤 마을' })).toBe('갓난아기 · 푸샤 마을');
   });
 });
 
@@ -63,6 +70,42 @@ describe('싸움 앞에서 보이는 말', () => {
     const weak = newLife5(1);
     for (const k of Object.keys(weak.hero.base)) weak.hero.base[k as keyof typeof weak.hero.base] = 1;
     expect(matchWord(weak, foe)).toBe('상대가 안 된다');
+  });
+});
+
+describe('선택 창과 싸움 앞의 물음', () => {
+  it('문 표시: 특별한 문, 전에 골라 본 문, 위험, 잠긴 까닭', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const p = { ...s.pending, moment: true, doors: [
+      { label: '가', hint: '힌트', locked: null, special: true, tried: true, danger: true },
+      { label: '나', hint: '힌트2', locked: '돈이 모자라다', special: false, tried: false, danger: false },
+    ] };
+    const v = doorView(s, p);
+    expect(v.heading.startsWith('큰 계기')).toBe(true);
+    expect(v.doors[0].tags).toEqual(['특별한 문', '전에 골라 본 문', '위험']);
+    expect(v.doors[1]).toMatchObject({ index: 1, locked: '돈이 모자라다', tags: [] });
+  });
+  it('선택 창의 자료에 가치관 이름이 새어 나가지 않는다', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      const s = newLife5(seed); if (s.pending?.kind !== 'door') continue;
+      const v = doorView(s, s.pending);
+      for (const d of v.doors) for (const t of d.tags) expect(Object.values(VALUE_NAME)).not.toContain(t);
+    }
+  });
+  it('싸움 앞: 목숨을 걸지 않으면 죽을 위험은 없다', () => {
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;   // as: 아래 askFight 뒤에도 null로 좁혀지지 않게
+    askFight(s, Object.keys(FOES)[0], true, false);
+    if (s.pending?.kind !== 'fight') throw new Error();
+    const v = fightView(s, { ...s.pending, lethal: false, risk: { injury: 0.5, limb: 0.1, death: 0 } });
+    expect(v.risk.map((r) => r.word)).toEqual(['매우 높다', '낮다', '없다']);
+    expect(v.name.length).toBeGreaterThan(0);
+  });
+  it('잠긴 문의 힌트 자리에는 잠긴 까닭, 큰 계기가 아니면 제목만', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const p = { ...s.pending, moment: false, doors: [{ label: '나', hint: '힌트2', locked: '돈이 모자라다', special: false, tried: false, danger: false }] };
+    const v = doorView(s, p);
+    expect(v.heading).toBe(p.title);
+    expect(v.doors[0].hint).toBe('✕ 돈이 모자라다');
   });
 });
 
@@ -116,7 +159,7 @@ describe('연표', () => {
       { age: 17, text: '바다로 나갔다' },
     ];
     expect(timelineView(s)).toEqual([
-      { age: '0살', text: '태어났다' },
+      { age: '갓난아기', text: '태어났다' },
       { age: '열일곱 살', text: '바다로 나갔다' },
       { age: '열여덟 살', text: '바다로 나갔다' },
       { age: '열일곱 살', text: '바다로 나갔다' },

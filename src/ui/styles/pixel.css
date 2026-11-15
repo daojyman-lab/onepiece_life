@@ -328,3 +328,18 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .app.mobile.m5 .story-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .app.mobile.m5 .story-panel .story { flex: 1; height: auto; min-height: 120px; }
 .m-nav.four { grid-template-columns: repeat(4, 1fr); }
+/* 떠 있는 일의 창(선택 · 싸움): 창이 화면 안에 들고, 본문과 문 목록이 창 안에서 스크롤한다 */
+.modal.pend { max-height: calc(100vh - 56px); max-height: calc(100dvh - 56px); display: flex; flex-direction: column; }
+.modal.pend > .head, .modal.pend > .speaker, .modal.pend > .pend-foot { flex: none; }
+.modal.pend .speaker .scroll { max-height: 34vh; max-height: 34dvh; overflow-y: auto; scrollbar-width: thin; }
+.pend-doors { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; margin-top: 8px; padding: 0 2px 2px 12px; }
+.pend-foot { margin-top: 6px; }
+/* 큰 계기: 창 테두리가 붉다 */
+.modal.moment { border-color: var(--red); box-shadow: 0 0 0 var(--px) var(--red-d), inset 0 0 0 2px var(--gold), 6px 6px 0 var(--px) var(--shadow); }
+@media (max-width: 760px) {
+  .modal.pend { max-height: calc(100vh - 88px - env(safe-area-inset-bottom)); max-height: calc(100dvh - 88px - env(safe-area-inset-bottom)); }
+  .modal.pend .speaker .face.big { width: 64px; height: 64px; }
+  .modal.pend .speaker .scroll { max-height: 26dvh; }
+}
+/* 휴대폰에는 마우스가 없으니 '마우스를 올려 두면 멈춘다'를 내지 않는다 */
+.app.mobile .story-idle { display: none; }

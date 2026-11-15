@@ -128,14 +128,15 @@ function TopBar({ s }: { s: Life5 }) {
 function Profile({ s }: { s: Life5 }) {
   const st = useStore();
   const p = profileView(s);
-  const age = shownAt(s, st.shownId).age;
+  const at = shownAt(s, st.shownId);
+  const age = at.age;
   return (
     <Panel title="인물">
       <div class="poster">
         <div class="wanted">{WANTED_LABEL[s.hero.standing] ?? 'PROFILE'}</div>
         <Face who={{ ...heroWho5(s), age }} size="big" />
         <div class="t14"><b>{p.name}</b></div>
-        <div class="t9 soft">{ageWord(age)} · {p.island}</div>
+        <div class="t9 soft">{yearLabel(at)}</div>
         <div class="row" style={{ justifyContent: 'center', marginTop: 4 }}><span class="tag">{p.standing}</span></div>
         {p.fame && <div style={{ marginTop: 4 }}><b>{p.fame}</b></div>}
       </div>
@@ -204,11 +205,14 @@ function StoryPanel({ s }: { s: Life5 }) {
     const el = box.current;
     if (el && stick.current) el.scrollTop = el.scrollHeight;
   }, [newest, onlyHeavy]);
+  // 마우스를 올린 채 칸이 사라지면(탭 바꿈 · 화면 바꿈) 멈춤이 남지 않게 푼다
+  useEffect(() => () => actions.setReading(false), []);
   const onScroll = () => {
     const el = box.current;
     if (!el) return;   // 휴대폰에서 탭을 바꾸는 순간 이야기 칸이 사라질 수 있다
     stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
   };
+  const idle = st.settings.speed !== 0 && !st.reading && waiting === 0 && !s.pending;
   const status = st.settings.speed === 0 ? '❚❚ 정지 중 — ▶ 를 누르면 이야기가 이어진다'
     : st.reading ? '❚❚ 읽는 동안 멈춰 있다'
     : waiting > 0 ? `이야기가 이어지는 중… (${waiting}줄)`
@@ -229,7 +233,7 @@ function StoryPanel({ s }: { s: Life5 }) {
           : <div key={l.id} class={`line ${l.weight} ${l.id === newest ? 'rise' : ''}`}>{l.text}</div>)}
       </div>
       <div class="row between t9" style={{ marginTop: 4 }}>
-        <span class="soft">{status}</span>
+        <span class={`soft ${idle ? 'story-idle' : ''}`}>{status}</span>
         {waiting > 0 && <button class="btn small" onClick={() => actions.showAll()}>▶▶ 바로 보기</button>}
       </div>
     </Panel>

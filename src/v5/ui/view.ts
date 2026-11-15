@@ -36,8 +36,9 @@ const HEAVY: ReadonlySet<LogLine['weight']> = new Set(['heavy', 'year']);
 const ONES = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'];
 const TENS = ['', '열', '스물', '서른', '마흔', '쉰', '예순', '일흔', '여든', '아흔'];
 
-/** 3 → '세 살', 20 → '스무 살', 21 → '스물한 살'. 100 이상(과 1 미만)은 숫자로 '100살' */
+/** 0 → '갓난아기', 3 → '세 살', 20 → '스무 살', 21 → '스물한 살'. 100 이상은 숫자로 '100살' */
 export function ageWord(n: number): string {
+  if (n === 0) return '갓난아기';
   if (n < 1 || n >= 100) return `${n}살`;
   const t = Math.floor(n / 10), o = n % 10;
   const word = n === 20 ? '스무' : TENS[t] + ONES[o];
@@ -168,6 +169,45 @@ export function riskWords(risk: { injury: number; limb: number; death: number })
 /** 상대의 격: 상대의 힘 ÷ 내 힘으로 '한참 아래다' ~ '상대가 안 된다' */
 export function matchWord(s: Life5, foe: EnemySpec): string {
   return bandWord(gapOf(s, foe), MATCH_WORDS, MATCH_TOP);
+}
+
+export interface FightView { name: string; who: Who; match: string; lethal: boolean; risk: { label: string; word: string }[] }
+
+/** 싸움 앞의 물음: 상대, 상대의 격, 위험 세 줄. 목숨을 걸지 않은 싸움은 죽을 위험이 '없다' */
+export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): FightView {
+  const w = riskWords(p.risk);
+  return {
+    name: p.foe.name, who: foeWho(p.foe), match: matchWord(s, p.foe), lethal: p.lethal,
+    risk: [
+      { label: '다칠 위험', word: w.injury },
+      { label: '몸을 잃을 위험', word: w.limb },
+      { label: '죽을 위험', word: p.lethal ? w.death : RISK_NONE },
+    ],
+  };
+}
+
+// ── 선택 창 ──
+export interface DoorView {
+  heading: string;                     // 큰 계기면 '큰 계기 · {제목}', 아니면 제목
+  moment: boolean; speaker: { name: string; who: Who }; body: string;
+  doors: { index: number; label: string; hint: string; locked: string | null; tags: string[] }[];
+}
+
+/** 선택 창의 자료. 문 옆에는 '전에 골라 본 문' 같은 표시만 붙고, 문이 올리는 가치관은 싣지 않는다 */
+export function doorView(s: Life5, p: Extract<Pending5, { kind: 'door' }>): DoorView {
+  const sp = speakerOf(s, p);
+  const isHero = TURNING_BY_ID[p.turning]?.speaker === 'hero';
+  return {
+    heading: p.moment ? `큰 계기 · ${p.title}` : p.title,
+    moment: p.moment,
+    speaker: { name: isHero ? `${sp.name} (나)` : sp.name, who: sp.who },
+    body: p.body,
+    doors: p.doors.map((d, index) => ({
+      index, label: d.label, locked: d.locked,
+      hint: d.locked ? `✕ ${d.locked}` : d.hint,
+      tags: [d.special && '특별한 문', d.tried && '전에 골라 본 문', d.danger && '위험'].filter((t): t is string => !!t),
+    })),
+  };
 }
 
 // ── 장면 ──
