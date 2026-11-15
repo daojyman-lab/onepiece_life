@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, heroWho5, matchWord, profileView, riskWords, speakerOf, storyLines, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, codexView, hallView, heroWho5, matchWord, profileView, riskWords, speakerOf, storyLines, valueWords, yearLabel } from '../../src/v5/ui/view';
 import { newLife5 } from '../../src/v5/core/state';
 import { addValues } from '../../src/v5/core/values';
 import { autoplay5 } from '../../src/v5/core/autoplay';
+import { emptyMeta5, recordLife } from '../../src/v5/core/meta';
 import { V } from '../../src/v5/data/balance';
 import { FOES } from '../../src/v5/data/foes';
 
@@ -84,5 +85,22 @@ describe('말하는 사람', () => {
   });
   it('주인공의 겉모습 열쇠는 인생마다 같다', () => {
     expect(heroWho5(newLife5(9)).key).toBe(heroWho5(newLife5(9)).key);
+  });
+});
+
+describe('도감과 명예의 전당', () => {
+  it('도감은 문을 제목과 이름, 가치관 이름으로 푼다', () => {
+    const s = autoplay5(11, 'random').s;
+    const meta = recordLife(emptyMeta5(), s);
+    const c = codexView(meta);
+    expect(c.doors.length).toBeGreaterThan(0);
+    for (const d of c.doors) { expect(d.title).not.toContain('#'); expect(JSON.stringify(d.values)).not.toMatch(/\d/); }
+    expect(codexView({ ...meta, doors: { 'no_such#0': [] } }).doors).toEqual([]);
+  });
+  it('명예의 전당은 최근 인생이 위다', () => {
+    let meta = emptyMeta5();
+    meta = recordLife(meta, autoplay5(1, 'random').s); meta = recordLife(meta, autoplay5(2, 'random').s);
+    const h = hallView(meta);
+    expect(h.length).toBe(2); expect(h[0].name).toBe(meta.hall[1].name);
   });
 });

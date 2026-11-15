@@ -1,17 +1,18 @@
 // 화면에 나갈 말: 인생 상태를 화면이 그대로 그릴 수 있는 글과 그림 자료로 바꾼다.
 // Preact도 DOM도 쓰지 않는다 (Node에서 시험한다). 가치관 점수는 숫자로 내지 않고 말로만 바꾼다.
 import { josa } from '../../core/josa';
-import { fmtMoney } from '../../core/util';
+import { fill, fmtMoney } from '../../core/util';
 import { FRUIT_BY_ID } from '../../data/fruits';
 import { SEA_BY_ID } from '../../data/seas';
 import { weaponOfSkills, type SceneInput, type Weapon, type Who } from '../../ui/pixel/pixelArt';
 import { fullName } from '../core/birth';
 import { LIMB_NAME, LIMBS } from '../core/body';
 import { gapOf } from '../core/fight';
+import type { Meta5 } from '../core/meta';
 import { isDeep, topValues } from '../core/values';
 import { V } from '../data/balance';
 import { STRENGTHS } from '../data/strengths';
-import { TURNING_BY_ID } from '../data/turnings';
+import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
 import { VALUE_NAME } from '../data/values';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, STANDING_NAME, TIER_WORD, WEALTH_NAME,
@@ -193,4 +194,45 @@ export function sceneOf(s: Life5): SceneInput {
 /** 떠오른 줄(id ≤ shownId) 가운데 마지막 160줄. onlyHeavy면 가벼운 줄을 뺀다 (해 구분선은 남긴다) */
 export function storyLines(s: Life5, shownId: number, onlyHeavy: boolean): LogLine[] {
   return s.log.filter((l) => l.id <= shownId && (!onlyHeavy || HEAVY.has(l.weight))).slice(-STORY_KEEP);
+}
+
+// ── 도감 · 명예의 전당 ──
+/** 도감에는 지금 인생이 없으므로 문 이름의 자리표시를 이 말로 채운다 */
+const CODEX_FILL = { name: '나', town: '고향', island: '그 섬' };
+
+/** 원작 인물 id → 이름. 전환점의 '사람을 만난다' 효과에 적힌 이름에서 모은다 */
+const CANON_NAME: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const t of TURNINGS) for (const fx of [...(t.fx ?? []), ...t.doors.flatMap((d) => d.fx)]) {
+    if (fx.op === 'person' && fx.canon && fx.name && !out[fx.canon]) out[fx.canon] = fx.name;
+  }
+  return out;
+})();
+
+export interface CodexView { doors: { title: string; door: string; values: string[] }[]; fruits: string[]; people: string[]; lives: number }
+
+/** 도감: 골라 본 문(전환점 제목 · 문 이름 · 올린 가치관 이름, 제목 순), 먹어 본 열매, 만난 인물. 데이터에 없는 문은 건너뛴다 */
+export function codexView(meta: Meta5): CodexView {
+  const doors = Object.entries(meta.doors).flatMap(([key, values]) => {
+    const [id, i] = key.split('#');
+    const t = TURNING_BY_ID[id];
+    const d = t?.doors[Number(i)];
+    if (!t || !d) return [];
+    return [{ title: t.title, door: fill(d.label, CODEX_FILL), values: values.map((v) => VALUE_NAME[v]).filter(Boolean), i: Number(i) }];
+  });
+  doors.sort((a, b) => a.title.localeCompare(b.title, 'ko') || a.i - b.i);
+  return {
+    doors: doors.map(({ title, door, values }) => ({ title, door, values })),
+    fruits: meta.fruits.map((id) => FRUIT_BY_ID[id]?.name ?? id),
+    people: meta.people.map((id) => CANON_NAME[id] ?? id),
+    lives: meta.lives,
+  };
+}
+
+/** 명예의 전당: 최근 인생이 위. end는 '일흔두 살, 노환' (끝난 까닭이 없으면 나이만) */
+export function hallView(meta: Meta5): { name: string; persona: string; oneLine: string; end: string }[] {
+  return [...meta.hall].reverse().map((h) => ({
+    name: h.name, persona: h.persona, oneLine: h.oneLine,
+    end: h.cause ? `${ageWord(h.age)}, ${h.cause}` : ageWord(h.age),
+  }));
 }

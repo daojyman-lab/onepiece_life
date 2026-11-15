@@ -60,4 +60,16 @@ describe('가져오기', () => {
     const r = parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: bad, meta: emptyMeta5() }));
     expect(r.life).toBeNull(); expect(r.error).toBeTruthy();
   });
+  it('인생도 v5 도감도 없는 v5 파일은 이유를 알려 준다', () => {
+    const r = parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: null, meta: null }));
+    expect(r.life).toBeNull(); expect(r.meta).toBeNull(); expect(r.error).toBeTruthy();
+    expect(parseImport(JSON.stringify({ app: 'grand-treasure', version: 5 })).error).toBeTruthy();
+    expect(parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: null, meta: { schema: 4, lives: 3 } })).error).toBeTruthy();
+  });
+  it('v5가 아닌 도감은 버린다', () => {
+    const r = parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: newLife5(2), meta: { schema: 4, lives: 3 } }));
+    expect(r.life?.rng.seed).toBe(2); expect(r.meta).toBeNull(); expect(r.error).toBeUndefined();
+    expect(parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: newLife5(2), meta: '글자' })).meta).toBeNull();
+    expect(parseImport(JSON.stringify({ app: 'grand-treasure', version: 5, life: null, meta: emptyMeta5() })).meta?.schema).toBe(5);
+  });
 });

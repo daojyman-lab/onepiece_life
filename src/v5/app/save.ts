@@ -68,6 +68,7 @@ export function parseImport(text: string): { life: Life5 | null; meta: Meta5 | n
   }
   const m = d.meta as { schema?: unknown } | null | undefined;
   const meta = typeof m === 'object' && m !== null && m.schema === 5 ? normalizeMeta5(m) : null;
+  if (!life && !meta) return { life: null, meta: null, error: '파일에 이어 갈 인생도 도감도 없다' };
   return { life, meta };
 }
 
