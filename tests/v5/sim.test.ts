@@ -1,13 +1,17 @@
 // tests/v5/sim.test.ts
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { autoplay5 } from '../../src/v5/core/autoplay';
 import { topValues } from '../../src/v5/core/values';
 import { VALUE_IDS } from '../../src/v5/data/values';
 import type { Life5 } from '../../src/v5/core/types';
 
 const N = 600;
-const runs = Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'random'));
-const lives = runs.map((r) => r.s);
+let runs: ReturnType<typeof autoplay5>[] = [];
+let lives: Life5[] = [];
+beforeAll(() => {
+  runs = Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'random'));
+  lives = runs.map((r) => r.s);
+}, 300_000);
 const avg = (f: (s: Life5) => number, xs = lives) => xs.reduce((a, s) => a + f(s), 0) / xs.length;
 const topTier = (s: Life5) => Math.max(...Object.values(s.growth.tier));
 const rate = (xs: Life5[], f: (s: Life5) => boolean) => xs.filter(f).length / Math.max(1, xs.length);

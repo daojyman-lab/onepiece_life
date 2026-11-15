@@ -4,7 +4,7 @@ import { chance, pick, rngOf, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { TURNING_BY_ID } from '../data/turnings';
 import { birthHardship } from './birth';
-import { invariants5, reduce5 } from './reduce';
+import { apply5, invariants5 } from './reduce';
 import { newLife5 } from './state';
 import { topValues } from './values';
 import type { Life5, Lineage, ValueId, Wealth } from './types';
@@ -58,7 +58,7 @@ export function autoplay5(seed: number, policy: Policy = 'random', opt: { wealth
   const violations: string[] = [];
   for (let i = 0; i < MAX_STEPS; i++) {
     if (s.pending?.kind === 'ending') return { s, stuck: false, violations };
-    s = s.pending ? reduce5(s, { type: 'answer', index: choose(s, policy, r) }) : reduce5(s, { type: 'step' });
+    apply5(s, s.pending ? { type: 'answer', index: choose(s, policy, r) } : { type: 'step' });   // 이 상태는 autoplay5의 것이다
     for (const v of invariants5(s)) if (violations.length < 20) violations.push(`${s.age}살: ${v}`);
   }
   return { s, stuck: s.pending?.kind !== 'ending', violations };
