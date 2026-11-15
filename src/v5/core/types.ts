@@ -127,7 +127,9 @@ export interface Turning {
 }
 export interface Minor {
   id: string; when: Cond[]; weight: number; cooldownYears: number;
-  outcomes: { lean: Partial<Values>; text: string[]; fx: Fx[] }[];   // lean이 빈 객체면 누구나
+  needs?: Need[];                              // 안 맞으면 이 일은 일어나지 않는다
+  // lean이 빈 객체면 누구나. needs · when이 안 맞는 결과는 고르지 않는다 (when: 반대쪽 가치관이 깊으면 빼는 데 쓴다)
+  outcomes: { lean: Partial<Values>; text: string[]; fx: Fx[]; needs?: Need[]; when?: Cond[] }[];
 }
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =

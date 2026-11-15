@@ -3,12 +3,13 @@ import { BRANCH_NAMES } from '../../data/skills';
 import { TALENT_BY_ID } from '../../data/talents';
 import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
-import { LINES } from '../data/lines';
+import { LINES, type DailyLine5 } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { checkAll } from './cond';
 import { familyYear } from './family';
 import { minorFight } from './fight';
+import { needsOk } from './needs';
 import { rollFortune, rollMisfortune } from './fortune';
 import { canUse } from './body';
 import { addMastery, fillText, tierCap } from './fx';
@@ -171,9 +172,14 @@ function talentMult(s: Life5, b: Branch): number {
 function dailyLine(s: Life5, act: Activity, r: Rng): void {
   if (!chance(r, isQuiet(s) ? V.lines.quietDailyP : V.lines.dailyP)) return;
   const fits = (lean: Partial<Record<ValueId, number>>) => VALUE_IDS.some((id) => (lean[id] ?? 0) > 0 && (LEAN[id][act] ?? 0) > 0);
-  const pool = LINES.filter((l) => checkAll(s, l.when) && !isRecent(s, fillText(s, l.text)));
+  const pool = LINES.filter((l) => lineFits(s, l) && !isRecent(s, fillText(s, l.text)));
   const line = leanPick(s, r, pool, (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
   if (line) dayLine(s, fillText(s, line.text));
+}
+
+/** 이 사람에게 이 기록 줄이 맞는가: 조건(when)과 글이 전제하는 것(needs) */
+export function lineFits(s: Life5, l: DailyLine5): boolean {
+  return checkAll(s, l.when) && needsOk(s, l.needs);
 }
 
 /** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. */

@@ -4,18 +4,9 @@ import { TURNINGS } from '../../src/v5/data/turnings';
 import { VALUE_NAME } from '../../src/v5/data/values';
 import { RELATION_KIND } from '../../src/v5/data/words';
 import type { Fx, Need } from '../../src/v5/core/types';
+import { WORD_NEEDS } from './wordNeeds';
 
 const doorTurnings = TURNINGS.filter((t) => t.kind === 'door' || t.kind === 'moment' || t.kind === 'fortune');
-/** 낱말의 첫머리: 앞이 한글이 아니다 (받아들인다의 '아들', 쫓아내다의 '아내'를 거른다) */
-const W = '(?<=^|[^가-힣])';
-/** 글에 이 낱말이 나오면 이 필요가 적혀 있어야 한다 */
-const WORD_NEEDS: [RegExp, Need][] = [
-  [new RegExp(`${W}동료(들)?(을|를|이|가|에게|와|과|의)`), 'crew'],
-  [new RegExp(`${W}(아내|남편|배우자)`), 'spouse'],
-  [new RegExp(`자식|(?<=^|[^가-힣]|큰|작은|막내|외동)(아들|딸(?![기깍꾹랑]))`), 'child'],
-  [new RegExp(`동생|형제|${W}누이(?![다고며는던])|오빠|언니|누나`), 'sibling'],
-  [/헤엄|(바다|물)(에|로) 뛰어|바다 밑으로|물속으로/, 'swim'],
-];
 /** 낱말은 나오지만 그 필요가 아닌 경우 (전환점 id → 걸리지 않게 할 필요와 까닭). 여기에 더할 때는 까닭을 적는다 */
 const EXEMPT: Record<string, { need: Need; why: string }> = {
   after_fight: { need: 'crew', why: '「동료가 되라고 손을 내민다」는 쓰러뜨린 적을 동료로 얻는 문이다' },

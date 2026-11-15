@@ -5,6 +5,7 @@ import { MINORS } from '../data/minors';
 import { checkAll } from './cond';
 import { applyFx } from './fx';
 import { dayLine, isRecent } from './log';
+import { needsOk } from './needs';
 import { leanPick } from './values';
 import type { Life5, Minor } from './types';
 
@@ -20,9 +21,10 @@ function cooledDown(s: Life5, m: Minor): boolean {
  * 고른 결과의 글이 모두 최근에 낸 것이면 이 토막에는 일이 일어나지 않는다
  */
 export function runMinor(s: Life5, r: Rng): boolean {
-  const m = weighted(r, MINORS.filter((x) => checkAll(s, x.when) && cooledDown(s, x)), (x) => x.weight);
+  const m = weighted(r, MINORS.filter((x) => checkAll(s, x.when) && needsOk(s, x.needs) && cooledDown(s, x)), (x) => x.weight);
   if (!m) return false;
-  const out = leanPick(s, r, m.outcomes, (o) => o.lean)!;
+  const out = leanPick(s, r, m.outcomes.filter((o) => checkAll(s, o.when) && needsOk(s, o.needs)), (o) => o.lean);
+  if (!out) return false;
   const texts = out.text.map((t) => fill(t, { name: s.hero.name, town: s.hero.town, island: s.hero.island })).filter((t) => !isRecent(s, t));
   if (texts.length === 0) return false;
   dayLine(s, pick(r, texts));
