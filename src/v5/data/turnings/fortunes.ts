@@ -19,7 +19,7 @@ export const FORTUNES: Turning[] = [
     title: '숨어 사는 영웅', body: '바닷가 오두막에 숨어 사는 늙은 해군 영웅이 {name}의 눈빛을 오래 들여다본다. 제자를 받지 않는다던 사람이다.',
     doors: [
       { label: '가르침을 받는다', hint: '세상에 이름난 주먹을 배운다. 돈으로는 들일 수 없는 스승이다', values: { justice: D },
-        fx: [{ op: 'master', name: '늙은 해군 영웅', branch: 'armament', cap: TOP, years: 6, paid: false }] },
+        fx: [{ op: 'master', name: '늙은 해군 영웅', branch: 'armament', cap: TOP, years: 15, paid: false }] },
       decline('가르침을 받지 않는다', '정중히 고개를 숙이고 돌아선다'),
     ],
   }),
@@ -48,7 +48,7 @@ export const FORTUNES: Turning[] = [
     title: '난파선의 검객', body: '부서진 배 위에서 홀로 칼을 닦던 검객이 {name}에게 칼끝을 겨눈다. 견뎌 내면 가르쳐 주겠다고 한다.',
     doors: [
       { label: '검객의 시험을 받는다', hint: '죽을 만큼 몰아붙여진다. 견디면 칼의 끝을 본다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -20 }, { op: 'master', name: '난파선의 검객', branch: 'sword', cap: TOP, years: 5, paid: false }] },
+        fx: [{ op: 'hp', add: -20 }, { op: 'master', name: '난파선의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }] },
       decline('시험을 받지 않는다', '칼끝을 피해 물러난다'),
     ],
   }),
@@ -86,7 +86,7 @@ export const FORTUNES: Turning[] = [
     title: '늙은 권법가', body: '동료를 등지지 않고 끝까지 버티는 {name}을(를) 지켜보던 늙은 권법가가 다가온다. 그런 사람에게만 가르친다고 한다.',
     doors: [
       { label: '권법가의 가르침을 받는다', hint: '돈으로는 들일 수 없는 스승이다', values: { loyalty: D },
-        fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 6, paid: false }] },
+        fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 15, paid: false }] },
       decline('가르침을 받지 않는다', '지금의 동료들과 함께 자라겠다'),
     ],
   }),
@@ -114,7 +114,7 @@ export const FORTUNES: Turning[] = [
     title: '바람의 노인', body: '외딴 섬의 오두막에서 바람 소리만 듣고 사는 노인이 {name}을(를) 불러 앉힌다.',
     doors: [
       { label: '노인의 가르침을 받는다', hint: '보이지 않는 것을 보게 된다. 서두르지 않는 법을 배운다', values: { peace: D },
-        fx: [{ op: 'master', name: '바람의 노인', branch: 'observation', cap: TOP, years: 6, paid: false }] },
+        fx: [{ op: 'master', name: '바람의 노인', branch: 'observation', cap: TOP, years: 15, paid: false }] },
       decline('가르침을 받지 않는다', '바람 소리는 혼자서도 들을 수 있다'),
     ],
   }),

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "simulate": "vite-node tools/simulate.ts",
+    "simulate5": "vite-node tools/simulate5.ts",
     "validate-data": "vite-node tools/validate-data.ts"
   },
   "dependencies": {

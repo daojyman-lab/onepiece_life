@@ -13,7 +13,7 @@ const APEX_FAME = 3_000_000_000 / V.fame.bounty;
 const WARLORD_FAME = 300_000_000 / V.fame.bounty;
 /** CP 발탁: 공적 3천만 */
 const CP_FAME = 30_000_000 / V.fame.bounty;
-const ACADEMY_FEE = 100000;
+const ACADEMY_FEE = 200000;
 const SHOP_COST = 100000;
 const DRAFT_EXEMPT = 50000;
 
@@ -40,7 +40,7 @@ export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 해적
   {
     id: 'path_pirate_taken', kind: 'door', when: at(age(15, 30), st('child', 'civil', 'settled', 'shipwright'), sea('east')),
-    weight: 6, repeat: 'once', speaker: 'hero',
+    weight: 10, repeat: 'once', speaker: 'hero',
     title: '해적에게 붙잡히다', body: '{island} 앞바다에서 해적선이 고깃배를 덮쳤다. 선장이 {name}의 멱살을 움켜쥐고, 마침 일손이 모자랐다며 웃는다.',
     doors: [
       { label: '끌려가 선원이 된다', hint: '돌아갈 길은 당분간 없다', values: { romance: D },
@@ -56,7 +56,7 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_pirate_sail', kind: 'door', when: at(age(16, 35), st('child', 'civil', 'settled', 'shipwright', 'bountyHunter')),
-    weight: 6, repeat: 'once', speaker: 'hero',
+    weight: 10, repeat: 'once', speaker: 'hero',
     title: '깃발을 올리다', body: '{island} 부두에 낡은 배 한 척이 헐값에 나왔다. 해골 깃발 하나만 그려 넣으면 내일이라도 바다로 나갈 수 있다.',
     doors: [
       { label: '배를 사서 해골 깃발을 올린다', hint: '오늘부터 쫓기는 몸이 된다', values: { freedom: D },
@@ -72,7 +72,7 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_raid', kind: 'door', when: at(st('pirate', 'warlord'), age(16)),
-    weight: 5, repeat: { years: 3 }, speaker: 'hero',
+    weight: 8, repeat: { years: 3 }, speaker: 'hero',
     title: '수평선의 상선', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이 호위도 없이 {island} 쪽으로 느릿느릿 움직이고 있다.',
     doors: [
       { label: '상선을 덮친다', hint: '현상금이 오른다', values: { dominion: D },
@@ -115,7 +115,7 @@ export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 해군과 정부
   {
     id: 'path_marine_join', kind: 'door', when: at(age(15, 25), st('child', 'civil')),
-    weight: 7, repeat: 'once', speaker: { relation: '해군 모병관' },
+    weight: 10, repeat: 'once', speaker: { relation: '해군 모병관' },
     title: '해군 모병', body: '{island} 광장에 해군 모병 천막이 섰다. 모병관이 지원서를 내밀며, 사관학교에 갈 사람은 따로 줄을 서라고 한다.',
     doors: [
       { label: '말단 수병으로 지원한다', hint: '바닥부터 구른다', values: { justice: D },
@@ -203,7 +203,7 @@ export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 혁명군 · 현상금 사냥꾼 · 조선공
   {
     id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east')),
-    weight: 5, repeat: 'once', speaker: { canon: '드래곤' },
+    weight: 8, repeat: 'once', speaker: { canon: '드래곤' },
     title: '폭풍 속의 사내', body: '처형대에 벼락이 떨어지던 날, 망토를 두른 사내가 비에 젖은 {name}에게 말을 건다. 이 세상이 왜 이 모양인지 궁금하지 않느냐고.',
     doors: [
       { label: '사내를 따라간다', hint: '세상의 뒤편으로 들어간다. 돌아올 수 없다', values: { justice: D },
@@ -227,7 +227,7 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_bounty', kind: 'door', when: at(age(17, 40), st('civil', 'pirate', 'settled', 'shipwright')),
-    weight: 4, repeat: 'once', speaker: { relation: '현상금 사냥꾼' },
+    weight: 6, repeat: 'once', speaker: { relation: '현상금 사냥꾼' },
     title: '수배서를 뗀 손', body: '{island} 해군 지부 게시판 앞에서 칼을 찬 사냥꾼이 수배서 한 장을 떼어 낸다. 둘이 잡으면 반씩 나누자고 {name}에게 제안한다.',
     doors: [
       { label: '사냥꾼의 길로 들어선다', hint: '남의 목에 걸린 돈으로 산다', values: { ambition: D },
@@ -238,7 +238,7 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_shipwright', kind: 'door', when: at(age(15, 30), st('child', 'civil', 'settled')),
-    weight: 5, repeat: 'once', speaker: { relation: '조선소의 목수장' },
+    weight: 8, repeat: 'once', speaker: { relation: '조선소의 목수장' },
     title: '조선소의 망치 소리', body: '{island} 조선소에서 늙은 목수장이 대패를 내려놓는다. 손이 야무지니 견습으로 들어오라고 한다.',
     doors: [
       { label: '견습 목수가 된다', hint: '나무와 쇠로 평생을 산다', values: { inquiry: D },
@@ -250,7 +250,7 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_iceburg', kind: 'door', when: at(age(18, 50), st('civil', 'pirate', 'settled', 'bountyHunter', 'shipwright'), sea('gl_first')),
-    weight: 5, repeat: 'once', speaker: { canon: '아이스버그' },
+    weight: 8, repeat: 'once', speaker: { canon: '아이스버그' },
     title: '물의 도시의 시장', body: '물의 도시의 조선 회사 사장이 어깨에 쥐를 얹은 채 {name}이(가) 손본 배를 한참 들여다본다. 회사에 들어오지 않겠느냐고 한다.',
     doors: [
       { label: '조선 회사의 목수가 된다', hint: '물의 도시에 눌러산다', values: { inquiry: D },
@@ -264,8 +264,8 @@ export const PATHS: Turning[] = [
 
   // ---------------------------------------------------------------- 정착 · 감옥 · 은퇴
   {
-    id: 'path_settle', kind: 'door', when: at(age(25, 70), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'civil')),
-    weight: 3, repeat: { years: 6 }, speaker: 'hero',
+    id: 'path_settle', kind: 'door', when: at(age(35, 70), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'civil')),
+    weight: 3, repeat: 'once', speaker: 'hero',
     title: '닻을 내리다', body: '{island}의 언덕에서 내려다보는 바다가 유난히 잔잔하다. 여기서라면 남은 날을 보내도 좋겠다는 생각이 든다.',
     doors: [
       { label: '{island}에 집을 짓고 눌러앉는다', hint: '바다는 창밖으로만 본다', values: { peace: D },
@@ -329,8 +329,8 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_retire', kind: 'door', when: at(age(50), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright', 'settled', 'civil')),
-    weight: 5, repeat: { years: 5 }, speaker: 'hero',
+    id: 'path_retire', kind: 'door', when: at(age(65), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp')),
+    weight: 5, repeat: 'once', speaker: 'hero',
     title: '칼을 내려놓다', body: '거울 속의 {name}은(는) 어느새 희끗한 머리다. 무릎도 예전 같지 않다. 이제 물러날 때가 되었는지도 모른다.',
     doors: [
       { label: '모든 것을 내려놓고 물러난다', hint: '남은 날은 조용히 보낸다', values: { peace: D },

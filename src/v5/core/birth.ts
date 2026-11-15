@@ -4,7 +4,7 @@ import { TALENTS, type Talent } from '../../data/talents';
 import { chance, int, pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
 import { HOMES } from '../data/homes';
-import type { Hero5, HomeId, Life5, StatKey, Wealth } from './types';
+import type { Hero5, HomeId, Life5, Lineage, StatKey, Wealth } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const WEALTHS: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
@@ -70,7 +70,12 @@ export function rollBirth(s: Life5, opt: { name?: string; gender?: 'm' | 'f' } =
   h.island = home.island;
   h.sea = home.sea;
 
-  if (wealth === 'poor') s.hardship += V.hardship.poor;
-  if (lineage === 'orphan') s.hardship += V.hardship.orphan;
-  if (lineage === 'outcast') s.hardship += V.hardship.outcast;
+  s.hardship += birthHardship(wealth, lineage);
+}
+
+/** 태어나며 지고 나오는 시련: 가난, 고아, 차별받는 핏줄 */
+export function birthHardship(wealth: Wealth, lineage: Lineage): number {
+  return (wealth === 'poor' ? V.hardship.poor : 0)
+    + (lineage === 'orphan' ? V.hardship.orphan : 0)
+    + (lineage === 'outcast' ? V.hardship.outcast : 0);
 }

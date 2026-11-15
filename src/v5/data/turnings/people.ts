@@ -10,7 +10,7 @@ import type { Cond, Door, Turning, Values } from '../../core/types';
 
 const D = V.value.door;
 const PAID_CAP = V.growth.paidCap;
-const DOJO_FEE = 50000;
+const DOJO_FEE = 250000;
 const HAKI_FEE = 300000;
 const PROSTHETIC_COST = 40000;
 const ALL_IN_MIN = 50000;
@@ -29,16 +29,16 @@ export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 스승
   {
     id: 'pp_dojo', kind: 'door', when: at(age(12, 40), st('child', 'civil', 'pirate', 'marine', 'bountyHunter', 'shipwright', 'settled', 'revolution')),
-    weight: 5, repeat: { years: 6 }, speaker: { relation: '도장의 사범' },
+    weight: 8, repeat: { years: 6 }, speaker: { relation: '도장의 사범' },
     title: '도장의 문', body: '{island}에 이름난 사범들이 모인 도장이 있다. 수업료만 낸다면 누구든 받아 준다고 한다.',
     doors: [
       { label: '검술 사범에게 수업료를 낸다', hint: '칼 쓰는 법을 처음부터 제대로 배운다', when: [{ c: 'money', min: DOJO_FEE }], values: { ambition: D },
-        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 검술 사범', branch: 'sword', cap: PAID_CAP, years: 5, paid: true }] },
+        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 검술 사범', branch: 'sword', cap: PAID_CAP, years: 8, paid: true }] },
       { label: '총포 교관에게 수업료를 낸다', hint: '먼 곳을 맞히는 눈을 기른다', when: [{ c: 'money', min: DOJO_FEE }], values: { inquiry: D },
-        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 총포 교관', branch: 'gun', cap: PAID_CAP, years: 5, paid: true }] },
+        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 총포 교관', branch: 'gun', cap: PAID_CAP, years: 8, paid: true }] },
       { label: '권법 사범에게 수업료를 낸다', hint: '맨몸으로 버티고 때리는 법을 배운다', when: [{ c: 'money', min: DOJO_FEE }], values: { dominion: D },
-        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 권법 사범', branch: 'fist', cap: PAID_CAP, years: 5, paid: true }] },
-      { label: '담 너머로 수련을 훔쳐본다', hint: '돈 없이 눈으로만 배운다', values: { freedom: D }, fx: [{ op: 'mastery', branch: 'fist', add: 8 }] },
+        fx: [{ op: 'money', add: -DOJO_FEE }, { op: 'master', name: '도장의 권법 사범', branch: 'fist', cap: PAID_CAP, years: 8, paid: true }] },
+      { label: '담 너머로 수련을 훔쳐본다', hint: '돈 없이 눈으로만 배운다', values: { inquiry: D }, fx: [{ op: 'mastery', branch: 'fist', add: 8 }] },
     ],
   },
   {
@@ -67,7 +67,7 @@ export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 동료 · 배신 · 약속
   {
     id: 'pp_crew', kind: 'door', when: at(age(16), st('pirate', 'revolution', 'bountyHunter', 'warlord', 'marine')),
-    weight: 5, repeat: { years: 4 }, speaker: { relation: '낯선 떠돌이' },
+    weight: 8, repeat: { years: 4 }, speaker: { relation: '낯선 떠돌이' },
     title: '태워 달라는 자', body: '{island} 부두에서 낡은 짐 보따리를 멘 떠돌이가 {name}을(를) 막아선다. 배에 태워 주면 무엇이든 하겠다고 한다.',
     doors: [
       { label: '동료로 받아들인다', hint: '등을 맡길 사람이 하나 는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'crew', relation: '동료' }] },
@@ -130,7 +130,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'pp_debt', kind: 'door', when: at(age(18, 40), st(...ACTIVE), { c: 'lineage', is: ['commoner', 'marineFamily', 'pirateChild'] }, { c: 'wealth', max: 'common' }),
-    weight: 3, repeat: 'once', speaker: { relation: '빚쟁이' },
+    weight: 6, repeat: 'once', speaker: { relation: '빚쟁이' },
     title: '집안의 빚', body: '빚쟁이들이 {town}의 집에 들이닥쳤다. 집안이 진 빚을 갚지 못하면 늙은 부모를 끌고 가겠다고 한다.',
     doors: [
       { label: '빚을 떠안는다', hint: '몇 해는 번 돈을 고스란히 넘긴다', values: { devotion: D },
@@ -149,7 +149,7 @@ export const PEOPLE: Turning[] = [
         fx: [{ op: 'move', island: '로그타운', sea: 'east' }, { op: 'log', text: '로그타운으로 달려가 부모의 마지막 숨을 곁에서 지켰다.', weight: 'heavy' },
              { op: 'timeline', text: '부모의 임종을 지켰다' }] },
       { label: '돌아가지 못한다', hint: '평생 마음에 걸린다', values: { ambition: D },
-        fx: [{ op: 'hardship', add: 8 }, { op: 'log', text: '편지를 접어 품에 넣었다. 다음 소식은 부고였다.', weight: 'heavy' }] },
+        fx: [{ op: 'hardship', add: 4 }, { op: 'log', text: '편지를 접어 품에 넣었다. 다음 소식은 부고였다.', weight: 'heavy' }] },
     ],
   },
 
@@ -160,7 +160,7 @@ export const PEOPLE: Turning[] = [
     title: '불타는 배', body: '포격을 맞은 배가 불길에 휩싸였다. 한쪽에선 동료가 기둥에 깔려 있고, 다른 쪽에선 아이들이 갇혀 울고 있다. 둘 다 구할 시간은 없다.',
     doors: [
       { label: '동료를 먼저 구한다', hint: '아이들의 울음이 귀에 남는다', values: { loyalty: D },
-        fx: [{ op: 'hardship', add: 8 }, { op: 'log', text: '동료를 업고 빠져나왔다. 아이들은 끝내 구하지 못했다.', weight: 'heavy' }] },
+        fx: [{ op: 'hardship', add: 4 }, { op: 'log', text: '동료를 업고 빠져나왔다. 아이들은 끝내 구하지 못했다.', weight: 'heavy' }] },
       { label: '아이들을 먼저 구한다', hint: '동료를 잃을지도 모른다', values: { justice: D },
         fx: [{ op: 'losePerson', relation: '동료' }, { op: 'fame', add: 10 },
              { op: 'log', text: '아이들을 안고 빠져나왔다. 돌아보니 동료가 있던 자리는 이미 불길 속이었다.', weight: 'heavy' }] },
@@ -186,14 +186,14 @@ export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 돈 · 몸
   {
     id: 'pp_all_in', kind: 'door', when: at(age(18), st(...ACTIVE), { c: 'money', min: ALL_IN_MIN }),
-    weight: 3, repeat: { years: 10 }, speaker: { relation: '노름판의 전주' },
+    weight: 1, repeat: { years: 10 }, speaker: { relation: '노름판의 전주' },
     title: '한판 승부', body: '{island} 뒷골목의 노름판. 전주가 웃으며, 가진 것을 전부 걸면 판돈을 크게 쳐 주겠다고 한다.',
     doors: [
       { label: '판을 떠난다', hint: '가진 것은 지킨다', values: { peace: D }, fx: [] },
       { label: '전 재산을 건다', hint: '모두 얻거나 모두 잃는다', values: { ambition: D }, mark: 'daring', danger: true,
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'money', add: 200000 }, { op: 'log', text: '마지막 패가 뒤집혔다. 노름판의 돈이 모두 {name}의 앞으로 밀려왔다.', weight: 'heavy' }],
-               else: [{ op: 'money', add: -100000000 }, { op: 'hardship', add: 8 }, { op: 'log', text: '마지막 패가 뒤집혔다. 빈 주머니로 노름판을 나섰다.', weight: 'heavy' }] }] },
+               else: [{ op: 'money', add: -100000000 }, { op: 'hardship', add: 4 }, { op: 'log', text: '마지막 패가 뒤집혔다. 빈 주머니로 노름판을 나섰다.', weight: 'heavy' }] }] },
       { label: '전주의 속임수를 꿰뚫고 판을 뒤집는다', hint: '눈치 빠른 사람만 할 수 있다', special: 'inquiry', values: { inquiry: D },
         fx: [{ op: 'money', add: 50000 }, { op: 'fame', add: 2 }] },
     ],

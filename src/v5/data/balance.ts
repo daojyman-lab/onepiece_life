@@ -4,8 +4,8 @@ export const V = {
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.5 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3 },
-  growth: { perPart: 2.2, ageMult: [ { to: 15, m: 0.8 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
-            masterMult: 2, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,
+  growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
+            masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,
             tierUp: 100, maxTier: 6, noMasterCap: 3,
             tierPower: 0.25,                   // 힘 = 능력치 합 × (1 + 가장 높은 단계 × tierPower)
             studyObs: 0.5,                     // study가 견문색 숙련에 주는 몫 (perPart의 배수)
@@ -23,11 +23,11 @@ export const V = {
       devotion: { family: 0.4, work: 0.15 }, romance: { roam: 0.4 }, inquiry: { study: 0.5 },
       loyalty: { family: 0.25, train: 0.2 }, freedom: { roam: 0.5 }, peace: { rest: 0.35, family: 0.25 },
     },
-    poorWork: 60, poorKidWork: 90, kidAge: 15, dutyWork: 30,
+    poorWork: 5, poorKidWork: 90, kidAge: 15, dutyWork: 30,
     lineBoost: 3,                              // 활동과 같은 쪽으로 기운 일상 기록이 뽑힐 배율
   },
-  hardship: { poor: 10, orphan: 15, outcast: 10, limb: 20, loss: 12, defeat: 6, afterFortune: 0.5 },
-  fortune: { baseP: 0.004, perHardship: 0.0003, capP: 0.06, minAge: 12 },
+  hardship: { poor: 40, orphan: 60, outcast: 10, limb: 20, loss: 6, defeat: 3, afterFortune: 0.5 },
+  fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16 },
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
   fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25,
            injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 1.1,
@@ -51,9 +51,9 @@ export const V = {
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
-  risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0025, oldFrom: 60, oldK: 0.0015, treatCost: 3000,
+  risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 5000,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
-          monthsPerPart: 3, worsenMonths: 9,   // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
+          monthsPerPart: 3, worsenMonths: 15,  // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
           maxStage: 3,
           // 사고는 바다 위의 처지에서만
           seaStandings: ['pirate', 'marine', 'revolution', 'bountyHunter', 'warlord'],
