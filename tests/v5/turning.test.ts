@@ -94,7 +94,7 @@ describe('전환점 데이터', () => {
 
 describe('전환점의 흐름', () => {
   it('전환점 데이터의 문 말에는 가치관 이름도 숫자도 없다', () => {
-    const names = new RegExp(Object.values(VALUE_NAME).join('|') + '|\d');
+    const names = new RegExp(Object.values(VALUE_NAME).join('|') + '|\\d');
     for (const t of TURNINGS) for (const d of t.doors) expect(d.label + d.hint, t.id).not.toMatch(names);
   });
   it('본문의 자리표시가 채워지고 성씨가 들어가지 않는다', () => {
@@ -122,7 +122,10 @@ describe('전환점의 흐름', () => {
     expect(opened.length).toBeGreaterThanOrEqual(6);
     expect(new Set(opened).size).toBe(opened.length);
     expect(s.stats.stops).toBe(opened.length);
-    for (const n of Object.values(perYear)) expect(n).toBeLessThanOrEqual(Math.ceil(V.stopsPerYear[0].n) + 2);
+    for (const [age, count] of Object.entries(perYear)) {
+      const n = V.stopsPerYear.find((x) => Number(age) <= x.to)!.n;
+      expect(count, `${age}살`).toBeLessThanOrEqual(Math.ceil(n) + 1);
+    }
   });
   it('문 말고 다른 것이 떠 있으면 답은 아무것도 하지 않는다', () => {
     const s: Life5 = { ...newLife5(1), pending: { kind: 'ending', cause: '시험' } };

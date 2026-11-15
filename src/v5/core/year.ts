@@ -7,6 +7,7 @@ import { LINES } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { checkAll } from './cond';
 import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
+import { runMinor } from './minor';
 import { logLine } from './state';
 import { openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
@@ -30,7 +31,8 @@ export function stepPart(s: Life5): void {
   const act = activityOf(s, r);
   dailyLine(s, act, r);
   growPart(s, act, r);
-  // 뒤 과제가 여기에 차례로 끼운다: 자잘한 일 → 병과 사고 → 기연 → (전환점은 맨 끝)
+  if (chance(r, V.lines.minorP)) runMinor(s, r);
+  // 뒤 과제가 여기에 차례로 끼운다: 병과 사고 → 기연 → (전환점은 맨 끝)
   turningPoint(s, r);
   nextPart(s);
   endIfDead(s);
