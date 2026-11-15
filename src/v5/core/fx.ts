@@ -5,6 +5,7 @@ import { chance, pick, rngOf } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { STRENGTHS } from '../data/strengths';
+import { revealSurname } from './fortune';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import type { BranchId } from '../../core/types';
@@ -97,13 +98,15 @@ function applyOne(s: Life5, e: Fx): void {
       applyFx(s, chance(rngOf(s.rng), e.p) ? e.then : (e.else ?? []));
       return;
     case 'mastery': addMastery(s, e.branch, e.add); return;
-    case 'tier': s.growth.tier[e.branch] = clamp(e.to, 0, V.growth.maxTier); return;
+    // 단계를 그 자리까지 끌어올린다. 이미 더 높으면 그대로 둔다
+    case 'tier': s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
     case 'master':
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
       return;
-    // 뒤 과제가 채운다 (몸과 병, 열매, 성씨, 싸움). 그때까지는 아무 일도 없다
+    case 'reveal': revealSurname(s); return;
+    // 뒤 과제가 채운다 (몸과 병, 열매, 싸움). 그때까지는 아무 일도 없다
     case 'injury': case 'loseLimb': case 'prosthetic': case 'illness':
-    case 'eatFruit': case 'reveal': case 'fight':
+    case 'eatFruit': case 'fight':
       return;
   }
 }

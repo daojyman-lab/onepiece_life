@@ -28,6 +28,7 @@ export const V = {
   },
   hardship: { poor: 10, orphan: 15, outcast: 10, limb: 20, loss: 12, defeat: 6, afterFortune: 0.5 },
   fortune: { baseP: 0.004, perHardship: 0.0003, capP: 0.06, minAge: 12 },
+  surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
   fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25 },
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2 },
   risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 30000 },

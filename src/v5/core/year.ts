@@ -6,6 +6,7 @@ import { V } from '../data/balance';
 import { LINES } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { checkAll } from './cond';
+import { rollFortune, rollMisfortune } from './fortune';
 import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { logLine } from './state';
@@ -33,9 +34,19 @@ export function stepPart(s: Life5): void {
   growPart(s, act, r);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
   // 뒤 과제가 여기에 차례로 끼운다: 병과 사고 → 기연 → (전환점은 맨 끝)
+  if (s.part === V.partsPerYear - 1) yearTurn(s, r);
   turningPoint(s, r);
   nextPart(s);
   endIfDead(s);
+}
+
+/**
+ * 해가 바뀌는 자리(한 해의 마지막 토막)에서 한 번: 고를 수 없는 불행 → 기연.
+ * 전환점보다 먼저 굴려서, 기연이 뜨면 그 토막의 전환점이 기연에게 자리를 내준다.
+ */
+function yearTurn(s: Life5, r: Rng): void {
+  rollMisfortune(s, r);
+  rollFortune(s, r);
 }
 
 /** 멈출 차례면 전환점 하나를 띄운다 */

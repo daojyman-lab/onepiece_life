@@ -69,17 +69,24 @@ export function wantsStop(s: Life5, r: Rng): boolean {
   return chance(r, n / V.partsPerYear);
 }
 
-function repeatAllows(s: Life5, t: Turning): boolean {
+/** 한 번뿐이면 본 적이 없어야, 되풀이되면 마지막으로 본 뒤 그만큼 해가 지나야 한다 */
+export function repeatAllows(s: Life5, t: Turning): boolean {
   const last = s.seen[t.id];
   if (last === undefined) return true;
   return t.repeat !== 'once' && s.age - last >= t.repeat.years;
 }
 
-/** 다음에 띄울 전환점. 줄 서 있는 것이 먼저, 다음으로 조건과 반복이 허락하는 문 · 큰 계기 중에서 가중치로 */
+/**
+ * 다음에 띄울 전환점. 줄 서 있는 것이 먼저, 다음으로 조건과 반복이 허락하는 문 · 큰 계기 중에서 가중치로.
+ * 줄의 맨 앞은 실제로 열 수 있을 때만 줄에서 뺀다. 지금 못 열면 줄은 그대로 두고 보통대로 고른다.
+ * 데이터에 없는 id(아직 만들지 않은 전환점)는 조용히 버린다.
+ */
 export function pickTurning(s: Life5, r: Rng): Turning | null {
   while (s.queue.length) {
-    const t = TURNING_BY_ID[s.queue.shift()!];
-    if (t) return t;
+    const t = TURNING_BY_ID[s.queue[0]];
+    if (!t) { s.queue.shift(); continue; }
+    if (resolveDoors(s, t).some((d) => !d.locked)) { s.queue.shift(); return t; }
+    break;
   }
   const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment')
     && checkAll(s, t.when) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));

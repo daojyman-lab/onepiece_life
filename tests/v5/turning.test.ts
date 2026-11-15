@@ -2,7 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { openTurning, resolveDoors } from '../../src/v5/core/turning';
+import { openTurning, pickTurning, resolveDoors } from '../../src/v5/core/turning';
+import { rngOf } from '../../src/core/rng';
+import { checkAll } from '../../src/v5/core/cond';
 import { addValues } from '../../src/v5/core/values';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { VALUE_NAME } from '../../src/v5/data/values';
@@ -136,6 +138,39 @@ describe('전환점의 흐름', () => {
     openTurning(s, { ...T, id: 't_die', doors: [{ label: '뛰어내린다', hint: '돌아올 수 없다', fx: [{ op: 'die', cause: '절벽' }] }] });
     s = reduce5(s, { type: 'answer', index: 0 });
     expect(s.pending).toEqual({ kind: 'ending', cause: '절벽' });
+  });
+  it('줄 선 전환점이 지금 열 수 없으면 줄에서 빠지지 않고, 열 수 있게 되면 먼저 뜬다', () => {
+    const s = newLife5(1); s.pending = null; s.age = 9;
+    const front = TURNINGS.find((t) => t.id === 'kid_spyglass')!;   // 조건 없는 문이 있다
+    s.queue = [front.id];
+    const realDoors = front.doors;
+    try {
+      front.doors = [realDoors[2]];                                // 넉넉한 집만 여는 문 하나만 남긴다
+      s.hero.wealth = 'poor';
+      const t = pickTurning(s, rngOf(s.rng));
+      expect(t?.id).not.toBe(front.id);
+      expect(s.queue).toEqual([front.id]);
+      s.hero.wealth = 'noble';
+      expect(pickTurning(s, rngOf(s.rng))?.id).toBe(front.id);
+      expect(s.queue).toEqual([]);
+    } finally {
+      front.doors = realDoors;
+    }
+  });
+  it('줄에 아직 없는 전환점 id가 있으면 조용히 버리고 다음으로 넘어간다', () => {
+    const s = newLife5(1); s.pending = null; s.age = 9;
+    s.queue = ['moment_not_yet', 'kid_spyglass'];
+    expect(pickTurning(s, rngOf(s.rng))?.id).toBe('kid_spyglass');
+    expect(s.queue).toEqual([]);
+  });
+  it('보통의 흐름에서는 기연과 불행을 뽑지 않는다', () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const s = newLife5(seed); s.pending = null; s.age = 30; s.hero.standing = 'pirate'; s.hardship = 1000;
+      // 조건으로는 이 사람에게 와도 되는 기연 · 불행이 있다
+      expect(TURNINGS.some((t) => (t.kind === 'fortune' || t.kind === 'misfortune') && checkAll(s, t.when))).toBe(true);
+      const t = pickTurning(s, rngOf(s.rng));
+      if (t) expect(['door', 'moment']).toContain(t.kind);
+    }
   });
   it('문의 표시로 강점을 얻으면 그 이름이 무겁게 기록된다', () => {
     let s = newLife5(1); s.pending = null; s.marks.rebel = 2;
