@@ -5,7 +5,8 @@ import { pick, rngOf } from '../../core/rng';
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth } from './birth';
-import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
+import type { LogType } from '../../core/types';
+import type { Branch, Life5, Limb, LimbState, LogWeight, Stats, Values, Wealth } from './types';
 
 export { fullName } from './birth';
 const LIMBS: readonly Limb[] = ['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'];
@@ -57,6 +58,12 @@ export function emptyLife(seed: number): Life5 {
   };
 }
 
+/** 기록 한 줄을 남긴다. 조사를 고르고, 최근 V.log.keep줄만 남긴다. */
+export function logLine(s: Life5, text: string, weight: LogWeight = 'light', type: LogType = 'life'): void {
+  s.log.push({ id: s.seq++, age: s.age, text: josa(text), weight, type });
+  if (s.log.length > V.log.keep) s.log.splice(0, s.log.length - V.log.keep);
+}
+
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };
 
 /** 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문은 아직 없다. */
@@ -69,9 +76,7 @@ export function newLife5(seed: number, opt: { name?: string; gender?: 'm' | 'f' 
     ? `${pick(r, ORPHAN_STORIES).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
     : `${h.town}의 ${WEALTH_HOUSE[h.wealth]}에서 ${fullName(h)}이(가) 태어났다.`;
   const gifts = h.talents.map((id) => TALENT_BY_ID[id]).map((t) => `${t.name}${t.good ? '' : '(-)'}`).join(', ');
-  for (const text of [born, `타고난 것: ${gifts}`]) {
-    s.log.push({ id: s.seq++, age: s.age, text: josa(text), weight: 'heavy', type: 'world' });
-  }
+  for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
   s.hero.standing = 'child';
   return s;

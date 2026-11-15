@@ -13,4 +13,7 @@ export const V = {
   risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 30000 },
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },
   birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
+  hp: { max: 100 },
+  log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
+  person: { bond: 50 },                        // 새로 만난 사람의 처음 유대
 } as const;
