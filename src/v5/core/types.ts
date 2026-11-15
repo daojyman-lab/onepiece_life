@@ -78,6 +78,7 @@ export type Fx =
   | { op: 'hardship'; add: number }
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string }
   | { op: 'losePerson'; relation: string }
+  | { op: 'losePerson'; who: 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' }   // 관계 글과 상관없이 그 갈래의 사람 하나
   | { op: 'injury'; severity: Injury['severity'] }
   | { op: 'loseLimb'; limb: Limb | 'random' }
   | { op: 'prosthetic'; grade: 'basic' | 'superior' }

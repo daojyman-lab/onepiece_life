@@ -11,6 +11,7 @@ import { STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
 import { askFight } from './fight';
+import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
@@ -91,7 +92,7 @@ function applyOne(s: Life5, e: Fx): void {
       return;
     }
     case 'losePerson': {
-      const p = s.people.find((x) => x.alive && x.relation === e.relation);
+      const p = s.people.find((x) => x.alive && ('who' in e ? personIs(x, e.who) : x.relation === e.relation));
       if (!p) return;
       p.alive = false;
       s.hardship += V.hardship.loss;

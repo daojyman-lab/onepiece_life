@@ -2,11 +2,12 @@
 import { describe, expect, it } from 'vitest';
 import { needOk, whyNeed } from '../../src/v5/core/needs';
 import { newLife5 } from '../../src/v5/core/state';
-import { resolveDoors, openTurning, answerDoor } from '../../src/v5/core/turning';
+import { resolveDoors, openTurning, openQueued, answerDoor } from '../../src/v5/core/turning';
 import { normalizeLife5 } from '../../src/v5/core/load';
 import { check, whyNot } from '../../src/v5/core/cond';
 import { applyFx } from '../../src/v5/core/fx';
 import { V } from '../../src/v5/data/balance';
+import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import type { Life5, Turning } from '../../src/v5/core/types';
 
 const adult = (seed = 1): Life5 => { const s = newLife5(seed); s.pending = null; s.age = 25; s.hero.standing = 'pirate'; s.people = []; return s; };
@@ -58,6 +59,35 @@ describe('되풀이 막기', () => {
     const s = adult(); const t = T({ max: 1 });
     expect(openTurning(s, t)).toBe(true); answerDoor(s, 0); s.age += 5;
     expect(openTurning(s, t)).toBe(false);
+  });
+});
+
+describe('줄 선 전환점과 상한', () => {
+  const queued = (s: Life5, id: string) => { s.queue = [id]; return openQueued(s); };
+  it('줄에 선 전환점도 상한에 닿았으면 열리지 않고 줄에서 버려진다', () => {
+    const s = adult(); const t = TURNING_BY_ID.prison_escape; s.hero.standing = 'prisoner';
+    s.seenCount[t.id] = V.turning.maxRepeat;
+    expect(queued(s, t.id)).toBe(false); expect(s.queue).toEqual([]); expect(s.pending).toBeNull();
+  });
+  it('닫힌 전환점도 줄에서 버려진다', () => {
+    const s = adult(); s.hero.standing = 'prisoner'; s.closed = ['prison_escape'];
+    expect(queued(s, 'prison_escape')).toBe(false); expect(s.queue).toEqual([]);
+  });
+  it('싸움 뒤의 문과 큰 계기(줄로만 오는 전환점)는 상한이 없다', () => {
+    for (const id of ['after_fight', 'moment_loss']) {
+      const s = adult(); s.seenCount[id] = V.turning.maxRepeat * 5;
+      expect(queued(s, id), id).toBe(true); expect(s.pending?.kind === 'door' && s.pending.turning).toBe(id);
+    }
+  });
+});
+
+describe('잃는 사람', () => {
+  it('losePerson의 갈래 crew는 관계 글과 상관없이 살아 있는 동료 하나를 잃는다', () => {
+    const s = adult();
+    applyFx(s, [{ op: 'person', kind: 'crew', relation: '부두 건달 출신 선원' }]);
+    expect(needOk(s, 'crew')).toBe(true);
+    applyFx(s, [{ op: 'losePerson', who: 'crew' }]);
+    expect(needOk(s, 'crew')).toBe(false);
   });
 });
 

@@ -32,7 +32,7 @@ export const MOMENTS: Turning[] = [
     doors: [
       { label: '더 강해져서 다시 찾아간다', hint: '이 패배를 잊지 않는다', values: { ambition: D }, mark: 'unyielding', fx: [] },
       { label: '왜 졌는지 처음부터 되짚는다', hint: '힘보다 앎이 모자랐다고 여긴다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
-      { label: '싸움에서 한 걸음 물러선다', hint: '이기고 지는 것이 다가 아니라고 여긴다', values: { peace: D }, fx: [] },
+      { label: '싸움에서 한 걸음 물러선다', hint: '이기고 지는 것이 다가 아니라고 받아들인다', values: { peace: D }, fx: [] },
     ],
   }),
   moment('moment_saved', {

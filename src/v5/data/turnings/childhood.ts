@@ -115,7 +115,7 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_shipwreck', kind: 'door', when: kid(7, 15), weight: 9, repeat: 'once', speaker: 'hero',
     title: '폭풍 뒤의 해변', body: '폭풍이 지난 아침, 해변에 부서진 배와 정신을 잃은 뱃사람이 떠밀려 왔다.',
     doors: [
-      { label: '물에 뛰어들어 사람을 끌어올린다', hint: '파도가 아직 거칠다', values: { devotion: D, justice: D }, mark: 'fellowship', danger: true,
+      { label: '물에 뛰어들어 사람을 끌어올린다', hint: '파도가 아직 거칠다', needs: ['swim'], values: { devotion: D, justice: D }, mark: 'fellowship', danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '구해 준 뱃사람' }] },
       { label: '부서진 배의 짐을 뒤진다', hint: '쓸 만한 것이 나올지도 모른다', values: { ambition: D }, fx: [{ op: 'money', add: 2000 }] },
       { label: '어른들을 부르러 달려간다', hint: '어른들이 알아서 한다', values: { peace: D, loyalty: D }, fx: [] },

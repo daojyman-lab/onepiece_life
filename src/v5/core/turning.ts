@@ -45,8 +45,12 @@ export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   });
 }
 
-/** 한 인생에 이 전환점이 열릴 수 있는 횟수 */
-const capOf = (t: Turning): number => t.max ?? (t.repeat === 'once' ? 1 : V.turning.maxRepeat);
+/**
+ * 한 인생에 이 전환점이 열릴 수 있는 횟수. 가중치 0인 전환점(싸움 뒤의 문, 큰 계기)은 저절로 뽑히지 않고
+ * 일이 일어날 때만 줄로 오므로, 되풀이되는 것이면 상한이 없다: 싸움에는 언제나 그 뒤가, 잃음에는 언제나 그 계기가 있다.
+ */
+const capOf = (t: Turning): number =>
+  t.max ?? (t.repeat === 'once' ? 1 : t.weight === 0 ? Infinity : V.turning.maxRepeat);
 
 /** 이 인생에서 아직 열릴 수 있는가: 거절해 닫히지 않았고, 열린 횟수가 상한에 닿지 않았다 */
 export function stillOpen(s: Life5, t: Turning): boolean {

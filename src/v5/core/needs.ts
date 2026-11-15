@@ -1,15 +1,18 @@
 // 사건의 글이 전제하는 것(동료, 가족, 헤엄, 칼 …)이 이 사람에게 있는가.
 // 전환점의 needs가 안 맞으면 그 전환점은 오지 않고, 문의 needs가 안 맞으면 그 문은 잠긴다.
 import { RELATION_KIND } from '../data/words';
-import type { Life5, Need } from './types';
+import type { Life5, Need, Person } from './types';
 
-const hasPerson = (s: Life5, kinds: string[]) => s.people.some((p) => p.alive && kinds.includes(p.relation));
+/** 이 사람이 그 갈래(함께 싸우는 동료, 배우자 · 자식 · 형제 · 부모)인가 */
+export function personIs(p: Person, who: 'crew' | keyof typeof RELATION_KIND): boolean {
+  return who === 'crew' ? p.crew !== undefined : RELATION_KIND[who].includes(p.relation);
+}
+
 const usable = (x: string) => x !== 'lost';
 
 export function needOk(s: Life5, n: Need): boolean {
   switch (n) {
-    case 'crew': return s.people.some((p) => p.alive && p.crew !== undefined);
-    case 'spouse': case 'child': case 'sibling': case 'parent': return hasPerson(s, RELATION_KIND[n]);
+    case 'crew': case 'spouse': case 'child': case 'sibling': case 'parent': return s.people.some((p) => p.alive && personIs(p, n));
     case 'swim': return s.hero.fruit === null;
     case 'sword': case 'gun': case 'fist': return s.growth.tier[n] >= 1;
     case 'arms': return usable(s.hero.limbs.armL) || usable(s.hero.limbs.armR);

@@ -89,11 +89,11 @@ export const PATHS: Turning[] = [
     weight: 8, repeat: 'once', speaker: { relation: '세계 정부의 사자' },
     title: '칠무해 제의', body: '세계 정부의 사자가 {island}에 정박한 {name}의 배에 올랐다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
     doors: [
-      { label: '제의를 받는다', hint: '쫓기지 않는 대신 목줄이 채워진다', values: { ambition: D },
+      { label: '제의를 받아들인다', hint: '쫓기지 않는 대신 목줄이 채워진다', values: { ambition: D },
         fx: [{ op: 'standing', to: 'warlord' }, { op: 'fame', add: 100 }, { op: 'timeline', text: '왕의 칠무해가 되었다' }] },
-      { label: '사자를 바다에 던져 버린다', hint: '정부 전체를 적으로 돌린다', values: { freedom: D },
+      { label: '사자를 바다에 던져 버린다', hint: '정부 전체를 적으로 돌린다', values: { freedom: D, dominion: D },
         fx: [{ op: 'fame', add: 50 }, { op: 'flag', id: 'govEnemy' }, { op: 'log', text: '사자는 바다에 빠진 채 욕을 퍼부었다. 현상금이 껑충 뛰었다.', weight: 'heavy' }] },
-      { label: '받되 정부를 발판으로 쓴다', hint: '목줄을 쥔 손을 언젠가 물어뜯는다', special: 'dominion', values: { dominion: D },
+      { label: '받아들이되 정부를 발판으로 쓴다', hint: '목줄을 쥔 손을 언젠가 물어뜯는다', special: 'dominion', values: { dominion: D },
         fx: [{ op: 'standing', to: 'warlord' }, { op: 'fame', add: 150 }, { op: 'flag', id: 'warlordSchemer' }, { op: 'timeline', text: '칠무해의 자리를 발판으로 삼았다' }] },
     ],
   },
@@ -102,7 +102,7 @@ export const PATHS: Turning[] = [
     weight: 20, repeat: 'once', speaker: 'hero',
     title: '바다의 정점', body: '{name}의 현상금이 세상에서 가장 높은 자리에 닿았다. 바다 위의 모든 깃발이 그 이름 앞에서 머뭇거린다.',
     doors: [
-      { label: '바다의 왕좌에 앉는다', hint: '세상이 그 이름을 해적왕이라 부른다', values: { ambition: D },
+      { label: '바다의 왕좌에 앉는다', hint: '세상이 그 이름을 해적왕이라 부른다', values: { ambition: D, dominion: D },
         fx: [{ op: 'flag', id: 'apex' }, { op: 'flag', id: 'pirateKing' }, { op: 'fame', add: 500 },
              { op: 'log', text: '세상은 {name}을(를) 해적왕이라 불렀다.', weight: 'heavy' }, { op: 'timeline', text: '바다의 정점에 섰다' }] },
       { label: '왕관 대신 수평선을 고른다', hint: '이름만 남기고 끝없는 항해를 계속한다', values: { freedom: D },
@@ -126,7 +126,8 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    // 해군 가문의 아이에게만: 모병의 문이 셋을 넘지 않도록 추천장은 따로 온다
+    // 해군 가문의 아이에게만: 모병의 문이 셋을 넘지 않도록 추천장은 따로 온다.
+    // 문의 lineage 조건(전환점 조건과 겹친다)과 once인데 붙인 closes는 tests/v5/paths.test.ts와 거절 문의 규칙을 맞추려고 둔 것이다.
     id: 'path_marine_family', kind: 'door', when: at(age(15, 25), st('child', 'civil'), { c: 'lineage', is: ['marineFamily'] }),
     weight: 10, repeat: 'once', speaker: { relation: '해군 모병관' },
     title: '가문의 추천장', body: '모병관이 {name}의 집을 따로 찾아왔다. 해군에 몸담았던 집안의 이름으로 사관학교 추천장을 써 주겠다고 한다.',
@@ -140,7 +141,7 @@ export const PATHS: Turning[] = [
   {
     id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east')),
     weight: 6, repeat: 'once', speaker: { canon: '스모커' },
-    title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 내쫓는 걸 봤다고 한다.',
+    title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 쫓아내는 걸 봤다고 한다.',
     doors: [
       { label: '그의 부대에 들어간다', hint: '거칠지만 곧은 상관을 얻는다', values: { justice: D },
         fx: [{ op: 'standing', to: 'marine' }, { op: 'person', kind: 'ally', relation: '상관', name: '스모커', canon: 'smoker' },
