@@ -20,6 +20,13 @@ describe('저장 읽기', () => {
     const f = normalizeLife5(s)!;
     expect(f.seenCount).toEqual({}); expect(f.closed).toEqual([]); expect(f.standingSince).toBe(30);
   });
+  it('최근 기록 줄의 칸이 없는 옛 저장도 읽힌다', () => {
+    const s = JSON.parse(JSON.stringify(newLife5(1)));
+    delete s.recentLines;
+    const f = normalizeLife5(s)!;
+    expect(f.recentLines).toEqual([]);
+    expect(() => reduce5({ ...f, pending: null }, { type: 'step' })).not.toThrow();
+  });
   it('칸이 빠진 옛 저장은 기본값으로 채워 살린다', () => {
     const s = JSON.parse(JSON.stringify(newLife5(1)));
     delete s.queueTries; delete s.known; delete s.stats.named;

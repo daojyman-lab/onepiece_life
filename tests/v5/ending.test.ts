@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
 import { buildEnding } from '../../src/v5/core/ending';
+import { ageShort } from '../../src/v5/core/words';
+import { autoplay5 } from '../../src/v5/core/autoplay';
 import { emptyMeta5, recordLife } from '../../src/v5/core/meta';
 import { applyFx } from '../../src/v5/core/fx';
 import { addValues } from '../../src/v5/core/values';
@@ -85,7 +87,7 @@ describe('엔딩 자료의 세부', () => {
       .toEqual(['pirate', 'prisoner', 'civil', 'marine'].map((x) => STANDING_PHRASE[x as keyof typeof STANDING_PHRASE]));
     const line = buildEnding(s, emptyMeta5()).oneLine;
     expect(line.startsWith(`${s.hero.town}에서 태어나`)).toBe(true);
-    expect(line).toContain('55살에 노환으로 죽었다.');
+    expect(line).toContain('쉰다섯에 노환으로 죽었다.');
     const shown = Object.values(STANDING_PHRASE).filter((p) => line.includes(p.replace(/다$/, '')));
     expect(shown.length).toBe(3);
   });
@@ -103,7 +105,7 @@ describe('엔딩 자료의 세부', () => {
   });
   it('싸움에서 쓰러진 죽음은 그 말 그대로 맺는다', () => {
     const line = buildEnding(bare(3, 30, '도끼손 모건에게 쓰러졌다'), emptyMeta5()).oneLine;
-    expect(line.endsWith('30살에 도끼손 모건에게 쓰러졌다.')).toBe(true);
+    expect(line.endsWith('서른에 도끼손 모건에게 쓰러졌다.')).toBe(true);
   });
   it('이름이 알려진 인생은 신문 1면에 실린다', () => {
     const s = bare(4); s.hero.standing = 'pirate'; s.hero.fame = V.ending.knownFame;
@@ -148,12 +150,34 @@ describe('엔딩 자료의 세부', () => {
     ];
     const u = buildEnding(s, emptyMeta5()).unchosen;
     expect(u).toHaveLength(3);
-    expect(u[0]).toBe("20세, 해군 모병: '말단 수병으로 지원한다'를 고르지 않았다.");
+    expect(u[0]).toBe("스무 살, 해군 모병: '말단 수병으로 지원한다'를 고르지 않았다.");
     expect(u[1]).toContain('남겨진 사람');
   });
   it('기록에는 나이 · 원인 · 가장 높은 단계 · 명성 · 전적이 든다', () => {
     const s = bare(9, 61); s.growth.tier.sword = 3; s.hero.fame = 12; s.stats.fights = 5; s.stats.wins = 3;
     expect(buildEnding(s, emptyMeta5()).record).toEqual({ age: 61, cause: '노환', topTier: 3, fame: 12, fights: 5, wins: 3, limbsLost: 0, fortunes: 0 });
+  });
+});
+
+describe('엔딩의 나이는 말로', () => {
+  it.each([[68, '예순여덟'], [42, '마흔둘'], [20, '스물'], [21, '스물하나'], [3, '셋'], [10, '열'], [100, '100']])('ageShort(%i) → %s', (n, w) => {
+    expect(ageShort(n)).toBe(w);
+  });
+  it('끝난 인생 30개의 엔딩 자료에 숫자 나이(68살, 14세)가 없다', () => {
+    for (let i = 0; i < 30; i++) {
+      const { s } = autoplay5(4000 + i, 'random');
+      const { record: _record, ...rest } = buildEnding(s, emptyMeta5());
+      expect(JSON.stringify(rest), `seed ${4000 + i}`).not.toMatch(/\d+(살|세)/);
+    }
+  });
+  it('겹친 원작 순간은 "열네 살, …" 꼴이다', () => {
+    const s = bare(14, 60);
+    s.timeline.push({ age: 14, text: '흰 연기의 대령: 따른다', canon: 'smoker' });
+    expect(buildEnding(s, emptyMeta5()).canonMoments).toEqual(['열네 살, 흰 연기의 대령: 따른다']);
+  });
+  it('이름이 알려진 인생의 신문 1면에도 나이를 말로 쓴다', () => {
+    const s = bare(4, 68); s.hero.standing = 'pirate'; s.hero.fame = V.ending.knownFame;
+    expect(buildEnding(s, emptyMeta5()).remembered).toContain('예순여덟 살로');
   });
 });
 

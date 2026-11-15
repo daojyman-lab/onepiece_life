@@ -14,6 +14,7 @@ import { fullName } from './birth';
 import { fillText } from './fx';
 import type { Meta5 } from './meta';
 import { topValues } from './values';
+import { ageShort, ageWord } from './words';
 import type { Fx, Life5, Turning } from './types';
 
 export interface Ending5 {
@@ -56,8 +57,8 @@ export function oneLineOf(s: Life5): string {
   const limb = s.timeline.find((t) => t.limb);
   const shown = s.timeline.filter((t) => picked.includes(t) || t === limb).map((t) => t.text.replace(/\.$/, ''));
   const end = endOf(s);
-  const death = !s.ended ? `${end.age}살의 오늘에 이르렀다.`
-    : /다$/.test(end.cause) ? `${end.age}살에 ${end.cause}.` : `${end.age}살에 ${end.cause}(으)로 죽었다.`;
+  const death = !s.ended ? `${ageWord(end.age)}의 오늘에 이르렀다.`
+    : /다$/.test(end.cause) ? `${ageShort(end.age)}에 ${end.cause}.` : `${ageShort(end.age)}에 ${end.cause}(으)로 죽었다.`;
   return josa(`${s.hero.town}에서 태어나 ${[...shown.map(asClause), death].join(', ')}`);
 }
 
@@ -66,7 +67,7 @@ function rememberedOf(s: Life5): string {
   const h = s.hero;
   if (h.fame < E.knownFame) return fill(RUMOR, { town: h.town });
   return fill(HEADLINE[h.standing] ?? HEADLINE.default, {
-    name: fullName(h), town: h.town, age: String(endOf(s).age), bounty: fmtMoney(h.fame * V.fame.bounty),
+    name: fullName(h), town: h.town, age: ageWord(endOf(s).age), bounty: fmtMoney(h.fame * V.fame.bounty),
   });
 }
 
@@ -97,7 +98,7 @@ function unchosenOf(s: Life5): string[] {
   const big = once.filter((u) => isBig(TURNING_BY_ID[u.turning]));
   const rest = once.filter((u) => !isBig(TURNING_BY_ID[u.turning]));
   return [...big, ...rest].slice(0, E.unchosen)
-    .map((u) => fill(UNCHOSEN_LINE, { age: String(u.age), title: u.title, door: u.door }));
+    .map((u) => fill(UNCHOSEN_LINE, { age: ageWord(u.age), title: u.title, door: u.door }));
 }
 
 /** 골라 본 문 "id#번호"를 읽을 수 있는 말로. 데이터에 없는 전환점이면 키 그대로 */
@@ -124,7 +125,7 @@ export function buildEnding(s: Life5, meta: Meta5): Ending5 {
     oneLine: oneLineOf(s),
     remembered: rememberedOf(s),
     canonWords: canonWordsOf(s),
-    canonMoments: s.timeline.filter((t) => t.canon).map((t) => `${t.age}세, ${t.text}`),
+    canonMoments: s.timeline.filter((t) => t.canon).map((t) => `${ageWord(t.age)}, ${t.text}`),
     unchosen: unchosenOf(s),
     secret: s.hero.secretSurname ? fill(SECRET_LINE, { surname: s.hero.secretSurname }) : null,
     newCodex: newCodexOf(s, meta),

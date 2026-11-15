@@ -9,7 +9,7 @@ type Obj = Record<string, unknown>;
 const isObj = (x: unknown): x is Obj => typeof x === 'object' && x !== null && !Array.isArray(x);
 
 /** 인생의 맨 위 칸 가운데 목록이어야 하는 것과 객체여야 하는 것 */
-const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed'] as const;
+const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed', 'recentLines'] as const;
 const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats', 'seenCount'] as const;
 
 /**

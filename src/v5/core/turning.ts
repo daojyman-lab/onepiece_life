@@ -5,7 +5,7 @@ import { chance, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
-import { VALUE_DEEPEN, VALUE_NAME } from '../data/values';
+import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
 import { needsOk, whyNeed } from './needs';
@@ -153,8 +153,13 @@ export function answerDoor(s: Life5, index: number): void {
   const door = t?.doors[index];
   if (!chosen || chosen.locked || !t || !door) return;
 
+  const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
-  for (const id of rose) logLine(s, VALUE_DEEPEN[id], 'heavy', 'choice');
+  // 이번 선택으로 깊어지는 선을 넘었을 때만 "깊어졌다". 아직 깊지 않거나 이미 깊으면 "기울었다" (인물 칸의 말과 맞춘다)
+  for (const id of rose) {
+    const crossed = before[id] < V.value.deep && isDeep(s, id);
+    logLine(s, crossed ? VALUE_DEEPEN[id] : VALUE_LEAN[id], crossed ? 'heavy' : 'light', 'choice');
+  }
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
   p.doors.forEach((d, i) => {

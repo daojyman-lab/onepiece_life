@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sfx } from '../../../app/sound';
 import { B } from '../../../data/balance';
 import { drawScene } from '../../../ui/pixel/pixelArt';
+import { battleSpeedOf } from '../../app/flow';
 import { actions, dispatch, useStore } from '../../app/store';
 import type { Life5, Pending5 } from '../../core/types';
 import { Face, Gauge, Modal } from '../common';
@@ -18,7 +19,8 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   const b = p.battle;
   const total = b.events.length;
   const [idx, setIdx] = useState(0);
-  const ms = B.battleLineMs / st.settings.battleSpeed;
+  const speed = battleSpeedOf(st.settings.battleSpeed, st.settings.speed);   // 이야기가 빠르면 전투도 그만큼 빠르게 (4배속까지)
+  const ms = B.battleLineMs / speed;
   // 한 줄씩 저절로 넘긴다
   useEffect(() => {
     if (idx >= total) return;
@@ -91,7 +93,7 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
         <div class="row battle5-bar">
           <button class="btn" onClick={() => setIdx(total)}>건너뛰기 ▶▶</button>
           <span class="t9">재생 속도</span>
-          {SPEEDS.map((x) => <button key={x} class={`btn small ${st.settings.battleSpeed === x ? 'on' : ''}`} aria-pressed={st.settings.battleSpeed === x} onClick={() => actions.setBattleSpeed(x)}>{x}×</button>)}
+          {SPEEDS.map((x) => <button key={x} class={`btn small ${speed === x ? 'on' : ''}`} aria-pressed={speed === x} onClick={() => actions.setBattleSpeed(x)}>{x}×</button>)}
         </div>
       )}
     </Modal>

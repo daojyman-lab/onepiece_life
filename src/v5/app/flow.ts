@@ -68,6 +68,15 @@ export function windowReady(life: Life5 | null, shownId: number, msSinceLastReve
   return !!life && caughtUp(life, shownId) && msSinceLastReveal >= windowDelay(speed);
 }
 
+/**
+ * 전투 창의 재생 배속: 전투 배속 설정과, 이야기 배속을 전투 배속(1 · 2 · 4)의 범위로 줄인 값 가운데 큰 것.
+ * 이야기가 8배속이면 전투는 4배속, 정지(0)면 설정 그대로
+ */
+export function battleSpeedOf(setting: Settings['battleSpeed'], story: Settings['speed']): Settings['battleSpeed'] {
+  const fromStory = story >= 4 ? 4 : story >= 2 ? 2 : 1;
+  return Math.max(setting, fromStory) as Settings['battleSpeed'];
+}
+
 /** 마지막 줄이 떠오른 뒤 창이 뜨기까지 기다리는 시간(밀리초) */
 export function windowDelay(speed: Settings['speed']): number {
   return CLOCK.windowDelayMs / (speed || 1);

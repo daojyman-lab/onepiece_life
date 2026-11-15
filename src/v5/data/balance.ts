@@ -5,7 +5,8 @@ export const V = {
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
-  lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3 },
+  lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3,
+           noRepeat: 12 },                    // 일상 · 자잘한 일의 글은 최근 이만큼 낸 것을 다시 뽑지 않는다
   growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
             masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,
             tierUp: 100, maxTier: 6, noMasterCap: 3,
@@ -56,7 +57,8 @@ export const V = {
   injury: { months: { light: 3, heavy: 9, scar: 0 }, monthsPerPart: 3,   // 흉터(scar)는 낫지 않는다
             statMult: { light: 0.95, heavy: 0.8 },   // 낫지 않은 상처 하나마다 모든 능력치에 곱한다
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
-  limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
+  // eye.aim: 잃은 눈 하나마다 주인공의 공격이 덜 닿는 몫 (돈으로 단 눈은 그 절반, 기연으로 얻은 눈은 줄지 않는다)
+  limb: { eye: { spd: 0.9, aim: 0.15 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
   risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 5000,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다

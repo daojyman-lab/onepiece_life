@@ -5,6 +5,7 @@ import { reduce5, invariants5 } from '../../src/v5/core/reduce';
 import { checkAll, whyNot } from '../../src/v5/core/cond';
 import { applyFx } from '../../src/v5/core/fx';
 import { V } from '../../src/v5/data/balance';
+import { autoplay5 } from '../../src/v5/core/autoplay';
 import type { Life5 } from '../../src/v5/core/types';
 
 const step = (s: Life5) => reduce5(s, { type: 'step' });
@@ -37,6 +38,17 @@ describe('한 해의 진행', () => {
     const lines = s.log.filter((l) => l.weight !== 'year').length - s0.log.length;
     expect(lines / 20).toBeGreaterThanOrEqual(2);
     expect(lines / 20).toBeLessThanOrEqual(8);
+  });
+  it('일상 기록과 자잘한 일의 글은 12줄 안에 다시 나오지 않는다', () => {
+    expect(V.lines.noRepeat).toBe(12);
+    for (const seed of [9000, 9001, 9002]) {
+      const { s } = autoplay5(seed, 'random');
+      // 일상 · 자잘한 일의 줄은 type 'day'다. 해 구분선(year)과 고른 뒤의 줄(choice)은 들지 않는다
+      const day = s.log.filter((l) => l.weight === 'light' && l.type === 'day').map((l) => l.text);
+      expect(day.length, `seed ${seed}`).toBeGreaterThan(50);
+      day.forEach((t, i) => expect(day.slice(Math.max(0, i - V.lines.noRepeat), i), `seed ${seed} #${i}`).not.toContain(t));
+      expect(s.recentLines.length).toBeLessThanOrEqual(V.lines.noRepeat);
+    }
   });
   it('대기 중인 일이 있으면 흐르지 않는다', () => {
     const s0: Life5 = { ...newLife5(3), pending: { kind: 'ending', cause: '시험' } };

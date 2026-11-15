@@ -14,7 +14,7 @@ import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
-import { logLine, yearDivider } from './log';
+import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -162,12 +162,16 @@ function talentMult(s: Life5, b: Branch): number {
   return m;
 }
 
-/** 일상 기록 한 줄 (가치관 쪽으로 기울고, 이 토막의 활동과 같은 쪽으로 기운 줄을 먼저 고른다) */
+/**
+ * 일상 기록 한 줄 (가치관 쪽으로 기울고, 이 토막의 활동과 같은 쪽으로 기운 줄을 먼저 고른다).
+ * 최근에 낸 글(recentLines)은 뽑지 않는다. 뽑을 것이 없으면 이 토막은 줄을 내지 않는다
+ */
 function dailyLine(s: Life5, act: Activity, r: Rng): void {
   if (!chance(r, isQuiet(s) ? V.lines.quietDailyP : V.lines.dailyP)) return;
   const fits = (lean: Partial<Record<ValueId, number>>) => VALUE_IDS.some((id) => (lean[id] ?? 0) > 0 && (LEAN[id][act] ?? 0) > 0);
-  const line = leanPick(s, r, LINES.filter((l) => checkAll(s, l.when)), (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
-  if (line) logLine(s, fillText(s, line.text), 'light', 'day');
+  const pool = LINES.filter((l) => checkAll(s, l.when) && !isRecent(s, fillText(s, l.text)));
+  const line = leanPick(s, r, pool, (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
+  if (line) dayLine(s, fillText(s, line.text));
 }
 
 /** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. */

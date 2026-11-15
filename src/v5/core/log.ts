@@ -14,3 +14,15 @@ export function logLine(s: Life5, text: string, weight: LogWeight = 'light', typ
 export function yearDivider(s: Life5): void {
   logLine(s, `── ${s.age}살 ──`, 'year', 'info', { island: s.hero.island });
 }
+
+/** 최근 V.lines.noRepeat개 안에 낸 일상 · 자잘한 일의 글인가 (자리표시를 채운 뒤의 글로 견준다) */
+export function isRecent(s: Life5, text: string): boolean {
+  return s.recentLines.includes(text);
+}
+
+/** 일상 · 자잘한 일의 글 한 줄(가벼운 줄, type 'day')을 남기고, 다시 뽑지 않도록 기억한다 */
+export function dayLine(s: Life5, text: string): void {
+  logLine(s, text, 'light', 'day');
+  s.recentLines.push(text);
+  if (s.recentLines.length > V.lines.noRepeat) s.recentLines.splice(0, s.recentLines.length - V.lines.noRepeat);
+}

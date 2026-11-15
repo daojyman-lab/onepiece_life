@@ -1,6 +1,6 @@
 // tests/v5/flow.test.ts
 import { describe, expect, it } from 'vitest';
-import { CLOCK, READ_GRACE_MS, caughtUp, estimateMinutes, lastLogId, nextHidden, nextTick, shouldRead, shouldSave, windowReady, type FlowInput } from '../../src/v5/app/flow';
+import { CLOCK, READ_GRACE_MS, battleSpeedOf, caughtUp, estimateMinutes, lastLogId, nextHidden, nextTick, shouldRead, shouldSave, windowReady, type FlowInput } from '../../src/v5/app/flow';
 import { reduce5 } from '../../src/v5/core/reduce';
 import type { Life5 } from '../../src/v5/core/types';
 import { parseImport } from '../../src/v5/app/save';
@@ -10,6 +10,12 @@ import { emptyMeta5 } from '../../src/v5/core/meta';
 
 const base = (over: Partial<FlowInput> = {}): FlowInput =>
   ({ life: newLife5(1), shownId: -1, speed: 1, screen: 'main', modalOpen: false, reading: false, hidden: false, ...over });
+
+describe('전투 창의 배속', () => {
+  it.each([[1, 8, 4], [1, 2, 2], [4, 1, 4], [2, 0, 2], [1, 4, 4], [2, 1, 2]] as const)('설정 %i, 이야기 %i → %i', (setting, story, want) => {
+    expect(battleSpeedOf(setting, story)).toBe(want);
+  });
+});
 
 describe('흐름', () => {
   it('못 본 줄이 있으면 한 줄씩 띄운다', () => {

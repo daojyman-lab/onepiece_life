@@ -15,7 +15,7 @@ import { V } from '../data/balance';
 import { FOE_SEA, FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
 import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
-import { canUse, effectiveStats5, loseLimb } from './body';
+import { canUse, effectiveStats5, limbFactor, loseLimb } from './body';
 import { applyFx } from './fx';
 import { BRANCH_ID, power5, tierMult, topTier } from './power';
 import { logLine } from './state';
@@ -136,6 +136,18 @@ function applyPassives(u: CUnit): void {
 }
 
 /**
+ * 눈을 잃어 공격이 덜 닿는 만큼의 배율 (설계 5.7). 잃은 눈 하나마다 V.limb.eye.aim을 빼고,
+ * 돈으로 단 눈은 그 절반만, 기연으로 얻은 눈(1보다 나은 눈)은 빼지 않는다.
+ * v4 전투에서 공격하는 쪽의 명중은 속도 차이로만 정해지고(그 몫은 0~0.25로 잘린다) 속도는 이미 눈의 벌점(eye.spd)을 받으므로,
+ * 빗나가는 공격의 몫을 주는 피해의 기댓값으로 걸어 둔다: 유닛의 mods.dmg에 곱한다
+ */
+function aimMult(s: Life5): number {
+  let m = 1;
+  for (const l of ['eyeL', 'eyeR'] as const) m *= 1 - V.limb.eye.aim * (1 - Math.min(1, limbFactor(s.hero.limbs[l])));
+  return m;
+}
+
+/**
  * v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다.
  * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
  */
@@ -148,6 +160,7 @@ export function heroUnit5(s: Life5): CUnit {
   const maxHp = Math.round((C.hp.base + st.vit * C.hp.perVit) * health);
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
   const top = topValues(s, 1)[0];
+  const aim = aimMult(s);
   const traits = s.strengths.filter((id) => STRENGTH_TRAIT[id]).map((id) => HERO_TRAIT_BY_ID[STRENGTH_TRAIT[id]]?.mods);
   const u: CUnit = {
     key: 'hero', name: fullName(h), side: 'L', hero: true, leader: true, role: 'hero',
@@ -164,7 +177,7 @@ export function heroUnit5(s: Life5): CUnit {
     faction: FACTION[h.standing] ?? 'civil', species: h.species, gender: h.gender, age: s.age,
     faceKey: `hero:${s.rng.seed}`,
     mods: mergeMods(SPECIES_PASSIVES[h.species]?.mods, ...h.talents.map((t) => TALENT_BY_ID[t]?.mods), ...traits,
-      fruitMods(h.fruit?.id, skillMastery(s.growth.tier.fruit), false)),
+      fruitMods(h.fruit?.id, skillMastery(s.growth.tier.fruit), false), aim < 1 ? { dmg: aim } : undefined),
   };
   applyPassives(u);
   return u;

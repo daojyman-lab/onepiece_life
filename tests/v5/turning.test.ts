@@ -54,6 +54,20 @@ describe('문', () => {
     expect(s.marks.rebel).toBe(1);
     expect(s.pending).toBeNull();
   });
+  it('아직 깊지 않으면 그 쪽으로 기울었다는 가벼운 줄, 이번에 깊어지는 선을 넘으면 깊어졌다는 무거운 줄', () => {
+    const pickPeace = (start: number) => {
+      let s = newLife5(1); s.pending = null; s.values.peace = start; openTurning(s, T);
+      const from = s.seq;
+      s = reduce5(s, { type: 'answer', index: 0 });
+      return s.log.filter((l) => l.id >= from && l.type === 'choice');
+    };
+    const zero = pickPeace(0);
+    expect(zero).toEqual([expect.objectContaining({ text: '평온 쪽으로 마음이 기울었다.', weight: 'light' })]);
+    const cross = pickPeace(V.value.deep - 1);
+    expect(cross).toEqual([expect.objectContaining({ text: '평온이 깊어졌다.', weight: 'heavy' })]);
+    const already = pickPeace(V.value.deep);
+    expect(already).toEqual([expect.objectContaining({ text: '평온 쪽으로 마음이 기울었다.', weight: 'light' })]);
+  });
   it('고르지 않은 열린 문은 가지 않은 길로 남고, 고른 문은 골라 본 문으로 남는다', () => {
     let s = newLife5(1); s.pending = null; openTurning(s, T);
     s = reduce5(s, { type: 'answer', index: 0 });

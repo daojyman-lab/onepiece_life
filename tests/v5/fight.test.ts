@@ -58,6 +58,17 @@ describe('싸움', () => {
     expect(b.death).toBeGreaterThanOrEqual(a.death);
     expect(b.limb).toBeLessThanOrEqual(V.fight.limbCap);
   });
+  it('눈을 잃으면 명중이 떨어진다: 돈으로 단 눈은 절반만, 기연으로 얻은 눈은 줄지 않는다 (설계 5.7)', () => {
+    const aim = (f: (s: Life5) => void) => { const s = fighter(1); f(s); return heroUnit5(s).mods.dmg ?? 1; };
+    const whole = aim(() => {});
+    const one = aim((s) => { s.hero.limbs.eyeL = 'lost'; });
+    const basic = aim((s) => { s.hero.limbs.eyeL = 'basic'; });
+    const superior = aim((s) => { s.hero.limbs.eyeL = 'superior'; });
+    expect(one).toBeCloseTo(whole * (1 - V.limb.eye.aim));
+    expect(basic).toBeCloseTo(whole * (1 - V.limb.eye.aim / 2));
+    expect(superior).toBeCloseTo(whole);
+    expect(aim((s) => { s.hero.limbs.eyeL = 'lost'; s.hero.limbs.eyeR = 'lost'; })).toBeLessThan(one);
+  });
   it('목숨을 걸지 않은 싸움에서는 죽지 않는다', () => {
     expect(riskOf(fighter(1, 5), FOES[weak], false).death).toBe(0);
     for (let i = 0; i < 60; i++) {

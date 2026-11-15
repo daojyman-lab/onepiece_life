@@ -9,7 +9,20 @@ export const VALUE_NAME: Record<ValueId, string> = {
   loyalty: '의리', freedom: '자유', dominion: '패도', peace: '평온',
 };
 
-/** 문을 고른 뒤 뜨는 문장 */
+/** 문을 고른 뒤 뜨는 문장: 아직 깊지 않거나 이미 깊을 때 (가벼운 줄) */
+export const VALUE_LEAN: Record<ValueId, string> = {
+  justice: '정의 쪽으로 마음이 기울었다.',
+  devotion: '헌신 쪽으로 마음이 기울었다.',
+  ambition: '야망 쪽으로 마음이 기울었다.',
+  romance: '낭만 쪽으로 마음이 기울었다.',
+  inquiry: '탐구 쪽으로 마음이 기울었다.',
+  loyalty: '의리 쪽으로 마음이 기울었다.',
+  freedom: '자유 쪽으로 마음이 기울었다.',
+  dominion: '패도 쪽으로 마음이 기울었다.',
+  peace: '평온 쪽으로 마음이 기울었다.',
+};
+
+/** 문을 고른 뒤 뜨는 문장: 이번 선택으로 깊어지는 선(V.value.deep)을 넘었을 때 (무거운 줄) */
 export const VALUE_DEEPEN: Record<ValueId, string> = {
   justice: '정의가 깊어졌다.',
   devotion: '헌신이 깊어졌다.',

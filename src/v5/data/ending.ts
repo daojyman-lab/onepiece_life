@@ -1,5 +1,5 @@
 // 엔딩 자료의 문장들 (설계 5.8). 가치관 점수(숫자)는 어디에도 쓰지 않는다.
-// 자리표시: {name} 신문에서는 성까지 쓴 이름, 원작 인물의 한마디에서는 이름만. {town} 고향 마을, {age} 나이,
+// 자리표시: {name} 신문에서는 성까지 쓴 이름, 원작 인물의 한마디에서는 이름만. {town} 고향 마을, {age} 말로 쓴 나이(「예순여덟 살」),
 // {bounty} 현상금(공적), {title} {door} 전환점과 문, {surname} 숨은 성.
 import type { Standing } from '../core/types';
 
@@ -11,16 +11,16 @@ export const PERSONA_PLAIN = '그렇게 한 생을 건넜다';
 export const RUMOR = '{town}의 누군가는 가끔 그 이름을 떠올린다.';
 /** 이름이 알려진 인생: 신문 1면. 처지에 맞는 것이 없으면 default */
 export const HEADLINE: Partial<Record<Standing, string>> & { default: string } = {
-  pirate: '「현상금 {bounty}베리의 해적 {name}, {age}살로 바다에 잠들다」',
-  warlord: '「칠무해 {name}, {age}살로 잠들다. 현상금 {bounty}베리의 옛 이름」',
-  marine: '「공적 {bounty}베리의 해군 {name}, {age}살로 잠들다」',
-  cp: '「존재하지 않는 기관의 {name}, {age}살로 잠들다」',
-  revolution: '「혁명군 {name}, {age}살로 잠들다. 정부가 건 현상금 {bounty}베리」',
-  bountyHunter: '「현상금 사냥꾼 {name}, {age}살로 잠들다」',
-  default: '「{town} 출신 {name}, {age}살로 잠들다. 바다가 그 이름을 기억한다」',
+  pirate: '「현상금 {bounty}베리의 해적 {name}, {age}로 바다에 잠들다」',
+  warlord: '「칠무해 {name}, {age}로 잠들다. 현상금 {bounty}베리의 옛 이름」',
+  marine: '「공적 {bounty}베리의 해군 {name}, {age}로 잠들다」',
+  cp: '「존재하지 않는 기관의 {name}, {age}로 잠들다」',
+  revolution: '「혁명군 {name}, {age}로 잠들다. 정부가 건 현상금 {bounty}베리」',
+  bountyHunter: '「현상금 사냥꾼 {name}, {age}로 잠들다」',
+  default: '「{town} 출신 {name}, {age}로 잠들다. 바다가 그 이름을 기억한다」',
 };
 
-export const UNCHOSEN_LINE = "{age}세, {title}: '{door}'을(를) 고르지 않았다.";
+export const UNCHOSEN_LINE = "{age}, {title}: '{door}'을(를) 고르지 않았다.";
 export const SECRET_LINE = '당신의 진짜 성은 {surname}(이)었다.';
 
 /** 원작 인물이 주인공을 어떻게 기억하는지. 유대가 낮으면 low, 높으면 high. {name}은 주인공의 이름 */

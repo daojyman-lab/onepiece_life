@@ -149,6 +149,7 @@ export interface Life5 {
   unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)
   known: string[];                             // 지난 인생들에서 골라 본 "전환점id#문번호" (새 인생을 만들 때 도감에서 받는다)
   log: LogLine[]; timeline: TimelineEntry[];
+  recentLines: string[];                       // 최근에 낸 일상 · 자잘한 일의 글 (V.lines.noRepeat개까지). 이 안의 글은 다시 뽑지 않는다
   pending: Pending5;
   stats: Stats5;
   seq: number;
