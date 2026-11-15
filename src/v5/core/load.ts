@@ -8,6 +8,10 @@ type Obj = Record<string, unknown>;
 
 const isObj = (x: unknown): x is Obj => typeof x === 'object' && x !== null && !Array.isArray(x);
 
+/** 인생의 맨 위 칸 가운데 목록이어야 하는 것과 객체여야 하는 것 */
+const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known'] as const;
+const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats'] as const;
+
 /** got에 빠진(undefined인) 칸을 def의 값으로 채운 새 객체 */
 function withDefaults(got: Obj, def: object): Obj {
   const out: Obj = { ...got };
@@ -24,7 +28,9 @@ export function normalizeLife5(x: unknown): Life5 | null {
   const seed = isObj(x.rng) && typeof x.rng.seed === 'number' ? x.rng.seed : 0;
   const def = emptyLife(seed);
   const s = withDefaults(x, def);
-  for (const k of ['stats', 'hero', 'growth'] as const) s[k] = isObj(s[k]) ? withDefaults(s[k] as Obj, def[k]) : def[k];
+  // 큰 칸의 모양이 틀리면(목록이어야 할 곳에 객체가 있는 등) 고쳐 읽지 않는다
+  if (LIFE_ARRAYS.some((k) => !Array.isArray(s[k])) || LIFE_OBJECTS.some((k) => !isObj(s[k]))) return null;
+  for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
   try {
     return invariants5(life, true).length === 0 ? life : null;
@@ -33,8 +39,13 @@ export function normalizeLife5(x: unknown): Life5 | null {
   }
 }
 
-/** 저장된 도감을 읽는다. 못 읽으면 빈 도감, 빠진 칸은 빈 값으로 채운다. */
+/** 저장된 도감을 읽는다. 못 읽으면 빈 도감, 빠지거나 모양이 틀린 칸은 빈 값으로 채운다. */
 export function normalizeMeta5(x: unknown): Meta5 {
-  if (!isObj(x) || x.schema !== 5) return emptyMeta5();
-  return withDefaults(x, emptyMeta5()) as unknown as Meta5;
+  const def = emptyMeta5();
+  if (!isObj(x) || x.schema !== 5) return def;
+  const m = withDefaults(x, def);
+  if (!isObj(m.doors)) m.doors = def.doors;
+  for (const k of ['fruits', 'people', 'hall'] as const) if (!Array.isArray(m[k])) m[k] = def[k];
+  if (typeof m.lives !== 'number' || !Number.isFinite(m.lives)) m.lives = def.lives;
+  return m as unknown as Meta5;
 }

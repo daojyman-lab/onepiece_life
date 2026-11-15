@@ -28,4 +28,22 @@ describe('저장 읽기', () => {
     expect(normalizeMeta5(null)).toEqual(emptyMeta5());
     expect(normalizeMeta5({ schema: 5, lives: 2 })).toEqual({ ...emptyMeta5(), lives: 2 });
   });
+  it('도감의 칸이 엉뚱한 모양이면 그 칸만 빈 값으로 돌린다', () => {
+    const m = normalizeMeta5({ schema: 5, doors: ['a'], fruits: 'x', people: { a: 1 }, hall: 3, lives: '2' });
+    expect(m).toEqual(emptyMeta5());
+    expect(normalizeMeta5({ schema: 5, doors: 'x', fruits: ['f'], lives: 3 })).toEqual({ ...emptyMeta5(), fruits: ['f'], lives: 3 });
+    expect(normalizeMeta5({ schema: 5, doors: null, hall: null })).toEqual(emptyMeta5());
+  });
+  it('인생의 큰 칸이 엉뚱한 모양이면 null', () => {
+    const arrays = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known'];
+    const objects = ['hero', 'growth', 'values', 'stats'];
+    for (const k of arrays) for (const v of [{}, 'x', 3, null]) {
+      const s = JSON.parse(JSON.stringify(newLife5(1))); s[k] = v;
+      expect(normalizeLife5(s), `${k}=${JSON.stringify(v)}`).toBeNull();
+    }
+    for (const k of objects) for (const v of [[], 'x', 3, null]) {
+      const s = JSON.parse(JSON.stringify(newLife5(1))); s[k] = v;
+      expect(normalizeLife5(s), `${k}=${JSON.stringify(v)}`).toBeNull();
+    }
+  });
 });
