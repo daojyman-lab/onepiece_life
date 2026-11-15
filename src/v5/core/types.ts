@@ -98,7 +98,7 @@ export type Fx =
   | { op: 'fight'; foe: string; lethal: boolean; forced: boolean }
   | { op: 'queue'; turning: string }
   | { op: 'log'; text: string; weight: LogWeight }
-  | { op: 'timeline'; text: string }
+  | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
   | { op: 'die'; cause: string }
   | { op: 'chance'; p: number; then: Fx[]; else?: Fx[] };
 

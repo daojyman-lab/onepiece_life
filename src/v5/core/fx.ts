@@ -104,7 +104,7 @@ function applyOne(s: Life5, e: Fx): void {
     }
     case 'queue': if (!s.queue.includes(e.turning)) s.queue.push(e.turning); return;
     case 'log': logLine(s, fillText(s, e.text), e.weight); return;
-    case 'timeline': s.timeline.push({ age: s.age, text: fillText(s, e.text) }); return;
+    case 'timeline': s.timeline.push({ age: s.age, text: fillText(s, e.text), ...(e.canon ? { canon: e.canon } : {}) }); return;
     case 'die':
       if (!h.alive) return;
       h.alive = false;

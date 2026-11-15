@@ -13,6 +13,10 @@ import { MARINE } from './marine';
 import { REVOLUTION } from './revolution';
 import { LAND } from './land';
 import { LIFE } from './life';
+import { CANON_EAST } from './canon';
+import { CANON_SEA } from './canon-2';
+import { SEA_LEAVE, SEA_RETURN } from './sea';
+import { SEA_GRAND_LINE, SEA_NEW_WORLD } from './sea-2';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -28,6 +32,12 @@ const GROUPS: Turning[][] = [
   REVOLUTION,
   LAND,
   LIFE,
+  CANON_EAST,
+  CANON_SEA,
+  SEA_LEAVE,
+  SEA_RETURN,
+  SEA_GRAND_LINE,
+  SEA_NEW_WORLD,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();

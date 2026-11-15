@@ -57,6 +57,13 @@ const ROWS: Record<string, Row> = {
   ideo: ['이데오', 'm', 25, 'pirate'],
   koala: ['코알라', 'f', 21, 'rev'],
   hack: ['핵', 'm', 38, 'rev', 'fishman'],
+  // 과제 10: 위대한 항로와 신세계에서 만나는 사람들
+  chopper: ['토니토니 쵸파', 'm', 15, 'pirate'],
+  vivi: ['네펠타리 비비', 'f', 16, 'civil'],
+  franky: ['프랑키', 'm', 34, 'pirate'],
+  whitebeard: ['흰수염 에드워드 뉴게이트', 'm', 72, 'pirate'],
+  jinbe: ['징베', 'm', 44, 'pirate', 'fishman'],
+  law: ['트라팔가 로', 'm', 24, 'pirate'],
 };
 
 export const CANON: Record<string, CanonPerson> = Object.fromEntries(Object.entries(ROWS).map(([id, [name, gender, age, faction, species]]) =>
