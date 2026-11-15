@@ -379,7 +379,7 @@ export const PIRATE: Turning[] = [
       { label: '뱃머리를 돌려 그 고향까지 데려다준다', hint: '석 달의 항해가 늦어진다', needs: ['ship'], values: { loyalty: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'money', add: -10000 }, { op: 'losePerson', who: 'crew' },
              { op: 'log', text: '석 달을 돌아 동료의 고향 부두에 닿았다. 동료는 배에서 내려 다시 돌아보지 않고 언덕을 올랐다.', weight: 'heavy' }] },
-      { label: '지금은 안 된다며 붙잡는다', hint: '동료는 남지만 그 눈빛이 달라진다', values: { ambition: D },
+      { label: '지금은 안 된다며 붙잡는다', hint: '동료는 남지만 그 눈빛이 달라진다', values: { dominion: D }, 
         fx: [{ op: 'hardship', add: 2 }, { op: 'flag', id: 'heldCrew' }] },
     ],
   },

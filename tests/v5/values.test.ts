@@ -15,6 +15,23 @@ describe('가치관', () => {
     addValues(s, { loyalty: -500 });
     expect(s.values.loyalty).toBe(0);
   });
+  it('높을수록 덜 오른다 (V.value.soften, 과제 13)', () => {
+    const s = emptyLife(1);
+    addValues(s, { loyalty: 50 });
+    const before = s.values.loyalty;
+    addValues(s, { loyalty: 10, peace: 10 });
+    const softened = 10 * (1 - (before / V.value.max) * V.value.soften);
+    expect(s.values.loyalty - before).toBeCloseTo(softened, 5);
+    expect(s.values.peace).toBeCloseTo(10, 5);   // 0에서는 그대로 오른다
+    expect(V.value.soften).toBeGreaterThanOrEqual(0); expect(V.value.soften).toBeLessThanOrEqual(1);
+  });
+  it('내리는 쪽은 누그러뜨리지 않는다', () => {
+    const s = emptyLife(1);
+    addValues(s, { loyalty: 80 });
+    const before = s.values.loyalty;
+    addValues(s, { loyalty: -10 });
+    expect(before - s.values.loyalty).toBeCloseTo(10, 5);
+  });
   it('큰 계기는 보통 선택의 세 배를 움직인다', () => {
     expect(V.value.moment).toBe(V.value.door * 3);
   });
@@ -26,9 +43,10 @@ describe('가치관', () => {
   });
   it('깊은지는 기준선으로 가른다', () => {
     const s = emptyLife(1);
-    addValues(s, { dominion: V.value.deep - 1 });
+    // 과제 13부터 addValues는 높을수록 덜 오르므로(soften), 기준선만 보려고 점수를 바로 놓는다
+    s.values.dominion = V.value.deep - 1;
     expect(isDeep(s, 'dominion')).toBe(false);
-    addValues(s, { dominion: 1 });
+    s.values.dominion = V.value.deep;
     expect(isDeep(s, 'dominion')).toBe(true);
   });
   it('기울여 뽑기는 높은 가치관 쪽으로 기울지만 정해지지는 않는다', () => {

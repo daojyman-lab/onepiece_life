@@ -7,7 +7,7 @@ const mis = (id: string, title: string, when: Cond[], weight: number, repeat: Tu
   ({ id, kind: 'misfortune', when, weight, repeat, speaker: 'hero', title, body, doors: [], fx });
 
 export const MISFORTUNES: Turning[] = [
-  mis('mis_house_ruin', '집안의 몰락', [{ c: 'age', min: 5 }, { c: 'wealth', min: 'common' }], 0.01, 'once',
+  mis('mis_house_ruin', '집안의 몰락', [{ c: 'age', min: 5, max: 12 }, { c: 'wealth', min: 'common' }], 0.01, 'once',   // 과제 13: 자란 집의 몰락이므로 어린 날(열두 살까지)
     '빚과 모함이 겹쳐 집안이 하루아침에 무너졌다. 대대로 지켜 온 것이 모두 남의 손에 넘어갔다.',
     [{ op: 'money', add: -1000000 }, { op: 'wealth', to: 'poor' }, { op: 'hardship', add: 25 }, { op: 'queue', turning: 'moment_ruin' }]),
   mis('mis_home_fire', '고향의 화재', [{ c: 'age', min: 5 }], 0.01, 'once',
@@ -42,4 +42,16 @@ export const MISFORTUNES: Turning[] = [
   { ...mis('mis_child_lost', '자식을 먼저 보내다', [{ c: 'age', min: 30 }], 0.01, 'once',
     '자식이 먼저 세상을 떠났다. 바다에서 돌아오지 못했다는 소식이 늦게 닿았다.',
     [{ op: 'losePerson', who: 'child' }, { op: 'hardship', add: 10 }, { op: 'queue', turning: 'moment_child' }]), needs: ['child'] },
+
+  // ---------------------------------------------------------------- 과제 13: 원작이 시작된 무렵 이스트 블루의 섬을 덮치는 해적들
+  // 이름 있는 상대와 맞닥뜨린다. 싸울지 물러날지는 그 자리에서 묻는다 (물러나도 마주친 것으로 센다)
+  mis('mis_raid_buggy', '광대 해적단의 습격', [{ c: 'age', min: 15, max: 30 }, { c: 'sea', is: ['east'] }], 0.012, 'once',
+    '광대 분장의 해적단이 {island}에 들이닥쳤다. 대포알이 지붕을 날리고, 사람들이 언덕으로 달아났다.',
+    [{ op: 'hardship', add: 1 }, { op: 'money', add: -3000 }, { op: 'fight', foe: 'b_buggy', lethal: false, forced: false }]),
+  mis('mis_raid_krieg', '굶주린 함대', [{ c: 'age', min: 15, max: 30 }, { c: 'sea', is: ['east'] }], 0.012, 'once',
+    '너덜너덜한 함대가 {island} 앞바다에 닻을 내렸다. 굶주린 해적들이 창고마다 문을 부쉈다.',
+    [{ op: 'hardship', add: 1 }, { op: 'money', add: -5000 }, { op: 'fight', foe: 'b_krieg', lethal: false, forced: false }]),
+  mis('mis_raid_alvida', '쇠몽둥이의 해적선', [{ c: 'age', min: 14, max: 28 }, { c: 'sea', is: ['east'] }], 0.012, 'once',
+    '쇠몽둥이를 든 여선장의 해적선이 {island}의 항구를 털었다. 붙잡힌 사람들이 갑판으로 끌려갔다.',
+    [{ op: 'hardship', add: 1 }, { op: 'money', add: -2000 }, { op: 'fight', foe: 'b_alvida', lethal: false, forced: false }]),
 ];

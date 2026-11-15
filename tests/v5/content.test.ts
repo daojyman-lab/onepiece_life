@@ -1,9 +1,9 @@
 // tests/v5/content.test.ts — 사건 데이터의 짜임. 내용 과제마다 개수 검사를 더한다.
 import { describe, expect, it } from 'vitest';
 import { TURNINGS } from '../../src/v5/data/turnings';
-import { VALUE_NAME } from '../../src/v5/data/values';
+import { VALUE_IDS, VALUE_NAME } from '../../src/v5/data/values';
 import { RELATION_KIND } from '../../src/v5/data/words';
-import type { Fx, Need } from '../../src/v5/core/types';
+import type { Fx, Need, ValueId } from '../../src/v5/core/types';
 import { WORD_NEEDS } from './wordNeeds';
 
 const doorTurnings = TURNINGS.filter((t) => t.kind === 'door' || t.kind === 'moment' || t.kind === 'fortune');
@@ -64,4 +64,15 @@ describe('사건 데이터의 짜임', () => {
     for (const t of TURNINGS) for (const e of [...allFx(t.fx), ...t.doors.flatMap((d) => allFx(d.fx))])
       if (e.op === 'person' && e.kind === 'family') expect(words, `${t.id} '${e.relation}'`).toContain(e.relation);
   });
+});
+
+describe('3단계 전체 (과제 13)', () => {
+  it('조건 없는 문의 가치관 표시가 고르다', () => {
+    const n = Object.fromEntries(VALUE_IDS.map((v) => [v, 0])) as Record<ValueId, number>;
+    for (const t of TURNINGS) for (const d of t.doors) if (!d.special && !d.when?.length && !d.needs?.length)
+      for (const v of VALUE_IDS) if ((d.values?.[v] ?? 0) > 0) n[v]++;
+    const total = Object.values(n).reduce((a, b) => a + b, 0);
+    for (const v of VALUE_IDS) { expect(n[v] / total, v).toBeGreaterThanOrEqual(0.07); expect(n[v] / total, v).toBeLessThanOrEqual(0.17); }
+  });
+  it('전환점이 240개 이상이다', () => { expect(TURNINGS.length).toBeGreaterThanOrEqual(240); });
 });

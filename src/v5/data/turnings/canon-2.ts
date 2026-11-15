@@ -16,7 +16,7 @@ export const CANON_SEA: Turning[] = [
     weight: 5, repeat: 'once', speaker: { canon: 'zoro' },
     title: '세 번째 지나가는 검객', body: '{island}의 같은 골목을 칼 세 자루를 찬 초록 머리 검객이 세 번째 지나간다. 이번에는 {name} 앞에서 멈추더니, 항구가 어느 쪽이냐고 퉁명스럽게 묻는다. 항구는 그가 걸어온 쪽이다.',
     doors: [
-      { label: '길 대신 한 판 겨루자고 청한다', hint: '목숨까지는 아니어도 크게 베일 수 있다. 세상에서 가장 강해지겠다는 검이다', values: { ambition: D }, danger: true,
+      { label: '길 대신 한 판 겨루자고 청한다', hint: '목숨까지는 아니어도 크게 베일 수 있다. 세상에서 가장 강해지겠다는 검이다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'mastery', branch: 'sword', add: 12 }, { op: 'person', kind: 'rival', relation: '길을 잃은 검객', canon: 'zoro' },
              { op: 'chance', p: 0.3, then: [{ op: 'injury', severity: 'light' }] }] },
       { label: '항구까지 직접 데려다준다', hint: '반나절이 걸린다. 그 사이 검객은 두 번 다른 골목으로 새려 한다', values: { devotion: D },

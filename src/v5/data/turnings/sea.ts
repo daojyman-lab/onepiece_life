@@ -135,7 +135,7 @@ export const SEA_LEAVE: Turning[] = [
     weight: 4, repeat: 'once', speaker: { relation: '상선의 선장' },
     title: '사막 왕국행 상선', body: '{island}에 위대한 항로의 사막 왕국으로 가는 큰 상선이 들어왔다. 갑판 일꾼을 구한다고 한다. 품삯은 이 바다의 세 배, 돌아오는 배편은 약속할 수 없다고.',
     doors: [
-      { label: '갑판 일꾼으로 오른다', hint: '모르는 바다로 간다. 품삯이 두둑하다', values: { freedom: D },
+      { label: '갑판 일꾼으로 오른다', hint: '모르는 바다로 간다. 품삯이 두둑하다', values: { romance: D }, 
         fx: [{ op: 'money', add: 15000 }, { op: 'move', island: '알라바스타 왕국', sea: 'gl_first' },
              { op: 'log', text: '상선은 모래바람 부는 왕국의 항구에 닻을 내렸다. 품삯을 받고 배에서 내렸다.', weight: 'heavy' }, { op: 'timeline', text: '상선의 일꾼이 되어 위대한 항로로 갔다' }] },
       { label: '선장에게 장사 밑천을 대고 몫을 받기로 한다', hint: '저는 남고 돈만 보낸다. 배가 돌아올지는 모른다', values: { ambition: D },

@@ -83,12 +83,12 @@ const CIVIL: Turning[] = [
     weight: 4, repeat: 'once', speaker: { relation: '마을의 어른들' },
     title: '항구를 넓히는 일', body: '{island}의 촌장이 상인들과 손잡고 항구를 넓히려 한다. 어민들의 갯벌이 메워진다. 갈라진 마을 사람들이 {name}에게 촌장 자리에 나서 달라고 찾아왔다.',
     doors: [
-      { label: '촌장 자리에 나선다', hint: '마을의 일을 손에 쥐고, 마을의 원망도 함께 쥔다', values: { ambition: D },
+      { label: '촌장 자리에 나선다', hint: '마을의 일을 손에 쥐고, 마을의 원망도 함께 쥔다', values: { dominion: D }, 
         fx: [{ op: 'fame', add: 2 }, { op: 'flag', id: 'villageHead' }, { op: 'person', kind: 'rival', relation: '자리를 잃은 옛 촌장' },
              { op: 'timeline', text: '{island}의 촌장이 되었다' }] },
       { label: '자리는 사양하고 갯벌을 지키는 어민들 앞에 선다', hint: '상인들의 장사에 끼지 못하게 된다', values: { justice: D },
         fx: [{ op: 'money', add: -15000 }, { op: 'person', kind: 'ally', relation: '갯벌을 지킨 어민' }, { op: 'hardship', add: 1 }] },
-      { label: '두 쪽 사이에 끼지 않고 제 일만 한다', hint: '조용히 지나가고, 양쪽 모두 {name}을(를) 섭섭해한다', values: { peace: D }, closes: true, fx: [] },
+      { label: '두 쪽 사이에 끼지 않고 제 일만 한다', hint: '양쪽 모두 {name}을(를) 섭섭해하지만, 한 해 동안 번 돈은 고스란히 남는다', values: { peace: D }, closes: true, fx: [{ op: 'money', add: 12000 }] },
     ],
   },
   {
@@ -386,7 +386,7 @@ const SETTLED: Turning[] = [
     doors: [
       { label: '앞장서 돌을 나르고 다리를 놓는다', hint: '한 철 내내 허리가 휜다', values: { loyalty: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'vit', add: 1 }, { op: 'person', kind: 'ally', relation: '함께 다리를 놓은 이웃' }] },
-      { label: '촌장의 장부를 캐어 사라진 세금을 밝힌다', hint: '촌장이 물러날 수도 있다. {name}은(는) 촌장의 원수가 된다', values: { justice: D }, mark: 'rebel',
+      { label: '촌장의 장부를 캐어 사라진 세금을 밝힌다', hint: '촌장이 물러날 수도 있다. {name}은(는) 촌장의 원수가 된다', values: { inquiry: D }, mark: 'rebel',
         fx: [{ op: 'fame', add: 2 }, { op: 'person', kind: 'rival', relation: '세금을 빼돌린 촌장' }] },
       { label: '돈만 내고 손은 빠진다', hint: '살림이 줄고, 마음은 편하다', fx: [{ op: 'money', add: -12000 }] },
     ],

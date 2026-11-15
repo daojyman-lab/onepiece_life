@@ -257,7 +257,7 @@ const LAND_LATE: Turning[] = [
     weight: 4, repeat: 'once', speaker: { relation: '상단의 주인' },
     title: '항구의 제안', body: '큰 상단의 주인이 낡은 창고와 항구의 운송권을 함께 넘기겠다고 한다. 받으면 {island}의 물자가 모두 {name}의 손을 거친다. 작은 배를 부리는 이웃들의 일감은 줄어든다.',
     doors: [
-      { label: '운송권을 받는다', hint: '섬의 물자를 손에 쥔다. 이웃들의 눈길이 달라진다', values: { ambition: D },
+      { label: '운송권을 받는다', hint: '섬의 물자를 손에 쥔다. 이웃들의 눈길이 달라진다', values: { dominion: D }, 
         fx: [{ op: 'money', add: 80000 }, { op: 'person', kind: 'rival', relation: '일감을 잃은 이웃 뱃사람' }] },
       { label: '운송권을 받아 이웃 뱃사람들과 나눈다', hint: '돈은 적게 남는다. 섬이 함께 먹고산다', values: { justice: D },
         fx: [{ op: 'money', add: 20000 }, { op: 'person', kind: 'ally', relation: '일감을 나눠 받은 뱃사람' }] },
@@ -273,7 +273,7 @@ const LAND_LATE: Turning[] = [
         fx: [{ op: 'hp', add: -15 }, { op: 'base', key: 'vit', add: 1 }, { op: 'fame', add: 2 }] },
       { label: '젊은이들이 새 섬에 자리 잡게 돕는다', hint: '떠나는 사람들의 길을 연다. 저는 남는다', values: { devotion: D },
         fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '새 섬으로 간 젊은이', age: { younger: 30 } }] },
-      { label: '물에 잠긴 창고들을 헐값에 사들인다', hint: '물이 빠지면 값이 오른다', values: { ambition: D },
+      { label: '물에 잠긴 창고들을 헐값에 사들인다', hint: '물이 빠지면 값이 오른다', values: { dominion: D }, 
         fx: [{ op: 'money', add: 30000 }, { op: 'hardship', add: 1 }] },
     ],
   },
@@ -461,7 +461,7 @@ const ANY_LATE: Turning[] = [
     doors: [
       { label: '아끼던 칼 한 자루를 쥐여 보낸다', hint: '제자의 길을 축복한다. 곁이 빈다', values: { freedom: D },
         fx: [{ op: 'person', kind: 'ally', relation: '칼을 받아 떠난 제자', age: { younger: 30 } }] },
-      { label: '한 해만 더 배우고 가라고 붙잡는다', hint: '제자는 남는다. 그 눈빛이 조급하다', values: { loyalty: D },
+      { label: '한 해만 더 배우고 가라고 붙잡는다', hint: '제자는 남는다. 그 눈빛이 조급하다', values: { dominion: D }, 
         fx: [{ op: 'person', kind: 'ally', relation: '한 해를 더 배운 제자', age: { younger: 30 } }, { op: 'hardship', add: 1 }] },
       { label: '그 배의 항해사로 함께 오른다', hint: '늙은 몸으로 젊은이의 바다를 따라간다', values: { romance: D }, danger: true,
         fx: [{ op: 'hp', add: -15 }, { op: 'mastery', branch: 'observation', add: 6 }] },

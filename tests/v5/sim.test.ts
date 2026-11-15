@@ -9,11 +9,15 @@ const N = 600;
 let runs: ReturnType<typeof autoplay5>[] = [];
 let lives: Life5[] = [];
 let ambitious: Life5[] = [];
+let leanReport: ReturnType<typeof summarize>;
+let randomReport: ReturnType<typeof summarize>;
 beforeAll(() => {
   runs = Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'random'));
   lives = runs.map((r) => r.s);
   ambitious = Array.from({ length: 300 }, (_, i) => autoplay5(9000 + i, { value: 'ambition' }).s);
-}, 300_000);
+  randomReport = summarize(lives);
+  leanReport = summarize(Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'lean').s));
+}, 600_000);
 const avg = (f: (s: Life5) => number, xs = lives) => xs.reduce((a, s) => a + f(s), 0) / xs.length;
 const topTier = (s: Life5) => Math.max(...Object.values(s.growth.tier));
 const rate = (xs: Life5[], f: (s: Life5) => boolean) => xs.filter(f).length / Math.max(1, xs.length);
@@ -66,4 +70,23 @@ describe('시뮬레이터 (설계 7장)', () => {
     const after = lost.filter((s) => s.ended!.age - (s.timeline.find((t) => /잃었다/.test(t.text))?.age ?? 0) > 10);
     expect(after.length / Math.max(1, lost.length)).toBeGreaterThanOrEqual(0.5);
   });
+});
+
+describe('시뮬레이터 (3단계 균형, 과제 13)', () => {
+  it('멈춤이 나이대마다 고르다 (lean)', () => {
+    expect(leanReport.perLife.stops).toBeGreaterThanOrEqual(70); expect(leanReport.perLife.stops).toBeLessThanOrEqual(95);
+    expect(leanReport.stopsByBand.kid).toBeGreaterThanOrEqual(1.2); expect(leanReport.stopsByBand.kid).toBeLessThanOrEqual(1.9);
+    expect(leanReport.stopsByBand.youth).toBeGreaterThanOrEqual(2.0); expect(leanReport.stopsByBand.youth).toBeLessThanOrEqual(3.0);
+    expect(leanReport.stopsByBand.later).toBeGreaterThanOrEqual(0.6); expect(leanReport.stopsByBand.later).toBeLessThanOrEqual(1.3);
+  });
+  it('같은 사건이 되풀이되지 않는다', () => {
+    expect(leanReport.maxSeen.p95).toBeLessThanOrEqual(3);
+    expect(leanReport.emptyPool).toBeLessThanOrEqual(0.1);
+    expect(leanReport.quietYears).toBeLessThanOrEqual(0.5);
+  });
+  it('가치관이 한쪽으로 쏠리지 않는다 (무작위)', () => {
+    for (const v of VALUE_IDS) { expect(randomReport.topShare[v], v).toBeLessThanOrEqual(0.35); expect(randomReport.topShare[v], v).toBeGreaterThanOrEqual(0.04); }
+  });
+  it('이름 있는 상대를 만나는 인생이 흔하다', () => { expect(leanReport.namedLives).toBeGreaterThanOrEqual(0.4); });
+  it('집안의 몰락은 드물다', () => { expect(randomReport.ruined).toBeLessThanOrEqual(0.2); });
 });

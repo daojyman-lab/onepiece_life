@@ -44,7 +44,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     weight: 4, repeat: { years: 6 }, speaker: 'hero',
     title: '멈춘 기록 지침', body: '손목의 기록 지침 바늘이 제멋대로 돈다. 섬의 자기장이 바늘을 망가뜨렸다. 이 바다에서 길을 잃는다는 건 죽는다는 뜻이다. 항구에는 다음 섬으로 떠나는 다른 해적선이 있다.',
     doors: [
-      { label: '다른 배의 꽁무니를 따라간다', hint: '앞 배의 선장에게 뱃삯 대신 몫을 떼어 준다', values: { ambition: D },
+      { label: '다른 배의 꽁무니를 따라간다', hint: '앞 배의 선장에게 뱃삯 대신 몫을 떼어 준다', 
         fx: [{ op: 'money', add: -10000 }] },
       { label: '별과 해류를 읽어 스스로 길을 찾는다', hint: '틀리면 바다 한가운데서 굶는다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '별을 따라 사흘 만에 다음 섬의 그림자를 보았다.', weight: 'heavy' }],

@@ -11,7 +11,9 @@ export function addValues(s: Life5, add: Partial<Values>, mult = 1): ValueId[] {
     const d = add[id];
     if (d === undefined) continue;
     const before = s.values[id];
-    s.values[id] = Math.min(V.value.max, Math.max(0, before + d * mult));
+    // 오르는 쪽만 누그러뜨린다: 높을수록 덜 오른다 (V.value.soften 0이면 그대로)
+    const gain = d > 0 ? d * mult * (1 - (before / V.value.max) * V.value.soften) : d * mult;
+    s.values[id] = Math.min(V.value.max, Math.max(0, before + gain));
     if (s.values[id] > before) rose.push(id);
   }
   return rose;

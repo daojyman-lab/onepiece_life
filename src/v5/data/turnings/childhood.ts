@@ -42,7 +42,7 @@ export const CHILDHOOD: Turning[] = [
     doors: [
       { label: '밤늦도록 이야기를 듣는다', hint: '바다 저편이 마음에 오래 남는다', values: { romance: D }, fx: [] },
       { label: '지도를 그려 달라고 조른다', hint: '머릿속에 바닷길이 그려진다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
-      { label: '해 지기 전에 돌아가 집안일을 돕는다', hint: '이야기는 반만 듣는다', values: { devotion: D }, fx: [] },
+      { label: '해 지기 전에 돌아가 집안일을 돕는다', hint: '이야기는 반만 듣는다', values: { peace: D }, fx: [] },
     ],
   },
   {
@@ -136,7 +136,7 @@ export const CHILDHOOD: Turning[] = [
     doors: [
       { label: '물에 뛰어들어 사람을 끌어올린다', hint: '파도가 아직 거칠다', needs: ['swim'], values: { devotion: D, justice: D }, mark: 'fellowship', danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '구해 준 뱃사람' }] },
-      { label: '부서진 배의 짐을 뒤진다', hint: '쓸 만한 것이 나올지도 모른다', values: { ambition: D }, fx: [{ op: 'money', add: 2000 }] },
+      { label: '부서진 배의 짐을 뒤진다', hint: '쓸 만한 것이 나올지도 모른다', values: { inquiry: D }, fx: [{ op: 'money', add: 2000 }] },
       { label: '어른들을 부르러 달려간다', hint: '어른들이 알아서 한다', values: { peace: D, loyalty: D }, fx: [] },
     ],
   },
@@ -219,7 +219,7 @@ export const CHILDHOOD: Turning[] = [
                else: [{ op: 'hp', add: -10 }, { op: 'flag', id: 'marineRecord' }, { op: 'log', text: '해군에게 들켰다. 소년은 끌려가고 {name}의 이름은 초소의 장부에 올랐다.', weight: 'heavy' }] }] },
       { label: '해군에 알린다', hint: '포상금이 나온다. 끌려가는 소년이 {name}을(를) 한 번 돌아본다', values: { justice: D },
         fx: [{ op: 'money', add: 3000 }, { op: 'flag', id: 'turnedInPirate' }] },
-      { label: '숨겨 주는 값으로 해적선의 보물 이야기를 내놓으라고 한다', hint: '소년은 마지못해 낡은 해도 한 장을 내준다. 값을 치른 사이에 고마움은 없다', values: { ambition: D },
+      { label: '숨겨 주는 값으로 해적선의 보물 이야기를 내놓으라고 한다', hint: '소년은 마지못해 낡은 해도 한 장을 내준다. 값을 치른 사이에 고마움은 없다', values: { romance: D }, 
         fx: [{ op: 'flag', id: 'pirateMap' }, { op: 'base', key: 'luk', add: 1 }] },
     ],
   },
