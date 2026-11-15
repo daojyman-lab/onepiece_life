@@ -220,7 +220,7 @@ export const REVOLUTION: Turning[] = [
       { label: '총을 내려놓고 뭍의 조용한 마을로 간다', hint: '싸움에서 물러나지만, 정부의 명단에서는 지워지지 않는다', values: { peace: D },
         fx: [{ op: 'standing', to: 'settled' }, { op: 'flag', id: 'wanted' }, { op: 'timeline', text: '혁명군을 떠나 뭍에 자리 잡았다' }] },
       { label: '어느 깃발에도 매이지 않는 해적이 된다', hint: '세상을 바꾸는 대신 제 바다를 산다', values: { freedom: D },
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'timeline', text: '혁명군을 떠나 해적 깃발을 올렸다' }] },
+        fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' }, { op: 'timeline', text: '혁명군을 떠나 해적 깃발을 올렸다' }] },
       { label: '아이들이 총을 들지 않아도 될 때까지 남는다', hint: '더 깊은 싸움으로 들어간다. 몸이 먼저 지친다', values: { devotion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 15 }] },
     ],

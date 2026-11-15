@@ -64,7 +64,7 @@ const LOVE: Turning[] = [
     doors: [
       { label: '하던 일을 접고 돌아가 혼인한다', hint: '약속을 지킨다. 바다의 일은 거기서 멈춘다', values: { devotion: D },
         fx: [{ op: 'unflag', id: 'waitingLove' }, { op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' },
-             { op: 'timeline', text: '오래 기다려 준 사람과 혼인했다' }] },
+             { op: 'moveHome' }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '오래 기다려 준 사람과 혼인했다' }] },
       { label: '이제 기다리지 말라는 답장을 쓴다', hint: '그 사람을 놓아준다. 답장을 쓰는 데 사흘이 걸린다', values: { freedom: D },
         fx: [{ op: 'unflag', id: 'waitingLove' }, { op: 'hardship', add: 4 }] },
     ],

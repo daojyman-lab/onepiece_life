@@ -396,7 +396,7 @@ export const PIRATE: Turning[] = [
                       { op: 'log', text: '처형대에 닿기 전에 쓰러졌다. 동료와 같은 쇠사슬에 묶였다.', weight: 'heavy' }] }] },
       { label: '모은 돈을 털어 간수를 매수한다', hint: '싸우지 않고 빼내지만 빈털터리가 된다', when: [{ c: 'money', min: RANSOM }], values: { devotion: D },
         fx: [{ op: 'money', add: -RANSOM }, { op: 'log', text: '처형 전날 밤, 감옥 뒷문이 소리 없이 열렸다.', weight: 'heavy' }] },
-      { label: '남은 선원들을 지키려 그 섬을 떠난다', hint: '동료를 버렸다는 말이 따라다닌다', values: { loyalty: D },
+      { label: '남은 선원들을 지키려 그 섬을 떠난다', hint: '동료를 버렸다는 말이 따라다닌다', mark: 'composure',
         fx: [{ op: 'losePerson', who: 'crew' }, { op: 'hardship', add: 5 }, { op: 'fame', add: -5 }] },
     ],
   },
