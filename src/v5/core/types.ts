@@ -126,6 +126,7 @@ export interface Life5 {
   hardship: number;
   people: Person[];
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
+  queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
   stopsThisYear: number;
   unchosen: Unchosen[]; tried: string[];       // tried: "전환점id#문번호" (도감으로 옮겨진다)
   log: LogLine[]; timeline: TimelineEntry[];

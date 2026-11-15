@@ -2,7 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { openTurning, pickTurning, resolveDoors } from '../../src/v5/core/turning';
+import { openTurning, pickTurning, resolveDoors, takeQueued } from '../../src/v5/core/turning';
+import { loseLimb } from '../../src/v5/core/body';
+import { FOES } from '../../src/v5/data/foes';
 import { rngOf } from '../../src/core/rng';
 import { checkAll } from '../../src/v5/core/cond';
 import { addValues } from '../../src/v5/core/values';
@@ -190,5 +192,39 @@ describe('전환점의 흐름', () => {
     expect(s.strengths).toContain('rebel');
     const name = STRENGTHS.find((x) => x.id === 'rebel')!.name;
     expect(s.log.some((l) => l.weight === 'heavy' && l.text.includes(name))).toBe(true);
+  });
+});
+
+describe('줄 선 일은 그 일 바로 다음에 열린다 (설계 5.7, 5.2a)', () => {
+  const adult = (seed: number): Life5 => {
+    const s = newLife5(seed); s.pending = null; s.age = 25; s.hero.standing = 'civil'; s.stopsThisYear = 99;   // 올해의 상한을 넘겨 둔다
+    return s;
+  };
+  it('이름 있는 상대를 이긴 결과를 받아들이면 바로 다음 토막에 싸움 뒤의 문이 뜬다', () => {
+    let s = adult(7);
+    for (const k of Object.keys(s.hero.base) as (keyof Life5['hero']['base'])[]) s.hero.base[k] = 500;   // 몸을 잃지 않을 만큼 세다
+    s.pending = { kind: 'battle', foe: structuredClone(FOES.b_morgan), lethal: false, battle: {} as never, result: 'win' };
+    s = reduce5(s, { type: 'answer', index: 0 });
+    expect(s.pending).toBeNull();
+    const { age, part } = s;
+    s = reduce5(s, { type: 'step' });
+    expect(s.pending?.kind === 'door' && s.pending.turning).toBe('after_fight');
+    expect([s.age, s.part]).toEqual([age, part]);
+  });
+  it('몸을 잃으면 바로 다음 토막에 큰 계기가 뜬다', () => {
+    let s = adult(3);
+    loseLimb(s, 'legL', rngOf(s.rng));
+    s = reduce5(s, { type: 'step' });
+    expect(s.pending?.kind === 'door' && s.pending.turning).toBe('moment_limb');
+    expect(s.pending?.kind === 'door' && s.pending.moment).toBe(true);
+  });
+  it('맨 앞이 막혀 있으면 뒤의 것을 먼저 열고, 막힌 것은 몇 번 못 열면 버린다', () => {
+    const s = adult(1);
+    s.queue = ['prison_escape', 'moment_loss'];               // prison_escape는 죄수만 연다
+    expect(takeQueued(s)?.id).toBe('moment_loss');
+    expect(s.queue).toEqual(['prison_escape']);
+    for (let i = 1; i < V.queue.maxTries; i++) expect(takeQueued(s)).toBeNull();
+    expect(s.queue).toEqual([]);
+    expect(s.queueTries).toEqual({});
   });
 });

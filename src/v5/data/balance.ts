@@ -3,6 +3,7 @@ export const V = {
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10 },
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.5 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
+  queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3 },
   growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
             masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,

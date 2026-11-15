@@ -15,7 +15,7 @@ import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { logLine } from './state';
-import { openTurning, pickTurning, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -33,6 +33,7 @@ export function isQuiet(s: Life5): boolean {
 export function stepPart(s: Life5): void {
   if (s.pending) return;
   if (!s.hero.alive) { endIfDead(s); return; }
+  if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
 
   const r = rngOf(s.rng);
   partRisks(s, r);

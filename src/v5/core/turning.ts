@@ -77,17 +77,36 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 }
 
 /**
- * 다음에 띄울 전환점. 줄 서 있는 것이 먼저, 다음으로 조건과 반복이 허락하는 문 · 큰 계기 중에서 가중치로.
- * 줄의 맨 앞은 실제로 열 수 있을 때만 줄에서 뺀다. 지금 못 열면 줄은 그대로 두고 보통대로 고른다.
- * 데이터에 없는 id(아직 만들지 않은 전환점)는 조용히 버린다.
+ * 줄에서 지금 열 수 있는(조건이 맞고 열린 문이 있는) 첫 전환점을 꺼낸다. 앞의 것이 막혀 있으면 건너뛴다.
+ * 열지 못한 것은 횟수를 세고, V.queue.maxTries번 못 열면 버린다. 데이터에 없는 id는 조용히 버린다.
  */
-export function pickTurning(s: Life5, r: Rng): Turning | null {
-  while (s.queue.length) {
-    const t = TURNING_BY_ID[s.queue[0]];
-    if (!t) { s.queue.shift(); continue; }
-    if (resolveDoors(s, t).some((d) => !d.locked)) { s.queue.shift(); return t; }
-    break;
+export function takeQueued(s: Life5): Turning | null {
+  for (let i = 0; i < s.queue.length;) {
+    const id = s.queue[i];
+    const t = TURNING_BY_ID[id];
+    if (t && checkAll(s, t.when) && resolveDoors(s, t).some((d) => !d.locked)) {
+      s.queue.splice(i, 1); delete s.queueTries[id];
+      return t;
+    }
+    const tries = (s.queueTries[id] ?? 0) + 1;
+    if (!t || tries >= V.queue.maxTries) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
+    s.queueTries[id] = tries;
+    i++;
   }
+  return null;
+}
+
+/** 줄 선 전환점 가운데 열 수 있는 것을 바로 띄운다 (멈춤 주사위도 올해의 상한도 보지 않는다). 띄웠으면 true */
+export function openQueued(s: Life5): boolean {
+  if (s.pending) return false;
+  const t = takeQueued(s);
+  return t ? openTurning(s, t) : false;
+}
+
+/** 다음에 띄울 전환점. 줄 서 있는 것이 먼저, 다음으로 조건과 반복이 허락하는 문 · 큰 계기 중에서 가중치로. */
+export function pickTurning(s: Life5, r: Rng): Turning | null {
+  const queued = takeQueued(s);
+  if (queued) return queued;
   const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment')
     && checkAll(s, t.when) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));
   return weighted(r, pool, (t) => t.weight);
