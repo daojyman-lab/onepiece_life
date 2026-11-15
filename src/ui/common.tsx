@@ -52,10 +52,10 @@ export function Gauge({ value, max, kind = 'hp', thin }: { value: number; max: n
   );
 }
 
-export function Modal({ title, children, onClose, wide }: { title: string; children: ComponentChildren; onClose?: () => void; wide?: boolean }) {
+export function Modal({ title, children, onClose, wide, cls = '' }: { title: string; children: ComponentChildren; onClose?: () => void; wide?: boolean; cls?: string }) {
   return (
     <div class="overlay" role="dialog" aria-modal="true" aria-label={title}>
-      <div class={`modal frame frame-pad ${wide ? 'wide' : ''}`}>
+      <div class={`modal frame frame-pad ${wide ? 'wide' : ''} ${cls}`}>
         <div class="head">
           <span class="sign">{title}</span>
           {onClose && <button class="btn small" onClick={onClose}>닫기 ✕</button>}

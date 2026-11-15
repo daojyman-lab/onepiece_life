@@ -280,3 +280,31 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
   .app.desk .cols { grid-template-columns: 220px minmax(0, 1fr) 300px; }
   .app.desk .col.right { grid-column: auto; }
 }
+
+/* ---------- 상점 (시안 B): 왼쪽 분류 · 가운데 목록 · 오른쪽 상세 ---------- */
+.shop-modal { height: min(620px, calc(100dvh - 48px)); display: flex; flex-direction: column; }
+.shop { flex: 1; min-height: 0; display: grid; grid-template-columns: 170px minmax(0, 1fr) 280px; gap: 6px; }
+.shop > .paper { min-height: 0; overflow-y: auto; scrollbar-width: thin; margin: 0; }
+.shop-group + .shop-group { margin-top: 8px; }
+.shop-group-title { font-family: 'Galmuri9', sans-serif; font-size: 10px; color: var(--ink-soft); margin: 0 0 3px 2px; }
+.shop-cat, .shop-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px; width: 100%;
+  background: transparent; border: 0; border-left: 3px solid transparent; padding: 5px 6px; cursor: pointer;
+  font: inherit; font-size: 12px; color: var(--ink); text-align: left;
+}
+.shop-cat:hover, .shop-row:hover { background: var(--paper-l); }
+.shop-cat.on, .shop-row.on { background: #fff2c0; border-left-color: var(--gold-d); font-weight: 700; }
+.shop-row { border-bottom: 1px dashed var(--tan-d); }
+.shop-row.dim { color: var(--ink-soft); }
+.shop-badge { font-size: 10px; background: var(--wood-d); color: var(--paper); padding: 0 5px; }
+.shop-detail .stack { gap: 6px; }
+.shop-actions { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+@media (max-width: 760px) {
+  .shop-modal { height: calc(100dvh - 90px - env(safe-area-inset-bottom)); }
+  .shop { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) minmax(0, 1.1fr); }
+  .shop-menu { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
+  .shop-menu .shop-group { display: flex; gap: 2px; align-items: center; margin: 0; }
+  .shop-menu .shop-group-title { display: none; }
+  .shop-cat { width: auto; border-left: 0; border-bottom: 3px solid transparent; }
+  .shop-cat.on { border-bottom-color: var(--gold-d); }
+}
