@@ -166,9 +166,9 @@ export const CHILDHOOD: Turning[] = [
     title: '눈이 마주친 또래', body: '부둣가에서 고집 센 또래 하나와 눈이 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
     doors: [
       { label: '먼저 주먹을 날린다', hint: '코피가 터지도록 뒹군다. 그 아이와는 오래 겨루는 사이가 된다', values: { dominion: D }, mark: 'unyielding',
-        fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: '어릴 적 맞수' }] },
+        fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' }] },
       { label: '등대까지 달리기로 겨루자고 한다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
-        fx: [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수' },
+        fx: [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' },
              { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }], else: [{ op: 'log', text: '등대 앞에서 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
       { label: '눈싸움을 그만두고 손을 내민다', hint: '그 아이는 한참 망설이다 손을 잡는다. 겨룰 상대 대신 놀 동무가 생긴다', values: { loyalty: D },
         fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }] },

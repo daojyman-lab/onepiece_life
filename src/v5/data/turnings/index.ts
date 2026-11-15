@@ -11,6 +11,8 @@ import { PIRATE } from './pirate';
 import { HUNTER } from './hunter';
 import { MARINE } from './marine';
 import { REVOLUTION } from './revolution';
+import { LAND } from './land';
+import { LIFE } from './life';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -24,6 +26,8 @@ const GROUPS: Turning[][] = [
   HUNTER,
   MARINE,
   REVOLUTION,
+  LAND,
+  LIFE,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();

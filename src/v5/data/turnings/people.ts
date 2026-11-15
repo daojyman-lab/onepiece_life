@@ -116,27 +116,27 @@ export const PEOPLE: Turning[] = [
 
   // ---------------------------------------------------------------- 가족
   {
-    id: 'pp_marriage', kind: 'door', when: at(age(20, 45), st(...ACTIVE)),
+    id: 'pp_marriage', kind: 'door', when: at(age(20, 45), st(...ACTIVE), { c: 'flag', id: 'sweetheart', has: true }),   // 마음에 둔 사람(life_meet)이 있어야 온다
     weight: 5, repeat: 'once', speaker: { relation: '마음에 둔 사람' },
     title: '청혼', body: '{island}의 바닷가에서, 오래 곁에 있던 사람이 {name}의 손을 잡는다. 함께 살자고, 이번에는 대답을 듣고 싶다고.',
     doors: [
       { label: '청혼을 받아들인다', hint: '평생을 함께할 사람이 생긴다', values: { devotion: D },
-        fx: [{ op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' }, { op: 'timeline', text: '혼인했다' }] },
-      { label: '바다를 택한다', hint: '그 사람은 기다려 주지 않는다', values: { freedom: D }, fx: [{ op: 'hardship', add: 3 }] },
-      { label: '돌아올 때까지 기다려 달라고 한다', hint: '약속 하나를 품고 떠난다', values: { romance: D }, fx: [{ op: 'flag', id: 'waitingLove' }] },
+        fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' }, { op: 'timeline', text: '혼인했다' }] },
+      { label: '바다를 택한다', hint: '그 사람은 기다려 주지 않는다', values: { freedom: D }, fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'hardship', add: 3 }] },
+      { label: '돌아올 때까지 기다려 달라고 한다', hint: '약속 하나를 품고 떠난다', values: { romance: D }, fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'flag', id: 'waitingLove' }] },
     ],
   },
   {
-    id: 'pp_child', kind: 'door', when: at(age(21, 50), st(...ACTIVE), { c: 'flag', id: 'married', has: true }),
+    id: 'pp_child', kind: 'door', when: at(age(21, 40), st(...ACTIVE), { c: 'flag', id: 'married', has: true }),   // 마흔까지: 자식이 자라서 오는 사건(life.ts)은 쉰 넘어 온다
     weight: 6, repeat: 'once', speaker: 'hero',
     title: '작은 손', body: '갓난아이가 {name}의 손가락을 꼭 쥐었다. 이 작은 손이 앞으로의 날들을 바꿔 놓을 것 같다.',
     doors: [
       { label: '{island}에 자리 잡고 곁에서 키운다', hint: '바다보다 아이를 고른다', values: { devotion: D },
-        fx: [{ op: 'person', kind: 'family', relation: '자식' }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '아이가 태어나 {island}에 자리 잡았다' }] },
+        fx: [{ op: 'person', kind: 'family', relation: '자식', age: 0 }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '아이가 태어나 {island}에 자리 잡았다' }] },
       { label: '아이를 맡기고 다시 떠난다', hint: '돌아올 이유가 하나 생긴다', values: { ambition: D },
-        fx: [{ op: 'person', kind: 'family', relation: '자식' }, { op: 'hardship', add: 3 }, { op: 'timeline', text: '아이가 태어났다' }] },
+        fx: [{ op: 'person', kind: 'family', relation: '자식', age: 0 }, { op: 'hardship', add: 3 }, { op: 'timeline', text: '아이가 태어났다' }] },
       { label: '아이에게 바다를 보여 주겠다며 데려간다', hint: '거친 삶을 함께 산다', special: 'romance', values: { romance: D },
-        fx: [{ op: 'person', kind: 'family', relation: '자식' }, { op: 'flag', id: 'childAtSea' }, { op: 'timeline', text: '아이와 함께 바다를 떠돌았다' }] },
+        fx: [{ op: 'person', kind: 'family', relation: '자식', age: 0 }, { op: 'flag', id: 'childAtSea' }, { op: 'timeline', text: '아이와 함께 바다를 떠돌았다' }] },
     ],
   },
   {
