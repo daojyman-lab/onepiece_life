@@ -1,7 +1,7 @@
 // tests/v5/growth.test.ts
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
-import { reduce5 } from '../../src/v5/core/reduce';
+import { apply5, reduce5 } from '../../src/v5/core/reduce';
 import { addValues } from '../../src/v5/core/values';
 import { activityOf, power5 } from '../../src/v5/core/year';
 import { applyFx } from '../../src/v5/core/fx';
@@ -74,5 +74,26 @@ describe('숙련과 단계의 상한', () => {
   });
   it('약한 스승도 스승 없을 때의 상한 3보다 낮추지는 않는다', () => {
     expect(pushSword({ cap: 2, paid: false }).tier.sword).toBe(V.growth.noMasterCap);
+  });
+});
+
+describe('아이의 일', () => {
+  /** 열여섯 살이 될 때까지 첫 번째 열린 문으로 키운다 */
+  function to16(seed: number, wealth: 'poor' | 'common'): Life5 {
+    const s = newLife5(seed, { wealth, lineage: 'commoner' });
+    for (let i = 0; i < 5000 && s.age < 16 && s.pending?.kind !== 'ending'; i++) {
+      if (s.pending?.kind === 'door') apply5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
+      else apply5(s, s.pending ? { type: 'answer', index: 1 } : { type: 'step' });
+    }
+    return s;
+  }
+  const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)];
+  it('가난한 집 아이는 살려고 일하지만, 열여섯에 평범한 집 아이보다 돈이 많지 않다', () => {
+    const poor = Array.from({ length: 120 }, (_, i) => to16(500 + i, 'poor').hero.money);
+    const common = Array.from({ length: 120 }, (_, i) => to16(500 + i, 'common').hero.money);
+    expect(median(poor)).toBeLessThan(median(common));
+  });
+  it('아이의 품삯은 어른의 품삯보다 훨씬 적다', () => {
+    expect(V.growth.kidWorkMoney).toBeLessThan(V.growth.workMoney / 2);
   });
 });

@@ -15,7 +15,8 @@ export const V = {
             branchStats: { fist: ['str', 'vit'], sword: ['str', 'spd'], gun: ['spd', 'luk'], observation: ['int', 'wil'],
                            armament: ['vit', 'wil'], conqueror: ['wil'], fruit: ['wil', 'vit'] },
             bareStats: ['str', 'spd', 'vit'],  // 갈래가 아직 없을 때 수련이 올리는 몸
-            workMoney: 3000, familyBond: 2, restHp: 10 },
+            workMoney: 3000, familyBond: 2, restHp: 10,
+            kidWorkMoney: 500 },               // activity.kidAge 이하 아이가 일해서 제 손에 남는 돈 (나머지는 식구가 먹는다)
   // 한 토막의 활동: 기본 가중치 + Σ 가치관 점수 × 계수 + 처지
   activity: {
     base: 10,

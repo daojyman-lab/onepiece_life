@@ -116,7 +116,7 @@ export function growPart(s: Life5, act: Activity, r: Rng): void {
       addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation'));
       return;
     case 'roam': statUp(s, r, ['luk', 'spd'], G.statP.roam * age); return;
-    case 'work': h.money += G.workMoney; return;
+    case 'work': h.money += s.age <= V.activity.kidAge ? G.kidWorkMoney : G.workMoney; return;   // 아이의 품삯은 대개 식구의 밥이 된다
     case 'family':
       for (const p of s.people) if (p.alive) p.bond = Math.min(V.person.bondMax, p.bond + G.familyBond);
       return;
