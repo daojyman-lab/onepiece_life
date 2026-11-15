@@ -1,6 +1,6 @@
 // tests/v5/pixel.test.ts
 import { describe as group, expect, it } from 'vitest';
-import { attackArm, describe as desc } from '../../src/ui/pixel/pixelArt';
+import { attackArm, describe as desc, holstered } from '../../src/ui/pixel/pixelArt';
 import { heroWho5 } from '../../src/v5/ui/view';
 import { newLife5 } from '../../src/v5/core/state';
 
@@ -25,5 +25,12 @@ group('신체 손실의 겉모습', () => {
     expect(attackArm({ armL: 'lost' })).toBe('armR');
     expect(attackArm({ armL: 'lost', armR: 'superior' })).toBe('armR');
     expect(attackArm({ armL: 'lost', armR: 'lost' })).toBeNull();
+  });
+  it('칼집은 무기를 뽑아 든 동안에만 비고, 두 팔을 다 잃으면 공격 자세에도 꽂힌 채다', () => {
+    expect(holstered(null, {})).toBe(true);
+    expect(holstered('attack', {})).toBe(false);
+    expect(holstered('attack', { armL: 'lost' })).toBe(false);
+    expect(holstered('attack', { armL: 'lost', armR: 'lost' })).toBe(true);
+    expect(holstered(null, { armL: 'lost', armR: 'lost' })).toBe(true);
   });
 });

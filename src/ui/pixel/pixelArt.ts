@@ -228,6 +228,14 @@ export function attackArm(body: BodyMark): 'armL' | 'armR' | null {
   return body.armR !== 'lost' ? 'armR' : null;
 }
 
+/**
+ * 칼집 · 권총집에 무기가 꽂혀 있는가: 공격 자세에서 뻗는 팔이 있어 무기를 뽑아 든 동안만 아니다.
+ * 두 팔을 다 잃으면 공격 자세에도 뽑아 들 팔이 없으니 꽂힌 채다 (공격 틀마다 깜빡이지 않게)
+ */
+export function holstered(pose: 'attack' | null, body: BodyMark): boolean {
+  return pose !== 'attack' || attackArm(body) === null;
+}
+
 export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCanvasElement {
   if (w.form === 'seaking') {
     const k = 'seaking|' + w.key + '|' + frame;
@@ -287,8 +295,8 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
   const sx = cross ? 3 : 12, sleeve = cross ? clS : cl; // 소매가 시작하는 곳 · 몸 앞을 지나는 소매는 그늘색
   /** 뻗은 팔의 손목 쪽 한 칸: 의수는 팔 색, 강철 팔은 금색 테 */
   const wristL = (wx: number) => { if (mL) r(wx, ay + 1, 1, 2, atkSt === 'superior' ? GOLD : mL[1]); };
-  // 평소 모습: 등 뒤 칼집 · 허벅지 권총집
-  if (pose !== 'attack' && !child) {
+  // 평소 모습: 등 뒤 칼집 · 허벅지 권총집 (무기를 뽑아 든 동안에만 감춘다)
+  if (holstered(pose, body) && !child) {
     if (wp === 'sword') { r(1, torsoTop - 2, 1, 2, '#c8a040'); r(1, torsoTop, 1, torsoH + 3, '#3a2a40'); r(0, torsoTop + 1, 1, torsoH + 1, '#5a4466'); }
     if (wp === 'gun') { r(11, legsTop, 2, 3, '#4a3020'); r(11, legsTop - 1, 1, 1, '#7a7a88'); }
   }

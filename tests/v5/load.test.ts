@@ -4,6 +4,9 @@ import { normalizeLife5, normalizeMeta5 } from '../../src/v5/core/load';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
 import { emptyMeta5 } from '../../src/v5/core/meta';
+import { askFight } from '../../src/v5/core/fight';
+import { FOES } from '../../src/v5/data/foes';
+import type { Pending5 } from '../../src/v5/core/types';
 
 describe('저장 읽기', () => {
   it('멀쩡한 인생은 그대로 돌려준다', () => {
@@ -33,6 +36,33 @@ describe('저장 읽기', () => {
     expect(m).toEqual(emptyMeta5());
     expect(normalizeMeta5({ schema: 5, doors: 'x', fruits: ['f'], lives: 3 })).toEqual({ ...emptyMeta5(), fruits: ['f'], lives: 3 });
     expect(normalizeMeta5({ schema: 5, doors: null, hall: null })).toEqual(emptyMeta5());
+  });
+  it('떠 있는 일(pending)은 없거나, 그 종류에 맞는 칸을 갖춰야 한다', () => {
+    const life = () => JSON.parse(JSON.stringify(newLife5(1)));
+    const ok = life(); expect(ok.pending.kind).toBe('door');
+    expect(normalizeLife5(ok)).not.toBeNull();
+    expect(normalizeLife5({ ...life(), pending: null })).not.toBeNull();
+    expect(normalizeLife5({ ...life(), pending: { kind: 'ending', cause: '병' } })).not.toBeNull();
+    // 싸움 · 전투는 실제로 만든 것을 되읽어 본다
+    const f = newLife5(1); f.pending = null as Pending5; f.age = 22;
+    askFight(f, Object.keys(FOES)[0], true, false);
+    expect(f.pending?.kind).toBe('fight');
+    expect(normalizeLife5(JSON.parse(JSON.stringify(f)))).not.toBeNull();
+    const b = newLife5(1); b.pending = null as Pending5; b.age = 22;
+    askFight(b, Object.keys(FOES)[0], false, true);
+    expect(b.pending?.kind).toBe('battle');
+    const bj = JSON.parse(JSON.stringify(b));
+    expect(normalizeLife5(bj)).not.toBeNull();
+    const door = life().pending;
+    const bad: unknown[] = [
+      3, 'x', [], {}, { kind: 'shop' },
+      { ...door, doors: 'x' }, { ...door, doors: undefined }, { ...door, title: 3 }, { ...door, body: undefined },
+      { kind: 'fight', lethal: true, risk: { injury: 0, limb: 0, death: 0 } }, { kind: 'fight', foe: 'x' }, { kind: 'fight', foe: [] },
+      { ...bj.pending, foe: null }, { ...bj.pending, battle: null }, { ...bj.pending, battle: { ...bj.pending.battle, events: {} } },
+      { ...bj.pending, battle: { ...bj.pending.battle, units: undefined } },
+      { kind: 'ending', cause: 3 },
+    ];
+    for (const p of bad) expect(normalizeLife5({ ...life(), pending: p }), JSON.stringify(p)?.slice(0, 80)).toBeNull();
   });
   it('인생의 큰 칸이 엉뚱한 모양이면 null', () => {
     const arrays = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known'];
