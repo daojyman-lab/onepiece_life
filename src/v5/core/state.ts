@@ -3,12 +3,11 @@ import { TALENT_BY_ID } from '../../data/talents';
 import { josa } from '../../core/josa';
 import { pick, rngOf } from '../../core/rng';
 import { V } from '../data/balance';
+import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth } from './birth';
-import type { Branch, Life5, Limb, LimbState, Stats, ValueId, Values, Wealth } from './types';
+import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
 
 export { fullName } from './birth';
-
-const VALUE_IDS: readonly ValueId[] = ['justice', 'devotion', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'];
 const LIMBS: readonly Limb[] = ['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'];
 const BRANCHES: readonly Branch[] = ['fist', 'sword', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
