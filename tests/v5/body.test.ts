@@ -61,7 +61,8 @@ describe('신체 손실', () => {
       s = s.pending ? reduce5(s, { type: 'answer', index: s.pending.kind === 'door' ? s.pending.doors.findIndex((d) => !d.locked) : 1 }) : reduce5(s, { type: 'step' });
       expect(invariants5(s)).toEqual([]);
     }
-    expect(s.age).toBeGreaterThanOrEqual(startAge + 40);
+    // 멈추지 않았다는 것은 40년을 흘렀거나, 그 전에 인생이 끝에 닿았다는 뜻이다(병이나 노환은 시드에 따라 온다).
+    expect(s.ended !== null || s.age >= startAge + 40).toBe(true);
   });
   it('여섯 부위를 모두 잃은 인생도 끝에 닿는다', () => {
     let s = adult(5);
