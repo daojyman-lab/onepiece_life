@@ -1,10 +1,13 @@
 import { ORPHAN_STORIES, SPECIES_NAMES } from '../../data/births';
 import { TALENT_BY_ID } from '../../data/talents';
 import { josa } from '../../core/josa';
-import { pick, rngOf } from '../../core/rng';
+import { pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
+import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth } from './birth';
+import { checkAll } from './cond';
+import { openTurning } from './turning';
 import type { LogType } from '../../core/types';
 import type { Branch, Life5, Limb, LimbState, LogWeight, Stats, Values, Wealth } from './types';
 
@@ -66,7 +69,7 @@ export function logLine(s: Life5, text: string, weight: LogWeight = 'light', typ
 
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };
 
-/** 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문은 아직 없다. */
+/** 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다. */
 export function newLife5(seed: number, opt: { name?: string; gender?: 'm' | 'f' } = {}): Life5 {
   const s = emptyLife(seed);
   rollBirth(s, opt);
@@ -79,5 +82,7 @@ export function newLife5(seed: number, opt: { name?: string; gender?: 'm' | 'f' 
   for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
   s.hero.standing = 'child';
+  const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
+  if (first) openTurning(s, first);
   return s;
 }

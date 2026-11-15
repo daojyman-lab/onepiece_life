@@ -1,6 +1,7 @@
 // 명령 처리와 불변 조건. 입력 상태는 바꾸지 않는다.
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
+import { answerDoor } from './turning';
 import { stepPart } from './year';
 import type { Command5, Life5 } from './types';
 
@@ -8,7 +9,7 @@ export function reduce5(prev: Life5, cmd: Command5): Life5 {
   const s = structuredClone(prev);
   switch (cmd.type) {
     case 'step': if (s.pending === null) stepPart(s); break;
-    case 'answer': break;                      // 문과 싸움의 답은 뒤 과제가 채운다
+    case 'answer': if (s.pending?.kind === 'door') answerDoor(s, cmd.index); break;   // 싸움의 답은 뒤 과제가 채운다
   }
   return s;
 }

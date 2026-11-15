@@ -8,6 +8,7 @@ import { VALUE_IDS } from '../data/values';
 import { checkAll } from './cond';
 import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
 import { logLine } from './state';
+import { openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -29,9 +30,17 @@ export function stepPart(s: Life5): void {
   const act = activityOf(s, r);
   dailyLine(s, act, r);
   growPart(s, act, r);
-  // 뒤 과제가 여기에 차례로 끼운다: 자잘한 일 → 병과 사고 → 기연 → 전환점
+  // 뒤 과제가 여기에 차례로 끼운다: 자잘한 일 → 병과 사고 → 기연 → (전환점은 맨 끝)
+  turningPoint(s, r);
   nextPart(s);
   endIfDead(s);
+}
+
+/** 멈출 차례면 전환점 하나를 띄운다 */
+function turningPoint(s: Life5, r: Rng): void {
+  if (s.pending || !wantsStop(s, r)) return;
+  const t = pickTurning(s, r);
+  if (t) openTurning(s, t);
 }
 
 /** 이 토막에 인물이 한 일. 기본 가중치에 가치관(점수 × 계수)과 처지가 더한다. */
