@@ -41,6 +41,15 @@ describe('흐름', () => {
     expect(nextHidden(life, -1)?.id).toBe(life.log[0].id);
     expect(caughtUp(life, life.log[life.log.length - 1].id)).toBe(true);
   });
+  it('인생이 끝났어도 못 본 줄이 남아 있으면 줄을 띄우고, 엔딩 창은 아직 뜨지 않는다', () => {
+    const life = autoplay5(21, 'random').s;
+    expect(life.pending?.kind).toBe('ending');
+    const shownId = life.log[life.log.length - 3].id;
+    expect(nextTick(base({ life, shownId }))).toMatchObject({ do: 'reveal', id: life.log[life.log.length - 2].id });
+    expect(caughtUp(life, shownId)).toBe(false);
+    expect(caughtUp(life, lastLogId(life))).toBe(true);
+    expect(nextTick(base({ life, shownId: lastLogId(life) }))).toEqual({ do: 'wait' });
+  });
   it('1배속으로 한 인생은 25~45분이다', () => {
     const lives = Array.from({ length: 40 }, (_, i) => autoplay5(9000 + i, 'random').s);
     const avg = lives.reduce((a, s) => a + estimateMinutes(s.seq, s.stats.stops), 0) / lives.length;

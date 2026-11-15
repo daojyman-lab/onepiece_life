@@ -356,3 +356,8 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 }
 /* 휴대폰에는 마우스가 없으니 '마우스를 올려 두면 멈춘다'를 내지 않는다 */
 .app.mobile .story-idle { display: none; }
+/* 엔딩 창: 본문이 창 안에서 스크롤하고 맨 아래 단추는 늘 닿는다 */
+.modal.ending5 > .ending5-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; padding-right: 10px; }
+.modal.ending5 > .ending5-go { flex: none; margin-top: 8px; }
+.ending5-body > section { display: flex; flex-direction: column; gap: 2px; }
+.ending5-body summary { cursor: pointer; }

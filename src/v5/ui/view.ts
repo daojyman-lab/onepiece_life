@@ -7,6 +7,7 @@ import { SEA_BY_ID } from '../../data/seas';
 import { weaponOfSkills, type SceneInput, type Weapon, type Who } from '../../ui/pixel/pixelArt';
 import { fullName } from '../core/birth';
 import { LIMB_NAME, LIMBS } from '../core/body';
+import { buildEnding } from '../core/ending';
 import { gapOf } from '../core/fight';
 import type { Meta5 } from '../core/meta';
 import { isDeep, topValues } from '../core/values';
@@ -191,7 +192,7 @@ export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): Fi
 export interface DoorView {
   heading: string;                     // 큰 계기면 '큰 계기 · {제목}', 아니면 제목
   moment: boolean; speaker: { name: string; who: Who }; body: string;
-  doors: { index: number; label: string; hint: string; locked: string | null; danger: boolean; tags: string[] }[];
+  doors: { index: number; label: string; hint: string; locked: string | null; danger: boolean; tags: { text: string; red: boolean }[] }[];
 }
 
 /** 선택 창의 자료. 문 옆에는 '전에 골라 본 문' 같은 표시만 붙고, 문이 올리는 가치관은 싣지 않는다 */
@@ -206,7 +207,11 @@ export function doorView(s: Life5, p: Extract<Pending5, { kind: 'door' }>): Door
     doors: p.doors.map((d, index) => ({
       index, label: d.label, locked: d.locked, danger: d.danger,
       hint: d.locked ? `✕ ${d.locked}` : d.hint,
-      tags: [d.special && '특별한 문', d.tried && '전에 골라 본 문', d.danger && '위험'].filter((t): t is string => !!t),
+      tags: [
+        d.special && { text: '특별한 문', red: false },
+        d.tried && { text: '전에 골라 본 문', red: false },
+        d.danger && { text: '위험', red: true },
+      ].filter((t): t is { text: string; red: boolean } => !!t),
     })),
   };
 }
@@ -334,10 +339,41 @@ export function codexView(meta: Meta5): CodexView {
   };
 }
 
+/** 끝난 나이와 까닭: '일흔두 살, 노환' (끝난 까닭이 없으면 나이만) */
+function endWord(age: number, cause: string): string {
+  return cause ? `${ageWord(age)}, ${cause}` : ageWord(age);
+}
+
 /** 명예의 전당: 최근 인생이 위. end는 '일흔두 살, 노환' (끝난 까닭이 없으면 나이만) */
 export function hallView(meta: Meta5): { name: string; persona: string; oneLine: string; end: string }[] {
-  return [...meta.hall].reverse().map((h) => ({
-    name: h.name, persona: h.persona, oneLine: h.oneLine,
-    end: h.cause ? `${ageWord(h.age)}, ${h.cause}` : ageWord(h.age),
-  }));
+  return [...meta.hall].reverse().map((h) => ({ name: h.name, persona: h.persona, oneLine: h.oneLine, end: endWord(h.age, h.cause) }));
+}
+
+// ── 엔딩 ──
+export interface EndingView {
+  name: string; end: string;                         // '일흔두 살, 노환' 꼴
+  persona: string; oneLine: string; remembered: string;
+  canonWords: { who: string; line: string }[]; canonMoments: string[];
+  unchosen: string[]; secret: string | null; newCodex: string[];
+  record: { label: string; value: string }[];        // 접힌 칸
+}
+
+/** 엔딩 창의 자료. meta는 이 인생을 더하기 전의 도감이어야 '새로 채운 것'이 나온다 */
+export function endingView(s: Life5, meta: Meta5): EndingView {
+  const e = buildEnding(s, meta), r = e.record;
+  return {
+    name: fullName(s.hero).trim(), end: endWord(r.age, r.cause),
+    persona: e.persona, oneLine: e.oneLine, remembered: e.remembered,
+    canonWords: e.canonWords, canonMoments: e.canonMoments,
+    unchosen: e.unchosen, secret: e.secret, newCodex: e.newCodex,
+    record: [
+      { label: '끝난 나이', value: ageWord(r.age) },
+      { label: '까닭', value: r.cause || '-' },
+      { label: '가장 높은 단계', value: TIER_WORD[r.topTier] || '없음' },
+      { label: '이름값', value: fmtMoney(r.fame) },
+      { label: '싸움', value: `${r.fights}번 중 ${r.wins}승` },
+      { label: '잃은 부위', value: `${r.limbsLost}곳` },
+      { label: '만난 기연', value: `${r.fortunes}번` },
+    ],
+  };
 }

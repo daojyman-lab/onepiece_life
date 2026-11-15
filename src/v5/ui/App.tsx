@@ -7,6 +7,7 @@ import type { Standing } from '../core/types';
 import { BattleModal } from './modals/BattleModal';
 import { CodexModal } from './modals/CodexModal';
 import { DoorModal } from './modals/DoorModal';
+import { EndingModal } from './modals/EndingModal';
 import { FightModal } from './modals/FightModal';
 import { MenuModal } from './modals/MenuModal';
 import { Main } from './screens/Main';
@@ -29,6 +30,7 @@ export function App() {
   const popup = st.screen === 'main' && ready && p ? `${p.kind}:${p.kind === 'door' ? p.turning : ''}:${s!.log.length}` : '';
   useEffect(() => {
     if (popup && p?.kind === 'door') sfx('event');
+    else if (popup && p?.kind === 'ending') sfx('lose');
   }, [popup]);
   if (st.screen === 'start' || !s) return <><Start /><SoundToggles /><Toasts /></>;
   // 떠 있는 일(문 · 싸움 · 엔딩)의 창: 기록이 다 떠오른 뒤에 뜬다. 창을 닫는 길은 답하는 것뿐이다
@@ -37,7 +39,8 @@ export function App() {
   else if (p?.kind === 'door') pendingView = <DoorModal key={popup} s={s} p={p} />;
   else if (p?.kind === 'fight') pendingView = <FightModal key={popup} s={s} p={p} />;
   else if (p?.kind === 'battle') pendingView = <BattleModal key={popup} s={s} p={p} />;
-  // 엔딩(과제 9)은 아직 창이 없다
+  // 엔딩에는 이 인생을 더하기 전의 도감을 넘긴다 (endLife가 그 뒤에 더한다)
+  else if (p?.kind === 'ending') pendingView = <EndingModal key={popup} s={s} meta={st.meta} />;
   // 관리용 창은 떠 있는 일의 창이 없을 때만
   let manage = null;
   if (!pendingView) {

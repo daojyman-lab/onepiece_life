@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, battleLine, codexView, doorView, fightView, hallView, heroWho5, hpAt, matchWord, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
 import type { BattleEvent } from '../../src/core/types';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { askFight } from '../../src/v5/core/fight';
@@ -84,14 +84,14 @@ describe('선택 창과 싸움 앞의 물음', () => {
     ] };
     const v = doorView(s, p);
     expect(v.heading.startsWith('큰 계기')).toBe(true);
-    expect(v.doors[0].tags).toEqual(['특별한 문', '전에 골라 본 문', '위험']);
+    expect(v.doors[0].tags).toEqual([{ text: '특별한 문', red: false }, { text: '전에 골라 본 문', red: false }, { text: '위험', red: true }]);
     expect(v.doors[1]).toMatchObject({ index: 1, locked: '돈이 모자라다', tags: [] });
   });
   it('선택 창의 자료에 가치관 이름이 새어 나가지 않는다', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const s = newLife5(seed); if (s.pending?.kind !== 'door') continue;
       const v = doorView(s, s.pending);
-      for (const d of v.doors) for (const t of d.tags) expect(Object.values(VALUE_NAME)).not.toContain(t);
+      for (const d of v.doors) for (const t of d.tags) expect(Object.values(VALUE_NAME)).not.toContain(t.text);
     }
   });
   it('싸움 앞: 목숨을 걸지 않으면 죽을 위험은 없다', () => {
@@ -188,7 +188,7 @@ describe('도감과 명예의 전당', () => {
     const meta = recordLife(emptyMeta5(), s);
     const c = codexView(meta);
     expect(c.doors.length).toBeGreaterThan(0);
-    for (const d of c.doors) { expect(d.title).not.toContain('#'); expect(JSON.stringify(d.values)).not.toMatch(/\d/); }
+    for (const d of c.doors) { expect(d.title).not.toContain('#'); expect(d.door).not.toContain('{'); expect(JSON.stringify(d.values)).not.toMatch(/\d/); }
     expect(codexView({ ...meta, doors: { 'no_such#0': [] } }).doors).toEqual([]);
   });
   it('명예의 전당은 최근 인생이 위다', () => {
@@ -196,6 +196,27 @@ describe('도감과 명예의 전당', () => {
     meta = recordLife(meta, autoplay5(1, 'random').s); meta = recordLife(meta, autoplay5(2, 'random').s);
     const h = hallView(meta);
     expect(h.length).toBe(2); expect(h[0].name).toBe(meta.hall[1].name);
+  });
+  it('명예의 전당의 끝은 "…살, 까닭", 까닭이 없으면 나이만', () => {
+    const meta = { ...emptyMeta5(), hall: [
+      { name: '가', persona: '', oneLine: '', age: 72, cause: '노환' },
+      { name: '나', persona: '', oneLine: '', age: 30, cause: '' },
+    ] };
+    expect(hallView(meta).map((h) => h.end)).toEqual(['서른 살', '일흔두 살, 노환']);
+  });
+  it('엔딩 자료: 빈 칸 없이 채워지고 가치관 숫자가 없다', () => {
+    const s = autoplay5(21, 'random').s;
+    const v = endingView(s, emptyMeta5());
+    expect(v.persona.length).toBeGreaterThan(0); expect(v.oneLine.length).toBeGreaterThan(0); expect(v.remembered.length).toBeGreaterThan(0);
+    expect(v.end).toContain('살');
+    expect(v.record.length).toBeGreaterThanOrEqual(5);
+    expect(v.newCodex.length).toBeGreaterThan(0);                       // 첫 인생이면 새로 채운 것이 있다
+    expect(endingView(s, recordLife(emptyMeta5(), s)).newCodex).toEqual([]);   // 이미 든 도감이면 없다
+    for (const x of Object.values(s.values)) if (x > 0 && !Number.isInteger(x)) expect(JSON.stringify(v)).not.toContain(String(x));
+  });
+  it('엔딩의 끝은 명예의 전당과 같은 꼴이다', () => {
+    const s = autoplay5(21, 'random').s;
+    expect(endingView(s, emptyMeta5()).end).toBe(hallView(recordLife(emptyMeta5(), s))[0].end);
   });
 });
 
