@@ -71,7 +71,7 @@ function MobileMain({ s }: { s: Life5 }) {
         <button class="btn small" onClick={() => actions.open('menu')} aria-label="메뉴">☰</button>
       </header>
       <div class={`m5-body ${tab === 'story' ? 'fill' : ''}`}>
-        {tab === 'story' && <><Scene s={s} /><StoryPanel s={s} /></>}
+        {tab === 'story' && <><Scene s={s} ready={caughtUp(s, st.shownId)} /><StoryPanel s={s} /></>}
         {tab === 'hero' && <Profile s={s} />}
         {tab === 'people' && <PeoplePanel s={s} />}
         {tab === 'timeline' && <TimelinePanel s={s} />}
@@ -99,7 +99,7 @@ export function Main() {
       <div class="cols">
         <div class="col left"><Profile s={s} /></div>
         <div class="col mid">
-          <Scene s={s} />
+          <Scene s={s} ready={caughtUp(s, st.shownId)} />
           <StoryPanel s={s} />
         </div>
         <div class="col right"><SideTabs s={s} /></div>
@@ -163,21 +163,21 @@ function Profile({ s }: { s: Life5 }) {
   );
 }
 
-/** 장면: v4 Scene과 같은 캔버스 반복 그리기. 인생이 바뀔 때만 그림 자료를 다시 만든다 */
-function Scene({ s }: { s: Life5 }) {
+/** 장면: v4 Scene과 같은 캔버스 반복 그리기. 인생이나 따라잡음이 바뀔 때만 그림 자료를 다시 만든다. ready 전에는 싸움 상대를 그리지 않는다 */
+function Scene({ s, ready }: { s: Life5; ready: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const live = useRef(s);
-  live.current = s;
+  const live = useRef({ s, ready });
+  live.current = { s, ready };
   useEffect(() => {
     const c = ref.current!;
     let raf = 0, t = 0;
-    let last: Life5 | null = null, input: SceneInput | null = null;
+    let last: Life5 | null = null, lastReady = false, input: SceneInput | null = null;
     const loop = () => {
       t += 1;
       const w = c.clientWidth, h = c.clientHeight;
       if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
       const cur = live.current;
-      if (cur !== last || !input) { last = cur; input = sceneOf(cur); }
+      if (cur.s !== last || cur.ready !== lastReady || !input) { last = cur.s; lastReady = cur.ready; input = sceneOf(cur.s, cur.ready); }
       const ctx = c.getContext('2d');
       if (ctx && w > 0) drawScene(ctx, w, h, t, input);
       raf = requestAnimationFrame(loop);

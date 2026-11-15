@@ -50,7 +50,7 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   useEffect(() => {
     const c = cv.current;
     if (!c) return;
-    const base = sceneOf(s);
+    const base = sceneOf(s, true);   // 전투 창은 이야기가 다 떠오른 뒤에 뜬다
     let raf = 0, t = 0;
     const loop = () => {
       t++;

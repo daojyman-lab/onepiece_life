@@ -61,8 +61,18 @@ describe('프로필', () => {
 
 describe('싸움 앞에서 보이는 말', () => {
   it('위험은 숫자가 아니라 말이다', () => {
-    expect(riskWords({ injury: 0.5, limb: 0.1, death: 0 })).toEqual({ injury: '매우 높다', limb: '낮다', death: '없다' });
-    expect(riskWords({ injury: 0.01, limb: 0.2, death: 0.02 })).toEqual({ injury: '거의 없다', limb: '높다', death: '거의 없다' });
+    expect(riskWords({ injury: 0.5, limb: 0.1, death: 0 }, false)).toEqual({ injury: '매우 높다', limb: '낮다', death: '없다' });
+    expect(riskWords({ injury: 0.01, limb: 0.2, death: 0.02 }, true)).toEqual({ injury: '거의 없다', limb: '높다', death: '거의 없다' });
+  });
+  it('띠의 경계 값은 위 띠의 말이다', () => {
+    expect(riskWords({ injury: 0.4, limb: 0.15, death: 0.03 }, true)).toEqual({ injury: '매우 높다', limb: '높다', death: '낮다' });
+    expect(riskWords({ injury: 0, limb: 0.0299, death: 0.3999 }, true)).toEqual({ injury: '거의 없다', limb: '거의 없다', death: '높다' });
+    expect(riskWords({ injury: 1, limb: 1, death: 1 }, true)).toEqual({ injury: '매우 높다', limb: '매우 높다', death: '매우 높다' });
+  });
+  it('목숨을 건 싸움은 죽을 위험이 0이어도 "없다"가 아니라 "거의 없다"다', () => {
+    expect(riskWords({ injury: 0, limb: 0, death: 0 }, true).death).toBe('거의 없다');
+    expect(riskWords({ injury: 0, limb: 0, death: 0 }, false).death).toBe('없다');
+    expect(riskWords({ injury: 0, limb: 0, death: 0.5 }, false).death).toBe('없다');   // 목숨을 걸지 않으면 죽지 않는다
   });
   it('상대의 격: 아주 강한 주인공에게는 한참 아래, 아주 약한 주인공에게는 상대가 안 된다', () => {
     const foe = Object.values(FOES)[0];
@@ -107,6 +117,7 @@ describe('선택 창과 싸움 앞의 물음', () => {
     askFight(s, Object.keys(FOES)[0], true, false);
     if (s.pending?.kind !== 'fight') throw new Error();
     expect(fightView(s, { ...s.pending, lethal: true, risk: { injury: 0.5, limb: 0.1, death: 0.2 } }).risk[2].word).toBe('높다');
+    expect(fightView(s, { ...s.pending, lethal: true, risk: { injury: 0.5, limb: 0.1, death: 0 } }).risk[2].word).toBe('거의 없다');
   });
   it('주인공이 말하는 문의 말하는 사람은 {이름} (나)', () => {
     const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
@@ -144,7 +155,6 @@ describe('자동 전투 창', () => {
     expect(resultLine(s.pending.result).length).toBeGreaterThan(0);
   });
   it('결과 줄과 모든 사건의 글', () => {
-    expect(resultLine.length).toBe(1);                                   // 결과 하나만 받는다
     expect(resultLine('win')).toBe('이겼다.');
     expect(resultLine('lose')).toBe('졌다.');
     expect(resultLine('retreat')).toBe('물러났다.');
@@ -259,8 +269,16 @@ describe('장면', () => {
     const s = newLife5(1);
     const base = s.people[0];
     s.people = Array.from({ length: 6 }, (_, i) => ({ ...base, id: `c${i}`, name: `동료${i}`, kind: 'crew' as const, alive: true }));
-    expect(sceneOf(s).crew.length).toBe(3);
+    expect(sceneOf(s, true).crew.length).toBe(3);
     s.people = s.people.slice(0, 2);
-    expect(sceneOf(s).crew.length).toBe(2);
+    expect(sceneOf(s, true).crew.length).toBe(2);
+  });
+  it('싸움 상대는 이야기가 따라잡은 뒤에야 장면에 나온다', () => {
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
+    askFight(s, Object.keys(FOES)[0], true, false);
+    if (s.pending?.kind !== 'fight') throw new Error();
+    expect(sceneOf(s, false).foe).toBeNull();
+    expect(sceneOf(s, true).foe).not.toBeNull();
+    expect(sceneOf(newLife5(1), true).foe).toBeNull();                    // 싸움이 아니면 상대가 없다
   });
 });

@@ -15,12 +15,12 @@ const RISK_NONE = '없다';
 const MATCH_WORDS: readonly [number, string][] = [[0.7, '한참 아래다'], [1.15, '해볼 만하다'], [1.8, '버겁다']];
 const MATCH_TOP = '상대가 안 된다';
 
-/** 위험을 말로. 목숨을 걸지 않은 싸움(death 0)은 '없다' */
-export function riskWords(risk: { injury: number; limb: number; death: number }): { injury: string; limb: string; death: string } {
+/** 위험을 말로. 죽을 위험은 목숨을 걸지 않은 싸움이면 '없다', 목숨을 건 싸움이면 띠의 말이다(0이어도 '거의 없다') */
+export function riskWords(risk: { injury: number; limb: number; death: number }, lethal: boolean): { injury: string; limb: string; death: string } {
   return {
     injury: bandWord(risk.injury, RISK_WORDS, RISK_TOP),
     limb: bandWord(risk.limb, RISK_WORDS, RISK_TOP),
-    death: risk.death === 0 ? RISK_NONE : bandWord(risk.death, RISK_WORDS, RISK_TOP),
+    death: lethal ? bandWord(risk.death, RISK_WORDS, RISK_TOP) : RISK_NONE,
   };
 }
 
@@ -33,13 +33,13 @@ export interface FightView { name: string; who: Who; match: string; lethal: bool
 
 /** 싸움 앞의 물음: 상대, 상대의 격, 위험 세 줄. 목숨을 걸지 않은 싸움은 죽을 위험이 '없다' */
 export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): FightView {
-  const w = riskWords(p.risk);
+  const w = riskWords(p.risk, p.lethal);
   return {
     name: p.foe.name, who: foeWho(p.foe), match: matchWord(s, p.foe), lethal: p.lethal,
     risk: [
       { label: '다칠 위험', word: w.injury },
       { label: '몸을 잃을 위험', word: w.limb },
-      { label: '죽을 위험', word: p.lethal ? w.death : RISK_NONE },
+      { label: '죽을 위험', word: w.death },
     ],
   };
 }

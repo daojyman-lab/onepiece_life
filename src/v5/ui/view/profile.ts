@@ -20,7 +20,7 @@ const STORY_KEEP = 160;
 const HEAVY: ReadonlySet<LogLine['weight']> = new Set(['heavy', 'year']);
 
 export interface ProfileView {
-  name: string; age: string; standing: string; born: string; island: string;
+  name: string; age: string; standing: string; born: string;
   values: string[]; strengths: { name: string; text: string }[];
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
@@ -47,7 +47,6 @@ export function profileView(s: Life5): ProfileView {
     age: ageWord(s.age),
     standing: STANDING_NAME[h.standing],
     born: `${h.town}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
-    island: h.island,
     values: valueWords(s),
     strengths: STRENGTHS.filter((x) => s.strengths.includes(x.id)).map((x) => ({ name: x.name, text: x.text })),
     body: LIMBS.flatMap((l) => {
@@ -69,10 +68,11 @@ const ISLAND_COLORS = ['#70b582', '#c8b070', '#8ab0d0', '#b0d890', '#d0a0a0', '#
 /** 장면에 그리는 동료 수 (v4 drawScene이 그리는 만큼) */
 const SCENE_CREW = 3;
 
-export function sceneOf(s: Life5): SceneInput {
+/** 장면 자료. ready는 이야기가 다 떠올랐는가: 그 전에는 싸움 상대를 그리지 않는다(창보다 먼저 나오지 않게) */
+export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const h = s.hero, p = s.pending;
   const sea = SEA_BY_ID[h.sea];
-  const foe = p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
+  const foe = ready && p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
   const hero = heroWho5(s);
   return {
     hero,
