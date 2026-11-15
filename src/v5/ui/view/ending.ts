@@ -4,7 +4,8 @@ import { FRUIT_BY_ID } from '../../../data/fruits';
 import { fullName } from '../../core/birth';
 import { buildEnding } from '../../core/ending';
 import type { Meta5 } from '../../core/meta';
-import { TURNING_BY_ID, TURNINGS } from '../../data/turnings';
+import { CANON } from '../../data/canon';
+import { TURNING_BY_ID } from '../../data/turnings';
 import { VALUE_NAME } from '../../data/values';
 import { TIER_WORD } from '../../data/words';
 import type { Life5 } from '../../core/types';
@@ -12,15 +13,6 @@ import { ageWord, endWord } from './words';
 
 /** 도감에는 지금 인생이 없으므로 문 이름의 자리표시를 이 말로 채운다 */
 const CODEX_FILL = { name: '나', town: '고향', island: '그 섬' };
-
-/** 원작 인물 id → 이름. 전환점의 '사람을 만난다' 효과에 적힌 이름에서 모은다 */
-const CANON_NAME: Record<string, string> = (() => {
-  const out: Record<string, string> = {};
-  for (const t of TURNINGS) for (const fx of [...(t.fx ?? []), ...t.doors.flatMap((d) => d.fx)]) {
-    if (fx.op === 'person' && fx.canon && fx.name && !out[fx.canon]) out[fx.canon] = fx.name;
-  }
-  return out;
-})();
 
 export interface CodexView { doors: { title: string; door: string; values: string[] }[]; fruits: string[]; people: string[]; lives: number }
 
@@ -37,7 +29,7 @@ export function codexView(meta: Meta5): CodexView {
   return {
     doors: doors.map(({ title, door, values }) => ({ title, door, values })),
     fruits: meta.fruits.map((id) => FRUIT_BY_ID[id]?.name ?? id),
-    people: meta.people.map((id) => CANON_NAME[id] ?? id),
+    people: meta.people.map((id) => CANON[id]?.name ?? id),
     lives: meta.lives,
   };
 }

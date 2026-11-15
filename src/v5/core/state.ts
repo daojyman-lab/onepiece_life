@@ -5,6 +5,7 @@ import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth, type BirthOpt } from './birth';
+import { rollFamily } from './family';
 import { LIMBS } from './body';
 import { logLine, yearDivider } from './log';
 import { checkAll } from './cond';
@@ -64,7 +65,7 @@ export function emptyLife(seed: number): Life5 {
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };
 
 /**
- * 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다.
+ * 새 인생: 출생 주사위를 굴리고 가족을 두고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다.
  * known: 지난 인생들에서 골라 본 문(도감의 Object.keys(meta.doors)). 문에 "전에 골라 본 문"으로 보인다.
  */
 export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string[] } = {}): Life5 {
@@ -79,6 +80,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   const gifts = h.talents.map((id) => TALENT_BY_ID[id]).map((t) => `${t.name}${t.good ? '' : '(-)'}`).join(', ');
   for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
+  rollFamily(s, r);                            // 가족은 시작하는 나이에 맞춰 둔다 (손아래 형제는 이미 태어난 아이만)
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);

@@ -74,7 +74,7 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   h.talents = talents.map((t) => t.id);
   h.base = base;
   h.money = V.wealthMoney[wealth];
-  h.island = home.island;
+  h.island = town.name;                        // 태어난 마을이 처음 사는 섬이다
   h.sea = home.sea;
 
   s.hardship += birthHardship(wealth, lineage);

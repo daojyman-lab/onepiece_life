@@ -76,7 +76,9 @@ export type Fx =
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'hardship'; add: number }
-  | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string }
+  // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
+  | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
+      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f' }
   | { op: 'losePerson'; relation: string }
   | { op: 'losePerson'; who: 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' }   // 관계 글과 상관없이 그 갈래의 사람 하나
   | { op: 'injury'; severity: Injury['severity'] }

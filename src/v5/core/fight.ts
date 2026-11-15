@@ -13,7 +13,6 @@ import { chance, hashString, int, pick, rngOf, type Rng } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { FOE_SEA, FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
-import { HOMES } from '../data/homes';
 import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
 import { canUse, effectiveStats5, loseLimb } from './body';
@@ -69,10 +68,10 @@ export function foePower(e: EnemySpec): number {
 
 /**
  * 지금 있는 바다의 위험: 그 바다에서 만나는 상대의 힘(v4 enemyPower 범위)의 가운데 값.
- * 아직 어려서 고향 섬에 있으면 어느 바다에서 태어났든 가장 낮은 바다의 위험 속에 산다.
+ * 아직 어려서 태어난 마을에 있으면 어느 바다에서 태어났든 가장 낮은 바다의 위험 속에 산다.
  */
 export function dangerOf(s: Life5): number {
-  const atHome = s.age <= F.dangerKidAge && s.hero.island === HOMES[s.hero.home].island;
+  const atHome = s.age <= F.dangerKidAge && s.hero.island === s.hero.town;
   const sea = atHome ? SEAS.reduce((a, b) => (b.stage < a.stage ? b : a)) : SEA_BY_ID[s.hero.sea];
   const [lo, hi] = sea.enemyPower;
   return lo + (hi - lo) / 2;

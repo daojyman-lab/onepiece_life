@@ -233,7 +233,7 @@ export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 이름 있는 상대 (바다마다)
   {
     id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '도끼손 모건' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'morgan' },
     title: '도끼손 대령', body: '셸스 마을의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}의 배를 노려본다.',
     doors: [
       fightDoor('대령에게 맞선다', '목숨을 건 싸움이 된다', { freedom: D }, 'b_morgan', READY(1)),
@@ -244,7 +244,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_arlong', kind: 'door', when: at(age(15, 24), st(...LAWFUL), sea('east')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '톱상어 아론' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'arlong' },
     title: '톱상어의 섬', body: '코노미 제도의 마을들이 어인 해적에게 공물을 바치고 있다. 톱니 코의 선장이 {name}을(를) 보고 이빨을 드러낸다.',
     doors: [
       fightDoor('어인 해적에게 맞선다', '목숨을 건 싸움이 된다', { justice: D }, 'b_arlong', READY(2)),
@@ -255,7 +255,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_smoker', kind: 'door', when: at(age(17), st(...HUNTED), sea('gl_entry')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '스모커' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'smoker' },
     title: '연기의 추격자', body: '흰 연기가 {island}의 거리를 뒤덮는다. 시가 두 대를 문 해군이 {name}의 앞을 막아선다. 이 바다까지 쫓아왔다.',
     doors: [
       fightDoor('연기 속으로 뛰어든다', '맨손으로는 닿지 않을지도 모른다', { ambition: D }, 'b_smoker', READY(3)),
@@ -265,7 +265,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_mr1', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_entry')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '미스터 1' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'daz' },
     title: '칼날의 사내', body: '{island}의 어둠 속에서 민머리의 사내가 팔을 칼날로 바꾼다. 비밀 결사의 사냥꾼이 {name}을(를) 다음 목표로 정했다.',
     doors: [
       fightDoor('칼날에 맞선다', '온몸이 칼인 상대다', { justice: D }, 'b_mr1', READY(2)),
@@ -276,7 +276,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_lucci', kind: 'door', when: at(age(18), st(...HUNTED), sea('gl_first')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '롭 루치' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'lucci' },
     title: '정부의 암살자', body: '{island}의 다리 위, 비둘기를 어깨에 얹은 사내가 길을 막는다. 정부의 이름으로 {name}을(를) 처리하러 왔다고 한다.',
     doors: [
       fightDoor('암살자에게 맞선다', '사람을 죽이는 기술의 끝을 상대한다', { loyalty: D }, 'b_lucci', READY(3)),
@@ -288,7 +288,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_crocodile', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_first')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '크로커다일' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'crocodile' },
     title: '사막의 왕', body: '모래폭풍 너머, 갈고리 손의 칠무해가 왕국을 삼키려 한다. 그가 {name}을(를) 내려다보며 시가 연기를 내뿜는다.',
     doors: [
       fightDoor('모래의 사내에게 맞선다', '물이 없으면 닿지 않는다', { justice: D }, 'b_crocodile', READY(3)),
@@ -299,7 +299,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_kizaru', kind: 'door', when: at(age(18), st(...HUNTED), sea('sabaody')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '키자루' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'kizaru' },
     title: '빛의 대장', body: '{island}의 하늘이 눈부시게 번쩍인다. 느릿한 말투의 해군 대장이 {name} 앞에 빛으로 내려선다. 빛보다 빠른 발차기가 날아온다.',
     doors: [
       fightDoor('빛에 맞선다', '해군 대장이다. 살아남을 수 있을지 모른다', { ambition: D }, 'b_darc', READY(4)),
@@ -310,7 +310,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_hody', kind: 'door', when: at(age(18, 26), st(...SEAFARING), sea('sabaody')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '호디 존스' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'hody' },
     title: '바다 밑의 증오', body: '어인섬의 광장. 붉은 약에 취한 어인이 인간을 몰아내자고 외친다. 핏발 선 눈이 {name}에게 꽂힌다.',
     doors: [
       fightDoor('광장 한가운데서 맞선다', '섬 사람들이 지켜본다', { justice: D }, 'b_hody', READY(3)),
@@ -320,7 +320,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_fujitora', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '후지토라' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'fujitora' },
     title: '눈 감은 대장', body: '{island}의 하늘에서 운석이 떨어진다. 눈을 감은 해군 대장이 지팡이 칼을 짚고 {name}의 기척을 읽는다.',
     doors: [
       fightDoor('운석 아래서 맞선다', '하늘을 끌어내리는 상대다', { ambition: D }, 'b_fujitora', READY(5)),
@@ -333,7 +333,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_doflamingo', kind: 'door', when: at(age(17, 26), st('civil', 'shipwright', 'settled', ...SEAFARING), sea('nw_first')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '돈키호테 도플라밍고' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'doflamingo' },
     title: '하늘의 악마', body: '드레스로자의 하늘에 실로 엮은 새장이 내려온다. 분홍 깃털 외투의 왕이 웃으며 {name}을(를) 꼭두각시로 만들려 한다.',
     doors: [
       fightDoor('새장 안에서 왕에게 맞선다', '실이 온몸을 노린다', { justice: D }, 'b_doflamingo', READY(5)),
@@ -344,7 +344,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_akainu', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_late')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '아카이누' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'akainu' },
     title: '마그마의 원수', body: '바다가 끓어오른다. 철저한 정의를 외치는 해군의 정점이 마그마의 주먹을 들고 {name}의 배를 막아선다.',
     doors: [
       fightDoor('마그마에 맞선다', '이 산을 넘으면 바다의 정점이 보인다', { ambition: D }, 'b_akainu', READY(6)),
@@ -356,7 +356,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_kaido', kind: 'door', when: at(age(17, 30), st(...LAWFUL, 'pirate', 'revolution'), sea('nw_late')),
-    weight: 4, repeat: { years: 5 }, speaker: { canon: '백수 카이도' },
+    weight: 4, repeat: { years: 5 }, speaker: { canon: 'kaido' },
     title: '가장 강한 생물', body: '와노쿠니의 하늘을 푸른 용이 가른다. 세상에서 가장 강하다는 사황이 술병을 기울이며 {name}을(를) 내려다본다.',
     doors: [
       fightDoor('용에게 맞선다', '세상에서 가장 강한 상대다', { dominion: D }, 'b_kaido', READY(6)),

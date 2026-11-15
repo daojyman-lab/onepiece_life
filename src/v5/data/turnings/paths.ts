@@ -140,15 +140,15 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east')),
-    weight: 6, repeat: 'once', speaker: { canon: '스모커' },
+    weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 쫓아내는 걸 봤다고 한다.',
     doors: [
       { label: '그의 부대에 들어간다', hint: '거칠지만 곧은 상관을 얻는다', values: { justice: D },
-        fx: [{ op: 'standing', to: 'marine' }, { op: 'person', kind: 'ally', relation: '상관', name: '스모커', canon: 'smoker' },
+        fx: [{ op: 'standing', to: 'marine' }, { op: 'person', kind: 'ally', relation: '상관', canon: 'smoker' },
              { op: 'timeline', text: '스모커 대령의 부대에 들어갔다' }] },
       { label: '고개만 꾸벅하고 돌아선다', hint: '연기 냄새만 남는다', values: { freedom: D }, fx: [] },
       { label: '부대 대신 그의 주먹을 배우고 싶다고 조른다', hint: '한동안 귀찮게 따라다닌다', values: { ambition: D },
-        fx: [{ op: 'mastery', branch: 'fist', add: 15 }, { op: 'person', kind: 'ally', relation: '연기 냄새의 대령', name: '스모커', canon: 'smoker' }] },
+        fx: [{ op: 'mastery', branch: 'fist', add: 15 }, { op: 'person', kind: 'ally', relation: '연기 냄새의 대령', canon: 'smoker' }] },
     ],
   },
   {
@@ -211,11 +211,11 @@ export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 혁명군 · 현상금 사냥꾼 · 조선공
   {
     id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east')),
-    weight: 8, repeat: 'once', speaker: { canon: '드래곤' },
+    weight: 8, repeat: 'once', speaker: { canon: 'dragon' },
     title: '폭풍 속의 사내', body: '처형대에 벼락이 떨어지던 날, 망토를 두른 사내가 비에 젖은 {name}에게 말을 건다. 이 세상이 왜 이 모양인지 궁금하지 않느냐고.',
     doors: [
       { label: '사내를 따라간다', hint: '세상의 뒤편으로 들어간다. 돌아올 수 없다', values: { justice: D },
-        fx: [{ op: 'standing', to: 'revolution' }, { op: 'person', kind: 'ally', relation: '망토의 사내', name: '드래곤', canon: 'dragon' },
+        fx: [{ op: 'standing', to: 'revolution' }, { op: 'person', kind: 'ally', relation: '망토의 사내', canon: 'dragon' },
              { op: 'timeline', text: '폭풍 속의 사내를 따라 혁명군이 되었다' }] },
       { label: '무슨 소리냐며 뿌리친다', hint: '빗속에 사내가 사라진다', values: { peace: D }, fx: [] },
       { label: '세상의 비밀을 묻는다', hint: '대답 대신 오래된 책 한 권을 받는다', values: { inquiry: D },
@@ -258,12 +258,12 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_iceburg', kind: 'door', when: at(age(18, 50), st('civil', 'pirate', 'settled', 'bountyHunter', 'shipwright'), sea('gl_first')),
-    weight: 8, repeat: 'once', speaker: { canon: '아이스버그' },
+    weight: 8, repeat: 'once', speaker: { canon: 'iceburg' },
     title: '물의 도시의 시장', body: '물의 도시의 조선 회사 사장이 어깨에 쥐를 얹은 채 {name}이(가) 손본 배를 한참 들여다본다. 회사에 들어오지 않겠느냐고 한다.',
     doors: [
       { label: '조선 회사의 목수가 된다', hint: '물의 도시에 눌러산다', values: { inquiry: D },
         fx: [{ op: 'standing', to: 'shipwright' }, { op: 'move', island: '워터 세븐', sea: 'gl_first' },
-             { op: 'person', kind: 'ally', relation: '조선 회사 사장', name: '아이스버그', canon: 'iceburg' }, { op: 'timeline', text: '워터 세븐의 조선 회사에 들어갔다' }] },
+             { op: 'person', kind: 'ally', relation: '조선 회사 사장', canon: 'iceburg' }, { op: 'timeline', text: '워터 세븐의 조선 회사에 들어갔다' }] },
       { label: '배 한 척을 부탁하고 다시 떠난다', hint: '가진 돈을 털어 튼튼한 배를 얻는다', values: { romance: D },
         fx: [{ op: 'money', add: -50000 }, { op: 'flag', id: 'goodShip' }, { op: 'base', key: 'luk', add: 1 }] },
       { label: '고개를 젓는다', hint: '지금의 길을 간다', values: { peace: D }, fx: [] },
@@ -399,11 +399,11 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east')),
-    weight: 6, repeat: 'once', speaker: { canon: '몽키 D. 루피' },
+    weight: 6, repeat: 'once', speaker: { canon: 'luffy' },
     title: '처형대 위의 웃음', body: '{island} 처형대에서 목이 잘릴 뻔했던 밀짚모자 소년이 벼락 속에서 웃으며 살아났다. 그의 작은 배가 폭풍 속으로 떠나려 한다.',
     doors: [
       { label: '그 배를 쫓아 붉은 산을 넘는다', hint: '폭풍을 뚫고 위대한 항로로 간다', values: { romance: D },
-        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'person', kind: 'ally', relation: '밀짚모자 소년', name: '루피', canon: 'luffy' },
+        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'person', kind: 'ally', relation: '밀짚모자 소년', canon: 'luffy' },
              { op: 'log', text: '밀짚모자의 배를 쫓아 붉은 산을 넘었다. 등 뒤로 로그타운이 멀어졌다.', weight: 'heavy' },
              { op: 'timeline', text: '밀짚모자를 따라 위대한 항로에 들어섰다' }] },
       { label: '그 웃음을 가슴에 새긴다', hint: '그날을 오래 기억한다', values: { freedom: D }, fx: [{ op: 'flag', id: 'sawLuffy' }] },

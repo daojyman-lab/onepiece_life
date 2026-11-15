@@ -3,6 +3,7 @@ import { josa } from '../../core/josa';
 import { fill } from '../../core/util';
 import { chance, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
+import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
 import { VALUE_DEEPEN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
@@ -28,7 +29,7 @@ function fillTurning(s: Life5, text: string): string {
 function speakerOf(s: Life5, t: Turning): string {
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
-  if ('canon' in sp) return sp.canon;
+  if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
   return s.people.find((p) => p.alive && p.relation === sp.relation)?.name ?? sp.relation;
 }
 

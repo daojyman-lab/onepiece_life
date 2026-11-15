@@ -7,6 +7,7 @@ import { crewPowerFor } from '../../core/people';
 import { chance, pick, rngOf, weighted } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
+import { CANON, canonAge } from '../data/canon';
 import { STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
@@ -77,11 +78,12 @@ function applyOne(s: Life5, e: Fx): void {
     case 'hardship': s.hardship = Math.max(0, s.hardship + e.add); return;
     case 'person': {
       const r = rngOf(s.rng);
-      const gender = pick(r, ['m', 'f'] as const);
+      const c = e.canon ? CANON[e.canon] : undefined;
+      const gender = c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
       const p: Person = {
-        id: `p${s.seq++}`, name: e.name ?? pick(r, FIRST_NAMES[gender]), gender, age: s.age,
+        id: `p${s.seq++}`, name: c?.name ?? e.name ?? pick(r, FIRST_NAMES[gender]), gender, age: personAge(s, e),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
-        bond: V.person.bond, faction: 'civil', species: 'human', alive: true,
+        bond: V.person.bond, faction: c?.faction ?? 'civil', species: c?.species ?? 'human', alive: true,
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
@@ -127,6 +129,15 @@ function applyOne(s: Life5, e: Fx): void {
     case 'wealth': h.wealth = e.to; return;
     case 'eatFruit': eatFruit(s, e.id); return;
   }
+}
+
+/** 새로 만나는 사람의 나이: 원작 인물은 원작의 나이 차, 적힌 나이, 주인공보다 n살 위/아래, 없으면 주인공과 같은 나이 */
+function personAge(s: Life5, e: Extract<Fx, { op: 'person' }>): number {
+  if (e.canon && CANON[e.canon]) return canonAge(e.canon, s.age);
+  const a = e.age;
+  if (a === undefined) return s.age;
+  if (typeof a === 'number') return a;
+  return 'older' in a ? s.age + a.older : Math.max(0, s.age - a.younger);
 }
 
 /** 악마의 열매를 먹는다. 'random'이면 낮은 등급 쪽으로 기울여 원작 인물의 것이 아닌 열매를 고른다. 이미 능력자면 아무 일도 없다 */

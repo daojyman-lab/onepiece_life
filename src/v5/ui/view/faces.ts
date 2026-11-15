@@ -1,6 +1,7 @@
 // 얼굴: 주인공 · 곁의 사람 · 상대를 픽셀 그림의 Who로 바꾼다.
 import { weaponOfSkills, type Weapon, type Who } from '../../../ui/pixel/pixelArt';
 import { LIMBS } from '../../core/body';
+import { CANON, canonAge } from '../../data/canon';
 import { TURNING_BY_ID } from '../../data/turnings';
 import type { EnemySpec, Life5, Pending5, Person, Standing } from '../../core/types';
 
@@ -38,12 +39,16 @@ export function heroWho5(s: Life5): Who {
   return who;
 }
 
-/** 떠 있는 문의 말하는 사람: 주인공, 원작 인물, 곁의 사람(없으면 관계 이름) */
+/** 떠 있는 문의 말하는 사람: 주인공, 원작 인물(원작의 성별 · 나이 차로 그린다), 곁의 사람(없으면 관계 이름) */
 export function speakerOf(s: Life5, p: Extract<Pending5, { kind: 'door' }>): { name: string; who: Who } {
   const sp = TURNING_BY_ID[p.turning]?.speaker;
   if (!sp) return { name: p.speaker, who: { key: p.speaker } };
   if (sp === 'hero') return { name: p.speaker, who: heroWho5(s) };
-  if ('canon' in sp) return { name: p.speaker, who: { key: sp.canon } };
+  if ('canon' in sp) {
+    const c = CANON[sp.canon];
+    if (!c) return { name: p.speaker, who: { key: sp.canon } };
+    return { name: p.speaker, who: { key: sp.canon, gender: c.gender, age: canonAge(sp.canon, s.age), species: c.species ?? 'human', faction: c.faction } };
+  }
   const person = s.people.find((x) => x.alive && x.relation === sp.relation);
   return person ? { name: person.name, who: personWho5(person) } : { name: p.speaker, who: { key: p.speaker } };
 }

@@ -115,7 +115,7 @@ describe('엔딩 자료의 세부', () => {
     const s = bare(5);
     applyFx(s, [{ op: 'person', kind: 'ally', relation: '상관', name: '스모커', canon: 'smoker' }]);
     const low = buildEnding(s, emptyMeta5()).canonWords[0];
-    s.people[0].bond = V.person.bondMax;
+    s.people.find((p) => p.canon === 'smoker')!.bond = V.person.bondMax;   // 앞에는 가족이 있다
     const high = buildEnding(s, emptyMeta5()).canonWords[0];
     expect(low.who).toBe('스모커');
     expect(low.line).not.toBe(high.line);
@@ -132,7 +132,7 @@ describe('엔딩 자료의 세부', () => {
     let s = newLife5(7); s.pending = null; s.age = 15; s.hero.standing = 'civil';
     expect(openTurning(s, TURNING_BY_ID.path_smoker)).toBe(true);
     s = reduce5(s, { type: 'answer', index: 1 });
-    expect(s.timeline.at(-1)!.canon).toBe('스모커');
+    expect(s.timeline.at(-1)!.canon).toBe('smoker');                      // 연표에는 원작 인물의 id가 남는다
     s.ended = { cause: '노환', age: 70 }; s.pending = { kind: 'ending', cause: '노환' };
     const e = buildEnding(s, emptyMeta5());
     expect(e.canonMoments.some((m) => m.includes('흰 연기의 대령'))).toBe(true);
