@@ -1,12 +1,19 @@
-// 한 해를 네 토막으로 나눈 진행.
-import { chance, rngOf } from '../../core/rng';
+// 한 해를 네 토막으로 나눈 진행. 토막마다 가치관이 정한 일을 하고, 그만큼 자란다.
+import { BRANCH_NAMES } from '../../data/skills';
+import { TALENT_BY_ID } from '../../data/talents';
+import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { LINES } from '../data/lines';
+import { VALUE_IDS } from '../data/values';
 import { checkAll } from './cond';
-import { fillText } from './fx';
+import { addMastery, BRANCH_ID, fillText, tierCap } from './fx';
 import { logLine } from './state';
 import { leanPick } from './values';
-import type { Life5 } from './types';
+import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
+
+const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
+const BRANCHES = Object.keys(BRANCH_ID) as Branch[];
+const LEAN: Record<ValueId, Partial<Record<Activity, number>>> = V.activity.lean;
 
 /** 정점에 올랐거나 은퇴해 조용히 사는 때 */
 export function isQuiet(s: Life5): boolean {
@@ -18,17 +25,107 @@ export function stepPart(s: Life5): void {
   if (s.pending) return;
   if (!s.hero.alive) { endIfDead(s); return; }
 
-  dailyLine(s);
-  // 뒤 과제가 여기에 차례로 끼운다: 자동 성장 → 자잘한 일 → 병과 사고 → 기연 → 전환점
+  const r = rngOf(s.rng);
+  const act = activityOf(s, r);
+  dailyLine(s, act, r);
+  growPart(s, act, r);
+  // 뒤 과제가 여기에 차례로 끼운다: 자잘한 일 → 병과 사고 → 기연 → 전환점
   nextPart(s);
   endIfDead(s);
 }
 
-/** 일상 기록 한 줄 (가치관 쪽으로 기운다) */
-function dailyLine(s: Life5): void {
-  const r = rngOf(s.rng);
+/** 이 토막에 인물이 한 일. 기본 가중치에 가치관(점수 × 계수)과 처지가 더한다. */
+export function activityOf(s: Life5, r: Rng): Activity {
+  const h = s.hero;
+  const A = V.activity;
+  if (h.standing === 'prisoner') return 'rest';
+  const w: Record<Activity, number> = { train: A.base, work: A.base, study: A.base, roam: A.base, family: A.base, rest: A.base };
+  for (const id of VALUE_IDS) {
+    for (const a of ACTIVITIES) w[a] += (LEAN[id][a] ?? 0) * s.values[id];
+  }
+  if (h.wealth === 'poor') w.work += s.age <= A.kidAge ? A.poorKidWork : A.poorWork;
+  if (h.standing === 'marine' || h.standing === 'cp') w.work += A.dutyWork;
+  return weighted(r, ACTIVITIES, (a) => w[a])!;
+}
+
+/** 스승이 있으면 스승의 갈래, 없으면 가장 멀리 간(단계와 숙련) 갈래. 아무것도 익히지 않았으면 null */
+export function mainBranch(s: Life5): Branch | null {
+  if (s.growth.master) return s.growth.master.branch;
+  const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
+  let best: Branch | null = null;
+  for (const b of BRANCHES) if (progress(b) > (best ? progress(best) : 0)) best = b;
+  return best;
+}
+
+/** 대략의 힘: 능력치 합 × (1 + 가장 높은 단계 × tierPower) */
+export function power5(s: Life5): number {
+  const sum = Object.values(s.hero.base).reduce((a, b) => a + b, 0);
+  return sum * (1 + Math.max(...Object.values(s.growth.tier)) * V.growth.tierPower);
+}
+
+/** 한 토막의 활동만큼 자란다: 숙련과 능력치, 단계, 정체와 돌파 */
+export function growPart(s: Life5, act: Activity, r: Rng): void {
+  const h = s.hero;
+  const G = V.growth;
+  const age = ageMult(s.age);
+  switch (act) {
+    case 'train': train(s, r, age); return;
+    case 'study':
+      statUp(s, r, ['int'], G.statP.study * age);
+      addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation'));
+      return;
+    case 'roam': statUp(s, r, ['luk', 'spd'], G.statP.roam * age); return;
+    case 'work': h.money += G.workMoney; return;
+    case 'family':
+      for (const p of s.people) if (p.alive) p.bond = Math.min(V.person.bondMax, p.bond + G.familyBond);
+      return;
+    case 'rest': h.hp = Math.min(V.hp.max, h.hp + G.restHp); return;
+  }
+}
+
+function train(s: Life5, r: Rng, age: number): void {
+  const G = V.growth;
+  const b = mainBranch(s);
+  const roll = r();
+  if (roll < G.stallP) {
+    logLine(s, b ? `${BRANCH_NAMES[BRANCH_ID[b]]} 수련이 제자리걸음이었다.` : '몸이 무거워 수련이 손에 잡히지 않았다.', 'light', 'growth');
+    return;
+  }
+  if (!b) { statUp(s, r, G.bareStats, G.statP.train * age); return; }
+  const m = s.growth.master;
+  let add = G.perPart * age * talentMult(s, b) * (m && m.branch === b ? G.masterMult : 1);
+  const capped = s.growth.tier[b] >= tierCap(s, b) && s.growth.mastery[b] >= G.tierUp;
+  if (roll < G.stallP + G.breakP && age > 0 && !capped) {
+    add += G.breakAdd;
+    logLine(s, `수련 중에 무언가를 붙잡았다. ${BRANCH_NAMES[BRANCH_ID[b]]}의 벽 하나가 무너졌다.`, 'heavy', 'growth');
+  }
+  addMastery(s, b, add);
+  statUp(s, r, G.branchStats[b], G.statP.train * age);
+}
+
+/** 확률 p로 keys 가운데 하나를 1 올린다 */
+function statUp(s: Life5, r: Rng, keys: readonly StatKey[], p: number): void {
+  if (chance(r, p)) s.hero.base[pick(r, keys)] += 1;
+}
+
+function ageMult(age: number): number {
+  return V.growth.ageMult.find((x) => age <= x.to)?.m ?? 0;
+}
+
+/** 타고난 재능의 숙련 배율. 갈래 자신, 'all', 패기 갈래면 'haki'를 모두 곱한다 */
+function talentMult(s: Life5, b: Branch): number {
+  const id = BRANCH_ID[b];
+  const keys = id.startsWith('haki.') ? [id, 'all', 'haki'] as const : [id, 'all'] as const;
+  let m = 1;
+  for (const t of s.hero.talents) for (const k of keys) m *= TALENT_BY_ID[t]?.mastery?.[k] ?? 1;
+  return m;
+}
+
+/** 일상 기록 한 줄 (가치관 쪽으로 기울고, 이 토막의 활동과 같은 쪽으로 기운 줄을 먼저 고른다) */
+function dailyLine(s: Life5, act: Activity, r: Rng): void {
   if (!chance(r, isQuiet(s) ? V.lines.quietDailyP : V.lines.dailyP)) return;
-  const line = leanPick(s, r, LINES.filter((l) => checkAll(s, l.when)), (l) => l.lean);
+  const fits = (lean: Partial<Record<ValueId, number>>) => VALUE_IDS.some((id) => (lean[id] ?? 0) > 0 && (LEAN[id][act] ?? 0) > 0);
+  const line = leanPick(s, r, LINES.filter((l) => checkAll(s, l.when)), (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
   if (line) logLine(s, fillText(s, line.text), 'light', 'day');
 }
 
@@ -41,6 +138,17 @@ function nextPart(s: Life5): void {
   s.stopsThisYear = 0;
   s.stats.years += 1;
   logLine(s, `── ${s.age}살 ──`, 'year', 'info');
+  masterYear(s);
+}
+
+/** 스승과 함께한 해를 하나 줄인다. 다 채우면 스승은 떠난다. */
+function masterYear(s: Life5): void {
+  const m = s.growth.master;
+  if (!m) return;
+  m.yearsLeft -= 1;
+  if (m.yearsLeft > 0) return;
+  s.growth.master = null;
+  logLine(s, `${m.name}이(가) 가르침을 마치고 떠났다.`, 'heavy', 'life');
 }
 
 function endIfDead(s: Life5): void {
