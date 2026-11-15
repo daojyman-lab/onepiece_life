@@ -44,3 +44,35 @@ describe('가치관이 정하는 한 해', () => {
     expect(s.growth.tier.sword).toBeLessThanOrEqual(3);
   });
 });
+
+describe('숙련과 단계의 상한', () => {
+  /** 숙련을 크게 여러 번 더해 상한까지 밀어 올린다 */
+  function pushSword(master?: { cap: number; paid: boolean }) {
+    const s = newLife5(1);
+    if (master) applyFx(s, [{ op: 'master', name: '스승', branch: 'sword', cap: master.cap, years: 10, paid: master.paid }]);
+    for (let i = 0; i < 10; i++) applyFx(s, [{ op: 'mastery', branch: 'sword', add: 1000 }]);
+    return s.growth;
+  }
+  it('숙련이 100에 닿으면 단계가 하나 오르고 숙련은 0으로 돌아간다', () => {
+    const s = newLife5(1);
+    applyFx(s, [{ op: 'mastery', branch: 'sword', add: 60 }]);
+    expect(s.growth.tier.sword).toBe(0);
+    applyFx(s, [{ op: 'mastery', branch: 'sword', add: 40 }]);
+    expect(s.growth.tier.sword).toBe(1);
+    expect(s.growth.mastery.sword).toBe(0);
+  });
+  it('스승이 없으면 3단계에서 멈추고 숙련은 100에 머문다', () => {
+    const g = pushSword();
+    expect(g.tier.sword).toBe(V.growth.noMasterCap);
+    expect(g.mastery.sword).toBe(V.growth.tierUp);
+  });
+  it('돈으로 들인 스승은 상한이 6이어도 4단계까지만', () => {
+    expect(pushSword({ cap: 6, paid: true }).tier.sword).toBe(V.growth.paidCap);
+  });
+  it('돈으로 들이지 않은 스승은 6단계까지 가르친다', () => {
+    expect(pushSword({ cap: 6, paid: false }).tier.sword).toBe(V.growth.maxTier);
+  });
+  it('약한 스승도 스승 없을 때의 상한 3보다 낮추지는 않는다', () => {
+    expect(pushSword({ cap: 2, paid: false }).tier.sword).toBe(V.growth.noMasterCap);
+  });
+});
