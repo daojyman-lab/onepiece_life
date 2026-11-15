@@ -393,7 +393,7 @@ export const PATHS: Turning[] = [
     title: '주인 잃은 배', body: '{island} 항구에 주인을 잃은 범선 한 척이 묶여 있다. 위대한 항로를 건널 만한 배다.',
     doors: [
       { label: '배를 얻어 붉은 산을 넘는다', hint: '세상에서 가장 험한 바다로 들어선다', values: { romance: D },
-        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'fame', add: 5 },
+        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 5 },
              { op: 'log', text: '배는 붉은 산의 물길을 거슬러 올라 위대한 항로에 들어섰다.', weight: 'heavy' }, { op: 'timeline', text: '위대한 항로에 들어섰다' }] },
       { label: '배를 팔아 돈을 챙긴다', hint: '당분간은 이 바다로 족하다', values: { ambition: D }, fx: [{ op: 'money', add: 80000 }] },
       { label: '원래 주인을 찾아 돌려준다', hint: '고맙다는 말만 듣는다', values: { justice: D }, fx: [{ op: 'fame', add: 3 }] },
