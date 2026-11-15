@@ -7,6 +7,7 @@ import { LINES } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { checkAll } from './cond';
+import { familyYear } from './family';
 import { minorFight } from './fight';
 import { rollFortune, rollMisfortune } from './fortune';
 import { canUse } from './body';
@@ -184,6 +185,7 @@ function nextPart(s: Life5): void {
   s.stopsThisYear = 0;
   s.stats.years += 1;
   yearDivider(s);
+  familyYear(s);                               // 늙은 가족이 세상을 떠날 수 있다
   comeOfAge(s);
   masterYear(s);
 }

@@ -1,6 +1,7 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
 import { josa } from '../../core/josa';
 import { fmtMoney } from '../../core/util';
+import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
 import { VALUE_NAME } from '../data/values';
 import { isDeep } from './values';
@@ -39,6 +40,8 @@ export function check(s: Life5, c: Cond): boolean {
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
     case 'town': return c.is.includes(h.town);
     case 'standingYears': return s.age - s.standingSince >= c.min;
+    case 'island': return c.is.includes(h.island);
+    case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
   }
 }
 
@@ -67,6 +70,8 @@ function reason(s: Life5, c: Cond): string {
     case 'secret': return c.known ? '아직 밝혀지지 않았다' : '숨은 것이 없다';
     case 'town': return '태어난 마을이 다르다';
     case 'standingYears': return '지금 처지가 된 지 얼마 되지 않았다';
+    case 'island': return '여기서는 일어나지 않는다';
+    case 'canonAge': return '그 사람과 때가 맞지 않는다';
   }
 }
 

@@ -4,6 +4,10 @@ import { newLife5 } from '../../src/v5/core/state';
 import { applyFx } from '../../src/v5/core/fx';
 import { normalizeLife5 } from '../../src/v5/core/load';
 import { personIs } from '../../src/v5/core/needs';
+import { familyYear } from '../../src/v5/core/family';
+import { check } from '../../src/v5/core/cond';
+import { HOMES } from '../../src/v5/data/homes';
+import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import { CANON, canonAge } from '../../src/v5/data/canon';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { V } from '../../src/v5/data/balance';
@@ -95,5 +99,100 @@ describe('태어난 마을', () => {
     const f = normalizeLife5(s)!;
     expect(f).not.toBeNull();
     expect(f.people).toEqual([]);
+  });
+});
+
+describe('가족 (고친 것)', () => {
+  it('부모는 맏이가 태어날 때도 parentAtBirth살 이상이다', () => {
+    for (const s of lives(300, 7000, { lineage: 'commoner' })) {
+      const eldest = Math.max(s.age, ...siblings(s).map((p) => p.age));
+      for (const p of s.people.filter((x) => personIs(x, 'parent'))) expect(p.age, `${s.rng.seed}`).toBeGreaterThanOrEqual(eldest + V.family.parentAtBirth);
+    }
+  });
+  it('딸에게 손위 형제는 오빠 · 언니, 아들에게는 형 · 누나다', () => {
+    const girls = lives(200, 8000, { lineage: 'commoner', gender: 'f' }).flatMap(siblings).map((p) => p.relation);
+    const boys = lives(200, 8000, { lineage: 'commoner', gender: 'm' }).flatMap(siblings).map((p) => p.relation);
+    expect(girls).toContain('오빠'); expect(girls).toContain('언니');
+    expect(girls.some((r) => r === '형' || r === '누나')).toBe(false);
+    expect(boys).toContain('형'); expect(boys).toContain('누나');
+    expect(boys.some((r) => r === '오빠' || r === '언니')).toBe(false);
+  });
+  it('같은 씨앗은 같은 가족을 낸다', () => {
+    expect(newLife5(42, { lineage: 'commoner' }).people).toEqual(newLife5(42, { lineage: 'commoner' }).people);
+  });
+  it('younger면 주인공보다 그만큼 아래, 0 아래로는 내려가지 않는다', () => {
+    const s = newLife5(4); s.age = 12;
+    applyFx(s, [{ op: 'person', kind: 'ally', relation: '꼬마', age: { younger: 5 } }, { op: 'person', kind: 'ally', relation: '아기', age: { younger: 30 } }]);
+    expect(s.people.at(-2)!.age).toBe(7);
+    expect(s.people.at(-1)!.age).toBe(0);
+  });
+});
+
+describe('가족의 노환', () => {
+  /** 부모 하나를 그 나이로 두고 years해 동안 한 해씩 나이를 먹인다 */
+  const ageParent = (seed: number, startAge: number, years: number) => {
+    const s = newLife5(seed, { lineage: 'commoner' });
+    const p = s.people.find((x) => x.relation === '어머니')!;
+    p.age = startAge;
+    for (let y = 0; y < years && p.alive; y++) { p.age += 1; familyYear(s); }
+    return s;
+  };
+  it('백 살의 부모는 스무 해 안에 거의 틀림없이 세상을 떠나고, 기록에 남는다', () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const s = ageParent(seed, 100, 20);
+      expect(s.people.find((x) => x.relation === '어머니')!.alive).toBe(false);
+      expect(s.log.some((l) => l.text === '어머니가 세상을 떠났다.' && l.weight === 'heavy')).toBe(true);
+    }
+  });
+  it('마흔 살의 가족은 이 일로 죽지 않는다', () => {
+    for (let seed = 1; seed <= 50; seed++) expect(ageParent(seed, 40, 20).people.find((x) => x.relation === '어머니')!.alive).toBe(true);
+  });
+  it('같은 씨앗이면 같은 해에 떠난다', () => {
+    expect(ageParent(9, 80, 30)).toEqual(ageParent(9, 80, 30));
+  });
+  it('원작 인물과 동료는 이 일로 죽지 않는다', () => {
+    const s = newLife5(5); s.age = 30;
+    applyFx(s, [{ op: 'person', kind: 'ally', relation: '아버지', canon: 'garp' }, { op: 'person', kind: 'crew', relation: '형', age: 95 }]);
+    for (const p of s.people.slice(-2)) p.age = 110;
+    for (let y = 0; y < 20; y++) familyYear(s);
+    for (const p of s.people.slice(-2)) expect(p.alive).toBe(true);
+  });
+});
+
+describe('고향으로 · 조건', () => {
+  it('moveHome은 태어난 마을과 고향의 바다로 돌아간다', () => {
+    const s = newLife5(3);
+    applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'moveHome' }]);
+    expect(s.hero.island).toBe(s.hero.town);
+    expect(s.hero.sea).toBe(HOMES[s.hero.home].sea);
+  });
+  it('island 조건은 지금 있는 섬을 본다', () => {
+    const s = newLife5(3); s.hero.town = '후샤 마을'; s.hero.island = '로그타운';
+    expect(check(s, { c: 'island', is: ['로그타운'] })).toBe(true);
+    s.hero.island = '후샤 마을';
+    expect(check(s, { c: 'island', is: ['로그타운'] })).toBe(false);
+  });
+  it('canonAge 조건은 그 원작 인물의 지금 나이를 본다', () => {
+    const s = newLife5(3); s.age = 10;      // 스모커 27, 루피 10
+    expect(check(s, { c: 'canonAge', id: 'smoker', min: 25 })).toBe(true);
+    expect(check(s, { c: 'canonAge', id: 'smoker', max: 26 })).toBe(false);
+    expect(check(s, { c: 'canonAge', id: 'luffy', min: 17 })).toBe(false);
+    expect(check(s, { c: 'canonAge', id: 'luffy', min: 5, max: 12 })).toBe(true);
+  });
+  it('로그타운에서만 일어나는 장면은 로그타운에 있어야 열린다', () => {
+    expect(TURNING_BY_ID.kid_scaffold.when).toContainEqual({ c: 'town', is: ['로그타운'] });
+    for (const id of ['path_smoker', 'path_rev_dragon', 'path_follow_luffy']) expect(TURNING_BY_ID[id].when, id).toContainEqual({ c: 'island', is: ['로그타운'] });
+  });
+  it('부모를 전제하는 사건은 부모가 있어야 오고, 임종의 문은 부모를 잃게 한다', () => {
+    for (const id of ['pp_parent', 'pp_debt']) {
+      expect(TURNING_BY_ID[id].needs, id).toContain('parent');
+      expect(TURNING_BY_ID[id].when.find((c) => c.c === 'lineage'), id).toMatchObject({ is: expect.arrayContaining(['outcast']) });
+    }
+    for (const d of TURNING_BY_ID.pp_parent.doors) expect(d.fx).toContainEqual({ op: 'losePerson', who: 'parent' });
+  });
+  it('어떤 사건도 로그타운으로 못 박아 돌려보내지 않는다', () => {
+    const all = (fx: Fx[]): Fx[] => fx.flatMap((e) => e.op === 'chance' ? [e, ...all(e.then), ...all(e.else ?? [])] : [e]);
+    for (const t of TURNINGS) for (const e of all([...(t.fx ?? []), ...t.doors.flatMap((d) => d.fx)]))
+      if (e.op === 'move') expect(e.island, t.id).not.toBe('로그타운');
   });
 });

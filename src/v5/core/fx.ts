@@ -8,6 +8,7 @@ import { chance, pick, rngOf, weighted } from '../../core/rng';
 import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { CANON, canonAge } from '../data/canon';
+import { HOMES } from '../data/homes';
 import { STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
@@ -67,6 +68,7 @@ function applyOne(s: Life5, e: Fx): void {
       s.timeline.push({ age: s.age, text: STANDING_PHRASE[e.to], standing: e.to });
       return;
     case 'move': h.island = e.island; h.sea = e.sea; return;
+    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); return;
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
     case 'mark': {

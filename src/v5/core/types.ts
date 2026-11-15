@@ -39,7 +39,11 @@ export type LogWeight = 'light' | 'heavy' | 'year';
 export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
-export interface TimelineEntry { age: number; text: string; standing?: Standing; canon?: string; limb?: Limb }
+export interface TimelineEntry {
+  age: number; text: string; standing?: Standing;
+  canon?: string;                              // 원작 인물 id (3단계부터). 옛 저장에는 표시 이름이 남아 있다. 있는지만 본다
+  limb?: Limb;
+}
 
 export type Cond =
   | { c: 'age'; min?: number; max?: number }
@@ -59,7 +63,9 @@ export type Cond =
   | { c: 'hardship'; min: number }
   | { c: 'secret'; known: boolean }
   | { c: 'town'; is: string[] }                 // 태어난 마을 (hero.town)
-  | { c: 'standingYears'; min: number };        // 지금의 처지가 된 지 몇 해
+  | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
+  | { c: 'island'; is: string[] }               // 지금 있는 섬 (hero.island)
+  | { c: 'canonAge'; id: string; min?: number; max?: number };   // 그 원작 인물의 지금 나이 (canonAge)
 
 export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
@@ -70,6 +76,7 @@ export type Fx =
   | { op: 'standing'; to: Standing }
   | { op: 'wealth'; to: Wealth }                         // 집안 형편이 바뀐다 (몰락 등)
   | { op: 'move'; island: string; sea: SeaId }
+  | { op: 'moveHome' }                                  // 태어난 마을과 고향의 바다로 돌아간다
   | { op: 'mastery'; branch: Branch; add: number }
   | { op: 'tier'; branch: Branch; to: number }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }

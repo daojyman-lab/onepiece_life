@@ -102,7 +102,7 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_scaffold', kind: 'door', when: kid(6, 15), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'kid_scaffold', kind: 'door', when: [...kid(6, 15), { c: 'town', is: ['로그타운'] }], weight: 10, repeat: 'once', speaker: 'hero',
     title: '처형대', body: '{island} 광장의 처형대. 어른들은 해적왕이 저 위에서 웃으며 죽었다고 말한다.',
     doors: [
       { label: '몰래 처형대 위에 올라가 바다를 본다', hint: '들키면 경비에게 끌려 내려온다', values: { romance: D }, mark: 'obsession', fx: [] },

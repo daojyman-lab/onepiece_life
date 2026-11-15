@@ -35,6 +35,8 @@ export const at = (...c: Cond[]): Cond[] => [{ c: 'home', is: ['loguetown'] }, .
 export const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 export const age = (min?: number, max?: number): Cond => ({ c: 'age', min, max });
 export const sea = (...is: SeaId[]): Cond => ({ c: 'sea', is });
+/** 로그타운의 장면(처형대, 스모커의 거리)은 지금 로그타운에 있어야 일어난다 */
+const inLoguetown: Cond = { c: 'island', is: ['로그타운'] };
 
 export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 해적
@@ -139,7 +141,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east')),
+    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east'), inLoguetown),
     weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 쫓아내는 걸 봤다고 한다.',
     doors: [
@@ -210,7 +212,7 @@ export const PATHS: Turning[] = [
 
   // ---------------------------------------------------------------- 혁명군 · 현상금 사냥꾼 · 조선공
   {
-    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east')),
+    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east'), inLoguetown),
     weight: 8, repeat: 'once', speaker: { canon: 'dragon' },
     title: '폭풍 속의 사내', body: '처형대에 벼락이 떨어지던 날, 망토를 두른 사내가 비에 젖은 {name}에게 말을 건다. 이 세상이 왜 이 모양인지 궁금하지 않느냐고.',
     doors: [
@@ -363,7 +365,7 @@ export const PATHS: Turning[] = [
       { label: '지나가는 배에 신호를 보낸다', hint: '누구의 배일지는 모른다', values: { peace: D },
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'move', island: '위스키 피크', sea: 'gl_entry' }, { op: 'log', text: '현상금 사냥꾼의 배에 건져져 위스키 피크에 내렸다.', weight: 'heavy' }],
-               else: [{ op: 'move', island: '로그타운', sea: 'east' }, { op: 'log', text: '해군 순찰선에 구조되어 로그타운으로 돌아왔다.', weight: 'heavy' }] }] },
+               else: [{ op: 'moveHome' }, { op: 'log', text: '해군 순찰선에 구조되어 {town}(으)로 돌아왔다.', weight: 'heavy' }] }] },
     ],
   },
   {
@@ -398,7 +400,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east')),
+    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east'), inLoguetown),
     weight: 6, repeat: 'once', speaker: { canon: 'luffy' },
     title: '처형대 위의 웃음', body: '{island} 처형대에서 목이 잘릴 뻔했던 밀짚모자 소년이 벼락 속에서 웃으며 살아났다. 그의 작은 배가 폭풍 속으로 떠나려 한다.',
     doors: [
@@ -415,9 +417,9 @@ export const PATHS: Turning[] = [
     weight: 2, repeat: { years: 8 }, speaker: 'hero',
     title: '고향행 배', body: '{island} 항구에서 이스트 블루로 가는 상선이 닻을 올리고 있다. 갑판 위에서 들려오는 사투리가 귀에 익다.',
     doors: [
-      { label: '배에 올라 로그타운으로 돌아간다', hint: '자란 거리로 돌아간다', values: { devotion: D },
-        fx: [{ op: 'move', island: '로그타운', sea: 'east' }, { op: 'log', text: '오랜만에 로그타운의 처형대를 올려다보았다. 거리는 그대로였다.', weight: 'heavy' },
-             { op: 'timeline', text: '고향 로그타운으로 돌아왔다' }] },
+      { label: '배에 올라 {town}(으)로 돌아간다', hint: '자란 거리로 돌아간다', values: { devotion: D },
+        fx: [{ op: 'moveHome' }, { op: 'log', text: '오랜만에 {town}의 거리를 걸었다. 거리는 그대로였다.', weight: 'heavy' },
+             { op: 'timeline', text: '고향 {town}(으)로 돌아왔다' }] },
       { label: '돌아보지 않는다', hint: '갈 길이 아직 멀다', values: { ambition: D }, fx: [] },
       { label: '고향에 편지와 돈을 부친다', hint: '마음만 먼저 돌려보낸다', values: { loyalty: D }, fx: [{ op: 'money', add: -10000 }] },
     ],

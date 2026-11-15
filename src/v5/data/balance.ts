@@ -77,7 +77,10 @@ export const V = {
   // 출생 때의 가족 (고아는 없다): 부모 둘은 주인공보다 parentOlder 사이로 많고, 형제는 0~maxSiblings명, 주인공과 siblingGap 차이.
   // siblings[형편][n]: 형제가 n명일 가중치. 가난한 집일수록 많다
   family: { parentOlder: [20, 38], maxSiblings: 3, siblingGap: [1, 8], olderP: 0.5,   // olderP: 형제가 손위일 확률
-            siblings: { poor: [2, 3, 3, 2], common: [3, 4, 2, 1], comfortable: [4, 4, 2, 0.5], noble: [5, 3, 1, 0.5] } },
+            siblings: { poor: [2, 3, 3, 2], common: [3, 4, 2, 1], comfortable: [4, 4, 2, 0.5], noble: [5, 3, 1, 0.5] },
+            parentAtBirth: 17,                 // 부모는 맏이가 태어날 때도 이 나이 이상이다
+            // 가족의 노환: oldFrom살부터 한 해에 oldP.start, 한 살마다 oldP.perYear씩 늘어 oldP.cap까지
+            oldFrom: 70, oldP: { start: 0.04, perYear: 0.01, cap: 0.5 } },
   hp: { max: 100 },
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
   person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝

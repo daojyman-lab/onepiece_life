@@ -12,6 +12,7 @@ import { FRUIT_BY_ID } from '../../src/data/fruits';
 import { SEAS } from '../../src/data/seas';
 import { rngOf } from '../../src/core/rng';
 import { V } from '../../src/v5/data/balance';
+import { HOMES } from '../../src/v5/data/homes';
 import type { Fx, Life5, Standing } from '../../src/v5/core/types';
 
 const allFx = (fx: Fx[]): Fx[] => fx.flatMap((f) => (f.op === 'chance' ? [f, ...allFx(f.then), ...allFx(f.else ?? [])] : [f]));
@@ -26,7 +27,8 @@ describe('길과 바다', () => {
   it('보스를 이기지 않아도 바다를 옮기는 사건이 다섯 가지 이상이고, 거꾸로 가거나 건너뛰는 것도 있다', () => {
     const moves = TURNINGS.filter((t) => [...t.doors.flatMap((d) => allFx(d.fx)), ...allFx(t.fx ?? [])].some((f) => f.op === 'move'));
     expect(moves.length).toBeGreaterThanOrEqual(5);
-    const seas = new Set(doorFx.filter((f) => f.op === 'move').map((f) => (f as { sea: string }).sea));
+    // moveHome은 고향의 바다(이 단계에서는 로그타운 = 이스트 블루)로 돌아가는 것이다
+    const seas = new Set(doorFx.flatMap((f) => (f.op === 'move' ? [f.sea] : f.op === 'moveHome' ? [HOMES.loguetown.sea] : [])));
     expect(seas.has('east')).toBe(true);
     expect(seas.has('nw_first') || seas.has('nw_late')).toBe(true);
   });

@@ -140,8 +140,8 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'pp_debt', kind: 'door', when: at(age(18, 40), st(...ACTIVE), { c: 'lineage', is: ['commoner', 'marineFamily', 'pirateChild'] }, { c: 'wealth', max: 'common' }),
-    weight: 6, repeat: 'once', speaker: { relation: '빚쟁이' },
+    id: 'pp_debt', kind: 'door', when: at(age(18, 40), st(...ACTIVE), { c: 'lineage', is: ['commoner', 'marineFamily', 'pirateChild', 'outcast'] }, { c: 'wealth', max: 'common' }),
+    weight: 6, repeat: 'once', needs: ['parent'], speaker: { relation: '빚쟁이' },
     title: '집안의 빚', body: '빚쟁이들이 {town}의 집에 들이닥쳤다. 집안이 진 빚을 갚지 못하면 늙은 부모를 끌고 가겠다고 한다.',
     doors: [
       { label: '빚을 떠안는다', hint: '몇 해는 번 돈을 고스란히 넘긴다', values: { devotion: D },
@@ -152,15 +152,16 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'pp_parent', kind: 'door', when: at(age(25, 60), st(...ACTIVE), { c: 'lineage', is: ['commoner', 'marineFamily', 'pirateChild'] }),
-    weight: 3, repeat: 'once', speaker: 'hero',
+    id: 'pp_parent', kind: 'door', when: at(age(25, 60), st(...ACTIVE), { c: 'lineage', is: ['commoner', 'marineFamily', 'pirateChild', 'outcast'] }),
+    weight: 3, repeat: 'once', needs: ['parent'], speaker: 'hero',
     title: '고향에서 온 편지', body: '{town}에서 편지가 왔다. 늙은 부모가 자리에 누워 {name}을(를) 찾는다고 한다.',
     doors: [
       { label: '모든 것을 두고 고향으로 달려간다', hint: '하던 일은 멈춘다', values: { devotion: D },
-        fx: [{ op: 'move', island: '로그타운', sea: 'east' }, { op: 'log', text: '로그타운으로 달려가 부모의 마지막 숨을 곁에서 지켰다.', weight: 'heavy' },
-             { op: 'timeline', text: '부모의 임종을 지켰다' }] },
+        fx: [{ op: 'moveHome' }, { op: 'log', text: '{town}(으)로 달려가 부모의 마지막 숨을 곁에서 지켰다.', weight: 'heavy' },
+             { op: 'losePerson', who: 'parent' }, { op: 'timeline', text: '부모의 임종을 지켰다' }] },
       { label: '돌아가지 못한다', hint: '평생 마음에 걸린다', values: { ambition: D },
-        fx: [{ op: 'hardship', add: 4 }, { op: 'log', text: '편지를 접어 품에 넣었다. 다음 소식은 부고였다.', weight: 'heavy' }] },
+        fx: [{ op: 'hardship', add: 4 }, { op: 'log', text: '편지를 접어 품에 넣었다. 다음 소식은 부고였다.', weight: 'heavy' },
+             { op: 'losePerson', who: 'parent' }] },
     ],
   },
 
@@ -234,7 +235,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east')),
     weight: 4, repeat: { years: 5 }, speaker: { canon: 'morgan' },
-    title: '도끼손 대령', body: '셸스 마을의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}의 배를 노려본다.',
+    title: '도끼손 대령', body: '셸스 타운의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}의 배를 노려본다.',
     doors: [
       fightDoor('대령에게 맞선다', '목숨을 건 싸움이 된다', { freedom: D }, 'b_morgan', READY(1)),
       { label: '마을 사람들을 먼저 빼돌린다', hint: '싸움은 피하지만 쫓긴다', values: { devotion: D },

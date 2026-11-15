@@ -87,7 +87,7 @@ function canonWordsOf(s: Life5): Ending5['canonWords'] {
 const allFx = (fx: Fx[]): Fx[] => fx.flatMap((f) => (f.op === 'chance' ? [f, ...allFx(f.then), ...allFx(f.else ?? [])] : [f]));
 /** 큰 계기이거나, 문 하나라도 처지나 바다를 바꾸는 전환점 */
 const isBig = (t: Turning | undefined): boolean =>
-  !!t && (t.kind === 'moment' || t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'standing' || f.op === 'move')));
+  !!t && (t.kind === 'moment' || t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'standing' || f.op === 'move' || f.op === 'moveHome')));
 
 /**
  * 고르지 않은 문 최대 셋, 전환점 하나에 하나씩(처음 놓친 문). 큰 계기와 길을 바꾸는 전환점이 먼저,
