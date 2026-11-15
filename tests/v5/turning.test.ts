@@ -164,13 +164,15 @@ describe('전환점의 흐름', () => {
     expect(s.queue).toEqual([]);
   });
   it('보통의 흐름에서는 기연과 불행을 뽑지 않는다', () => {
+    let picked = 0;
     for (let seed = 1; seed <= 200; seed++) {
-      const s = newLife5(seed); s.pending = null; s.age = 30; s.hero.standing = 'pirate'; s.hardship = 1000;
-      // 조건으로는 이 사람에게 와도 되는 기연 · 불행이 있다
+      // 유년기 문과, 조건으로는 와도 되는 기연 · 불행이 함께 있는 나이
+      const s = newLife5(seed); s.pending = null; s.age = 9; s.hero.home = 'loguetown'; s.hardship = 1000;
       expect(TURNINGS.some((t) => (t.kind === 'fortune' || t.kind === 'misfortune') && checkAll(s, t.when))).toBe(true);
       const t = pickTurning(s, rngOf(s.rng));
-      if (t) expect(['door', 'moment']).toContain(t.kind);
+      if (t) { picked++; expect(['door', 'moment']).toContain(t.kind); }
     }
+    expect(picked).toBeGreaterThan(0);
   });
   it('문의 표시로 강점을 얻으면 그 이름이 무겁게 기록된다', () => {
     let s = newLife5(1); s.pending = null; s.marks.rebel = 2;

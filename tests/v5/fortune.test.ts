@@ -158,6 +158,18 @@ describe('고아의 비밀 성씨', () => {
     expect(s!.flags).toContain('surnameKnown');
     expect(s!.log.slice(log0).some((l) => l.weight === 'heavy' && l.text.includes(name))).toBe(true);
   });
+  it('밝혀지는 기록의 조사가 이름의 받침에 맞는다', () => {
+    let s0: Life5 | null = null;
+    for (let i = 0; i < 3000 && !s0; i++) { const x = newLife5(i); if (x.hero.secretSurname) s0 = x; }
+    for (const [given, tail] of [['루피', '」였다'], ['진', '」이었다']] as const) {
+      const s: Life5 = JSON.parse(JSON.stringify(s0));
+      s.hero.name = given;
+      revealSurname(s);
+      const line = s.log[s.log.length - 1].text;
+      expect(line, given).toContain(`${given}${tail}`);
+      expect(line).not.toMatch(/\(이\)/);
+    }
+  });
   it('숨은 성이 없으면 아무 일도 없다', () => {
     let s: Life5 | null = null;
     for (let i = 0; i < 3000 && !s; i++) { const x = newLife5(i); if (!x.hero.secretSurname) s = x; }

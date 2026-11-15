@@ -67,5 +67,5 @@ export function revealSurname(s: Life5): void {
   for (const [k, v] of Object.entries(def?.bonus ?? {}) as [StatKey, number][])
     h.base[k] = Math.max(0, h.base[k] + v * V.surname.revealMult);
   if (!s.flags.includes('surnameKnown')) s.flags.push('surnameKnown');
-  logLine(s, `품에 지녀 온 것이 실마리가 되어 잃어버린 성이 밝혀졌다. ${h.name}의 진짜 이름은 「${name} ${h.name}」이었다. 잠들어 있던 핏줄의 힘이 깨어난다.`, 'heavy', 'world');
+  logLine(s, `품에 지녀 온 것이 실마리가 되어 잃어버린 성이 밝혀졌다. ${h.name}의 진짜 이름은 「${name} ${h.name}」(이)었다. 잠들어 있던 핏줄의 힘이 깨어난다.`, 'heavy', 'world');
 }
