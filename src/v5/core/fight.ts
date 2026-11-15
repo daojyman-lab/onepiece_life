@@ -30,7 +30,7 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 const sum = (st: Stats) => Object.values(st).reduce((a, b) => a + b, 0);
 
 /** 싸움 물음의 답 */
-const ENGAGE = 0, BACK_OFF = 1;
+export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const AFTER_FIGHT = 'after_fight';
 

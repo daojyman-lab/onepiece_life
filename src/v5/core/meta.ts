@@ -19,6 +19,11 @@ export function emptyMeta5(): Meta5 {
   return { schema: 5, doors: {}, fruits: [], people: [], hall: [], lives: 0 };
 }
 
+/** 지난 인생들에서 골라 본 문. newLife5의 known으로 넘긴다 */
+export function knownDoors(meta: Meta5): string[] {
+  return Object.keys(meta.doors);
+}
+
 /** 그 문이 올리는 가치관. 데이터에 없는 전환점 · 문이거나 가치관이 없는 문이면 빈 목록 */
 function doorValues(key: string): ValueId[] {
   const [id, i] = key.split('#');

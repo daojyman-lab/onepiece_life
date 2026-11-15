@@ -5,6 +5,7 @@ import { reduce5 } from '../../src/v5/core/reduce';
 import { openTurning, pickTurning, resolveDoors, takeQueued } from '../../src/v5/core/turning';
 import { loseLimb } from '../../src/v5/core/body';
 import { FOES } from '../../src/v5/data/foes';
+import { emptyMeta5, knownDoors } from '../../src/v5/core/meta';
 import { rngOf } from '../../src/core/rng';
 import { checkAll } from '../../src/v5/core/cond';
 import { addValues } from '../../src/v5/core/values';
@@ -192,6 +193,24 @@ describe('전환점의 흐름', () => {
     expect(s.strengths).toContain('rebel');
     const name = STRENGTHS.find((x) => x.id === 'rebel')!.name;
     expect(s.log.some((l) => l.weight === 'heavy' && l.text.includes(name))).toBe(true);
+  });
+});
+
+describe('전에 골라 본 문 (설계 5.9, 5.2a)', () => {
+  it('지난 인생에서 고른 문은 새 인생에서도 골라 본 문으로 보인다', () => {
+    const first = newLife5(4);
+    const p = first.pending;
+    if (p?.kind !== 'door') throw new Error('첫 문이 없다');
+    const meta = emptyMeta5();
+    meta.doors[`${p.turning}#0`] = [];
+    const s = newLife5(4, { known: knownDoors(meta) });
+    const q = s.pending;
+    if (q?.kind !== 'door') throw new Error('첫 문이 없다');
+    expect(q.turning).toBe(p.turning);
+    expect(q.doors[0].tried).toBe(true);
+    expect(q.doors.slice(1).every((d) => !d.tried)).toBe(true);
+    expect(s.tried).toEqual([]);
+    expect(p.doors[0].tried).toBe(false);
   });
 });
 

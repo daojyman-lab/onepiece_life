@@ -47,16 +47,18 @@ export function personaOf(s: Life5): string {
 const asClause = (text: string) => text.replace(/다$/, '고');
 
 /**
- * "{town}에서 태어나" + 처지가 바뀐 지점(연표) 최대 셋 + 죽음.
- * 셋이 넘으면 맨 처음 하나와 마지막 것들을 꼽는다. 원인이 "~다"로 끝나는 말이면 그대로 맺는다.
+ * "{town}에서 태어나" + 처지가 바뀐 지점(연표) 최대 셋 + 몸을 처음 잃은 일(설계 5.7) + 죽음. 연표의 차례대로 잇는다.
+ * 처지가 바뀐 지점이 셋이 넘으면 맨 처음 하나와 마지막 것들을 꼽는다. 원인이 "~다"로 끝나는 말이면 그대로 맺는다.
  */
 export function oneLineOf(s: Life5): string {
-  const turns = s.timeline.filter((t) => t.standing).map((t) => t.text);
+  const turns = s.timeline.filter((t) => t.standing);
   const picked = turns.length <= E.oneLine ? turns : [turns[0], ...turns.slice(turns.length - (E.oneLine - 1))];
+  const limb = s.timeline.find((t) => t.limb);
+  const shown = s.timeline.filter((t) => picked.includes(t) || t === limb).map((t) => t.text.replace(/\.$/, ''));
   const end = endOf(s);
   const death = !s.ended ? `${end.age}살의 오늘에 이르렀다.`
     : /다$/.test(end.cause) ? `${end.age}살에 ${end.cause}.` : `${end.age}살에 ${end.cause}(으)로 죽었다.`;
-  return josa(`${s.hero.town}에서 태어나 ${[...picked.map(asClause), death].join(', ')}`);
+  return josa(`${s.hero.town}에서 태어나 ${[...shown.map(asClause), death].join(', ')}`);
 }
 
 /** 명성이 낮으면 고향의 소문, 높으면 신문 1면 */

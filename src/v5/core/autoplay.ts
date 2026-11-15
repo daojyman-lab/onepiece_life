@@ -1,9 +1,8 @@
 // 자동 플레이와 요약 (설계 7장의 시뮬레이터가 쓴다). 순수 함수다: 시각도 Math.random도 쓰지 않는다.
 // 정책이 고를 때 쓰는 난수는 인생의 난수(s.rng)와 따로 둔다. 그래야 고르는 방식이 인생의 주사위를 흐트러뜨리지 않는다.
 import { chance, pick, rngOf, type Rng } from '../../core/rng';
-import { V } from '../data/balance';
 import { TURNING_BY_ID } from '../data/turnings';
-import { birthHardship } from './birth';
+import { BACK_OFF, ENGAGE } from './fight';
 import { apply5, invariants5 } from './reduce';
 import { newLife5 } from './state';
 import { topValues } from './values';
@@ -13,7 +12,6 @@ import type { Life5, Lineage, ValueId, Wealth } from './types';
 export type Policy = 'random' | 'first' | { value: ValueId };
 
 const MAX_STEPS = 20000;
-const ENGAGE = 0, BACK_OFF = 1;
 /** 정책의 난수 씨앗을 인생의 씨앗과 갈라놓는 수 */
 const POLICY_SALT = 0x5eed;
 const FIGHTERS: readonly ValueId[] = ['dominion', 'ambition'];
@@ -42,18 +40,12 @@ function choose(s: Life5, policy: Policy, r: Rng): number {
 }
 
 /**
- * 한 인생을 끝까지 자동으로 돌린다. opt의 집안 형편 · 핏줄은 태어난 직후 덮어쓰고, 돈과 시련을 그에 맞게 다시 센다.
+ * 한 인생을 끝까지 자동으로 돌린다. opt의 집안 형편 · 핏줄은 출생 주사위에 넘겨 정해 둔다 (돈 · 시련 · 성씨가 그에 맞는다).
  * MAX_STEPS 안에 엔딩에 닿지 못하면 stuck. 명령마다 불변 조건을 확인해 어긴 것을 모은다.
  */
 export function autoplay5(seed: number, policy: Policy = 'random', opt: { wealth?: Wealth; lineage?: Lineage } = {}):
   { s: Life5; stuck: boolean; violations: string[] } {
-  let s = newLife5(seed);
-  if (opt.wealth || opt.lineage) {
-    s.hero.wealth = opt.wealth ?? s.hero.wealth;
-    s.hero.lineage = opt.lineage ?? s.hero.lineage;
-    s.hero.money = V.wealthMoney[s.hero.wealth];
-    s.hardship = birthHardship(s.hero.wealth, s.hero.lineage);
-  }
+  const s = newLife5(seed, opt);
   const r = rngOf({ seed: seed ^ POLICY_SALT, cursor: 0 });
   const violations: string[] = [];
   for (let i = 0; i < MAX_STEPS; i++) {

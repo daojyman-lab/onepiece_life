@@ -35,6 +35,22 @@ describe('출생 주사위', () => {
       if (s.hero.lineage === 'orphan') expect(s.hardship).toBeGreaterThanOrEqual(V.hardship.orphan);
     }
   });
+  it('집안 형편 · 핏줄을 정해 주면 돈 · 시련 · 성씨가 그에 맞는다', () => {
+    for (let i = 0; i < 300; i++) {
+      const o = newLife5(100 + i, { wealth: 'poor', lineage: 'orphan' });
+      expect(o.hero.surname).toBeNull();
+      expect(o.hero.money).toBe(V.wealthMoney.poor);
+      expect(o.hardship).toBe(V.hardship.poor + V.hardship.orphan);
+      expect(o.log[0].text).toContain('불렀다');                 // 고아의 출생 이야기
+      const n = newLife5(100 + i, { wealth: 'noble', lineage: 'commoner' });
+      expect(n.hero.surname).not.toBeNull();
+      expect(n.hero.secretSurname).toBeNull();
+      expect(n.hero.money).toBe(V.wealthMoney.noble);
+      expect(n.hardship).toBe(0);
+    }
+    const rareOrphans = Array.from({ length: 600 }, (_, i) => newLife5(100 + i, { lineage: 'orphan' }));
+    expect(rareOrphans.some((s) => s.hero.secretSurname)).toBe(true);
+  });
   it('성을 모르는 고아의 이름에 undefined나 null이 찍히지 않는다', () => {
     for (const s of many) {
       expect(fullName(s.hero)).not.toMatch(/undefined|null/);

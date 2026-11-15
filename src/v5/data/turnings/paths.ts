@@ -265,7 +265,7 @@ export const PATHS: Turning[] = [
   // ---------------------------------------------------------------- 정착 · 감옥 · 은퇴
   {
     id: 'path_settle', kind: 'door', when: at(age(35, 70), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'civil')),
-    weight: 3, repeat: 'once', speaker: 'hero',
+    weight: 3, repeat: { years: 8 }, speaker: 'hero',
     title: '닻을 내리다', body: '{island}의 언덕에서 내려다보는 바다가 유난히 잔잔하다. 여기서라면 남은 날을 보내도 좋겠다는 생각이 든다.',
     doors: [
       { label: '{island}에 집을 짓고 눌러앉는다', hint: '바다는 창밖으로만 본다', values: { peace: D },
@@ -329,8 +329,8 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_retire', kind: 'door', when: at(age(65), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp')),
-    weight: 5, repeat: 'once', speaker: 'hero',
+    id: 'path_retire', kind: 'door', when: at(age(65), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright', 'settled', 'civil')),
+    weight: 5, repeat: { years: 8 }, speaker: 'hero',
     title: '칼을 내려놓다', body: '거울 속의 {name}은(는) 어느새 희끗한 머리다. 무릎도 예전 같지 않다. 이제 물러날 때가 되었는지도 모른다.',
     doors: [
       { label: '모든 것을 내려놓고 물러난다', hint: '남은 날은 조용히 보낸다', values: { peace: D },

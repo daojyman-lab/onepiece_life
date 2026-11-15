@@ -31,14 +31,15 @@ function speakerOf(s: Life5, t: Turning): string {
   return s.people.find((p) => p.alive && p.relation === sp.relation)?.name ?? sp.relation;
 }
 
-/** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 골라 본 적이 있는지 */
+/** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생이나 이번 인생에 골라 본 적이 있는지 */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
     let locked = whyNot(s, d.when);
     if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
+    const key = `${t.id}#${i}`;
     return {
       label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,
-      special: d.special !== undefined, tried: s.tried.includes(`${t.id}#${i}`), danger: d.danger ?? false,
+      special: d.special !== undefined, tried: s.known.includes(key) || s.tried.includes(key), danger: d.danger ?? false,
     };
   });
 }

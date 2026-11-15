@@ -35,8 +35,8 @@ export interface Growth5 {
 export type LogWeight = 'light' | 'heavy' | 'year';
 export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
-/** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄 */
-export interface TimelineEntry { age: number; text: string; standing?: Standing; canon?: string }
+/** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
+export interface TimelineEntry { age: number; text: string; standing?: Standing; canon?: string; limb?: Limb }
 
 export type Cond =
   | { c: 'age'; min?: number; max?: number }
@@ -128,7 +128,8 @@ export interface Life5 {
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
   queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
   stopsThisYear: number;
-  unchosen: Unchosen[]; tried: string[];       // tried: "전환점id#문번호" (도감으로 옮겨진다)
+  unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)
+  known: string[];                             // 지난 인생들에서 골라 본 "전환점id#문번호" (새 인생을 만들 때 도감에서 받는다)
   log: LogLine[]; timeline: TimelineEntry[];
   pending: Pending5;
   stats: Stats5;

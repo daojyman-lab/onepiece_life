@@ -4,7 +4,7 @@ import { pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
-import { fullName, rollBirth } from './birth';
+import { fullName, rollBirth, type BirthOpt } from './birth';
 import { LIMBS } from './body';
 import { logLine } from './log';
 import { checkAll } from './cond';
@@ -52,7 +52,7 @@ export function emptyLife(seed: number): Life5 {
     people: [],
     flags: [], seen: {}, queue: [], queueTries: {},
     stopsThisYear: 0,
-    unchosen: [], tried: [],
+    unchosen: [], tried: [], known: [],
     log: [], timeline: [],
     pending: null,
     stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0 },
@@ -63,9 +63,13 @@ export function emptyLife(seed: number): Life5 {
 
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };
 
-/** 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다. */
-export function newLife5(seed: number, opt: { name?: string; gender?: 'm' | 'f' } = {}): Life5 {
+/**
+ * 새 인생: 출생 주사위를 굴리고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다.
+ * known: 지난 인생들에서 골라 본 문(도감의 Object.keys(meta.doors)). 문에 "전에 골라 본 문"으로 보인다.
+ */
+export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string[] } = {}): Life5 {
   const s = emptyLife(seed);
+  s.known = [...(opt.known ?? [])];
   rollBirth(s, opt);
   const h = s.hero;
   const r = rngOf(s.rng);

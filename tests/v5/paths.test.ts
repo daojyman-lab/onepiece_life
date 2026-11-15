@@ -221,3 +221,14 @@ describe('규칙', () => {
     expect(opened).toBe(50);
   });
 });
+
+describe('정착과 은퇴는 되풀이된다', () => {
+  const byId = (id: string) => TURNINGS.find((t) => t.id === id)!;
+  it('닻을 내리는 문과 칼을 내려놓는 문은 한 번뿐이 아니고 긴 간격으로 다시 온다', () => {
+    for (const id of ['path_settle', 'path_retire']) expect(byId(id).repeat, id).toEqual({ years: 8 });
+  });
+  it('뭍에 자리 잡은 사람, 뭍의 어른, 조선공도 다시 은퇴할 수 있다', () => {
+    const is = byId('path_retire').when.find((c) => c.c === 'standing');
+    for (const st of ['settled', 'civil', 'shipwright'] as Standing[]) expect(is && 'is' in is ? is.is : [], st).toContain(st);
+  });
+});

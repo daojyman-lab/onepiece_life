@@ -89,6 +89,18 @@ describe('엔딩 자료의 세부', () => {
     const shown = Object.values(STANDING_PHRASE).filter((p) => line.includes(p.replace(/다$/, '')));
     expect(shown.length).toBe(3);
   });
+  it('몸을 잃은 인생은 한 줄 인생에 잃은 일이 연표의 차례대로 적힌다 (설계 5.7)', () => {
+    const s = bare(2, 55);
+    applyFx(s, [{ op: 'standing', to: 'pirate' }]);
+    applyFx(s, [{ op: 'loseLimb', limb: 'armL' }]);
+    applyFx(s, [{ op: 'standing', to: 'settled' }]);
+    const line = buildEnding(s, emptyMeta5()).oneLine;
+    expect(line).toContain('왼팔을 잃었고');
+    const pirate = STANDING_PHRASE.pirate.replace(/다$/, ''), settled = STANDING_PHRASE.settled.replace(/다$/, '');
+    expect(line.indexOf(pirate)).toBeLessThan(line.indexOf('왼팔'));
+    expect(line.indexOf('왼팔')).toBeLessThan(line.indexOf(settled));
+    expect(buildEnding(bare(2, 55), emptyMeta5()).oneLine).not.toContain('잃었');
+  });
   it('싸움에서 쓰러진 죽음은 그 말 그대로 맺는다', () => {
     const line = buildEnding(bare(3, 30, '도끼손 모건에게 쓰러졌다'), emptyMeta5()).oneLine;
     expect(line.endsWith('30살에 도끼손 모건에게 쓰러졌다.')).toBe(true);

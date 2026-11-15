@@ -16,8 +16,15 @@ export function fullName(h: Hero5): string {
   return h.surname ? `${h.surname} ${h.name}` : h.name;
 }
 
-/** 빈 인생의 주인공 칸을 모두 출생 주사위로 채운다. 시련도 더한다. */
-export function rollBirth(s: Life5, opt: { name?: string; gender?: 'm' | 'f' } = {}): void {
+/** 출생 주사위에 미리 정해 줄 수 있는 것. wealth · lineage는 시뮬레이터가 출생을 고정할 때 쓴다 */
+export interface BirthOpt { name?: string; gender?: 'm' | 'f'; wealth?: Wealth; lineage?: Lineage }
+
+/**
+ * 빈 인생의 주인공 칸을 모두 출생 주사위로 채운다. 시련도 더한다.
+ * 핏줄을 정해 주면 고아인지도 그에 따른다: 고아면 성을 모르고, 희귀한 성씨는 숨은 성으로 남는다.
+ * 고아가 아니라고 정하면 희귀한 성씨도 드러난 성이 된다.
+ */
+export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   const r = rngOf(s.rng);
   const h = s.hero;
 
@@ -30,14 +37,14 @@ export function rollBirth(s: Life5, opt: { name?: string; gender?: 'm' | 'f' } =
   let species = sur.kind === 'rare' ? sur.species : pick(r, home.species);
   if (sur.kind === 'common' && chance(r, SPECIES_REROLL.p)) species = weighted(r, SPECIES_REROLL.weights, (x) => x[1])![0];
   // 희귀한 성씨, 이 고향에 없는 종족은 떠내려온 고아로 태어난다
-  const orphan = sur.kind === 'rare' || !home.species.includes(species);
+  const orphan = opt.lineage ? opt.lineage === 'orphan' : sur.kind === 'rare' || !home.species.includes(species);
 
   // 이스트 블루의 이름난 집안은 그 집안이 사는 마을에서만 태어난다
   const towns = HOMETOWNS.filter((t) => sur.kind !== 'local' || sur.homes!.includes(t.name));
   const town = pick(r, towns.length ? towns : HOMETOWNS);
 
-  const wealth: Wealth = orphan ? 'poor' : weighted(r, WEALTHS, (w) => home.wealth[w])!;
-  const lineage = orphan ? 'orphan' : weighted(r, home.lineages, (x) => x[1])![0];
+  const wealth: Wealth = opt.wealth ?? (orphan ? 'poor' : weighted(r, WEALTHS, (w) => home.wealth[w])!);
+  const lineage = opt.lineage ?? (orphan ? 'orphan' : weighted(r, home.lineages, (x) => x[1])![0]);
 
   const talents: Talent[] = [];
   const nTalents = int(r, V.birth.talents.min, V.birth.talents.max);
@@ -58,7 +65,7 @@ export function rollBirth(s: Life5, opt: { name?: string; gender?: 'm' | 'f' } =
   h.name = opt.name ?? pick(r, FIRST_NAMES[gender]);
   h.gender = gender;
   h.surname = orphan ? null : sur.name;
-  h.secretSurname = sur.kind === 'rare' ? sur.name : null;
+  h.secretSurname = orphan && sur.kind === 'rare' ? sur.name : null;
   h.species = species;
   h.home = homeId;
   h.town = town.name;

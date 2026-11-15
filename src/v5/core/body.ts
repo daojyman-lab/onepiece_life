@@ -81,7 +81,7 @@ export function loseLimb(s: Life5, limb: Limb | 'random', r: Rng): Limb | null {
   s.hardship += V.hardship.limb;
   s.stats.limbsLost += 1;
   const text = `${LIMB_NAME[l]}을(를) 잃었다.`;
-  s.timeline.push({ age: s.age, text: josa(text) });
+  s.timeline.push({ age: s.age, text: josa(text), limb: l });
   if (!s.queue.includes('moment_limb')) s.queue.push('moment_limb');
   logLine(s, text, 'heavy', 'danger');
   return l;
