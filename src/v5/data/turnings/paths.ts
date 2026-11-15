@@ -57,18 +57,18 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_pirate_sail', kind: 'door', when: at(age(16, 35), st('child', 'civil', 'settled', 'shipwright', 'bountyHunter')),
+    id: 'path_pirate_sail', kind: 'door', when: at(age(16, 35), st('child', 'civil', 'settled', 'shipwright')),
     weight: 10, repeat: 'once', speaker: 'hero',
     title: '깃발을 올리다', body: '{island} 부두에 낡은 배 한 척이 헐값에 나왔다. 해골 깃발 하나만 그려 넣으면 내일이라도 바다로 나갈 수 있다.',
     doors: [
       { label: '배를 사서 해골 깃발을 올린다', hint: '오늘부터 쫓기는 몸이 된다', values: { freedom: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' },
+        fx: [{ op: 'money', add: -10000 }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
              { op: 'log', text: '낡은 돛대 끝에 직접 그린 해골 깃발이 펄럭였다.', weight: 'heavy' }, { op: 'timeline', text: '해적 깃발을 올렸다' }] },
       { label: '이름난 해적선에 견습으로 오른다', hint: '남의 깃발 아래서 바다를 배운다', values: { loyalty: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }] },
       { label: '바다는 꿈으로만 둔다', hint: '뭍에서의 삶이 이어진다', values: { peace: D }, fx: [] },
       { label: '부두의 건달들을 모아 선단을 꾸린다', hint: '처음부터 우두머리로 바다에 나선다', special: 'dominion', values: { dominion: D },
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 10 },
+        fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' }, { op: 'fame', add: 10 },
              { op: 'person', kind: 'crew', relation: '부두 건달 출신 선원' }, { op: 'timeline', text: '건달들을 이끌고 해적이 되었다' }] },
     ],
   },
@@ -87,14 +87,14 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }),
+    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'standingYears', min: 2 }),
     weight: 8, repeat: 'once', speaker: { relation: '세계 정부의 사자' },
-    title: '칠무해 제의', body: '세계 정부의 사자가 {island}에 정박한 {name}의 배에 올랐다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
+    title: '칠무해 제의', body: '세계 정부의 사자가 {island}의 여관으로 {name}을(를) 찾아왔다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
     doors: [
       { label: '제의를 받아들인다', hint: '쫓기지 않는 대신 목줄이 채워진다', values: { ambition: D },
         fx: [{ op: 'standing', to: 'warlord' }, { op: 'fame', add: 100 }, { op: 'timeline', text: '왕의 칠무해가 되었다' }] },
       { label: '사자를 바다에 던져 버린다', hint: '정부 전체를 적으로 돌린다', values: { freedom: D, dominion: D },
-        fx: [{ op: 'fame', add: 50 }, { op: 'flag', id: 'govEnemy' }, { op: 'log', text: '사자는 바다에 빠진 채 욕을 퍼부었다. 현상금이 껑충 뛰었다.', weight: 'heavy' }] },
+        fx: [{ op: 'fame', add: 50 }, { op: 'flag', id: 'govEnemy' }, { op: 'log', text: '사자는 바다에 빠진 채 욕을 퍼부었다. 현상금이 껑충 뛰었다.', weight: 'heavy' }], closes: true },
       { label: '받아들이되 정부를 발판으로 쓴다', hint: '목줄을 쥔 손을 언젠가 물어뜯는다', special: 'dominion', values: { dominion: D },
         fx: [{ op: 'standing', to: 'warlord' }, { op: 'fame', add: 150 }, { op: 'flag', id: 'warlordSchemer' }, { op: 'timeline', text: '칠무해의 자리를 발판으로 삼았다' }] },
     ],
@@ -236,7 +236,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_bounty', kind: 'door', when: at(age(17, 40), st('civil', 'pirate', 'settled', 'shipwright')),
+    id: 'path_bounty', kind: 'door', when: at(age(17, 40), st('civil', 'settled', 'shipwright')),
     weight: 6, repeat: 'once', speaker: { relation: '현상금 사냥꾼' },
     title: '수배서를 뗀 손', body: '{island} 해군 지부 게시판 앞에서 칼을 찬 사냥꾼이 수배서 한 장을 떼어 낸다. 둘이 잡으면 반씩 나누자고 {name}에게 제안한다.',
     doors: [

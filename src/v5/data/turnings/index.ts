@@ -7,6 +7,10 @@ import { MOMENTS } from './moments';
 import { PATHS } from './paths';
 import { PEOPLE } from './people';
 import { TOWNS } from './towns';
+import { PIRATE } from './pirate';
+import { HUNTER } from './hunter';
+import { MARINE } from './marine';
+import { REVOLUTION } from './revolution';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -16,6 +20,10 @@ const GROUPS: Turning[][] = [
   PATHS,
   PEOPLE,
   TOWNS,
+  PIRATE,
+  HUNTER,
+  MARINE,
+  REVOLUTION,
 ];
 
 export const TURNINGS: Turning[] = GROUPS.flat();
