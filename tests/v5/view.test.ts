@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, codexView, doorView, fightView, hallView, heroWho5, matchWord, profileView, riskWords, sceneOf, speakerOf, storyLines, timelineView, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, battleLine, codexView, doorView, fightView, hallView, heroWho5, hpAt, matchWord, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
+import type { BattleEvent } from '../../src/core/types';
+import { TURNINGS } from '../../src/v5/data/turnings';
 import { askFight } from '../../src/v5/core/fight';
 import { VALUE_NAME } from '../../src/v5/data/values';
 import type { Pending5 } from '../../src/v5/core/types';
@@ -100,12 +102,61 @@ describe('선택 창과 싸움 앞의 물음', () => {
     expect(v.risk.map((r) => r.word)).toEqual(['매우 높다', '낮다', '없다']);
     expect(v.name.length).toBeGreaterThan(0);
   });
+  it('싸움 앞: 목숨을 걸면 죽을 위험은 위험의 띠에서 나온 말이다', () => {
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
+    askFight(s, Object.keys(FOES)[0], true, false);
+    if (s.pending?.kind !== 'fight') throw new Error();
+    expect(fightView(s, { ...s.pending, lethal: true, risk: { injury: 0.5, limb: 0.1, death: 0.2 } }).risk[2].word).toBe('높다');
+  });
+  it('주인공이 말하는 문의 말하는 사람은 {이름} (나)', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const t = TURNINGS.find((x) => x.speaker === 'hero')!;
+    expect(doorView(s, { ...s.pending, turning: t.id, speaker: '루피' }).speaker.name).toBe('루피 (나)');
+  });
+  it('문마다 위험 여부가 따로 있다', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const p = { ...s.pending, doors: [
+      { label: '가', hint: '', locked: null, special: false, tried: false, danger: true },
+      { label: '나', hint: '', locked: null, special: false, tried: false, danger: false },
+    ] };
+    expect(doorView(s, p).doors.map((d) => d.danger)).toEqual([true, false]);
+  });
   it('잠긴 문의 힌트 자리에는 잠긴 까닭, 큰 계기가 아니면 제목만', () => {
     const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
     const p = { ...s.pending, moment: false, doors: [{ label: '나', hint: '힌트2', locked: '돈이 모자라다', special: false, tried: false, danger: false }] };
     const v = doorView(s, p);
     expect(v.heading).toBe(p.title);
     expect(v.doors[0].hint).toBe('✕ 돈이 모자라다');
+  });
+});
+
+describe('자동 전투 창', () => {
+  it('전투 재생: 끝까지 가면 진 쪽의 체력이 0이다', () => {
+    let s = newLife5(1); s.pending = null as Pending5; s.age = 22; s.hero.standing = 'pirate';   // as: askFight 뒤에도 null로 좁혀지지 않게
+    for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 60;
+    askFight(s, Object.keys(FOES)[0], false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    const b = s.pending.battle;
+    expect(hpAt(b, 0)).toEqual(b.units.map((u) => u.maxHp));
+    const end = hpAt(b, b.events.length);
+    expect(end.some((h) => h === 0) || s.pending.result === 'retreat').toBe(true);
+    for (const e of b.events) { const t = battleLine(b, e); expect(t).not.toMatch(/undefined|\(이\)가|을\(를\)/); }
+    expect(resultLine(s.pending.result, false).length).toBeGreaterThan(0);
+  });
+  it('결과 줄과 모든 사건의 글', () => {
+    expect(resultLine('win', false)).toBe('이겼다.');
+    expect(resultLine('lose', true)).toBe('졌다.');
+    expect(resultLine('retreat', false)).toBe('물러났다.');
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
+    askFight(s, Object.keys(FOES)[0], false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    const b = s.pending.battle;
+    const kinds: BattleEvent[] = [
+      { k: 'item', d: 0, who: 0, item: 'potion', name: '회복약' }, { k: 'retreat', who: 0, ok: false },
+      { k: 'drown', who: 0 }, { k: 'rest', who: 0 }, { k: 'join', d: 0, who: 0, side: 'L' },
+    ];
+    for (const e of kinds) expect(battleLine(b, e)).not.toMatch(/undefined|\(이\)가|을\(를\)/);
+    expect(unitWho(s, b.units.find((u) => u.hero)!)).toEqual(heroWho5(s));
   });
 });
 

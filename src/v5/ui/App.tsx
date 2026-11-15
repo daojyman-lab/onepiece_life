@@ -2,9 +2,9 @@
 import { useEffect } from 'preact/hooks';
 import { music, sfx } from '../../app/sound';
 import { caughtUp } from '../app/flow';
-import { actions, dispatch, useStore } from '../app/store';
-import type { Pending5, Standing } from '../core/types';
-import { Modal } from './common';
+import { actions, useStore } from '../app/store';
+import type { Standing } from '../core/types';
+import { BattleModal } from './modals/BattleModal';
 import { CodexModal } from './modals/CodexModal';
 import { DoorModal } from './modals/DoorModal';
 import { FightModal } from './modals/FightModal';
@@ -36,7 +36,7 @@ export function App() {
   if (!ready) { /* 기다린다 */ }
   else if (p?.kind === 'door') pendingView = <DoorModal key={popup} s={s} p={p} />;
   else if (p?.kind === 'fight') pendingView = <FightModal key={popup} s={s} p={p} />;
-  else if (p?.kind === 'battle') pendingView = <BattleStub key={popup} p={p} />;
+  else if (p?.kind === 'battle') pendingView = <BattleModal key={popup} s={s} p={p} />;
   // 엔딩(과제 9)은 아직 창이 없다
   // 관리용 창은 떠 있는 일의 창이 없을 때만
   let manage = null;
@@ -52,20 +52,6 @@ export function App() {
       <SoundToggles />
       <Toasts />
     </>
-  );
-}
-
-const RESULT_WORD = { win: '이겼다', lose: '졌다', retreat: '물러났다' } as const;
-
-/** 임시 싸움 창: 결과만 보이고 확인으로 넘긴다. 과제 8의 싸움 창이 이 자리를 대신한다 */
-function BattleStub({ p }: { p: Extract<Pending5, { kind: 'battle' }> }) {
-  return (
-    <Modal title="싸움" cls="pend">
-      <div class="scroll">{p.foe.name} · {RESULT_WORD[p.result]}</div>
-      <div class="pend-doors">
-        <button class="opt" onClick={() => dispatch({ type: 'answer', index: 0 })}><b>확인</b></button>
-      </div>
-    </Modal>
   );
 }
 

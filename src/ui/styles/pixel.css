@@ -341,5 +341,18 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
   .modal.pend .speaker .face.big { width: 64px; height: 64px; }
   .modal.pend .speaker .scroll { max-height: 26dvh; }
 }
+/* 자동 전투 창: 위에 양쪽 체력, 가운데 장면, 아래 사건 줄(창 안에서 스크롤), 맨 아래 단추는 늘 닿는다 */
+.modal.battle5 > * { flex: none; }
+.battle5-vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+.battle5-scene { padding: 0; margin: 0 0 6px; }
+.battle5-scene .scene { height: 150px; }
+.modal.battle5 > .battle-log { flex: 1 1 auto; min-height: 72px; max-height: none; }
+.battle5-bar, .battle5-end { margin-top: 6px; }
+.battle5-end .btn { margin-top: 6px; }
+@media (max-width: 760px) {
+  .battle5-scene .scene { height: 104px; }
+  .battle5-vs .face.sm { width: 28px; height: 28px; }
+  .battle5-vs .side { grid-template-columns: 28px 1fr; }
+}
 /* 휴대폰에는 마우스가 없으니 '마우스를 올려 두면 멈춘다'를 내지 않는다 */
 .app.mobile .story-idle { display: none; }

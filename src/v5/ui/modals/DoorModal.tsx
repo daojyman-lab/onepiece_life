@@ -4,9 +4,6 @@ import type { Life5, Pending5 } from '../../core/types';
 import { Face, Modal } from '../common';
 import { ageWord, doorView } from '../view';
 
-/** 붉은 표시로 다는 문 표시 */
-const RED_TAG = '위험';
-
 export function DoorModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'door' }> }) {
   const v = doorView(s, p);
   return (
@@ -20,10 +17,11 @@ export function DoorModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'do
       </div>
       <div class="pend-doors">
         {v.doors.map((d) => (
-          <button key={d.index} class={`opt ${d.tags.includes(RED_TAG) ? 'danger' : ''}`} disabled={!!d.locked}
+          <button key={d.index} class={`opt ${d.danger ? 'danger' : ''}`} disabled={!!d.locked}
             onClick={() => dispatch({ type: 'answer', index: d.index })}>
             <b>{d.label}</b>
-            {d.tags.map((t) => <span key={t} class={`tag ${t === RED_TAG ? 'red' : ''}`} style={{ marginLeft: 6 }}>{t}</span>)}
+            {/* 위험한 문이면 doorView가 위험 표시를 맨 끝에 단다 */}
+            {d.tags.map((t, i) => <span key={t} class={`tag ${d.danger && i === d.tags.length - 1 ? 'red' : ''}`} style={{ marginLeft: 6 }}>{t}</span>)}
             <span class="hint">{d.hint}</span>
           </button>
         ))}
