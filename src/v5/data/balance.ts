@@ -12,4 +12,5 @@ export const V = {
   limb: { eye: { spd: 0.9, gun: 0.7 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2 },
   risk: { illnessP: 0.03, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.003, oldFrom: 60, oldK: 0.0015, treatCost: 30000 },
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },
+  birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
 } as const;
