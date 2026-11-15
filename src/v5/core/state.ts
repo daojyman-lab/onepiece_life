@@ -6,7 +6,7 @@ import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth, type BirthOpt } from './birth';
 import { LIMBS } from './body';
-import { logLine } from './log';
+import { logLine, yearDivider } from './log';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
 import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
@@ -79,6 +79,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   const gifts = h.talents.map((id) => TALENT_BY_ID[id]).map((t) => `${t.name}${t.good ? '' : '(-)'}`).join(', ');
   for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
+  yearDivider(s);                              // 시작하는 해에도 구분선이 있다
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
   if (first) openTurning(s, first);

@@ -4,6 +4,7 @@ import { newLife5 } from '../../src/v5/core/state';
 import { reduce5, invariants5 } from '../../src/v5/core/reduce';
 import { checkAll, whyNot } from '../../src/v5/core/cond';
 import { applyFx } from '../../src/v5/core/fx';
+import { V } from '../../src/v5/data/balance';
 import type { Life5 } from '../../src/v5/core/types';
 
 const step = (s: Life5) => reduce5(s, { type: 'step' });
@@ -17,6 +18,14 @@ describe('한 해의 진행', () => {
     expect(s1.age).toBe(s0.age + 1);
     expect(s1.part).toBe(0);
     expect(s1.log.some((l) => l.weight === 'year' && l.age === s1.age)).toBe(true);
+  });
+  it('해 구분선에는 나이와 섬이 자료로 실린다', () => {
+    let s = newLife5(3); s.pending = null;
+    const first = s.log.find((l) => l.weight === 'year');
+    expect(first).toMatchObject({ age: V.birth.startAge, island: s.hero.island });   // 시작하는 해에도 구분선이 있다
+    for (let i = 0; i < 4; i++) s = reduce5({ ...s, pending: null }, { type: 'step' });
+    const years = s.log.filter((l) => l.weight === 'year');
+    expect(years[years.length - 1]).toMatchObject({ age: V.birth.startAge + 1, island: s.hero.island });
   });
   it('기록에 달 표시가 없다', () => {
     const s = flow({ ...newLife5(3), pending: null }, 40);

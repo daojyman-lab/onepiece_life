@@ -14,6 +14,7 @@ import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
+import { yearDivider } from './log';
 import { logLine } from './state';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
@@ -178,7 +179,7 @@ function nextPart(s: Life5): void {
   s.age += 1;
   s.stopsThisYear = 0;
   s.stats.years += 1;
-  logLine(s, `── ${s.age}살 ──`, 'year', 'info');
+  yearDivider(s);
   comeOfAge(s);
   masterYear(s);
 }

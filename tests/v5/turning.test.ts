@@ -246,4 +246,14 @@ describe('줄 선 일은 그 일 바로 다음에 열린다 (설계 5.7, 5.2a)',
     expect(s.queue).toEqual([]);
     expect(s.queueTries).toEqual({});
   });
+  it('열 수 없는 줄 선 전환점은 토막마다 한 번만 세어, maxTries 토막을 채워야 버려진다', () => {
+    for (let seed = 1; seed <= 10; seed++) {                  // 멈춤 주사위가 나와 pickTurning까지 가는 토막이 섞이도록 여러 씨앗
+      let s = adult(seed); s.stopsThisYear = 0;
+      s.queue = ['prison_escape'];                            // 죄수만 연다
+      for (let i = 1; i < V.queue.maxTries; i++) s = reduce5({ ...s, pending: null }, { type: 'step' });
+      expect(s.queue).toEqual(['prison_escape']);
+      s = reduce5({ ...s, pending: null }, { type: 'step' });
+      expect(s.queue).toEqual([]);
+    }
+  });
 });

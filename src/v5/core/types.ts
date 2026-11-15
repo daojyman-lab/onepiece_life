@@ -33,7 +33,8 @@ export interface Growth5 {
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
-export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType }
+/** 기록 한 줄. island: 해 구분선(weight 'year')에만 있다. 그 해를 시작한 섬 이름 */
+export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
 export interface TimelineEntry { age: number; text: string; standing?: Standing; canon?: string; limb?: Limb }
