@@ -20,7 +20,7 @@ const BORN: Turning[] = [
         fx: [dream('pirateKing')] },
       { label: '세상의 끝을 이 눈으로 보겠다고 다짐한다', hint: '아무도 본 적 없는 곳까지 가고 싶다', values: { romance: D },
         fx: [dream('worldEnd')] },
-      { label: '평생 쓰고도 남을 보물을 찾겠다고 다짐한다', hint: '반짝이는 것을 손에 쥐는 상상만으로 가슴이 뛴다', values: { greed: D },
+      { label: '평생 쓰고도 남을 보물을 찾겠다고 다짐한다', hint: '반짝이는 것을 손에 쥐는 상상만으로 가슴이 뛴다', values: { greed: D, dominion: D },
         fx: [dream('treasure')] },
     ],
   },

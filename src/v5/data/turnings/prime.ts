@@ -32,7 +32,7 @@ export const PRIME: Turning[] = [
     id: 'prime_trial', kind: 'door', when: [...ready, { c: 'hardship', min: PRIME_HARDSHIP }], weight: 30, repeat: 'once', speaker: 'hero',
     title: '견뎌 낸 끝에서', body: '굶주림도, 패배도, 잃은 것도 많았다. 그런데 오늘, 쓰러질 것 같던 자리에서 {name}은(는) 처음으로 흔들리지 않았다. 지난 시간이 모두 이 순간을 위해 쌓였던 것처럼 몸과 마음이 맞물린다. 이 힘을 무엇에 쓸까.',
     doors: [
-      { label: '나를 꺾었던 것들에게 차례로 되갚는다', hint: '다시는 지지 않는다는 것을 보여 준다', values: { ambition: D },
+      { label: '나를 꺾었던 것들에게 차례로 되갚는다', hint: '다시는 지지 않는다는 것을 보여 준다', values: { dominion: D },
         fx: [prime, { op: 'base', key: 'wil', add: 1 }, heavy('{name}은(는) 한때 자신을 쓰러뜨린 이름들을 하나씩 떠올렸다.')] },
       { label: '나 같은 처지의 사람들을 끌어올린다', hint: '견뎌 본 사람만 아는 것이 있다', values: { justice: D },
         fx: [prime, heavy('{name}은(는) 지난날의 자신과 꼭 닮은 얼굴들에게 손을 내밀었다.')] },

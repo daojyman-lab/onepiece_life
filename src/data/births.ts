@@ -239,8 +239,8 @@ export const SURNAME_WEIGHT: Record<SurnameDef['kind'], number> = { common: 3, l
 
 export const COMMON_SURNAMES = SURNAMES.filter((x) => x.kind === 'common' && !x.home).map((x) => x.name);
 export const FIRST_NAMES = {
-  m: ['루카', '에단', '카이', '리온', '테오', '하루', '진', '로이', '세온', '도윤', '마테오', '빌리', '쇼', '라스', '토마', '닐', '오웬', '유리'],
-  f: ['미라', '엘리', '나루', '세라', '유나', '리사', '카야', '루나', '노아', '히나', '소피', '아린', '레아', '모아', '이브', '시아'],
+  m: ['루카', '에단', '카이', '리온', '테오', '하루', '진', '로이', '마테오', '빌리', '쇼', '라스', '토마', '닐', '오웬', '유리'],
+  f: ['미라', '엘리', '나루', '세라', '리사', '카야', '루나', '노아', '히나', '소피', '레아', '이브'],
 };
 /** 고향마다 다른 이름 (없으면 FIRST_NAMES) */
 export const HOME_FIRST_NAMES: Partial<Record<HomeKey, { m: string[]; f: string[] }>> = {

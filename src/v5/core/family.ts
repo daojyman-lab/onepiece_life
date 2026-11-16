@@ -1,5 +1,5 @@
 // 출생 때의 가족: 부모 둘과 형제 몇. 가족은 싸우지 않는다 (crew가 없다). 고아는 가족이 없다.
-import { FIRST_NAMES } from '../../data/births';
+import { homeFirstNames } from './names';
 import { chance, int, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { RELATION_KIND } from '../data/words';
@@ -23,8 +23,9 @@ export function rollFamily(s: Life5, r: Rng): void {
   const F = V.family;
   const used = new Set([h.name]);
   const add = (relation: string, gender: 'm' | 'f', age: number) => {
-    const pool = FIRST_NAMES[gender].filter((x) => !used.has(x));
-    const first = pick(r, pool.length ? pool : FIRST_NAMES[gender]);
+    const all = homeFirstNames(h.home, gender);
+    const pool = all.filter((x) => !used.has(x));
+    const first = pick(r, pool.length ? pool : all);
     used.add(first);
     const p: Person = {
       id: `p${s.seq++}`, name: h.surname ? `${h.surname} ${first}` : first, gender, age,

@@ -1,6 +1,7 @@
 // 출생 주사위 (설계 5.1): 고향, 집안 형편, 핏줄, 타고난 몸.
 import { potentialOf } from './stages';
-import { HOME_FIRST_NAMES, HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT, FIRST_NAMES } from '../../data/births';
+import { homeFirstNames } from './names';
+import { HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT } from '../../data/births';
 import { TALENTS, type Talent } from '../../data/talents';
 import { chance, int, pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
@@ -71,7 +72,7 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
     base[k] = Math.max(V.birth.statFloor, V.birth.stat + add);
   }
 
-  h.name = opt.name ?? pick(r, (HOME_FIRST_NAMES[homeId] ?? FIRST_NAMES)[gender]);
+  h.name = opt.name ?? pick(r, homeFirstNames(homeId, gender));
   h.gender = gender;
   h.surname = orphan ? null : sur.name;
   h.secretSurname = orphan && sur.kind === 'rare' ? sur.name : null;

@@ -1,7 +1,7 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { setDream } from './dreams';
+import { npcName } from './names';
 import { enterPrime } from './stages';
-import { FIRST_NAMES } from '../../data/births';
 import { FRUIT_BY_ID, FRUITS } from '../../data/fruits';
 import { SEA_BY_ID } from '../../data/seas';
 import { BRANCH_NAMES } from '../../data/skills';
@@ -98,7 +98,7 @@ function applyOne(s: Life5, e: Fx): void {
       const c = e.canon ? CANON[e.canon] : undefined;
       const gender = c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
       const p: Person = {
-        id: `p${s.seq++}`, name: c?.name ?? e.name ?? pick(r, FIRST_NAMES[gender]), gender, age: personAge(s, e),
+        id: `p${s.seq++}`, name: c?.name ?? e.name ?? npcName(s, r, gender), gender, age: personAge(s, e),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
         bond: V.person.bond, faction: c?.faction ?? 'civil', species: c?.species ?? 'human', alive: true,
       };
