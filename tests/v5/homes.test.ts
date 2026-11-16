@@ -5,7 +5,9 @@ import { check } from '../../src/v5/core/cond';
 import { HOMES } from '../../src/v5/data/homes';
 import { HOMETOWNS, SURNAMES } from '../../src/data/births';
 import { TURNINGS, COASTAL_WORDS, WORLD_GOV_WORDS } from '../../src/v5/data/turnings';
-import type { HomeId, Turning } from '../../src/v5/core/types';
+import { HOMES_LEAVE, HOMES_RETURN } from '../../src/v5/data/turnings/homes-sea';
+import { autoplay5 } from '../../src/v5/core/autoplay';
+import type { Cond, Fx, HomeId, Turning } from '../../src/v5/core/types';
 
 const IDS = Object.keys(HOMES) as HomeId[];
 const born = (home: HomeId, n = 200) => Array.from({ length: n }, (_, i) => newLife5(300 + i, { home }));
@@ -75,5 +77,37 @@ describe('로그타운에 묶인 사건을 푼다 (과제 2)', () => {
     const s = newLife5(7, { home: 'wano' });
     for (const t of TURNINGS.filter((t) => !t.when.some((c) => c.c === 'home' || c.c === 'town' || (c.c === 'island' && !c.not))))
       if (WORLD_GOV_WORDS.test(textOf(t)) || t.when.some((c) => c.c === 'sea')) expect(t.when.some((c) => !check(s, c)), t.id).toBe(true);
+  });
+});
+
+describe('고향마다 바다로 나가는 길 (과제 3)', () => {
+  const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));
+  const homeOf = (t: Turning) => t.when.find((c): c is Extract<Cond, { c: 'home' }> => c.c === 'home')?.is ?? [];
+  const leaves = (t: Turning) => t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'move'));
+  const returns = (t: Turning) => t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'moveHome'));
+  it('다섯 고향마다 떠나는 길이 셋 이상, 돌아오는 길이 하나 이상이다', () => {
+    for (const id of IDS.filter((x) => x !== 'loguetown')) {
+      expect(HOMES_LEAVE.filter((t) => homeOf(t).includes(id) && leaves(t)).length, id).toBeGreaterThanOrEqual(3);
+      expect(HOMES_RETURN.filter((t) => homeOf(t).includes(id) && returns(t)).length, id).toBeGreaterThanOrEqual(1);
+    }
+    for (const t of [...HOMES_LEAVE, ...HOMES_RETURN]) expect(TURNINGS, t.id).toContain(t);
+  });
+  it('와노쿠니를 떠나는 길은 열여덟 살이 넘어야 열린다', () => {
+    for (const t of HOMES_LEAVE.filter((t) => homeOf(t).includes('wano')))
+      expect((t.when.find((c) => c.c === 'age') as { min?: number }).min, t.id).toBeGreaterThanOrEqual(18);
+  });
+  it('이스트 블루가 고향이 아닌 사람은 이스트 블루로 「돌아가는」 문을 받지 않는다', () => {
+    for (const t of TURNINGS) {
+      const toEast = t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'move' && f.sea === 'east'));
+      const fromAway = !t.when.some((c) => (c.c === 'sea' && c.is.every((x) => x === 'east')) || c.c === 'town' || (c.c === 'island' && !c.not));
+      if (toEast && fromAway && /돌아/.test([t.title, t.body, ...t.doors.flatMap((d) => [d.label, d.hint])].join(' ')))
+        expect(t.when, t.id).toContainEqual({ c: 'home', is: ['loguetown'] });
+    }
+  });
+  it('외딴 고향에서 태어난 사람도 떠나는 길로 섬을 떠나 바다의 사건을 만난다 (자동 플레이 60명)', () => {
+    for (const home of ['wano', 'fishman', 'sky', 'zou'] as HomeId[]) {
+      const left = Array.from({ length: 60 }, (_, i) => autoplay5(700 + i, 'random', { home }).s).filter((s) => s.hero.island !== s.hero.town || s.timeline.some((x) => /떠났|내려갔|나갔|끌려갔|뛰어내렸|올랐/.test(x.text)));
+      expect(left.length, home).toBeGreaterThan(5);
+    }
   });
 });
