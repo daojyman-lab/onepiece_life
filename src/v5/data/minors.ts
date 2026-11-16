@@ -93,7 +93,7 @@ function canonPassing(): Minor[] {
     { id: 'm_cn_mihawk', when: [...atSeaAge(['east', 'gl_entry', 'gl_first'], 16)], weight: 3, cooldownYears: ONCE,
       outcomes: [
         met('mihawk', '관 모양의 작은 배를 탄 검사를 보았다', { ambition: 1 }, ['관 모양의 작은 배가 지나갔다. 등에 커다란 칼을 멘 사내가 매의 눈으로 이쪽을 보았다.', '세계 최강의 검사라는 사내의 배가 지나가자 뱃사람들이 숨을 죽였다.']),
-        met('mihawk', '관 모양의 배를 피해 뱃머리를 돌렸다', { peace: 1 }, ['관 모양의 작은 배가 보이자 선장이 말없이 뱃머리를 돌렸다.', '매의 눈을 한 검사의 배를 피해 섬 그늘에 숨었다.']),
+        met('mihawk', '관 모양의 배를 피해 뱃머리를 돌렸다', { peace: 1 }, ['관 모양의 작은 배가 보이자 배 위의 모두가 말없이 뱃머리를 돌렸다.', '매의 눈을 한 검사의 배를 피해 섬 그늘에 숨었다.']),
         met('mihawk', '세계 최강의 검사가 지나갔다는 소문을 들었다', {}, ['관 모양의 배를 탄 검사가 근처 바다를 지났다는 소문이 돌았다.', '해적선 하나가 반으로 갈라져 떠내려왔다. 누구의 짓인지는 다들 알았다.']),
       ] },
     { id: 'm_cn_bonney', when: [...atSeaAge(['sabaody'], 17)], weight: 4, cooldownYears: ONCE,
@@ -596,7 +596,7 @@ export const MINORS: Minor[] = ([
   },
   // ---------------- 해적 · 혁명군
   {
-    id: 'm_sea_feast', when: [adult, st('pirate', 'revolution'), money(20000)], weight: 4, cooldownYears: 2,
+    id: 'm_sea_feast', when: [adult, st('pirate'), { c: 'flag', id: 'captain', has: true }, money(20000)], weight: 4, cooldownYears: 2,
     outcomes: [
       { lean: { romance: 1 }, text: ['금고가 넘치자 배에서 밤새 연회를 열었다.', '모두에게 술과 고기를 돌리고 노래판을 벌였다.'], fx: [{ op: 'money', add: -5000 }] },
       { lean: { loyalty: 1 }, text: ['이번 항해에서 고생한 선원들에게 몫을 더 얹어 주었다.', '다친 선원의 몫은 따로 떼어 두었다.'], fx: [{ op: 'money', add: -3000 }] },

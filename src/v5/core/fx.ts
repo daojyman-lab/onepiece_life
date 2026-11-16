@@ -51,6 +51,12 @@ export function applyFx(s: Life5, fx: Fx[]): void {
   for (const e of fx) applyOne(s, e);
 }
 
+/** 제 배를 가진 해적과 칠무해는 선장이다 (선장 · 선원에 따라 다른 글이 온다: 표시 'captain') */
+function captainByShip(s: Life5): void {
+  const st = s.hero.standing;
+  if ((st === 'warlord' || (st === 'pirate' && s.flags.includes('ship'))) && !s.flags.includes('captain')) s.flags.push('captain');
+}
+
 function applyOne(s: Life5, e: Fx): void {
   const h = s.hero;
   switch (e.op) {
@@ -70,11 +76,12 @@ function applyOne(s: Life5, e: Fx): void {
       const text = (h.standing === 'child' && STANDING_FROM_CHILD[e.to]) || STANDING_PHRASE[e.to];
       h.standing = e.to;
       s.standingSince = s.age;
+      captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
     case 'move': h.island = e.island; h.sea = e.sea; return;
     case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
-    case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); return;
+    case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); return;
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
     case 'mark': {
       const got = addMark(s, e.id);

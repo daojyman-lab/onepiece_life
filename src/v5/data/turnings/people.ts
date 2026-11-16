@@ -245,7 +245,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east')),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'morgan' },
-    title: '도끼손 대령', body: '셸스 타운의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}의 배를 노려본다.',
+    title: '도끼손 대령', body: '셸스 타운의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}이(가) 탄 배를 노려본다.',
     doors: [
       fightDoor('대령에게 맞선다', '목숨을 건 싸움이 된다', { freedom: D }, 'b_morgan', READY(1)),
       { label: '마을 사람들을 먼저 빼돌린다', hint: '싸움은 피하지만 쫓긴다', values: { freedom: D },
@@ -397,7 +397,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'meet_akainu', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_late')),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'akainu' },
-    title: '마그마의 원수', body: '바다가 끓어오른다. 철저한 정의를 외치는 해군의 정점이 마그마의 주먹을 들고 {name}의 배를 막아선다.',
+    title: '마그마의 원수', body: '바다가 끓어오른다. 철저한 정의를 외치는 해군의 정점이 마그마의 주먹을 들고 {name}이(가) 탄 배를 막아선다.',
     doors: [
       fightDoor('마그마에 맞선다', '이 산을 넘으면 바다의 정점이 보인다', { ambition: D }, 'b_akainu', READY(6)),
       { label: '배를 버리고 바다 밑으로 피한다', hint: '배는 잃어도 목숨은 남는다', needs: ['swim'], values: { peace: D },

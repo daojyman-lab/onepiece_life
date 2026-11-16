@@ -187,7 +187,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     ],
   },
   {
-    id: 'nw_yonko_offer', kind: 'door', when: at(age(19), st('pirate', 'warlord'), sea('nw_first', 'nw_late'), { c: 'fame', min: 30 }),
+    id: 'nw_yonko_offer', kind: 'door', when: at(age(19), st('pirate', 'warlord'), sea('nw_first', 'nw_late'), { c: 'fame', min: 30 }, { c: 'flag', id: 'captain', has: true }),
     weight: 4, repeat: 'once', speaker: { relation: '사황 해적단의 간부' },
     title: '깃발을 내리라는 말', body: '사황 해적단의 간부가 {name}의 배에 올랐다. 이 바다에서 깃발을 지키는 해적은 오래 못 간다고, 사황의 산하에 들어오면 이름도 배도 지켜 주겠다고 한다.',
     doors: [

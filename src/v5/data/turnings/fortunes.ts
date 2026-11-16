@@ -157,7 +157,7 @@ export const FORTUNES: Turning[] = [
   }),
   fortune('fortune_unnamed_route', 'freedom', {
     speaker: { relation: '정체 모를 항해사' },
-    title: '기록되지 않은 항로', body: '어느 깃발 아래에도 없는 항해사가 {name}의 배에 올라 해도 한 장을 펼친다. 해군의 눈도 사황의 손도 닿지 않는 항로라고, 누구에게도 매이지 않는 사람에게만 준다고 한다.',
+    title: '기록되지 않은 항로', body: '어느 깃발 아래에도 없는 항해사가 {name}이(가) 탄 배에 올라 해도 한 장을 펼친다. 해군의 눈도 사황의 손도 닿지 않는 항로라고, 누구에게도 매이지 않는 사람에게만 준다고 한다.',
     doors: [
       { label: '해도를 받는다', hint: '바다를 읽는 눈이 단번에 트인다. 쫓는 자들을 따돌릴 수 있다', values: { freedom: D },
         fx: [{ op: 'tier', branch: 'observation', to: LEAP }, { op: 'flag', id: 'secretRoute' }, { op: 'base', key: 'spd', add: 2 }] },

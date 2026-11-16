@@ -137,7 +137,7 @@ function Profile({ s }: { s: Life5 }) {
         <Face who={{ ...heroWho5(s), age }} size="big" />
         <div class="t14"><b>{p.name}</b></div>
         <div class="t9 soft">{yearLabel(at)}</div>
-        <div class="row" style={{ justifyContent: 'center', marginTop: 4 }}><span class="tag">{p.who}</span><span class="tag">{p.standing}</span></div>
+        <div class="row" style={{ justifyContent: 'center', marginTop: 4 }}><span class="tag">{p.who}</span><span class="tag">{p.standing}</span>{p.role && <span class="tag">{p.role}</span>}</div>
         {p.fame && <div style={{ marginTop: 4 }}><b>{p.fame}</b></div>}
       </div>
       <div class="stack" style={{ marginTop: 8 }}>

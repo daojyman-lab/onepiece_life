@@ -237,7 +237,7 @@ const FAMILY: Turning[] = [
   {
     id: 'life_sibling_other_side', kind: 'door', when: at(age(18, 55), st(...HUNTED)),
     weight: 4, repeat: 'once', needs: ['sibling'], speaker: { relation: '해군이 된 형제' },
-    title: '군함 위의 얼굴', body: '{name}의 배를 쫓아오는 군함의 뱃머리에 낯익은 얼굴이 서 있다. 해군 장교가 된 형제다. 형제가 확성기를 들고 배를 세우라고 외친다.',
+    title: '군함 위의 얼굴', body: '{name}이(가) 탄 배를 쫓아오는 군함의 뱃머리에 낯익은 얼굴이 서 있다. 해군 장교가 된 형제다. 형제가 확성기를 들고 배를 세우라고 외친다.',
     doors: [
       { label: '형제와 칼을 맞대지 않으려 다른 바다로 달아난다', hint: '이 바다의 일을 버린다', values: { loyalty: D },
         fx: [{ op: 'fame', add: -3 }, { op: 'flag', id: 'fledSibling' }, { op: 'hardship', add: 1 }] },
@@ -249,7 +249,7 @@ const FAMILY: Turning[] = [
     ],
   },
   {
-    id: 'life_inheritance', kind: 'door', when: at(age(30, 70), grown),
+    id: 'life_inheritance', kind: 'door', when: at(age(30, 70), grown, { c: 'kin', who: 'parent', has: false }),   // 부모가 남긴 것: 부모가 세상을 떠난 뒤에만
     weight: 4, repeat: 'once', needs: ['sibling'], speaker: { relation: '형제' },
     title: '하나뿐인 집', body: '부모가 남긴 {town}의 집과 밭은 하나뿐이다. 형제는 거기서 식구들과 살아야 한다며 통째로 달라고 하고, 동네 어른들은 반씩 나누는 게 법도라고 한다.',
     doors: [

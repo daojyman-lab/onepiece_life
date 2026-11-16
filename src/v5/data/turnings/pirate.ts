@@ -18,6 +18,50 @@ const DOCTOR_FEE = 15000;
 const RANSOM = 80000;
 
 export const PIRATE: Turning[] = [
+  // ---------------------------------------------------------------- 남의 배를 타는 선원 (표시 'captain'이 없다)
+  {
+    id: 'crew_raid', kind: 'door', when: at(age(16), PIR, noFlag('captain')),
+    weight: 8, repeat: { years: 3 }, speaker: { relation: '선장' },
+    title: '선장의 명령', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이다. 선장이 칼을 뽑아 들고 외친다. 건너가라. {name}은(는) 밧줄을 쥔 선원들 틈에 서 있다.',
+    doors: [
+      { label: '맨 먼저 밧줄을 타고 건너간다', hint: '선장의 눈에 든다. 맨 앞은 칼도 먼저 맞는다', values: { ambition: D }, danger: true,
+        fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 12 }, { op: 'money', add: 15000 }, { op: 'flag', id: 'captainsEye' },
+             { op: 'log', text: '맨 먼저 상선의 갑판을 밟았다. 그날 저녁, 선장이 제 술잔을 {name}에게 밀어 주었다.', weight: 'heavy' }] },
+      { label: '남들이 싸우는 사이 짐칸으로 내려가 제 주머니부터 채운다', hint: '몫보다 훨씬 많이 챙긴다. 들키면 배의 규칙대로 벌을 받는다', values: { greed: D }, danger: true,
+        fx: [{ op: 'chance', p: 0.7, then: [{ op: 'money', add: 45000 }],
+               else: [{ op: 'hp', add: -15 }, { op: 'money', add: -5000 }, { op: 'log', text: '주머니에서 금화가 쏟아졌다. 돛대에 묶여 하루를 보냈다.', weight: 'heavy' }] }] },
+      { label: '겁에 질린 상인의 식구들을 선장 몰래 보트에 태워 보낸다', hint: '몫은 줄고, 그 식구들은 뭍에 닿는다', values: { justice: D },
+        fx: [{ op: 'money', add: 5000 }, { op: 'flag', id: 'sparedMerchants' }] },
+    ],
+  },
+  {
+    id: 'crew_share', kind: 'door', when: at(age(16), PIR, noFlag('captain'), settledIn(1)),
+    weight: 6, repeat: 'once', speaker: 'hero',
+    title: '몫을 나누는 밤', body: '전리품을 나누는 밤이다. 선장의 몫이 약속보다 눈에 띄게 크다. 갑판의 선원들이 서로 눈치만 본다. {name}의 손에 놓인 주머니는 가볍다.',
+    doors: [
+      { label: '일어나서 약속한 몫을 내놓으라고 따진다', hint: '선장의 눈 밖에 난다. 선원들은 그 말을 기억한다', values: { justice: D }, mark: 'rebel',
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 20000 }, { op: 'fame', add: 5 }, { op: 'log', text: '선장이 한참 노려보다 금화 자루 하나를 갑판에 던졌다. 선원들이 환호했다.', weight: 'heavy' }],
+               else: [{ op: 'hp', add: -12 }, { op: 'log', text: '선장의 주먹이 먼저 날아왔다. 아무도 편들지 않았다.', weight: 'heavy' }] }] },
+      { label: '배를 얻어 탄 값이라 여기고 입을 다문다', hint: '아무 일도 일어나지 않는다. 선장은 말 잘 듣는 선원을 오래 태운다', values: { loyalty: D },
+        fx: [{ op: 'money', add: 6000 }, { op: 'flag', id: 'captainsEye' }] },
+      { label: '불만 있는 선원들을 밤마다 하나씩 제 편으로 만든다', hint: '언젠가 이 배의 주인이 바뀔지도 모른다', values: { dominion: D },
+        fx: [{ op: 'flag', id: 'crewFaction' }, { op: 'fame', add: 3 }] },
+    ],
+  },
+  {
+    id: 'crew_first_mate', kind: 'door', when: at(age(18), PIR, noFlag('captain'), settledIn(3)),
+    weight: 6, repeat: 'once', speaker: { relation: '선장' },
+    title: '키를 맡기는 손', body: '폭풍이 지나간 새벽, 선장이 {name}을(를) 키 앞으로 부른다. 이 배에서 제 다음은 너라고, 부선장 자리를 맡으라고 한다. 선원들이 일손을 멈추고 이쪽을 본다.',
+    doors: [
+      { label: '키를 잡는다', hint: '선장의 오른팔이 된다. 선장이 쓰러지는 날 이 배를 떠맡을 사람이 된다', values: { loyalty: D },
+        fx: [{ op: 'flag', id: 'firstMate' }, { op: 'fame', add: 10 }, { op: 'money', add: 10000 }, { op: 'timeline', text: '해적선의 부선장이 되었다' }] },
+      { label: '언젠가 제 깃발을 올릴 거라고 털어놓는다', hint: '선장은 크게 웃고, 떠나는 날 밑천을 쥐여 주겠다고 한다', values: { ambition: D },
+        fx: [{ op: 'money', add: 30000 }, { op: 'flag', id: 'ownFlagDream' },
+             { op: 'log', text: '선장이 말했다. 나도 네 나이 때 남의 배에서 똑같은 소리를 했지.', weight: 'heavy' }] },
+      { label: '자리는 사양하고 지금처럼 밧줄이나 잡겠다고 한다', hint: '매이는 것이 없다. 언제든 내릴 수 있다', values: { freedom: D },
+        fx: [{ op: 'base', key: 'wil', add: 1 }] },
+    ],
+  },
   // ---------------------------------------------------------------- 들어서는 길: 남의 배에 타서
   {
     id: 'pirate_stowaway', kind: 'door', when: at(age(16, 30), st('civil', 'shipwright', 'settled'), settledIn(2)),
@@ -167,7 +211,7 @@ export const PIRATE: Turning[] = [
 
   // ---------------------------------------------------------------- 약탈과 선
   {
-    id: 'pirate_winter_ship', kind: 'door', when: at(age(16), PIR),
+    id: 'pirate_winter_ship', kind: 'door', when: at(age(16), PIR, hasFlag('captain')),
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '겨울 식량을 실은 배', body: '붙잡은 상선의 짐칸에는 금화 상자와 함께, 북쪽 섬 마을로 가는 겨울 식량과 약초가 가득하다. 저 마을에는 이번 겨울 이 배 말고 들어갈 배가 없다고 한다.',
     doors: [
@@ -181,7 +225,7 @@ export const PIRATE: Turning[] = [
     ],
   },
   {
-    id: 'pirate_village_pirates', kind: 'door', when: at(age(16), PIR),
+    id: 'pirate_village_pirates', kind: 'door', when: at(age(16), PIR, hasFlag('captain')),
     weight: 5, repeat: 'once', speaker: { relation: '늙은 촌장' },
     title: '눌러앉은 해적단', body: '{island}의 촌장이 무릎을 꿇었다. 다른 해적단이 마을에 눌러앉아 해마다 곡식을 빼앗아 간다고, 같은 해적이라도 좋으니 그들을 몰아내 달라고.',
     doors: [
@@ -333,7 +377,7 @@ export const PIRATE: Turning[] = [
 
   // ---------------------------------------------------------------- 동료가 있는 해적의 일
   {
-    id: 'pirate_davy_back', kind: 'door', when: at(age(17), PIR), needs: ['crew'],
+    id: 'pirate_davy_back', kind: 'door', when: at(age(17), PIR, hasFlag('captain')), needs: ['crew'],
     weight: 4, repeat: 'once', speaker: { relation: '상대 해적단의 선장' },
     title: '데비 백 파이트', body: '{island} 앞바다에서 마주친 해적단의 선장이 옛 해적의 놀이를 청한다. 세 판을 겨뤄 더 많이 이긴 쪽이 진 쪽의 선원 하나를 데려간다. 진 쪽은 아무 말도 할 수 없다.',
     doors: [
@@ -401,7 +445,7 @@ export const PIRATE: Turning[] = [
     ],
   },
   {
-    id: 'pirate_reunion', kind: 'door', when: at(age(17), PIR, hasFlag('crewScattered'), settledIn(2)),
+    id: 'pirate_reunion', kind: 'door', when: at(age(17), PIR, hasFlag('captain'), hasFlag('crewScattered'), settledIn(2)),
     weight: 8, repeat: 'once', speaker: 'hero',
     title: '흩어진 깃발', body: '그날 흩어진 사람들이 어디서 무엇을 하는지 소문만 들려온다. 남은 것은 해진 깃발 한 장과 {name}의 이름뿐이다.',
     doors: [

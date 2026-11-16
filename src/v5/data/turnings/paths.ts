@@ -76,7 +76,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_raid', kind: 'door', when: at(st('pirate', 'warlord'), age(16)),
+    id: 'path_raid', kind: 'door', when: at(st('pirate', 'warlord'), age(16), { c: 'flag', id: 'captain', has: true }),   // 선장의 결정. 선원은 crew_raid (pirate.ts)
     weight: 8, repeat: { years: 3 }, speaker: 'hero',
     title: '수평선의 상선', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이 호위도 없이 {island} 쪽으로 느릿느릿 움직이고 있다.',
     doors: [

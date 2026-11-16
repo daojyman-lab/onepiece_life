@@ -27,6 +27,7 @@ const HEAVY: ReadonlySet<LogLine['weight']> = new Set(['heavy', 'year']);
 
 export interface ProfileView {
   name: string; age: string; standing: string; born: string;
+  role: string | null;                                 // 해적 · 칠무해의 자리: 제 깃발을 올린 '선장'인가, 남의 배를 타는 '선원'인가
   who: string;                                         // 성별 · 종족 (예: '남자 · 인간')
   values: string[]; strengths: { name: string; text: string }[];
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
@@ -77,6 +78,7 @@ export function profileView(s: Life5): ProfileView {
     name: fullName(h).trim(),
     age: ageWord(s.age),
     standing: standingTitle(s),
+    role: h.standing === 'pirate' || h.standing === 'warlord' ? (s.flags.includes('captain') ? '선장' : '선원') : null,
     who: `${h.gender === 'f' ? '여자' : '남자'} · ${SPECIES_NAMES[h.species]}`,
     born: `${townLabel(h.home, h.town)}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
     values: valueWords(s),
