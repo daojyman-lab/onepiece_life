@@ -22,6 +22,7 @@ import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
+import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
 const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
@@ -29,9 +30,14 @@ const LEAN: Record<ValueId, Partial<Record<Activity, number>>> = V.activity.lean
 
 export { power5 } from './power';
 
-/** 정점에 올랐거나 은퇴해 조용히 사는 때 */
+/** 은퇴해 조용히 살거나, 정점에 오른 뒤 전성기가 아닌 때. 전성기는 오히려 느리게 흐른다 (통합 기획 5.3) */
 export function isQuiet(s: Life5): boolean {
-  return s.hero.standing === 'retired' || s.flags.includes('apex');
+  return s.hero.standing === 'retired' || (s.flags.includes('apex') && !inPrime(s));
+}
+
+/** 전성기의 첫 바퀴인가: 이 바퀴가 끝나도 나이를 먹지 않는다 */
+function firstLap(s: Life5): boolean {
+  return inPrime(s) && !s.prime!.lap;
 }
 
 /** 한 토막을 진행한다. 대기 중인 일이 있으면 아무것도 하지 않는다. */
@@ -49,10 +55,10 @@ export function stepPart(s: Life5): void {
   healInjuries(s);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
   if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
-  if (s.part === V.partsPerYear - 1) yearTurn(s, r);
+  if (s.part === V.partsPerYear - 1 && !firstLap(s)) yearTurn(s, r);   // 병 · 기연은 실제 한 해에 한 번
   turningPoint(s, r);
   notePath(s);
-  if (s.hero.alive) nextPart(s);
+  if (s.hero.alive) nextPart(s, r);
   endIfDead(s);
 }
 
@@ -142,9 +148,9 @@ function healInjuries(s: Life5): void {
 export function growPart(s: Life5, act: Activity, r: Rng): void {
   const h = s.hero;
   const G = V.growth;
-  const age = ageMult(s.age);
+  const age = ageMult(s.age) * potentialMult(s, null);
   switch (act) {
-    case 'train': train(s, r, age); return;
+    case 'train': train(s, r, ageMult(s.age)); return;
     case 'study':
       statUp(s, r, ['int'], G.statP.study * age);
       addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation'));
@@ -166,6 +172,7 @@ function train(s: Life5, r: Rng, age: number): void {
     logLine(s, b ? `${BRANCH_NAMES[BRANCH_ID[b]]} 수련이 제자리걸음이었다.` : '몸이 무거워 수련이 손에 잡히지 않았다.', 'light', 'growth');
     return;
   }
+  age *= potentialMult(s, b);
   if (!b) { statUp(s, r, G.bareStats, G.statP.train * age); return; }
   const m = s.growth.master;
   let add = G.perPart * age * talentMult(s, b) * (m && m.branch === b ? G.masterMult : 1);
@@ -217,11 +224,20 @@ export function lineFits(s: Life5, l: DailyLine5): boolean {
   return checkAll(s, l.when) && needsOk(s, l.needs) && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
-/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. */
-function nextPart(s: Life5): void {
+/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */
+function nextPart(s: Life5, r: Rng): void {
   const part = s.part + 1;
   if (part < V.partsPerYear) { s.part = part as Life5['part']; return; }
   s.part = 0;
+  if (firstLap(s)) {
+    s.prime!.lap = true;
+    s.stopsThisYear = 0;
+    logLine(s, `── ${s.age}살 · 전성기의 두 번째 항해 ──`, 'year', 'info', { island: s.hero.island });
+    partCompanions(s);
+    voyage(s);
+    return;
+  }
+  if (s.prime) s.prime.lap = false;
   s.age += 1;
   for (const p of s.people) if (p.alive) p.age += 1;   // 이름난 사람도, 곁의 사람도 주인공과 함께 나이를 먹는다
   s.stopsThisYear = 0;
@@ -233,6 +249,8 @@ function nextPart(s: Life5): void {
   livingIncome(s);
   partCompanions(s);
   voyage(s);
+  primeYear(s);
+  agingYear(s, r);
 }
 
 /** 임시 동행은 약속한 햇수가 차면 제 길로 떠난다: 동료에서 빠지고 아는 사람으로 남는다 */

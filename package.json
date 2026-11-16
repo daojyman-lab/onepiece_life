@@ -1,6 +1,6 @@
 {
   "name": "grand-treasure",
-  "version": "5.0.0-dev.1",
+  "version": "6.1.0",
   "private": true,
   "type": "module",
   "description": "그랜드 트레저 v5 — 비영리 팬게임",

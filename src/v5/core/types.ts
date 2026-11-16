@@ -29,7 +29,9 @@ export interface Hero5 {
   standing: Standing; island: string; sea: SeaId;
   alive: boolean;
   bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
+  potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
 }
+export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
@@ -179,5 +181,7 @@ export interface Life5 {
   stats: Stats5;
   seq: number;
   ended: { cause: string; age: number } | null;
+  /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
+  prime?: { from: number; until: number; lap: boolean } | null;
 }
 export type Command5 = { type: 'step' } | { type: 'answer'; index: number };

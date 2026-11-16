@@ -26,6 +26,7 @@ import { WANO } from './wano';
 import { BONDS } from './bonds';
 import { ISLANDS, ISLAND_OF } from './islands';
 import { RECRUIT_TURNINGS } from './recruits';
+import { PRIME } from './prime';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -55,6 +56,7 @@ const GROUPS: Turning[][] = [
   WANO,
   ISLANDS,
   RECRUIT_TURNINGS,
+  PRIME,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

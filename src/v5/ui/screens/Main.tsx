@@ -1,4 +1,5 @@
 // v5 본 화면: 데스크톱은 세 칸(인물 · 장면과 이야기 · 인연과 연표), 휴대폰(760px 이하)은 탭 넷. (v4 src/ui/screens/Main.tsx와 같은 마크업 · 클래스)
+import { stageName } from '../../core/stages';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { drawScene, type SceneInput } from '../../../ui/pixel/pixelArt';
 import { caughtUp, shouldRead } from '../../app/flow';
@@ -136,12 +137,13 @@ function Profile({ s }: { s: Life5 }) {
         <div class="wanted">{WANTED_LABEL[s.hero.standing] ?? 'PROFILE'}</div>
         <Face who={{ ...heroWho5(s), age }} size="big" />
         <div class="t14"><b>{p.name}</b></div>
-        <div class="t9 soft">{yearLabel(at)}</div>
+        <div class="t9 soft">{yearLabel(at)} · {stageName(s, age)}</div>
         <div class="row" style={{ justifyContent: 'center', marginTop: 4 }}><span class="tag">{p.who}</span><span class="tag">{p.standing}</span>{p.role && <span class="tag">{p.role}</span>}</div>
         {p.fame && <div style={{ marginTop: 4 }}><b>{p.fame}</b></div>}
       </div>
       <div class="stack" style={{ marginTop: 8 }}>
         <div class="t9">{p.born}</div>
+        <div class="t9"><b>재능</b> {p.potential}</div>
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}

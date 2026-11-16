@@ -9,6 +9,8 @@ import { LIMB_NAME, LIMBS } from '../../core/body';
 import { V } from '../../data/balance';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
+import { POTENTIALS } from '../../data/stages';
+import { stageName } from '../../core/stages';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
   POWER_TOP, POWER_WORDS, STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
@@ -28,6 +30,8 @@ const HEAVY: ReadonlySet<LogLine['weight']> = new Set(['heavy', 'year']);
 
 export interface ProfileView {
   name: string; age: string; standing: string; born: string;
+  stage: string;                                       // 생애 단계 (유년기 · 수련기 · 청년기 · 장년기 · 전성기 · 황혼기)
+  potential: string;                                   // 타고난 잠재력 (예: '대기만성형 · 오랜 실전 끝에 늦게 크게 자란다')
   role: string | null;                                 // 해적 · 칠무해의 자리: 제 깃발을 올린 '선장'인가, 남의 배를 타는 '선원'인가
   who: string;                                         // 성별 · 종족 (예: '남자 · 인간')
   values: string[]; strengths: { name: string; text: string }[];
@@ -78,6 +82,8 @@ export function profileView(s: Life5): ProfileView {
   return {
     name: fullName(h).trim(),
     age: ageWord(s.age),
+    stage: stageName(s),
+    potential: (() => { const p = POTENTIALS[s.hero.potential ?? 'balanced']; return `${p.name} · ${p.text}`; })(),
     standing: standingTitle(s),
     role: h.standing === 'pirate' || h.standing === 'warlord' ? (s.flags.includes('captain') ? '선장' : '선원') : null,
     who: `${h.gender === 'f' ? '여자' : '남자'} · ${SPECIES_NAMES[h.species]}`,

@@ -9,13 +9,17 @@ export const V = {
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 0.95 } ],
-  stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 0.8 } ],
+  stopsQuiet: 0.4,
+  // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
+  prime: { minAge: 22, maxAge: 40, years: 5, tier: 3 },
+  // 노화: from살부터 한 해에 rolls번, 확률 start + perYear×(나이−from) + wear×(잃은 부위 + 부상)로 근력 · 속도 · 체력 하나가 1 줄어든다 (cap까지)
+  aging: { from: 50, start: 0.25, perYear: 0.03, wear: 0.1, cap: 0.9, rolls: 2, lineP: 0.35 },                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3,
            noRepeat: 12 },                    // 일상 · 자잘한 일의 글은 최근 이만큼 낸 것을 다시 뽑지 않는다
-  growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 30, m: 1.0 }, { to: 45, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
+  growth: { perPart: 5, ageMult: [ { to: 15, m: 1.0 }, { to: 40, m: 1.0 }, { to: 50, m: 0.6 }, { to: 59, m: 0.25 }, { to: 200, m: 0 } ],
             masterMult: 10, paidCap: 4, stallP: 0.08, breakP: 0.03, breakAdd: 25,
             tierUp: 100, maxTier: 6, noMasterCap: 3,
             // 단계의 힘 배율 (0~6단계). 힘 = 능력치 합 × tierCurve[가장 높은 단계]. 전투에서도 주인공의 능력치에 곱한다

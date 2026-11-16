@@ -1,4 +1,5 @@
 // 출생 주사위 (설계 5.1): 고향, 집안 형편, 핏줄, 타고난 몸.
+import { potentialOf } from './stages';
 import { HOME_FIRST_NAMES, HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT, FIRST_NAMES } from '../../data/births';
 import { TALENTS, type Talent } from '../../data/talents';
 import { chance, int, pick, rngOf, weighted } from '../../core/rng';
@@ -84,6 +85,7 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   for (const t of talents) for (const [id, m] of Object.entries(t.mastery ?? {}))
     if ((m ?? 1) > 1 && id.startsWith('martial.')) { const b = BRANCH_OF[id]; if (b) s.growth.pref[b] += V.growth.pref.talent; }
   h.base = base;
+  h.potential = potentialOf(s.rng.seed);
   h.money = V.wealthMoney[wealth];
   h.island = town.name;                        // 태어난 마을이 처음 사는 섬이다
   h.sea = home.sea;
