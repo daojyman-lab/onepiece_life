@@ -20,6 +20,7 @@ export function EndingModal({ s, meta }: { s: Life5; meta: Meta5 }) {
           <div class="hr" />
           <div class="t9 soft">어떤 사람이었나</div>
           <div class="t14"><b>{v.persona}</b></div>
+          {v.dream && <div class="t9" style={{ marginTop: 4 }}>{v.dream}</div>}
         </div>
         <section>
           <b>한 줄 인생</b>

@@ -22,6 +22,7 @@ import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
+import { dreamYear } from './dreams';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -232,7 +233,7 @@ function nextPart(s: Life5, r: Rng): void {
   if (firstLap(s)) {
     s.prime!.lap = true;
     s.stopsThisYear = 0;
-    logLine(s, `── ${s.age}살 · 전성기의 두 번째 항해 ──`, 'year', 'info', { island: s.hero.island });
+    logLine(s, '같은 해, 전성기의 두 번째 항해가 시작되었다.', 'heavy', 'life');
     partCompanions(s);
     voyage(s);
     return;
@@ -250,6 +251,7 @@ function nextPart(s: Life5, r: Rng): void {
   partCompanions(s);
   voyage(s);
   primeYear(s);
+  dreamYear(s);
   agingYear(s, r);
 }
 

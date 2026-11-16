@@ -1,5 +1,6 @@
 // 엔딩 자료 (설계 5.8): 끝난 인생에서 화면에 띄울 문장과 기록을 모은다. 화면은 만들지 않는다.
 // 가치관 점수(숫자)는 어떤 문장에도 넣지 않는다. 말로만 드러낸다.
+import { dreamLine } from './dreams';
 import { FRUIT_BY_ID } from '../../data/fruits';
 import { josa } from '../../core/josa';
 import { fill, fmtMoney } from '../../core/util';
@@ -19,6 +20,7 @@ import type { Fx, Life5, Turning } from './types';
 
 export interface Ending5 {
   persona: string;
+  dream: string | null;                        // 꿈과 그 결말 한 줄 (꿈을 품지 않았으면 null)
   oneLine: string;
   remembered: string;
   canonWords: { who: string; line: string }[];
@@ -122,6 +124,7 @@ export function buildEnding(s: Life5, meta: Meta5): Ending5 {
   const end = endOf(s);
   return {
     persona: personaOf(s),
+    dream: dreamLine(s),
     oneLine: oneLineOf(s),
     remembered: rememberedOf(s),
     canonWords: canonWordsOf(s),

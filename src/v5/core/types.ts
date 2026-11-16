@@ -32,6 +32,7 @@ export interface Hero5 {
   potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
+export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
@@ -73,7 +74,8 @@ export type Cond =
   | { c: 'species'; is: Species[] }             // 종족
   | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
   | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
-  | { c: 'canonAge'; id: string; min?: number; max?: number };   // 그 원작 인물의 지금 나이 (canonAge)
+  | { c: 'canonAge'; id: string; min?: number; max?: number }
+  | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)   // 그 원작 인물의 지금 나이 (canonAge)
 
 export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
@@ -90,6 +92,7 @@ export type Fx =
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
+  | { op: 'dream'; id: DreamId }                         // 꿈을 품는다 · 바꾼다
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
@@ -183,5 +186,7 @@ export interface Life5 {
   ended: { cause: string; age: number } | null;
   /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
   prime?: { from: number; until: number; lap: boolean } | null;
+  /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
+  dream?: { id: DreamId; since: number; done: number | null } | null;
 }
 export type Command5 = { type: 'step' } | { type: 'answer'; index: number };

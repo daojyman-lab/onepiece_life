@@ -27,6 +27,7 @@ import { BONDS } from './bonds';
 import { ISLANDS, ISLAND_OF } from './islands';
 import { RECRUIT_TURNINGS } from './recruits';
 import { PRIME } from './prime';
+import { DREAM_TURNINGS } from './dreams';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -57,6 +58,7 @@ const GROUPS: Turning[][] = [
   ISLANDS,
   RECRUIT_TURNINGS,
   PRIME,
+  DREAM_TURNINGS,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

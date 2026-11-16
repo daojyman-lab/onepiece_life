@@ -46,6 +46,12 @@ export function check(s: Life5, c: Cond): boolean {
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
+    case 'dream': {
+      const d = s.dream;
+      if (!d) return !c.has;
+      if (!c.has) return false;
+      return (c.done === undefined || (d.done !== null) === c.done) && (!c.is || c.is.includes(d.id)) && (c.years === undefined || s.age - d.since >= c.years);
+    }
   }
 }
 
@@ -79,6 +85,7 @@ function reason(s: Life5, c: Cond): string {
     case 'kin': return '때가 맞지 않는다';
     case 'path': return '걷는 길이 다르다';
     case 'canonAge': return '그 사람과 때가 맞지 않는다';
+    case 'dream': return '마음에 품은 것이 다르다';
   }
 }
 

@@ -1,4 +1,5 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
+import { setDream } from './dreams';
 import { enterPrime } from './stages';
 import { FIRST_NAMES } from '../../data/births';
 import { FRUIT_BY_ID, FRUITS } from '../../data/fruits';
@@ -83,6 +84,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'move': h.island = e.island; h.sea = e.sea; return;
     case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
+    case 'dream': setDream(s, e.id); return;
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
     case 'mark': {
       const got = addMark(s, e.id);

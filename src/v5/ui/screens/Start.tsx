@@ -51,7 +51,7 @@ export function Start() {
     <div class="app start-screen">
       <div class="frame frame-pad" style={{ textAlign: 'center', width: '100%' }}>
         <h1 class="game-title">GRAND TREASURE</h1>
-        <div class="t9 soft">v6.1 · 갈래 치는 인생 (개발 중)</div>
+        <div class="t9 soft">v6.2 · 갈래 치는 인생 (개발 중)</div>
         <JollyRoger />
 
         {life && (
