@@ -1,4 +1,4 @@
-import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType } from '../../core/types';
+import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../../core/types';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
 export type ValueId = 'justice' | 'devotion' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
@@ -87,7 +87,10 @@ export type Fx =
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
-      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f' }
+      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
+      role?: CrewRole }                          // 동료(crew)의 싸움 자리. 없으면 V.person.crew.role
+  | { op: 'crewTrain'; add: number }            // 살아 있는 동료 모두의 레벨을 올린다 (해군 분대를 키운다)
+  | { op: 'partCrew'; prefix: string }          // 관계 글이 prefix로 시작하는 동료가 떠난다: 동료에서 빠지고 아는 사람(ally)으로 남는다
   | { op: 'losePerson'; relation: string }
   | { op: 'losePerson'; who: 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' }   // 관계 글과 상관없이 그 갈래의 사람 하나
   | { op: 'injury'; severity: Injury['severity'] }

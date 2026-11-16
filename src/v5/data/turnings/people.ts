@@ -24,6 +24,9 @@ const fightDoor = (label: string, hint: string, values: Partial<Values>, foe: st
 const duelDoor = (label: string, hint: string, values: Partial<Values>, foe: string, when?: Cond[]): Door =>
   ({ label, hint, values, when, fx: [{ op: 'fight', foe, lethal: false, forced: false }] });
 
+/** 해군은 떠돌이를 동료로 받지 않는다: 분대원은 분대장이 된 뒤 신병으로 받는다 (marine.ts의 mn_squad_pick) */
+const NOT_SQUAD: Cond = { c: 'standing', is: ['child', 'civil', 'pirate', 'revolution', 'bountyHunter', 'warlord', 'shipwright', 'cp', 'settled', 'prisoner', 'retired'] };
+
 export const PEOPLE: Turning[] = [
   // ---------------------------------------------------------------- 스승
   {
@@ -77,7 +80,7 @@ export const PEOPLE: Turning[] = [
 
   // ---------------------------------------------------------------- 동료 · 배신 · 약속
   {
-    id: 'pp_crew', kind: 'door', when: at(age(16), st('pirate', 'revolution', 'bountyHunter', 'warlord', 'marine')),
+    id: 'pp_crew', kind: 'door', when: at(age(16), st('pirate', 'revolution', 'bountyHunter', 'warlord')),
     weight: 8, repeat: { years: 4 }, speaker: { relation: '낯선 떠돌이' },
     title: '태워 달라는 자', body: '{island} 부두에서 낡은 짐 보따리를 멘 떠돌이가 {name}을(를) 막아선다. 배에 태워 주면 무엇이든 하겠다고 한다.',
     doors: [
@@ -97,7 +100,7 @@ export const PEOPLE: Turning[] = [
       { label: '빼앗긴 것을 받아 낸다', hint: '그 자리에서 값을 치르게 한다', values: { dominion: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'fame', add: 5 }, { op: 'log', text: '빼앗긴 것을 이자까지 쳐서 받아 냈다.', weight: 'heavy' }] },
       { label: '말없이 등을 돌린다', hint: '다시는 엮이지 않는다', values: { freedom: D }, fx: [] },
-      { label: '다시 한번 믿어 본다', hint: '돌아올 자리를 내어 준다', special: 'loyalty', values: { loyalty: D },
+      { label: '다시 한번 믿어 본다', hint: '돌아올 자리를 내어 준다', special: 'loyalty', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '돌아온 옛 동료' }, { op: 'timeline', text: '배신한 동료를 다시 받아들였다' }] },
     ],
   },
@@ -106,7 +109,7 @@ export const PEOPLE: Turning[] = [
     weight: 6, repeat: 'once', speaker: { relation: '어릴 적 동무' },
     title: '약속한 동무', body: '{island} 항구에서 누군가 {name}의 이름을 크게 부른다. 오래전 바닷가에서 약속을 나눈 그 동무다.',
     doors: [
-      { label: '약속대로 같은 배에 오른다', hint: '어릴 적 약속을 지킨다', values: { loyalty: D },
+      { label: '약속대로 같은 배에 오른다', hint: '어릴 적 약속을 지킨다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '어릴 적 동무' }, { op: 'timeline', text: '어릴 적 약속대로 동무와 같은 배에 올랐다' }] },
       { label: '서로 다른 길을 걷고 있음을 받아들인다', hint: '웃으며 다시 헤어진다', values: { peace: D }, fx: [] },
       { label: '서로 칼을 겨눌 사이가 되었음을 안다', hint: '평생의 맞수가 생긴다', values: { dominion: D }, 
@@ -190,7 +193,7 @@ export const PEOPLE: Turning[] = [
         fx: [{ op: 'log', text: '상대를 일으켜 세워 보내 주었다. 등 뒤에서 이를 가는 소리가 들렸다.', weight: 'light' }] },
       { label: '가진 것을 모두 빼앗는다', hint: '이긴 자의 몫을 챙긴다', values: { dominion: D },
         fx: [{ op: 'money', add: 50000 }, { op: 'log', text: '쓰러진 자의 금고를 털었다.', weight: 'light' }] },
-      { label: '동료가 되라고 손을 내민다', hint: '어제의 적이 등을 맡길 사람이 될지도 모른다', values: { loyalty: D },
+      { label: '동료가 되라고 손을 내민다', hint: '어제의 적이 등을 맡길 사람이 될지도 모른다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '쓰러뜨린 적이었던 동료' }, { op: 'log', text: '한참을 노려보던 상대가 마침내 손을 잡았다.', weight: 'heavy' }] },
     ],
   },

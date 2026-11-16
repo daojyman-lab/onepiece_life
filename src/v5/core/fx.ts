@@ -91,11 +91,23 @@ function applyOne(s: Life5, e: Fx): void {
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
         const { role, level } = V.person.crew;
-        p.crew = { role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
+        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
       }
       s.people.push(p);
       return;
     }
+    case 'crewTrain': {
+      const stage = SEA_BY_ID[h.sea].stage;
+      for (const p of s.people) {
+        if (!p.alive || !p.crew) continue;
+        p.crew.level = Math.min(V.person.crew.maxLevel, p.crew.level + e.add);
+        p.crew.power = Math.max(p.crew.power, crewPowerFor(stage, p.crew.level));
+      }
+      return;
+    }
+    case 'partCrew':
+      for (const p of s.people) if (p.alive && p.crew && p.relation.startsWith(e.prefix)) { delete p.crew; p.kind = 'ally'; }
+      return;
     case 'losePerson': {
       const p = s.people.find((x) => x.alive && ('who' in e ? personIs(x, e.who) : x.relation === e.relation));
       if (!p) return;

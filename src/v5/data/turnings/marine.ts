@@ -21,8 +21,14 @@ const seasoned: Cond = { c: 'flag', id: 'mnFirst', has: true };
 /** CP에 막 들어온 사람(cpNew)은 이름을 버리는 날(cp_nameless)을 먼저 맞는다. 다른 CP의 일은 그 뒤에 온다 */
 const CP_NEW: Fx = { op: 'flag', id: 'cpNew' };
 const cpSettled: Cond = { c: 'flag', id: 'cpNew', has: false };
-/** 해군을 떠나면 분대원(mn_squad_pick)은 따라오지 않는다 */
-const PART_SQUAD: Fx[] = ['분대의 돌격병', '분대의 군의관', '분대의 항해 수병'].map((relation) => ({ op: 'losePerson', relation }) as Fx);
+/** 분대원의 관계 글은 모두 이 말로 시작한다. 해군은 떠돌이를 동료로 받지 않고, 분대장(mnOfficer)이 된 뒤 신병을 받아 키운다 (v4의 분대 스카우트) */
+export const SQUAD = '분대원';
+/** 해군을 떠나면 분대원은 따라오지 않는다: 동료에서 빠지고 아는 사람으로 남는다 */
+const PART_SQUAD: Fx[] = [{ op: 'partCrew', prefix: SQUAD }];
+const squadMember = (role: string, crewRole: 'vanguard' | 'support' | 'medic' | 'navigator' | 'cook', extra: Partial<Extract<Fx, { op: 'person' }>> = {}): Fx =>
+  ({ op: 'person', kind: 'crew', relation: `${SQUAD} · ${role}`, role: crewRole, age: { younger: 5 }, ...extra });
+/** 분대가 있는 분대장 */
+const hasSquad: Cond[] = [officer];
 
 export const MARINE: Turning[] = [
   // ---------------------------------------------------------------- 수병의 날들
@@ -75,18 +81,83 @@ export const MARINE: Turning[] = [
     ],
   },
   {
-    // v4 mn_soldier · mn_marksman · mn_medic · mn_navigator · mn_cook을 하나로: 셋 가운데 하나만 데려온다
+    // v4 mn_soldier · mn_marksman · mn_medic · mn_navigator · mn_cook: 분대장이 되면 연병장에서 신병을 골라 분대로 데려온다
     id: 'mn_squad_pick', kind: 'door', when: at(st('marine'), officer, seasoned),
-    weight: 7, repeat: { years: 3 }, max: 2, speaker: 'hero',
-    title: '분대에 빈자리 하나', body: '{name}의 분대에 자리가 하나 났다. 늦게까지 목검을 휘두르는 일병, 밤새 부상병의 붕대를 가는 견습 군의관, 폭풍 속에서 항로를 바로잡았다는 항해과 수병이 눈에 들어온다. 고르지 않은 둘은 다른 분대로 간다.',
+    weight: 7, repeat: { years: 2 }, max: 3, speaker: 'hero',
+    title: '연병장의 신병들', body: '새 신병들이 연병장에 줄지어 섰다. 분대장은 저마다 쓸 만한 신병을 데려간다. 늦게까지 목검을 휘두르는 녀석, 사격장에서 표적 한가운데만 맞히는 녀석, 밤새 부상병의 붕대를 가는 견습 군의관이 눈에 들어온다.',
     doors: [
-      { label: '목검의 일병을 데려와 돌격조로 세운다', hint: '분대가 앞장서 공을 세우고, 앞장선 만큼 {name}도 다치기 쉽다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'person', kind: 'crew', relation: '분대의 돌격병' }, { op: 'fame', add: 8 },
-             { op: 'chance', p: 0.4, then: [{ op: 'injury', severity: 'light' }, { op: 'hp', add: -10 }] }] },
-      { label: '견습 군의관을 데려온다', hint: '상처는 빨리 아물고, 몸을 사리는 분대라는 소리에 공적이 깎인다', values: { devotion: D },
-        fx: [{ op: 'person', kind: 'crew', relation: '분대의 군의관' }, { op: 'hp', add: 15 }, { op: 'fame', add: -4 }] },
+      { label: '목검의 신병을 돌격조로 데려온다', hint: '분대가 앞장서 공을 세우고, 앞장선 만큼 {name}도 다치기 쉽다', values: { ambition: D }, danger: true,
+        fx: [squadMember('돌격병', 'vanguard'), { op: 'fame', add: 6 }, { op: 'chance', p: 0.3, then: [{ op: 'injury', severity: 'light' }, { op: 'hp', add: -10 }] }] },
+      { label: '사격장의 신병을 저격수로 데려온다', hint: '멀리서 분대를 받쳐 준다. 훈련에 탄값이 든다', values: { justice: D },
+        fx: [squadMember('저격수', 'support'), { op: 'money', add: -5000 }] },
+      { label: '견습 군의관을 데려온다', hint: '상처는 빨리 아물고, 몸을 사리는 분대라는 소리를 듣는다', values: { devotion: D },
+        fx: [squadMember('군의관', 'medic'), { op: 'hp', add: 15 }, { op: 'fame', add: -3 }] },
+    ],
+  },
+  {
+    // 싸움 밖에서 분대를 받치는 신병
+    id: 'mn_squad_pick_2', kind: 'door', when: at(st('marine'), officer, seasoned),
+    weight: 5, repeat: { years: 3 }, max: 2, speaker: 'hero',
+    title: '연병장 밖의 신병들', body: '연병장에는 서지 않는 신병들도 있다. 폭풍 속에서 항로를 바로잡았다는 항해과 수병, 취사반에서 쫓겨날 만큼 손이 큰 요리병. 둘 다 다른 분대장들이 눈독을 들인다.',
+    doors: [
       { label: '항해과 수병에게서 해류 읽는 법을 배우며 데려온다', hint: '바다를 보는 눈이 트이고, 그 수병을 노리던 분대장과 척을 진다', values: { inquiry: D },
-        fx: [{ op: 'person', kind: 'crew', relation: '분대의 항해 수병' }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'rival', relation: '수병을 빼앗긴 분대장' }] },
+        fx: [squadMember('항해 수병', 'navigator'), { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'rival', relation: '수병을 빼앗긴 분대장' }] },
+      { label: '쫓겨난 요리병을 데려온다', hint: '분대의 밥이 달라진다. 다른 분대장들이 웃는다', values: { loyalty: D },
+        fx: [squadMember('요리병', 'cook'), { op: 'hp', add: 10 }] },
+    ],
+  },
+  {
+    // 분대장이 신병을 키운다: 훈련의 방식이 분대의 색을 정한다
+    id: 'mn_squad_drill', kind: 'door', when: at(st('marine'), ...hasSquad), needs: ['crew'],
+    weight: 7, repeat: { years: 2 }, max: 5, speaker: 'hero',
+    title: '분대 훈련', body: '{name}의 분대원들이 연병장에 모였다. 아직 총 쥐는 손이 어설픈 녀석도 있다. 다음 출동까지 한 철이 남았다.',
+    doors: [
+      { label: '해 뜨기 전부터 해 질 때까지 몰아붙인다', hint: '분대가 단단해진다. 원망하는 눈빛도 생긴다', values: { dominion: D },
+        fx: [{ op: 'crewTrain', add: 3 }, { op: 'log', text: '분대원들이 연병장에 쓰러져 잠들었다. 다음 날 아무도 늦지 않았다.', weight: 'light' }] },
+      { label: '하나하나 곁에 붙어 약점을 고쳐 준다', hint: '제 수련 시간이 줄어든다. 분대원들이 {name}을(를) 따른다', values: { devotion: D },
+        fx: [{ op: 'crewTrain', add: 2 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '밤마다 분대원 하나씩 붙잡고 자세를 고쳐 주었다.', weight: 'light' }] },
+      { label: '해적 소탕에 실전으로 데려간다', hint: '빨리 큰다. 다치는 녀석이 나올지 모른다', values: { ambition: D }, danger: true,
+        fx: [{ op: 'crewTrain', add: 4 }, { op: 'fame', add: 5 }, { op: 'chance', p: 0.35, then: [{ op: 'hp', add: -15 }, { op: 'log', text: '분대원 하나가 칼을 맞았다. 들것에 실려 가며 다음엔 안 맞는다고 웃었다.', weight: 'heavy' }] }] },
+    ],
+  },
+  {
+    // 첫 출동에서 얼어붙은 신병
+    id: 'mn_rookie_froze', kind: 'door', when: at(st('marine'), ...hasSquad), needs: ['crew'],
+    weight: 6, repeat: 'once', speaker: { relation: '얼어붙은 신병' },
+    title: '얼어붙은 신병', body: '해적선에 오르던 순간 막내 분대원이 사다리에서 얼어붙었다. 덕분에 분대가 뒤에서 막혀 해적 둘을 놓쳤다. 막내는 연병장 구석에서 고개를 들지 못한다.',
+    doors: [
+      { label: '다음 출동에 막내를 맨 앞에 세운다', hint: '두려움은 부딪혀야 사라진다고 믿는다', values: { ambition: D }, danger: true,
+        fx: [{ op: 'chance', p: 0.6, then: [{ op: 'crewTrain', add: 2 }, { op: 'log', text: '막내가 맨 먼저 해적선에 뛰어올랐다. 다리는 떨리고 있었다.', weight: 'heavy' }],
+          else: [{ op: 'hp', add: -10 }, { op: 'log', text: '막내는 또 얼어붙었다. 그 대신 {name}이(가) 칼을 맞았다.', weight: 'heavy' }] }] },
+      { label: '제 첫 출동에서 떨던 이야기를 해 준다', hint: '막내가 고개를 든다', values: { loyalty: D }, mark: 'fellowship',
+        fx: [{ op: 'crewTrain', add: 2 }] },
+      { label: '보고서에 놓친 책임을 제 이름으로 적는다', hint: '막내는 무사하고 {name}의 공적이 깎인다', values: { justice: D },
+        fx: [{ op: 'fame', add: -5 }, { op: 'crewTrain', add: 1 }] },
+    ],
+  },
+  {
+    // v4 namedCrew: 코비 · 헤르메포 · 타시기. 원작이 시작될 무렵 해군에 막 들어온 신병들
+    id: 'mn_named_rookies', kind: 'door', when: at(st('marine'), ...hasSquad, age(17, 26)),
+    weight: 6, repeat: 'once', speaker: 'hero',
+    title: '눈에 띄는 신병들', body: '본부에서 온 신병들 가운데 셋이 눈에 띈다. 큰 목소리로 인사하는 분홍 머리 소년, 툴툴대면서도 제일 먼저 갑판을 닦는 턱이 긴 청년, 칼은 잘 쓰는데 안경을 자꾸 떨어뜨리는 여자 하사.',
+    doors: [
+      { label: '분홍 머리 소년을 분대로 데려온다', hint: '언젠가 크게 될 녀석이다. 지금은 겁이 많다', values: { devotion: D },
+        fx: [squadMember('분홍 머리 신병', 'vanguard', { canon: 'coby' }), { op: 'timeline', text: '분홍 머리 신병 코비를 분대로 데려왔다', canon: 'coby' }] },
+      { label: '턱이 긴 청년을 분대로 데려온다', hint: '버릇은 없지만 한번 따르면 끝까지 따른다', values: { loyalty: D },
+        fx: [squadMember('턱이 긴 신병', 'vanguard', { canon: 'helmeppo' }), { op: 'timeline', text: '헤르메포를 분대로 데려왔다', canon: 'helmeppo' }] },
+      { label: '안경 쓴 검사를 분대로 데려온다', hint: '명검을 모으는 버릇이 있다', values: { inquiry: D },
+        fx: [squadMember('안경 쓴 검사', 'vanguard', { canon: 'tashigi' }), { op: 'timeline', text: '타시기를 분대로 데려왔다', canon: 'tashigi' }] },
+    ],
+  },
+  {
+    // 키운 분대원이 다른 부대의 장교로 뽑혀 간다
+    id: 'mn_squad_graduate', kind: 'door', when: at(st('marine'), ...hasSquad, years(6)), needs: ['crew'],
+    weight: 5, repeat: 'once', speaker: { relation: '다 자란 분대원' },
+    title: '떠나는 분대원', body: '신병 때부터 키운 분대원들이 본부의 장교로 뽑혀 간다고 한다. 경례하는 손끝들이 떨린다. 붙잡으면 남겠다고 할 것이다.',
+    doors: [
+      { label: '등을 떠밀어 보낸다', hint: '분대는 빈다. 바다 곳곳에 {name}의 사람들이 생긴다', values: { devotion: D },
+        fx: [{ op: 'partCrew', prefix: `${SQUAD} · ` }, { op: 'fame', add: 8 }, { op: 'timeline', text: '키운 분대원들을 장교로 떠나보냈다' }] },
+      { label: '본부에 말해 남게 한다', hint: '분대는 그대로다. 그 녀석들의 앞길을 막는다', values: { loyalty: D }, fx: [] },
     ],
   },
   {

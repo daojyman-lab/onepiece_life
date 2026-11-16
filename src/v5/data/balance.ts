@@ -86,7 +86,7 @@ export const V = {
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
   person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝
             // 새 동료의 싸움 자리와 레벨. 힘은 v4 crewPowerFor(지금 바다의 단계, level)
-            crew: { role: 'vanguard', level: 1 } },
+            crew: { role: 'vanguard', level: 1, maxLevel: 30 } },
   ending: { knownFame: 10,                     // 이 명성(현상금 1,000만)부터 신문 1면에 실린다. 아래는 고향의 소문
             bondHigh: 70,                      // 원작 인물의 한마디: 유대가 이만큼이면 가까운 사이의 말
             canonWords: 3, unchosen: 3, oneLine: 3 },   // 엔딩에 꼽는 원작 인물 · 가지 않은 길 · 한 줄 인생의 처지 변화 수

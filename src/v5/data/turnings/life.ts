@@ -8,6 +8,8 @@ import { V } from '../balance';
 import { ACTIVE, GROWN, HUNTED, SEAFARING, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
+/** 해군은 떠돌이를 동료로 받지 않는다 (marine.ts의 mn_squad_pick) */
+const NOT_SQUAD: Cond = { c: 'standing', is: ['child', 'civil', 'pirate', 'revolution', 'bountyHunter', 'warlord', 'shipwright', 'cp', 'settled', 'prisoner', 'retired'] };
 const D = V.value.door;
 const has = (id: string): Cond => ({ c: 'flag', id, has: true });
 const not = (id: string): Cond => ({ c: 'flag', id, has: false });
@@ -355,7 +357,7 @@ const BONDS: Turning[] = [
         fx: [{ op: 'hp', add: -12 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'money', add: -5000 }] },
       { label: '술잔을 채워 밀어 준다', hint: '밤새 옛이야기를 한다', values: { peace: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '밤새 웃고 떠들었다. 해가 뜨자 맞수는 손을 흔들고 떠났다.', weight: 'light' }] },
-      { label: '같이 가자고 손을 내민다', hint: '어제의 맞수가 등을 맡길 사람이 된다', values: { loyalty: D },
+      { label: '같이 가자고 손을 내민다', hint: '어제의 맞수가 등을 맡길 사람이 된다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '함께하게 된 어릴 적 맞수' }, { op: 'timeline', text: '어릴 적 맞수와 같은 길을 걷게 되었다' }] },
     ],
   },
@@ -373,5 +375,6 @@ const BONDS: Turning[] = [
     ],
   },
 ];
+
 
 export const LIFE: Turning[] = [...LOVE, ...FAMILY, ...BONDS];
