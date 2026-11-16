@@ -42,6 +42,13 @@ describe('가치관은 말로만', () => {
 });
 
 describe('프로필', () => {
+  it('성별과 종족이 나온다', () => {
+    const s = newLife5(5, { home: 'fishman' });
+    s.hero.gender = 'f'; s.hero.species = 'merfolk';
+    expect(profileView(s).who).toBe('여자 · 인어족');
+    s.hero.gender = 'm'; s.hero.species = 'human';
+    expect(profileView(s).who).toBe('남자 · 인간');
+  });
   it('성이 없는 고아의 이름에 null이나 앞뒤 빈칸이 없다', () => {
     const s = newLife5(5, { lineage: 'orphan' });
     const n = profileView(s).name;

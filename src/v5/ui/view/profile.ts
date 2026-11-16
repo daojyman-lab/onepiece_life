@@ -3,6 +3,7 @@ import { fmtMoney } from '../../../core/util';
 import { FRUIT_BY_ID } from '../../../data/fruits';
 import { SEA_BY_ID } from '../../../data/seas';
 import type { SceneInput } from '../../../ui/pixel/pixelArt';
+import { SPECIES_NAMES } from '../../../data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS } from '../../core/body';
 import { V } from '../../data/balance';
@@ -21,6 +22,7 @@ const HEAVY: ReadonlySet<LogLine['weight']> = new Set(['heavy', 'year']);
 
 export interface ProfileView {
   name: string; age: string; standing: string; born: string;
+  who: string;                                         // 성별 · 종족 (예: '남자 · 인간')
   values: string[]; strengths: { name: string; text: string }[];
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
@@ -46,6 +48,7 @@ export function profileView(s: Life5): ProfileView {
     name: fullName(h).trim(),
     age: ageWord(s.age),
     standing: STANDING_NAME[h.standing],
+    who: `${h.gender === 'f' ? '여자' : '남자'} · ${SPECIES_NAMES[h.species]}`,
     born: `${h.town}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
     values: valueWords(s),
     strengths: STRENGTHS.filter((x) => s.strengths.includes(x.id)).map((x) => ({ name: x.name, text: x.text })),
