@@ -101,7 +101,10 @@ function applyOne(s: Life5, e: Fx): void {
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
-        const { role, level } = V.person.crew;
+        const { role, maxLevel } = V.person.crew;
+        const level = Math.min(maxLevel, e.level ?? V.person.crew.level);
+        if (e.canon) s.people = s.people.filter((x) => !(x.alive && x.canon === e.canon));   // 이미 아는 사이였으면 그 사람이 배에 오른다 (둘이 되지 않는다)
+        if (e.years) p.tempUntil = s.age + e.years;
         p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
       }
       s.people.push(p);

@@ -80,6 +80,7 @@ export interface Person {
   faction: 'civil' | 'pirate' | 'marine' | 'rev';
   species: Species;
   crew?: CrewInfo;
+  tempUntil?: number;         // v5 임시 동행: 주인공이 이 나이가 되면 제 길로 떠난다 (없으면 끝까지 함께하는 동료)
   epithet?: string;           // 이명 (동료). 없으면 성격에서 정한다
   power?: number;             // 라이벌 같은 비동료의 대략적 힘
   alive: boolean;

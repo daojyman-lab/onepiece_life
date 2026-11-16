@@ -231,7 +231,17 @@ function nextPart(s: Life5): void {
   comeOfAge(s);
   masterYear(s);
   livingIncome(s);
+  partCompanions(s);
   voyage(s);
+}
+
+/** 임시 동행은 약속한 햇수가 차면 제 길로 떠난다: 동료에서 빠지고 아는 사람으로 남는다 */
+function partCompanions(s: Life5): void {
+  for (const p of s.people) {
+    if (!p.alive || !p.crew || p.tempUntil === undefined || s.age < p.tempUntil) continue;
+    delete p.crew; delete p.tempUntil; p.kind = 'ally';
+    logLine(s, josa(`${p.name}이(가) 제 길로 떠났다. 다시 만나자는 말은 짧았다.`), 'heavy');
+  }
 }
 
 /** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
