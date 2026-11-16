@@ -72,7 +72,7 @@ export const SEA_LEAVE: Turning[] = [
       { label: '뱃사람에게 술을 사며 위대한 항로의 해도를 캐묻는다', hint: '떠나기 전에 바다를 안다. 술값이 꽤 든다', values: { inquiry: D },
         fx: [{ op: 'money', add: -8000 }, { op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'glChart' }] },
       { label: '보물을 쫓는 바보들에게 배와 식량을 비싸게 판다', hint: '이 바다에 남아 돈을 번다', values: { greed: D },
-        fx: [{ op: 'money', add: 20000 }] },
+        fx: [{ op: 'money', add: 30000 }] },
     ],
   },
   {
@@ -195,7 +195,7 @@ export const SEA_RETURN: Turning[] = [
         fx: [{ op: 'money', add: 20000 }, { op: 'move', island: '코노미 제도', sea: 'east' }, { op: 'log', text: '귤 향기가 나는 섬에서 상인과 헤어졌다. 이스트 블루의 바람은 순했다.', weight: 'heavy' },
              { op: 'timeline', text: '상선을 호위해 이스트 블루로 돌아왔다' }] },
       { label: '뱃길에서 상인의 짐을 가로챈다', hint: '돌아갈 필요가 없다. 상인의 비명이 남는다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 35000 }, { op: 'hardship', add: 2 }, { op: 'person', kind: 'enemy', relation: '짐을 빼앗긴 상인' }] },
+        fx: [{ op: 'money', add: 52000 }, { op: 'hardship', add: 2 }, { op: 'person', kind: 'enemy', relation: '짐을 빼앗긴 상인' }] },
       { label: '돌아갈 생각이 없다며 거절한다', hint: '이 바다의 일을 계속한다', fx: [] },
     ],
   },

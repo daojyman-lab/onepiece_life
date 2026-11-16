@@ -87,7 +87,7 @@ export const PIRATE_2: Turning[] = [
       { label: '그의 주먹을 끝까지 지켜보고 배운다', hint: '몸은 성하고 손에 남는 것은 적다', values: { inquiry: D },
         fx: [{ op: 'mastery', branch: 'fist', add: 8 }, { op: 'base', key: 'int', add: 1 }] },
       { label: '투기장의 판돈을 챙겨 자리를 뜬다', hint: '권투사의 실망한 얼굴이 남는다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 30000 }] },
+        fx: [{ op: 'money', add: 45000 }] },
     ],
   },
 ];

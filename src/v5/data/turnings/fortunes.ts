@@ -28,7 +28,7 @@ export const FORTUNES: Turning[] = [
     title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name}의 수완을 오래 지켜봤다고 한다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
     doors: [
       { label: '장부에 이름을 올리고 총잡이를 받는다', hint: '어둠의 거래에 발을 들인다. 그 총잡이는 끝까지 가르친다', values: { greed: D },
-        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 50000 }] },
+        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 75000 }] },
       decline('총잡이를 받지 않는다', '그 돈의 냄새가 싫다'),
     ],
   }),

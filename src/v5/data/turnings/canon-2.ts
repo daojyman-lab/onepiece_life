@@ -35,7 +35,7 @@ export const CANON_SEA: Turning[] = [
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 8 }, { op: 'person', kind: 'ally', relation: '불주먹의 사내', canon: 'ace' },
              { op: 'log', text: '깨어난 사내가 고맙다며 고개를 숙이고, 식당의 밥값을 모두 냈다. 물론 제 몫은 내지 않고 달아났다.', weight: 'heavy' }] },
       { label: '소란을 틈타 사내의 돈주머니를 먼저 챙긴다', hint: '불의 주먹이 깨어나면 끝이다', values: { greed: D }, danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 30000 }],
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 45000 }],
                else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }, { op: 'person', kind: 'rival', relation: '돈주머니를 지킨 불주먹', canon: 'ace' },
                       { op: 'log', text: '손끝이 주머니에 닿는 순간 식당 안이 불길로 가득 찼다.', weight: 'heavy' }] }] },
       { label: '엮이지 않고 밥값을 치르고 나간다', hint: '등 뒤에서 식탁이 부서지는 소리가 난다', values: { peace: D },
@@ -171,7 +171,7 @@ export const CANON_SEA: Turning[] = [
       { label: '연구소의 장부를 빼내 바깥에 알린다', hint: '정부의 실험이 드러난다. 그만큼 쫓긴다', values: { justice: D },
         fx: [{ op: 'fame', add: 10 }, { op: 'flag', id: 'govEnemy' }, { op: 'person', kind: 'ally', relation: '장부를 받아 간 외과의', canon: 'law' }] },
       { label: '외과의와 손잡고 연구소의 약을 빼돌려 판다', hint: '큰돈이 된다. 아이들은 남의 손에 맡긴다', values: { greed: D },
-        fx: [{ op: 'money', add: 60000 }, { op: 'hardship', add: 3 }, { op: 'person', kind: 'rival', relation: '눈살을 찌푸린 외과의', canon: 'law' }] },
+        fx: [{ op: 'money', add: 90000 }, { op: 'hardship', add: 3 }, { op: 'person', kind: 'rival', relation: '눈살을 찌푸린 외과의', canon: 'law' }] },
     ],
   },
   {

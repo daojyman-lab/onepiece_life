@@ -128,7 +128,7 @@ export const TOWNS_2: Turning[] = [
       { label: '나미를 배신자라 부르는 아이들 앞을 막는다', hint: '또래들과 크게 싸우고 따돌림을 받는다. 나미는 고맙다는 말 대신 등을 돌린다', values: { loyalty: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -10 }, { op: 'flag', id: 'namiDefender' }] },
       { label: '혼자 해적선에 숨어들어 돈을 훔쳐 본다', hint: '나미는 혼자 하는 일이라며 끼워 주지 않는다. 혼자 들어갔다가 크게 다칠 수도 있다', values: { greed: D }, mark: 'daring', danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 5000 }, { op: 'log', text: '술에 취한 해적의 돈주머니를 들고 갯바위 사이로 빠져나왔다.', weight: 'heavy' }],
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 8000 }, { op: 'log', text: '술에 취한 해적의 돈주머니를 들고 갯바위 사이로 빠져나왔다.', weight: 'heavy' }],
                else: [{ op: 'hp', add: -20 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '해적에게 들켜 갑판에서 내던져졌다. 겨우 뭍에 기어올랐다.', weight: 'heavy' }] }] },
     ],
   },
@@ -143,7 +143,7 @@ export const TOWNS_2: Turning[] = [
       { label: '귤밭에 남아 마을 사람들과 공물을 함께 갚는다', hint: '열여섯을 기다리지 않고 귤밭 일꾼이 된다. 이 섬을 벗어날 날은 기약이 없다', values: { loyalty: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'hardship', add: 5 }] },
       { label: '아론 파크의 일꾼 자리를 받는다', hint: '공물을 내지 않아도 되고 품삯도 받는다. 마을에는 {name}을(를) 반기는 집이 없어진다', values: { greed: D }, 
-        fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 5000 }, { op: 'flag', id: 'arlongWorker' }] },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 8000 }, { op: 'flag', id: 'arlongWorker' }] },
     ],
   },
 

@@ -63,7 +63,7 @@ export const PEOPLE: Turning[] = [
       { label: '스승으로 모신다', hint: '돈은 들지 않지만 끝까지 가르칠 사람은 아니다', values: { inquiry: D }, 
         fx: [{ op: 'master', name: '떠돌이 무인', branch: 'fist', cap: V.growth.noMasterCap, years: 3, paid: false }] },
       { label: '혼자 하겠다고 한다', hint: '누구의 제자도 되지 않는다', values: { freedom: D }, fx: [] },
-      { label: '무인이 잠든 사이 비급만 베껴 팔아넘긴다', hint: '돈이 생긴다. 무인은 그 길로 떠난다', values: { greed: D }, fx: [{ op: 'money', add: 8000 }] },
+      { label: '무인이 잠든 사이 비급만 베껴 팔아넘긴다', hint: '돈이 생긴다. 무인은 그 길로 떠난다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }] },
     ],
   },
   {
@@ -86,7 +86,7 @@ export const PEOPLE: Turning[] = [
     title: '태워 달라는 자', body: '{island} 부두에서 낡은 짐 보따리를 멘 떠돌이가 {name}을(를) 막아선다. 배에 태워 주면 무엇이든 하겠다고 한다.',
     doors: [
       { label: '동료로 받아들인다', hint: '등을 맡길 사람이 하나 는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'crew', relation: '동료' }] },
-      { label: '뱃삯을 두둑이 받고 태워 준다', hint: '선원이 아니라 손님이다. 다음 항구에서 내린다', values: { greed: D }, fx: [{ op: 'money', add: 10000 }] },
+      { label: '뱃삯을 두둑이 받고 태워 준다', hint: '선원이 아니라 손님이다. 다음 항구에서 내린다', values: { greed: D }, fx: [{ op: 'money', add: 15000 }] },
       { label: '한판 붙어 보고 정한다', hint: '실력을 보고 받는다', values: { dominion: D },
         fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'crew', relation: '시험을 통과한 동료' }] },
     ],
@@ -153,6 +153,10 @@ export const PEOPLE: Turning[] = [
       { label: '빚쟁이들을 두들겨 쫓아낸다', hint: '뒤탈이 남는다', values: { dominion: D }, fx: [{ op: 'hp', add: -10 }, { op: 'flag', id: 'loanSharkGrudge' }] },
       { label: '집과 연을 끊고 떠난다', hint: '부모의 얼굴을 다시 보지 못할 수도 있다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 5 }, { op: 'timeline', text: '집과 연을 끊었다' }] },
+      { label: '빚 문서를 사들여 빚쟁이 노릇을 대신한다', hint: '빚은 사라지고, 이웃들의 빚까지 손에 쥔다', special: 'greed', when: [{ c: 'money', min: 30000 }], values: { greed: D },
+        fx: [{ op: 'money', add: -30000 }, { op: 'chance', p: 0.75, then: [{ op: 'money', add: 120000 }, { op: 'log', text: '골목의 빚 문서가 모두 {name}의 손에 들어왔다. 이자는 꼬박꼬박 들어왔다.', weight: 'heavy' }],
+               else: [{ op: 'flag', id: 'loanSharkGrudge' }, { op: 'log', text: '빚 문서를 사들였지만 갚을 사람들이 밤새 섬을 떠났다. 종이 뭉치만 남았다.', weight: 'heavy' }] },
+             { op: 'timeline', text: '집안의 빚 문서를 사들였다' }] },
     ],
   },
   {
@@ -167,7 +171,7 @@ export const PEOPLE: Turning[] = [
         fx: [{ op: 'hardship', add: 4 }, { op: 'log', text: '편지를 접어 품에 넣었다. 다음 소식은 부고였다.', weight: 'heavy' },
              { op: 'losePerson', who: 'parent' }] },
       { label: '돌아가 남은 재산부터 셈한다', hint: '임종은 지킨다. 식구들의 눈길이 차갑다', values: { greed: D },
-        fx: [{ op: 'moveHome' }, { op: 'money', add: 15000 }, { op: 'losePerson', who: 'parent' }, { op: 'timeline', text: '부모의 임종을 지키고 재산부터 챙겼다' }] },
+        fx: [{ op: 'moveHome' }, { op: 'money', add: 22000 }, { op: 'losePerson', who: 'parent' }, { op: 'timeline', text: '부모의 임종을 지키고 재산부터 챙겼다' }] },
     ],
   },
 
@@ -195,7 +199,7 @@ export const PEOPLE: Turning[] = [
       { label: '살려서 보내 준다', hint: '언젠가 다시 마주칠지도 모른다', values: { peace: D },
         fx: [{ op: 'log', text: '상대를 일으켜 세워 보내 주었다. 등 뒤에서 이를 가는 소리가 들렸다.', weight: 'light' }] },
       { label: '가진 것을 모두 빼앗는다', hint: '이긴 자의 몫을 챙긴다', values: { greed: D },
-        fx: [{ op: 'money', add: 50000 }, { op: 'log', text: '쓰러진 자의 금고를 털었다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: 75000 }, { op: 'log', text: '쓰러진 자의 금고를 털었다.', weight: 'light' }] },
       { label: '동료가 되라고 손을 내민다', hint: '어제의 적이 등을 맡길 사람이 될지도 모른다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '쓰러뜨린 적이었던 동료' }, { op: 'log', text: '한참을 노려보던 상대가 마침내 손을 잡았다.', weight: 'heavy' }] },
     ],
@@ -222,7 +226,7 @@ export const PEOPLE: Turning[] = [
     title: '소용돌이 무늬의 열매', body: '{island} 시장의 노점 구석에 소용돌이 무늬가 새겨진 열매 하나가 굴러다닌다. 상인은 그게 무엇인지도 모르는 눈치다.',
     doors: [
       { label: '헐값에 사서 그 자리에서 먹는다', hint: '한 번 먹으면 다시는 헤엄칠 수 없다', needs: ['swim'], values: { romance: D }, fx: [{ op: 'eatFruit', id: 'random' }] },
-      { label: '사 두었다가 비싸게 판다', hint: '알아보는 사람을 만나면 큰돈이 된다. 못 만나면 산 값만 날린다', values: { greed: D }, fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 110000 }, { op: 'log', text: '열매를 알아본 수집가가 금화 자루를 내밀었다.', weight: 'light' }], else: [{ op: 'log', text: '열매를 알아보는 사람은 끝내 나타나지 않았다. 열매는 썩어 버렸다.', weight: 'light' }] }] },
+      { label: '사 두었다가 비싸게 판다', hint: '알아보는 사람을 만나면 큰돈이 된다. 못 만나면 산 값만 날린다', values: { greed: D }, fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 165000 }, { op: 'log', text: '열매를 알아본 수집가가 금화 자루를 내밀었다.', weight: 'light' }], else: [{ op: 'log', text: '열매를 알아보는 사람은 끝내 나타나지 않았다. 열매는 썩어 버렸다.', weight: 'light' }] }] },
       { label: '모른 척 지나간다', hint: '수상한 것은 건드리지 않는다', values: { peace: D }, fx: [] },
     ],
   },
@@ -256,7 +260,7 @@ export const PEOPLE: Turning[] = [
     doors: [
       fightDoor('어인 해적에게 맞선다', '목숨을 건 싸움이 된다', { justice: D }, 'b_arlong', READY(2)),
       { label: '뇌물을 받고 눈을 감는다', hint: '주머니는 두둑해지고 마을은 그대로다', values: { greed: D },
-        fx: [{ op: 'money', add: 50000 }, { op: 'flag', id: 'tookBribe' }] },
+        fx: [{ op: 'money', add: 75000 }, { op: 'flag', id: 'tookBribe' }] },
       { label: '본부에 지원을 요청하고 물러난다', hint: '지원은 언제 올지 모른다. 물러나는 길목을 어인들이 막아설 수도 있다', values: { peace: D }, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'fight', foe: 'b_arlong', lethal: false, forced: false }] }] },
     ],
   },
@@ -347,7 +351,7 @@ export const PEOPLE: Turning[] = [
       { label: '손을 잡고 나라를 뒤집는 데 끼어든다', hint: '혁명군과 한편이 된다. 해군의 눈에 이름이 남는다', values: { justice: D }, danger: true,
         fx: [{ op: 'hp', add: -15 }, { op: 'fame', add: 15 }, { op: 'person', kind: 'ally', relation: '실크해트의 혁명가', canon: 'sabo' }, { op: 'timeline', text: '투기장에서 혁명군의 사보와 함께 싸웠다', canon: 'sabo' }] },
       { label: '불꽃이 시선을 끄는 틈에 투기장의 상금을 챙긴다', hint: '큰돈이 된다. 해군과 혁명군 모두 그 얼굴을 기억한다', values: { greed: D },
-        fx: [{ op: 'money', add: 60000 }, { op: 'timeline', text: '사보의 불꽃이 투기장을 삼킨 날 상금을 챙겨 달아났다', canon: 'sabo' }] },
+        fx: [{ op: 'money', add: 90000 }, { op: 'timeline', text: '사보의 불꽃이 투기장을 삼킨 날 상금을 챙겨 달아났다', canon: 'sabo' }] },
       { label: '남의 싸움이라며 섬을 빠져나간다', hint: '포위망이 좁혀지기 전에 떠난다', values: { freedom: D }, fx: [{ op: 'timeline', text: '불꽃의 혁명가를 등지고 섬을 떠났다', canon: 'sabo' }] },
     ],
   },

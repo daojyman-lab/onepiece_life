@@ -1,6 +1,7 @@
 export const V = {
   partsPerYear: 4,
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
+           greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후

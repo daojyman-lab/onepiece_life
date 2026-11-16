@@ -18,6 +18,7 @@ import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
+import { isDeep } from './values';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -57,7 +58,10 @@ function applyOne(s: Life5, e: Fx): void {
       for (const k of e.key === 'all' ? STAT_KEYS : [e.key]) h.base[k] = Math.max(0, h.base[k] + e.add);
       return;
     case 'hp': h.hp = clamp(h.hp + e.add, 0, V.hp.max); return;
-    case 'money': h.money = Math.max(0, h.money + e.add); return;
+    case 'money': { // 탐욕이 깊으면 들어오는 돈이 불어난다 (나가는 돈은 그대로)
+      const add = e.add > 0 && isDeep(s, 'greed') ? Math.round(e.add * V.value.greedMoney) : e.add;
+      h.money = Math.max(0, h.money + add); return;
+    }
     case 'fame': h.fame = Math.max(0, h.fame + e.add); return;
     case 'rank': h.rank = Math.max(0, h.rank + e.add); return;
     // 처지가 실제로 바뀔 때만 연표에 짧게 남긴다 (한 줄 인생이 이 줄들을 잇는다)

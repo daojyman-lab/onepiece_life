@@ -76,7 +76,7 @@ export const SEA_GRAND_LINE: Turning[] = [
       { label: '목수들과 함께 방파제를 지킨다', hint: '밤새 모래주머니를 쌓는다. 도시가 {name}을(를) 기억한다', values: { loyalty: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'vit', add: 1 }] },
       { label: '빈집들의 문을 열고 들어간다', hint: '물결이 다 쓸어 갈 것들이다. 아무도 보지 않는다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 20000 }, { op: 'hardship', add: 1 }] },
+        fx: [{ op: 'money', add: 30000 }, { op: 'hardship', add: 1 }] },
     ],
   },
   {
@@ -183,7 +183,7 @@ export const SEA_NEW_WORLD: Turning[] = [
       { label: '군함이 둘러싸기 전에 섬을 빠져나간다', hint: '미래는 보지 못한다. 포위망 밖으로 나간다', values: { peace: D },
         fx: [{ op: 'log', text: '빠져나온 다음 날, 섬 쪽 하늘에 빛줄기가 내리꽂혔다.', weight: 'light' }] },
       { label: '연구실의 물건을 빼내 비싸게 판다', hint: '큰돈이 된다. 박사의 경비 기계가 쫓아온다', values: { greed: D }, danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 80000 }], else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }] }] },
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 120000 }], else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }] }] },
     ],
   },
   {

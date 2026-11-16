@@ -38,7 +38,7 @@ const BEFORE: Turning[] = [
         fx: [{ op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '주근깨 소년', canon: 'ace' }],
                else: [{ op: 'log', text: '산적들을 끌고 돌아왔을 때 소년은 이미 혼자 불량배들을 눕혀 놓고 사라진 뒤였다.', weight: 'light' }] }] },
       { label: '소년과 불량배 누가 이기나 내기를 건다', hint: '구경꾼들 사이에서 몇 푼을 번다. 소년의 눈길이 차갑다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 1500 }, { op: 'person', kind: 'rival', relation: '구경꾼을 노려보던 소년', canon: 'ace' }] },
+        fx: [{ op: 'money', add: 2000 }, { op: 'person', kind: 'rival', relation: '구경꾼을 노려보던 소년', canon: 'ace' }] },
     ],
   },
   {
@@ -68,7 +68,7 @@ const BEFORE: Turning[] = [
       { label: '해적이 될 거라고 대꾸한다', hint: '사랑의 주먹이 정수리에 떨어진다. 영웅은 웃으며 녀석들은 다 똑같다고 한다', values: { freedom: D }, mark: 'rebel',
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '꿀밤을 먹인 해군 영웅', canon: 'garp' }] },
       { label: '손자가 숨은 산길을 알려 주고 센베이를 얻는다', hint: '영웅은 기뻐하고, 산속의 손자는 {name}을(를) 고자질쟁이로 기억한다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 1000 }, { op: 'flag', id: 'toldGarp' }] },
+        fx: [{ op: 'money', add: 2000 }, { op: 'flag', id: 'toldGarp' }] },
     ],
   },
 ];
@@ -129,7 +129,7 @@ const EAST_ARC: Turning[] = [
         fx: [{ op: 'hp', add: -8 }, { op: 'log', text: '언덕 위에서 촌장은 한참 울었다. 그날 저녁, 밀짚모자의 소년이 광대 선장을 하늘로 날려 보냈다는 소식이 왔다.', weight: 'heavy' },
              { op: 'timeline', text: '광대 해적단이 오렌지 마을을 차지한 날, 촌장을 언덕으로 데려갔다', canon: 'buggy' }] },
       { label: '광대 해적단의 잡일을 거들고 품삯을 받는다', hint: '마을을 턴 해적들 밑에서 일한다. 마을 사람들이 {name}을(를) 보지 않는다', values: { greed: D },
-        fx: [{ op: 'money', add: 5000 }, { op: 'hardship', add: 1 }, { op: 'person', kind: 'ally', relation: '품삯을 준 광대 선장', canon: 'buggy' },
+        fx: [{ op: 'money', add: 8000 }, { op: 'hardship', add: 1 }, { op: 'person', kind: 'ally', relation: '품삯을 준 광대 선장', canon: 'buggy' },
              { op: 'timeline', text: '광대 해적단이 마을을 차지한 날, 그 밑에서 잡일을 했다', canon: 'buggy' }] },
     ],
   },

@@ -48,7 +48,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '할머니 몫까지 받아 집에 데려다준다', hint: '두 사람 몫을 들고 간다', values: { romance: D }, fx: [{ op: 'person', kind: 'ally', relation: '배급 줄의 할머니' }] },
       { label: '관리에게 할머니 몫을 달라고 따진다', hint: '어린 목소리라도 관리의 눈에 띈다', values: { justice: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'chance', p: 0.5, then: [{ op: 'fame', add: 1 }], else: [{ op: 'hp', add: -5 }] }] },
-      { label: '줄 앞자리를 팔고 쌀값을 번다', hint: '줄은 사고팔 수 있다', values: { greed: D }, fx: [{ op: 'money', add: 1500 }] },
+      { label: '줄 앞자리를 팔고 쌀값을 번다', hint: '줄은 사고팔 수 있다', values: { greed: D }, fx: [{ op: 'money', add: 2000 }] },
     ],
   },
   {
@@ -102,7 +102,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '낭인에게 칼을 가르쳐 달라고 조른다', hint: '낭인이 귀찮아하면서도 가르쳐 준다', values: { romance: D }, fx: [{ op: 'mastery', branch: 'sword', add: 10 }, { op: 'person', kind: 'ally', relation: '쿠리의 떠돌이 낭인' }] },
       { label: '낭인에게 먹을 것을 날라 준다', hint: '낭인은 말없이 받는다', values: { freedom: D }, fx: [{ op: 'person', kind: 'ally', relation: '쿠리의 떠돌이 낭인' }] },
-      { label: '낭인을 관리에게 알린다', hint: '상을 받는다. 낭인이 사라진다', values: { greed: D }, fx: [{ op: 'money', add: 3000 }, { op: 'hardship', add: 1 }] },
+      { label: '낭인을 관리에게 알린다', hint: '상을 받는다. 낭인이 사라진다', values: { greed: D }, fx: [{ op: 'money', add: 4000 }, { op: 'hardship', add: 1 }] },
     ],
   },
   {
@@ -111,7 +111,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '찻잔을 나르며 귀를 기울인다', hint: '들은 것을 누구에게 말할지는 나중 일이다', values: { inquiry: D }, fx: [{ op: 'flag', id: 'wano_overheard' }, { op: 'base', key: 'int', add: 1 }] },
       { label: '찻집 일을 성실히 하고 삯을 받는다', hint: '눈과 귀를 닫는다', values: { loyalty: D }, fx: [{ op: 'money', add: 2000 }] },
-      { label: '관리의 지갑을 슬쩍한다', hint: '들키면 큰일이다', values: { greed: D }, danger: true, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 8000 }], else: [{ op: 'hp', add: -15 }, { op: 'hardship', add: 2 }] }] },
+      { label: '관리의 지갑을 슬쩍한다', hint: '들키면 큰일이다', values: { greed: D }, danger: true, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 12000 }], else: [{ op: 'hp', add: -15 }, { op: 'hardship', add: 2 }] }] },
     ],
   },
   {
@@ -189,7 +189,7 @@ export const WANO: Turning[] = [
              { op: 'timeline', text: '불의 축제 밤, 카이도의 섬으로 쳐들어갔다' }] },
       { label: '도시에 남아 불을 끄고 다친 사람을 나른다', hint: '싸움 대신 도시를 지킨다', values: { justice: D }, fx: [{ op: 'person', kind: 'ally', relation: '축제의 밤에 구한 사람' }, { op: 'timeline', text: '불의 축제 밤, 불타는 도시를 지켰다' }] },
       { label: '카이도 쪽에 이 소식을 판다', hint: '큰돈을 받는다. 낭인들에게 들키면 끝이다', values: { greed: D }, danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 60000 }], else: [{ op: 'hp', add: -25 }, { op: 'person', kind: 'enemy', relation: '배신을 안 낭인' }] }] },
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 90000 }], else: [{ op: 'hp', add: -25 }, { op: 'person', kind: 'enemy', relation: '배신을 안 낭인' }] }] },
     ],
   },
   {
@@ -232,7 +232,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '집안의 칼을 꺼내 맹세한다', hint: '그날이 오면 목숨을 건다', values: { loyalty: D }, mark: 'obsession', fx: [{ op: 'flag', id: 'wano_sworn' }, { op: 'person', kind: 'ally', relation: '옛 영주의 무사' }] },
       { label: '집안을 지키려 맹세를 거절한다', hint: '무사가 고개를 끄덕이고 떠난다', closes: true, values: { peace: D }, fx: [] },
-      { label: '무사를 쇼군에게 넘긴다', hint: '집안은 무사하다. 무사의 이름이 저주처럼 남는다', values: { greed: D }, fx: [{ op: 'money', add: 20000 }, { op: 'hardship', add: 2 }] },
+      { label: '무사를 쇼군에게 넘긴다', hint: '집안은 무사하다. 무사의 이름이 저주처럼 남는다', values: { greed: D }, fx: [{ op: 'money', add: 30000 }, { op: 'hardship', add: 2 }] },
     ],
   },
   {
@@ -251,7 +251,7 @@ export const WANO: Turning[] = [
     id: 'wanoa_smile_trade', kind: 'door', when: adult(18, 50, LANDED), weight: 5, repeat: 'once', speaker: { relation: '뒷골목의 거간꾼' },
     title: '웃는 열매의 거간꾼', body: '뒷골목 거간꾼이 이상한 열매를 판다. 먹으면 짐승의 힘을 얻거나, 아니면 평생 웃기만 한다. 값은 비싸고 사려는 사람은 많다.',
     doors: [
-      { label: '열매를 사서 되판다', hint: '팔리면 큰돈이 된다. 누군가는 웃기만 하게 된다', values: { greed: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'money', add: -10000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 35000 }, { op: 'log', text: '열매는 웃돈을 받고 팔려 나갔다.', weight: 'light' }], else: [{ op: 'log', text: '관리의 단속에 열매를 빼앗겼다. 산 값만 날렸다.', weight: 'light' }] }] },
+      { label: '열매를 사서 되판다', hint: '팔리면 큰돈이 된다. 누군가는 웃기만 하게 된다', values: { greed: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'money', add: -10000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 52000 }, { op: 'log', text: '열매는 웃돈을 받고 팔려 나갔다.', weight: 'light' }], else: [{ op: 'log', text: '관리의 단속에 열매를 빼앗겼다. 산 값만 날렸다.', weight: 'light' }] }] },
       { label: '거간꾼의 창고를 불태운다', hint: '들키면 끌려간다', values: { justice: D }, danger: true, fx: [{ op: 'chance', p: 0.6, then: [{ op: 'fame', add: 3 }], else: [{ op: 'hp', add: -20 }, { op: 'hardship', add: 2 }] }] },
       { label: '눈을 돌린다', hint: '뒷골목의 일이다', closes: true, fx: [] },
     ],
@@ -289,7 +289,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '양조장을 사서 술을 빚는다', hint: '뿌리를 내린다. 쌀을 구하는 게 일이다', values: { peace: D }, fx: [{ op: 'money', add: -25000 }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '강가의 양조장에서 술을 빚기 시작했다' }] },
       { label: '우물만 사서 마을에 맑은 물을 나눈다', hint: '돈은 안 된다', values: { romance: D }, fx: [{ op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '맑은 물을 얻은 마을' }] },
-      { label: '양조장을 사서 쇼군의 관리들에게 술을 댄다', hint: '돈과 연줄이 생긴다', values: { greed: D }, fx: [{ op: 'money', add: -25000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 60000 }], else: [] }] },
+      { label: '양조장을 사서 쇼군의 관리들에게 술을 댄다', hint: '돈과 연줄이 생긴다', values: { greed: D }, fx: [{ op: 'money', add: -25000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 90000 }], else: [] }] },
     ],
   },
   {
@@ -315,7 +315,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '창고를 열어 이웃과 나눈다', hint: '관리에게 끌려갈지 모른다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: '흉년에 쌀을 나눈 이웃' }, { op: 'chance', p: 0.4, then: [{ op: 'hardship', add: 2 }], else: [] }] },
       { label: '쌀을 숨기고 집안부터 살린다', hint: '이웃들의 눈길이 아프다', values: { peace: D }, fx: [] },
-      { label: '쌀값이 오를 때 비싸게 판다', hint: '돈을 번다. 원망을 산다', values: { greed: D }, fx: [{ op: 'money', add: 30000 }, { op: 'person', kind: 'enemy', relation: '흉년에 원망을 품은 이웃' }] },
+      { label: '쌀값이 오를 때 비싸게 판다', hint: '돈을 번다. 원망을 산다', values: { greed: D }, fx: [{ op: 'money', add: 45000 }, { op: 'person', kind: 'enemy', relation: '흉년에 원망을 품은 이웃' }] },
     ],
   },
   {
@@ -333,7 +333,7 @@ export const WANO: Turning[] = [
     doors: [
       { label: '집에 들여 재운다', hint: '들키면 함께 벌을 받는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'ally', relation: '비 오는 밤 숨겨 준 낭인' }, { op: 'chance', p: 0.3, then: [{ op: 'hardship', add: 2 }], else: [] }] },
       { label: '주먹밥과 우산만 주어 보낸다', hint: '서로 이름을 묻지 않는다', values: { freedom: D }, fx: [] },
-      { label: '관리에게 알린다', hint: '상을 받는다', values: { greed: D }, fx: [{ op: 'money', add: 8000 }, { op: 'person', kind: 'enemy', relation: '고발당한 낭인' }] },
+      { label: '관리에게 알린다', hint: '상을 받는다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }, { op: 'person', kind: 'enemy', relation: '고발당한 낭인' }] },
     ],
   },
   {

@@ -103,7 +103,7 @@ export const HOMES_LEAVE: Turning[] = [
              { op: 'timeline', text: '쫓기는 낭인들과 나라를 떠났다' }] },
       { label: '배를 대 주고 집으로 돌아간다', hint: '함께 가지는 않는다. 들키면 같이 벌을 받는다', values: { loyalty: D }, fx: [{ op: 'chance', p: 0.3, then: [{ op: 'hardship', add: 2 }, { op: 'hp', add: -10 }] }] },
       { label: '관리에게 숨은 곳을 알린다', hint: '상을 받는다. 낭인들의 칼끝이 언젠가 돌아온다', values: { greed: D },
-        fx: [{ op: 'money', add: 20000 }, { op: 'person', kind: 'enemy', relation: '고발당한 낭인' }] },
+        fx: [{ op: 'money', add: 30000 }, { op: 'person', kind: 'enemy', relation: '고발당한 낭인' }] },
     ],
   },
   // ---------------------------------------------------------------- 어인섬 (지상으로 가는 문이 좁다)

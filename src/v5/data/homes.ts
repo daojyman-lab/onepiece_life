@@ -61,3 +61,11 @@ if (HOME_WEIGHTS) {
     if (id in HOMES && Number.isFinite(Number(w))) HOMES[id as HomeId].weight = Number(w);
   }
 }
+
+/** 태어난 마을 앞에 붙는 큰 지명: 로그타운 고향은 바다 이름, 다른 고향은 그 섬 이름 (마을 이름이 섬 이름과 같으면 그 섬이 있는 바다) */
+const REGION: Record<HomeId, string> = { loguetown: '이스트 블루', water7: '워터 세븐', wano: '와노쿠니', fishman: '어인섬', sky: '하늘섬', zou: '조우' };
+const REGION_WIDE: Record<HomeId, string> = { loguetown: '이스트 블루', water7: '위대한 항로', wano: '신세계', fishman: '위대한 항로', sky: '위대한 항로', zou: '신세계' };
+export function townLabel(home: HomeId, town: string): string {
+  const region = REGION[home] === town ? REGION_WIDE[home] : REGION[home];
+  return `${region} ${town}`;
+}

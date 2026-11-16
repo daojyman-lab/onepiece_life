@@ -7,6 +7,7 @@ import { SPECIES_NAMES } from '../../../data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS } from '../../core/body';
 import { V } from '../../data/balance';
+import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
@@ -77,7 +78,7 @@ export function profileView(s: Life5): ProfileView {
     age: ageWord(s.age),
     standing: standingTitle(s),
     who: `${h.gender === 'f' ? '여자' : '남자'} · ${SPECIES_NAMES[h.species]}`,
-    born: `${h.town}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
+    born: `${townLabel(h.home, h.town)}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
     values: valueWords(s),
     strengths: STRENGTHS.filter((x) => s.strengths.includes(x.id)).map((x) => ({ name: x.name, text: x.text })),
     body: LIMBS.flatMap((l) => {

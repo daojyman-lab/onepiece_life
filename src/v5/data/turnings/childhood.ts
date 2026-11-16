@@ -43,7 +43,7 @@ export const CHILDHOOD: Turning[] = [
     doors: [
       { label: '밤늦도록 이야기를 듣는다', hint: '바다 저편이 마음에 오래 남는다', values: { romance: D }, fx: [] },
       { label: '지도를 그려 달라고 조른다', hint: '머릿속에 바닷길이 그려진다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
-      { label: '뱃사람의 보물 이야기를 부잣집 아이에게 팔아넘긴다', hint: '몇 닢을 번다. 뱃사람이 다시는 이야기를 들려주지 않는다', values: { greed: D }, fx: [{ op: 'money', add: 1000 }] },
+      { label: '뱃사람의 보물 이야기를 부잣집 아이에게 팔아넘긴다', hint: '몇 닢을 번다. 뱃사람이 다시는 이야기를 들려주지 않는다', values: { greed: D }, fx: [{ op: 'money', add: 2000 }] },
     ],
   },
   {
@@ -105,7 +105,7 @@ export const CHILDHOOD: Turning[] = [
     title: '부두의 노름판', body: '부두 뒷골목에서 뱃사람들이 주사위 노름을 한다. 한 사람이 끼워 주겠다며 손짓한다.',
     doors: [
       { label: '가진 돈을 몽땅 건다', hint: '크게 따거나 몽땅 잃는다', values: { greed: D }, mark: 'daring', danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 3000 }], else: [{ op: 'money', add: -3000 }] }] },
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 4000 }], else: [{ op: 'money', add: -3000 }] }] },
       { label: '노름판의 속임수를 지켜본다', hint: '손놀림의 비밀을 알아챈다', values: { inquiry: D }, mark: 'composure', fx: [] },
       { label: '경비대에 알린다', hint: '뱃사람들의 미움을 산다', values: { justice: D }, fx: [{ op: 'person', kind: 'rival', relation: '노름판의 뱃사람' }] },
     ],
@@ -262,7 +262,7 @@ export const CHILDHOOD: Turning[] = [
       { label: '어린아이 몫까지 밤늦게 꼰다', hint: '손바닥이 갈라진다. 그 아이는 회초리를 피한다', values: { loyalty: D }, mark: 'fellowship',
         fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'vit', add: 1 }] },
       { label: '감독의 눈에 들어 아이들의 반장이 된다', hint: '품삯이 오른다. 그 대신 느린 아이를 감독에게 일러야 하는 자리다', values: { greed: D }, 
-        fx: [{ op: 'money', add: 2000 }, { op: 'flag', id: 'factoryForeman' }] },
+        fx: [{ op: 'money', add: 3000 }, { op: 'flag', id: 'factoryForeman' }] },
     ],
   },
   {

@@ -87,6 +87,9 @@ export const PATHS: Turning[] = [
       { label: '사황의 깃발을 단 배를 건드린다', hint: '신세계 전체가 그 이름을 알게 된다', when: [sea('nw_first', 'nw_late')], values: { ambition: D }, danger: true,
         fx: [{ op: 'fame', add: 300 }, { op: 'hp', add: -30 }, { op: 'injury', severity: 'heavy' },
              { op: 'log', text: '사황의 보급선을 털었다. 그날로 세상의 모든 신문에 {name}의 얼굴이 실렸다.', weight: 'heavy' }] },
+      { label: '상선을 털지 않고 통행세를 매긴다', hint: '피를 보지 않고 짐칸이 통째로 들어온다', special: 'greed', values: { greed: D },
+        fx: [{ op: 'money', add: 110000 }, { op: 'fame', add: 5 }, { op: 'flag', id: 'tollPirate' },
+             { op: 'log', text: '상인들은 떨면서도 순순히 금고를 열었다. 다음 항해에도 이 바다를 지나려면 그래야 했다.', weight: 'heavy' }] },
     ],
   },
   {
@@ -183,6 +186,9 @@ export const PATHS: Turning[] = [
       { label: '사황의 부하를 쫓아 깊이 들어간다', hint: '신세계에 이름이 울린다', when: [sea('nw_first', 'nw_late')], values: { ambition: D }, danger: true,
         fx: [{ op: 'fame', add: 300 }, { op: 'hp', add: -30 }, { op: 'injury', severity: 'heavy' },
              { op: 'log', text: '사황의 간부를 붙잡아 왔다. 해군 본부가 {name}의 이름을 기억했다.', weight: 'heavy' }] },
+      { label: '해적 선장에게 뒷돈을 받고 눈을 감는다', hint: '보고서 한 장이면 큰돈이 주머니로 들어온다', special: 'greed', values: { greed: D },
+        fx: [{ op: 'money', add: 90000 }, { op: 'flag', id: 'letPiratesGo' }, { op: 'flag', id: 'bribed' },
+             { op: 'log', text: '보고서에는 \'해적선은 이미 떠난 뒤였음\'이라고 적었다. 품 안의 돈주머니가 묵직했다.', weight: 'heavy' }] },
     ],
   },
   {
