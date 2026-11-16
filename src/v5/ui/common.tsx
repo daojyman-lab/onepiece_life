@@ -1,11 +1,12 @@
 // v5 화면의 공용 조각. v4 src/ui/common.tsx의 같은 이름과 같은 마크업 · 클래스 (v4의 LifeState에 기대는 것은 옮기지 않는다).
 import type { ComponentChildren } from 'preact';
-import { faceURL, type Who } from '../../ui/pixel/pixelArt';
+import type { Who } from '../../ui/pixel/pixelArt';
+import { portraitURL } from './portraits';
 
 export const fmt = (n: number) => Math.round(n).toLocaleString('ko-KR');
 
 export function Face({ who, size = '', title }: { who: Who; size?: '' | 'big' | 'sm' | 'xs'; title?: string }) {
-  return <img class={`face ${size}`} src={faceURL(who)} alt={title ?? ''} title={title} />;
+  return <img class={`face ${size}`} src={portraitURL(who)} alt={title ?? ''} title={title} />;
 }
 
 export function Gauge({ value, max, kind = 'hp', thin }: { value: number; max: number; kind?: 'hp' | 'sp' | 'gold'; thin?: boolean }) {
