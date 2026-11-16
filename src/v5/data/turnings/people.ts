@@ -227,7 +227,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'pp_prosthetic', kind: 'door', when: at(st('child', ...GROWN), { c: 'limbLost', min: 1 }),
+    id: 'pp_prosthetic', kind: 'door', when: at(st('child', ...GROWN), { c: 'limbLost', min: 1, limbs: ['armL', 'armR', 'legL', 'legR'] }),
     weight: 8, repeat: { years: 1 }, speaker: { relation: '의수 장인' },
     title: '기름때 묻은 공방', body: '{island}의 공방에서 기름때 묻은 장인이 {name}이(가) 잃은 자리를 살핀다. 값만 치르면 쓸 만한 것을 달아 주겠다고 한다.',
     doors: [

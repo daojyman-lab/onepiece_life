@@ -11,7 +11,7 @@ const WEALTH_ORDER: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble
 const wealthRank = (w: Wealth) => WEALTH_ORDER.indexOf(w);
 const inRange = (n: number, min?: number, max?: number) => (min === undefined || n >= min) && (max === undefined || n <= max);
 /** 아직 의수 · 의족을 달지 않은, 잃은 채로 남은 부위의 수 */
-const lostLimbs = (s: Life5) => Object.values(s.hero.limbs).filter((x) => x === 'lost').length;
+const lostLimbs = (s: Life5, only?: readonly string[]) => Object.entries(s.hero.limbs).filter(([k, x]) => x === 'lost' && (!only || only.includes(k))).length;
 const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ?? id;
 
 export function check(s: Life5, c: Cond): boolean {
@@ -33,7 +33,7 @@ export function check(s: Life5, c: Cond): boolean {
     }
     case 'flag': return s.flags.includes(c.id) === c.has;
     case 'fruit': return (h.fruit !== null) === c.has;
-    case 'limbLost': return lostLimbs(s) >= c.min;
+    case 'limbLost': return lostLimbs(s, c.limbs) >= c.min;
     case 'sea': return c.is.includes(h.sea);
     case 'hardship': return s.hardship >= c.min;
     // 밝혀졌다 = 'surnameKnown' 표시가 있다. 모른다 = 아직 숨은 성이 남아 있다 (숨은 성이 없는 사람은 둘 다 아니다)
@@ -66,7 +66,7 @@ function reason(s: Life5, c: Cond): string {
     case 'tier': return '아직 그 경지에 이르지 못했다';
     case 'flag': return '때가 맞지 않는다';
     case 'fruit': return c.has ? '열매 능력자만 할 수 있다' : '능력자는 할 수 없다';
-    case 'limbLost': return '잃은 곳이 없다';
+    case 'limbLost': return c.limbs ? '잃은 팔다리가 없다' : '잃은 곳이 없다';
     case 'sea': return '이 바다에서는 할 수 없다';
     case 'hardship': return '아직 겪은 것이 모자란다';
     case 'secret': return c.known ? '아직 밝혀지지 않았다' : '숨은 것이 없다';

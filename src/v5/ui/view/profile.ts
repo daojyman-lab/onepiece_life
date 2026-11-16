@@ -29,6 +29,8 @@ export interface ProfileView {
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
+  path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
+  haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
   hp: number; hurts: string[];                         // 부상과 병의 이름
 }
@@ -80,6 +82,8 @@ export function profileView(s: Life5): ProfileView {
       return st === 'ok' ? [] : [{ limb: LIMB_NAME[l], word: LIMB_STATE_WORD[st] }];
     }),
     skills: BRANCHES.filter((b) => g.tier[b] >= 1).map((b) => ({ name: BRANCH_NAME[b], tier: TIER_WORD[g.tier[b]] ?? '' })),
+    path: g.path ? BRANCH_NAME[g.path] : null,
+    haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     money: `${fmtMoney(h.money)} 베리`,

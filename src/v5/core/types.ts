@@ -61,7 +61,7 @@ export type Cond =
   | { c: 'tier'; branch: Branch | 'any'; min: number }
   | { c: 'flag'; id: string; has: boolean }
   | { c: 'fruit'; has: boolean }
-  | { c: 'limbLost'; min: number }
+  | { c: 'limbLost'; min: number; limbs?: Limb[] }  // limbs가 있으면 그 부위만 센다 (의수 · 의족은 팔다리만)
   | { c: 'sea'; is: SeaId[] }
   | { c: 'hardship'; min: number }
   | { c: 'secret'; known: boolean }

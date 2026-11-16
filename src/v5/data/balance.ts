@@ -66,8 +66,8 @@ export const V = {
   limb: { eye: { spd: 0.9, aim: 0.15 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
   // 뭍에 자리 잡은(settled) · 물러난(retired) 사람이 해마다 버는 살림 돈 (밭 · 가게 · 모아 둔 것). 약값을 낼 수 있게 한다 (3단계 균형 보고)
-  income: { settled: 2500, retired: 1500 },
-  risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 1200,
+  income: { settled: 4000, retired: 2500 },
+  risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 1200, calmGuard: 0.3,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
           monthsPerPart: 3, worsenMonths: 15,  // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
           maxStage: 3,

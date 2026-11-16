@@ -18,10 +18,15 @@ export function oldAgeP(age: number): number {
   return age < R.oldFrom ? 0 : (age - R.oldFrom + 1) ** 2 * R.oldK;
 }
 
+/** 평온하게 산 사람은 노환이 늦게 온다 (설계 7장: 가치관이 다르면 인생의 길이 다르다). 평온 점수에 비례해 V.risk.calmGuard까지 줄인다 */
+function calmMult(s: Life5): number {
+  return 1 - R.calmGuard * s.values.peace / V.value.max;
+}
+
 /** 해가 바뀔 때 한 번: 노환 → 병 → 사고의 조짐 → 굶주림. 죽었거나 떠 있는 일이 있으면 굴리지 않는다 */
 export function yearRisks(s: Life5, r: Rng): void {
   if (!s.hero.alive || s.pending) return;
-  if (chance(r, oldAgeP(s.age) * talentMult(s, 'oldAge'))) { die(s, '노환'); return; }
+  if (chance(r, oldAgeP(s.age) * talentMult(s, 'oldAge') * calmMult(s))) { die(s, '노환'); return; }
   if (!s.hero.illness && chance(r, illnessP(s))) {
     applyFx(s, [{ op: 'illness', id: 'cough' }]);
     logLine(s, '기침이 멎지 않는다.', 'heavy', 'danger');

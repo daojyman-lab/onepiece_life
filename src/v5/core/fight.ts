@@ -151,6 +151,14 @@ function aimMult(s: Life5): number {
  * v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다.
  * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
  */
+/** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 뒤 가장 높은 단계의 배율을 곱한다 (heroUnit5와 같다) */
+export function heroFightStats(s: Life5): Stats {
+  const st: Stats = effectiveStats5(s);
+  const m = tierMult(topTier(s));
+  for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
+  return st;
+}
+
 export function heroUnit5(s: Life5): CUnit {
   const h = s.hero;
   const st: Stats = effectiveStats5(s);

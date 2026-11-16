@@ -10,8 +10,12 @@ export function personWho5(p: Person): Who {
 }
 
 /** 인연 목록: 줄마다 사람의 id(목록 열쇠로 쓴다) */
-export function peopleView(s: Life5): { id: string; name: string; relation: string; gone: boolean; who: Who }[] {
-  return s.people.map((p) => ({ id: p.id, name: p.name, relation: p.relation, gone: !p.alive, who: personWho5(p) }));
+/** crew: 함께 다니는 동료면 그 자리와 레벨 (예: '돌격 · Lv.3', 다쳤으면 '다쳐 쉬는 중') */
+const CREW_ROLE_NAME: Record<string, string> = { vanguard: '돌격', support: '지원', medic: '의사', navigator: '항해사', cook: '요리사', shipwright: '목수' };
+
+export function peopleView(s: Life5): { id: string; name: string; relation: string; gone: boolean; who: Who; crew: string | null }[] {
+  return s.people.map((p) => ({ id: p.id, name: p.name, relation: p.relation, gone: !p.alive, who: personWho5(p),
+    crew: p.alive && p.crew ? `${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
 }
 
 function factionOf(st: Standing): NonNullable<Who['faction']> {

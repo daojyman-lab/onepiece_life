@@ -361,3 +361,15 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .modal.ending5 > .ending5-go { flex: none; margin-top: 8px; }
 .ending5-body > section { display: flex; flex-direction: column; gap: 2px; }
 .ending5-body summary { cursor: pointer; }
+/* 싸움 앞의 능력치 비교: 나(왼쪽, 파랑) · 이름 · 상대(오른쪽, 빨강) */
+.fight-stats { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.fight-stat { display: grid; grid-template-columns: 1fr 2.6em 3em 2.6em 1fr; align-items: center; gap: 4px; }
+.fight-stat .num { text-align: center; font-variant-numeric: tabular-nums; }
+.fight-stat .lab { text-align: center; color: var(--ink-soft); }
+.fight-stat .bar { height: 7px; background: var(--wood-dd); position: relative; display: flex; }
+.fight-stat .bar.me { justify-content: flex-end; }
+.fight-stat .bar i { display: block; height: 100%; }
+.fight-stat .bar.me i { background: var(--blue); }
+.fight-stat .bar.foe i { background: var(--red); }
+/* 인연 칸의 작은 탭 (인연 · 동료) */
+.people-tabs { display: flex; gap: 4px; margin-bottom: 6px; }

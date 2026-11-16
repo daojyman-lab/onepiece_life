@@ -145,6 +145,8 @@ function Profile({ s }: { s: Life5 }) {
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
+        {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
+        {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
@@ -202,10 +204,18 @@ function StoryPanel({ s }: { s: Life5 }) {
   const items = storyLines(s, st.shownId, onlyHeavy);
   const waiting = s.log.filter((l) => l.id > st.shownId).length;
   const newest = items.length ? items[items.length - 1].id : undefined;
+  // 새 줄이 뜨면 그 줄이 보이게 따라간다. 떠오르는 움직임이 높이를 바꾸므로 다음 그림 때 한 번 더 맞춘다
   useEffect(() => {
     const el = box.current;
-    if (el && stick.current) el.scrollTop = el.scrollHeight;
+    if (!el || !stick.current) return;
+    el.scrollTop = el.scrollHeight;
+    const raf = requestAnimationFrame(() => { if (stick.current) el.scrollTop = el.scrollHeight; });
+    const t = setTimeout(() => { if (stick.current) el.scrollTop = el.scrollHeight; }, 400);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); };
   }, [newest, onlyHeavy]);
+  /** 읽는 사람이 직접 칸을 굴렸다 (휠 · 터치 · 키). 오래된 줄이 위에서 잘려 나가며 생긴 스크롤은 이것이 아니다 */
+  const userScroll = useRef(0);
+  const markUser = () => { userScroll.current = Date.now(); };
   // 마우스를 올린 채 칸이 사라지면(탭 바꿈 · 화면 바꿈) 멈춤이 남지 않게 푼다
   useEffect(() => () => actions.setReading(false), []);
   const onScroll = () => {
@@ -214,7 +224,7 @@ function StoryPanel({ s }: { s: Life5 }) {
     // 맨 아래 가까이면 다시 따라가고, 읽는 사람이 위로 올렸을 때만 따라가기를 멈춘다.
     // (빠른 배속에서는 스크롤 사건이 오기 전에 새 줄이 붙어 틈이 벌어질 수 있으니 틈만 보고 멈추지 않는다)
     if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) stick.current = true;
-    else if (el.scrollTop < lastTop.current) stick.current = false;
+    else if (el.scrollTop < lastTop.current && Date.now() - userScroll.current < 1000) stick.current = false;
     lastTop.current = el.scrollTop;
   };
   // 마우스가 칸 안에서 실제로 움직일 때만 멈춘다(flow.ts shouldRead). 창이 닫혀 커서가 그 자리에 놓였을 뿐이면 흐름은 이어진다
@@ -237,7 +247,7 @@ function StoryPanel({ s }: { s: Life5 }) {
         ))}
       </div>
     }>
-      <div class="story" ref={box} onScroll={onScroll} aria-live="polite"
+      <div class="story" ref={box} onScroll={onScroll} aria-live="polite" onWheel={markUser} onTouchMove={markUser} onKeyDown={markUser} onPointerDown={markUser}
         onPointerMove={onPointerMove} onPointerLeave={() => actions.setReading(false)}>
         {items.map((l) => l.weight === 'year'
           ? <div key={l.id} class={`story-year ${l.id === newest ? 'rise' : ''}`}>{yearLabel(l)}</div>
@@ -272,17 +282,24 @@ function SideTabs({ s }: { s: Life5 }) {
 }
 
 function PeoplePanel({ s }: { s: Life5 }) {
-  const people = peopleView(s);
+  const [sub, setSub] = useState<'all' | 'crew'>('all');
+  const all = peopleView(s);
+  const people = sub === 'crew' ? all.filter((p) => p.crew) : all;
   return (
     <Panel title="인연">
+      <div class="people-tabs" role="tablist" aria-label="인연과 동료">
+        {([['all', '인연'], ['crew', `동료 ${all.filter((p) => p.crew).length}`]] as const).map(([k, label]) => (
+          <button key={k} role="tab" aria-selected={sub === k} class={`btn small ${sub === k ? 'on' : ''}`} onClick={() => setSub(k)}>{label}</button>
+        ))}
+      </div>
       <div class="stack">
-        {people.length === 0 && <div class="soft">아무도 없다.</div>}
+        {people.length === 0 && <div class="soft">{sub === 'crew' ? '함께 다니는 동료가 없다.' : '아무도 없다.'}</div>}
         {people.map((p) => (
           <div key={p.id} class={`row ${p.gone ? 'gone' : ''}`} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Face who={p.who} size="sm" />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div><b>{p.name}</b></div>
-              <div class="t9 soft">{p.relation}{p.gone ? ' · 떠났다' : ''}</div>
+              <div class="t9 soft">{p.relation}{p.gone ? ' · 떠났다' : ''}{p.crew ? ` · ${p.crew}` : ''}</div>
             </div>
           </div>
         ))}

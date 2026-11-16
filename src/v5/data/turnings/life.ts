@@ -310,7 +310,7 @@ const BONDS: Turning[] = [
     weight: 4, repeat: 'once', speaker: 'hero',
     title: '판 쪽에 선 벗', body: '오랜 벗이 {name}의 큰 거래를 남에게 몰래 넘겼다. 거래는 깨졌고, 벗은 그 대가로 받은 돈으로 새 배를 샀다. 벗이 {island}의 술집에 있다는 말이 들린다.',
     doors: [
-      { label: '같은 방식으로 되갚아 준다', hint: '벗의 다음 거래를 망쳐 놓는다. 서로 원수가 된다', values: { dominion: D },
+      { label: '벗이 챙긴 몫을 이자까지 쳐서 빼앗아 온다', hint: '돈은 돌아온다. 서로 원수가 된다', values: { greed: D },
         fx: [{ op: 'money', add: 10000 }, { op: 'person', kind: 'rival', relation: '원수가 된 옛 벗' }] },
       { label: '술집에 가서 까닭을 묻고 용서한다', hint: '손해는 그대로다. 벗은 술잔을 들지 못한다', values: { loyalty: D },
         fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '용서받은 옛 벗' }] }] },

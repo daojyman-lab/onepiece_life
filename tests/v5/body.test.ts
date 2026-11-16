@@ -96,13 +96,13 @@ describe('신체 손실의 세부', () => {
     expect(s.queue.filter((q) => q === 'moment_limb')).toHaveLength(1);
     expect(s.timeline.length).toBe(2);
   });
-  it('의수 · 의족은 다리 → 팔 → 눈 순으로 달고, 돈으로 단 것은 기연으로 더 나아진다', () => {
+  it('의수 · 의족은 다리 → 팔 순으로 달고 눈은 달지 않으며, 돈으로 단 것은 기연으로 더 나아진다', () => {
     const s = adult();
     loseLimb(s, 'eyeR', rngOf(s.rng)); loseLimb(s, 'armL', rngOf(s.rng)); loseLimb(s, 'legR', rngOf(s.rng));
     expect(fitProsthetic(s, 'basic')).toBe('legR');
     expect(fitProsthetic(s, 'basic')).toBe('armL');
-    expect(fitProsthetic(s, 'basic')).toBe('eyeR');
-    expect(fitProsthetic(s, 'basic')).toBeNull();
+    expect(fitProsthetic(s, 'basic')).toBeNull();   // 4단계: 의안은 달지 않는다
+    expect(s.hero.limbs.eyeR).toBe('lost');
     expect(fitProsthetic(s, 'superior')).toBe('legR');
     expect(s.hero.limbs.legR).toBe('superior');
   });

@@ -11,7 +11,8 @@ export const LIMB_NAME: Record<Limb, string> = {
   eyeL: '왼쪽 눈', eyeR: '오른쪽 눈', armL: '왼팔', armR: '오른팔', legL: '왼쪽 다리', legR: '오른쪽 다리',
 };
 /** 의수 · 의족을 다는 차례: 다리 → 팔 → 눈 */
-const FIT_ORDER: readonly Limb[] = ['legL', 'legR', 'armL', 'armR', 'eyeL', 'eyeR'];
+/** 의수 · 의족을 다는 차례. 눈은 달지 않는다 (의안은 그리지 않는다) */
+const FIT_ORDER: readonly Limb[] = ['legL', 'legR', 'armL', 'armR'];
 const EYES: readonly Limb[] = ['eyeL', 'eyeR'];
 const ARMS: readonly Limb[] = ['armL', 'armR'];
 const LEGS: readonly Limb[] = ['legL', 'legR'];

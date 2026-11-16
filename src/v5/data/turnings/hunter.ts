@@ -170,7 +170,7 @@ export const HUNTER: Turning[] = [
         fx: [{ op: 'fame', add: 20 }, { op: 'flag', id: 'pirateHunterName' }, { op: 'hp', add: -10 }] },
       { label: '이름을 지우고 작은 사냥으로 조용히 산다', hint: '큰돈은 다시 만지지 못한다', values: { peace: D },
         fx: [{ op: 'fame', add: -15 }, { op: 'flag', id: 'quietHunter' }] },
-      { label: '목을 노리는 해적들을 한곳에 꾀어 쓸어버린다', hint: '한 번에 끝내거나 한 번에 끝난다', special: 'dominion', values: { dominion: D }, danger: true,
+      { label: '목을 노리는 해적들을 한곳에 꾀어 쓸어버린다', hint: '한 번에 끝내거나 한 번에 끝난다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'fame', add: 50 }, { op: 'money', add: 100000 }, { op: 'hp', add: -25 },
                       { op: 'log', text: '가짜 보물 소문에 몰려든 해적들을 섬 하나에 가두었다. 그 바다의 수배서가 절반으로 줄었다.', weight: 'heavy' }],
