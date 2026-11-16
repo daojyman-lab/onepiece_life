@@ -2,7 +2,10 @@
 import { BRANCH_NAMES } from '../../data/skills';
 import { TALENT_BY_ID } from '../../data/talents';
 import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
+import { josa } from '../../core/josa';
+import { SEA_BY_ID } from '../../data/seas';
 import { V } from '../data/balance';
+import { SEA_STANDINGS } from '../data/landlocked';
 import { LINES, type DailyLine5 } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
@@ -228,6 +231,22 @@ function nextPart(s: Life5): void {
   comeOfAge(s);
   masterYear(s);
   livingIncome(s);
+  voyage(s);
+}
+
+/** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
+export function voyage(s: Life5): void {
+  const h = s.hero;
+  if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
+  const r = rngOf(s.rng);
+  if (!chance(r, V.voyage.p)) return;
+  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island);
+  const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
+  if (!next) return;
+  const first = !s.flags.includes(`at:${next}`);
+  h.island = next;
+  if (first) s.flags.push(`at:${next}`);
+  logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
 }
 
 /** 뭍에 자리 잡은 사람 · 물러난 사람은 해마다 살림 돈을 번다 (V.income) */

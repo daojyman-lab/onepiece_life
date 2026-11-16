@@ -24,6 +24,7 @@ import { HOMES_LEAVE, HOMES_RETURN } from './homes-sea';
 import { WATER7 } from './water7';
 import { WANO } from './wano';
 import { BONDS } from './bonds';
+import { ISLANDS, ISLAND_OF } from './islands';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -51,6 +52,7 @@ const GROUPS: Turning[][] = [
   HOMES_RETURN,
   WATER7,
   WANO,
+  ISLANDS,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));
@@ -72,5 +74,12 @@ export function landlocked(t: Turning): Turning {
   return t;
 }
 
-export const TURNINGS: Turning[] = GROUPS.flat().map(landlocked);
+/** 그 섬에서 일어나는 바다의 전환점은 그 섬에 닿아야 열린다 (항해: core/year.ts의 voyage) */
+function anchored(t: Turning): Turning {
+  const island = ISLAND_OF[t.id];
+  if (island && !t.when.some((c) => c.c === 'island')) t.when.push({ c: 'island', is: [island] });
+  return t;
+}
+
+export const TURNINGS: Turning[] = GROUPS.flat().map(anchored).map(landlocked);
 export const TURNING_BY_ID: Record<string, Turning> = Object.fromEntries(TURNINGS.map((t) => [t.id, t]));

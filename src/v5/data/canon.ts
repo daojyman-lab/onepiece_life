@@ -52,6 +52,13 @@ const ROWS: Record<string, Row> = {
   doflamingo: ['돈키호테 도플라밍고', 'm', 39, 'pirate'],
   akainu: ['아카이누', 'm', 53, 'marine'],
   kaido: ['백수 카이도', 'm', 57, 'pirate'],
+  // 섬에서 만나 배에 태우는 사람들 (turnings/islands.ts)
+  gin: ['긴', 'm', 25, 'pirate'],
+  johnny: ['조니', 'm', 23, 'civil'],
+  bonclay: ['봉쿠레', 'm', 30, 'pirate'],
+  duval: ['듀발', 'm', 27, 'pirate'],
+  sai: ['사이', 'm', 28, 'pirate'],
+  hajrudin: ['하이루딘', 'm', 79, 'pirate', 'giant'],
   bartolomeo: ['바르톨로메오', 'm', 22, 'pirate'],
   cavendish: ['캐번디시', 'm', 24, 'pirate'],
   ideo: ['이데오', 'm', 25, 'pirate'],
