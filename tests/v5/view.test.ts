@@ -42,6 +42,17 @@ describe('가치관은 말로만', () => {
 });
 
 describe('프로필', () => {
+  it('해적은 이름값에 따라, 해군은 자리에 따라 이름이 오르고, 신참 · 병사를 벗어나면 가장 높은 가치관의 말이 붙는다', () => {
+    const s = newLife5(9); s.hero.standing = 'pirate'; s.values.ambition = 30; s.values.romance = 10;
+    s.hero.fame = 5; expect(profileView(s).standing).toBe('신참 해적');
+    s.hero.fame = 60; expect(profileView(s).standing).toBe('야망 있는 이름난 해적');
+    s.hero.fame = 200; expect(profileView(s).standing).toBe('야망 있는 악명 높은 해적');
+    s.hero.fame = 900; expect(profileView(s).standing).toBe('야망 있는 바다를 뒤흔드는 대해적');
+    const m = newLife5(9); m.hero.standing = 'marine'; m.values.romance = 30;
+    expect(profileView(m).standing).toBe('해군 병사');
+    m.flags.push('mnOfficer'); expect(profileView(m).standing).toBe('낭만적인 해군 부사관');
+    m.hero.rank = 3; expect(profileView(m).standing).toBe('낭만적인 해군 장교');
+  });
   it('성별과 종족이 나온다', () => {
     const s = newLife5(5, { home: 'fishman' });
     s.hero.gender = 'f'; s.hero.species = 'merfolk';

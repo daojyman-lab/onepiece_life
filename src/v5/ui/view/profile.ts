@@ -9,8 +9,10 @@ import { LIMB_NAME, LIMBS } from '../../core/body';
 import { V } from '../../data/balance';
 import { STRENGTHS } from '../../data/strengths';
 import {
-  BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, STANDING_NAME, TIER_WORD, WEALTH_NAME,
+  BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
+  STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
 } from '../../data/words';
+import { topValues } from '../../core/values';
 import type { Branch, Life5, LogLine, Standing } from '../../core/types';
 import { foeWho, heroWho5, personWho5 } from './faces';
 import { ageWord, valueWords } from './words';
@@ -40,6 +42,27 @@ function fameWord(s: Life5): string {
   return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(fame * V.fame.bounty)} 베리` : `이름값 ${fmtMoney(fame)}`;
 }
 
+/**
+ * 처지의 이름. 해적은 이름값(명성)에 따라 신참 해적 → 이름난 해적 → 악명 높은 해적 → 대해적,
+ * 해군은 병사 → 부사관(분대장) → 장교. 신참 · 병사를 벗어나면 가장 높은 가치관의 말을 앞에 붙인다 (예: '야망 있는 이름난 해적')
+ */
+export function standingTitle(s: Life5): string {
+  const h = s.hero;
+  const top = topValues(s, 1)[0];
+  const adj = (base: string) => (top ? `${VALUE_ADJ[top]} ${base}` : base);
+  if (h.standing === 'pirate') {
+    const fame = Math.round(h.fame);
+    if (fame < PIRATE_TITLES[0][0]) return PIRATE_TITLES[0][1];
+    return adj(PIRATE_TITLES.find(([lim]) => fame < lim)?.[1] ?? PIRATE_TOP_TITLE);
+  }
+  if (h.standing === 'marine') {
+    if (h.rank >= MARINE_OFFICER_RANK) return adj(MARINE_TITLES.officer);
+    if (s.flags.includes('mnOfficer')) return adj(MARINE_TITLES.nco);
+    return MARINE_TITLES.soldier;
+  }
+  return STANDING_NAME[h.standing];
+}
+
 export function profileView(s: Life5): ProfileView {
   const h = s.hero, g = s.growth;
   const hurts = h.injuries.map((i) => INJURY_NAME[i.severity]);
@@ -47,7 +70,7 @@ export function profileView(s: Life5): ProfileView {
   return {
     name: fullName(h).trim(),
     age: ageWord(s.age),
-    standing: STANDING_NAME[h.standing],
+    standing: standingTitle(s),
     who: `${h.gender === 'f' ? '여자' : '남자'} · ${SPECIES_NAMES[h.species]}`,
     born: `${h.town}의 ${WEALTH_NAME[h.wealth]} · ${LINEAGE_NAME[h.lineage]}`,
     values: valueWords(s),

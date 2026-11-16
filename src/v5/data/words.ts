@@ -2,7 +2,7 @@
 import { BRANCH_NAMES } from '../../data/skills';
 import { BRANCH_ID } from '../core/power';
 import type { Injury } from '../../core/types';
-import type { Branch, Lineage, LimbState, Standing, Wealth } from '../core/types';
+import type { Branch, Lineage, LimbState, Standing, ValueId, Wealth } from '../core/types';
 
 export const WEALTH_NAME: Record<Wealth, string> = {
   poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안',
@@ -45,3 +45,15 @@ export const RELATION_KIND: Record<'spouse' | 'child' | 'sibling' | 'parent', st
   sibling: ['형', '누나', '오빠', '언니', '남동생', '여동생'],
   parent: ['아버지', '어머니'],
 };
+
+/** 처지 앞에 붙는 가치관의 말 (가장 높은 가치관) */
+export const VALUE_ADJ: Record<ValueId, string> = {
+  justice: '정의로운', devotion: '헌신적인', ambition: '야망 있는', romance: '낭만적인', inquiry: '탐구심 많은',
+  loyalty: '의리 있는', freedom: '자유로운', dominion: '패도를 걷는', peace: '온화한',
+};
+/** 해적의 이름값(명성)에 따른 이름: [이 명성 미만이면, 이름]. 맨 처음(신참)에는 가치관의 말을 붙이지 않는다 */
+export const PIRATE_TITLES: readonly [number, string][] = [[30, '신참 해적'], [150, '이름난 해적'], [400, '악명 높은 해적']];
+export const PIRATE_TOP_TITLE = '바다를 뒤흔드는 대해적';
+/** 해군의 자리: 분대를 거느리기 전은 병사, 분대장(mnOfficer)부터 부사관, 계급 marineOfficerRank부터 장교 */
+export const MARINE_TITLES = { soldier: '해군 병사', nco: '해군 부사관', officer: '해군 장교' } as const;
+export const MARINE_OFFICER_RANK = 3;
