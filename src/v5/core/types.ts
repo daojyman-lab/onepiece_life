@@ -1,7 +1,7 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../../core/types';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
-export type ValueId = 'justice' | 'devotion' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
+export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
 export type Values = Record<ValueId, number>;                    // 각 0~100
 export type HomeId = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou';
 export type Wealth = 'poor' | 'common' | 'comfortable' | 'noble';

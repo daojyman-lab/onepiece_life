@@ -71,11 +71,11 @@ export const SEA_GRAND_LINE: Turning[] = [
     weight: 4, repeat: 'once', speaker: { relation: '물의 도시의 목수' },
     title: '물의 도시의 큰 물결', body: '워터 세븐에 해마다 오는 큰 물결이 밀려온다. 아래 도시는 모두 높은 곳으로 피했다. 뒷골목에 아직 다리를 다친 노인이 남아 있다는 외침이 들린다. 빈집들의 문은 열려 있다.',
     doors: [
-      { label: '큰 물결 속으로 노인을 데리러 간다', hint: '물결이 집채만 하다. 헤엄을 못 치면 끝이다', values: { devotion: D }, danger: true, needs: ['swim'],
+      { label: '큰 물결 속으로 노인을 데리러 간다', hint: '물결이 집채만 하다. 헤엄을 못 치면 끝이다', values: { loyalty: D }, danger: true, needs: ['swim'],
         fx: [{ op: 'hp', add: -20 }, { op: 'person', kind: 'ally', relation: '큰 물결에서 건진 노인', age: { older: 40 } }, { op: 'fame', add: 3 }] },
       { label: '목수들과 함께 방파제를 지킨다', hint: '밤새 모래주머니를 쌓는다. 도시가 {name}을(를) 기억한다', values: { loyalty: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'vit', add: 1 }] },
-      { label: '빈집들의 문을 열고 들어간다', hint: '물결이 다 쓸어 갈 것들이다. 아무도 보지 않는다', values: { ambition: D },
+      { label: '빈집들의 문을 열고 들어간다', hint: '물결이 다 쓸어 갈 것들이다. 아무도 보지 않는다', values: { greed: D }, 
         fx: [{ op: 'money', add: 20000 }, { op: 'hardship', add: 1 }] },
     ],
   },
@@ -98,7 +98,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     title: '휴먼 숍', body: '샤본디 제도 1번 그로브의 경매장에 사람들이 줄지어 들어간다. 오늘의 상품은 사람이다. 무대 뒤의 우리 안에서 어린 인어가 울고 있다. 앞줄에 천룡인이 앉아 있다.',
     doors: [
       { label: '경매장 앞에서 고개를 숙이고 지나간다', hint: '천룡인과 엮이지 않는다. 우는 소리가 오래 남는다', fx: [{ op: 'hardship', add: 2 }] },
-      { label: '가진 돈을 다 모아 한 사람의 값을 치른다', hint: '빈털터리가 된다. 사슬 하나가 풀린다', values: { devotion: D }, when: [{ c: 'money', min: 50000 }],
+      { label: '가진 돈을 다 모아 한 사람의 값을 치른다', hint: '빈털터리가 된다. 사슬 하나가 풀린다', values: { freedom: D }, when: [{ c: 'money', min: 50000 }],
         fx: [{ op: 'money', add: -50000 }, { op: 'person', kind: 'ally', relation: '경매장에서 값을 치러 풀어 준 사람' }, { op: 'timeline', text: '샤본디의 경매장에서 한 사람의 값을 치러 풀어 주었다' }] },
       { label: '무대 뒤로 숨어들어 우리의 자물쇠를 부순다', hint: '천룡인의 물건에 손대는 일이다. 해군 대장이 온다', values: { justice: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5, then: [{ op: 'fame', add: 15 }, { op: 'flag', id: 'govEnemy' }, { op: 'log', text: '소동 속에서 인어를 물가로 데려갔다. 그날 밤 해군 대장이 섬에 왔다는 소문이 돌았다.', weight: 'heavy' }],
@@ -140,7 +140,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '말하는 장난감들의 나라', body: '드레스로자의 거리에는 사람과 장난감이 함께 산다. 외다리 장난감 병정이 {name}의 옷자락을 잡고 속삭인다. 이 장난감들은 원래 사람이었다고, 아무도 그들을 기억하지 못한다고.',
     doors: [
-      { label: '말을 흘려듣고 이 나라를 서둘러 떠난다', hint: '이 나라의 일에 엮이지 않는다', values: { peace: D },
+      { label: '말을 흘려듣고 이 나라를 서둘러 떠난다', hint: '이 나라의 일에 엮이지 않는다', values: { freedom: D },
         fx: [{ op: 'log', text: '항구를 떠나며 돌아보니 장난감 병정이 아직 부두에 서 있었다.', weight: 'light' }] },
       { label: '병정을 따라 지하의 장난감들을 만난다', hint: '이 나라의 왕이 숨긴 것을 보게 된다. 쫓기게 된다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'dressrosaSecret' }, { op: 'chance', p: 0.3, then: [{ op: 'hp', add: -15 }] }] },
@@ -154,7 +154,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     title: '걷는 코끼리 위의 나라', body: '천 년을 걷는 거대한 코끼리의 등 위에 밍크족의 나라가 있다. 숲이 부서지고 연기가 오른다. 사황의 부하가 누군가를 찾는다며 나라를 짓밟고 갔다고 한다. 다친 밍크족들이 나무 아래 누워 있다.',
     doors: [
       { label: '숲에 숨어 짓밟는 자들이 지나가길 기다린다', hint: '나서지 않는다. 살아남는다', fx: [{ op: 'hardship', add: 1 }] },
-      { label: '다친 밍크족들의 상처를 싸맨다', hint: '며칠을 숲에서 보낸다. 털복숭이 전사들이 {name}을(를) 친구라 부른다', values: { devotion: D },
+      { label: '다친 밍크족들의 상처를 싸맨다', hint: '며칠을 숲에서 보낸다. 털복숭이 전사들이 {name}을(를) 친구라 부른다', values: { peace: D },
         fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'ally', relation: '털복숭이 밍크족 전사' }] },
       { label: '짓밟은 자들을 뒤쫓아 앙갚음한다', hint: '사황의 부하다. 경지가 있어야 맞선다', values: { loyalty: D }, danger: true, when: READY(4),
         fx: [{ op: 'hp', add: -25 }, { op: 'fame', add: 20 }] },
@@ -165,7 +165,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '웃음밖에 남지 않은 마을', body: '와노쿠니의 가난한 마을 사람들이 굶주린 얼굴로 웃고 있다. 가짜 열매를 먹고 웃음 말고는 모든 표정을 잃었다고 한다. 성 아랫마을에서는 쇼군의 잔치가 한창이다.',
     doors: [
-      { label: '몰래 쌀을 날라 마을에 나눈다', hint: '쇼군의 순찰에 걸리면 끝이다', values: { devotion: D }, danger: true,
+      { label: '몰래 쌀을 날라 마을에 나눈다', hint: '쇼군의 순찰에 걸리면 끝이다', values: { justice: D }, danger: true,
         fx: [{ op: 'money', add: -15000 }, { op: 'chance', p: 0.3, then: [{ op: 'hp', add: -15 }] }, { op: 'person', kind: 'ally', relation: '웃음밖에 남지 않은 마을의 노인', age: { older: 30 } }] },
       { label: '성 아랫마을의 잔치에 끼어 쇼군의 눈에 든다', hint: '배부르게 먹는다. 무엇을 등지고 있는지 안다', values: { ambition: D },
         fx: [{ op: 'money', add: 20000 }, { op: 'hardship', add: 2 }] },
@@ -182,7 +182,7 @@ export const SEA_NEW_WORLD: Turning[] = [
         fx: [{ op: 'base', key: 'int', add: 2 }, { op: 'flag', id: 'eggheadLab' }, { op: 'chance', p: 0.3, then: [{ op: 'flag', id: 'govEnemy' }] }] },
       { label: '군함이 둘러싸기 전에 섬을 빠져나간다', hint: '미래는 보지 못한다. 포위망 밖으로 나간다', values: { peace: D },
         fx: [{ op: 'log', text: '빠져나온 다음 날, 섬 쪽 하늘에 빛줄기가 내리꽂혔다.', weight: 'light' }] },
-      { label: '연구실의 물건을 빼내 비싸게 판다', hint: '큰돈이 된다. 박사의 경비 기계가 쫓아온다', values: { ambition: D }, danger: true,
+      { label: '연구실의 물건을 빼내 비싸게 판다', hint: '큰돈이 된다. 박사의 경비 기계가 쫓아온다', values: { greed: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 80000 }], else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }] }] },
     ],
   },

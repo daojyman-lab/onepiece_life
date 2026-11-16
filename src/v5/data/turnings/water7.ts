@@ -27,7 +27,7 @@ export const WATER7: Turning[] = [
     id: 'w7k_yagara_race', kind: 'door', when: kidW(6, 13), weight: 8, repeat: 'once', speaker: 'hero',
     title: '야가라 경주', body: '물길을 오가는 야가라(물소처럼 생긴 큰 물고기) 경주가 열린다. 이긴 아이에게는 시장 상인회가 새 노를 준다. 빌린 야가라는 늙고 느리다.',
     doors: [
-      { label: '늙은 야가라를 달래 가며 끝까지 달린다', hint: '꼴찌일지 모른다. 야가라와는 친해진다', values: { devotion: D }, fx: [{ op: 'base', key: 'wil', add: 1 }] },
+      { label: '늙은 야가라를 달래 가며 끝까지 달린다', hint: '꼴찌일지 모른다. 야가라와는 친해진다', values: { inquiry: D }, fx: [{ op: 'base', key: 'wil', add: 1 }] },
       { label: '지름길 물길로 몰래 빠진다', hint: '들키면 쫓겨난다. 안 들키면 새 노를 받는다', values: { freedom: D },
         fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 3000 }, { op: 'log', text: '지름길로 빠져 일등으로 들어왔다. 상인회장은 고개를 갸웃했다.', weight: 'light' }],
                else: [{ op: 'log', text: '지름길 끝에서 심판의 배가 기다리고 있었다.', weight: 'light' }] }] },
@@ -49,7 +49,7 @@ export const WATER7: Turning[] = [
     title: '해체업자 형들', body: '뒷골목 해체장의 형들이 버려진 배를 뜯어 고철로 판다. 망을 볼 꼬마가 하나 필요하다고 한다. 해적의 배도 가리지 않는다.',
     doors: [
       { label: '망을 보며 형들과 어울린다', hint: '뒷골목의 한패가 된다', values: { loyalty: D }, mark: 'fellowship', fx: [{ op: 'person', kind: 'ally', relation: '해체장의 형' }, { op: 'money', add: 2000 }] },
-      { label: '해적 배를 뜯는 날만 끼어든다', hint: '해적의 물건은 값이 비싸다. 해적이 돌아오면 큰일이다', values: { ambition: D }, danger: true,
+      { label: '해적 배를 뜯는 날만 끼어든다', hint: '해적의 물건은 값이 비싸다. 해적이 돌아오면 큰일이다', values: { greed: D }, danger: true,
         fx: [{ op: 'chance', p: 0.7, then: [{ op: 'money', add: 6000 }], else: [{ op: 'hp', add: -15 }, { op: 'log', text: '배 주인이 돌아왔다. 형들과 함께 물길로 달아났다.', weight: 'light' }] }] },
       { label: '형들과 어울리지 않는다', hint: '뒷골목에서 혼자 지낸다', closes: true, fx: [] },
     ],
@@ -58,7 +58,7 @@ export const WATER7: Turning[] = [
     id: 'w7k_aqua_roof', kind: 'door', when: kidW(6, 15), weight: 7, repeat: 'once', speaker: 'hero',
     title: '해일 대비', body: '아쿠아 라구나 철이 다가와 아랫동네 사람들이 짐을 윗동네로 옮긴다. 혼자 사는 할머니 집은 아직 짐이 그대로다.',
     doors: [
-      { label: '할머니 짐부터 옮긴다', hint: '제 짐은 늦어진다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '아랫동네 할머니' }, { op: 'base', key: 'vit', add: 1 }] },
+      { label: '할머니 짐부터 옮긴다', hint: '제 짐은 늦어진다', values: { romance: D }, fx: [{ op: 'person', kind: 'ally', relation: '아랫동네 할머니' }, { op: 'base', key: 'vit', add: 1 }] },
       { label: '짐 나르는 일을 하고 품삯을 받는다', hint: '돈을 받고 아무 집이나 옮긴다', values: { ambition: D }, fx: [{ op: 'money', add: 2500 }] },
       { label: '물길 둑에 모래주머니를 쌓는 어른들을 돕는다', hint: '동네 전체를 지킨다', values: { justice: D }, fx: [{ op: 'base', key: 'str', add: 1 }] },
     ],
@@ -69,7 +69,7 @@ export const WATER7: Turning[] = [
     doors: [
       { label: '제 손으로 깎은 배로 나간다', hint: '못생겼어도 제 배다', values: { romance: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
       { label: '심사하는 목수에게 부잣집 배를 일러바친다', hint: '공정해진다. 부잣집 아이가 앙심을 품는다', values: { justice: D }, fx: [{ op: 'person', kind: 'rival', relation: '모형 배 대회의 부잣집 아이' }] },
-      { label: '부잣집 아이에게 배를 깎아 주고 돈을 받는다', hint: '상은 남의 것이 된다. 돈은 내 것이다', values: { dominion: D }, fx: [{ op: 'money', add: 3000 }] },
+      { label: '부잣집 아이에게 배를 깎아 주고 돈을 받는다', hint: '상은 남의 것이 된다. 돈은 내 것이다', values: { greed: D }, fx: [{ op: 'money', add: 3000 }] },
     ],
   },
   {
@@ -78,7 +78,7 @@ export const WATER7: Turning[] = [
     doors: [
       { label: '배는 혼자 짓는 게 아니라고 쏘아붙인다', hint: '말싸움이 주먹다짐이 된다', values: { freedom: D }, fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'rival', relation: '직공장 집 아이' }] },
       { label: '그 아이와 친해져 조선소 구경을 간다', hint: '도크 안을 처음 본다', values: { inquiry: D }, fx: [{ op: 'person', kind: 'ally', relation: '직공장 집 아이' }, { op: 'base', key: 'int', add: 1 }] },
-      { label: '그 아이 무리를 제 아래로 끌어들인다', hint: '물길가 아이들의 우두머리가 된다', special: 'dominion', values: { dominion: D }, fx: [{ op: 'fame', add: 2 }] },
+      { label: '그 아이 무리를 제 아래로 끌어들인다', hint: '물길가 아이들의 우두머리가 된다', values: { dominion: D }, fx: [{ op: 'fame', add: 2 }] },
     ],
   },
   {
@@ -96,7 +96,7 @@ export const WATER7: Turning[] = [
     title: '관광객의 지갑', body: '배를 맞추러 온 부자 관광객이 물길가 의자에 두툼한 지갑을 두고 곤돌라에 올랐다. 곤돌라는 벌써 다리 밑을 지난다.',
     doors: [
       { label: '지갑을 들고 물길을 따라 달린다', hint: '돌려준다. 사례를 받을지도 모른다', values: { justice: D }, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 5000 }], else: [] }, { op: 'base', key: 'spd', add: 1 }] },
-      { label: '지갑을 품에 넣는다', hint: '큰돈이 생긴다. 뒷골목에 소문이 난다', values: { dominion: D }, fx: [{ op: 'money', add: 15000 }, { op: 'hardship', add: 1 }] },
+      { label: '지갑을 품에 넣는다', hint: '큰돈이 생긴다. 뒷골목에 소문이 난다', values: { greed: D }, fx: [{ op: 'money', add: 15000 }, { op: 'hardship', add: 1 }] },
       { label: '지갑을 경비 초소에 맡긴다', hint: '내 손은 깨끗하다. 주인이 찾을지는 모른다', values: { loyalty: D }, fx: [] },
     ],
   },
@@ -113,7 +113,7 @@ export const WATER7: Turning[] = [
     id: 'w7k_pirate_errand', kind: 'door', when: kidW(8, 15), weight: 7, repeat: 'once', speaker: { relation: '배를 고치러 온 해적' },
     title: '해적의 심부름', body: '배를 고치러 온 해적 하나가 동전을 튕기며, 도크가 비는 밤이 언제냐고 묻는다. 대답만 해 주면 동전은 네 것이라고 한다.',
     doors: [
-      { label: '동전을 받고 알려 준다', hint: '돈을 번다. 그 밤 도크에서 무슨 일이 날지 모른다', values: { ambition: D }, fx: [{ op: 'money', add: 4000 }, { op: 'hardship', add: 1 }] },
+      { label: '동전을 받고 알려 준다', hint: '돈을 번다. 그 밤 도크에서 무슨 일이 날지 모른다', values: { greed: D }, fx: [{ op: 'money', add: 4000 }, { op: 'hardship', add: 1 }] },
       { label: '경비에게 해적이 수상하다고 알린다', hint: '해적이 앙심을 품을지 모른다', values: { justice: D }, fx: [{ op: 'person', kind: 'enemy', relation: '도크를 노린 해적' }, { op: 'fame', add: 1 }] },
       { label: '해적에게 바다 이야기를 대신 들려 달라고 한다', hint: '돈 대신 이야기를 받는다', values: { romance: D }, fx: [{ op: 'base', key: 'wil', add: 1 }] },
     ],
@@ -123,7 +123,7 @@ export const WATER7: Turning[] = [
     title: '늙은 목수의 이야기', body: '물길가 의자에 앉은 늙은 목수가, 옛날 이 도시에는 바다 위로 달리는 열차를 만든 어인 목수가 있었다고 한다. 그 목수는 세계정부에 끌려갔다.',
     doors: [
       { label: '그 목수의 설계도가 어디 있는지 묻는다', hint: '위험한 이야기다. 늙은 목수가 입을 다물지 모른다', values: { inquiry: D }, fx: [{ op: 'flag', id: 'w7_tom_story' }, { op: 'base', key: 'int', add: 1 }] },
-      { label: '늙은 목수의 연장을 닦아 준다', hint: '이야기 값을 한다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '늙은 목수' }] },
+      { label: '늙은 목수의 연장을 닦아 준다', hint: '이야기 값을 한다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: '늙은 목수' }] },
     ],
   },
   {
@@ -133,7 +133,7 @@ export const WATER7: Turning[] = [
       { label: '손바닥이 터지도록 들보를 깎는다', hint: '붙을지 모른다. 붙으면 조선소에 이름이 남는다', values: { ambition: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -5 }, { op: 'chance', p: 0.55, then: [{ op: 'flag', id: 'w7_apprentice' }, { op: 'log', text: '직공장이 들보를 쓰다듬고는 내일부터 나오라고 했다.', weight: 'heavy' }],
                else: [{ op: 'log', text: '들보는 반쯤 깎였다. 직공장이 내년에 다시 오라고 했다.', weight: 'light' }] }] },
-      { label: '옆 아이의 연장이 부러지자 제 것을 빌려준다', hint: '내 들보가 늦어진다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '견습 시험에서 연장을 빌려준 아이' }] },
+      { label: '옆 아이의 연장이 부러지자 제 것을 빌려준다', hint: '내 들보가 늦어진다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'ally', relation: '견습 시험에서 연장을 빌려준 아이' }] },
       { label: '시험 대신 고철상 일을 한다', hint: '하루 품삯을 번다', values: { freedom: D }, fx: [{ op: 'money', add: 2000 }] },
     ],
   },
@@ -153,7 +153,7 @@ export const WATER7: Turning[] = [
       { label: '짐을 들어 주고 동전을 모은다', hint: '하루 종일 역을 뛰어다닌다', values: { romance: D }, fx: [{ op: 'money', add: 2500 }, { op: 'base', key: 'vit', add: 1 }] },
       { label: '주인 없는 짐을 열어 본다', hint: '무엇이 들었는지 모른다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 6000 }], else: [{ op: 'hardship', add: 1 }, { op: 'log', text: '짐 속에는 해군 문양이 찍힌 서류뿐이었다. 얼른 제자리에 두었다.', weight: 'light' }] }] },
-      { label: '길 잃은 손님을 숙소까지 데려다준다', hint: '동전 대신 고맙다는 말을 듣는다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '길을 안내해 준 손님' }] },
+      { label: '길 잃은 손님을 숙소까지 데려다준다', hint: '동전 대신 고맙다는 말을 듣는다', values: { freedom: D }, fx: [{ op: 'person', kind: 'ally', relation: '길을 안내해 준 손님' }] },
     ],
   },
   {
@@ -183,7 +183,7 @@ export const WATER7: Turning[] = [
       { label: '정부의 관리에게 돌을 던진다', hint: '어린 손이라도 붙잡히면 큰일이다', values: { justice: D }, danger: true,
         fx: [{ op: 'flag', id: 'w7_saw_tom' }, { op: 'chance', p: 0.6, then: [{ op: 'hp', add: -5 }], else: [{ op: 'hp', add: -15 }, { op: 'hardship', add: 2 }] },
              { op: 'timeline', text: '끌려가는 어인 목수 톰을 향해 돌을 던졌다', canon: 'tom' }] },
-      { label: '울부짖는 제자의 옷자락을 붙잡는다', hint: '배를 쫓다 물에 빠질 것 같다', values: { devotion: D },
+      { label: '울부짖는 제자의 옷자락을 붙잡는다', hint: '배를 쫓다 물에 빠질 것 같다', values: { romance: D },
         fx: [{ op: 'flag', id: 'w7_saw_tom' }, { op: 'person', kind: 'ally', relation: '어인 목수의 젊은 제자', canon: 'franky' }, { op: 'timeline', text: '울부짖는 목수의 제자를 붙잡았다', canon: 'franky' }] },
     ],
   },
@@ -207,7 +207,7 @@ export const WATER7: Turning[] = [
              { op: 'timeline', text: '가면의 밤, 불타는 저택에서 시장을 끌어냈다', canon: 'iceburg' }] },
       { label: '가면 쓴 목수의 이름을 경비대에 알린다', hint: '아무도 믿지 않을지 모른다. 그 목수의 눈이 {name}을(를) 본다', values: { justice: D },
         fx: [{ op: 'person', kind: 'enemy', relation: '비둘기를 얹은 가면의 사내', canon: 'lucci' }, { op: 'timeline', text: '가면의 밤, 가면 쓴 목수의 정체를 알렸다', canon: 'lucci' }] },
-      { label: '아랫동네 사람들을 해일에서 피신시킨다', hint: '저택은 남에게 맡긴다. 오늘 밤 해일이 온다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '해일의 밤에 구한 이웃' }, { op: 'base', key: 'vit', add: 1 }] },
+      { label: '아랫동네 사람들을 해일에서 피신시킨다', hint: '저택은 남에게 맡긴다. 오늘 밤 해일이 온다', values: { justice: D }, fx: [{ op: 'person', kind: 'ally', relation: '해일의 밤에 구한 이웃' }, { op: 'base', key: 'vit', add: 1 }] },
     ],
   },
   {
@@ -269,7 +269,7 @@ export const WATER7: Turning[] = [
     id: 'w7a_pirate_order', kind: 'door', when: adult(18, 60, st('shipwright', 'civil')), weight: 6, repeat: { years: 6 }, speaker: { relation: '현상금이 걸린 해적 선장' },
     title: '해적의 주문', body: '현상금이 걸린 해적 선장이 조선소에 금화 자루를 내려놓는다. 군함보다 빠른 배를 지어 달라고 한다. 해군이 이 도시를 지켜보고 있다.',
     doors: [
-      { label: '돈을 받고 가장 빠른 배를 짓는다', hint: '목수는 손님을 가리지 않는다', values: { ambition: D }, fx: [{ op: 'money', add: 40000 }, { op: 'hardship', add: 1 }] },
+      { label: '돈을 받고 가장 빠른 배를 짓는다', hint: '목수는 손님을 가리지 않는다', values: { greed: D }, fx: [{ op: 'money', add: 40000 }, { op: 'hardship', add: 1 }] },
       { label: '해적의 배는 짓지 않는다고 돌려보낸다', hint: '돈을 놓친다. 선장이 이를 간다', values: { justice: D }, fx: [{ op: 'person', kind: 'enemy', relation: '주문을 거절당한 해적 선장' }] },
       { label: '배에 몰래 해군의 표식을 숨겨 넣는다', hint: '해군에 넘길 수 있다. 들키면 끝장이다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'money', add: 50000 }, { op: 'fame', add: 3 }], else: [{ op: 'hp', add: -25 }, { op: 'person', kind: 'enemy', relation: '속은 것을 안 해적 선장' }] }] },
@@ -279,8 +279,8 @@ export const WATER7: Turning[] = [
     id: 'w7a_aqua_rebuild', kind: 'door', when: adult(20, 70, LANDED), weight: 6, repeat: { years: 8 }, speaker: 'hero',
     title: '해일이 지나간 뒤', body: '아쿠아 라구나가 아랫동네를 휩쓸었다. 시장은 아랫동네를 비우고 윗동네만 다시 짓자고 한다. 아랫동네 사람들은 갈 곳이 없다.',
     doors: [
-      { label: '아랫동네 사람들과 집을 다시 세운다', hint: '돈도 시간도 든다. 사람들이 남는다', values: { devotion: D }, fx: [{ op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '아랫동네 사람들' }] },
-      { label: '비워진 아랫동네 땅을 헐값에 사들인다', hint: '언젠가 값이 오른다. 원망을 산다', values: { dominion: D }, fx: [{ op: 'money', add: -20000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 60000 }], else: [] }, { op: 'person', kind: 'enemy', relation: '땅을 빼앗긴 아랫동네 사람' }] },
+      { label: '아랫동네 사람들과 집을 다시 세운다', hint: '돈도 시간도 든다. 사람들이 남는다', values: { inquiry: D }, fx: [{ op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '아랫동네 사람들' }] },
+      { label: '비워진 아랫동네 땅을 헐값에 사들인다', hint: '언젠가 값이 오른다. 원망을 산다', values: { greed: D }, fx: [{ op: 'money', add: -20000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 60000 }], else: [] }, { op: 'person', kind: 'enemy', relation: '땅을 빼앗긴 아랫동네 사람' }] },
       { label: '해일을 막는 새 둑을 설계해 시장에게 낸다', hint: '받아들여질지 모른다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'chance', p: 0.4, then: [{ op: 'fame', add: 5 }], else: [] }] },
     ],
   },
@@ -289,8 +289,8 @@ export const WATER7: Turning[] = [
     title: '야가라 대여점', body: '물길 어귀의 야가라 대여점이 문을 닫는다. 주인 노인은 야가라들을 누가 맡아 주길 바란다. 값은 싸지만 야가라는 먹성이 좋다.',
     doors: [
       { label: '가게를 맡아 야가라를 빌려준다', hint: '물길에 뿌리를 내린다', values: { peace: D }, fx: [{ op: 'money', add: -15000 }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '물길 어귀에서 야가라 대여점을 열었다' }] },
-      { label: '야가라를 팔아 넘기고 차익을 남긴다', hint: '노인이 서운해한다', values: { ambition: D }, fx: [{ op: 'money', add: 12000 }] },
-      { label: '야가라들을 노인 곁에 두고 돌보러 다닌다', hint: '돈은 안 된다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '야가라 대여점 노인' }] },
+      { label: '야가라를 팔아 넘기고 차익을 남긴다', hint: '노인이 서운해한다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }] },
+      { label: '야가라들을 노인 곁에 두고 돌보러 다닌다', hint: '돈은 안 된다', values: { inquiry: D }, fx: [{ op: 'person', kind: 'ally', relation: '야가라 대여점 노인' }] },
     ],
   },
   {
@@ -306,9 +306,9 @@ export const WATER7: Turning[] = [
     id: 'w7a_ghost_ship', kind: 'door', when: adult(20, 55, st('shipwright', 'civil')), weight: 4, repeat: 'once', speaker: { relation: '창백한 얼굴의 선장' },
     title: '안개 속의 배', body: '안개 낀 새벽, 돛이 찢긴 낡은 배가 도크에 닿았다. 창백한 선장은 선원들의 이름을 말하지 않고, 배만 다시 띄우게 해 달라고 한다. 값은 금괴다.',
     doors: [
-      { label: '아무것도 묻지 않고 배를 고친다', hint: '금괴를 받는다. 배가 어디로 가는지는 모른다', values: { ambition: D }, fx: [{ op: 'money', add: 30000 }] },
+      { label: '아무것도 묻지 않고 배를 고친다', hint: '금괴를 받는다. 배가 어디로 가는지는 모른다', values: { greed: D }, fx: [{ op: 'money', add: 30000 }] },
       { label: '선원들이 어떻게 되었는지 묻는다', hint: '선장이 입을 열지 모른다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'w7_ghost_story' }] },
-      { label: '찢긴 돛을 공짜로 기워 준다', hint: '선장의 눈이 처음으로 웃는다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '안개 속 배의 선장' }] },
+      { label: '찢긴 돛을 공짜로 기워 준다', hint: '선장의 눈이 처음으로 웃는다', values: { romance: D }, fx: [{ op: 'person', kind: 'ally', relation: '안개 속 배의 선장' }] },
     ],
   },
   {
@@ -323,8 +323,8 @@ export const WATER7: Turning[] = [
     id: 'w7a_sinking', kind: 'door', when: adult(36, 80, LANDED), weight: 5, repeat: 'once', speaker: { relation: '구역장' },
     title: '가라앉는 도시', body: '해마다 물길의 바닥이 조금씩 높아진다. 도시가 가라앉고 있다는 것을 이제 아이들도 안다. 구역장은 아랫동네를 떠나 새 섬으로 옮기자는 문서를 돌린다.',
     doors: [
-      { label: '떠날 사람들의 짐을 꾸려 준다', hint: '도시의 앞날을 받아들인다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '새 섬으로 떠난 이웃' }] },
-      { label: '남은 동네를 높이 쌓아 올리자고 사람들을 모은다', hint: '오래 걸린다. 끝을 못 볼지도 모른다', values: { loyalty: D }, mark: 'obsession', fx: [{ op: 'money', add: -10000 }, { op: 'fame', add: 3 }] },
+      { label: '떠날 사람들의 짐을 꾸려 준다', hint: '도시의 앞날을 받아들인다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: '새 섬으로 떠난 이웃' }] },
+      { label: '남은 동네를 높이 쌓아 올리자고 사람들을 모은다', hint: '오래 걸린다. 끝을 못 볼지도 모른다', values: { dominion: D }, mark: 'obsession', fx: [{ op: 'money', add: -10000 }, { op: 'fame', add: 3 }] },
       { label: '아랫동네의 옛 모습을 기록으로 남긴다', hint: '사라질 거리를 글과 그림으로 붙잡는다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
     ],
   },
@@ -332,7 +332,7 @@ export const WATER7: Turning[] = [
     id: 'w7a_apprentice', kind: 'door', when: adult(36, 75, st('shipwright', 'settled', 'retired', 'civil')), weight: 5, repeat: 'once', speaker: { relation: '도크를 기웃거리는 아이' },
     title: '도크의 아이', body: '날마다 도크 울타리 너머로 망치질을 지켜보는 아이가 있다. 손톱 밑이 까맣다. 뒷골목 아이다.',
     doors: [
-      { label: '아이를 견습으로 들인다', hint: '가르치는 데 몇 해가 든다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '뒷골목에서 들인 견습', age: { younger: 30 } }] },
+      { label: '아이를 견습으로 들인다', hint: '가르치는 데 몇 해가 든다', values: { freedom: D }, fx: [{ op: 'person', kind: 'ally', relation: '뒷골목에서 들인 견습', age: { younger: 30 } }] },
       { label: '아이에게 들보 깎는 시험을 낸다', hint: '실력이 없으면 돌려보낸다', values: { justice: D }, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '시험을 통과한 견습', age: { younger: 30 } }], else: [] }] },
       { label: '못 본 척 망치질을 계속한다', hint: '아이는 언젠가 오지 않는다', closes: true, fx: [] },
     ],
@@ -341,7 +341,7 @@ export const WATER7: Turning[] = [
     id: 'w7a_scrap_market', kind: 'door', when: adult(36, 70, st('civil', 'settled', 'shipwright')), weight: 4, repeat: 'once', speaker: { relation: '고철 시장의 거간꾼' },
     title: '고철 시장의 자리', body: '뒷골목 고철 시장에 좋은 자리가 났다. 거간꾼은 웃돈을 내는 사람에게 주겠다고 한다. 그 자리는 원래 다리를 다친 해체업자의 것이다.',
     doors: [
-      { label: '웃돈을 내고 자리를 차지한다', hint: '장사가 잘된다. 해체업자가 쫓겨난다', values: { dominion: D }, fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 30000 }], else: [] }, { op: 'person', kind: 'enemy', relation: '자리를 잃은 해체업자' }] },
+      { label: '웃돈을 내고 자리를 차지한다', hint: '장사가 잘된다. 해체업자가 쫓겨난다', values: { greed: D }, fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 30000 }], else: [] }, { op: 'person', kind: 'enemy', relation: '자리를 잃은 해체업자' }] },
       { label: '해체업자가 자리를 지키도록 거간꾼과 담판한다', hint: '거간꾼의 눈 밖에 난다', values: { justice: D }, fx: [{ op: 'person', kind: 'ally', relation: '다리를 다친 해체업자' }, { op: 'person', kind: 'enemy', relation: '고철 시장의 거간꾼' }] },
     ],
   },
@@ -359,7 +359,7 @@ export const WATER7: Turning[] = [
     title: '마지막 배', body: '손이 예전 같지 않다. 한 척만 더 짓는다면 그것이 마지막 배가 될 것이다. 누구를 위한 배를 지을지 정해야 한다.',
     doors: [
       { label: '아무도 타지 않을 꿈의 배를 짓는다', hint: '평생 그려 온 설계를 끝낸다', values: { romance: D }, fx: [{ op: 'money', add: -20000 }, { op: 'fame', add: 5 }, { op: 'timeline', text: '평생 그려 온 마지막 배를 지었다' }] },
-      { label: '가난한 어부에게 줄 고깃배를 짓는다', hint: '이름은 남지 않는다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '마지막 배를 받은 어부' }, { op: 'timeline', text: '마지막 배를 가난한 어부에게 주었다' }] },
+      { label: '가난한 어부에게 줄 고깃배를 짓는다', hint: '이름은 남지 않는다', values: { loyalty: D }, fx: [{ op: 'person', kind: 'ally', relation: '마지막 배를 받은 어부' }, { op: 'timeline', text: '마지막 배를 가난한 어부에게 주었다' }] },
       { label: '견습들에게 망치를 넘기고 짓는 것을 지켜본다', hint: '내 손 대신 그들의 손이 짓는다', values: { loyalty: D }, fx: [{ op: 'timeline', text: '마지막 배는 견습들의 손으로 지어졌다' }] },
     ],
   },
@@ -367,7 +367,7 @@ export const WATER7: Turning[] = [
     id: 'w7a_train_crash', kind: 'door', when: adult(25, 65, LANDED), weight: 4, repeat: 'once', speaker: 'hero',
     title: '멈춰 선 바다 열차', body: '바다 위 선로 한가운데서 열차가 멈췄다. 폭풍이 다가오는데 객차에는 사람들이 가득하다. 정비공들은 다른 섬에 있다.',
     doors: [
-      { label: '작은 배를 저어 열차까지 간다', hint: '폭풍과 시합이다', values: { devotion: D }, danger: true,
+      { label: '작은 배를 저어 열차까지 간다', hint: '폭풍과 시합이다', values: { freedom: D }, danger: true,
         fx: [{ op: 'chance', p: 0.65, then: [{ op: 'fame', add: 5 }, { op: 'person', kind: 'ally', relation: '열차에서 구한 손님' }], else: [{ op: 'hp', add: -25 }] }] },
       { label: '역의 기관사들과 구조 열차를 띄운다', hint: '선로를 아는 사람들과 함께한다', values: { loyalty: D }, fx: [{ op: 'fame', add: 3 }] },
       { label: '선로의 고장 난 곳을 짚어 정비공에게 전한다', hint: '열차가 제 힘으로 움직일지 모른다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },

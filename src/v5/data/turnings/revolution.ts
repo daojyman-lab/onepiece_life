@@ -36,7 +36,7 @@ export const REVOLUTION: Turning[] = [
     weight: 3, repeat: 'once', speaker: 'hero',
     title: '세금 대신 불', body: '바다 건너 왕국의 병사들이 {island} 근처의 어촌에 들이닥쳤다. 왕에게 바칠 세금을 못 냈다며 집에 불을 놓는다. 해군의 군함은 먼바다에 떠서 지켜보기만 한다.',
     doors: [
-      { label: '살아남은 사람들을 이끌고 산으로 숨는다', hint: '가진 것을 나누며 겨울을 난다', values: { devotion: D },
+      { label: '살아남은 사람들을 이끌고 산으로 숨는다', hint: '가진 것을 나누며 겨울을 난다', values: { romance: D },
         fx: [{ op: 'money', add: -20000 }, { op: 'hardship', add: 4 }, { op: 'person', kind: 'ally', relation: '불탄 마을의 생존자' }, { op: 'flag', id: 'revSeed' }] },
       { label: '혁명군을 찾아 바다로 나선다', hint: '지금의 삶을 버리고 세상의 뒤편으로 들어간다', values: { justice: D },
         fx: [{ op: 'standing', to: 'revolution' }, { op: 'log', text: '불탄 마을의 재를 한 줌 쥐고 바다로 나섰다. 석 달 뒤 혁명군의 배에 닿았다.', weight: 'heavy' },
@@ -71,7 +71,7 @@ export const REVOLUTION: Turning[] = [
              { op: 'person', kind: 'ally', relation: '어인 가라테 사범', canon: 'hack' }, { op: 'hp', add: -8 }] },
       { label: '기지의 서고에서 세상의 옛 기록을 읽는다', hint: '눈이 트이지만 몸은 무뎌진다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 2 }, { op: 'base', key: 'str', add: -1 }] },
-      { label: '노예선에서 구한 아이들의 밥을 짓는다', hint: '싸움에서 멀어지고, 아이들이 {name}을(를) 따른다', values: { devotion: D },
+      { label: '노예선에서 구한 아이들의 밥을 짓는다', hint: '싸움에서 멀어지고, 아이들이 {name}을(를) 따른다', values: { justice: D },
         fx: [{ op: 'person', kind: 'ally', relation: '기지에서 키운 아이' }, { op: 'base', key: 'wil', add: 1 }] },
     ],
   },
@@ -82,7 +82,7 @@ export const REVOLUTION: Turning[] = [
     doors: [
       { label: '예정대로 성문을 연다', hint: '봉기는 성공하고, 공주는 {name}을(를) 다시 보지 않는다', values: { justice: D },
         fx: [{ op: 'fame', add: 25 }, { op: 'hardship', add: 4 }, { op: 'log', text: '성문이 열렸다. 횃불 사이로 공주의 얼굴이 보였다. {name}은(는) 고개를 돌렸다.', weight: 'heavy' }] },
-      { label: '성문을 열기 전에 공주를 성 밖으로 빼낸다', hint: '신호가 늦어져 동지들이 다칠 수 있다', values: { devotion: D }, danger: true,
+      { label: '성문을 열기 전에 공주를 성 밖으로 빼낸다', hint: '신호가 늦어져 동지들이 다칠 수 있다', values: { justice: D }, danger: true,
         fx: [{ op: 'person', kind: 'ally', relation: '성 밖으로 빼낸 공주' },
              { op: 'chance', p: 0.5, then: [{ op: 'fame', add: 10 }], else: [{ op: 'hp', add: -20 }, { op: 'hardship', add: 4 }, { op: 'log', text: '신호가 늦었다. 성문 앞에서 동지 여럿이 쓰러졌다.', weight: 'heavy' }] }] },
       { label: '공주를 볼모로 잡고 왕을 무릎 꿇린다', hint: '피 없이 끝나지만, 공주의 눈에 증오가 남는다', values: { dominion: D },
@@ -108,7 +108,7 @@ export const REVOLUTION: Turning[] = [
     weight: 5, repeat: 'once', speaker: { relation: '퇴각을 명하는 지휘관' },
     title: '퇴각 명령', body: '봉기가 무너졌다. 지휘관이 해 뜨기 전에 배로 물러나라고 명한다. 헛간에는 걸을 수 없는 부상자 열둘이 누워 있고, 왕국의 병사들이 아침이면 들이닥친다.',
     doors: [
-      { label: '헛간에 남아 부상자들의 상처를 꿰맨다', hint: '병사들이 오면 함께 붙잡힌다', values: { devotion: D }, mark: 'fellowship', danger: true,
+      { label: '헛간에 남아 부상자들의 상처를 꿰맨다', hint: '병사들이 오면 함께 붙잡힌다', values: { peace: D }, mark: 'fellowship', danger: true,
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'person', kind: 'ally', relation: '헛간에서 살린 부상자' }, { op: 'log', text: '병사들은 헛간을 그냥 지나쳤다. 열둘 가운데 아홉이 살았다.', weight: 'heavy' }],
                else: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '피 묻은 손 그대로 붙잡혀 끌려갔다.', weight: 'heavy' }] }] },
@@ -147,7 +147,7 @@ export const REVOLUTION: Turning[] = [
     weight: 4, repeat: 'once', speaker: 'hero',
     title: '곡식을 실은 군함', body: '굶는 왕국의 왕에게 곡식을 실어 나르는 해군 보급선. 그 곡식은 왕의 곳간으로만 간다. 갑판에는 이제 막 입대한 듯한 앳된 수병들이 보초를 선다.',
     doors: [
-      { label: '수병들을 묶어만 두고 곡식을 마을들에 나눈다', hint: '굶는 사람들이 한 철을 나고, 해군은 혁명군의 이름을 더 높이 건다', values: { devotion: D },
+      { label: '수병들을 묶어만 두고 곡식을 마을들에 나눈다', hint: '굶는 사람들이 한 철을 나고, 해군은 혁명군의 이름을 더 높이 건다', values: { romance: D },
         fx: [{ op: 'fame', add: 15 }, { op: 'hp', add: -8 }, { op: 'log', text: '곡식 자루가 밤새 마을에서 마을로 넘어갔다.', weight: 'light' }] },
       { label: '보급선을 통째로 가라앉혀 본때를 보인다', hint: '바다의 모든 보급선이 떨고, 수병들도 바다에 빠진다', values: { dominion: D },
         fx: [{ op: 'fame', add: 30 }, { op: 'hardship', add: 5 }, { op: 'flag', id: 'govEnemy' }] },
@@ -221,7 +221,7 @@ export const REVOLUTION: Turning[] = [
         fx: [{ op: 'standing', to: 'settled' }, { op: 'flag', id: 'wanted' }, { op: 'timeline', text: '혁명군을 떠나 뭍에 자리 잡았다' }] },
       { label: '어느 깃발에도 매이지 않는 해적이 된다', hint: '세상을 바꾸는 대신 제 바다를 산다', values: { freedom: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' }, { op: 'timeline', text: '혁명군을 떠나 해적 깃발을 올렸다' }] },
-      { label: '아이들이 총을 들지 않아도 될 때까지 남는다', hint: '더 깊은 싸움으로 들어간다. 몸이 먼저 지친다', values: { devotion: D }, mark: 'unyielding',
+      { label: '아이들이 총을 들지 않아도 될 때까지 남는다', hint: '더 깊은 싸움으로 들어간다. 몸이 먼저 지친다', values: { inquiry: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 15 }] },
     ],
   },

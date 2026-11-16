@@ -57,7 +57,7 @@ export const HOMES_LEAVE: Turning[] = [
     id: 'w7_aqua_laguna', kind: 'door', when: atHome('water7', age(12, 60), st('child', 'civil', 'shipwright', 'settled', 'retired')), weight: 3, repeat: 'once', speaker: 'hero',
     title: '아쿠아 라구나', body: '해마다 오는 큰 해일이 올해는 유난히 높다. 물길 아래 거리까지 바닷물이 차오르는데, 부두의 작은 배에 아이 둘이 갇혀 있다.',
     doors: [
-      { label: '작은 배로 뛰어들어 아이들을 끌어낸다', hint: '물살에 배째 휩쓸릴지 모른다', values: { devotion: D }, danger: true,
+      { label: '작은 배로 뛰어들어 아이들을 끌어낸다', hint: '물살에 배째 휩쓸릴지 모른다', values: { justice: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5,
           then: [{ op: 'hp', add: -15 }, { op: 'person', kind: 'ally', relation: '해일에서 건진 아이', age: { younger: 10 } }, { op: 'log', text: '아이 둘을 안고 계단 위로 기어올랐다.', weight: 'heavy' }],
           else: [{ op: 'hp', add: -30 }, { op: 'move', island: '자야', sea: 'gl_first' },
@@ -101,8 +101,8 @@ export const HOMES_LEAVE: Turning[] = [
         fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'person', kind: 'ally', relation: '바다로 함께 달아난 낭인' }, { op: 'hardship', add: 2 },
              { op: 'log', text: '밤바다를 사흘 저었다. 낭인들은 바깥 나라의 항구에서 흩어졌다.', weight: 'heavy' },
              { op: 'timeline', text: '쫓기는 낭인들과 나라를 떠났다' }] },
-      { label: '배를 대 주고 집으로 돌아간다', hint: '함께 가지는 않는다. 들키면 같이 벌을 받는다', values: { devotion: D }, fx: [{ op: 'chance', p: 0.3, then: [{ op: 'hardship', add: 2 }, { op: 'hp', add: -10 }] }] },
-      { label: '관리에게 숨은 곳을 알린다', hint: '상을 받는다. 낭인들의 칼끝이 언젠가 돌아온다', values: { dominion: D },
+      { label: '배를 대 주고 집으로 돌아간다', hint: '함께 가지는 않는다. 들키면 같이 벌을 받는다', values: { loyalty: D }, fx: [{ op: 'chance', p: 0.3, then: [{ op: 'hardship', add: 2 }, { op: 'hp', add: -10 }] }] },
+      { label: '관리에게 숨은 곳을 알린다', hint: '상을 받는다. 낭인들의 칼끝이 언젠가 돌아온다', values: { greed: D },
         fx: [{ op: 'money', add: 20000 }, { op: 'person', kind: 'enemy', relation: '고발당한 낭인' }] },
     ],
   },
@@ -123,7 +123,7 @@ export const HOMES_LEAVE: Turning[] = [
     id: 'fm_slaver', kind: 'door', when: atHome('fishman', age(13, 30), st('child', 'civil', 'settled')), weight: 2, repeat: 'once', speaker: 'hero',
     title: '바다의 숲의 그물', body: '바다의 숲에서 놀던 아이들 위로 커다란 그물이 내려왔다. 지상의 노예상이다. {name}의 발목에도 그물코가 감긴다.',
     doors: [
-      { label: '그물을 물어뜯고 아이들부터 빼낸다', hint: '아이들은 달아난다. {name}은(는) 끌려갈지 모른다', values: { devotion: D }, danger: true,
+      { label: '그물을 물어뜯고 아이들부터 빼낸다', hint: '아이들은 달아난다. {name}은(는) 끌려갈지 모른다', values: { justice: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5,
           then: [{ op: 'hp', add: -15 }, { op: 'log', text: '그물이 찢어졌다. 아이들과 함께 산호 틈으로 숨었다.', weight: 'heavy' }],
           else: [{ op: 'hp', add: -20 }, { op: 'hardship', add: 6 }, { op: 'move', island: '샤본디 제도', sea: 'sabaody' },
@@ -201,7 +201,7 @@ export const HOMES_LEAVE: Turning[] = [
       { label: '임무를 받고 바깥 바다로 나간다', hint: '동맹의 나라를 찾아 떠난다', values: { loyalty: D },
         fx: [{ op: 'move', island: '와노쿠니', sea: 'nw_late' }, { op: 'fame', add: 5 }, { op: 'log', text: '폭포를 거슬러 오르는 잉어를 타고 쇄국의 나라에 숨어들었다.', weight: 'heavy' },
              { op: 'timeline', text: '전사의 임무로 바깥 바다에 나갔다' }] },
-      { label: '다른 전사에게 양보하고 숲을 지킨다', hint: '고향을 비울 수 없다', values: { devotion: D }, fx: [] },
+      { label: '다른 전사에게 양보하고 숲을 지킨다', hint: '고향을 비울 수 없다', values: { justice: D }, fx: [] },
     ],
   },
   {
@@ -214,7 +214,7 @@ export const HOMES_LEAVE: Turning[] = [
           else: [{ op: 'hp', add: -25 }, { op: 'hardship', add: 5 }, { op: 'move', island: '샤본디 제도', sea: 'sabaody' },
                  { op: 'log', text: '사슬에 묶여 해적선 밑창에 실렸다. 샤본디의 경매장 뒤뜰에서 소동이 벌어진 틈에 달아났다.', weight: 'heavy' },
                  { op: 'timeline', text: '바깥 해적에게 붙잡혀 고향을 떠났다' }] }] },
-      { label: '아이들을 숲 깊이 숨긴다', hint: '싸우지 않는다. 해적들은 빈손으로 떠난다', values: { devotion: D }, fx: [{ op: 'person', kind: 'ally', relation: '숲에 숨겨 준 아이', age: { younger: 8 } }] },
+      { label: '아이들을 숲 깊이 숨긴다', hint: '싸우지 않는다. 해적들은 빈손으로 떠난다', values: { justice: D }, fx: [{ op: 'person', kind: 'ally', relation: '숲에 숨겨 준 아이', age: { younger: 8 } }] },
     ],
   },
 ];
@@ -224,7 +224,7 @@ export const HOMES_RETURN: Turning[] = [
     id: 'w7_return', kind: 'door', when: away('water7', age(20), ROAMING, sea('gl_entry', 'gl_first', 'sabaody')), weight: 2, repeat: { years: 8 }, speaker: 'hero',
     title: '물의 도시행 배', body: '{island}의 항구에 물의 도시에서 지은 배가 닿았다. 뱃머리의 조각이 낯익다.',
     doors: [
-      { label: '배를 얻어 타고 {town}(으)로 돌아간다', hint: '물길의 거리로 돌아간다', values: { devotion: D },
+      { label: '배를 얻어 타고 {town}(으)로 돌아간다', hint: '물길의 거리로 돌아간다', values: { loyalty: D },
         fx: [{ op: 'moveHome' }, { op: 'log', text: '물길 위로 곤돌라가 미끄러졌다. {town}은(는) 그대로였다.', weight: 'heavy' }, { op: 'timeline', text: '고향 {town}(으)로 돌아왔다' }] },
       { label: '돌아보지 않는다', hint: '갈 길이 아직 멀다', values: { freedom: D }, fx: [] },
     ],
@@ -242,7 +242,7 @@ export const HOMES_RETURN: Turning[] = [
     id: 'fm_return', kind: 'door', when: away('fishman', age(20), ROAMING, sea('sabaody', 'gl_first', 'nw_first')), weight: 2, repeat: { years: 8 }, speaker: 'hero',
     title: '해저 일만 미터', body: '{island}에서 거품 옷을 입힌 배가 바닷속 섬으로 내려간다. 지상의 눈길에 지친 어인들이 줄을 선다.',
     doors: [
-      { label: '배에 올라 {town}(으)로 돌아간다', hint: '바닷속 고향으로 내려간다', values: { devotion: D },
+      { label: '배에 올라 {town}(으)로 돌아간다', hint: '바닷속 고향으로 내려간다', values: { romance: D },
         fx: [{ op: 'moveHome' }, { op: 'log', text: '햇빛이 닿지 않는 깊이에서 고향의 거품 지붕이 빛났다.', weight: 'heavy' }, { op: 'timeline', text: '바닷속 고향 {town}(으)로 돌아왔다' }] },
       { label: '지상에 남는다', hint: '돌아가면 다시는 오르지 못할 것 같다', values: { ambition: D }, fx: [] },
     ],
@@ -260,7 +260,7 @@ export const HOMES_RETURN: Turning[] = [
     id: 'zou_return', kind: 'door', when: away('zou', age(20), ROAMING, sea('nw_first', 'nw_late')), weight: 2, repeat: { years: 8 }, speaker: 'hero',
     title: '걷는 섬의 발자국', body: '{island}의 뱃사람들이, 바다 위를 걷는 거대한 코끼리를 먼바다에서 봤다고 한다. 지금 가면 따라잡을 수 있다.',
     doors: [
-      { label: '배를 빌려 코끼리를 쫓아간다', hint: '밧줄 길을 타고 고향의 숲으로 돌아간다', values: { devotion: D },
+      { label: '배를 빌려 코끼리를 쫓아간다', hint: '밧줄 길을 타고 고향의 숲으로 돌아간다', values: { inquiry: D },
         fx: [{ op: 'money', add: -10000 }, { op: 'moveHome' }, { op: 'log', text: '코끼리의 다리를 타고 올라가니 숲의 냄새가 그대로였다.', weight: 'heavy' }, { op: 'timeline', text: '걷는 섬을 쫓아 고향 {town}(으)로 돌아왔다' }] },
       { label: '코끼리가 가는 쪽으로 고개만 숙인다', hint: '돌아가지 않는다', values: { loyalty: D }, fx: [] },
     ],

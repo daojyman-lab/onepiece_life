@@ -26,7 +26,7 @@ describe('과제 8: 해군과 CP, 혁명군', () => {
   it('아홉 가치관이 두 파일의 문에 저마다 세 번 이상 붙는다', () => {
     const count: Partial<Record<ValueId, number>> = {};
     for (const d of valued([...MARINE, ...REVOLUTION])) for (const v of Object.keys(d.values!) as ValueId[]) count[v] = (count[v] ?? 0) + 1;
-    for (const v of ['justice', 'devotion', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'] as ValueId[])
+    for (const v of ['justice', 'greed', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'] as ValueId[])
       expect(count[v] ?? 0, v).toBeGreaterThanOrEqual(3);
   });
   it('정의가 붙은 문이 해군에만 몰리지 않고, 해군에도 야망 · 의리 · 패도의 문이 있다', () => {

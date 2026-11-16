@@ -40,7 +40,7 @@ export const PIRATE_2: Turning[] = [
     doors: [
       { label: '섬을 제 나라로 삼는다', hint: '섬은 {name}의 것이 되고 원로들의 말은 줄어든다', values: { dominion: D },
         fx: [{ op: 'flag', id: 'ruler' }, { op: 'money', add: 100000 }, { op: 'fame', add: 20 }, { op: 'timeline', text: '섬 하나를 다스리게 되었다' }] },
-      { label: '공물은 받지 않고 섬의 바다만 지켜 준다', hint: '돈 대신 해마다 지킬 바다가 하나 는다', values: { devotion: D },
+      { label: '공물은 받지 않고 섬의 바다만 지켜 준다', hint: '돈 대신 해마다 지킬 바다가 하나 는다', values: { romance: D },
         fx: [{ op: 'flag', id: 'guardian' }, { op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '섬의 원로' }] },
       { label: '섬에 매이지 않겠다며 떠난다', hint: '원로들은 다른 해적을 찾을 것이다', values: { freedom: D }, fx: [], closes: true },
     ],
@@ -70,7 +70,7 @@ export const PIRATE_2: Turning[] = [
     doors: [
       { label: '신문의 자리를 걸고 겨룬다', hint: '이겨도 져도 평생 그 이름이 따라붙는다', values: { ambition: D }, danger: true,
         fx: [{ op: 'hp', add: -25 }, { op: 'fame', add: 30 }, { op: 'person', kind: 'rival', relation: '백마의 귀공자', canon: 'cavendish' }] },
-      { label: '그의 체면을 세워 주고 함께 싸울 날을 기약한다', hint: '신문의 주인공 자리는 그에게 넘긴다', values: { devotion: D },
+      { label: '그의 체면을 세워 주고 함께 싸울 날을 기약한다', hint: '신문의 주인공 자리는 그에게 넘긴다', values: { romance: D },
         fx: [{ op: 'fame', add: -10 }, { op: 'person', kind: 'ally', relation: '백마의 귀공자', canon: 'cavendish' }] },
       { label: '말 엉덩이를 걷어차고 달아난다', hint: '광장이 웃음바다가 되고 칼끝이 쫓아온다', values: { freedom: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 5 }, { op: 'flag', id: 'cavendishGrudge' }] },
@@ -86,7 +86,7 @@ export const PIRATE_2: Turning[] = [
              { op: 'person', kind: 'ally', relation: '주먹을 맞댄 권투사', canon: 'ideo' }] },
       { label: '그의 주먹을 끝까지 지켜보고 배운다', hint: '몸은 성하고 손에 남는 것은 적다', values: { inquiry: D },
         fx: [{ op: 'mastery', branch: 'fist', add: 8 }, { op: 'base', key: 'int', add: 1 }] },
-      { label: '투기장의 판돈을 챙겨 자리를 뜬다', hint: '권투사의 실망한 얼굴이 남는다', values: { ambition: D },
+      { label: '투기장의 판돈을 챙겨 자리를 뜬다', hint: '권투사의 실망한 얼굴이 남는다', values: { greed: D }, 
         fx: [{ op: 'money', add: 30000 }] },
     ],
   },

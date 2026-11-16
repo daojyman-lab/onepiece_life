@@ -22,7 +22,7 @@ export const MOMENTS: Turning[] = [
   moment('moment_loss', {
     title: '남겨진 사람', body: '아끼던 사람이 더는 곁에 없다. 텅 빈 자리를 바라보며 {name}은(는) 한참을 움직이지 못한다.',
     doors: [
-      { label: '남은 사람들을 끝까지 지킨다', hint: '다시는 누구도 잃지 않겠다고 다짐한다', values: { devotion: D }, mark: 'fellowship', fx: [] },
+      { label: '남은 사람들을 끝까지 지킨다', hint: '다시는 누구도 잃지 않겠다고 다짐한다', values: { loyalty: D }, mark: 'fellowship', fx: [] },
       { label: '그 사람이 꿈꾸던 곳으로 떠난다', hint: '못다 한 길을 대신 걷는다', values: { romance: D }, fx: [] },
       { label: '이렇게 만든 세상을 바로잡는다', hint: '같은 일이 다시 없도록 맞서기로 한다', values: { justice: D }, fx: [] },
     ],
@@ -39,7 +39,7 @@ export const MOMENTS: Turning[] = [
     title: '내밀어진 손', body: '모든 것이 끝났다고 여긴 순간, 이름도 모르는 누군가가 {name}을(를) 끌어올렸다. 그는 대가를 묻지 않았다.',
     doors: [
       { label: '그 은혜를 평생 갚는다', hint: '그 사람의 뒤를 따르기로 한다', values: { loyalty: D }, fx: [] },
-      { label: '받은 만큼 다른 이에게 베푼다', hint: '언젠가 누군가에게 같은 손을 내민다', values: { devotion: D }, fx: [] },
+      { label: '받은 만큼 다른 이에게 베푼다', hint: '언젠가 누군가에게 같은 손을 내민다', values: { justice: D }, fx: [] },
       { label: '고맙다는 말만 남기고 길을 떠난다', hint: '누구에게도 매이지 않는다', values: { freedom: D }, fx: [] },
     ],
   }),
@@ -65,7 +65,7 @@ export const MOMENTS: Turning[] = [
     title: '먼저 간 아이', body: '{name}은(는) 먼저 간 아이가 쓰던 방의 문을 오래 열지 못한다. 순서가 바뀌었다. 바다가 무엇을 가져갔는지, 아직 실감이 나지 않는다.',
     doors: [
       { label: '그 아이가 가려던 바다로 대신 나간다', hint: '못다 한 항해를 잇는다', values: { romance: D }, fx: [] },
-      { label: '남은 식구와 아이들 곁을 떠나지 않는다', hint: '다시는 아무도 혼자 바다에 보내지 않는다', values: { devotion: D }, mark: 'fellowship', fx: [] },
+      { label: '남은 식구와 아이들 곁을 떠나지 않는다', hint: '다시는 아무도 혼자 바다에 보내지 않는다', values: { loyalty: D }, mark: 'fellowship', fx: [] },
       { label: '그 아이를 삼킨 바다의 일을 끝까지 캐묻는다', hint: '그날 무슨 일이 있었는지 알아낸다', values: { inquiry: D }, fx: [] },
     ],
   }),

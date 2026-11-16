@@ -14,7 +14,7 @@ const standingsOf = (t: Turning): Standing[] | null => {
 };
 /** 처지 조건이 이 처지들 안에만 있다 */
 const only = (t: Turning, is: Standing[]) => { const s = standingsOf(t); return s !== null && s.every((x) => is.includes(x)); };
-const VALUES: ValueId[] = ['justice', 'devotion', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'];
+const VALUES: ValueId[] = ['justice', 'greed', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'];
 const valued = (ts: Turning[]) => ts.flatMap((t) => t.doors).filter((d) => Object.keys(d.values ?? {}).length > 0);
 
 describe('과제 7: 해적과 현상금 사냥꾼', () => {

@@ -2,7 +2,7 @@ export const V = {
   partsPerYear: 4,
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.28 }, { to: 200, n: 1.0 } ],
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
@@ -30,7 +30,7 @@ export const V = {
     base: 10,
     lean: {
       ambition: { train: 0.5 }, dominion: { train: 0.4, roam: 0.1 }, justice: { train: 0.25, work: 0.2 },
-      devotion: { family: 0.4, work: 0.15 }, romance: { roam: 0.4 }, inquiry: { study: 0.5 },
+      greed: { work: 0.45 }, romance: { roam: 0.4 }, inquiry: { study: 0.5 },
       loyalty: { family: 0.25, train: 0.2 }, freedom: { roam: 0.5 }, peace: { rest: 0.35, family: 0.25 },
     },
     poorWork: 5, poorKidWork: 90, kidAge: 15, dutyWork: 30,

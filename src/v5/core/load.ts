@@ -1,5 +1,6 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
 import { V } from '../data/balance';
+import { VALUE_IDS } from '../data/values';
 import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
@@ -54,6 +55,8 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
+  if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;
   // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다
   const g = life.growth;
   if (isObj(g) && isObj(g.pref) && isObj(g.tier) && isObj(g.mastery) && Object.values(g.pref).every((v) => !v)) {
@@ -73,6 +76,8 @@ export function normalizeMeta5(x: unknown): Meta5 {
   if (!isObj(x) || x.schema !== 5) return def;
   const m = withDefaults(x, def);
   if (!isObj(m.doors)) m.doors = def.doors;
+  // 없어진 가치관(헌신)은 도감에서 지운다
+  else for (const [k, v] of Object.entries(m.doors)) if (Array.isArray(v)) (m.doors as Obj)[k] = v.filter((x) => VALUE_IDS.includes(x as never));
   for (const k of ['fruits', 'people', 'hall'] as const) if (!Array.isArray(m[k])) m[k] = def[k];
   if (typeof m.lives !== 'number' || !Number.isFinite(m.lives)) m.lives = def.lives;
   return m as unknown as Meta5;

@@ -39,13 +39,13 @@ function canonPassing(): Minor[] {
     { id: 'm_cn_dadan', when: [{ c: 'town', is: ['후샤 마을', '고아 왕국 그레이 터미널'] }, { c: 'age', min: 5, max: 12 }, st('child')], weight: 6, cooldownYears: ONCE,
       outcomes: [
         met('dadan', '코르보 산의 산적 일가에게 혼쭐이 났다', { freedom: 1 }, ['코르보 산에 몰래 들어갔다가 산적 일가의 여두목에게 귀를 잡혀 끌려 나왔다.', '산적 소굴의 고기를 훔치다 걸려 장작을 한 짐 패고서야 풀려났다.']),
-        met('dadan', '코르보 산의 산적 일가에게 감자를 얻었다', { devotion: 1 }, ['길 잃은 산적 일가의 꼬마를 소굴까지 데려다주고 찐 감자를 얻었다.', '산적 일가의 빨래를 거들어 주고 감자 한 바구니를 받아 왔다.']),
+        met('dadan', '코르보 산의 산적 일가에게 감자를 얻었다', { romance: 1 }, ['길 잃은 산적 일가의 꼬마를 소굴까지 데려다주고 찐 감자를 얻었다.', '산적 일가의 빨래를 거들어 주고 감자 한 바구니를 받아 왔다.']),
         met('dadan', '코르보 산의 산적 일가를 멀리서 보았다', {}, ['코르보 산 쪽에서 산적들이 아이들을 쫓아다니며 고함치는 소리가 들렸다.', '산적 일가의 여두목이 시장에서 술을 잔뜩 사 가는 것을 보았다.']),
       ] },
     { id: 'm_cn_makino', when: [...inTown('후샤 마을', 3, 12), st('child')], weight: 6, cooldownYears: ONCE,
       outcomes: [
         met('makino', '마키노의 술집에서 우유를 얻어 마셨다', { romance: 1 }, ['마키노의 술집 구석에 앉아 해적들의 노래를 들으며 우유를 마셨다.', '마키노가 내준 우유를 마시며 술집에 걸린 해도를 오래 올려다보았다.']),
-        met('makino', '마키노의 술집 일을 거들었다', { devotion: 1 }, ['마키노의 술집에서 빈 잔을 나르고 사과 하나를 얻었다.', '비 오는 날 마키노의 술집 앞 물웅덩이를 메워 주었다.']),
+        met('makino', '마키노의 술집 일을 거들었다', { peace: 1 }, ['마키노의 술집에서 빈 잔을 나르고 사과 하나를 얻었다.', '비 오는 날 마키노의 술집 앞 물웅덩이를 메워 주었다.']),
         met('makino', '마키노의 술집 앞을 지났다', {}, ['마키노의 술집 창문 너머로 웃음소리가 흘러나왔다.', '마키노가 술집 앞을 쓸며 손을 흔들어 주었다.']),
       ] },
     { id: 'm_cn_helmeppo', when: [...inTown('셸스 타운', 8, 15)], weight: 6, cooldownYears: ONCE,
@@ -62,7 +62,7 @@ function canonPassing(): Minor[] {
       ] },
     { id: 'm_cn_bellemere', when: [...inTown('코코야시 마을', 3, 9)], weight: 6, cooldownYears: ONCE,
       outcomes: [
-        met('bellemere', '귤밭의 벨메일에게 귤을 얻었다', { devotion: 1 }, ['귤밭의 벨메일이 담배를 물고 귤 한 아름을 안겨 주었다.', '벨메일의 귤밭에서 잡초를 뽑아 주고 귤을 얻었다.']),
+        met('bellemere', '귤밭의 벨메일에게 귤을 얻었다', { justice: 1 }, ['귤밭의 벨메일이 담배를 물고 귤 한 아름을 안겨 주었다.', '벨메일의 귤밭에서 잡초를 뽑아 주고 귤을 얻었다.']),
         met('bellemere', '귤밭의 두 자매와 뛰어놀았다', { freedom: 1 }, ['귤밭의 주황 머리 아이와 언덕을 뛰어다니다 해 지는 줄 몰랐다.', '귤밭의 두 자매와 숨바꼭질을 하다 벨메일에게 다 같이 혼났다.']),
         met('bellemere', '귤밭 언덕을 지났다', {}, ['귤밭 언덕에서 벨메일이 두 아이를 부르는 소리가 들렸다.', '귤 향기가 나는 언덕길을 지나 집으로 돌아왔다.']),
       ] },
@@ -74,7 +74,7 @@ function canonPassing(): Minor[] {
       ] },
     { id: 'm_cn_sanji', when: [...atSeaAge(['east'], 14, 17)], weight: 4, cooldownYears: ONCE,
       outcomes: [
-        met('sanji', '발라티에의 금발 요리사에게 볶음밥을 얻어먹었다', { devotion: 0.5, romance: 0.5 }, ['돈 없이 발라티에에 들렀다가 금발의 요리사가 내준 볶음밥을 먹었다.', '발라티에의 금발 요리사가 배고프면 언제든 오라며 뒷문을 열어 주었다.']),
+        met('sanji', '발라티에의 금발 요리사에게 볶음밥을 얻어먹었다', { romance: 1 }, ['돈 없이 발라티에에 들렀다가 금발의 요리사가 내준 볶음밥을 먹었다.', '발라티에의 금발 요리사가 배고프면 언제든 오라며 뒷문을 열어 주었다.']),
         met('sanji', '발라티에에서 밥값을 치렀다', { justice: 1 }, ['발라티에에서 밥을 먹고 요리사가 받지 않겠다는 밥값을 탁자에 두고 나왔다.', '발라티에의 요리사들 싸움을 구경하다 밥값을 넉넉히 치렀다.']),
         met('sanji', '바다 위의 식당을 지나쳤다', {}, ['바다 위의 식당 발라티에에서 요리사들의 고함이 들려왔다.', '물고기 모양의 식당이 수평선에서 반짝였다.']),
       ] },
@@ -87,7 +87,7 @@ function canonPassing(): Minor[] {
     { id: 'm_cn_laboon', when: [...atSeaAge(['gl_entry'], 16)], weight: 5, cooldownYears: ONCE,
       outcomes: [
         met('laboon', '붉은 산 아래의 거대한 고래와 마주쳤다', { romance: 1 }, ['붉은 산을 넘자 머리에 상처투성이인 거대한 고래가 붉은 벽을 향해 울부짖고 있었다.', '쌍둥이 곶의 늙은 등대지기에게 쉰 해째 옛 선원들을 기다리는 고래 이야기를 들었다.']),
-        met('laboon', '거대한 고래의 머리를 치료하는 의사를 도왔다', { devotion: 1 }, ['쌍둥이 곶의 늙은 의사를 도와 고래 머리의 상처에 약을 발랐다.', '붉은 벽에 머리를 박는 고래를 달래려 하루 종일 노래를 불러 주었다.']),
+        met('laboon', '거대한 고래의 머리를 치료하는 의사를 도왔다', { loyalty: 1 }, ['쌍둥이 곶의 늙은 의사를 도와 고래 머리의 상처에 약을 발랐다.', '붉은 벽에 머리를 박는 고래를 달래려 하루 종일 노래를 불러 주었다.']),
         met('laboon', '거대한 고래의 울음을 들었다', {}, ['붉은 산 아래 바다에서 고래의 울음이 길게 울렸다.', '쌍둥이 곶의 등대가 고래의 그림자에 가렸다.']),
       ] },
     { id: 'm_cn_mihawk', when: [...atSeaAge(['east', 'gl_entry', 'gl_first'], 16)], weight: 3, cooldownYears: ONCE,
@@ -104,14 +104,14 @@ function canonPassing(): Minor[] {
       ] },
     { id: 'm_cn_jinbe_kids', when: [...atSeaAge(['sabaody', 'nw_first'], 17), { c: 'island', is: ['어인섬'] }], weight: 5, cooldownYears: ONCE,
       outcomes: [
-        met('jinbe', '어인섬의 아이들에게 인간의 노래를 가르쳤다', { devotion: 1 }, ['어인섬의 해변에서 인간을 처음 본 아이들에게 이스트 블루의 노래를 가르쳤다.', '어인섬 아이들의 정권 지르기 수련을 끝까지 구경해 주었다.']),
+        met('jinbe', '어인섬의 아이들에게 인간의 노래를 가르쳤다', { romance: 1 }, ['어인섬의 해변에서 인간을 처음 본 아이들에게 이스트 블루의 노래를 가르쳤다.', '어인섬 아이들의 정권 지르기 수련을 끝까지 구경해 주었다.']),
         met('jinbe', '어인 가라테 수련을 어깨너머로 배웠다', { ambition: 1 }, ['고래상어 어인이 아이들에게 가르치는 정권 지르기를 어깨너머로 따라 했다.', '물을 쳐서 멀리 보내는 어인 가라테를 몰래 흉내 내 보았다.']),
         met('jinbe', '바다 밑의 섬을 걸었다', {}, ['바다 밑 섬의 빛나는 나무들 사이를 걸었다.', '인어들이 지나가며 인간을 신기하게 쳐다보았다.']),
       ] },
     { id: 'm_cn_colosseum', when: [...atSeaAge(['nw_first'], 18), { c: 'island', is: ['드레스로자'] }], weight: 5, cooldownYears: ONCE,
       outcomes: [
         met('kyros', '외다리 장난감 병정의 싸움에 돈을 걸었다', { ambition: 1 }, ['콜로세움에서 외다리로 싸우는 장난감 병정에게 돈을 걸었다. 병정이 이겼다.', '외다리 병정의 싸움을 보며 함성을 질렀다.']),
-        met('kyros', '외다리 장난감 병정에게 빵을 나눠 주었다', { devotion: 1 }, ['콜로세움 뒷골목에서 외다리 장난감 병정에게 빵 한 조각을 나눠 주었다.', '장난감 병정이 넘어지자 손을 내밀어 일으켜 주었다.']),
+        met('kyros', '외다리 장난감 병정에게 빵을 나눠 주었다', { peace: 1 }, ['콜로세움 뒷골목에서 외다리 장난감 병정에게 빵 한 조각을 나눠 주었다.', '장난감 병정이 넘어지자 손을 내밀어 일으켜 주었다.']),
         met('kyros', '콜로세움의 함성을 들었다', {}, ['콜로세움 쪽에서 큰 함성이 들렸다.', '드레스로자의 거리에서 장난감 병정 하나가 아이를 지켜보고 있었다.']),
       ] },
     { id: 'm_cn_wano', when: [...atSeaAge(['nw_late'], 18), { c: 'island', is: ['와노쿠니'] }], weight: 5, cooldownYears: ONCE,
@@ -130,14 +130,14 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { loyalty: 1 }, text: ['싸운 친구의 집 앞까지 찾아가 먼저 사과했다.', '다툰 친구가 혼날 때 옆에 서서 같이 꾸중을 들었다.'], fx: [] },
       { lean: { dominion: 1 }, text: ['말다툼 끝에 친구를 밀쳐 넘어뜨렸다.', '말싸움에서 지자 친구의 연을 빼앗아 버렸다.'], fx: [] },
-      { lean: { peace: 0.6, devotion: 0.4 }, text: ['다툰 친구에게 아끼던 사탕을 내밀며 화해했다.', '다툰 친구와 나란히 앉아 말없이 노을을 보다가 풀었다.'], fx: [] },
+      { lean: { peace: 0.6 }, text: ['다툰 친구에게 아끼던 사탕을 내밀며 화해했다.', '다툰 친구와 나란히 앉아 말없이 노을을 보다가 풀었다.'], fx: [] },
       { lean: {}, text: ['친구와 다투고 사흘 동안 말을 하지 않았다.', '사소한 일로 친구와 토라졌다가 저녁 무렵 다시 놀았다.'], fx: [] },
     ],
   },
   {
     id: 'm_kid_errand', when: [kid], weight: 9, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['이웃 아주머니의 장바구니를 집까지 들어다 드렸다.', '이웃 할아버지의 그물을 바닷가까지 날라다 드렸다.'], fx: [{ op: 'money', add: 100 }] },
+      { lean: { justice: 1 }, text: ['이웃 아주머니의 장바구니를 집까지 들어다 드렸다.', '이웃 할아버지의 그물을 바닷가까지 날라다 드렸다.'], fx: [{ op: 'money', add: 100 }] },
       { lean: { freedom: 1 }, text: ['심부름 가던 길에 바닷가로 새 버렸다가 꾸중을 들었다.', '심부름 돈으로 사탕을 사 먹고 시치미를 뗐다.'], fx: [] },
       { lean: {}, text: ['{town} 시장에 심부름을 다녀왔다.', '빵집 심부름을 하고 덤으로 빵 한 조각을 얻었다.'], fx: [] },
     ],
@@ -179,7 +179,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_lean_supper', when: [kid, { c: 'wealth', max: 'poor' }], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['모아 둔 동전을 몰래 쌀독에 넣어 두었다.', '제 몫의 감자를 반으로 쪼개 옆집 꼬마에게 주었다.'], fx: [{ op: 'money', add: -100 }] },
+      { lean: { loyalty: 1 }, text: ['모아 둔 동전을 몰래 쌀독에 넣어 두었다.', '제 몫의 감자를 반으로 쪼개 옆집 꼬마에게 주었다.'], fx: [{ op: 'money', add: -100 }] },
       { lean: { ambition: 1 }, text: ['묽은 죽을 비우며 언젠가 큰돈을 벌겠다고 이를 악물었다.', '빈 그릇을 보며 커서 배 한 척을 사겠다고 다짐했다.'], fx: [] },
       { lean: {}, text: ['저녁이 묽은 죽 한 그릇뿐이었다.', '배가 고파 잠이 오지 않는 밤이었다.'], fx: [{ op: 'hp', add: -2 }] },
     ],
@@ -196,7 +196,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_stray', when: [kid], weight: 6, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['비 맞은 떠돌이 고양이에게 생선 대가리를 나눠 주었다.', '다리를 저는 갈매기에게 물과 생선 부스러기를 챙겨 주었다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['비 맞은 떠돌이 고양이에게 생선 대가리를 나눠 주었다.', '다리를 저는 갈매기에게 물과 생선 부스러기를 챙겨 주었다.'], fx: [] },
       { lean: { justice: 1 }, text: ['떠돌이 개에게 돌을 던지던 아이들을 말렸다.', '고양이 꼬리에 깡통을 묶은 아이들에게 그만두라고 소리쳤다.'], fx: [] },
       { lean: {}, text: ['떠돌이 개에게 쫓겨 담장 위로 기어올랐다.', '골목 고양이에게 손등을 할퀴었다.'], fx: [] },
     ],
@@ -212,7 +212,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_lost_child', when: [kid], weight: 5, cooldownYears: 2,
     outcomes: [
-      { lean: { justice: 0.5, devotion: 0.5 }, text: ['울고 있는 길 잃은 꼬마의 손을 잡고 집을 찾아 주었다.', '엄마를 찾는 꼬마를 업고 장터를 세 바퀴 돌았다.'], fx: [] },
+      { lean: { justice: 0.5 }, text: ['울고 있는 길 잃은 꼬마의 손을 잡고 집을 찾아 주었다.', '엄마를 찾는 꼬마를 업고 장터를 세 바퀴 돌았다.'], fx: [] },
       { lean: { peace: 1 }, text: ['길 잃은 꼬마를 어른에게 데려다주고 돌아왔다.', '길 잃은 꼬마 곁에 앉아 엄마가 올 때까지 같이 기다렸다.'], fx: [] },
       { lean: {}, text: ['장터에서 길 잃은 꼬마를 보았지만 곧 엄마가 데려갔다.', '길 잃은 꼬마가 우는 소리에 돌아봤지만 금세 어른이 달려왔다.'], fx: [] },
     ],
@@ -220,7 +220,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_stray_pup', when: [kid], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['비에 젖은 강아지를 안아다 헛간에 몰래 숨겨 주었다.', '굶주린 강아지에게 아껴 둔 빵을 다 나눠 주었다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['비에 젖은 강아지를 안아다 헛간에 몰래 숨겨 주었다.', '굶주린 강아지에게 아껴 둔 빵을 다 나눠 주었다.'], fx: [] },
       { lean: { dominion: 1 }, when: fierce, text: ['으르렁대는 들개에게 막대기를 휘둘러 골목 밖으로 쫓아 버렸다.', '먹이를 탐내는 들개 앞에서 물러서지 않고 소리를 질러 내쫓았다.'], fx: [] },
       { lean: { peace: 1 }, when: calm, text: ['개가 짖어 대는 골목을 피해 다른 길로 돌아갔다.', '들개가 다가오자 가만히 서서 지나가기를 기다렸다.'], fx: [] },
       { lean: {}, text: ['길 잃은 강아지를 쫓아다니다 해가 저물었다.', '강아지와 골목에서 한참 술래잡기를 했다.'], fx: [] },
@@ -266,7 +266,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_chores', when: [young], needs: ['parent'], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['아버지 대신 그물 손질을 끝내 놓고 저녁상을 차렸다.', '어머니가 장에 간 사이 빨래를 다 걷어 개 두었다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['아버지 대신 그물 손질을 끝내 놓고 저녁상을 차렸다.', '어머니가 장에 간 사이 빨래를 다 걷어 개 두었다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['아버지 가게의 장부를 들여다보며 숫자 맞추는 법을 익혔다.', '어머니에게 생선 값 매기는 법을 물어 수첩에 적었다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['집안일을 하다 말고 몰래 빠져나가 바닷가에서 놀았다.', '그물 손질을 하라는 말을 못 들은 척 언덕으로 달아났다.'], fx: [] },
       { lean: {}, text: ['아버지를 도와 그물을 깁다 손가락을 찔렸다.', '어머니를 도와 하루 종일 생선을 말렸다.'], fx: [] },
@@ -275,7 +275,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_storm_night', when: [young], needs: ['parent'], weight: 5, cooldownYears: 2,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['폭풍이 치는 밤, 이웃 꼬마들을 우리 집 다락으로 데려와 재웠다.', '폭풍 속에 혼자 사는 이웃 할머니 집 덧문을 걸어 드렸다.'], fx: [] },
+      { lean: { loyalty: 1 }, text: ['폭풍이 치는 밤, 이웃 꼬마들을 우리 집 다락으로 데려와 재웠다.', '폭풍 속에 혼자 사는 이웃 할머니 집 덧문을 걸어 드렸다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['폭풍이 치는 밤, 어머니와 함께 날아가려는 지붕을 밤새 붙잡았다.', '아버지 곁에서 물에 잠긴 마당의 물을 밤새 퍼냈다.'], fx: [{ op: 'hp', add: -2 }] },
       { lean: { peace: 1 }, text: ['폭풍이 지나가길 기다리며 이불을 뒤집어쓰고 숨죽였다.', '덜컹거리는 창문 소리를 들으며 어머니 품에서 잠들었다.'], fx: [] },
       { lean: {}, text: ['폭풍이 지나간 아침, 부서진 울타리 조각을 주워 모았다.', '폭풍에 쓰러진 나무를 보러 동네 아이들과 몰려갔다.'], fx: [] },
@@ -305,7 +305,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { justice: 1 }, text: ['노점상을 괴롭히던 건달 둘을 쫓아냈다.', '아이 돈을 뺏던 건달의 팔을 비틀어 돈을 돌려주게 했다.'], fx: [{ op: 'hp', add: -3 }, { op: 'fame', add: 1 }] },
       { lean: { peace: 1 }, when: calm, text: ['건달들의 시비를 웃어넘기고 길을 비켜 주었다.', '건달들이 비키라기에 웃으며 길을 내주었다.'], fx: [] },
-      { lean: { dominion: 1 }, when: fierce, text: ['길을 막은 건달들을 때려눕히고 가진 돈을 털었다.', '시비 건 건달들을 눕히고 주머니를 털어 갔다.'], fx: [{ op: 'hp', add: -5 }, { op: 'money', add: 2000 }] },
+      { lean: { greed: 1 }, when: fierce, text: ['길을 막은 건달들을 때려눕히고 가진 돈을 털었다.', '시비 건 건달들을 눕히고 주머니를 털어 갔다.'], fx: [{ op: 'hp', add: -5 }, { op: 'money', add: 2000 }] },
       { lean: {}, text: ['건달들과 멱살잡이를 하다 순찰 해군이 오자 흩어졌다.', '건달들과 실랑이하다 지나가던 순찰대 덕에 풀려났다.'], fx: [{ op: 'hp', add: -2 }] },
     ],
   },
@@ -323,22 +323,22 @@ export const MINORS: Minor[] = ([
     id: 'm_rent', when: [adult, ashore], weight: 7, cooldownYears: 1,
     outcomes: [
       { lean: { freedom: 1 }, text: ['방세가 밀리자 짐을 싸서 더 싼 여관으로 옮겼다.', '방세를 아끼려고 짐을 싸서 부둣가 창고 다락으로 옮겼다.'], fx: [{ op: 'money', add: -1000 }] },
-      { lean: { devotion: 1 }, text: ['집주인 할머니의 지붕을 고쳐 주고 방세를 조금 깎았다.', '집주인 할아버지의 장작을 패 주고 방세를 조금 덜어 냈다.'], fx: [{ op: 'money', add: -1500 }] },
+      { lean: { romance: 1 }, text: ['집주인 할머니의 지붕을 고쳐 주고 방세를 조금 깎았다.', '집주인 할아버지의 장작을 패 주고 방세를 조금 덜어 냈다.'], fx: [{ op: 'money', add: -1500 }] },
       { lean: {}, text: ['방세를 치르고 나니 주머니가 가벼워졌다.', '밀린 외상값을 갚았다.'], fx: [{ op: 'money', add: -3000 }] },
     ],
   },
   {
     id: 'm_groceries', when: [adult, free], weight: 6, cooldownYears: 1,
     outcomes: [
-      { lean: { dominion: 1 }, text: ['생선 장수를 윽박질러 값을 반으로 깎았다.', '바가지를 씌우려는 장사꾼을 노려보아 제값에 샀다.'], fx: [{ op: 'money', add: -500 }] },
-      { lean: { devotion: 1 }, text: ['사정이 딱한 노점에서 일부러 넉넉히 샀다.', '팔리지 않는 할머니의 나물을 몽땅 사 왔다.'], fx: [{ op: 'money', add: -1500 }] },
+      { lean: { greed: 1 }, text: ['생선 장수를 윽박질러 값을 반으로 깎았다.', '바가지를 씌우려는 장사꾼을 노려보아 제값에 샀다.'], fx: [{ op: 'money', add: -500 }] },
+      { lean: { peace: 1 }, text: ['사정이 딱한 노점에서 일부러 넉넉히 샀다.', '팔리지 않는 할머니의 나물을 몽땅 사 왔다.'], fx: [{ op: 'money', add: -1500 }] },
       { lean: {}, text: ['{island} 시장에서 한 주 먹을 것을 샀다.', '{island} 시장에서 쌀 한 자루와 말린 생선을 샀다.'], fx: [{ op: 'money', add: -1000 }] },
     ],
   },
   {
     id: 'm_gear', when: [adult, free, money(10000)], weight: 5, cooldownYears: 2,
     outcomes: [
-      { lean: { ambition: 1 }, text: ['모은 돈을 털어 손에 꼭 맞는 무기를 새로 장만했다.', '대장간에 몇 번이고 드나들며 새 무기를 손에 맞게 고쳤다.'], fx: [{ op: 'money', add: -8000 }] },
+      { lean: { greed: 1 }, text: ['모은 돈을 털어 손에 꼭 맞는 무기를 새로 장만했다.', '대장간에 몇 번이고 드나들며 새 무기를 손에 맞게 고쳤다.'], fx: [{ op: 'money', add: -8000 }] },
       { lean: { romance: 0.7, loyalty: 0.3 }, text: ['낡은 무기를 버리지 못하고 대장간에 맡겨 고쳐 썼다.', '손때 묻은 무기의 손잡이만 새로 감아 계속 썼다.'], fx: [{ op: 'money', add: -2000 }] },
       { lean: {}, text: ['닳은 장화를 새것으로 바꿨다.', '해진 외투를 새로 맞췄다.'], fx: [{ op: 'money', add: -1500 }] },
     ],
@@ -355,15 +355,15 @@ export const MINORS: Minor[] = ([
     id: 'm_cold', when: [adult], weight: 6, cooldownYears: 1,
     outcomes: [
       { lean: { ambition: 1 }, text: ['감기 기운에도 쉬지 않고 버텼다.', '열이 펄펄 끓는데도 일을 나갔다.'], fx: [{ op: 'hp', add: -10 }] },
-      { lean: { peace: 0.6, devotion: 0.4 }, text: ['따뜻한 국을 끓여 먹고 푹 잤다.', '생강차를 끓여 마시고 이불을 뒤집어쓰고 잤다.'], fx: [{ op: 'hp', add: -2 }] },
+      { lean: { peace: 0.6 }, text: ['따뜻한 국을 끓여 먹고 푹 잤다.', '생강차를 끓여 마시고 이불을 뒤집어쓰고 잤다.'], fx: [{ op: 'hp', add: -2 }] },
       { lean: {}, text: ['감기에 걸려 며칠 앓았다.', '상한 생선을 먹고 하루를 꼬박 앓았다.'], fx: [{ op: 'hp', add: -6 }] },
     ],
   },
   {
     id: 'm_favor', when: [adult, free], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['이웃의 이삿짐을 하루 종일 날라 주었다.', '앓는 이웃 대신 그 집 그물을 걷어다 주었다.'], fx: [{ op: 'hp', add: -2 }] },
-      { lean: { freedom: 1 }, text: ['귀찮은 부탁을 이리저리 핑계 대며 피했다.', '부탁할 일이 있다는 이웃을 보고 슬쩍 다른 골목으로 샜다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['이웃의 이삿짐을 하루 종일 날라 주었다.', '앓는 이웃 대신 그 집 그물을 걷어다 주었다.'], fx: [{ op: 'hp', add: -2 }] },
+      { lean: { greed: 1 }, text: ['귀찮은 부탁을 이리저리 핑계 대며 피했다.', '부탁할 일이 있다는 이웃을 보고 슬쩍 다른 골목으로 샜다.'], fx: [] },
       { lean: {}, text: ['부탁받은 편지를 항구 사무소에 전해 주었다.', '부탁받은 짐을 이웃 마을까지 날라 주었다.'], fx: [] },
     ],
   },
@@ -371,7 +371,7 @@ export const MINORS: Minor[] = ([
     id: 'm_loan', when: [adult, free, money(5000)], weight: 5, cooldownYears: 2,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['오랜 친구가 돈을 빌려 달라기에 묻지 않고 내주었다.', '친구의 빚을 대신 갚아 주고 차용증을 찢었다.'], fx: [{ op: 'money', add: -3000 }] },
-      { lean: { devotion: 0.5, justice: 0.5 }, text: ['빌려 달라는 돈 대신 일자리를 알아봐 주었다.', '돈을 빌리러 온 친구와 같이 일자리를 알아보러 다녔다.'], fx: [] },
+      { lean: { justice: 0.5 }, text: ['빌려 달라는 돈 대신 일자리를 알아봐 주었다.', '돈을 빌리러 온 친구와 같이 일자리를 알아보러 다녔다.'], fx: [] },
       { lean: {}, text: ['돈을 빌려 달라는 말에 형편이 어렵다며 거절했다.', '빌려 달라는 말에 한참 망설이다 고개를 저었다.'], fx: [] },
     ],
   },
@@ -428,7 +428,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_drunk_friend', when: [adult, free], weight: 4, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 0.5, loyalty: 0.5 }, text: ['술에 취한 친구를 업고 집까지 데려다주었다.', '취해 쓰러진 친구 곁에서 날이 밝을 때까지 지켰다.'], fx: [] },
+      { lean: { loyalty: 0.5 }, text: ['술에 취한 친구를 업고 집까지 데려다주었다.', '취해 쓰러진 친구 곁에서 날이 밝을 때까지 지켰다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['취한 친구를 선술집에 두고 먼저 돌아왔다.', '술주정을 듣다 못해 친구를 두고 밤바다를 걸었다.'], fx: [] },
       { lean: {}, text: ['취해서 우는 친구의 넋두리를 새벽까지 들어 주었다.', '취한 친구와 부둣가에 앉아 노래를 불렀다.'], fx: [] },
     ],
@@ -461,7 +461,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_drowning', when: [adult, free], needs: ['swim'], weight: 4, cooldownYears: 2,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['파도에 휩쓸린 사람을 보자마자 바다에 뛰어들어 건져 냈다.', '물에 빠졌던 사람의 등을 두드려 물을 토하게 하고 담요를 덮어 주었다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['파도에 휩쓸린 사람을 보자마자 바다에 뛰어들어 건져 냈다.', '물에 빠졌던 사람의 등을 두드려 물을 토하게 하고 담요를 덮어 주었다.'], fx: [] },
       { lean: { justice: 1 }, text: ['사람이 빠졌는데 구경만 하던 사람들을 꾸짖어 밧줄을 던지게 했다.', '사람을 밀어 빠뜨린 취객을 붙잡아 초소로 끌고 갔다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['모두가 망설이는 거친 물살로 먼저 헤엄쳐 들어갔다.', '소용돌이를 뚫고 사람을 건져 부두 사람들의 박수를 받았다.'], fx: [{ op: 'hp', add: -3 }] },
       { lean: {}, text: ['부두에 빠진 사람에게 헤엄쳐 가서 물 밖으로 끌어냈다.', '젖은 옷을 짜며 건져 낸 사람이 숨 쉬는 것을 보고 자리를 떴다.'], fx: [] },
@@ -472,7 +472,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { inquiry: 1 }, text: ['우연히 얻은 낡은 주화의 무늬를 알아내려고 헌책방을 다 뒤졌다.', '옛 주화에 새겨진 연호로 사라진 나라를 짐작해 보았다.'], fx: [] },
       { lean: { romance: 1 }, text: ['보물선에서 나왔을지 모를 옛 주화를 부적처럼 목에 걸었다.', '주화 하나를 만지작거리며 몇백 년 전 바다를 그려 보았다.'], fx: [] },
-      { lean: { dominion: 1 }, text: ['헐값에 사려는 골동품상 앞에서 주화를 거두고 부른 값을 다 받았다.', '주화를 노리고 뒤를 밟던 좀도둑들을 붙잡아 혼쭐을 냈다.'], fx: [{ op: 'money', add: 2000 }] },
+      { lean: { greed: 1 }, text: ['헐값에 사려는 골동품상 앞에서 주화를 거두고 부른 값을 다 받았다.', '주화를 노리고 뒤를 밟던 좀도둑들을 붙잡아 혼쭐을 냈다.'], fx: [{ op: 'money', add: 2000 }] },
       { lean: {}, text: ['주운 옛 동전을 골동품 가게에 팔아 술값을 했다.', '옛 동전을 골동품 가게에 가져가 몇 푼 받았다.'], fx: [{ op: 'money', add: 500 }] },
     ],
   },
@@ -480,7 +480,7 @@ export const MINORS: Minor[] = ([
     id: 'm_sibling_letter', when: [adult, free], needs: ['sibling'], weight: 4, cooldownYears: 2,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['형제가 어렵다는 편지를 받고 하던 일을 제쳐 두고 도울 길을 찾았다.', '형제가 부탁한 물건을 구해 바로 부쳤다.'], fx: [{ op: 'money', add: -1000 }] },
-      { lean: { devotion: 1 }, text: ['형제의 안부 편지를 읽고 모은 돈과 이곳 특산물을 소포로 부쳤다.', '형제가 앓는다는 소식에 약초를 구해 편지와 함께 보냈다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { peace: 1 }, text: ['형제의 안부 편지를 읽고 모은 돈과 이곳 특산물을 소포로 부쳤다.', '형제가 앓는다는 소식에 약초를 구해 편지와 함께 보냈다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { freedom: 1 }, text: ['집으로 돌아오라는 형제의 편지를 읽고 웃으며 접어 두었다.', '형제에게 안부만 짧게 적은 답장을 보내고 제 길을 갔다.'], fx: [] },
       { lean: {}, text: ['형제의 편지를 읽고 그동안 지낸 이야기를 적어 답장했다.', '오랜만에 온 형제의 소식을 반갑게 읽고 품에 넣었다.'], fx: [] },
     ],
@@ -489,7 +489,7 @@ export const MINORS: Minor[] = ([
     id: 'm_rain_shelter', when: [adult, free], weight: 5, cooldownYears: 1,
     outcomes: [
       { lean: { peace: 1 }, text: ['갑자기 쏟아진 비를 피해 처마 밑에서 빗소리를 들었다.', '뛰지 않고 큰 나무 밑에서 비가 그칠 때까지 쉬어 갔다.'], fx: [] },
-      { lean: { devotion: 1 }, text: ['처마 밑에서 떠는 아이에게 겉옷을 벗어 덮어 주었다.', '하나뿐인 우산을 노인에게 주고 빗속을 걸어 돌아왔다.'], fx: [] },
+      { lean: { loyalty: 1 }, text: ['처마 밑에서 떠는 아이에게 겉옷을 벗어 덮어 주었다.', '하나뿐인 우산을 노인에게 주고 빗속을 걸어 돌아왔다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['구름이 흘러가는 쪽을 보고 소나기가 그칠 때를 맞혔다.', '처마 밑에 모인 사람들의 이야기에서 이 섬의 소문을 들었다.'], fx: [] },
       { lean: {}, text: ['갑자기 쏟아지는 비에 가까운 처마 밑으로 달려 들어갔다.', '비가 잦아들 때까지 젖은 옷자락을 털었다.'], fx: [] },
     ],
@@ -497,7 +497,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_home_letter', when: [adult, free, money(5000)], needs: ['parent'], weight: 4, cooldownYears: 3,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['고향에 흉년이 들었다는 어머니의 편지를 받고 모은 돈을 부쳤다.', '{town}의 부모님께 쌀값을 넉넉히 보냈다.'], fx: [{ op: 'money', add: -4000 }] },
+      { lean: { romance: 1 }, text: ['고향에 흉년이 들었다는 어머니의 편지를 받고 모은 돈을 부쳤다.', '{town}의 부모님께 쌀값을 넉넉히 보냈다.'], fx: [{ op: 'money', add: -4000 }] },
       { lean: { loyalty: 1 }, text: ['흉년 소식에 이웃집 몫까지 나눠 쓰라며 돈을 보냈다.', '어머니의 편지를 받자마자 답장과 함께 약값을 부쳤다.'], fx: [{ op: 'money', add: -4000 }] },
       { lean: { ambition: 1 }, text: ['돈은 조금만 부치고 더 벌어 크게 갚겠다고 답장을 썼다.', '고향에 보낼 돈을 아껴 일을 늘리는 데 썼다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: {}, text: ['어머니의 편지에 안부를 적어 답장하고 동전 몇 닢을 넣었다.', '고향 소식을 듣고 형편대로 조금 부쳤다.'], fx: [{ op: 'money', add: -1000 }] },
@@ -525,7 +525,7 @@ export const MINORS: Minor[] = ([
     id: 'm_homecoming', when: [{ c: 'age', min: 20 }, crew], needs: ['spouse'], weight: 4, cooldownYears: 2,
     outcomes: [
       { lean: { peace: 1 }, text: ['오랜만에 집에 들러 배우자 곁에서 며칠 푹 쉬었다.', '집에 와서 아무 데도 나가지 않고 마당만 쓸었다.'], fx: [{ op: 'hp', add: 5 }] },
-      { lean: { devotion: 1 }, text: ['배우자에게 줄 먼 섬의 옷감을 들고 집에 들렀다.', '오랜만의 집에서 새는 지붕부터 고쳐 놓았다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { peace: 1 }, text: ['배우자에게 줄 먼 섬의 옷감을 들고 집에 들렀다.', '오랜만의 집에서 새는 지붕부터 고쳐 놓았다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { freedom: 1 }, text: ['집에 들러 얼굴만 보이고 이튿날 새벽 바다로 돌아갔다.', '배우자의 잔소리를 웃으며 듣고 다시 짐을 꾸렸다.'], fx: [] },
       { lean: {}, text: ['오랜만에 집에 들러 배우자와 저녁을 먹었다.', '집에 들러 그동안 쌓인 편지를 읽었다.'], fx: [] },
     ],
@@ -544,7 +544,7 @@ export const MINORS: Minor[] = ([
     id: 'm_pirate_share', when: [adult, st('pirate')], weight: 8, cooldownYears: 1,
     outcomes: [
       { lean: { dominion: 1 }, text: ['전리품 더미에서 가장 값나가는 것을 먼저 집어 들었다.', '몫이 적다고 투덜대는 선원을 노려보아 입을 다물게 했다.'], fx: [{ op: 'money', add: 2000 }] },
-      { lean: { devotion: 1 }, text: ['다친 선원의 약값에 쓰라고 제 몫의 은화를 밀어 주었다.', '고향에 보낼 돈이 필요하다는 선원에게 제 몫을 덜어 주었다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { peace: 1 }, text: ['다친 선원의 약값에 쓰라고 제 몫의 은화를 밀어 주었다.', '고향에 보낼 돈이 필요하다는 선원에게 제 몫을 덜어 주었다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { romance: 1 }, text: ['금화 대신 이상한 모양의 나침반과 낡은 일지를 몫으로 골랐다.', '보석은 마다하고 정체 모를 뼈 장식을 챙겼다.'], fx: [] },
       { lean: {}, text: ['갑판에 둘러앉아 정한 대로 전리품을 똑같이 나눴다.', '몫으로 받은 동전 주머니를 해먹 밑에 숨겨 두었다.'], fx: [{ op: 'money', add: 1500 }] },
     ],
@@ -581,7 +581,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { justice: 1 }, text: ['곡식을 사재기한 악덕 상인의 창고를 털어 마을 사람들에게 나눠 주었다.', '사람을 사고판다는 상인의 금고를 털고 장부를 불살랐다.'], fx: [{ op: 'money', add: 1000 }] },
       { lean: { dominion: 1 }, text: ['항구에서 가장 큰 상점에 쳐들어가 금고를 통째로 들고 나왔다.', '창고지기를 묶어 두고 창고를 바닥까지 비웠다.'], fx: [{ op: 'money', add: 3000 }] },
-      { lean: { devotion: 1 }, text: ['턴 창고의 쌀가마를 굶는 포구 마을 앞에 내려놓고 왔다.', '창고에서 나온 약을 앓는 아이가 있는 집에 몰래 두었다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['턴 창고의 쌀가마를 굶는 포구 마을 앞에 내려놓고 왔다.', '창고에서 나온 약을 앓는 아이가 있는 집에 몰래 두었다.'], fx: [] },
       { lean: {}, text: ['항구 창고에서 술통 몇 개를 몰래 굴려 왔다.', '창고를 털러 갔다가 경비가 많아 술통 하나만 들고 돌아왔다.'], fx: [{ op: 'money', add: 500 }] },
     ],
   },
@@ -619,7 +619,7 @@ export const MINORS: Minor[] = ([
     id: 'm_marine_tax', when: [adult, st('marine')], weight: 8, cooldownYears: 2,
     outcomes: [
       { lean: { justice: 1 }, text: ['상인에게 뒷돈을 요구하던 고참의 손목을 붙잡아 말렸다.', '세금을 빼돌린 고참의 장부를 상관에게 그대로 올렸다.'], fx: [] },
-      { lean: { devotion: 1 }, text: ['세금을 못 내 우는 노점상 할머니 몫을 제 봉급에서 보탰다.', '가난한 어부의 그물은 압수 목록에서 빼 주었다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { justice: 1 }, text: ['세금을 못 내 우는 노점상 할머니 몫을 제 봉급에서 보탰다.', '가난한 어부의 그물은 압수 목록에서 빼 주었다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { dominion: 1 }, text: ['세금을 늦게 낸 상점 주인을 다그쳐 그 자리에서 받아 냈다.', '말이 많은 상인들 앞에서 탁자를 내리쳐 세금을 걷었다.'], fx: [] },
       { lean: {}, text: ['명령서에 적힌 대로 항구 상인들에게 세금을 걷었다.', '세금 자루와 장부를 맞춰 보고 일을 마쳤다.'], fx: [] },
     ],
@@ -628,7 +628,7 @@ export const MINORS: Minor[] = ([
     id: 'm_marine_drill', when: [adult, st('marine')], weight: 9, cooldownYears: 1,
     outcomes: [
       { lean: { ambition: 1 }, text: ['일과가 끝난 뒤에도 연병장에 남아 모래주머니를 차고 달렸다.', '진급 심사를 앞두고 교관에게 대련을 청했다.'], fx: [] },
-      { lean: { devotion: 1 }, text: ['구보 중 발목을 삔 신병을 부축해 끝까지 같이 뛰었다.', '사격 자세가 서툰 후임 곁에 남아 해 질 때까지 봐 주었다.'], fx: [] },
+      { lean: { loyalty: 1 }, text: ['구보 중 발목을 삔 신병을 부축해 끝까지 같이 뛰었다.', '사격 자세가 서툰 후임 곁에 남아 해 질 때까지 봐 주었다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['제식 훈련 도중 대열을 빠져나와 지붕 위에서 낮잠을 잤다.', '교관의 잔소리를 흘려듣고 제 방식대로 무기를 다뤘다.'], fx: [] },
       { lean: {}, text: ['구령에 맞춰 연병장을 돌며 그날 훈련을 마쳤다.', '땀에 젖은 군복을 털고 식당으로 향했다.'], fx: [] },
     ],
@@ -636,7 +636,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_marine_stowaway', when: [adult, st('marine')], weight: 7, cooldownYears: 2,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['군함 창고에 숨어든 배고픈 아이에게 몰래 주먹밥을 갖다주었다.', '밀항하다 들킨 아이를 벌 받지 않게 다음 항구에 조용히 내려 주었다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['군함 창고에 숨어든 배고픈 아이에게 몰래 주먹밥을 갖다주었다.', '밀항하다 들킨 아이를 벌 받지 않게 다음 항구에 조용히 내려 주었다.'], fx: [] },
       { lean: { justice: 1 }, text: ['밀항한 아이를 규정대로 넘기되 사정을 봐 달라는 글을 함께 올렸다.', '아이의 고향을 알아내 그 마을로 가는 배편에 태워 보냈다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['아이를 숨겨 주다 걸린 동기와 벌을 반씩 나눠 받았다.', '당직 동기에게 탈이 없도록 제가 먼저 찾은 것으로 해 두었다.'], fx: [] },
       { lean: {}, text: ['식량 창고에 숨어 있던 밀항자를 찾아 당직 장교에게 넘겼다.', '군함이 항구에 닿자 밀항한 아이를 부두에 내려 주었다.'], fx: [] },
@@ -672,7 +672,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_marine_patrol', when: [adult, st('marine')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['순찰 중 조난한 어선을 보고 보트를 내려 어부들을 건져 올렸다.', '순찰 중 길에 쓰러진 노인을 업고 진료소로 갔다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['순찰 중 조난한 어선을 보고 보트를 내려 어부들을 건져 올렸다.', '순찰 중 길에 쓰러진 노인을 업고 진료소로 갔다.'], fx: [] },
       { lean: { justice: 1 }, text: ['순찰 중 술 취해 행패 부리는 사내를 붙잡아 초소로 데려갔다.', '순찰 중 저울을 속이는 상인을 붙잡아 벌금을 물렸다.'], fx: [] },
       { lean: { dominion: 1 }, text: ['순찰 중 길을 비키지 않는 건달을 밀쳐 길바닥에 앉혔다.', '순찰 중 수상한 배를 세워 놓고 선원들을 한 줄로 세웠다.'], fx: [] },
       { lean: {}, text: ['항구 순찰을 돌며 정박한 배들의 깃발을 적었다.', '순찰 중 길 잃은 여행자에게 길을 알려 주었다.'], fx: [] },
@@ -681,7 +681,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_marine_aqua_laguna', when: [adult, st('marine'), { c: 'island', is: ['워터 세븐'] }], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['아쿠아 라구나가 오기 전, 뒷골목 노인들을 업어 고지대로 옮겼다.', '해일이 오는 밤, 집을 떠나지 않으려는 할머니를 끝까지 달래 데려갔다.'], fx: [{ op: 'hp', add: -2 }] },
+      { lean: { justice: 1 }, text: ['아쿠아 라구나가 오기 전, 뒷골목 노인들을 업어 고지대로 옮겼다.', '해일이 오는 밤, 집을 떠나지 않으려는 할머니를 끝까지 달래 데려갔다.'], fx: [{ op: 'hp', add: -2 }] },
       { lean: { justice: 1 }, text: ['해일 틈에 빈집을 털던 좀도둑들을 붙잡아 묶어 두었다.', '피난길에 자리를 다투는 사람들을 갈라 순서대로 올려 보냈다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['아쿠아 라구나를 앞두고 맡은 구역의 피난을 맨 먼저 끝냈다.', '해일 대비 작업에서 가장 무거운 모래 자루를 맡았다.'], fx: [] },
       { lean: {}, text: ['아쿠아 라구나가 지나간 뒤 수로에 떠다니는 쓰레기를 건져 냈다.', '해일 경보에 맞춰 주민들을 고지대로 안내했다.'], fx: [] },
@@ -700,7 +700,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_rev_ration', when: [adult, st('revolution')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['제 몫의 비상식량까지 털어 빈민가 아이들에게 죽을 쑤어 주었다.', '앓는 노인이 있는 판잣집에 약초와 깨끗한 물을 두고 왔다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['제 몫의 비상식량까지 털어 빈민가 아이들에게 죽을 쑤어 주었다.', '앓는 노인이 있는 판잣집에 약초와 깨끗한 물을 두고 왔다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['식량을 나눠 주며 모인 사람들 앞에서 세상을 바꾸자고 외쳤다.', '빈민가 청년들을 모아 몸 지키는 법을 가르쳤다.'], fx: [] },
       { lean: { justice: 1 }, text: ['구호 식량을 빼돌려 팔던 상인을 찾아내 자루를 되찾았다.', '줄을 새치기해 약한 사람의 몫을 가로채던 불량배들을 혼냈다.'], fx: [] },
       { lean: {}, text: ['구호 물자를 손수레에 싣고 빈민가 골목을 돌았다.', '명단에 따라 밀가루와 소금을 골고루 나눠 주었다.'], fx: [] },
@@ -746,7 +746,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_hunter_rival', when: [adult, st('bountyHunter')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { dominion: 1 }, when: fierce, text: ['사냥감을 가로채려던 다른 사냥꾼을 눕히고 몫을 차지했다.', '시비를 건 동업자의 무기를 쳐내고 구역에서 내쫓았다.'], fx: [{ op: 'money', add: 1500 }] },
+      { lean: { greed: 1 }, when: fierce, text: ['사냥감을 가로채려던 다른 사냥꾼을 눕히고 몫을 차지했다.', '시비를 건 동업자의 무기를 쳐내고 구역에서 내쫓았다.'], fx: [{ op: 'money', add: 1500 }] },
       { lean: { loyalty: 1 }, text: ['함께 쫓던 사냥꾼이 다치자 현상금을 반으로 나눠 치료비로 주었다.', '먼저 잡은 쪽이 다 갖자는 말을 마다하고 약속대로 나눴다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { peace: 1 }, when: calm, text: ['사냥감을 두고 다투기 싫어 다른 사냥꾼에게 넘기고 물러났다.', '동업자들이 몰려들자 다툼을 피해 자리를 비켜 주었다.'], fx: [] },
       { lean: {}, text: ['다른 사냥꾼과 구역을 나눠 각자 쫓기로 했다.', '누가 먼저 잡나 신경전을 벌이며 골목을 뒤졌다.'], fx: [] },
@@ -755,9 +755,9 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_hunter_broker', when: [adult, st('bountyHunter')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { dominion: 1 }, text: ['수수료를 떼먹으려는 중개인의 멱살을 잡아 다 받아 냈다.', '탁자를 내리쳐 중개인이 깎으려던 돈까지 챙겼다.'], fx: [{ op: 'money', add: 2000 }] },
-      { lean: { freedom: 1 }, text: ['기지까지 따라오라는 해군의 말을 마다하고 그 자리에서 돈만 받아 떠났다.', '번거로운 절차를 건너뛰고 중개인에게 넘겨 현금만 챙겼다.'], fx: [{ op: 'money', add: 1500 }] },
-      { lean: { devotion: 1 }, text: ['받은 현상금에서 수배범에게 털린 마을 사람들 몫을 떼어 주었다.', '사냥감에게 털렸던 상인에게 현상금 일부를 건넸다.'], fx: [{ op: 'money', add: 500 }] },
+      { lean: { greed: 1 }, text: ['수수료를 떼먹으려는 중개인의 멱살을 잡아 다 받아 냈다.', '탁자를 내리쳐 중개인이 깎으려던 돈까지 챙겼다.'], fx: [{ op: 'money', add: 2000 }] },
+      { lean: { greed: 1 }, text: ['기지까지 따라오라는 해군의 말을 마다하고 그 자리에서 돈만 받아 떠났다.', '번거로운 절차를 건너뛰고 중개인에게 넘겨 현금만 챙겼다.'], fx: [{ op: 'money', add: 1500 }] },
+      { lean: { loyalty: 1 }, text: ['받은 현상금에서 수배범에게 털린 마을 사람들 몫을 떼어 주었다.', '사냥감에게 털렸던 상인에게 현상금 일부를 건넸다.'], fx: [{ op: 'money', add: 500 }] },
       { lean: {}, text: ['붙잡은 해적을 해군 지부에 넘기고 현상금을 받았다.', '신원 확인을 마치고 현상금 봉투를 챙겨 나왔다.'], fx: [{ op: 'money', add: 2000 }] },
     ],
   },
@@ -773,7 +773,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_hunter_petty', when: [adult, st('bountyHunter')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['굶는 식구 때문에 빵을 훔쳤다는 좀도둑의 사정을 듣고 놓아주었다.', '약값을 구하려다 수배된 사내에게 오히려 동전 몇 닢을 쥐여 주었다.'], fx: [{ op: 'money', add: -500 }] },
+      { lean: { peace: 1 }, text: ['굶는 식구 때문에 빵을 훔쳤다는 좀도둑의 사정을 듣고 놓아주었다.', '약값을 구하려다 수배된 사내에게 오히려 동전 몇 닢을 쥐여 주었다.'], fx: [{ op: 'money', add: -500 }] },
       { lean: { justice: 1 }, text: ['훔친 물건을 주인에게 돌려주게 한 뒤 해군에 넘겼다.', '적은 현상금이라도 죄는 치러야 한다며 규정대로 묶었다.'], fx: [{ op: 'money', add: 500 }] },
       { lean: { ambition: 1 }, text: ['푼돈짜리 좀도둑은 거들떠보지 않고 큰 사냥감을 쫓았다.', '잔챙이에게 쓸 힘을 아껴 거물의 뒤를 밟았다.'], fx: [] },
       { lean: {}, text: ['길에서 마주친 좀도둑을 붙잡아 용돈을 벌었다.', '달아나는 소매치기의 발을 걸어 넘어뜨리고 포상금을 받았다.'], fx: [{ op: 'money', add: 500 }] },
@@ -782,7 +782,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_hunter_escort', when: [adult, st('bountyHunter')], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['끌고 가던 수배범이 앓아눕자 약을 사 먹이고 길을 늦췄다.', '굶은 수배범에게 제 몫의 빵을 나눠 주었다.'], fx: [{ op: 'money', add: -500 }] },
+      { lean: { peace: 1 }, text: ['끌고 가던 수배범이 앓아눕자 약을 사 먹이고 길을 늦췄다.', '굶은 수배범에게 제 몫의 빵을 나눠 주었다.'], fx: [{ op: 'money', add: -500 }] },
       { lean: { dominion: 1 }, text: ['끌고 가던 길에 도망치려던 수배범을 다시 붙잡아 두 손을 묶었다.', '말이 많은 수배범에게 재갈을 물리고 끌고 갔다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['끌고 가는 동안 수배범에게 그 패거리의 은신처를 캐물었다.', '수배범의 지도를 빼앗아 그가 다니던 뱃길을 따라 그려 보았다.'], fx: [] },
       { lean: {}, text: ['붙잡은 수배범을 끌고 해군 지부까지 이틀을 걸었다.', '끌고 가던 수배범과 한마디도 나누지 않고 길을 갔다.'], fx: [] },
@@ -801,7 +801,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_wright_fisher', when: [adult, st('shipwright')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['수리비가 모자란 늙은 어부의 조각배를 돈 받지 않고 고쳐 주었다.', '가난한 어부의 배 구멍을 메우고 노까지 새로 깎아 주었다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['수리비가 모자란 늙은 어부의 조각배를 돈 받지 않고 고쳐 주었다.', '가난한 어부의 배 구멍을 메우고 노까지 새로 깎아 주었다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['오래 밥을 챙겨 주던 단골 어부의 배부터 먼저 고쳤다.', '이웃의 고깃배가 부서지자 밤을 새워 고쳐 놓았다.'], fx: [] },
       { lean: { dominion: 1 }, text: ['수리비를 깎겠다는 선주에게 망치를 들어 보이며 제값을 받았다.', '돈을 안 내고 배를 빼 가려던 패거리를 각목으로 막아 세웠다.'], fx: [{ op: 'money', add: 1500 }] },
       { lean: {}, text: ['밑바닥이 갈라진 고깃배에 역청을 발라 메웠다.', '어선의 낡은 키를 떼어 내고 새 판자를 덧댔다.'], fx: [{ op: 'money', add: 1000 }] },
@@ -820,7 +820,7 @@ export const MINORS: Minor[] = ([
     id: 'm_wright_accident', when: [adult, st('shipwright')], weight: 7, cooldownYears: 2,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['무너지는 비계 아래 있던 목수를 밀쳐 내고 대신 어깨를 부딪쳤다.', '위험한 높은 곳 작업을 후배 대신 맡았다.'], fx: [{ op: 'hp', add: -5 }] },
-      { lean: { devotion: 1 }, text: ['톱에 손을 벤 견습공을 업고 의원에게 달려가 치료비를 냈다.', '더위에 지친 일꾼들에게 제 돈으로 수박을 사 돌렸다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { peace: 1 }, text: ['톱에 손을 벤 견습공을 업고 의원에게 달려가 치료비를 냈다.', '더위에 지친 일꾼들에게 제 돈으로 수박을 사 돌렸다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { justice: 1 }, text: ['안전 밧줄 없이 일을 시키는 감독에게 따져 작업을 멈추게 했다.', '닳은 밧줄을 그대로 쓰려는 반장을 말리고 새 밧줄로 바꿨다.'], fx: [] },
       { lean: {}, text: ['도크 바닥의 공구와 톱밥을 치웠다.', '느슨해진 도르래 밧줄을 다시 감고 일을 마쳤다.'], fx: [] },
     ],
@@ -837,7 +837,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_wright_apprentice', when: [adult, st('shipwright')], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['판자를 망친 견습공에게 처음부터 다시 대패 잡는 법을 보여 주었다.', '밤늦게까지 남아 견습공의 서툰 이음새를 같이 맞췄다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['판자를 망친 견습공에게 처음부터 다시 대패 잡는 법을 보여 주었다.', '밤늦게까지 남아 견습공의 서툰 이음새를 같이 맞췄다.'], fx: [] },
       { lean: { dominion: 1 }, text: ['판자를 망친 견습공에게 고함을 질러 하루 종일 청소만 시켰다.', '실수한 견습공의 연장을 빼앗고 구경만 하게 했다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['견습공이 망친 판자를 버리고 제 손으로 새로 깎아 일정을 맞췄다.', '견습공들과 누가 더 빨리 판자를 켜나 시합을 붙였다.'], fx: [] },
       { lean: {}, text: ['견습공이 망친 판자를 고쳐 쓰느라 하루가 다 갔다.', '견습공에게 못 박는 법을 몇 번 일러 주었다.'], fx: [] },
@@ -847,7 +847,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_civil_stall', when: [adult, st('civil')], weight: 9, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['비 오는 날 나물을 팔던 할머니의 바구니를 몽땅 사 드렸다.', '손님이 없어 한숨 쉬는 옆 좌판을 위해 지나가는 사람들을 불러 모았다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { loyalty: 1 }, text: ['비 오는 날 나물을 팔던 할머니의 바구니를 몽땅 사 드렸다.', '손님이 없어 한숨 쉬는 옆 좌판을 위해 지나가는 사람들을 불러 모았다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { justice: 1 }, text: ['저울을 속이는 상인을 사람들 앞에서 붙잡아 다시 달게 했다.', '자릿세를 뜯으러 온 불량배들 앞에 상인들을 대신해 나섰다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['새벽같이 나가 시장에서 가장 좋은 자리를 잡았다.', '다른 가게에 없는 먼 섬의 물건을 들여와 팔았다.'], fx: [{ op: 'money', add: 1500 }] },
       { lean: {}, text: ['좌판에 물건을 가지런히 늘어놓고 손님을 맞았다.', '해 질 녘 남은 물건을 떨이로 팔고 하루 셈을 맞췄다.'], fx: [{ op: 'money', add: 1000 }] },
@@ -857,7 +857,7 @@ export const MINORS: Minor[] = ([
     id: 'm_civil_dock_load', when: [adult, st('civil')], weight: 8, cooldownYears: 1,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['허리를 삔 일꾼 친구의 몫까지 상자를 날랐다.', '품삯을 떼인 친구와 함께 관리소 앞에서 끝까지 따졌다.'], fx: [] },
-      { lean: { dominion: 1 }, text: ['가장 무거운 자루를 혼자 번쩍 들어 일꾼들의 입을 다물게 했다.', '일감을 가로채려던 타지 일꾼들을 밀어내고 자리를 지켰다.'], fx: [{ op: 'money', add: 1500 }] },
+      { lean: { greed: 1 }, text: ['가장 무거운 자루를 혼자 번쩍 들어 일꾼들의 입을 다물게 했다.', '일감을 가로채려던 타지 일꾼들을 밀어내고 자리를 지켰다.'], fx: [{ op: 'money', add: 1500 }] },
       { lean: { freedom: 1 }, text: ['날씨가 좋아 오후 일을 내팽개치고 방파제에서 낚시를 했다.', '반장의 잔소리가 싫어 오전 품삯만 받고 바닷가로 놀러 갔다.'], fx: [] },
       { lean: {}, text: ['상선에서 내린 곡식 자루를 창고까지 날랐다.', '이마의 땀을 닦으며 하루 품삯을 받았다.'], fx: [{ op: 'money', add: 1000 }] },
     ],
@@ -866,7 +866,7 @@ export const MINORS: Minor[] = ([
     id: 'm_civil_festival_prep', when: [adult, st('civil')], weight: 7, cooldownYears: 2,
     outcomes: [
       { lean: { romance: 1 }, text: ['마을 축제에 걸 오색 깃발과 등불을 밤새 꾸몄다.', '광장 한가운데서 북소리에 맞춰 춤을 추었다.'], fx: [] },
-      { lean: { devotion: 1 }, text: ['축제가 끝난 광장에 남아 쓰레기를 혼자 치웠다.', '바쁜 이웃들 대신 마을 아이들을 돌보며 음식을 나눠 주었다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['축제가 끝난 광장에 남아 쓰레기를 혼자 치웠다.', '바쁜 이웃들 대신 마을 아이들을 돌보며 음식을 나눠 주었다.'], fx: [] },
       { lean: { peace: 1 }, text: ['붐비는 축제를 피해 마을 어귀 언덕에서 불꽃을 보았다.', '시끄러운 술자리를 빠져나와 바닷가를 걸었다.'], fx: [] },
       { lean: {}, text: ['이웃들과 광장에 축제 천막과 탁자를 세웠다.', '축제 노점에서 구운 고기와 맥주를 사 먹었다.'], fx: [{ op: 'money', add: -500 }] },
     ],
@@ -883,7 +883,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_civil_storm_roof', when: [adult, st('civil')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['제 집보다 혼자 사는 옆집 노인의 지붕부터 고쳤다.', '물에 잠긴 이웃집 세간을 밤새 함께 건져 냈다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['제 집보다 혼자 사는 옆집 노인의 지붕부터 고쳤다.', '물에 잠긴 이웃집 세간을 밤새 함께 건져 냈다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['바람에 날아간 친구네 가게 간판을 찾아 다시 못질해 주었다.', '약속한 배달을 지키려고 비바람을 뚫고 고개를 넘었다.'], fx: [{ op: 'hp', add: -3 }] },
       { lean: { peace: 1 }, text: ['비바람이 오기 전에 덧문을 걸고 따뜻한 차를 마셨다.', '난롯불을 지피고 빗소리를 들으며 하루를 보냈다.'], fx: [{ op: 'hp', add: 3 }] },
       { lean: {}, text: ['지붕에 올라가 들뜬 판자를 망치로 박았다.', '마당 물길을 다시 파고 새는 창틈을 헝겊으로 막았다.'], fx: [] },
@@ -893,7 +893,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_orphanage', when: [adult, st('civil', 'settled', 'retired'), money(10000)], weight: 4, cooldownYears: 3,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['지붕이 무너진 항구 고아원에 모아 둔 돈을 보냈다.', '고아원 지붕을 고치는 데 돈을 보태고 직접 판자도 날랐다.'], fx: [{ op: 'money', add: -5000 }] },
+      { lean: { peace: 1 }, text: ['지붕이 무너진 항구 고아원에 모아 둔 돈을 보냈다.', '고아원 지붕을 고치는 데 돈을 보태고 직접 판자도 날랐다.'], fx: [{ op: 'money', add: -5000 }] },
       { lean: { justice: 1 }, text: ['고아원 기금을 빼돌린 관리인을 찾아내 마을 회의에 세웠다.', '고아원 지붕 수리비를 떼먹은 목수를 찾아가 일을 마치게 했다.'], fx: [] },
       { lean: { ambition: 1 }, text: ['고아원 지붕 고치는 일을 앞장서 맡아 마을에 이름을 알렸다.', '제 이름을 새긴 현판을 다는 조건으로 수리비를 냈다.'], fx: [{ op: 'money', add: -3000 }] },
       { lean: {}, text: ['고아원 지붕이 무너졌다는 말을 듣고 동전 몇 닢을 모금함에 넣었다.', '고아원 수리하는 날 하루 일손을 보탰다.'], fx: [{ op: 'money', add: -300 }] },
@@ -902,7 +902,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_settled_garden', when: [adult, st('settled')], weight: 9, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['텃밭에서 가장 잘 익은 채소를 바구니에 담아 이웃에게 돌렸다.', '이웃 노인의 밭까지 새벽마다 물을 대 주었다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['텃밭에서 가장 잘 익은 채소를 바구니에 담아 이웃에게 돌렸다.', '이웃 노인의 밭까지 새벽마다 물을 대 주었다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['바닷바람에도 잘 크는 새 씨앗을 구해 흙을 바꿔 가며 심어 보았다.', '물길을 고쳐 대 보고 작년보다 굵은 감자를 캤다.'], fx: [] },
       { lean: { peace: 1 }, text: ['햇볕 아래 흙냄새를 맡으며 천천히 잡초를 뽑았다.', '밭 귀퉁이 그늘에 누워 바람 소리를 들으며 낮잠을 잤다.'], fx: [{ op: 'hp', add: 3 }] },
       { lean: {}, text: ['텃밭에 물을 주고 다 자란 감자를 캐 두었다.', '새들이 쪼지 못하게 밭 둘레에 허수아비를 세웠다.'], fx: [] },
@@ -920,7 +920,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_settled_supper', when: [adult, st('settled')], needs: ['spouse'], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['지친 배우자를 위해 장을 봐 와서 따뜻한 저녁을 차렸다.', '배우자가 좋아하는 생선을 구워 살을 발라 주었다.'], fx: [{ op: 'money', add: -500 }] },
+      { lean: { loyalty: 1 }, text: ['지친 배우자를 위해 장을 봐 와서 따뜻한 저녁을 차렸다.', '배우자가 좋아하는 생선을 구워 살을 발라 주었다.'], fx: [{ op: 'money', add: -500 }] },
       { lean: { romance: 1 }, text: ['식탁에 촛불을 켜고 처음 만난 날 이야기를 나눴다.', '마당에 자리를 펴고 별을 보며 둘이서 저녁을 먹었다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['바쁜 날이었지만 저녁 약속을 지키려고 일을 미루고 일찍 들어갔다.', '먼 길 다녀온 배우자의 짐을 받아 들고 발 씻을 물을 데웠다.'], fx: [] },
       { lean: {}, text: ['소박한 반찬을 차려 놓고 마주 앉아 하루 이야기를 나눴다.', '저녁을 먹고 나란히 설거지를 했다.'], fx: [] },
@@ -957,7 +957,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_retired_aspirant', when: [st('retired')], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['가르침을 청하는 젊은이에게 아는 것을 다 일러 주고 밥까지 먹여 보냈다.', '바다로 떠난다는 젊은이의 허술한 장비를 고쳐 주고 노잣돈을 쥐여 주었다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: { romance: 1 }, text: ['가르침을 청하는 젊은이에게 아는 것을 다 일러 주고 밥까지 먹여 보냈다.', '바다로 떠난다는 젊은이의 허술한 장비를 고쳐 주고 노잣돈을 쥐여 주었다.'], fx: [{ op: 'money', add: -1000 }] },
       { lean: { ambition: 1 }, text: ['건방진 젊은이의 도전을 받아 한 번에 꺾고 벽이 얼마나 높은지 보여 주었다.', '찾아온 젊은이에게 혹독한 수련을 시키며 최고가 되라고 다그쳤다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['가르쳐 달라는 젊은이를 뒷문으로 따돌리고 낚시를 갔다.', '스승 노릇은 질색이라며 알아서 부딪쳐 보라고 돌려보냈다.'], fx: [] },
       { lean: {}, text: ['찾아온 젊은이의 자세를 한 번 봐 주고 짧게 일러 보냈다.', '댓돌에 앉아 젊은이들의 대련을 보며 혀를 찼다.'], fx: [] },
@@ -994,8 +994,8 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_prison_tray', when: [st('prisoner')], weight: 9, cooldownYears: 1,
     outcomes: [
-      { lean: { dominion: 1 }, when: fierce, text: ['제 밥을 가로채려던 감방 덩치를 밀쳐 내고 빵을 되찾았다.', '사나운 눈으로 감방을 둘러보고 수프 건더기를 먼저 떴다.'], fx: [] },
-      { lean: { devotion: 1 }, text: ['열이 나서 앓는 옆자리 죄수에게 제 물과 빵 절반을 떼어 주었다.', '굶고 있는 어린 죄수에게 말없이 그릇을 밀어 주었다.'], fx: [{ op: 'hp', add: -2 }] },
+      { lean: { greed: 1 }, when: fierce, text: ['제 밥을 가로채려던 감방 덩치를 밀쳐 내고 빵을 되찾았다.', '사나운 눈으로 감방을 둘러보고 수프 건더기를 먼저 떴다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['열이 나서 앓는 옆자리 죄수에게 제 물과 빵 절반을 떼어 주었다.', '굶고 있는 어린 죄수에게 말없이 그릇을 밀어 주었다.'], fx: [{ op: 'hp', add: -2 }] },
       { lean: { peace: 1 }, when: calm, text: ['배식 줄의 몸싸움을 피해 맨 끝에서 조용히 받았다.', '먹을 것을 탐내는 죄수들과 다투지 않고 구석에서 빵을 씹었다.'], fx: [] },
       { lean: {}, text: ['철창 밑으로 들어온 딱딱한 빵과 묽은 수프를 남김없이 먹었다.', '배식 종소리에 맞춰 그릇을 들고 줄을 섰다.'], fx: [] },
     ],
@@ -1023,14 +1023,14 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { loyalty: 1 }, text: ['쓰러진 옆 감방 사람이 매를 맞지 않게 그 몫의 돌까지 날랐다.', '연장을 부러뜨렸다고 몰린 죄수 편에 서서 함께 벌을 받았다.'], fx: [{ op: 'hp', add: -4 }] },
       { lean: { dominion: 1 }, text: ['잔일을 떠넘기려는 죄수를 곡괭이 자루로 밀어내 입을 다물게 했다.', '채석장에서 가장 큰 바위를 혼자 깨뜨려 아무도 시비를 못 걸게 했다.'], fx: [] },
-      { lean: { freedom: 1 }, text: ['감시가 느슨한 틈에 채석장 그늘에 숨어 한나절 낮잠을 잤다.', '작업 구역을 슬쩍 벗어나 바닷바람 부는 절벽 끝을 구경했다.'], fx: [] },
+      { lean: { greed: 1 }, text: ['감시가 느슨한 틈에 채석장 그늘에 숨어 한나절 낮잠을 잤다.', '작업 구역을 슬쩍 벗어나 바닷바람 부는 절벽 끝을 구경했다.'], fx: [] },
       { lean: {}, text: ['족쇄를 찬 채 해 질 때까지 돌을 깨고 날랐다.', '종이 울리자 곡괭이를 내려놓고 줄지어 감방으로 돌아갔다.'], fx: [] },
     ],
   },
   {
     id: 'm_prison_rat', when: [st('prisoner')], weight: 7, cooldownYears: 2,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['감방 구석에 오는 작은 쥐에게 매일 빵 부스러기를 남겨 주었다.', '다리를 다친 쥐에게 짚으로 잠자리를 만들어 주었다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['감방 구석에 오는 작은 쥐에게 매일 빵 부스러기를 남겨 주었다.', '다리를 다친 쥐에게 짚으로 잠자리를 만들어 주었다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['쥐가 드나드는 구멍을 따라가 감방 밑에 물길이 있다는 것을 알아냈다.', '쥐가 물고 오는 풀잎을 보고 바깥 계절을 짐작했다.'], fx: [] },
       { lean: { peace: 1 }, text: ['찍찍거리는 쥐를 말벗 삼아 마음을 가라앉혔다.', '쥐 한 마리와 마주 앉아 조용한 밤을 보냈다.'], fx: [] },
       { lean: {}, text: ['빵을 노리는 쥐를 발로 쫓아냈다.', '철창 사이로 지나가는 쥐를 멍하니 바라보았다.'], fx: [] },
@@ -1039,7 +1039,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_prison_newcomer', when: [st('prisoner')], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 1 }, text: ['새로 들어와 떠는 어린 죄수에게 담요 반을 덮어 주었다.', '처음 들어온 죄수에게 간수 눈 밖에 나지 않는 법을 일러 주었다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['새로 들어와 떠는 어린 죄수에게 담요 반을 덮어 주었다.', '처음 들어온 죄수에게 간수 눈 밖에 나지 않는 법을 일러 주었다.'], fx: [] },
       { lean: { dominion: 1 }, text: ['새로 들어온 죄수에게 감방의 자리 순서를 똑똑히 가르쳤다.', '새로 온 죄수의 신발을 빼앗아 신었다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['새로 들어온 죄수에게 바깥 소식을 하나하나 캐물었다.', '새 죄수가 끌려온 사연을 듣고 요즘 바다의 형편을 짐작했다.'], fx: [] },
       { lean: {}, text: ['옆 감방에 새 죄수가 들어와 밤새 시끄러웠다.', '새로 들어온 죄수와 몇 마디 나누고 말았다.'], fx: [] },
@@ -1058,7 +1058,7 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_old_children', when: [old], weight: 5, cooldownYears: 1,
     outcomes: [
-      { lean: { devotion: 0.6, romance: 0.4 }, text: ['동네 아이들에게 젊은 날의 바다 이야기를 들려주었다.', '동네 아이들에게 바다에서 본 별자리를 가르쳐 주었다.'], fx: [] },
+      { lean: { romance: 0.4 }, text: ['동네 아이들에게 젊은 날의 바다 이야기를 들려주었다.', '동네 아이들에게 바다에서 본 별자리를 가르쳐 주었다.'], fx: [] },
       { lean: { justice: 1 }, text: ['싸우는 아이들을 붙잡아 양쪽 말을 끝까지 들어 주었다.', '아이들 놀이에서 반칙한 쪽을 불러 차분히 타일렀다.'], fx: [] },
       { lean: {}, text: ['공을 주워 달라는 아이들의 부탁을 들어주었다.', '아이들이 던진 공에 맞고도 웃어 주었다.'], fx: [] },
     ],

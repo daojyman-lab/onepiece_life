@@ -48,7 +48,7 @@ export const RELATION_KIND: Record<'spouse' | 'child' | 'sibling' | 'parent', st
 
 /** 처지 앞에 붙는 가치관의 말 (가장 높은 가치관) */
 export const VALUE_ADJ: Record<ValueId, string> = {
-  justice: '정의로운', devotion: '헌신적인', ambition: '야망 있는', romance: '낭만적인', inquiry: '탐구심 많은',
+  justice: '정의로운', greed: '탐욕스러운', ambition: '야망 있는', romance: '낭만적인', inquiry: '탐구심 많은',
   loyalty: '의리 있는', freedom: '자유로운', dominion: '패도를 걷는', peace: '온화한',
 };
 /** 해적의 이름값(명성)에 따른 이름: [이 명성 미만이면, 이름]. 맨 처음(신참)에는 가치관의 말을 붙이지 않는다 */

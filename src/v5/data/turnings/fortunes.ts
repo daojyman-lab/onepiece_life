@@ -23,24 +23,23 @@ export const FORTUNES: Turning[] = [
       decline('가르침을 받지 않는다', '정중히 고개를 숙이고 돌아선다'),
     ],
   }),
-  fortune('fortune_repaid', 'devotion', {
-    speaker: { relation: '돌아온 떠돌이' },
-    title: '돌아온 은혜', body: '오래전 {name}이(가) 아무 대가 없이 돌봐 준 떠돌이가 다시 찾아왔다. 그는 이름을 숨긴 무인이었다.',
+  fortune('fortune_black_broker', 'greed', {
+    speaker: { relation: '암시장의 큰손' },
+    title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name}의 수완을 오래 지켜봤다고 한다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
     doors: [
-      { label: '평생의 수련을 받는다', hint: '그가 쌓은 것을 한꺼번에 물려받는다', values: { devotion: D },
-        fx: [{ op: 'tier', branch: 'fist', to: LEAP }, { op: 'base', key: 'vit', add: 2 },
-             { op: 'log', text: '떠돌이의 주먹이 고스란히 몸에 새겨졌다.', weight: 'heavy' }] },
-      decline('보답을 받지 않는다', '은혜는 갚으라고 베푼 것이 아니다'),
+      { label: '장부에 이름을 올리고 총잡이를 받는다', hint: '어둠의 거래에 발을 들인다. 그 총잡이는 끝까지 가르친다', values: { greed: D },
+        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 50000 }] },
+      decline('총잡이를 받지 않는다', '그 돈의 냄새가 싫다'),
     ],
   }),
-  fortune('fortune_limb_maker', 'devotion', {
-    when: [{ c: 'limbLost', min: 1 }],
-    speaker: { relation: '이름 없는 장인' },
-    title: '이름 없는 장인', body: '{name}이(가) 잃은 곳을 본 떠돌이 장인이 말없이 치수를 잰다. 살아 있는 것처럼 움직이는 것을 만들어 주겠다고 한다.',
+  fortune('fortune_auction_fruit', 'greed', {
+    when: [{ c: 'fruit', has: false }],
+    speaker: 'hero',
+    title: '경매장 뒤뜰의 상자', body: '경매장 뒤뜰에서 경비가 조는 사이, 자물쇠가 풀린 상자 하나가 {name}의 눈에 들어왔다. 소용돌이 무늬의 열매가 들어 있다. 값을 매길 수 없는 물건이다.',
     doors: [
-      { label: '장인의 선물을 받는다', hint: '잃기 전보다 나은 몸이 된다', values: { devotion: D },
-        fx: [{ op: 'prosthetic', grade: 'superior' }, { op: 'log', text: '장인의 손끝에서 새 몸이 태어났다.', weight: 'heavy' }] },
-      decline('선물을 받지 않는다', '잃은 채로 사는 법을 이미 익혔다'),
+      { label: '상자를 받는다', hint: '아무도 모르게 열매를 손에 넣는다. 주인은 언젠가 찾으러 온다', values: { greed: D },
+        fx: [{ op: 'eatFruit', id: 'random' }, { op: 'person', kind: 'enemy', relation: '열매를 잃은 경매장 주인' }] },
+      decline('상자를 받지 않는다', '남의 물건에는 손대지 않는다'),
     ],
   }),
   fortune('fortune_sword_saint', 'ambition', {
