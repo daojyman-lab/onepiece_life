@@ -61,7 +61,6 @@ const ROWS: Record<string, Row> = {
   bonclay: ['봉쿠레', 'm', 30, 'pirate'],
   duval: ['듀발', 'm', 27, 'pirate'],
   sai: ['사이', 'm', 28, 'pirate'],
-  hajrudin: ['하이루딘', 'm', 79, 'pirate', 'giant'],
   bartolomeo: ['바르톨로메오', 'm', 22, 'pirate'],
   cavendish: ['캐번디시', 'm', 24, 'pirate'],
   ideo: ['이데오', 'm', 25, 'pirate'],

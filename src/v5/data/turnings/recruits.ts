@@ -19,8 +19,8 @@ const place = (p: string): Cond => (p.startsWith('@') ? sea(p.slice(1) as SeaId)
 const fame = (min: number): Cond => ({ c: 'fame', min });
 /** 이름난 사람은 처음부터 레벨이 높다 (없으면 V.person.crew.level) */
 const LEVEL: Record<string, number> = {
-  mihawk: 30, kuzan: 29, yamato: 24, killer: 16, xdrake: 16, ulti: 15, ashura: 15, karasu: 15, lindbergh: 15, morley: 15, betty: 15,
-  dorry: 14, brogy: 14, kawamatsu: 14, kikunojo: 14, chinjao: 14, pageone: 14, hyogoro: 12, raizo: 12, pedro: 12, sentomaru: 12,
+  mihawk: 30, kuzan: 29, yamato: 24, killer: 16, xdrake: 16, ulti: 15, ashura: 15, karasu: 15, lindbergh: 15, betty: 15,
+  kawamatsu: 14, kikunojo: 14, chinjao: 14, pageone: 14, hyogoro: 12, raizo: 12, pedro: 12, sentomaru: 12,
   daz: 10, kaku: 10, orlumbus: 10, jabra: 9, senorpink: 9, kalifa: 8, blueno: 8, perona: 8, wiper: 8, bellamy: 8, hina: 8,
 };
 /** 아무나 태울 수 없는 사람: 이름값이 있어야 말을 붙일 수 있고, 쿠잔은 해군을 떠난 뒤(원작 두 해 뒤)에만 만난다 */

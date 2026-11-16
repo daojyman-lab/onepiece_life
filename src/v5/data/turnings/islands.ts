@@ -165,12 +165,11 @@ export const ISLANDS: Turning[] = [
     ],
   },
   {
-    id: 'isl_elbaf_giant', kind: 'door', when: at(age(18), SAIL, on('엘바프')), weight: 10, repeat: 'once', speaker: { canon: 'hajrudin' },
-    title: '거인의 나라', body: '세상에서 가장 큰 나무 아래에 거인들의 나라가 있다. 술통이 집채만 하다. 용병으로 세상을 떠돌던 젊은 거인 선장이 옛 거병 해적단을 다시 일으키겠다며 잔을 든다. 거인이 {name}을(를) 손바닥에 올려 눈높이를 맞춘다.',
+    id: 'isl_elbaf_giant', kind: 'door', when: at(age(18), SAIL, on('엘바프')), weight: 10, repeat: 'once', speaker: 'hero',
+    title: '거인의 나라', body: '세상에서 가장 큰 나무 아래에 거인들의 나라가 있다. 술통이 집채만 하다. 거인 전사들이 작은 방문객을 신기한 듯 손바닥에 올려 눈높이를 맞춘다.',
     doors: [
-      { label: '집채만 한 술통을 같이 비우고 한 깃발 아래 서자고 한다', hint: '거인은 작은 사람의 배짱에 크게 웃는다', needs: ['ship'], when: [FREE], values: { loyalty: D },
-        fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'crew', relation: '술통을 같이 비운 거인 전사', canon: 'hajrudin', role: 'vanguard' },
-             heavy('하이루딘의 웃음소리에 나뭇잎이 떨어졌다. 좋다, 작은 선장!'), line('엘바프의 거인 하이루딘과 술통을 비웠다', 'hajrudin')] },
+      { label: '집채만 한 술통을 같이 비우며 옛 이야기를 듣는다', hint: '거인은 작은 사람의 배짱에 크게 웃는다', values: { loyalty: D },
+        fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'wil', add: 1 }, heavy('술통 너머로 거인들의 웃음소리에 나뭇잎이 떨어졌다. 좋다, 작은 손님!')] },
       { label: '전사의 결투를 청한다', hint: '엘바프에서는 결투에서 달아나지 않는 것이 긍지다. 맞으면 날아간다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -35 }, { op: 'fame', add: 40 }, { op: 'base', key: 'wil', add: 1 }, { op: 'chance', p: 0.4, then: [{ op: 'injury', severity: 'heavy' }] },
              heavy('세 번 날아갔고 세 번 일어났다. 거인들이 방패를 두드리며 {name}의 이름을 불렀다.')] },

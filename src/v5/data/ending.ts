@@ -212,10 +212,6 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     low: '{name}? 이름은 들었다.',
     high: '한 번 잔을 나눈 사이는 끝까지 간다. {name}의 부름이라면 팔보수군은 언제든 닻을 올렸을 거다.',
   },
-  hajrudin: {
-    low: '{name}? 작은 사람 가운데 그런 이름이 있었지.',
-    high: '작은 몸에 엘바프의 전사보다 큰 긍지를 지녔던 사람. {name}과(와) 마신 술통을 기억한다.',
-  },
   bartolomeo: {
     low: '어? 누구였더라! 미안, 그 무렵엔 선배님 생각뿐이었다고!',
     high: '{name}! 그 녀석은 진짜 근성 있었다! 그 이름 들으면 지금도 눈물이 난다고!',
