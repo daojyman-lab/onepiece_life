@@ -203,12 +203,15 @@ function dailyLine(s: Life5, act: Activity, r: Rng): void {
   const fits = (lean: Partial<Record<ValueId, number>>) => VALUE_IDS.some((id) => (lean[id] ?? 0) > 0 && (LEAN[id][act] ?? 0) > 0);
   const pool = LINES.filter((l) => lineFits(s, l) && !isRecent(s, fillText(s, l.text)));
   const line = leanPick(s, r, pool, (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
-  if (line) dayLine(s, fillText(s, line.text));
+  if (!line) return;
+  dayLine(s, fillText(s, line.text));
+  if (line.money) s.hero.money = Math.max(0, s.hero.money + line.money);   // 글이 말하는 돈이 실제로 오간다
 }
 
 /** 이 사람에게 이 기록 줄이 맞는가: 조건(when)과 글이 전제하는 것(needs) */
 export function lineFits(s: Life5, l: DailyLine5): boolean {
-  return checkAll(s, l.when) && needsOk(s, l.needs);
+  // 돈을 쓰는 줄은 그만한 돈이 있을 때만
+  return checkAll(s, l.when) && needsOk(s, l.needs) && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
 /** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. */

@@ -5,7 +5,8 @@
 // 처지가 배를 타는 처지(해적 · 해군 · 혁명군)면 그 처지가 배를 전제하므로 'ship'을 따로 적지 않는다. 'ship'은 제 배를 가졌을 때다.
 import type { Branch, Cond, Need, Standing, ValueId, Values } from '../core/types';
 
-export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[] }
+/** money: 글이 말하는 돈의 오감 (보냈다 · 써 버렸다면 음수, 주웠다 · 받아 냈다면 양수). 쓰는 줄은 그만한 돈이 있어야 나온다 */
+export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[]; money?: number }
 
 // ---------------- 나이대
 const kid: Cond = { c: 'age', min: 3, max: 15 };
@@ -29,8 +30,10 @@ const not = (id: ValueId): Cond => ({ c: 'value', id, deep: false });
 const calm = not('dominion');                 // 물러서는 줄: 맞서는 사람에게는 나오지 않는다
 const fierce = not('peace');                  // 맞서는 줄: 조용한 사람에게는 나오지 않는다
 
-const L = (when: Cond | Cond[], lean: Partial<Values>, text: string, needs?: Need[]): DailyLine5 =>
-  ({ when: Array.isArray(when) ? when : [when], lean, text, ...(needs ? { needs } : {}) });
+const L = (when: Cond | Cond[], lean: Partial<Values>, text: string, needs?: Need[], money?: number): DailyLine5 =>
+  ({ when: Array.isArray(when) ? when : [when], lean, text, ...(needs ? { needs } : {}), ...(money ? { money } : {}) });
+/** 돈이 오가는 줄 */
+const M = (when: Cond | Cond[], lean: Partial<Values>, text: string, money: number): DailyLine5 => L(when, lean, text, undefined, money);
 
 export const LINES: DailyLine5[] = [
   // ---------------- 정의
@@ -41,17 +44,17 @@ export const LINES: DailyLine5[] = [
   L(old, { justice: 1 }, '젊은이들의 다툼을 말리고 양쪽 말을 끝까지 들었다.'),
   L(old, { justice: 1 }, '옳지 않은 일을 보면 아직도 주먹이 먼저 쥐어졌다.'),
   // ---------------- 탐욕 (4단계: 헌신 대신. 부패하고 제 잇속을 먼저 챙긴다)
-  L(kid, { greed: 1 }, '심부름 거스름돈에서 몇 닢을 몰래 떼어 주머니에 넣었다.'),
-  L(kid, { greed: 1 }, '주운 동전을 주인을 찾지 않고 제 비밀 상자에 넣었다.'),
+  M(kid, { greed: 1 }, '심부름 거스름돈에서 몇 닢을 몰래 떼어 주머니에 넣었다.', 200),
+  M(kid, { greed: 1 }, '주운 동전을 주인을 찾지 않고 제 비밀 상자에 넣었다.', 200),
   L(adult, { greed: 1 }, '장부의 숫자를 살짝 고쳐 차액을 제 몫으로 돌렸다.'),
-  L(adult, { greed: 1 }, '급한 사람에게 물건값을 두 배로 불렀다.'),
+  M(adult, { greed: 1 }, '급한 사람에게 물건값을 두 배로 불렀다.', 2000),
   L(old, { greed: 1 }, '모아 둔 돈을 몇 번이고 세어 보고 다시 숨겼다.'),
-  L(old, { greed: 1 }, '빌려준 돈의 이자를 하루도 미루지 않고 받아 냈다.'),
+  M(old, { greed: 1 }, '빌려준 돈의 이자를 하루도 미루지 않고 받아 냈다.', 3000),
   // ---------------- 남을 돌보는 줄 (헌신이 빠진 뒤 정의 · 의리 · 평온으로)
   L(kid, { romance: 1 }, '앓아누운 이웃 할머니에게 물을 길어다 드렸다.'),
   L(kid, { peace: 1 }, '동생들의 밥을 먼저 덜어 주고 남은 것을 먹었다.', ['sibling']),
   L(adult, { justice: 1 }, '다친 뱃사람을 업고 의원까지 뛰었다.'),
-  L(adult, { loyalty: 1 }, '번 돈의 절반을 {town}의 고아원에 보냈다.'),
+  M(adult, { loyalty: 1 }, '번 돈 가운데 얼마를 {town}의 고아원에 보냈다.', -3000),
   L(old, { romance: 1 }, '마을 아이들에게 그물 깁는 법을 가르쳤다.'),
   L(old, { peace: 1 }, '남의 집 지붕을 고쳐 주느라 하루를 다 썼다.'),
   // ---------------- 야망
@@ -78,7 +81,7 @@ export const LINES: DailyLine5[] = [
   L(old, { inquiry: 1 }, '평생 모은 기록을 정리하며 밤을 새웠다.'),
   L(old, { inquiry: 1 }, '모르는 것이 아직 너무 많다는 사실이 즐거웠다.'),
   // ---------------- 의리
-  L(kid, { loyalty: 1 }, '친구가 깬 유리창 값을 같이 물어 주었다.'),
+  M(kid, { loyalty: 1 }, '친구가 깬 유리창 값을 같이 물어 주었다.', -300),
   L(kid, { loyalty: 1 }, '한번 한 약속은 비가 와도 지키러 나갔다.'),
   L(adult, { loyalty: 1 }, '빚진 사람의 부탁이라 군말 없이 먼 길을 다녀왔다.'),
   L(adult, { loyalty: 1 }, '등을 맡긴 사람의 험담을 듣고 자리를 박차고 나왔다.'),
@@ -184,7 +187,7 @@ export const LINES: DailyLine5[] = [
   L(small, { ambition: 1 }, '나뭇가지 칼싸움에서 이기고 하루 종일 으스댔다.'),
   L(small, {}, '어머니를 따라 시장에 가서 생선 고르는 법을 배웠다.', ['parent']),
   L(small, { romance: 1 }, '아버지 무릎에 앉아 먼바다 이야기를 들었다.', ['parent']),
-  L(small, {}, '모래사장에서 반짝이는 동전 한 닢을 주웠다.'),
+  M(small, {}, '모래사장에서 반짝이는 동전 한 닢을 주웠다.', 50),
   L(small, { freedom: 1 }, '몰래 고깃배에 숨어들었다가 들켜 호되게 혼났다.'),
   L(small, {}, '모래로 커다란 배를 쌓았다가 파도에 빼앗겼다.'),
   L(teen, {}, '새벽마다 바닷가 모래밭을 달렸다.'),
@@ -200,7 +203,7 @@ export const LINES: DailyLine5[] = [
   // ---------------- 해적
   L([grown, st('pirate')], { justice: 1 }, '들른 항구에서 털어 가자는 말을 끝까지 반대했다.'),
   L([grown, st('pirate')], { romance: 1 }, '배에 남은 식량을 털어 굶주린 포구 아이들에게 나눠 주었다.'),
-  L([grown, st('pirate')], { greed: 1 }, '나눠 갖기로 한 노획물 가운데 금붙이 몇 개를 몰래 제 궤짝에 숨겼다.'),
+  M([grown, st('pirate')], { greed: 1 }, '나눠 갖기로 한 노획물 가운데 금붙이 몇 개를 몰래 제 궤짝에 숨겼다.', 4000),
   L([grown, st('pirate')], { ambition: 1 }, '새로 붙은 수배서들의 현상금을 손가락으로 짚어 보며 웃었다.'),
   L([grown, st('pirate')], { inquiry: 1 }, '해도에 없는 해안선을 따라 걸으며 지형을 그려 넣었다.'),
   L([grown, st('pirate')], { romance: 1 }, '갑판에 둘러앉아 밤새 술잔을 돌리며 노래했다.'),
@@ -215,7 +218,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('pirate', 'revolution')], { romance: 1 }, '동료들과 갑판에서 밤새 연회를 벌였다.', ['crew']),
   // ---------------- 해군
   L([grown, st('marine')], { peace: 1 }, '초소 앞에 쓰러진 행인을 부축해 진료소까지 데려갔다.'),
-  L([grown, st('marine')], { greed: 1 }, '압수한 밀수품 몇 상자를 보고서에서 빼고 뒤로 팔았다.'),
+  M([grown, st('marine')], { greed: 1 }, '압수한 밀수품 몇 상자를 보고서에서 빼고 뒤로 팔았다.', 5000),
   L([grown, st('marine')], { justice: 1 }, '상인에게 뒷돈을 받는 고참을 보고 그 자리에서 따져 물었다.'),
   L([grown, st('marine')], { ambition: 1 }, '훈련이 끝난 뒤에도 연병장 모래밭을 몇 바퀴 더 달렸다.'),
   L([grown, st('marine')], { inquiry: 1 }, '항해 일지에 없는 섬의 이름을 해도에 적어 넣었다.'),
@@ -252,7 +255,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('bountyHunter')], {}, '무기를 손질하고 시장에 도는 소문을 들으러 나갔다.'),
   // ---------------- 조선공
   L([grown, st('shipwright')], { romance: 1 }, '수리비가 모자란 어부의 배를 저녁 늦게까지 남아 고쳐 주었다.'),
-  L([grown, st('shipwright')], { greed: 1 }, '새 목재 값을 받고 헌 목재를 끼워 넣었다.'),
+  M([grown, st('shipwright')], { greed: 1 }, '새 목재 값을 받고 헌 목재를 끼워 넣었다.', 3000),
   L([grown, st('shipwright')], { justice: 1 }, '썩은 목재를 섞어 판 목재상을 조선소 사람들 앞에서 따졌다.'),
   L([grown, st('shipwright')], { ambition: 1 }, '이음새가 꼭 맞을 때까지 같은 나무를 몇 번이고 깎았다.'),
   L([grown, st('shipwright')], { inquiry: 1 }, '오래된 배의 설계도를 펴 놓고 용골 잇는 법을 견주어 보았다.'),
@@ -264,7 +267,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('shipwright')], {}, '대패 날을 갈고 바닥의 톱밥을 쓸어 담았다.'),
   // ---------------- 뭍사람 (시민)
   L([grown, st('civil')], { peace: 1 }, '팔고 남은 음식을 모아 굶는 이웃에게 갖다주었다.'),
-  L([grown, st('civil')], { greed: 1 }, '저울 눈금을 슬쩍 틀어 놓고 하루 장사를 했다.'),
+  M([grown, st('civil')], { greed: 1 }, '저울 눈금을 슬쩍 틀어 놓고 하루 장사를 했다.', 1500),
   L([grown, st('civil')], { justice: 1 }, '저울을 속이는 상인 앞에서 눈금을 다시 달아 보였다.'),
   L([grown, st('civil')], { ambition: 1 }, '남보다 한 시간 일찍 문을 열고 한 시간 늦게 닫았다.'),
   L([grown, st('civil')], { inquiry: 1 }, '항구에 들어온 신문을 사서 먼 나라 소식을 꼼꼼히 읽었다.'),
@@ -329,7 +332,7 @@ export const LINES: DailyLine5[] = [
   L([grown, fruit], {}, '파도가 덮쳐 와 바다에 빠질 뻔했다. 열매를 먹은 몸이 원망스러웠다.'),
   L([grown, fruit], { inquiry: 1 }, '열매의 힘을 이리저리 시험해 보았다.'),
   // ---------------- 젊은 날 (16~35)
-  L(youth, { freedom: 1 }, '처음 손에 쥔 큰돈을 하루 만에 다 써 버렸다.'),
+  M(youth, { freedom: 1 }, '손에 쥔 큰돈을 하루 만에 다 써 버렸다.', -10000),
   L(youth, {}, '밤새 뛰어다니고도 아침이면 몸이 가뿐했다.'),
   L(youth, { romance: 1 }, '항구 축제에서 처음 본 사람과 밤새 이야기를 나눴다.'),
   L(youth, { ambition: 1 }, '나보다 센 사람이 있다는 소문을 들으면 잠이 오지 않았다.'),

@@ -338,7 +338,7 @@ export const PATHS: Turning[] = [
       { label: '죄수들을 이끌고 감옥을 뒤집는다', hint: '혼자가 아니라 무리로 나간다', special: 'dominion', values: { dominion: D }, danger: true,
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'fame', add: 60 }, { op: 'hp', add: -20 }, { op: 'person', kind: 'crew', relation: '탈옥 동지' },
              { op: 'log', text: '폭동이 감옥을 집어삼켰다. 앞장선 {name}의 이름이 신문에 실렸다.', weight: 'heavy' }, { op: 'timeline', text: '죄수들을 이끌고 탈옥했다' }] },
-      { label: '때를 기다린다', hint: '오늘은 눈을 감는다', values: { peace: D }, fx: [] },
+      { label: '간수의 순번을 살피며 때를 기다린다', hint: '오늘은 눈을 감고, 빈틈을 하나씩 적어 둔다', values: { inquiry: D }, fx: [] },
     ],
   },
   {

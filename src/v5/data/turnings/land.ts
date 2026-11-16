@@ -376,7 +376,7 @@ const SETTLED: Turning[] = [
       { label: '바람을 읽어 마을 앞 밭에 맞불을 놓자고 사람들을 이끈다', hint: '누군가의 밭을 태워야 한다. 바람이 바뀌면 모두 잃는다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'fame', add: 3 }, { op: 'log', text: '맞불이 불길을 막았다. 마을은 밭 몇 뙈기만 잃었다.', weight: 'heavy' }],
                else: [{ op: 'money', add: -40000 }, { op: 'hardship', add: 3 }, { op: 'log', text: '바람이 돌아섰다. 맞불까지 마을을 덮쳤다.', weight: 'heavy' }] }] },
-      { label: '곳간의 물건을 바닷가로 옮긴다', hint: '살림은 지키고, 마을 사람들의 눈길이 남는다', fx: [{ op: 'hardship', add: 2 }, { op: 'money', add: -5000 }] },
+      { label: '곳간의 물건을 바닷가로 옮긴다', hint: '살림은 지키고, 마을 사람들의 눈길이 남는다', values: { greed: D }, fx: [{ op: 'hardship', add: 2 }, { op: 'money', add: -5000 }] },
     ],
   },
   {

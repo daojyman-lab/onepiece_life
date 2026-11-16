@@ -93,3 +93,10 @@ describe('기록 줄 (과제 12)', () => {
     }
   });
 });
+
+describe('기록 줄의 돈 (4단계)', () => {
+  it('돈을 보내거나 쓰거나 줍거나 받아 내는 줄은 실제로 돈이 오간다 (money)', () => {
+    const MONEY = /돈(을|의|으로)? [^ ]*(보냈|써 버렸|부쳤)|값을 [^ ]*물어|동전[^.]*주웠|받아 냈|뒤로 팔았|몇 닢을|값을 받고|숨겼다\.$/;
+    for (const l of LINES.filter((x) => MONEY.test(x.text) && !/세어 보/.test(x.text))) expect(l.money, l.text).toBeDefined();
+  });
+});

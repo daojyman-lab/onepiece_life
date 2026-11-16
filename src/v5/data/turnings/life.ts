@@ -150,7 +150,8 @@ const FAMILY: Turning[] = [
     ],
   },
   {
-    id: 'life_child_name', kind: 'door', when: at(age(52, 80), grown),
+    // 뭍에서 일군 일(가게 · 작업장)을 물려줄 때. 바다의 처지는 아래의 깃발 · 제복 쪽이 온다
+    id: 'life_child_name', kind: 'door', when: at(age(52, 80), st('civil', 'shipwright', 'settled', 'retired')),
     weight: 4, repeat: 'once', needs: ['child'], speaker: { relation: '다 자란 자식' },
     title: '물려줄 이름', body: '{name}이(가) 평생 일군 일을 물려받을 나이가 된 자식이, 제 이름으로 전혀 다른 일을 시작하고 싶다고 한다. 손님들도 거래처도 {name}의 이름을 보고 온 사람들이다.',
     doors: [
