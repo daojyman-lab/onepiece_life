@@ -66,6 +66,7 @@ export type Cond =
   | { c: 'town'; is: string[] }                 // 태어난 마을 (hero.town)
   | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
   | { c: 'island'; is: string[] }               // 지금 있는 섬 (hero.island)
+  | { c: 'species'; is: Species[] }             // 종족
   | { c: 'canonAge'; id: string; min?: number; max?: number };   // 그 원작 인물의 지금 나이 (canonAge)
 
 export type Fx =

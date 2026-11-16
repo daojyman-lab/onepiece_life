@@ -7,7 +7,7 @@ import { apply5, invariants5 } from './reduce';
 import { newLife5 } from './state';
 import { leanPick, topValues } from './values';
 import { VALUE_IDS } from '../data/values';
-import type { Life5, Lineage, ValueId, Wealth } from './types';
+import type { HomeId, Life5, Lineage, ValueId, Wealth } from './types';
 
 /**
  * random 열린 문 가운데 고르게, first 첫 번째 열린 문, value 그 가치관을 올리는 문을 먼저,
@@ -48,7 +48,7 @@ export function choose(s: Life5, policy: Policy, r: Rng): number {
  * 한 인생을 끝까지 자동으로 돌린다. opt의 집안 형편 · 핏줄은 출생 주사위에 넘겨 정해 둔다 (돈 · 시련 · 성씨가 그에 맞는다).
  * MAX_STEPS 안에 엔딩에 닿지 못하면 stuck. 명령마다 불변 조건을 확인해 어긴 것을 모은다.
  */
-export function autoplay5(seed: number, policy: Policy = 'random', opt: { wealth?: Wealth; lineage?: Lineage } = {}):
+export function autoplay5(seed: number, policy: Policy = 'random', opt: { wealth?: Wealth; lineage?: Lineage; home?: HomeId } = {}):
   { s: Life5; stuck: boolean; violations: string[] } {
   const s = newLife5(seed, opt);
   const r = rngOf({ seed: seed ^ POLICY_SALT, cursor: 0 });

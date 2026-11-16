@@ -9,7 +9,9 @@ import { MINORS } from '../../src/v5/data/minors';
 import { CANON } from '../../src/v5/data/canon';
 import { CANON_WORDS } from '../../src/v5/data/ending';
 import { FOES, FOE_SEA } from '../../src/v5/data/foes';
-import { HOMETOWNS } from '../../src/data/births';
+import { HOMETOWNS as ALL_TOWNS } from '../../src/data/births';
+// 3단계의 마을 기준은 이스트 블루 여덟 마을이다 (4단계의 다섯 고향은 tests/v5/content-13~17이 본다)
+const HOMETOWNS = ALL_TOWNS.filter((t) => t.home === 'loguetown');
 import { newLife5 } from '../../src/v5/core/state';
 import { runMinor } from '../../src/v5/core/minor';
 import { applyFx } from '../../src/v5/core/fx';

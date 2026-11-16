@@ -1,5 +1,5 @@
 // 출생 주사위 (설계 5.1): 고향, 집안 형편, 핏줄, 타고난 몸.
-import { HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT, FIRST_NAMES } from '../../data/births';
+import { HOME_FIRST_NAMES, HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT, FIRST_NAMES } from '../../data/births';
 import { TALENTS, type Talent } from '../../data/talents';
 import { chance, int, pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
@@ -17,7 +17,7 @@ export function fullName(h: Hero5): string {
 }
 
 /** 출생 주사위에 미리 정해 줄 수 있는 것. wealth · lineage는 시뮬레이터가 출생을 고정할 때 쓴다 */
-export interface BirthOpt { name?: string; gender?: 'm' | 'f'; wealth?: Wealth; lineage?: Lineage }
+export interface BirthOpt { name?: string; gender?: 'm' | 'f'; wealth?: Wealth; lineage?: Lineage; home?: HomeId }
 
 /**
  * 빈 인생의 주인공 칸을 모두 출생 주사위로 채운다. 시련도 더한다.
@@ -28,20 +28,25 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   const r = rngOf(s.rng);
   const h = s.hero;
 
-  const homeId = weighted(r, Object.keys(HOMES) as HomeId[], (id) => HOMES[id].weight)!;
+  const homeId = opt.home ?? weighted(r, Object.keys(HOMES) as HomeId[], (id) => HOMES[id].weight)!;
   const home = HOMES[homeId];
 
   const gender: 'm' | 'f' = opt.gender ?? pick(r, ['m', 'f'] as const);
-  const sur = weighted(r, SURNAMES.filter((x) => x.gender === 'any' || x.gender === gender), (x) => SURNAME_WEIGHT[x.kind])!;
+  // 이스트 블루의 이름난 집안은 로그타운(이스트 블루)에서만, 고향마다 흔한 성이 있으면 그 성만 쓴다
+  const ownCommon = SURNAMES.some((x) => x.home === homeId);
+  const sur = weighted(r, SURNAMES.filter((x) => (x.gender === 'any' || x.gender === gender)
+    && (x.kind !== 'local' || homeId === 'loguetown')
+    && (x.kind !== 'common' || (ownCommon ? x.home === homeId : !x.home))), (x) => SURNAME_WEIGHT[x.kind])!;
 
-  let species = sur.kind === 'rare' ? sur.species : pick(r, home.species);
+  let species = sur.kind === 'rare' ? sur.species : sur.home ? sur.species : pick(r, home.species);
   if (sur.kind === 'common' && chance(r, SPECIES_REROLL.p)) species = weighted(r, SPECIES_REROLL.weights, (x) => x[1])![0];
   // 희귀한 성씨, 이 고향에 없는 종족은 떠내려온 고아로 태어난다
   const orphan = opt.lineage ? opt.lineage === 'orphan' : sur.kind === 'rare' || !home.species.includes(species);
 
-  // 이스트 블루의 이름난 집안은 그 집안이 사는 마을에서만 태어난다
-  const towns = HOMETOWNS.filter((t) => sur.kind !== 'local' || sur.homes!.includes(t.name));
-  const town = pick(r, towns.length ? towns : HOMETOWNS);
+  // 태어난 고향의 마을에서 태어난다. 이스트 블루의 이름난 집안은 그 집안이 사는 마을에서만 태어난다
+  const homeTowns = HOMETOWNS.filter((t) => t.home === homeId);
+  const towns = homeTowns.filter((t) => sur.kind !== 'local' || sur.homes!.includes(t.name));
+  const town = pick(r, towns.length ? towns : homeTowns);
 
   const wealth: Wealth = opt.wealth ?? (orphan ? 'poor' : weighted(r, WEALTHS, (w) => home.wealth[w])!);
   const lineage = opt.lineage ?? (orphan ? 'orphan' : weighted(r, home.lineages, (x) => x[1])![0]);
@@ -62,7 +67,7 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
     base[k] = Math.max(V.birth.statFloor, V.birth.stat + add);
   }
 
-  h.name = opt.name ?? pick(r, FIRST_NAMES[gender]);
+  h.name = opt.name ?? pick(r, (HOME_FIRST_NAMES[homeId] ?? FIRST_NAMES)[gender]);
   h.gender = gender;
   h.surname = orphan ? null : sur.name;
   h.secretSurname = orphan && sur.kind === 'rare' ? sur.name : null;

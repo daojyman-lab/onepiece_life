@@ -1,6 +1,8 @@
 // tests/v5/content-12.test.ts — 과제 12: 자잘한 일과 기록 줄의 개수와 짜임
 import { describe, expect, it } from 'vitest';
-import { HOMETOWNS } from '../../src/data/births';
+import { HOMETOWNS as ALL_TOWNS } from '../../src/data/births';
+// 3단계의 마을 기준은 이스트 블루 여덟 마을이다 (4단계의 다섯 고향은 tests/v5/content-13~17이 본다)
+const HOMETOWNS = ALL_TOWNS.filter((t) => t.home === 'loguetown');
 import { LINES } from '../../src/v5/data/lines';
 import { MINORS } from '../../src/v5/data/minors';
 import type { Cond, Need, Standing } from '../../src/v5/core/types';

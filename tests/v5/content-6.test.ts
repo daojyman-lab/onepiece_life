@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { CHILDHOOD } from '../../src/v5/data/turnings/childhood';
 import { TOWNS } from '../../src/v5/data/turnings/towns';
-import { HOMETOWNS } from '../../src/data/births';
+import { HOMETOWNS as ALL_TOWNS } from '../../src/data/births';
+// 3단계의 마을 기준은 이스트 블루 여덟 마을이다 (4단계의 다섯 고향은 tests/v5/content-13~17이 본다)
+const HOMETOWNS = ALL_TOWNS.filter((t) => t.home === 'loguetown');
 import { SEAS } from '../../src/data/seas';
 import { STRENGTHS } from '../../src/v5/data/strengths';
 import type { Cond, Fx, Turning } from '../../src/v5/core/types';
