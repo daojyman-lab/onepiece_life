@@ -147,7 +147,7 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7k_station_kid', kind: 'door', when: kidIn('샌 파우스트', 5, 14), weight: 8, repeat: 'once', speaker: 'hero',
+    id: 'w7k_station_kid', kind: 'door', when: kidIn('시프트 역', 5, 14), weight: 8, repeat: 'once', speaker: 'hero',
     title: '역 앞의 아이', body: '열차가 닿을 때마다 역 앞은 사람들로 붐빈다. 짐을 들어 주면 동전을 주는 손님도 있고, 짐을 맡기고 사라지는 손님도 있다.',
     doors: [
       { label: '짐을 들어 주고 동전을 모은다', hint: '하루 종일 역을 뛰어다닌다', values: { romance: D }, fx: [{ op: 'money', add: 2500 }, { op: 'base', key: 'vit', add: 1 }] },

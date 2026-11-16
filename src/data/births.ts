@@ -79,7 +79,7 @@ export const HOMETOWNS: Hometown[] = [
       { label: '해체업자 형들과 주먹다짐을 한다', hint: '체술 · 뒷골목의 싸움', branch: 'martial.fist' },
       { label: '고철로 만든 총을 쏘아 본다', hint: '사격 · 쏠 때마다 터질 것 같다', branch: 'martial.gun' },
     ] },
-  { name: '샌 파우스트', home: 'water7', sea: 'gl_first', text: '바다 열차가 닿는 조용한 섬',
+  { name: '시프트 역', home: 'water7', sea: 'gl_first', text: '바다 열차의 첫 역이 있는 작은 섬. 인어 할머니가 역장이다',
     households: [{ text: '선로지기 집' }, { text: '역 앞 식당' }],
     teachers: [
       { label: '역무원 아저씨에게 총을 배운다', hint: '사격 · 열차를 지키는 총', branch: 'martial.gun' },
