@@ -72,6 +72,9 @@ const ROWS: Record<string, Row> = {
   denjiro: ['덴지로', 'm', 37, 'civil'],
   yasuie: ['시모츠키 야스이에', 'm', 59, 'civil'],
   tama: ['오타마', 'f', 4, 'civil'],
+  // 4단계: 신세계에서 쫓기는 사람이 만나는 해군
+  tsuru: ['츠루', 'f', 72, 'marine'],
+  ryokugyu: ['녹우 아라마키', 'm', 44, 'marine'],
 };
 
 export const CANON: Record<string, CanonPerson> = Object.fromEntries(Object.entries(ROWS).map(([id, [name, gender, age, faction, species]]) =>

@@ -10,9 +10,11 @@ import { V } from '../../data/balance';
 import { STRENGTHS } from '../../data/strengths';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
-  STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
+  POWER_TOP, POWER_WORDS, STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
 } from '../../data/words';
 import { topValues } from '../../core/values';
+import { power5 } from '../../core/power';
+import { bandWord } from './words';
 import type { Branch, Life5, LogLine, Standing } from '../../core/types';
 import { foeWho, heroWho5, personWho5 } from './faces';
 import { ageWord, valueWords } from './words';
@@ -31,6 +33,7 @@ export interface ProfileView {
   master: string | null; fruit: string | null;
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
+  power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
   money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
   hp: number; hurts: string[];                         // 부상과 병의 이름
 }
@@ -86,6 +89,7 @@ export function profileView(s: Life5): ProfileView {
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
+    power: (() => { const p = Math.round(power5(s)); return `${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
     hp: Math.round(h.hp),

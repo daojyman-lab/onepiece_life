@@ -327,7 +327,7 @@ export const PEOPLE: Turning[] = [
   },
   {
     id: 'meet_fujitora', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first')),
-    weight: 8, repeat: { years: 5 }, speaker: { canon: 'fujitora' },
+    weight: 3, repeat: { years: 8 }, speaker: { canon: 'fujitora' },
     title: '눈 감은 대장', body: '{island}의 하늘에서 운석이 떨어진다. 눈을 감은 해군 대장이 지팡이 칼을 짚고 {name}의 기척을 읽는다.',
     doors: [
       fightDoor('운석 아래서 맞선다', '하늘을 끌어내리는 상대다', { ambition: D }, 'b_fujitora', READY(5)),
@@ -336,6 +336,47 @@ export const PEOPLE: Turning[] = [
                then: [{ op: 'fame', add: 20 }, { op: 'log', text: '주사위가 {name}의 편을 들었다. 대장은 웃으며 칼을 거두었다.', weight: 'heavy' }],
                else: [{ op: 'hp', add: -20 }, { op: 'log', text: '주사위가 등을 돌렸다. 땅이 꺼지는 틈에 겨우 빠져나왔다.', weight: 'heavy' }] }] },
       { label: '중력에 짓눌리기 전에 달아난다', hint: '땅이 무너져 내린다. 기척을 읽히면 맞닥뜨린다', values: { peace: D }, fx: [{ op: 'hp', add: -15 }, { op: 'chance', p: 0.5, then: [{ op: 'fight', foe: 'b_fujitora', lethal: false, forced: false }] }] },
+    ],
+  },
+  // 신세계 전반에서 쫓기는 사람이 만나는 다른 원작 인물들 (눈 감은 대장만 되풀이되지 않게)
+  {
+    id: 'meet_sabo_colosseum', kind: 'door', when: at(age(19, 26), st(...HUNTED), sea('nw_first')),
+    weight: 3, repeat: 'once', speaker: { canon: 'sabo' },
+    title: '투기장의 불꽃', body: '{island}의 투기장에서 실크해트를 쓴 사내가 불꽃을 두르고 서 있다. 사내는 {name}을(를) 흘끗 보더니, 이 나라를 뒤집을 거라며 손을 내민다. 바깥에서 해군의 함대가 섬을 둘러싼다.',
+    doors: [
+      { label: '손을 잡고 나라를 뒤집는 데 끼어든다', hint: '혁명군과 한편이 된다. 해군의 눈에 이름이 남는다', values: { justice: D }, danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'fame', add: 15 }, { op: 'person', kind: 'ally', relation: '실크해트의 혁명가', canon: 'sabo' }, { op: 'timeline', text: '투기장에서 혁명군의 사보와 함께 싸웠다', canon: 'sabo' }] },
+      { label: '불꽃이 시선을 끄는 틈에 투기장의 상금을 챙긴다', hint: '큰돈이 된다. 해군과 혁명군 모두 그 얼굴을 기억한다', values: { greed: D },
+        fx: [{ op: 'money', add: 60000 }, { op: 'timeline', text: '사보의 불꽃이 투기장을 삼킨 날 상금을 챙겨 달아났다', canon: 'sabo' }] },
+      { label: '남의 싸움이라며 섬을 빠져나간다', hint: '포위망이 좁혀지기 전에 떠난다', values: { freedom: D }, fx: [{ op: 'timeline', text: '불꽃의 혁명가를 등지고 섬을 떠났다', canon: 'sabo' }] },
+    ],
+  },
+  {
+    id: 'meet_tsuru', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first', 'sabaody')),
+    weight: 3, repeat: { years: 8 }, speaker: { canon: 'tsuru' },
+    title: '빨래하는 중장', body: '{island} 앞바다에 군함 한 척이 닻을 내렸다. 갑판의 노파가 빨래판을 들고, 너 같은 녀석들은 한 번 빨아서 널어야 정신을 차린다며 웃는다. 노련한 함대가 퇴로를 막는다.',
+    doors: [
+      { label: '노파와 마주 앉아 말로 풀어 본다', hint: '해군에서 가장 오래 산 머리다. 무엇을 내주게 될지 모른다', values: { inquiry: D },
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'fame', add: 5 }, { op: 'log', text: '노파는 차 한 잔을 다 마시고는, 다음에 보면 빨아 버리겠다며 함대를 물렸다.', weight: 'heavy' }],
+          else: [{ op: 'money', add: -20000 }, { op: 'log', text: '노파와 말을 섞을수록 내줄 것만 늘었다. 배의 금고가 가벼워졌다.', weight: 'heavy' }] },
+          { op: 'timeline', text: '해군의 츠루 중장과 마주 앉았다', canon: 'tsuru' }] },
+      { label: '안개를 틈타 퇴로를 뚫는다', hint: '함대 사이를 빠져나간다. 몇 발은 맞는다', values: { freedom: D }, danger: true,
+        fx: [{ op: 'hp', add: -20 }, { op: 'timeline', text: '츠루 중장의 함대를 뚫고 달아났다', canon: 'tsuru' }] },
+      { label: '부하들을 미끼로 남기고 혼자 달아난다', hint: '혼자는 산다. 남은 이들은 빨래판 앞에 선다', values: { greed: D }, needs: ['crew'],
+        fx: [{ op: 'hardship', add: 2 }, { op: 'losePerson', who: 'crew' }, { op: 'timeline', text: '츠루 중장의 함대 앞에 부하들을 두고 달아났다', canon: 'tsuru' }] },
+    ],
+  },
+  {
+    id: 'meet_ryokugyu', kind: 'door', when: at(age(22), st(...HUNTED), sea('nw_first', 'nw_late')),
+    weight: 3, repeat: { years: 8 }, speaker: { canon: 'ryokugyu' },
+    title: '숲이 된 섬', body: '하룻밤 사이 {island}의 거리가 숲으로 뒤덮였다. 나무 위에 걸터앉은 해군 대장이 하품을 하며, 사흘을 굶었더니 배가 고프다고 한다. 뿌리가 발목을 감아 온다.',
+    doors: [
+      { label: '뿌리를 끊고 숲을 불태우며 달아난다', hint: '섬 사람들의 집도 함께 탄다', values: { dominion: D }, danger: true,
+        fx: [{ op: 'hp', add: -20 }, { op: 'hardship', add: 1 }, { op: 'timeline', text: '숲이 된 섬에서 녹우 대장을 피해 달아났다', canon: 'ryokugyu' }] },
+      { label: '섬 사람들을 이끌고 땅속 수로로 빠져나간다', hint: '다 같이 나간다. 오래 걸린다', values: { justice: D },
+        fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 5 }, { op: 'timeline', text: '숲이 된 섬에서 사람들을 이끌고 빠져나왔다', canon: 'ryokugyu' }] },
+      { label: '배고프다는 대장에게 먹을 것을 바치고 지나간다', hint: '대장은 먹는 동안 눈을 감는다. 다시 만나면 모른다', values: { peace: D },
+        fx: [{ op: 'money', add: -10000 }, { op: 'timeline', text: '녹우 대장에게 먹을 것을 바치고 지나갔다', canon: 'ryokugyu' }] },
     ],
   },
   {

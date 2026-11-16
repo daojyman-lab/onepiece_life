@@ -236,6 +236,15 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     low: '{name}? 우리 역을 지나간 손님이었나. 은하하하!',
     high: '{name}은(는) 술맛을 아는 사람이었지. 은하하하! 이 할망구가 한 잔 따라 주마.',
   },
+  // 4단계: 신세계의 해군
+  tsuru: {
+    low: '{name}? 빨래하다 스친 얼굴이 한둘이어야지.',
+    high: '{name}은(는) 몇 번을 빨아도 때가 빠지지 않는 녀석이었지. 그게 그 녀석의 색이었어.',
+  },
+  ryokugyu: {
+    low: '…{name}? 배고파서 기억이 안 나는군.',
+    high: '{name}은(는) 숲에 갇혀도 길을 냈다. 그건 좀 인정하지.',
+  },
   // 4단계: 와노쿠니
   hiyori: {
     low: '{name}… 행렬 너머로 스친 얼굴이었을까요.',

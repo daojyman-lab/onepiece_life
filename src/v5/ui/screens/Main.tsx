@@ -150,6 +150,7 @@ function Profile({ s }: { s: Life5 }) {
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
+        <div class="t9"><b>전투력</b> {p.power}</div>
         <div class="row between"><span>돈</span><b class={s.hero.money < 0 ? 'red' : ''}>{p.money}</b></div>
         <div>
           <div class="row between t9"><span>체력</span><span>{p.hp} / 100</span></div>

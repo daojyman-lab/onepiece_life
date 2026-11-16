@@ -57,3 +57,10 @@ export const PIRATE_TOP_TITLE = '바다를 뒤흔드는 대해적';
 /** 해군의 자리: 분대를 거느리기 전은 병사, 분대장(mnOfficer)부터 부사관, 계급 marineOfficerRank부터 장교 */
 export const MARINE_TITLES = { soldier: '해군 병사', nco: '해군 부사관', officer: '해군 장교' } as const;
 export const MARINE_OFFICER_RANK = 3;
+
+/** 전투력(power5)을 말로: 이 값 미만이면 그 말. 기준은 이름 있는 상대의 힘 (알비다 100 · 아론 240 · 크로커다일 770 · 도플라밍고 2600 · 아카이누 5700) */
+export const POWER_WORDS: readonly [number, string][] = [
+  [100, '동네 싸움꾼'], [240, '이스트 블루의 해적 선장급'], [770, '이스트 블루를 휘어잡을 만한 급'],
+  [2600, '위대한 항로에서 이름난 급'], [5700, '신세계에서 버틸 만한 급'],
+];
+export const POWER_TOP = '대장 · 사황과 겨룰 만한 급';
