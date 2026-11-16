@@ -116,7 +116,7 @@ b, strong { font-weight: 700; }
 /* ---------- 프로필 ---------- */
 .poster { background: var(--paper); border: 2px solid var(--wood-d); padding: 8px; text-align: center; box-shadow: inset 0 0 0 2px var(--paper-l); }
 .poster .wanted { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--wood-d); letter-spacing: .1em; }
-.face { width: 72px; height: 72px; border: 2px solid var(--wood-d); background: var(--paper-l); }
+.face { width: 72px; height: 72px; border: 2px solid var(--wood-d); background: var(--paper-l); object-fit: cover; }
 .face.big { width: 96px; height: 96px; }
 .face.sm { width: 36px; height: 36px; }
 .face.xs { width: 24px; height: 24px; border-width: 1px; }
@@ -308,3 +308,68 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
   .shop-cat { width: auto; border-left: 0; border-bottom: 3px solid transparent; }
   .shop-cat.on { border-bottom-color: var(--gold-d); }
 }
+
+/* v5 */
+/* 이야기의 무게: heavy는 굵고 눈에 띄게, light는 보통 */
+.story .line.heavy { font-weight: 700; border-left-color: var(--gold-d); background: #fff2c0; }
+/* 맨 아래 줄이 해 구분선이어도 떠오른다 */
+.story .story-year.rise { animation: rise 900ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .story .story-year.rise { animation: none; } }
+/* 인연: 떠난 사람은 흐리게 */
+.row.gone { opacity: .5; }
+.timeline-row { padding: 2px 4px; border-bottom: 1px dashed var(--tan-d); }
+.timeline-row b { margin-right: 6px; }
+/* 휴대폰(v5): 페이지는 스크롤되지 않고 탭 몸통 안에서만 스크롤한다 */
+.app.mobile.m5 { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.app.mobile.m5 > .m-topbar { flex: none; position: static; }
+.m5-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.m5-body.fill { display: flex; flex-direction: column; overflow: hidden; }
+.m5-body.fill > .frame:first-child { flex: none; }
+.app.mobile.m5 .story-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.app.mobile.m5 .story-panel .story { flex: 1; height: auto; min-height: 120px; }
+.m-nav.four { grid-template-columns: repeat(4, 1fr); }
+/* 떠 있는 일의 창(선택 · 싸움): 창이 화면 안에 들고, 본문과 문 목록이 창 안에서 스크롤한다 */
+.modal.pend { max-height: calc(100vh - 56px); max-height: calc(100dvh - 56px); display: flex; flex-direction: column; }
+.modal.pend > .head, .modal.pend > .speaker, .modal.pend > .pend-foot { flex: none; }
+.modal.pend .speaker .scroll { max-height: 34vh; max-height: 34dvh; overflow-y: auto; scrollbar-width: thin; }
+.pend-doors { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; margin-top: 8px; padding: 0 2px 2px 12px; }
+.pend-foot { margin-top: 6px; }
+/* 큰 계기: 창 테두리가 붉다 */
+.modal.moment { border-color: var(--red); box-shadow: 0 0 0 var(--px) var(--red-d), inset 0 0 0 2px var(--gold), 6px 6px 0 var(--px) var(--shadow); }
+@media (max-width: 760px) {
+  .modal.pend { max-height: calc(100vh - 88px - env(safe-area-inset-bottom)); max-height: calc(100dvh - 88px - env(safe-area-inset-bottom)); }
+  .modal.pend .speaker .face.big { width: 64px; height: 64px; }
+  .modal.pend .speaker .scroll { max-height: 26dvh; }
+}
+/* 자동 전투 창: 위에 양쪽 체력, 가운데 장면, 아래 사건 줄(창 안에서 스크롤), 맨 아래 단추는 늘 닿는다 */
+.modal.battle5 > * { flex: none; }
+.battle5-vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+.battle5-scene { padding: 0; margin: 0 0 6px; }
+.battle5-scene .scene { height: 150px; }
+.modal.battle5 > .battle-log { flex: 1 1 auto; min-height: 72px; max-height: none; }
+.battle5-bar, .battle5-end { margin-top: 6px; }
+.battle5-end .btn { margin-top: 6px; }
+@media (max-width: 760px) {
+  .battle5-scene .scene { height: 104px; }
+  .battle5-vs .face.sm { width: 28px; height: 28px; }
+  .battle5-vs .side { grid-template-columns: 28px 1fr; }
+}
+/* 휴대폰에는 마우스가 없으니 '마우스를 올려 두면 멈춘다'를 내지 않는다 */
+.app.mobile .story-idle { display: none; }
+/* 엔딩 창: 본문이 창 안에서 스크롤하고 맨 아래 단추는 늘 닿는다 */
+.modal.ending5 > .ending5-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; padding-right: 10px; }
+.modal.ending5 > .ending5-go { flex: none; margin-top: 8px; }
+.ending5-body > section { display: flex; flex-direction: column; gap: 2px; }
+.ending5-body summary { cursor: pointer; }
+/* 싸움 앞의 능력치 비교: 나(왼쪽, 파랑) · 이름 · 상대(오른쪽, 빨강) */
+.fight-stats { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.fight-stat { display: grid; grid-template-columns: 1fr 2.6em 3em 2.6em 1fr; align-items: center; gap: 4px; }
+.fight-stat .num { text-align: center; font-variant-numeric: tabular-nums; }
+.fight-stat .lab { text-align: center; color: var(--ink-soft); }
+.fight-stat .bar { height: 7px; background: var(--wood-dd); position: relative; display: flex; }
+.fight-stat .bar.me { justify-content: flex-end; }
+.fight-stat .bar i { display: block; height: 100%; }
+.fight-stat .bar.me i { background: var(--blue); }
+.fight-stat .bar.foe i { background: var(--red); }
+/* 인연 칸의 작은 탭 (인연 · 동료) */
+.people-tabs { display: flex; gap: 4px; margin-bottom: 6px; }

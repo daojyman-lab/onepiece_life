@@ -1,0 +1,274 @@
+// 마을의 유년기 (3~15살): 그 마을에서 태어나 지금도 그 마을에 사는 아이에게만 온다 (kidIn).
+// 이 파일: 후샤 마을, 고아 왕국 그레이 터미널, 셸스 타운, 오렌지 마을. 나머지 네 마을은 towns-2.ts.
+// 원작의 일은 주인공의 나이(루피와 같은 나이)에 맞춰 오고, 주인공이 그 결말을 바꾸지 않는다.
+//   빨간 머리 해적단이 후샤 마을에 머문 것은 주인공 예닐곱 살, 그레이 터미널의 큰불은 일곱 살.
+//   모건 대령과 그 외아들 헤르메포는 주인공의 십대 내내 셸스 타운에 있다.
+// 마을마다 열다섯 살 무렵 어디로 갈지를 묻는 전환점(go_*)이 하나 있고, 고향을 아주 떠나는 문은 마을마다 많아야 하나다.
+// 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
+import { V } from '../balance';
+import { POOR, RICH, kidIn, leaveTo } from './childhood';
+import { TOWNS_2 } from './towns-2';
+import type { Turning } from '../../core/types';
+
+const D = V.value.door;
+const FUSHA = '후샤 마을', GRAY = '고아 왕국 그레이 터미널', SHELLS = '셸스 타운', ORANGE = '오렌지 마을';
+
+const TOWNS_1: Turning[] = [
+  // ---------------------------------------------------------------- 후샤 마을: 마키노의 술집, 코르보 산의 산적
+  {
+    id: 'town_fusha_redhair', kind: 'door', when: kidIn(FUSHA, 6, 7), weight: 20, repeat: 'once', speaker: { canon: 'shanks' },
+    title: '빨간 머리의 술자리', body: '마키노의 술집에 빨간 머리 선장의 해적단이 한 해째 눌러앉아 있다. 선장은 마을 아이들에게 고기를 나눠 주면서도, 배에 태워 달라는 말에는 웃으며 고개를 젓는다.',
+    doors: [
+      { label: '짧은 항해를 나가는 날 배의 술통에 숨어든다', hint: '닻을 올리기 전에 들키면 선원의 어깨에 얹혀 돌아온다. 집에서는 한동안 문밖에 못 나간다', values: { freedom: D }, mark: 'daring',
+        fx: [{ op: 'flag', id: 'stowawayRedHair' }, { op: 'log', text: '돛대 아래 술통 속에서 들켰다. 선장은 배를 잡고 웃으며 {name}을(를) 부두에 내려놓았다.', weight: 'heavy' }] },
+      { label: '망보는 선원에게 매듭과 바람 읽는 법을 배운다', hint: '술집 심부름으로 번 동전은 그 선원의 술값으로 다 나간다. 바다의 낌새가 눈에 들어온다', values: { inquiry: D },
+        fx: [{ op: 'money', add: -500 }, { op: 'mastery', branch: 'observation', add: 6 }] },
+      { label: '선장 앞에서 언젠가 내 배를 띄우겠다고 큰소리친다', hint: '술집의 어른들이 두고두고 놀린다. 뱉은 말은 거둘 수 없다', values: { ambition: D }, mark: 'obsession',
+        fx: [{ op: 'flag', id: 'redHairVow' }, { op: 'timeline', text: '빨간 머리 선장 앞에서 제 배를 띄우겠다고 큰소리쳤다' }] },
+    ],
+  },
+  {
+    id: 'town_fusha_higuma', kind: 'door', when: kidIn(FUSHA, 7, 7), weight: 20, repeat: 'once', speaker: 'hero',
+    title: '술집에 들이닥친 산적', body: '해적들이 바다에 나간 사이, 산적 두목 히구마 일당이 마키노의 술집 문을 걷어차고 들어와 술을 내놓으라고 한다. 그 무렵 마을에는 루피라는 꼬마가 이상한 열매를 먹고 몸이 고무처럼 늘어났다는 소문이 돌았다.',
+    doors: [
+      { label: '마키노를 감싸며 산적의 다리에 매달린다', hint: '어린 주먹으로는 상대가 안 된다. 얻어맞고 마룻바닥에 내동댕이쳐진다', values: { justice: D }, mark: 'unyielding', danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '산적의 발길질에 나가떨어졌다. 마키노가 울면서 {name}의 이마를 닦아 주었다.', weight: 'heavy' }] },
+      { label: '뒷문으로 빠져나가 촌장을 부르러 달린다', hint: '촌장이 달려오지만 산적은 늙은이의 말을 듣지 않는다. 술집의 술은 다 털린다', values: { freedom: D },
+        fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'ally', relation: '술집 주인', canon: 'makino' }] },
+      { label: '탁자 밑에 숨어 산적들의 얼굴과 말버릇을 외운다', hint: '다친 데는 없다. 숨어 있던 일이 오래 마음에 걸린다', values: { inquiry: D }, mark: 'composure',
+        fx: [{ op: 'flag', id: 'higumaFaces' }, { op: 'base', key: 'int', add: 1 }] },
+    ],
+  },
+  {
+    id: 'town_fusha_debt', kind: 'door', when: kidIn(FUSHA, 8, 12, POOR), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '산적의 빚', body: '흉년 끝에 집에서 산적에게 돈을 빌렸다. 갚을 날이 지나자 산적 졸개가 밤마다 문을 두드린다. 부모는 촌장에게는 알리지 말라고 몇 번이고 당부했다.',
+    doors: [
+      { label: '촌장에게 졸개의 행패를 낱낱이 이른다', hint: '마을 어른들이 산길을 지키기 시작한다. 부모는 크게 노하고, 졸개는 {name}의 얼굴을 기억한다', values: { justice: D }, mark: 'rebel',
+        fx: [{ op: 'flag', id: 'banditGrudge' }, { op: 'log', text: '촌장이 지팡이를 짚고 산 어귀까지 올라갔다. 그날 밤 부모는 {name}과(와) 말하지 않았다.', weight: 'light' }] },
+      { label: '산에 장작을 져다 바치며 빚을 조금씩 던다', hint: '한 철 내내 산길을 오르내린다. 어깨가 단단해지고 발목을 몇 번이고 삔다', values: { inquiry: D }, mark: 'fellowship',
+        fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'vit', add: 1 }] },
+      { label: '졸개를 이길 때까지 풍차 뒤에서 몽둥이를 휘두른다', hint: '한 번은 크게 얻어맞는다. 그다음부터 졸개가 문을 두드리는 밤이 준다', values: { dominion: D }, mark: 'unyielding', danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'mastery', branch: 'fist', add: 8 }] },
+    ],
+  },
+  {
+    id: 'town_fusha_crate', kind: 'door', when: kidIn(FUSHA, 11, 14, RICH), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '창고 바닥의 상자', body: '해군 영웅 가프 중장이 마을에 들른다는 전갈이 왔다. 그 전날 밤, 부모가 곡물 창고 바닥 밑에 상자 하나를 숨겼다. 틈으로 보인 것은 바다 건너에서 몰래 들여온 화약이었다.',
+    doors: [
+      { label: '가프 중장의 부하에게 상자를 알린다', hint: '집안의 장사는 무너진다. 부모와는 오래 말을 섞지 못한다', values: { justice: D }, mark: 'rebel',
+        fx: [{ op: 'wealth', to: 'common' }, { op: 'flag', id: 'reportedFamily' }, { op: 'timeline', text: '집안의 밀수를 해군에 알렸다' }] },
+      { label: '상자를 더 깊이 묻는 일을 거든다', hint: '집은 무사하다. 그 대신 평생 입 밖에 낼 수 없는 일이 생긴다', values: { loyalty: D },
+        fx: [{ op: 'flag', id: 'familySecret' }, { op: 'hardship', add: 2 }] },
+      { label: '입을 다무는 값으로 부모에게 배삯을 받아 낸다', hint: '주머니는 두둑해진다. 부모는 그날부터 {name}을(를) 남처럼 본다', values: { greed: D }, 
+        fx: [{ op: 'money', add: 20000 }, { op: 'flag', id: 'coldFamily' }] },
+    ],
+  },
+  {
+    id: 'go_fusha', kind: 'door', when: kidIn(FUSHA, 14, 15), weight: 16, repeat: 'once', speaker: 'hero',
+    title: '풍차 아래의 작은 배', body: '풍차 방앗간 아래 개울목에 주인 잃은 작은 배가 떠밀려 왔다. 루피라는 녀석은 산에서 혼자 수련하며 열일곱이 되면 바다로 나간다고 떠들고 다닌다. {name}에게도 어디로 갈지 정할 때가 왔다.',
+    doors: [
+      { label: '작은 배를 고쳐 섬 사이 짐배 일을 시작한다', hint: '열여섯을 기다리지 않고 제 밥벌이를 한다. 배를 고치느라 모아 둔 돈이 다 든다', values: { freedom: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: -2000 }, { op: 'flag', id: 'smallBoat' }, { op: 'timeline', text: '작은 짐배를 고쳐 섬 사이를 오갔다' }] },
+      { label: '로그타운으로 가는 상선의 갑판 일꾼이 된다', hint: '고향을 떠나 위대한 항로 입구의 항구에서 내린다. 돌아올 날은 정하지 않는다', values: { romance: D },
+        fx: leaveTo('로그타운', '상선의 갑판을 닦으며 바다를 건넜다. 처형대가 보이는 항구에 내렸다.', '열다섯에 후샤 마을을 떠나 로그타운으로 갔다') },
+      { label: '촌장 밑에서 마을 일을 거들며 남는다', hint: '바다는 멀어진다. 마을이 {name}을(를) 믿고 일을 맡기기 시작한다', values: { peace: D },
+        fx: [{ op: 'flag', id: 'villageHand' }, { op: 'base', key: 'int', add: 1 }] },
+    ],
+  },
+
+  // ---------------------------------------------------------------- 고아 왕국 그레이 터미널: 쓰레기 산과 높은 성벽
+  {
+    id: 'town_gray_stash', kind: 'door', when: kidIn(GRAY, 6, 7), weight: 18, repeat: 'once', speaker: 'hero',
+    title: '철판 밑의 보물', body: '쓰레기 산 너머 숲가, 녹슨 철판 밑에 누군가 동전과 보석 부스러기를 모아 두었다. 쇠파이프를 든 주근깨 소년과 모자를 쓴 소년이 날마다 그곳을 살피러 온다.',
+    doors: [
+      { label: '손대지 않고 철판을 도로 덮어 둔다', hint: '배고픈 밤이 이어진다. 두 소년은 끝내 {name}을(를) 모른다', values: { justice: D },
+        fx: [{ op: 'hp', add: -5 }] },
+      { label: '동전 한 줌을 집어 온다', hint: '며칠은 배불리 먹는다. 들키면 쇠파이프가 날아온다', values: { greed: D }, mark: 'daring', danger: true,
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 1500 }],
+               else: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '주근깨 소년에게 붙잡혀 쇠파이프로 흠씬 두들겨 맞았다.', weight: 'heavy' }] }] },
+      { label: '두 소년이 오는 길목에서 쓰레기 산 패거리를 망봐 준다', hint: '패거리의 눈 밖에 나 고철 줍는 자리를 잃는다. 두 소년이 {name}의 얼굴을 알게 된다', values: { loyalty: D }, mark: 'fellowship',
+        fx: [{ op: 'hp', add: -5 }, { op: 'flag', id: 'grayLookout' }] },
+    ],
+  },
+  {
+    id: 'town_gray_fire', kind: 'door', when: kidIn(GRAY, 7, 7), weight: 25, repeat: 'once', speaker: 'hero',
+    title: '불타는 쓰레기 산', body: '왕국이 귀한 손님을 맞기 전날 밤, 그레이 터미널 곳곳에서 한꺼번에 불길이 솟았다. 성문은 굳게 닫혀 있고, 연기 속에서 사람들의 비명이 들린다.',
+    doors: [
+      { label: '판잣집 아이들을 이끌고 바닷가 쪽으로 빠져나간다', hint: '불길을 헤치다 팔과 등에 화상을 입는다. 살아 나온 아이들이 {name}의 곁에 남는다', values: { loyalty: D }, mark: 'fellowship', danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'person', kind: 'ally', relation: '불길에서 함께 나온 아이' },
+             { op: 'flag', id: 'grayFire' }, { op: 'timeline', text: '그레이 터미널의 큰불에서 아이들을 이끌고 빠져나왔다' }] },
+      { label: '닫힌 성문을 두드리며 열어 달라고 외친다', hint: '성문은 열리지 않는다. 연기를 들이마시고 쓰러졌다가 겨우 깨어난다', values: { justice: D }, mark: 'rebel', danger: true,
+        fx: [{ op: 'hp', add: -25 }, { op: 'base', key: 'vit', add: -1 }, { op: 'flag', id: 'grayFire' },
+             { op: 'log', text: '성문은 끝내 열리지 않았다. 성벽 위의 병사들은 불길을 내려다보기만 했다.', weight: 'heavy' }, { op: 'timeline', text: '그레이 터미널의 큰불 속에서 닫힌 성문을 두드렸다' }] },
+      { label: '가진 것을 다 버리고 혼자 숲으로 달린다', hint: '살아남는다. 판잣집도 모아 둔 고철도 잿더미가 되고, 뒤에 남은 얼굴들이 오래 떠오른다', mark: 'composure',
+        fx: [{ op: 'money', add: -5000 }, { op: 'hardship', add: 5 }, { op: 'flag', id: 'grayFire' }, { op: 'timeline', text: '그레이 터미널의 큰불에서 혼자 살아남았다' }] },
+    ],
+  },
+  {
+    id: 'town_gray_scrap', kind: 'door', when: kidIn(GRAY, 8, 13, POOR), weight: 10, repeat: 'once', speaker: { relation: '고철패의 우두머리' },
+    title: '고철패의 부름', body: '고철을 독차지한 패거리가 쓰레기 산의 아이들을 불러 모은다. 따르는 아이는 배불리 먹고, 거절한 아이는 고철 줍는 자리를 빼앗긴다. 우두머리는 해 지기 전까지 답을 가져오라고 했다.',
+    doors: [
+      { label: '패거리에 들어가 고철 몫을 받는다', hint: '끼니 걱정은 사라진다. 그 대신 다른 아이들의 자리를 빼앗는 일을 맡는다', values: { greed: D },
+        fx: [{ op: 'money', add: 2000 }, { op: 'flag', id: 'scrapGang' }] },
+      { label: '거절하고 숲가에서 혼자 먹을 것을 찾는다', hint: '배를 곯고 짐승에게 물린다. 누구의 몫도 빼앗지 않는다', values: { freedom: D }, mark: 'rebel', closes: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'base', key: 'vit', add: 1 }] },
+      { label: '자리를 빼앗긴 아이들을 모아 벼랑 아래 새 고철 자리를 튼다', hint: '패거리와 몇 번이고 맞붙는다. 함께 버틴 아이들이 생긴다', values: { loyalty: D }, mark: 'unyielding', danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'person', kind: 'ally', relation: '고철 자리를 함께 지킨 아이' }] },
+    ],
+  },
+  {
+    id: 'town_gray_brooch', kind: 'door', when: kidIn(GRAY, 8, 13, RICH), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '성벽 안의 브로치', body: '{name}의 집은 높은 성벽 안 귀족 거리에 있다. 집안의 은 브로치가 사라지자, 성벽 밖에서 온 하녀 아이가 도둑으로 몰려 끌려갔다. 브로치는 {name}이(가) 장난치다 화단에 떨어뜨린 것이다.',
+    doors: [
+      { label: '부모에게 사실을 털어놓는다', hint: '하녀 아이는 풀려난다. 크게 꾸지람을 듣고 한 해 동안 성문 밖에 나가지 못한다', values: { justice: D },
+        fx: [{ op: 'flag', id: 'confessed' }, { op: 'flag', id: 'grounded' }] },
+      { label: '브로치를 몰래 찾아 놓고 하녀 아이의 식구에게 용돈을 보낸다', hint: '누명은 벗겨지지만 아이는 일자리를 잃는다. 모아 둔 용돈이 바닥난다', values: { romance: D },
+        fx: [{ op: 'money', add: -10000 }] },
+      { label: '입을 다문다', hint: '하녀 아이는 성벽 밖으로 쫓겨나 다시 보이지 않는다. 아무도 {name}을(를) 탓하지 않는다',
+        fx: [{ op: 'flag', id: 'guiltSecret' }, { op: 'hardship', add: 2 }] },
+    ],
+  },
+  {
+    id: 'go_gray', kind: 'door', when: kidIn(GRAY, 14, 15), weight: 16, repeat: 'once', speaker: 'hero',
+    title: '왕국을 떠나는 배', body: '주근깨 소년이 작은 배 하나로 바다에 나갔다는 소문이 성벽 밖에 돌았다. 왕국의 항구에서는 로그타운으로 가는 상선이 짐꾼을 구하고, 성벽 안 귀족 집은 문지기를 구한다.',
+    doors: [
+      { label: '로그타운행 상선의 짐꾼으로 오른다', hint: '쓰레기 산을 떠나 위대한 항로 입구의 항구에서 내린다. 돌아올 판잣집은 남기지 않는다', values: { freedom: D },
+        fx: leaveTo('로그타운', '짐칸의 냄새를 맡으며 며칠을 건넜다. 성벽 없는 항구 도시가 눈앞에 있었다.', '열다섯에 고아 왕국을 떠나 로그타운으로 갔다') },
+      { label: '성벽 안 귀족 집의 문지기가 된다', hint: '배는 부르다. 성벽 밖 옛 이웃들이 {name}을(를) 성벽 안의 사람이라 부르며 등을 돌린다', values: { ambition: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 5000 }, { op: 'flag', id: 'wallGuard' }, { op: 'timeline', text: '성벽 안 귀족 집의 문지기가 되었다' }] },
+      { label: '쓰레기 산에 남아 어린아이들을 거둔다', hint: '버는 것은 모두 아이들 입으로 들어간다. 판잣집 하나가 {name}의 집이 된다', values: { romance: D }, mark: 'fellowship',
+        fx: [{ op: 'hardship', add: 5 }, { op: 'person', kind: 'ally', relation: '거둔 아이' }, { op: 'flag', id: 'grayKeeper' }] },
+    ],
+  },
+
+  // ---------------------------------------------------------------- 셸스 타운: 해군 기지, 모건 대령과 헤르메포
+  {
+    id: 'town_shells_errand', kind: 'door', when: kidIn(SHELLS, 10, 14), weight: 10, repeat: 'once', speaker: 'hero',
+    title: '기지의 견습 자리', body: '해군 기지에서 잡일할 견습 아이를 뽑는다는 방이 붙었다. 모집하는 곳으로 가는 길에, 병사들이 노점 아이의 좌판을 짓밟고 웃으며 지나갔다. 아이는 다친 다리로 흩어진 과일을 줍고 있다.',
+    doors: [
+      { label: '좌판을 짓밟은 병사를 기지 앞에서 고발한다', hint: '모건 대령의 기지에서 병사를 고발한 아이는 견습이 될 수 없다. 병사들이 {name}의 얼굴을 기억한다', values: { justice: D }, mark: 'rebel',
+        fx: [{ op: 'hp', add: -5 }, { op: 'flag', id: 'baseGrudge' }] },
+      { label: '노점 아이를 업고 의원에게 간다', hint: '모집 시간은 놓친다. 약값은 {name}이(가) 치른다', values: { peace: D },
+        fx: [{ op: 'money', add: -1000 }, { op: 'person', kind: 'ally', relation: '노점의 아이' }] },
+      { label: '못 본 척 모집에 나간다', hint: '견습 자리를 얻어 품삯을 받는다. 그 아이의 우는 소리가 귀에 남는다', values: { greed: D }, 
+        fx: [{ op: 'money', add: 3000 }, { op: 'flag', id: 'baseErrand' }] },
+    ],
+  },
+  {
+    id: 'town_shells_helmeppo', kind: 'door', when: kidIn(SHELLS, 12, 15), weight: 12, repeat: 'once', speaker: { canon: 'helmeppo' },
+    title: '대령의 외아들', body: '모건 대령의 외아들 헤르메포가 병사 둘을 거느리고 장터를 돈다. 아버지에게 이른다는 말 한마디에 상인들은 천막을 접는다. 오늘은 {name}이(가) 일하는 노점 앞에서 걸음을 멈췄다.',
+    doors: [
+      { label: '노점을 뒤엎으려는 손을 붙잡는다', hint: '병사들에게 끌려가 기지 뒤뜰에서 매를 맞는다. 헤르메포는 그 얼굴을 잊지 않는다', values: { freedom: D }, mark: 'unyielding', danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'person', kind: 'enemy', relation: '앙심을 품은 대령의 외아들', canon: 'helmeppo' }] },
+      { label: '고개를 숙이고 헤르메포의 심부름꾼이 된다', hint: '노점은 무사하고 용돈도 생긴다. 장터 사람들이 {name}에게 등을 돌린다', values: { ambition: D },
+        fx: [{ op: 'money', add: 3000 }, { op: 'flag', id: 'helmeppoLackey' }] },
+      { label: '상인들과 천막을 함께 거두어 뒷골목에 장을 다시 연다', hint: '그날 벌이는 공친다. 뒷골목 장터 사람들이 {name}을(를) 제 식구처럼 대한다', values: { loyalty: D }, mark: 'fellowship',
+        fx: [{ op: 'money', add: -1000 }, { op: 'flag', id: 'backAlleyMarket' }] },
+    ],
+  },
+  {
+    id: 'town_shells_tax', kind: 'door', when: kidIn(SHELLS, 9, 14), weight: 10, repeat: 'once', speaker: 'hero',
+    title: '대령의 세금', body: '모건 대령이 마을에 새 세금을 매겼다. 기한을 넘긴 이웃 어부가 기지 마당의 말뚝에 묶였고, 물 한 모금 주는 자도 같은 벌을 받는다는 방이 붙었다.',
+    doors: [
+      { label: '밤에 기지 담을 넘어 물을 건넨다', hint: '어부는 그 밤을 넘긴다. 들키면 같은 말뚝에 묶인다', values: { peace: D }, mark: 'daring', danger: true,
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'log', text: '보초가 조는 사이 물통을 건네고 담을 넘어 돌아왔다.', weight: 'light' }],
+               else: [{ op: 'hp', add: -20 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '보초에게 붙잡혀 사흘을 어부 옆 말뚝에 묶여 있었다.', weight: 'heavy' }] }] },
+      { label: '세금 장부를 몰래 들여다보고 돈이 어디로 가는지 알아낸다', hint: '대령이 세금으로 제 동상을 세운다는 것을 안다. 아는 것만으로는 아무것도 바뀌지 않는다', values: { inquiry: D }, mark: 'composure',
+        fx: [{ op: 'flag', id: 'morganLedger' }, { op: 'base', key: 'int', add: 1 }] },
+      { label: '대령의 방이 붙은 벽에 밤새 낙서를 한다', hint: '마을 아이들이 낄낄댄다. 병사들이 낙서한 아이를 찾아 집집이 뒤진다', values: { freedom: D }, mark: 'rebel',
+        fx: [{ op: 'chance', p: 0.6, then: [{ op: 'flag', id: 'graffiti' }],
+               else: [{ op: 'hp', add: -10 }, { op: 'flag', id: 'baseGrudge' }, { op: 'log', text: '손에 묻은 먹물 때문에 병사에게 붙들려 매를 맞았다.', weight: 'light' }] }] },
+    ],
+  },
+  {
+    id: 'town_shells_fish', kind: 'door', when: kidIn(SHELLS, 9, 14, POOR), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '깎인 생선 값', body: '기지에 생선을 대는 상인이 빚을 핑계로 집에서 잡은 생선 값을 또 깎았다. 부모는 하루 벌이를 몽땅 내고도 빚을 다 갚지 못했다. 상인 집 도련님은 기지를 등에 업고 골목에서 {name}을(를) 비웃는다.',
+    doors: [
+      { label: '기지로 가는 화물선에 숨어 큰 항구로 가려 한다', hint: '사흘 만에 들켜 다음 항구에서 되돌려 보내진다. 집에는 빚과 꾸지람이 기다린다', values: { freedom: D }, mark: 'daring',
+        fx: [{ op: 'hp', add: -5 }, { op: 'flag', id: 'stowawayCaught' }, { op: 'log', text: '짐칸에서 들켰다. 선원들이 {name}을(를) 셸스 타운으로 가는 배에 도로 태웠다.', weight: 'heavy' }] },
+      { label: '도련님의 멱살을 잡는다', hint: '골목은 조용해진다. 상인이 생선 값을 더 깎고, 기지의 병사가 집에 찾아온다', values: { dominion: D },
+        fx: [{ op: 'flag', id: 'merchantGrudge' }, { op: 'hardship', add: 5 }] },
+      { label: '새벽마다 어시장에서 생선 손질을 거들어 빚을 던다', hint: '손에 칼자국이 늘고 놀 틈이 없다. 빚이 조금씩 준다', values: { loyalty: D }, mark: 'unyielding',
+        fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'str', add: 1 }] },
+    ],
+  },
+  {
+    id: 'go_shells', kind: 'door', when: kidIn(SHELLS, 14, 15), weight: 16, repeat: 'once', speaker: 'hero',
+    title: '기지의 문 앞에서', body: '셸스 타운의 해군 기지가 열다섯 살 견습 수병을 받는다는 방을 내걸었다. 같은 날 부두에는 로그타운으로 가는 보급선이 닻을 내렸다.',
+    doors: [
+      { label: '기지의 견습 수병으로 들어간다', hint: '흰 제복을 입는다. 모건 대령의 말이 곧 법인 기지다', values: { justice: D },
+        fx: [{ op: 'standing', to: 'marine' }, { op: 'flag', id: 'underMorgan' }, { op: 'timeline', text: '셸스 타운 기지의 견습 수병이 되었다' }] },
+      { label: '보급선의 잡일꾼이 되어 로그타운으로 간다', hint: '대령의 마을을 떠나 위대한 항로 입구의 항구에서 새로 시작한다', values: { freedom: D },
+        fx: leaveTo('로그타운', '보급선의 갑판에서 셸스 타운의 기지가 작아지는 것을 보았다.', '열다섯에 셸스 타운을 떠나 로그타운으로 갔다') },
+      { label: '부두 창고 일을 맡아 마을 사람들 곁에 남는다', hint: '대령의 세금을 함께 견딘다. 바다로 나갈 날은 미뤄진다', values: { loyalty: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 2000 }] },
+    ],
+  },
+
+  // ---------------------------------------------------------------- 오렌지 마을: 부들 촌장, 먹이 가게와 강아지 슈슈
+  {
+    id: 'town_orange_dogs', kind: 'door', when: kidIn(ORANGE, 6, 11), weight: 10, repeat: 'once', speaker: 'hero',
+    title: '닭장의 구멍', body: '장터의 닭이 자꾸 사라지자 어른들은 떠돌이 개들 짓이라고 했다. 개를 잡아 오는 아이에게는 장터 견습 자리를 준다고 한다. 먹이 가게 할아버지만 개들 편을 든다. 할아버지의 가게 앞에는 강아지 슈슈가 늘 앉아 있다.',
+    doors: [
+      { label: '닭장의 발자국을 따져 진짜 범인을 찾는다', hint: '족제비 굴을 찾아낸다. 어른들은 아이가 건방지다며 견습 자리를 주지 않는다', values: { inquiry: D },
+        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'weaselFound' }] },
+      { label: '늙은 떠돌이 개를 창고에 숨겨 먹인다', hint: '제 끼니를 덜어 먹인다. 들키면 개도 {name}도 창고에서 쫓겨난다', values: { justice: D }, mark: 'fellowship',
+        fx: [{ op: 'hp', add: -5 }, { op: 'chance', p: 0.6, then: [{ op: 'flag', id: 'kidDog' }],
+               else: [{ op: 'log', text: '창고 주인에게 들켰다. 늙은 개는 쫓겨났고 {name}은(는) 그 개를 따라 한참을 걸었다.', weight: 'light' }] }] },
+      { label: '개 사냥에 끼어 견습 자리를 얻는다', hint: '개에게 팔을 물린다. 먹이 가게 할아버지가 {name}을(를) 다시는 반기지 않는다', values: { ambition: D },
+        fx: [{ op: 'hp', add: -10 }, { op: 'money', add: 2000 }, { op: 'flag', id: 'dogHunter' }] },
+    ],
+  },
+  {
+    id: 'town_orange_scale', kind: 'door', when: kidIn(ORANGE, 9, 14, POOR), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '속인 저울', body: '부모가 품을 파는 생선 절임 공장에서, 주인이 저울추를 바꿔 일꾼들의 몫을 깎아 왔다. 심부름을 갔다가 진짜 무게가 적힌 장부를 손에 넣었다.',
+    doors: [
+      { label: '장부를 부들 촌장에게 가져간다', hint: '촌장이 공장 주인을 불러 세운다. 그 대신 부모가 공장에서 쫓겨나 집이 더 어려워진다', values: { justice: D },
+        fx: [{ op: 'hardship', add: 5 }, { op: 'flag', id: 'exposedScale' }] },
+      { label: '장부를 들고 공장 주인을 찾아가 입막음 값을 받는다', hint: '집에 돈이 들어온다. 일꾼들은 여전히 속는다', values: { greed: D }, mark: 'daring',
+        fx: [{ op: 'money', add: 4000 }, { op: 'flag', id: 'blackmailer' }] },
+      { label: '장부는 덮어 두고 공장 일을 나눠 맡는다', hint: '부모의 손이 조금 덜 바빠진다. 놀 틈은 사라지고 속임수는 그대로 남는다', values: { inquiry: D },
+        fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }] },
+    ],
+  },
+  {
+    id: 'town_orange_wall', kind: 'door', when: kidIn(ORANGE, 8, 13, RICH), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
+    title: '높아진 담장', body: '항구에서 가장 큰 잡화점인 {name}의 집에서, 골목 패거리가 물건을 훔쳐 가는 일이 잦아졌다. 부모는 담장을 높이고 집 밖에 나가지 말라고 했다. 부들 촌장은 담장보다 사람이 먼저라며 혀를 찼다.',
+    doors: [
+      { label: '밤에 담을 넘어 패거리를 찾아간다', hint: '훔쳐 간 까닭을 듣게 된다. 부모의 믿음을 잃고 용돈이 끊긴다', values: { freedom: D }, mark: 'rebel',
+        fx: [{ op: 'money', add: -5000 }, { op: 'person', kind: 'ally', relation: '골목 패거리의 대장' }] },
+      { label: '패거리 대장에게 일대일로 붙는다', hint: '얼굴에 상처가 남는다. 다음 날부터 가게 물건이 사라지지 않는다', values: { dominion: D }, danger: true,
+        fx: [{ op: 'hp', add: -15 }, { op: 'injury', severity: 'light' }, { op: 'mastery', branch: 'fist', add: 6 }] },
+      { label: '담장 안에서 가게 장부와 셈을 배운다', hint: '골목 또래들과 멀어진다. 가게의 돈이 어디서 새는지 보이기 시작한다', values: { inquiry: D },
+        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'shopLedger' }] },
+    ],
+  },
+  {
+    id: 'town_orange_mast', kind: 'door', when: kidIn(ORANGE, 11, 14), weight: 10, repeat: 'once', speaker: 'hero',
+    title: '수평선의 낯선 돛대', body: '오렌지 마을 앞바다에 깃발 없는 배 한 척이 사흘째 떠 있다. 마을 회의는 배를 숨길지 사람들을 옮길지 결론을 내지 못했고, 부들 촌장은 혼자 낡은 갑옷을 꺼내 입었다.',
+    doors: [
+      { label: '작은 배로 노를 저어 정체를 보러 간다', hint: '가까이 가면 무엇인지 알 수 있다. 저쪽의 화살이 먼저 닿을 수도 있다', values: { inquiry: D }, mark: 'daring', danger: true,
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'flag', id: 'scoutedShip' }, { op: 'log', text: '밀수꾼의 배였다. 촌장에게 알리자 마을 사람들이 횃불을 들고 해안을 지켰고, 배는 이튿날 떠났다.', weight: 'heavy' }],
+               else: [{ op: 'hp', add: -20 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '갑판에서 날아온 화살이 어깨를 스쳤다. 피를 흘리며 노를 저어 돌아왔다.', weight: 'heavy' }] }] },
+      { label: '노인과 어린아이들을 언덕 너머로 옮기는 일을 맡는다', hint: '사흘 밤을 뜬눈으로 새운다. 집안일은 내팽개친다', values: { freedom: D }, mark: 'fellowship',
+        fx: [{ op: 'hp', add: -10 }] },
+      { label: '부들 촌장 곁에서 망루를 지킨다', hint: '배가 오면 가장 먼저 맞서는 자리다. 촌장이 마을 회의에서 {name}의 이름을 부른다', values: { loyalty: D },
+        fx: [{ op: 'hp', add: -5 }, { op: 'flag', id: 'boodleTrust' }] },
+    ],
+  },
+  {
+    id: 'go_orange', kind: 'door', when: kidIn(ORANGE, 14, 15), weight: 16, repeat: 'once', speaker: 'hero',
+    title: '장터의 열다섯', body: '부들 촌장이 항구 창고를 새로 지을 일꾼을 찾는다. 같은 날 로그타운의 무기점 상인이 짐꾼을 구하러 장터에 왔다. 먹이 가게 할아버지는 기침을 하면서도, 슈슈의 산책을 맡아 줄 사람을 찾는다.',
+    doors: [
+      { label: '촌장의 창고 짓는 일꾼이 된다', hint: '열여섯을 기다리지 않고 망치를 잡는다. 촌장 밑에서 마을을 짓는 일이 평생의 일이 될지 모른다', values: { loyalty: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'base', key: 'str', add: 1 }, { op: 'flag', id: 'boodleWorker' }] },
+      { label: '무기점 상인을 따라 로그타운으로 간다', hint: '항구 마을을 떠나 처형대가 있는 큰 도시에서 짐을 진다', values: { ambition: D },
+        fx: leaveTo('로그타운', '칼 상자를 지고 상인을 따라 배에 올랐다. 오렌지 마을의 지붕들이 수평선 아래로 가라앉았다.', '열다섯에 오렌지 마을을 떠나 로그타운으로 갔다') },
+      { label: '장터 잡일로 살며 할아버지와 슈슈 곁에 남는다', hint: '벌이는 보잘것없다. 기침하는 노인의 날들이 조용히 이어진다', values: { peace: D },
+        fx: [{ op: 'flag', id: 'shushuWalker' }, { op: 'money', add: -1000 }] },
+    ],
+  },
+];
+
+/** 여덟 마을의 유년기 */
+export const TOWNS: Turning[] = [...TOWNS_1, ...TOWNS_2];
