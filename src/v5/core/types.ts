@@ -69,6 +69,7 @@ export type Cond =
   | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
   | { c: 'island'; is: string[]; not?: boolean } // 지금 있는 섬 (hero.island). not이면 그 섬들이 아닐 때
   | { c: 'species'; is: Species[] }             // 종족
+  | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
   | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
   | { c: 'canonAge'; id: string; min?: number; max?: number };   // 그 원작 인물의 지금 나이 (canonAge)
 

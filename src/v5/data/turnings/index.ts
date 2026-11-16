@@ -23,9 +23,11 @@ import { LATE } from './late';
 import { HOMES_LEAVE, HOMES_RETURN } from './homes-sea';
 import { WATER7 } from './water7';
 import { WANO } from './wano';
+import { BONDS } from './bonds';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
+  BONDS,
   FORTUNES,
   MISFORTUNES,
   MOMENTS,

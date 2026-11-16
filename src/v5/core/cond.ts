@@ -4,6 +4,7 @@ import { fmtMoney } from '../../core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
 import { VALUE_NAME } from '../data/values';
+import { personIs } from './needs';
 import { isDeep } from './values';
 import type { Cond, Life5, Wealth } from './types';
 
@@ -42,6 +43,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'standingYears': return s.age - s.standingSince >= c.min;
     case 'island': return c.is.includes(h.island) !== (c.not ?? false);
     case 'species': return c.is.includes(h.species);
+    case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
   }
@@ -74,6 +76,7 @@ function reason(s: Life5, c: Cond): string {
     case 'standingYears': return '지금 처지가 된 지 얼마 되지 않았다';
     case 'island': return '여기서는 일어나지 않는다';
     case 'species': return '종족이 다르다';
+    case 'kin': return '때가 맞지 않는다';
     case 'path': return '걷는 길이 다르다';
     case 'canonAge': return '그 사람과 때가 맞지 않는다';
   }
