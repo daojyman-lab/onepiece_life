@@ -22,6 +22,7 @@ import { SEA_GRAND_LINE, SEA_NEW_WORLD } from './sea-2';
 import { LATE } from './late';
 import { HOMES_LEAVE, HOMES_RETURN } from './homes-sea';
 import { WATER7 } from './water7';
+import { WANO } from './wano';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -47,6 +48,7 @@ const GROUPS: Turning[][] = [
   HOMES_LEAVE,
   HOMES_RETURN,
   WATER7,
+  WANO,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

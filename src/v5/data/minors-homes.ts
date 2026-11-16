@@ -13,6 +13,9 @@ const townsOf = (id: HomeId) => HOMETOWNS.filter((t) => t.home === id).map((t) =
 /** 그 고향에서 태어나 지금 고향에 있다 + 나이 */
 const at = (id: HomeId, min: number, max?: number, ...more: Cond[]): Cond[] =>
   [{ c: 'home', is: [id] }, { c: 'island', is: townsOf(id) }, { c: 'age', min, max }, ...more];
+/** 그 마을에서 태어나 지금 그 마을에 있다 + 나이 */
+const inTown = (town: string, min: number, max?: number, ...more: Cond[]): Cond[] =>
+  [{ c: 'home', is: [HOMETOWNS.find((t) => t.name === town)!.home] }, { c: 'town', is: [town] }, { c: 'island', is: [town] }, { c: 'age', min, max }, ...more];
 const KID = st('child');
 const GROWN = st('civil', 'shipwright', 'settled', 'retired');
 
@@ -74,6 +77,59 @@ const WATER7: Minor[] = [
     ] },
 ];
 
+// ======================================================== 와노쿠니 (과제 5)
+const WANO: Minor[] = [
+  { id: 'm_wano_cn_komurasaki', when: [...inTown('하나노미야코', 15, 22)], weight: 6, cooldownYears: ONCE,
+    outcomes: [
+      met('hiyori', '꽃의 도시의 이름난 기녀 행렬을 보았다', { romance: 1 }, ['꽃의 도시 큰길로 이름난 기녀 무라사키의 행렬이 지나갔다. 그 눈이 슬퍼 보였다.', '기녀 무라사키가 탄 가마의 발이 바람에 들려 얼굴이 잠깐 보였다.']),
+      met('hiyori', '기녀 무라사키가 떨어뜨린 부채를 주워 주었다', { devotion: 1 }, ['행렬에서 떨어진 부채를 주워 건네자 기녀 무라사키가 작게 고맙다고 했다.', '기녀 무라사키의 하녀가 흘린 짐을 주워 주었다.']),
+      met('hiyori', '기녀 무라사키의 소문을 들었다', {}, ['기녀 무라사키가 쇼군의 술잔을 거절했다는 소문이 돌았다.', '찻집에서 기녀 무라사키의 거문고 소리가 들려왔다.']),
+    ] },
+  { id: 'm_wano_cn_kyoshiro', when: [...inTown('하나노미야코', 16, 22)], weight: 5, cooldownYears: ONCE,
+    outcomes: [
+      met('denjiro', '졸린 눈의 협객 두목에게 길을 비켰다', { peace: 1 }, ['꽃의 도시 협객 두목 쿄시로가 하품을 하며 지나가자 모두 길을 비켰다.', '졸린 눈의 협객 두목이 술집에 들어서자 떠들던 건달들이 입을 다물었다.']),
+      met('denjiro', '협객 두목의 칼이 번쩍이는 것을 보았다', { inquiry: 1 }, ['졸린 눈의 협객 두목이 눈 깜짝할 새 칼을 뽑았다가 넣는 것을 보았다. 어떻게 한 건지 알 수 없었다.', '협객 두목 쿄시로의 칼집 끝이 붉게 칠해져 있는 것을 보았다.']),
+      met('denjiro', '협객 두목의 이름을 들었다', {}, ['꽃의 도시의 밤은 협객 두목 쿄시로의 것이라는 말을 들었다.', '쿄시로 일가의 건달들이 찻집 자릿세를 걷어 갔다.']),
+    ] },
+  { id: 'm_wano_cn_money_fairy', when: [...inTown('에비스 마을', 5, 20)], weight: 6, cooldownYears: ONCE,
+    outcomes: [
+      met('yasuie', '돈 뿌리는 노인이 남긴 동전을 주웠다', { devotion: 1 }, ['아침에 문을 여니 문턱에 동전 몇 닢이 놓여 있었다. 마을 사람들은 돈 뿌리는 노인의 짓이라며 웃었다.', '밤새 누군가 지붕 위로 동전을 던져 놓고 갔다. 동전으로 이웃집 약을 샀다.']),
+      met('yasuie', '돈 뿌리는 노인의 뒷모습을 보았다', { inquiry: 1 }, ['새벽 골목에서 누더기 노인이 집집마다 동전을 놓고 가는 뒷모습을 보았다.', '동전 자루를 멘 노인이 {name}에게 손가락을 입에 대 보였다.']),
+      met('yasuie', '돈 뿌리는 노인의 이야기를 들었다', {}, ['에비스 마을에 몰래 돈을 뿌리는 노인이 있다는 이야기를 들었다.', '마을 사람들이 동전을 주우며 웃었다. 그 웃음만은 진짜 같았다.']),
+    ] },
+  { id: 'm_wano_cn_tama', when: [...inTown('쿠리', 15, 22)], weight: 5, cooldownYears: ONCE,
+    outcomes: [
+      met('tama', '쿠리의 꼬마 쿠노이치에게 수수경단을 얻었다', { romance: 1 }, ['쿠리의 꼬마 오타마가 바다에서 올 사람을 기다린다며 수수경단을 나눠 주었다.', '오타마가 짐승들을 길들이는 수수경단이라며 하나를 건넸다. 맛은 그저 그랬다.']),
+      met('tama', '쿠리의 꼬마에게 먹을 것을 나눠 주었다', { devotion: 1 }, ['굶주린 쿠리의 꼬마 오타마에게 주먹밥을 나눠 주었다.', '오타마가 앓아누웠다는 말에 깨끗한 물을 길어다 주었다.']),
+      met('tama', '쿠리의 꼬마가 바다를 보고 있는 것을 보았다', {}, ['쿠리의 바위 위에서 꼬마 오타마가 바다 쪽을 오래 보고 있었다.', '오타마가 「약속했어」라고 혼잣말하는 것을 들었다.']),
+    ] },
+  { id: 'm_wano_cn_dragon', when: at('wano', 4, 21), weight: 4, cooldownYears: ONCE,
+    outcomes: [
+      met('kaido', '하늘을 가르는 푸른 용을 보았다', { ambition: 1 }, ['구름 사이로 푸른 용이 날아갔다. 어른들은 고개를 숙였고 {name}은(는) 눈을 떼지 못했다.', '천둥 같은 울음소리와 함께 푸른 용이 산을 넘어갔다.']),
+      met('kaido', '용의 그림자가 지나갈 때 숨었다', { peace: 1 }, ['푸른 용의 그림자가 마을을 덮자 집 안으로 뛰어들어 숨었다.', '용이 날아가는 동안 어른들과 함께 엎드려 숨을 죽였다.']),
+      met('kaido', '용의 울음소리를 들었다', {}, ['멀리 해골 섬 쪽에서 용의 울음소리가 들렸다.', '카이도가 또 술에 취해 날뛴다는 소문이 돌았다.']),
+    ] },
+  { id: 'm_wano_rice', when: at('wano', 5), weight: 8, cooldownYears: 1,
+    outcomes: [
+      { lean: { devotion: 1 }, text: ['배급받은 쌀을 반 덜어 옆집에 갖다주었다.', '굶는 아이에게 주먹밥을 쥐여 주었다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['쌀 배급 줄에서 앞자리를 팔아 돈을 벌었다.', '남은 쌀을 웃돈을 받고 팔았다.'], fx: [{ op: 'money', add: 800 }] },
+      { lean: {}, text: ['쌀 배급 줄에서 반나절을 기다렸다.', '배급받은 쌀에 돌이 섞여 있었다.'], fx: [] },
+    ] },
+  { id: 'm_wano_river', when: at('wano', 5), weight: 6, cooldownYears: 2,
+    outcomes: [
+      { lean: { inquiry: 1 }, text: ['검은 강물을 숯으로 걸러 마셔 보았다.', '검은 강의 물고기가 왜 죽는지 공장 쪽 물길을 따라가 보았다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['강에 공장 물을 버리는 일꾼들을 관리에게 따졌다가 쫓겨났다.', '검은 강에 몰래 표지를 세워 아이들이 마시지 않게 했다.'], fx: [] },
+      { lean: {}, text: ['산 너머 맑은 샘까지 물을 길으러 다녀왔다.', '검은 강가에서 빨래를 하다 손이 얼얼해졌다.'], fx: [] },
+    ] },
+  { id: 'm_wano_festival', when: at('wano', 4), weight: 6, cooldownYears: 2,
+    outcomes: [
+      { lean: { romance: 1 }, text: ['신사 축제에서 등불을 들고 밤새 춤을 추었다.', '축제의 불꽃을 보며 바깥 바다를 떠올렸다.'], fx: [] },
+      { lean: { loyalty: 1 }, text: ['축제 준비로 마을 사람들과 밤새 가마를 꾸몄다.', '축제 가마를 메고 마을을 돌았다.'], fx: [] },
+      { lean: {}, text: ['축제 노점에서 경단을 사 먹었다.', '축제 북소리를 들으며 잠들었다.'], fx: [] },
+    ] },
+];
+
 export const HOME_MINORS: Minor[] = [
   ...WATER7,
+  ...WANO,
 ];

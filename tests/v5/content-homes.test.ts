@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { WATER7 } from '../../src/v5/data/turnings/water7';
+import { WANO } from '../../src/v5/data/turnings/wano';
 import { MINORS } from '../../src/v5/data/minors';
 import { CANON } from '../../src/v5/data/canon';
 import { CANON_WORDS } from '../../src/v5/data/ending';
@@ -21,7 +22,7 @@ const forOrphan = (t: Turning) => !t.when.some((c) => (c.c === 'wealth' && c.min
 const special = (t: Turning) => t.when.some((c) => c.c === 'lineage' || c.c === 'species')
   || t.doors.some((d) => allFx(d.fx).some((f) => f.op === 'standing') || d.when?.some((c) => c.c === 'lineage' || c.c === 'species'));
 
-const CASES: [HomeId, Turning[]][] = [['water7', WATER7]];
+const CASES: [HomeId, Turning[]][] = [['water7', WATER7], ['wano', WANO]];
 
 for (const [id, ts] of CASES) describe(`고향의 내용: ${id}`, () => {
   const minors = MINORS.filter((m) => homeOf(m.when).includes(id));

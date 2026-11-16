@@ -67,6 +67,11 @@ const ROWS: Record<string, Row> = {
   // 4단계: 워터 세븐
   tom: ['톰', 'm', 72, 'civil', 'fishman'],
   kokoro: ['코코로', 'f', 70, 'civil', 'merfolk'],
+  // 4단계: 와노쿠니 (카이도는 위에 있다). 와노에서 원작이 일어나는 해는 주인공 스물한 살 무렵이다
+  hiyori: ['코즈키 히요리', 'f', 22, 'civil'],
+  denjiro: ['덴지로', 'm', 37, 'civil'],
+  yasuie: ['시모츠키 야스이에', 'm', 59, 'civil'],
+  tama: ['오타마', 'f', 4, 'civil'],
 };
 
 export const CANON: Record<string, CanonPerson> = Object.fromEntries(Object.entries(ROWS).map(([id, [name, gender, age, faction, species]]) =>

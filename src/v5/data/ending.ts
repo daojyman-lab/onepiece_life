@@ -236,6 +236,23 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     low: '{name}? 우리 역을 지나간 손님이었나. 은하하하!',
     high: '{name}은(는) 술맛을 아는 사람이었지. 은하하하! 이 할망구가 한 잔 따라 주마.',
   },
+  // 4단계: 와노쿠니
+  hiyori: {
+    low: '{name}… 행렬 너머로 스친 얼굴이었을까요.',
+    high: '{name}은(는) 어두운 시절에도 등불을 꺼뜨리지 않은 사람이었어요. 이 나라가 그 이름을 기억할 거예요.',
+  },
+  denjiro: {
+    low: '{name}? 꽃의 도시엔 그런 이름이 많았지.',
+    high: '{name}은(는) 칼보다 마음이 곧았다. 스무 해를 숨어 산 나도 그건 알아봤다.',
+  },
+  yasuie: {
+    low: '{name}이라… 동전 몇 닢 받아 간 아이였던가. 하하하!',
+    high: '{name}은(는) 웃음을 빼앗긴 나라에서 진짜로 웃을 줄 알았다. 그거면 됐다.',
+  },
+  tama: {
+    low: '{name}? 잘 모르겠어. 수수경단 먹으러 왔었나?',
+    high: '{name}은(는) 쿠리에서 제일 멋진 어른이었어! 약속도 꼭 지켰고!',
+  },
 };
 /** 표에 없는 원작 인물 */
 export const CANON_WORDS_DEFAULT: CanonWords = {
