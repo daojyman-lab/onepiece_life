@@ -49,3 +49,15 @@ export const HOMES: Record<HomeId, Home> = {
     lineages: [['commoner', 92], ['pirateChild', 8]],
   },
 };
+
+/**
+ * 빌드할 때 고향 가중치를 바꿀 수 있다: 환경 변수 VITE_HOMES="loguetown:40,water7:20,wano:14" (.env.production).
+ * 사이트에는 사건을 다 쓴 고향만 연다. 테스트와 시뮬레이터(Vite 밖)에서는 위의 값 그대로다.
+ */
+const HOME_WEIGHTS = (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_HOMES;
+if (HOME_WEIGHTS) {
+  for (const part of HOME_WEIGHTS.split(',')) {
+    const [id, w] = part.split(':').map((x) => x.trim());
+    if (id in HOMES && Number.isFinite(Number(w))) HOMES[id as HomeId].weight = Number(w);
+  }
+}
