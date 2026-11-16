@@ -16,3 +16,8 @@ export const STANDING_PHRASE: Record<Standing, string> = {
   prisoner: '감옥에 갇혔다',
   retired: '은퇴했다',
 };
+
+/** 아이에서 곧장 건너갈 때는 "돌아왔다"가 맞지 않아 이 말을 쓴다 */
+export const STANDING_FROM_CHILD: Partial<Record<Standing, string>> = {
+  civil: '뭍에서 제 몫의 일을 시작했다',
+};

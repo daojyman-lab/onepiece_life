@@ -11,7 +11,7 @@ import { addValues } from '../../src/v5/core/values';
 import { openTurning } from '../../src/v5/core/turning';
 import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import { VALUE_NAME } from '../../src/v5/data/values';
-import { STANDING_PHRASE } from '../../src/v5/data/standings';
+import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../../src/v5/data/standings';
 import { V } from '../../src/v5/data/balance';
 import type { Life5 } from '../../src/v5/core/types';
 
@@ -90,6 +90,13 @@ describe('엔딩 자료의 세부', () => {
     expect(line).toContain('쉰다섯에 노환으로 죽었다.');
     const shown = Object.values(STANDING_PHRASE).filter((p) => line.includes(p.replace(/다$/, '')));
     expect(shown.length).toBe(3);
+  });
+  it('아이에서 곧장 뭍의 일로 건너가면 "돌아왔다"고 적지 않는다 (과제 14)', () => {
+    const s = bare(2, 55); s.hero.standing = 'child';
+    applyFx(s, [{ op: 'standing', to: 'civil' }]);
+    expect(s.timeline.at(-1)?.text).toBe(STANDING_FROM_CHILD.civil);
+    applyFx(s, [{ op: 'standing', to: 'pirate' }, { op: 'standing', to: 'civil' }]);
+    expect(s.timeline.at(-1)?.text).toBe(STANDING_PHRASE.civil);
   });
   it('몸을 잃은 인생은 한 줄 인생에 잃은 일이 연표의 차례대로 적힌다 (설계 5.7)', () => {
     const s = bare(2, 55);

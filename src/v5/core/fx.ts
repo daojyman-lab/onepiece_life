@@ -9,7 +9,7 @@ import { fill } from '../../core/util';
 import { V } from '../data/balance';
 import { CANON, canonAge } from '../data/canon';
 import { HOMES } from '../data/homes';
-import { STANDING_PHRASE } from '../data/standings';
+import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
 import { askFight } from './fight';
@@ -63,9 +63,10 @@ function applyOne(s: Life5, e: Fx): void {
     // 처지가 실제로 바뀔 때만 연표에 짧게 남긴다 (한 줄 인생이 이 줄들을 잇는다)
     case 'standing':
       if (h.standing === e.to) return;
+      const text = (h.standing === 'child' && STANDING_FROM_CHILD[e.to]) || STANDING_PHRASE[e.to];
       h.standing = e.to;
       s.standingSince = s.age;
-      s.timeline.push({ age: s.age, text: STANDING_PHRASE[e.to], standing: e.to });
+      s.timeline.push({ age: s.age, text, standing: e.to });
       return;
     case 'move': h.island = e.island; h.sea = e.sea; return;
     case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
