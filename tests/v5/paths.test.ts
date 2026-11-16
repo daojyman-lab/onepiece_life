@@ -65,8 +65,8 @@ describe('길과 바다의 데이터', () => {
     expect(paths.length).toBeGreaterThanOrEqual(20);
     expect(people.length).toBeGreaterThanOrEqual(16);
   });
-  it('로그타운에서 태어난 사람에게 열리고, 본문의 자리표시는 {name} {town} {island}뿐이다', () => {
-    for (const t of [...paths, ...people].filter((x) => x.id !== 'after_fight')) expect(t.when, t.id).toContainEqual({ c: 'home', is: ['loguetown'] });
+  // 4단계부터 길과 사람의 사건은 어느 고향에서나 온다(외딴 고향 섬에서는 data/turnings/index.ts의 landlocked가 막는다)
+  it('본문의 자리표시는 {name} {town} {island}뿐이다', () => {
     for (const t of [...paths, ...people])
       for (const text of [t.title, t.body, ...t.doors.flatMap((d) => [d.label, d.hint])])
         for (const m of text.match(/\{\w+\}/g) ?? []) expect(['{name}', '{town}', '{island}'], t.id).toContain(m);

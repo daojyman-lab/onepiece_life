@@ -9,8 +9,9 @@ const D = V.value.door;
 /** 열두 살 넘어 고향을 아주 떠난 아이의 표시. 고향으로 돌아오면 지운다 (kid_away_letter) */
 export const LEFT_HOME = 'left_home_young';
 const stayed: Cond = { c: 'flag', id: LEFT_HOME, has: false };
-/** 아직 아이(처지 child)인 이스트 블루 사람, 이 나이 사이, 고향을 떠나지 않았다. 열다섯 살이라도 죄수나 해적이면 열리지 않는다 */
-const kid = (min: number, max: number): Cond[] => [{ c: 'age', min, max }, { c: 'home', is: ['loguetown'] }, { c: 'standing', is: ['child'] }, stayed];
+/** 아직 아이(처지 child)인 사람(어느 고향이든), 이 나이 사이, 고향을 떠나지 않았다. 열다섯 살이라도 죄수나 해적이면 열리지 않는다.
+ *  바다 · 항구를 전제하는 글은 index.ts의 landlocked가 바다에 닿지 않는 고향(조우 · 하늘섬 · 어인섬)에서 막는다 */
+export const kid = (min: number, max: number): Cond[] => [{ c: 'age', min, max }, { c: 'standing', is: ['child'] }, stayed];
 /** 그 마을에서 태어나 지금도 그 마을에 사는 아이 */
 export const kidIn = (town: string, min: number, max: number, ...more: Cond[]): Cond[] =>
   [...kid(min, max), { c: 'town', is: [town] }, { c: 'island', is: [town] }, ...more];

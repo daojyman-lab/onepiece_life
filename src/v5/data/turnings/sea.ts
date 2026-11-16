@@ -4,7 +4,7 @@
 // 로그타운으로 못 박아 돌려보내지 않는다 (family.test). 고향으로 돌아가는 일은 moveHome이다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { SEAFARING, age, at, sea, st } from './paths';
+import { SEAFARING, age, at, home, sea, st } from './paths';
 import type { Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -175,7 +175,7 @@ export const SEA_LEAVE: Turning[] = [
 export const SEA_RETURN: Turning[] = [
   // ---------------------------------------------------------------- 이스트 블루로 돌아오는 길
   {
-    id: 'sea_back_broke', kind: 'door', when: at(age(18, 55), st(...SEAFARING, 'civil'), sea('gl_entry', 'gl_first')),
+    id: 'sea_back_broke', kind: 'door', when: at(home('loguetown'), age(18, 55), st(...SEAFARING, 'civil'), sea('gl_entry', 'gl_first')),
     weight: 3, repeat: 'once', speaker: 'hero',
     title: '빈손의 항구', body: '위대한 항로에서 가진 것을 다 잃었다. {island}의 항구에 이스트 블루로 가는 상선이 있다. 선장은 갑판 일을 하면 뱃삯을 받지 않겠다고 한다.',
     doors: [
@@ -187,7 +187,7 @@ export const SEA_RETURN: Turning[] = [
     ],
   },
   {
-    id: 'sea_escort_east', kind: 'door', when: at(age(18, 55), st('bountyHunter', 'pirate', 'civil', 'revolution'), sea('gl_entry', 'gl_first')),
+    id: 'sea_escort_east', kind: 'door', when: at(home('loguetown'), age(18, 55), st('bountyHunter', 'pirate', 'civil', 'revolution'), sea('gl_entry', 'gl_first')),
     weight: 3, repeat: 'once', speaker: { relation: '귤을 사러 온 상인' },
     title: '이스트 블루까지의 호위', body: '{island}에서 이스트 블루의 섬들과 장사하는 상인이 호위를 구한다. 코노미 제도의 귤을 사러 간다고, 붉은 산을 다시 넘는 동안만 지켜 주면 넉넉히 치르겠다고 한다.',
     doors: [
@@ -200,7 +200,7 @@ export const SEA_RETURN: Turning[] = [
     ],
   },
   {
-    id: 'sea_ashes_home', kind: 'door', when: at(age(19, 60), st(...SEAFARING, 'civil', 'shipwright'), sea(...GL_SEAS)),
+    id: 'sea_ashes_home', kind: 'door', when: at(home('loguetown'), age(19, 60), st(...SEAFARING, 'civil', 'shipwright'), sea(...GL_SEAS)),
     weight: 2, repeat: 'once', speaker: 'hero',
     title: '고향에 묻어 달라던 말', body: '함께 이스트 블루를 떠나온 옛 동무가 {island}에서 숨을 거두었다. 시럽 마을의 언덕에 묻어 달라는 것이 마지막 말이었다. 유골함이 가볍다.',
     doors: [

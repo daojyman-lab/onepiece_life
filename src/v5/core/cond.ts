@@ -40,7 +40,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
     case 'town': return c.is.includes(h.town);
     case 'standingYears': return s.age - s.standingSince >= c.min;
-    case 'island': return c.is.includes(h.island);
+    case 'island': return c.is.includes(h.island) !== (c.not ?? false);
     case 'species': return c.is.includes(h.species);
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
   }

@@ -44,9 +44,9 @@ describe('과제 7: 해적과 현상금 사냥꾼', () => {
       expect(sy && sy.c === 'standingYears' ? sy.min : 0, t.id).toBeGreaterThanOrEqual(2);
     }
   });
-  it('문의 가치관 점수는 V.value.door만큼이고, 로그타운에서 태어난 사람에게 열린다', () => {
+  // 4단계부터 해적 · 사냥꾼의 사건은 어느 고향에서나 온다(외딴 고향 섬에서는 data/turnings/index.ts의 landlocked가 막는다)
+  it('문의 가치관 점수는 V.value.door만큼이다', () => {
     for (const t of [...PIRATE, ...HUNTER]) {
-      expect(t.when, t.id).toContainEqual({ c: 'home', is: ['loguetown'] });
       for (const d of t.doors) for (const v of Object.values(d.values ?? {})) expect(v, t.id).toBe(V.value.door);
     }
   });
