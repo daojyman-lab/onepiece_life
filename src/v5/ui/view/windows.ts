@@ -1,10 +1,12 @@
 // 싸움 앞의 물음과 선택 창.
 import type { Who } from '../../../ui/pixel/pixelArt';
-import { gapOf, heroFightStats } from '../../core/fight';
+import { foePower, gapOf, heroFightStats } from '../../core/fight';
 import { TURNING_BY_ID } from '../../data/turnings';
 import type { EnemySpec, Life5, Pending5 } from '../../core/types';
 import { foeWho, speakerOf } from './faces';
 import { bandWord } from './words';
+import { GRADES, GRADE_TOP } from '../../data/words';
+import { rating5 } from '../../core/power';
 
 // ── 화면의 말을 가르는 경계 (게임 규칙의 수가 아니라 말씨의 기준이다) ──
 /** 위험 확률 → 말: 이 값 미만이면 그 말 */
@@ -37,6 +39,8 @@ export interface FightView {
   /** 싸우기 전 능력치 비교: 나와 상대 (상대의 수는 대충 보인다: 10 단위로 깎는다) */
   stats: { label: string; me: number; foe: number }[];
   crew: number;                        // 함께 싸울 동료 수
+  /** 전투 등급 (종합 전투력: 능력치 · 무술 · 열매 · 패기): 나, 상대(간부 포함), 함께 싸울 동료들 */
+  grade: { me: string; foe: string; crew: string[] };
 }
 
 /** 싸움 앞의 물음: 상대, 상대의 격, 위험 세 줄. 목숨을 걸지 않은 싸움은 죽을 위험이 '없다' */
@@ -46,6 +50,10 @@ export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): Fi
     name: p.foe.name, who: foeWho(p.foe), match: matchWord(s, p.foe), lethal: p.lethal,
     stats: (() => { const me = heroFightStats(s); return STAT_LABEL.map(([k, label]) => ({ label, me: Math.round(me[k]), foe: Math.round((p.foe.base[k] ?? 0) / 10) * 10 })); })(),
     crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).length,
+    grade: {
+      me: bandWord(rating5(s), GRADES, GRADE_TOP), foe: bandWord(foePower(p.foe), GRADES, GRADE_TOP),
+      crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).map((x) => bandWord(x.crew!.power, GRADES, GRADE_TOP)),
+    },
     risk: [
       { label: '다칠 위험', word: w.injury },
       { label: '몸을 잃을 위험', word: w.limb },

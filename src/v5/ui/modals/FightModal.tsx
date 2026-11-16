@@ -16,6 +16,7 @@ export function FightModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'f
         </div>
         <div class="scroll stack" style={{ flex: 1 }}>
           <div><b>상대의 격: {v.match}</b></div>
+          <div class="row between"><span>전투 등급</span><b>나 {v.grade.me}급 · 상대 {v.grade.foe}급</b></div>
           <div class="fight-stats t9">
             <div class="row between soft"><span>나</span><span>능력치</span><span>상대</span></div>
             {v.stats.map((x) => {
@@ -30,7 +31,7 @@ export function FightModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'f
                 </div>
               );
             })}
-            {v.crew > 0 && <div class="soft">함께 싸울 동료 {v.crew}명</div>}
+            {v.crew > 0 && <div class="soft">함께 싸울 동료 {v.crew}명 ({v.grade.crew.map((g) => `${g}급`).join(' · ')})</div>}
           </div>
           {v.risk.map((r) => <div key={r.label} class="row between"><span>{r.label}</span><b>{r.word}</b></div>)}
           {v.lethal && <div class="red"><b>목숨을 건 싸움이다. 물러나도 무사하다는 보장이 없다.</b></div>}

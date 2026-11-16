@@ -1,6 +1,7 @@
 // 원작 인물. id는 저장(도감의 people, 사람의 canon)에 남으므로 바꾸지 않는다.
 // offset: 주인공이 열일곱 살일 때 이 사람의 나이 − 17. 나이는 원작이 시작할 때(루피 열일곱)의 나이를 따른다.
 import type { Person, Species } from '../core/types';
+import { RECRUITS } from './recruits';
 
 export interface CanonPerson {
   id: string; name: string; gender: 'm' | 'f'; offset: number; faction: Person['faction'];
@@ -83,6 +84,9 @@ const ROWS: Record<string, Row> = {
   tsuru: ['츠루', 'f', 72, 'marine'],
   ryokugyu: ['녹우 아라마키', 'm', 44, 'marine'],
 };
+
+// 배에 태울 수 있는 인물 (data/recruits.ts). 위에 이미 있는 사람은 위의 것을 쓴다
+for (const [id, name, gender, age, faction, species] of RECRUITS) ROWS[id] ??= [name, gender, age, faction, ...(species ? [species as Species] : [])] as Row;
 
 export const CANON: Record<string, CanonPerson> = Object.fromEntries(Object.entries(ROWS).map(([id, [name, gender, age, faction, species]]) =>
   [id, { id, name, gender, offset: age - 17, faction, ...(species ? { species } : {}) }]));

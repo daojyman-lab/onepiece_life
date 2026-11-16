@@ -14,8 +14,9 @@ import {
   POWER_TOP, POWER_WORDS, STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
 } from '../../data/words';
 import { topValues } from '../../core/values';
-import { power5 } from '../../core/power';
+import { rating5 } from '../../core/power';
 import { bandWord } from './words';
+import { GRADES, GRADE_TOP } from '../../data/words';
 import type { Branch, Life5, LogLine, Standing } from '../../core/types';
 import { foeWho, heroWho5, personWho5 } from './faces';
 import { ageWord, valueWords } from './words';
@@ -92,7 +93,7 @@ export function profileView(s: Life5): ProfileView {
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
-    power: (() => { const p = Math.round(power5(s)); return `${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
+    power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
     hp: Math.round(h.hp),

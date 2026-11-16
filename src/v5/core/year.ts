@@ -237,6 +237,7 @@ function nextPart(s: Life5): void {
 /** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
 export function voyage(s: Life5): void {
   const h = s.hero;
+  if (s.queue.length) return;                  // 이어지는 이야기가 줄 서 있으면 그 섬에 머문다
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
   if (!chance(r, V.voyage.p)) return;

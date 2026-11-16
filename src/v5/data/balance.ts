@@ -2,11 +2,14 @@ export const V = {
   partsPerYear: 4,
   // 항해: 바다를 다니는 처지(해적 · 해군 · 혁명군 · 사냥꾼 · 칠무해 · CP)는 해마다 p의 확률로 같은 바다의 다른 섬으로 옮겨 간다.
   // 아직 들르지 않은 섬은 fresh배 더 잘 뽑힌다. 들른 섬은 표시 'at:섬'으로 남는다
+  // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
+  // 싸움의 계산(power5)은 바꾸지 않는다. 등급의 경계는 data/words.ts의 GRADES
+  grade: { fruit: 0.5, haki: 0.25 },
   voyage: { p: 0.65, minAge: 16, fresh: 3 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 1.0 } ],
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 0.95 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)

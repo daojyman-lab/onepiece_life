@@ -1,4 +1,6 @@
 // 얼굴: 주인공 · 곁의 사람 · 상대를 픽셀 그림의 Who로 바꾼다.
+import { GRADES, GRADE_TOP } from '../../data/words';
+import { bandWord } from './words';
 import { weaponOfSkills, type Weapon, type Who } from '../../../ui/pixel/pixelArt';
 import { LIMBS } from '../../core/body';
 import { CANON, canonAge } from '../../data/canon';
@@ -15,7 +17,7 @@ const CREW_ROLE_NAME: Record<string, string> = { vanguard: '돌격', support: '�
 
 export function peopleView(s: Life5): { id: string; name: string; relation: string; gone: boolean; who: Who; crew: string | null }[] {
   return s.people.map((p) => ({ id: p.id, name: p.name, relation: p.relation, gone: !p.alive, who: personWho5(p),
-    crew: p.alive && p.crew ? `${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
+    crew: p.alive && p.crew ? `${bandWord(p.crew.power, GRADES, GRADE_TOP)}급 · ${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
 }
 
 function factionOf(st: Standing): NonNullable<Who['faction']> {

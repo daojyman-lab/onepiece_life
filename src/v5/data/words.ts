@@ -63,4 +63,7 @@ export const POWER_WORDS: readonly [number, string][] = [
   [100, '동네 싸움꾼'], [240, '이스트 블루의 해적 선장급'], [770, '이스트 블루를 휘어잡을 만한 급'],
   [2600, '위대한 항로에서 이름난 급'], [5700, '신세계에서 버틸 만한 급'],
 ];
+/** 전투 등급: 종합 전투력이 이 값 미만이면 그 등급 (나 · 동료 · 상대가 같은 잣대) */
+export const GRADES: readonly [number, string][] = [[60, 'F'], [100, 'E'], [240, 'D'], [500, 'C'], [770, 'B'], [1500, 'A'], [2600, 'S'], [5700, 'SS']];
+export const GRADE_TOP = 'SSS';
 export const POWER_TOP = '대장 · 사황과 겨룰 만한 급';

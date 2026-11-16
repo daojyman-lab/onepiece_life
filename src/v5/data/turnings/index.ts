@@ -25,6 +25,7 @@ import { WATER7 } from './water7';
 import { WANO } from './wano';
 import { BONDS } from './bonds';
 import { ISLANDS, ISLAND_OF } from './islands';
+import { RECRUIT_TURNINGS } from './recruits';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -53,6 +54,7 @@ const GROUPS: Turning[][] = [
   WATER7,
   WANO,
   ISLANDS,
+  RECRUIT_TURNINGS,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

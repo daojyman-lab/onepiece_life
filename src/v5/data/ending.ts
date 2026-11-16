@@ -2,6 +2,7 @@
 // 자리표시: {name} 신문에서는 성까지 쓴 이름, 원작 인물의 한마디에서는 이름만. {town} 고향 마을, {age} 말로 쓴 나이(「예순여덟 살」),
 // {bounty} 현상금(공적), {title} {door} 전환점과 문, {surname} 숨은 성.
 import type { Standing } from '../core/types';
+import { RECRUITS } from './recruits';
 
 export const PERSONA_NONE = '무엇을 좇았는지 끝내 알 수 없는 사람이었다.';
 /** 정신적 강점이 하나도 없을 때의 뒤 구절 */
@@ -288,6 +289,9 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
 };
 /** 표에 없는 원작 인물 */
+// 배에 태울 수 있는 인물의 한마디 (data/recruits.ts). 위에 이미 있는 사람은 위의 것을 쓴다
+for (const r of RECRUITS) CANON_WORDS[r[0]] ??= { low: '{name}? 잠깐 스친 사이였지.', high: r[11] };
+
 export const CANON_WORDS_DEFAULT: CanonWords = {
   low: '{name}? 그런 사람도 있었지.',
   high: '{name}과(와) 함께한 날들을 잊지 않겠다.',
