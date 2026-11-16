@@ -69,7 +69,7 @@ export const CHILDHOOD: Turning[] = [
     title: '현상수배서', body: '마을 게시판에 새 현상수배서가 붙었다. 활짝 웃는 해적의 얼굴 아래 큰돈이 적혀 있다.',
     doors: [
       { label: '수배서를 몰래 떼어 간직한다', hint: '저 사람처럼 웃으며 살고 싶어진다', values: { freedom: D, romance: D }, fx: [] },
-      { label: '언젠가 내 얼굴도 저기 걸리겠다고 다짐한다', hint: '마음속에 큰 꿈이 자리 잡는다', values: { ambition: D }, mark: 'obsession', fx: [] },
+      { label: '언젠가 내 얼굴도 저기 걸리겠다고 다짐한다', hint: '마음속에 큰 꿈이 자리 잡는다', values: { romance: D }, mark: 'obsession', fx: [] },
       { label: '아버지가 남긴 바다 이야기를 떠올린다', hint: '해적의 아이만 아는 이야기가 있다', when: [{ c: 'lineage', is: ['pirateChild'] }], values: { freedom: D, loyalty: D }, fx: [{ op: 'flag', id: 'fatherTale' }] },
     ],
   },

@@ -34,6 +34,8 @@ export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
+  pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
+  path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 해 구분선(weight 'year')에만 있다. 그 해를 시작한 섬 이름 */
@@ -67,6 +69,7 @@ export type Cond =
   | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
   | { c: 'island'; is: string[]; not?: boolean } // 지금 있는 섬 (hero.island). not이면 그 섬들이 아닐 때
   | { c: 'species'; is: Species[] }             // 종족
+  | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
   | { c: 'canonAge'; id: string; min?: number; max?: number };   // 그 원작 인물의 지금 나이 (canonAge)
 
 export type Fx =
@@ -89,6 +92,7 @@ export type Fx =
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
       age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
       role?: CrewRole }                          // 동료(crew)의 싸움 자리. 없으면 V.person.crew.role
+  | { op: 'pref'; branch: Branch; add: number } // 그 갈래의 선호도를 올린다 (자잘한 일도 쓸 수 있다)
   | { op: 'crewTrain'; add: number }            // 살아 있는 동료 모두의 레벨을 올린다 (해군 분대를 키운다)
   | { op: 'partCrew'; prefix: string }          // 관계 글이 prefix로 시작하는 동료가 떠난다: 동료에서 빠지고 아는 사람(ally)으로 남는다
   | { op: 'losePerson'; relation: string }

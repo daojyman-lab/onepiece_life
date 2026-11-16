@@ -48,7 +48,7 @@ export function emptyLife(seed: number): Life5 {
       alive: true,
       bornWealth: 'common',
     },
-    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null },
+    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null },
     values, strengths: [], marks: {},
     hardship: 0,
     people: [],

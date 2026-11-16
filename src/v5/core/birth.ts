@@ -4,8 +4,11 @@ import { TALENTS, type Talent } from '../../data/talents';
 import { chance, int, pick, rngOf, weighted } from '../../core/rng';
 import { V } from '../data/balance';
 import { HOMES } from '../data/homes';
-import type { Hero5, HomeId, Life5, Lineage, StatKey, Wealth } from './types';
+import { BRANCH_ID } from './power';
+import type { Branch, Hero5, HomeId, Life5, Lineage, StatKey, Wealth } from './types';
 
+/** 재능의 갈래 id('martial.sword') → 갈래('sword') */
+const BRANCH_OF: Record<string, Branch> = Object.fromEntries(Object.entries(BRANCH_ID).map(([b, id]) => [id, b as Branch]));
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const WEALTHS: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
 // v5에서는 집안 형편이 따로 있으므로 '가난한 집안' 재능은 뽑지 않는다
@@ -77,6 +80,9 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   h.wealth = wealth;
   h.lineage = lineage;
   h.talents = talents.map((t) => t.id);
+  // 무술 재능은 그 갈래의 선호도로 시작한다 (검술 재능이면 검술 쪽으로 기운 아이). 패기 · 열매는 계기가 있어야 길이 된다
+  for (const t of talents) for (const [id, m] of Object.entries(t.mastery ?? {}))
+    if ((m ?? 1) > 1 && id.startsWith('martial.')) { const b = BRANCH_OF[id]; if (b) s.growth.pref[b] += V.growth.pref.talent; }
   h.base = base;
   h.money = V.wealthMoney[wealth];
   h.island = town.name;                        // 태어난 마을이 처음 사는 섬이다

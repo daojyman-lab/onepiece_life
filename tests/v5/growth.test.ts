@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { apply5, reduce5 } from '../../src/v5/core/reduce';
 import { addValues } from '../../src/v5/core/values';
-import { activityOf, power5 } from '../../src/v5/core/year';
+import { activityOf, mainBranch, notePath, power5 } from '../../src/v5/core/year';
+import { LINES } from '../../src/v5/data/lines';
+import { MINORS } from '../../src/v5/data/minors';
 import { applyFx } from '../../src/v5/core/fx';
 import { rngOf } from '../../src/core/rng';
 import { V } from '../../src/v5/data/balance';
@@ -95,5 +97,38 @@ describe('아이의 일', () => {
   });
   it('아이의 품삯은 어른의 품삯보다 훨씬 적다', () => {
     expect(V.growth.kidWorkMoney).toBeLessThan(V.growth.workMoney / 2);
+  });
+});
+
+describe('선호도와 걷는 길', () => {
+  it('검술 재능을 타고나면 검술 쪽으로 기운 아이로 시작한다', () => {
+    const s = Array.from({ length: 300 }, (_, i) => newLife5(500 + i)).find((x) => x.hero.talents.includes('swordTalent') && !x.hero.talents.includes('fistTalent'))!;
+    expect(s.growth.pref.sword).toBeGreaterThanOrEqual(V.growth.pref.talent);
+    expect(mainBranch(s)).toBe('sword');
+  });
+  it('수련할수록 그 길의 선호도가 쌓이고, 고른 일의 숙련이 조금 끌어당긴다', () => {
+    const s = newLife5(3); s.growth.pref = { ...s.growth.pref, sword: 30, fist: 0 };
+    applyFx(s, [{ op: 'mastery', branch: 'fist', add: 10 }]);
+    expect(s.growth.pref.fist).toBe(10 * V.growth.pref.fromMastery);
+    expect(mainBranch(s)).toBe('sword');           // 한 번 고른 일로 길이 뒤집히지 않는다
+  });
+  it('스승을 들이면 그 갈래로 길이 바뀌고, 큰 일로 기록과 연표에 남는다', () => {
+    const s = newLife5(4); s.age = 14; s.growth.pref = { ...s.growth.pref, sword: 40 };
+    notePath(s);
+    expect(s.growth.path).toBe('sword');
+    applyFx(s, [{ op: 'master', name: '떠돌이 무인', branch: 'fist', cap: 4, years: 3, paid: false }]);
+    notePath(s);
+    expect(s.growth.path).toBe('fist');
+    expect(s.timeline.at(-1)?.text).toContain('떠돌이 무인');
+    expect(s.timeline.at(-1)?.text).toContain('체술');
+    expect(s.log.some((l) => l.weight === 'heavy' && l.text.includes('내려놓고'))).toBe(true);
+    s.growth.master = null;                         // 스승이 떠나도 길은 그대로다
+    notePath(s);
+    expect(s.growth.path).toBe('fist');
+  });
+  it('목검 · 칼을 쥐는 기록 줄과 자잘한 일은 검술의 길(또는 아직 길이 없는 아이)에게만 온다', () => {
+    for (const l of LINES.filter((x) => /목검을|칼 쓰는/.test(x.text))) expect(l.when.some((c) => c.c === 'path' && !c.is.includes('fist') && !c.is.includes('gun')), l.text).toBe(true);
+    const m = MINORS.find((x) => x.id === 'm_kid_wooden_sword')!;
+    expect(m.when).toContainEqual({ c: 'path', is: ['sword', 'none'] });
   });
 });

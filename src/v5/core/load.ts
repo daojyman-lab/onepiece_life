@@ -1,4 +1,6 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
+import { V } from '../data/balance';
+import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
 import { emptyLife } from './state';
@@ -52,6 +54,12 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다
+  const g = life.growth;
+  if (isObj(g) && isObj(g.pref) && isObj(g.tier) && isObj(g.mastery) && Object.values(g.pref).every((v) => !v)) {
+    for (const b of Object.keys(g.pref) as (keyof typeof g.pref)[]) g.pref[b] = (g.tier[b] ?? 0) * V.growth.tierUp + (g.mastery[b] ?? 0);
+    if (life.age >= V.growth.pref.pathAge) g.path = mainBranch(life);
+  }
   try {
     return invariants5(life, true).length === 0 ? life : null;
   } catch {

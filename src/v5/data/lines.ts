@@ -3,7 +3,7 @@
 // 글이 형제 · 동료 · 부모 · 헤엄을 전제하면 needs에 적는다 (tests/v5/content-12.test.ts가 낱말로 확인한다).
 // 물러서는 줄에는 맞서는 가치관이, 맞서는 줄에는 평온이 깊으면 나오지 않는 조건을 붙인다 (방금 싸움에 끼어든 사람에게 "자리를 피했다"가 나오지 않게).
 // 처지가 배를 타는 처지(해적 · 해군 · 혁명군)면 그 처지가 배를 전제하므로 'ship'을 따로 적지 않는다. 'ship'은 제 배를 가졌을 때다.
-import type { Cond, Need, Standing, ValueId, Values } from '../core/types';
+import type { Branch, Cond, Need, Standing, ValueId, Values } from '../core/types';
 
 export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[] }
 
@@ -22,6 +22,8 @@ const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 const atSea = st('pirate', 'marine', 'revolution');
 const town = (name: string): Cond[] => [{ c: 'town', is: [name] }, kid];
 const fruit: Cond = { c: 'fruit', has: true };
+/** 지금 걷는 길 (무기를 쥐는 줄은 그 길을 걷는 사람에게만) */
+const path = (...is: (Branch | 'none')[]): Cond => ({ c: 'path', is });
 /** 이 가치관이 깊으면 나오지 않는다 */
 const not = (id: ValueId): Cond => ({ c: 'value', id, deep: false });
 const calm = not('dominion');                 // 물러서는 줄: 맞서는 사람에게는 나오지 않는다
@@ -48,7 +50,9 @@ export const LINES: DailyLine5[] = [
   // ---------------- 야망
   L(kid, { ambition: 1 }, '언젠가 바다에서 가장 이름난 사람이 되겠다고 큰소리쳤다.'),
   L(kid, { ambition: 1 }, '나뭇가지로 친구들을 모두 이길 때까지 집에 가지 않았다.'),
-  L(adult, { ambition: 1 }, '새벽마다 부두에서 목검을 휘둘렀다.'),
+  L([adult, path('sword')], { ambition: 1 }, '새벽마다 부두에서 목검을 휘둘렀다.'),
+  L([adult, path('fist')], { ambition: 1 }, '새벽마다 모래 자루를 매달아 놓고 주먹이 까지도록 두드렸다.'),
+  L([adult, path('gun')], { ambition: 1 }, '새벽마다 빈 병을 세워 놓고 한 발씩 맞혀 나갔다.'),
   L(adult, { ambition: 1 }, '{island}에서 가장 센 자의 이름을 수첩에 적어 두었다.'),
   L(old, { ambition: 1 }, '아직 이루지 못한 것을 손가락으로 꼽아 보았다.'),
   L(old, { ambition: 1 }, '늙었다는 말을 들으면 괜히 더 무거운 짐을 졌다.'),
@@ -153,7 +157,7 @@ export const LINES: DailyLine5[] = [
   L(town('코코야시 마을'), { ambition: 1 }, '어른들보다 먼저 귤 상자를 다 채우겠다고 해가 지도록 땄다.'),
   // ---------------- 시모츠키 마을: 검술 도장, 논둑
   L(town('시모츠키 마을'), {}, '도장 담 밖에서 목검 부딪는 소리를 들으며 걸었다.'),
-  L(town('시모츠키 마을'), { ambition: 1 }, '도장 마당 끝에서 어른들의 칼 쓰는 자세를 흉내 냈다.'),
+  L([...town('시모츠키 마을'), path('sword', 'none')], { ambition: 1 }, '도장 마당 끝에서 어른들의 칼 쓰는 자세를 흉내 냈다.'),
   L(town('시모츠키 마을'), { devotion: 1 }, '도장 신발장에 흩어진 신을 가지런히 놓아두고 나왔다.'),
   L(town('시모츠키 마을'), {}, '논둑을 따라 걸으며 물꼬에 막힌 흙을 걷어 냈다.'),
   L(town('시모츠키 마을'), { peace: 1 }, '저녁 무렵 논둑에 앉아 개구리 우는 소리를 들었다.'),

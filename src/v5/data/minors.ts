@@ -185,11 +185,12 @@ export const MINORS: Minor[] = ([
     ],
   },
   {
-    id: 'm_kid_wooden_sword', when: [kid], weight: 6, cooldownYears: 2,
+    // 무기를 쥐는 일은 그 길로 기운 아이(또는 아직 길이 없는 아이)에게만, 하면 그 길이 더 좋아진다 (선호도)
+    id: 'm_kid_wooden_sword', when: [kid, { c: 'path', is: ['sword', 'none'] }], weight: 6, cooldownYears: 2,
     outcomes: [
-      { lean: { ambition: 1 }, text: ['부러진 목검 대신 단단한 떡갈나무로 새 목검을 깎았다.', '목검 손잡이가 닳도록 휘둘러 새 천을 감았다.'], fx: [] },
-      { lean: { romance: 1 }, text: ['주워 온 나무 막대에 이름을 새기고 보물처럼 아꼈다.', '목검에 바다의 이름을 붙이고 매일 밤 머리맡에 두었다.'], fx: [] },
-      { lean: {}, text: ['쓰던 나무칼이 부러져 바닷가에서 새 막대를 주워 왔다.', '목검을 바위에 부딪쳐 끝이 쪼개졌다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['부러진 목검 대신 단단한 떡갈나무로 새 목검을 깎았다.', '목검 손잡이가 닳도록 휘둘러 새 천을 감았다.'], fx: [{ op: 'pref', branch: 'sword', add: 3 }] },
+      { lean: { romance: 1 }, text: ['주워 온 나무 막대에 이름을 새기고 보물처럼 아꼈다.', '목검에 바다의 이름을 붙이고 매일 밤 머리맡에 두었다.'], fx: [{ op: 'pref', branch: 'sword', add: 2 }] },
+      { lean: {}, text: ['쓰던 나무칼이 부러져 바닷가에서 새 막대를 주워 왔다.', '목검을 바위에 부딪쳐 끝이 쪼개졌다.'], fx: [{ op: 'pref', branch: 'sword', add: 1 }] },
     ],
   },
   {

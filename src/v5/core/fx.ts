@@ -127,11 +127,17 @@ function applyOne(s: Life5, e: Fx): void {
     case 'chance':
       applyFx(s, chance(rngOf(s.rng), e.p) ? e.then : (e.else ?? []));
       return;
-    case 'mastery': addMastery(s, e.branch, e.add); return;
+    case 'mastery':
+      addMastery(s, e.branch, e.add);
+      if (e.add > 0) s.growth.pref[e.branch] += e.add * V.growth.pref.fromMastery;
+      return;
+    case 'pref': s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
     // 단계를 그 자리까지 끌어올린다. 이미 더 높으면 그대로 둔다
     case 'tier': s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
     case 'master':
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
+      // 스승을 들이면 그 갈래가 앞선다. 길이 바뀌면 year.ts의 notePath가 큰 일로 남긴다
+      s.growth.pref[e.branch] = Math.max(...Object.values(s.growth.pref)) + V.growth.pref.masterLead;
       return;
     case 'reveal': revealSurname(s); return;
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)

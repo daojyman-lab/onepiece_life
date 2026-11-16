@@ -234,7 +234,7 @@ export const PATHS: Turning[] = [
     doors: [
       { label: '밀사의 손을 잡는다', hint: '지금까지의 처지를 모두 버린다', values: { justice: D },
         fx: [{ op: 'standing', to: 'revolution' }, { op: 'timeline', text: '혁명군으로 돌아섰다' }] },
-      { label: '밀사를 해군에 넘긴다', hint: '공을 세우지만 뒷맛이 쓰다', values: { ambition: D }, fx: [{ op: 'fame', add: 20 }] },
+      { label: '밀사를 해군에 넘긴다', hint: '공을 세우지만 뒷맛이 쓰다', values: { dominion: D }, fx: [{ op: 'fame', add: 20 }] },
       { label: '못 들은 걸로 하고 돌려보낸다', hint: '아무 일도 없었던 밤이 된다', values: { peace: D }, fx: [] },
     ],
   },

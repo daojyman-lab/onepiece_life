@@ -302,7 +302,7 @@ const BONDS: Turning[] = [
         fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '몰락한 옛 은인', age: { older: 20 } }] },
       { label: '은인의 빚을 대신 갚아 다시 일어서게 한다', hint: '모아 둔 돈이 크게 나간다', values: { devotion: D },
         fx: [{ op: 'money', add: -50000 }, { op: 'chance', p: 0.5, then: [{ op: 'money', add: 30000 }, { op: 'log', text: '다시 일어선 은인이 몇 해 뒤 갚은 돈을 두 배로 돌려주었다.', weight: 'heavy' }] }] },
-      { label: '은인의 남은 물건을 헐값에 사서 되판다', hint: '돈이 남는다. 은인은 고맙다며 떠난다', values: { ambition: D },
+      { label: '은인의 남은 물건을 헐값에 사서 되판다', hint: '돈이 남는다. 은인은 고맙다며 떠난다', values: { dominion: D }, 
         fx: [{ op: 'money', add: 20000 }, { op: 'hardship', add: 1 }] },
     ],
   },

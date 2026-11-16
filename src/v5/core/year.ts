@@ -48,6 +48,7 @@ export function stepPart(s: Life5): void {
   if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
   if (s.part === V.partsPerYear - 1) yearTurn(s, r);
   turningPoint(s, r);
+  notePath(s);
   if (s.hero.alive) nextPart(s);
   endIfDead(s);
 }
@@ -92,12 +93,39 @@ export function activityOf(s: Life5, r: Rng): Activity {
 export function mainBranch(s: Life5): Branch | null {
   const m = s.growth.master;
   if (m && canUse(s, m.branch)) return m.branch;
+  // 선호도가 가장 높은 갈래 (같으면 더 멀리 간 갈래). 선호도가 하나도 없으면 가장 멀리 간 갈래
+  const pref = (b: Branch) => s.growth.pref[b] ?? 0;
   const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
+  const usable = (Object.keys(BRANCH_ID) as Branch[]).filter((b) => canUse(s, b));
+  const liked = usable.filter((b) => pref(b) > 0);
+  const pool = liked.length ? liked : usable.filter((b) => progress(b) > 0);
   let best: Branch | null = null;
-  for (const b of Object.keys(BRANCH_ID) as Branch[]) {
-    if (canUse(s, b) && progress(b) > (best ? progress(best) : 0)) best = b;
+  for (const b of pool) {
+    if (!best || pref(b) > pref(best) || (pref(b) === pref(best) && progress(b) > progress(best))) best = b;
   }
   return best;
+}
+
+/**
+ * 걷는 길(mainBranch)이 바뀌면 큰 일로 기록과 연표에 남긴다. 처음 길을 잡을 때도 남긴다.
+ * 어린 아이(pathAge 전)는 아직 길을 알리지 않는다.
+ */
+export function notePath(s: Life5): void {
+  if (s.age < V.growth.pref.pathAge) return;
+  const now = mainBranch(s);
+  const was = s.growth.path;
+  if (now === was || now === null) return;
+  s.growth.path = now;
+  const name = (b: Branch) => BRANCH_NAMES[BRANCH_ID[b]];
+  const m = s.growth.master;
+  const by = m && m.branch === now ? `${m.name}을(를) 만나 ` : '';
+  if (was === null) {
+    logLine(s, fillText(s, `{name}은(는) ${name(now)}을(를) 제 길로 삼았다.`), 'heavy', 'growth');
+    s.timeline.push({ age: s.age, text: fillText(s, `${name(now)}의 길을 걷기 시작했다`) });
+  } else {
+    logLine(s, fillText(s, `${by}${name(was)}을(를) 내려놓고 ${name(now)}의 길로 들어섰다.`), 'heavy', 'growth');
+    s.timeline.push({ age: s.age, text: fillText(s, `${by}${name(was)}에서 ${name(now)}(으)로 길을 바꿨다`) });
+  }
 }
 
 /** 한 토막만큼 상처가 아문다. 다 나은 상처는 지운다. 흉터는 낫지 않는다. */
@@ -144,6 +172,7 @@ function train(s: Life5, r: Rng, age: number): void {
     logLine(s, `수련 중에 무언가를 붙잡았다. ${BRANCH_NAMES[BRANCH_ID[b]]}의 벽 하나가 무너졌다.`, 'heavy', 'growth');
   }
   addMastery(s, b, add);
+  s.growth.pref[b] += G.pref.train;            // 갈고닦을수록 그 길이 더 좋아진다
   statUp(s, r, G.branchStats[b], G.statP.train * age);
 }
 
@@ -195,6 +224,14 @@ function nextPart(s: Life5): void {
   familyYear(s);                               // 늙은 가족이 세상을 떠날 수 있다
   comeOfAge(s);
   masterYear(s);
+  livingIncome(s);
+}
+
+/** 뭍에 자리 잡은 사람 · 물러난 사람은 해마다 살림 돈을 번다 (V.income) */
+function livingIncome(s: Life5): void {
+  const st = s.hero.standing;
+  if (st === 'settled') s.hero.money += V.income.settled;
+  else if (st === 'retired') s.hero.money += V.income.retired;
 }
 
 /** 아직 아이로 남은 사람은 어른이 되는 해에 저절로 뭍의 어른(civil)이 된다. 이제 제 밥벌이는 스스로 한다 */

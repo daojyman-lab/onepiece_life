@@ -2,7 +2,7 @@ export const V = {
   partsPerYear: 4,
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.3 }, { to: 200, n: 1.0 } ],
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.28 }, { to: 200, n: 1.0 } ],
   stopsQuiet: 0.4,                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
@@ -20,7 +20,11 @@ export const V = {
                            armament: ['vit', 'wil'], conqueror: ['wil'], fruit: ['wil', 'vit'] },
             bareStats: ['str', 'spd', 'vit'],  // 갈래가 아직 없을 때 수련이 올리는 몸
             workMoney: 3000, familyBond: 2, restHp: 10,
-            kidWorkMoney: 500 },               // activity.kidAge 이하 아이가 일해서 제 손에 남는 돈 (나머지는 식구가 먹는다)
+            kidWorkMoney: 500,
+            // 선호도 (숙련과 별개, 설계 5.4): 수련할 갈래는 선호도가 가장 높은 갈래다.
+            // 재능은 태어날 때 talent만큼, 수련은 한 토막에 train만큼, 고른 일의 숙련은 그 fromMastery 배만큼 쌓는다.
+            // 스승을 들이면 그 갈래가 가장 높은 선호도보다 masterLead만큼 앞선다 (길이 바뀌는 큰 일). pathAge살부터 길을 기록에 알린다
+            pref: { talent: 15, train: 1, fromMastery: 0.5, masterLead: 10, pathAge: 6 } },               // activity.kidAge 이하 아이가 일해서 제 손에 남는 돈 (나머지는 식구가 먹는다)
   // 한 토막의 활동: 기본 가중치 + Σ 가치관 점수 × 계수 + 처지
   activity: {
     base: 10,
@@ -61,7 +65,9 @@ export const V = {
   // eye.aim: 잃은 눈 하나마다 주인공의 공격이 덜 닿는 몫 (돈으로 단 눈은 그 절반, 기연으로 얻은 눈은 줄지 않는다)
   limb: { eye: { spd: 0.9, aim: 0.15 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
           blindSight: 2 },                     // 견문색이 이 단계 이상이면 두 눈을 잃어도 bothEyes를 곱하지 않는다
-  risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 1500,
+  // 뭍에 자리 잡은(settled) · 물러난(retired) 사람이 해마다 버는 살림 돈 (밭 · 가게 · 모아 둔 것). 약값을 낼 수 있게 한다 (3단계 균형 보고)
+  income: { settled: 2500, retired: 1500 },
+  risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 1200,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
           monthsPerPart: 3, worsenMonths: 15,  // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
           maxStage: 3,
