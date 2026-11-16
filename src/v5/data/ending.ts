@@ -227,6 +227,15 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     low: '…어디서 만났더라. 굳이 기억할 필요는 없겠지.',
     high: '{name}은(는) 꽤 골치 아픈 녀석이었다. 그래도 그 인연을 후회하지는 않는다.',
   },
+  // 4단계: 워터 세븐
+  tom: {
+    low: '{name}이라. 그 꼬마의 얼굴은 흐릿하다만, 손을 흔들던 건 기억나는군. 다하하하!',
+    high: '{name}은(는) 제가 만든 것에 끝까지 책임을 졌다. 목수든 아니든, 그런 놈이 좋은 사람이다. 다하하하!',
+  },
+  kokoro: {
+    low: '{name}? 우리 역을 지나간 손님이었나. 은하하하!',
+    high: '{name}은(는) 술맛을 아는 사람이었지. 은하하하! 이 할망구가 한 잔 따라 주마.',
+  },
 };
 /** 표에 없는 원작 인물 */
 export const CANON_WORDS_DEFAULT: CanonWords = {

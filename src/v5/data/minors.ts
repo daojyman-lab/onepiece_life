@@ -8,6 +8,8 @@
 // id는 전환점과 seen을 함께 쓰므로 'm_'로 시작한다 (술집 시비 'brawl'만 예외).
 // 자리표시: {name} 이름만, {town} 자란 마을, {island} 지금 있는 섬
 import type { Cond, Minor, SeaId, Standing, ValueId } from '../core/types';
+import { HOME_MINORS } from './minors-homes';
+import { landlockedMinor } from './landlocked';
 
 const kid: Cond = { c: 'age', min: 3, max: 15 };
 const young: Cond = { c: 'age', min: 5, max: 12 };
@@ -121,7 +123,7 @@ function canonPassing(): Minor[] {
   ];
 }
 
-export const MINORS: Minor[] = [
+export const MINORS: Minor[] = ([
   // ======================================================== 어린 시절 (3~15살)
   {
     id: 'm_kid_quarrel', when: [kid], weight: 10, cooldownYears: 1,
@@ -1065,4 +1067,7 @@ export const MINORS: Minor[] = [
   // 한 인생에 한 번(cooldownYears 99). 결과마다 연표에 원작 표시를 남겨 엔딩의 「겹친 원작 순간」에 나온다.
   // 원작의 때와 장소: 원작이 시작되기 전은 자란 마을에서, 그 뒤는 그 바다에서.
   ...canonPassing(),
-];
+
+  // ======================================================== 다섯 고향 (4단계, minors-homes.ts)
+  ...HOME_MINORS,
+] as Minor[]).map(landlockedMinor);
