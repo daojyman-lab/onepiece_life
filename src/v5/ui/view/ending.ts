@@ -41,7 +41,7 @@ export function hallView(meta: Meta5): { name: string; persona: string; oneLine:
 
 export interface EndingView {
   name: string; end: string;                         // '일흔두 살, 노환' 꼴
-  persona: string; dream: string | null; oneLine: string; remembered: string;
+  persona: string; dream: string | null; onePiece: string; oneLine: string; remembered: string;
   canonWords: { who: string; line: string }[]; canonMoments: string[];
   unchosen: string[]; secret: string | null; newCodex: string[];
   record: { label: string; value: string }[];        // 접힌 칸 (끝난 까닭이 없으면 그 줄은 없다)
@@ -52,7 +52,7 @@ export function endingView(s: Life5, meta: Meta5): EndingView {
   const e = buildEnding(s, meta), r = e.record;
   return {
     name: fullName(s.hero).trim(), end: endWord(r.age, r.cause),
-    persona: e.persona, dream: e.dream, oneLine: e.oneLine, remembered: e.remembered,
+    persona: e.persona, dream: e.dream, onePiece: e.onePiece, oneLine: e.oneLine, remembered: e.remembered,
     canonWords: e.canonWords, canonMoments: e.canonMoments,
     unchosen: e.unchosen, secret: e.secret, newCodex: e.newCodex,
     record: [

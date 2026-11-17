@@ -31,6 +31,7 @@ img, canvas { image-rendering: pixelated; }
 .t9 { font-family: 'Galmuri9', 'Galmuri11', sans-serif; font-size: 10px; line-height: 1.6; }
 .t14 { font-family: 'Galmuri14', 'Galmuri11', sans-serif; font-size: 15px; line-height: 1.5; }
 .t30 { font-family: 'Galmuri14', 'Galmuri11', sans-serif; font-size: 30px; line-height: 1.25; }
+.t11 { font-size: 11px; }
 .en { font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: .02em; }
 .soft { color: var(--ink-soft); }
 .red { color: var(--red); } .green { color: var(--green-d); } .gold { color: var(--gold-d); }
@@ -361,6 +362,15 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .modal.ending5 > .ending5-go { flex: none; margin-top: 8px; }
 .ending5-body > section { display: flex; flex-direction: column; gap: 2px; }
 .ending5-body summary { cursor: pointer; }
+/* 엔딩 장면: 하나씩 넘긴다. 장면이 바뀔 때 천천히 떠오른다 */
+.modal.ending5 > .ending5-body { display: flex; cursor: pointer; min-height: 220px; }
+.scene5-wrap { flex: 1; display: flex; animation: scene5-in 0.7s ease-out; }
+.scene5 { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 8px 4px; }
+.scene5.center { align-items: center; text-align: center; }
+.ending5-nav { flex: none; margin-top: 8px; align-items: center; }
+.onepiece5 { margin-top: 14px; line-height: 1.7; animation: scene5-in 1.6s ease-out; }
+@keyframes scene5-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .scene5-wrap, .onepiece5 { animation: none; } }
 /* 싸움 앞의 능력치 비교: 나(왼쪽, 파랑) · 이름 · 상대(오른쪽, 빨강) */
 .fight-stats { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
 .fight-stat { display: grid; grid-template-columns: 1fr 2.6em 3em 2.6em 1fr; align-items: center; gap: 4px; }
