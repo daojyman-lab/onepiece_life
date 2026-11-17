@@ -1,16 +1,16 @@
 # 초상화 그림 파일
 
 이 폴더에 그림 파일(png · gif · webp · jpg)을 넣으면, 게임이 코드로 그리는 픽셀 초상화 대신 그 파일을 씁니다.
-파일이 없으면 지금처럼 픽셀 초상화가 나옵니다. 다시 빌드(`npm run build` 또는 `play.bat`)해야 반영됩니다.
+파일이 없으면 지금처럼 픽셀 초상화가 나옵니다. 배포본에는 다시 빌드(`npm run build`)해야 반영됩니다.
 
 ## 이름 규칙 (확장자는 무엇이든, 대소문자 구분 없음)
 
 한 사람에게 아래 이름을 차례로 찾아 처음 나오는 파일을 씁니다.
 
 1. **그 사람만의 이름**
-   - 원작 인물: `src/v5/data/canon.ts`의 id. 예: `smoker.png`, `koby.gif`
+   - 원작 인물: `src/data/canon.ts`의 id. 예: `smoker.png`, `koby.gif`
    - 주인공: `hero-m.png`(남), `hero-f.png`(여)
-   - 이름 있는 상대: `src/data/bosses.ts`의 faceKey · canon · id
+   - 이름 있는 상대: `src/shared/data/bosses.ts`의 faceKey · canon · id
 2. `종족-진영-성별` 예: `fishman-pirate-m.png`, `human-marine-f.png`
 3. `진영-성별` 예: `pirate-m.png`, `rev-f.gif`
 4. `종족-성별` 예: `mink-f.png`

@@ -20,6 +20,12 @@ const away = (min: number, max: number): Cond[] =>
   [{ c: 'age', min, max }, { c: 'home', is: ['loguetown'] }, { c: 'standing', is: ['child'] }, { c: 'flag', id: LEFT_HOME, has: true }];
 export const POOR: Cond = { c: 'wealth', max: 'poor' };
 export const RICH: Cond = { c: 'wealth', min: 'comfortable' };
+const sickWhen: Cond[] = [...kid(6, 14), { c: 'flag', id: 'kidSicknessSeen', has: false }];
+const noParent: Cond = { c: 'kin', who: 'parent', has: false };
+const noGrandmother: Cond = { c: 'person', relation: '할머니', has: false };
+const noGrandfather: Cond = { c: 'person', relation: '할아버지', has: false };
+const noMentor: Cond = { c: 'person', relation: '스승', has: false };
+const sickSeen: Fx = { op: 'flag', id: 'kidSicknessSeen' };
 /** 고향을 아주 떠난다: 이스트 블루의 항구로 옮기고, 떠났다는 표시를 남긴다 */
 export const leaveTo = (island: string, text: string, line: string): Fx[] => [
   { op: 'move', island, sea: 'east' }, { op: 'flag', id: LEFT_HOME },
@@ -61,12 +67,57 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_sick_elder', kind: 'door', when: kid(6, 14), weight: 9, repeat: 'once', speaker: 'hero',
-    title: '앓아누운 어른', body: '{name}을(를) 돌봐 주던 어른이 열병으로 앓아누웠다. 약값이 만만치 않다.',
+    id: 'kid_sick_elder', kind: 'door', when: [...sickWhen, { c: 'kin', who: 'parent', has: true }], needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '가족의 열병', body: '{parent}가 열병으로 앓아누웠다. 평소 잠을 덮어 주던 손이 오늘은 이불 밖으로 나오지 않는다. 의원은 약값을 먼저 말한다.',
     doors: [
-      { label: '부두에서 짐을 날라 약값을 번다', hint: '몸은 고되지만 약을 살 수 있다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '해 질 때까지 짐을 나른 뒤 손바닥의 물집을 터뜨렸다. 받은 품삯을 의원에게 내밀자 돌봐 주던 어른의 약을 챙겨 주었다.', weight: 'light' }] },
-      { label: '의원에게서 비싼 약을 사 온다', hint: '집안 돈으로 금방 해결된다', when: [{ c: 'wealth', min: 'comfortable' }], values: { peace: D }, fx: [{ op: 'money', add: -10000 }, { op: 'log', text: '약 봉투를 들고 돌아오자 앓던 어른이 겨우 눈을 떴다. 집안 돈은 줄었지만 침상 곁의 걱정은 조금 누그러졌다.', weight: 'light' }] },
-      { label: '약초 책을 뒤져 직접 달인다', hint: '잘될지는 해 봐야 안다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '책장마다 약초 모양을 대조해 가며 쓴 탕약을 달였다. 어른은 한 모금 마시고 얼굴을 찌푸렸지만, {name}의 손을 놓지 않았다.', weight: 'light' }] },
+      { label: '장터에서 짐을 날라 약값을 번다', hint: '손은 아프지만 약을 살 수 있다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '해 질 때까지 짐을 나르자 손바닥에 물집이 잡혔다. 품삯을 내밀며 {parent}의 열을 설명하자 의원이 약봉지를 건넸다.', weight: 'light' }, sickSeen] },
+      { label: '집안 돈으로 약을 사 온다', hint: '약값은 크지만 오늘 안에 돌아올 수 있다', when: [{ c: 'wealth', min: 'comfortable' }], values: { peace: D }, fx: [{ op: 'money', add: -10000 }, { op: 'log', text: '약 봉투를 들고 돌아오자 {parent}가 겨우 눈을 떴다. 집안 돈은 줄었지만 침상 곁의 걱정은 조금 누그러졌다.', weight: 'light' }, sickSeen] },
+      { label: '약초 책을 뒤져 약을 달인다', hint: '잘될지는 해 봐야 안다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '책장마다 약초 모양을 대조해 쓴 탕약을 달였다. {parent}는 한 모금 마시고 얼굴을 찌푸렸지만 {name}의 손을 놓지 않았다.', weight: 'light' }, sickSeen] },
+    ],
+  },
+  {
+    id: 'kid_sick_grandmother', kind: 'door', when: [...sickWhen, noParent, { c: 'flag', id: 'grandGuard', has: true }, { c: 'person', relation: '할머니', has: true }], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '식어 가는 아궁이', body: '할머니가 열병으로 누운 뒤 아궁이 불이 꺼졌다. 늘 먼저 일어나 밥을 짓던 사람이 물 한 모금도 삼키기 힘들어한다.',
+    doors: [
+      { label: '남의 집 물동이를 날라 약값을 번다', hint: '물동이는 무겁지만 의원을 부를 수 있다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '몇 집의 물동이를 채우고 받은 동전을 세어 의원에게 달려갔다. 할머니는 약을 받아 들고도 먼저 갈라진 손바닥을 살폈다.', weight: 'light' }, sickSeen] },
+      { label: '이웃에게 도움을 청한다', hint: '혼자 짊어지지 않아도 된다', values: { loyalty: D }, fx: [{ op: 'log', text: '이웃이 마른 장작과 약초를 들고 왔다. 할머니는 부엌에 다시 불이 붙는 소리를 듣고 겨우 미소를 지었다.', weight: 'light' }, sickSeen] },
+      { label: '할머니가 가르쳐 준 약초를 찾아 달인다', hint: '기억을 더듬어 손수 돌본다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '할머니가 예전에 가리켜 준 잎을 골라 쓴 물을 달였다. 한 모금 넘긴 할머니가 맞는 풀이라고 고개를 끄덕였다.', weight: 'light' }, sickSeen] },
+    ],
+  },
+  {
+    id: 'kid_sick_grandfather', kind: 'door', when: [...sickWhen, noParent, { c: 'flag', id: 'grandGuard', has: true }, { c: 'person', relation: '할아버지', has: true }], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '멈춘 손길', body: '할아버지가 열병으로 누운 뒤 손때 묻은 공구가 작업대 위에 그대로 놓였다. 저녁마다 들려주던 이야기도 기침에 끊긴다.',
+    doors: [
+      { label: '장작을 패 주고 품삯으로 약을 산다', hint: '도끼질이 서툴러도 끝까지 해 본다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '해 질 때까지 장작을 패고 의원에게 동전을 내밀었다. 할아버지는 약봉지보다 먼저 부르튼 손을 보고 한참 말을 잇지 못했다.', weight: 'light' }, sickSeen] },
+      { label: '할아버지와 아는 이웃을 찾아간다', hint: '옛 인연이 힘을 보탤지도 모른다', values: { loyalty: D }, fx: [{ op: 'log', text: '이웃은 할아버지에게 빌린 공구를 돌려주러 온 참이었다. 사정을 듣자 약값을 보태고 침상 곁에 앉아 옛이야기를 꺼냈다.', weight: 'light' }, sickSeen] },
+      { label: '의원에게 열을 낮출 방법을 배운다', hint: '밤새 곁에서 직접 돌본다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '의원이 일러 준 대로 찬 물수건을 갈아 얹었다. 새벽녘 할아버지의 기침이 잦아들자 그제야 의자에 기대 잠들었다.', weight: 'light' }, sickSeen] },
+    ],
+  },
+  {
+    id: 'kid_sick_mentor', kind: 'door', when: [...sickWhen, noParent, noGrandmother, noGrandfather, { c: 'person', relation: '스승', has: true }], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '스승의 빈자리', body: '늘 새벽 수련을 깨우던 스승이 열병으로 일어나지 못했다. 목검은 문 옆에 기대어 있고 약을 구할 사람은 {name}뿐이다.',
+    doors: [
+      { label: '심부름을 맡아 스승의 약값을 번다', hint: '수련 대신 하루를 일한다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '해 질 때까지 심부름을 하고 의원에게 품삯을 내밀었다. 스승은 약을 받자마자 오늘 수련은 쉬라며 {name}의 손을 끌어당겼다.', weight: 'light' }, sickSeen] },
+      { label: '스승을 오래 알던 사람을 찾아간다', hint: '혼자 감당할 일을 나눈다', values: { loyalty: D }, fx: [{ op: 'log', text: '옛 친구는 스승의 이름을 듣고 약상자를 들고 찾아왔다. 두 사람이 낮은 목소리로 이야기를 나누는 동안 {name}은(는) 물을 데웠다.', weight: 'light' }, sickSeen] },
+      { label: '의원에게 간호하는 법을 배운다', hint: '스승 곁을 지키며 열을 살핀다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '의원이 알려 준 대로 물수건을 갈고 열이 오르는 때를 적었다. 스승은 눈을 뜨자마자 잘 배웠다고 말했다.', weight: 'light' }, sickSeen] },
+    ],
+  },
+  {
+    id: 'kid_sick_neighbor', kind: 'door', when: [...sickWhen, noParent, noGrandmother, noGrandfather, noMentor, { c: 'flag', id: 'lonely', has: false }], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '닫힌 이웃집 문', body: '가끔 남은 밥을 내주던 이웃이 열병으로 문을 열지 못한다. {name}은(는) 빈 그릇을 든 채 한참 문 앞에 서 있다.',
+    doors: [
+      { label: '이웃의 약값을 벌려고 짐을 나른다', hint: '빈 그릇을 돌려줄 때 약도 건넨다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '짐을 나르고 번 돈으로 약을 샀다. 이웃은 문틈으로 약봉지를 받고, 전에 건넸던 그릇에 따뜻한 물을 채워 돌려주었다.', weight: 'light' }, sickSeen] },
+      { label: '다른 이웃들에게 사정을 알린다', hint: '작은 도움을 모은다', values: { loyalty: D }, fx: [{ op: 'log', text: '한 사람은 물을 끓이고 다른 사람은 의원을 불렀다. 닫혀 있던 이웃집 문이 열리자 {name}은(는) 빈 그릇을 안고 안으로 들어갔다.', weight: 'light' }, sickSeen] },
+      { label: '의원에게 할 수 있는 일을 묻는다', hint: '약이 오기 전까지 곁을 지킨다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '의원이 알려 준 대로 물을 조금씩 먹이고 숨소리를 살폈다. 이웃은 정신이 들자 왜 아직 여기 있느냐고 묻고는 이불을 한쪽 내주었다.', weight: 'light' }, sickSeen] },
+    ],
+  },
+  {
+    id: 'kid_sick_alone', kind: 'door', when: [...sickWhen, noParent, noGrandmother, noGrandfather, noMentor, { c: 'flag', id: 'lonely', has: true }], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '혼자 앓는 밤', body: '열병이 찾아왔다. 좁은 잠자리에서 눈을 뜨니 물을 떠다 줄 사람도 약을 사다 줄 사람도 없다.',
+    doors: [
+      { label: '몸을 일으켜 약값을 벌러 나간다', hint: '쓰러지기 전에 의원에게 닿아야 한다', values: { ambition: D }, mark: 'unyielding', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '열병으로 비틀거리면서도 짐을 나르고 품삯으로 약을 샀다. 스스로 물을 떠 약을 삼킨 뒤에야 이불 속으로 돌아왔다.', weight: 'light' }, sickSeen] },
+      { label: '지나가는 사람에게 도움을 청한다', hint: '처음으로 낯선 이에게 손을 내민다', values: { loyalty: D }, fx: [{ op: 'log', text: '지나가던 사람이 의원을 불러 주었다. 이름도 묻지 못한 채 약을 받아 들었지만, 누군가 곁에 앉아 있던 밤은 오래 남았다.', weight: 'light' }, sickSeen] },
+      { label: '물과 그늘을 찾아 열이 내리기를 기다린다', hint: '혼자 버틸 방법을 찾는다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '물을 조금씩 마시며 열이 오를 때마다 그늘로 옮겼다. 새벽에 땀이 식자 스스로 버틴 밤이 끝났다는 걸 알았다.', weight: 'light' }, sickSeen] },
     ],
   },
   {

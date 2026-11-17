@@ -1,5 +1,6 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
 import { V } from '../data/balance';
+import { RETIRED_FRUIT_IDS } from '../shared/data/fruits';
 import { VALUE_IDS } from '../data/values';
 import { personalityCell } from './personality';
 import { topValues } from './values';
@@ -59,6 +60,12 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (life.hero.fruit?.id === 'gomu') life.hero.fruit.id = 'nika';
+  else if (life.hero.fruit && RETIRED_FRUIT_IDS.has(life.hero.fruit.id)) {
+    life.hero.fruit = null;
+    life.growth.tier.fruit = 0;
+    life.growth.mastery.fruit = 0;
+  }
   if (life.pending?.kind === 'door' && life.pending.turning === 'late_old_design' &&
       (!life.flags.includes('sharedFlightDesign') || !life.people.some((p) => p.alive && p.relation === '어릴 적 동무'))) {
     life.pending = null;
@@ -103,6 +110,7 @@ export function normalizeMeta5(x: unknown): Meta5 {
   // 없어진 가치관(헌신)은 도감에서 지운다
   else for (const [k, v] of Object.entries(m.doors)) if (Array.isArray(v)) (m.doors as Obj)[k] = v.filter((x) => VALUE_IDS.includes(x as never));
   for (const k of ['fruits', 'people', 'hall'] as const) if (!Array.isArray(m[k])) m[k] = def[k];
+  m.fruits = [...new Set((m.fruits as unknown[]).filter((id): id is string => typeof id === 'string' && !RETIRED_FRUIT_IDS.has(id)).map((id) => id === 'gomu' ? 'nika' : id))];
   if (typeof m.lives !== 'number' || !Number.isFinite(m.lives)) m.lives = def.lives;
   return m as unknown as Meta5;
 }

@@ -171,13 +171,14 @@ describe('규칙', () => {
     applyFx(s, TURNINGS.find((t) => t.id === 'mis_house_ruin')!.fx!);
     expect(s.hero.wealth).toBe('poor');
   });
-  it('열매를 먹으면 원작 인물의 것이 아닌 열매를 얻고, 이미 능력자면 아무 일도 없다', () => {
+  it('열매를 먹으면 원작 자연산 열매를 얻고, 이미 능력자면 아무 일도 없다', () => {
     const grades: number[] = [];
     for (let seed = 0; seed < 200; seed++) {
       const s = newLife5(seed); s.age = 20;
       applyFx(s, [{ op: 'eatFruit', id: 'random' }]);
       const f = FRUIT_BY_ID[s.hero.fruit!.id];
-      expect(f.canonUser).toBeNull();
+      expect(f).toBeDefined();
+      expect(f.id).not.toMatch(/^smile_/);
       expect(s.hero.fruit!.eatenAt).toBe(20);
       expect(s.growth.tier.fruit).toBe(V.fruit.startTier);
       expect(s.log.at(-1)!.weight).toBe('heavy');

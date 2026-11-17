@@ -19,7 +19,6 @@ export function mergeMods(...list: (Mods | undefined | null)[]): Mods {
     if (m.element) out.element = m.element;
     if (m.proc) out.proc = { ...m.proc };
     if (m.lastStand) out.lastStand = true;
-    if (m.noDrown) out.noDrown = true;
   }
   return out;
 }

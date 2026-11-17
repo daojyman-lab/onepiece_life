@@ -4,7 +4,7 @@ import { parentFound, parentMissing } from './family';
 import { sailTo } from './voyage';
 import { npcName } from './names';
 import { enterPrime } from './stages';
-import { FRUIT_BY_ID, FRUITS } from '../shared/data/fruits';
+import { FRUIT_BY_ID, NATURAL_FRUITS, SMILE_FRUITS } from '../shared/data/fruits';
 import { SEA_BY_ID } from '../shared/data/seas';
 import { BRANCH_NAMES } from '../shared/data/skills';
 import { crewPowerFor } from '../shared/core/people';
@@ -214,15 +214,22 @@ function personAge(s: Life5, e: Extract<Fx, { op: 'person' }>): number {
   return 'older' in a ? s.age + a.older : Math.max(0, s.age - a.younger);
 }
 
-/** 악마의 열매를 먹는다. 'random'이면 낮은 등급 쪽으로 기울여 원작 인물의 것이 아닌 열매를 고른다. 이미 능력자면 아무 일도 없다 */
+const SMILE_ISLANDS = new Set(['펑크 해저드', '드레스로자', '와노쿠니', '하나노미야코', '쿠리', '에비스 마을']);
+const SUCCESSFUL_SMILES = SMILE_FRUITS.filter((f) => f.id !== 'smile_failed');
+
+/** 악마의 열매를 먹는다. 관련 섬에서는 낮은 확률로 스마일을 만난다. 이미 능력자면 아무 일도 없다. */
 function eatFruit(s: Life5, id: string): void {
   if (s.hero.fruit) return;
   const W = V.fruit.gradeWeight;
-  const f = id === 'random'
-    ? weighted(rngOf(s.rng), FRUITS.filter((x) => x.canonUser === null), (x) => W[x.grade])
-    : FRUIT_BY_ID[id];
+  const r = rngOf(s.rng);
+  const f = id !== 'random' ? FRUIT_BY_ID[id]
+    : SMILE_ISLANDS.has(s.hero.island) && r() < V.fruit.smileChance
+      ? r() < V.fruit.smileSuccessChance ? pick(r, SUCCESSFUL_SMILES) : FRUIT_BY_ID.smile_failed
+      : weighted(r, NATURAL_FRUITS, (x) => W[x.grade]);
   if (!f) return;
   s.hero.fruit = { id: f.id, eatenAt: s.age };
-  s.growth.tier.fruit = Math.max(s.growth.tier.fruit, V.fruit.startTier);
-  logLine(s, `${f.name}을(를) 삼켰다. 몸속에서 낯선 힘이 꿈틀거린다. 다시는 헤엄칠 수 없다.`, 'heavy', 'growth');
+  s.growth.tier.fruit = f.id === 'smile_failed' ? 0 : Math.max(s.growth.tier.fruit, V.fruit.startTier);
+  logLine(s, f.id === 'smile_failed'
+    ? '스마일을 삼켰지만 능력은 깨어나지 않았다. 웃음만 남았고 다시는 헤엄칠 수 없다.'
+    : `${f.name}을(를) 삼켰다. 몸속에서 낯선 힘이 꿈틀거린다. 다시는 헤엄칠 수 없다.`, 'heavy', 'growth');
 }

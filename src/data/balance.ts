@@ -67,9 +67,10 @@ export const V = {
            minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
   fame: { bounty: 1000000 },                   // 명성 1 = 현상금(해군은 공적) 100만 베리
-  // 아무 열매나 먹을 때 등급(1 쓰레기 ~ 5 전설)마다 뽑힐 가중치. 원작 인물의 열매는 뽑지 않는다
+  // 자연산 열매를 무작위로 먹을 때 등급(1~5)별 가중치. 원작 보유자 여부와 관계없이 뽑는다
   fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 },
-           startTier: 1 },                     // 열매를 먹으면 열매 갈래가 적어도 이 단계에서 시작한다
+           smileChance: 0.03, smileSuccessChance: 0.1,
+           startTier: 1 },                     // 스마일 관련 섬 3%, 스마일 섭취 성공 10%
   injury: { months: { light: 6, heavy: 18, scar: 0 }, monthsPerPart: 3, restMonths: 3, medicMonths: 3,
             statMult: { light: 0.95, heavy: 0.8 }, partMult: { light: 0.85, heavy: 0.6, scar: 0.75 },
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
