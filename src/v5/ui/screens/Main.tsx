@@ -12,6 +12,22 @@ const SPEEDS = [0, 1, 2, 4, 8] as const;
 /** 인물 칸 머리 글 (v4 포스터와 같다): 해적 · 칠무해는 WANTED, 해군은 MARINE, 그 밖은 PROFILE */
 const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: 'WANTED', marine: 'MARINE' };
 
+/** 최신 줄이 위로 오도록 뒤집는다. 해 구분선(소제목)은 그 해의 일상 줄 위에 남는다 */
+function newestFirst<T extends { weight: string }>(items: T[]): T[] {
+  const blocks: T[][] = [];
+  for (const l of items) {
+    if (l.weight === 'year' || blocks.length === 0) blocks.push([l]);
+    else blocks[blocks.length - 1].push(l);
+  }
+  const out: T[] = [];
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const [head, ...rest] = blocks[i];
+    if (head.weight === 'year') out.push(head, ...rest.reverse());
+    else out.push(...blocks[i].reverse());
+  }
+  return out;
+}
+
 /** 폰 화면인가 (760px 이하) */
 function useMobile() {
   const q = '(max-width: 760px)';
@@ -114,7 +130,7 @@ function TopBar({ s }: { s: Life5 }) {
   const at = shownAt(s, st.shownId);
   return (
     <header class="frame topbar">
-      <span class="title">그랜드 트레저</span>
+      <span class="title">원피스 라이프</span>
       <span class="tag">{yearLabel(at)}</span>
       <span class="grow" />
       <SpeedButtons />
@@ -213,9 +229,9 @@ function StoryPanel({ s }: { s: Life5 }) {
   useEffect(() => {
     const el = box.current;
     if (!el || !stick.current) return;
-    el.scrollTop = el.scrollHeight;
-    const raf = requestAnimationFrame(() => { if (stick.current) el.scrollTop = el.scrollHeight; });
-    const t = setTimeout(() => { if (stick.current) el.scrollTop = el.scrollHeight; }, 400);
+    el.scrollTop = 0;
+    const raf = requestAnimationFrame(() => { if (stick.current) el.scrollTop = 0; });
+    const t = setTimeout(() => { if (stick.current) el.scrollTop = 0; }, 400);
     return () => { cancelAnimationFrame(raf); clearTimeout(t); };
   }, [newest, onlyHeavy]);
   /** 읽는 사람이 직접 칸을 굴렸다 (휠 · 터치 · 키). 오래된 줄이 위에서 잘려 나가며 생긴 스크롤은 이것이 아니다 */
@@ -226,10 +242,10 @@ function StoryPanel({ s }: { s: Life5 }) {
   const onScroll = () => {
     const el = box.current;
     if (!el) return;   // 휴대폰에서 탭을 바꾸는 순간 이야기 칸이 사라질 수 있다
-    // 맨 아래 가까이면 다시 따라가고, 읽는 사람이 위로 올렸을 때만 따라가기를 멈춘다.
+    // 맨 위 가까이면 다시 따라가고, 읽는 사람이 아래로 내렸을 때만 따라가기를 멈춘다.
     // (빠른 배속에서는 스크롤 사건이 오기 전에 새 줄이 붙어 틈이 벌어질 수 있으니 틈만 보고 멈추지 않는다)
-    if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) stick.current = true;
-    else if (el.scrollTop < lastTop.current && Date.now() - userScroll.current < 1000) stick.current = false;
+    if (el.scrollTop < 40) stick.current = true;
+    else if (el.scrollTop > lastTop.current && Date.now() - userScroll.current < 1000) stick.current = false;
     lastTop.current = el.scrollTop;
   };
   // 마우스가 칸 안에서 실제로 움직일 때만 멈춘다(flow.ts shouldRead). 창이 닫혀 커서가 그 자리에 놓였을 뿐이면 흐름은 이어진다
@@ -254,7 +270,7 @@ function StoryPanel({ s }: { s: Life5 }) {
     }>
       <div class="story" ref={box} onScroll={onScroll} aria-live="polite" onWheel={markUser} onTouchMove={markUser} onKeyDown={markUser} onPointerDown={markUser}
         onPointerMove={onPointerMove} onPointerLeave={() => actions.setReading(false)}>
-        {items.map((l) => l.weight === 'year'
+        {newestFirst(items).map((l) => l.weight === 'year'
           ? <div key={l.id} class={`story-year ${l.id === newest ? 'rise' : ''}`}>{yearLabel(l)}</div>
           : <div key={l.id} class={`line ${l.weight} ${l.id === newest ? 'rise' : ''}`}>{l.text}</div>)}
       </div>

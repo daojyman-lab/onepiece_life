@@ -2,14 +2,14 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { openTurning, pickTurning, resolveDoors, takeQueued } from '../../src/v5/core/turning';
+import { answerDoor, openTurning, pickTurning, resolveDoors, takeQueued } from '../../src/v5/core/turning';
 import { loseLimb } from '../../src/v5/core/body';
 import { FOES } from '../../src/v5/data/foes';
 import { emptyMeta5, knownDoors } from '../../src/v5/core/meta';
 import { rngOf } from '../../src/core/rng';
 import { checkAll } from '../../src/v5/core/cond';
 import { addValues } from '../../src/v5/core/values';
-import { TURNINGS } from '../../src/v5/data/turnings';
+import { TURNING_BY_ID, TURNINGS } from '../../src/v5/data/turnings';
 import { VALUE_NAME } from '../../src/v5/data/values';
 import { STRENGTHS } from '../../src/v5/data/strengths';
 import { V } from '../../src/v5/data/balance';
@@ -27,6 +27,28 @@ const T: Turning = {
 };
 
 describe('문', () => {
+  it('도크의 녹슨 못은 세 선택과 허락의 두 결과를 장면으로 전한 뒤 가치관을 기록한다', () => {
+    const t = TURNING_BY_ID.w7k_dock_nails;
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 80; seed++) for (let index = 0; index < 3; index++) {
+      const s = newLife5(seed); s.pending = null;
+      expect(openTurning(s, t)).toBe(true);
+      const from = s.seq;
+      const moneyBefore = s.hero.money;
+      answerDoor(s, index);
+      const lines = s.log.filter((l) => l.id >= from);
+      const scene = lines.findIndex((l) => /경비가|배를 만들었다/.test(l.text));
+      const choice = lines.findIndex((l) => l.type === 'choice');
+      expect(scene, `seed ${seed}, door ${index}`).toBeGreaterThanOrEqual(0);
+      expect(choice, `seed ${seed}, door ${index}`).toBeGreaterThan(scene);
+      if (index === 1) {
+        seen.add(lines[scene].text.includes('자루를 내주었다') ? 'allowed' : 'refused');
+        expect(s.hero.money > moneyBefore).toBe(lines[scene].text.includes('자루를 내주었다'));
+        expect(lines[choice].text).toContain('정의');
+      }
+    }
+    expect(seen).toEqual(new Set(['allowed', 'refused']));
+  });
   it('새 인생은 유년기의 첫 문이 떠 있는 채로 시작한다', () => {
     const s = newLife5(1);
     expect(s.pending?.kind).toBe('door');

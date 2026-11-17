@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, peopleView, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, battleFormation, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, peopleView, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
 import type { BattleEvent } from '../../src/core/types';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { askFight } from '../../src/v5/core/fight';
@@ -157,9 +157,31 @@ describe('선택 창과 싸움 앞의 물음', () => {
     expect(v.heading).toBe(p.title);
     expect(v.doors[0].hint).toBe('✕ 돈이 모자라다');
   });
+  it('선택 전에는 결과 문구를 숨기고 잠긴 까닭은 보여 준다', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const p = { ...s.pending, doors: [
+      { label: '족쇄를 푼다', hint: '죄수가 달아나고 섬 전체가 쫓는다', locked: null, special: false, tried: false, danger: true },
+      { label: '기록실에 들어간다', hint: '무죄 판결이 없다', locked: '열쇠가 없다', special: false, tried: false, danger: false },
+    ] };
+    const doors = doorView(s, p).doors;
+    expect(doors[0]).toMatchObject({ label: '족쇄를 푼다', hint: '', danger: true });
+    expect(doors[1].hint).toBe('✕ 열쇠가 없다');
+  });
 });
 
 describe('자동 전투 창', () => {
+  it('참전자에 따라 1대1과 집단전의 양쪽 명단을 나눈다', () => {
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
+    askFight(s, 'b_alvida', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    expect(battleFormation(s.pending.battle)).toEqual({ mode: 'duel', left: [0], right: [1] });
+    askFight(s, 'b_morgan', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    expect(battleFormation(s.pending.battle)).toEqual({ mode: 'group', left: [0], right: [1, 2] });
+    const b = s.pending.battle;
+    b.units.splice(1, 0, { ...b.units[0], key: 'crew', name: '동료', hero: false, leader: false });
+    expect(battleFormation(b)).toEqual({ mode: 'group', left: [0, 1], right: [2, 3] });
+  });
   it('전투 재생: 끝까지 가면 진 쪽의 체력이 0이다', () => {
     let s = newLife5(1); s.pending = null as Pending5; s.age = 22; s.hero.standing = 'pirate';   // as: askFight 뒤에도 null로 좁혀지지 않게
     for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 60;

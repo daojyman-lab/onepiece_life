@@ -345,6 +345,16 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 /* 자동 전투 창: 위에 양쪽 체력, 가운데 장면, 아래 사건 줄(창 안에서 스크롤), 맨 아래 단추는 늘 닿는다 */
 .modal.battle5 > * { flex: none; }
 .battle5-vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+.battle5-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 6px; }
+.battle5-party { min-width: 0; padding: 6px; }
+.battle5-roster { max-height: 180px; overflow-y: auto; margin-top: 4px; }
+.battle5-member { display: flex; align-items: center; gap: 6px; padding: 3px; border: 2px solid transparent; min-width: 0; }
+.battle5-member.acting { background: #fff2c0; border-color: var(--gold-d); }
+.battle5-member.targeted { border-color: var(--red); }
+.battle5-member.down { opacity: .5; }
+.battle5-member-info { flex: 1; min-width: 0; }
+.battle5-member-info .row { gap: 2px; }
+.battle5-member-info b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .battle5-scene { padding: 0; margin: 0 0 6px; }
 .battle5-scene .scene { height: 150px; }
 .modal.battle5 > .battle-log { flex: 1 1 auto; min-height: 72px; max-height: none; }
@@ -354,6 +364,9 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
   .battle5-scene .scene { height: 104px; }
   .battle5-vs .face.sm { width: 28px; height: 28px; }
   .battle5-vs .side { grid-template-columns: 28px 1fr; }
+  .battle5-roster { max-height: 140px; }
+  .battle5-member .face.sm { width: 28px; height: 28px; flex: none; }
+  .battle5-member-info .row span { font-size: 9px; }
 }
 /* 휴대폰에는 마우스가 없으니 '마우스를 올려 두면 멈춘다'를 내지 않는다 */
 .app.mobile .story-idle { display: none; }

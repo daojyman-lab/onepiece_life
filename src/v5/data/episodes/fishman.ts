@@ -88,7 +88,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '성난 무리 앞에 서서 인간 상인들을 항구에서 몰아낸다', hint: '골목의 박수와 시엘라의 굳은 얼굴을 함께 받는다', values: { dominion: D },
         fx: [flag('ep_fishman_b_mob'), { op: 'hardship', add: 1 }, log('죄 없는 인간 상인들까지 짐을 버리고 달아났다. 시엘라가 낮게 말했다. 미움으로 그물을 찢으면 다음 그물은 더 촘촘해진다고.'), next('ep_fishman_b_5')] },
       { label: '붉은 눈의 패거리가 남긴 순찰표를 가져온다', hint: '피해자들이 증거를 쥐게 된다', special: 'dominion', when: [ready(4), has('ep_fishman_b_hodyleak')], danger: true, values: { dominion: D },
-        fx: [flag('ep_fishman_b_jinbe'), next('ep_fishman_b_hody')] },
+        fx: [flag('ep_fishman_b_jinbe'), next('ep_fishman_b_hody'), log('시엘라가 젖은 순찰표를 광장에 펼쳤다. 납치된 인어 가족들이 붉은 표시 옆의 이름을 짚었다.', 'light')] },
     ],
   },
   {
@@ -97,7 +97,7 @@ export const EP_FISHMAN: Turning[] = [
     body: '침몰선의 화물칸에서 흰 닻 상회의 순찰표가 나온다. 몇몇 호위의 이름 옆에는 붉은 표시가 있지만, 그들이 무슨 일을 계획하는지는 아직 모른다. 피해자의 이름은 지워지지 않았다. {name}은(는) 종이가 젖기 전에 표를 접는다.',
     doors: [
       { label: '쫓지 않고 흰 닻의 그물부터 끊으러 간다', hint: '상회는 순찰표를 잃었다', values: { loyalty: D },
-        fx: [flag('ep_fishman_b_depot'), next('ep_fishman_b_5')] },
+        fx: [flag('ep_fishman_b_depot'), next('ep_fishman_b_5'), log('순찰표를 빼앗긴 상회는 창고 경비를 다시 짜야 했다. 그 사이 침몰선의 화물칸으로 들어갈 틈이 생겼다.', 'light')] },
       { label: '바닥에 떨어진 알약을 주워 왕궁 약사에게 가져간다', hint: '그 약이 무엇을 대가로 받는지 안다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, log('약사는 붉은 알약이 사람의 세월을 갉아먹을 수 있다고 경고했다.'), next('ep_fishman_b_5')] },
     ],
@@ -153,7 +153,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '알아 둔 창고의 코팅 수지 통에 구멍을 뚫어 둔다', hint: '배는 떠나도 막이 오래 버티지 못한다', when: [has('ep_fishman_b_depot')], values: { dominion: D }, danger: true,
         fx: [flag('ep_fishman_b_sabotage'), { op: 'hp', add: -6 }, log('수지 통마다 송곳 자국을 냈다. 끈적한 수지가 창고 바닥에 번졌다.'), next('ep_fishman_b_8')] },
       { label: '준비 없이 곧장 항구로 간다', hint: '그레이브는 이미 배에 올랐다', values: { ambition: D },
-        fx: [next('ep_fishman_b_8')] },
+        fx: [next('ep_fishman_b_8'), log('페론이 산호 굴 길을 가리키기도 전에 항구의 밧줄이 풀렸다. 그레이브는 갑판 위에서 기다렸다.', 'light')] },
     ],
   },
   {
@@ -166,7 +166,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '갑판으로 뛰어올라 그레이브와 정면으로 맞선다', hint: '두목의 총이 먼저 불을 뿜는다. 크게 다칠 각오를 한다', danger: true, values: { romance: D },
         fx: [fight('b_fm_grave', false, { win: 'ep_fishman_b_win', lose: 'ep_fishman_b_lose', back: 'ep_fishman_b_lose' })] },
       { label: '싸움에서 물러나 항구의 사람들을 뒤로 물린다', hint: '배는 떠난다. 다치는 사람은 줄어든다', values: { freedom: D },
-        fx: [next('ep_fishman_b_lose')] },
+        fx: [next('ep_fishman_b_lose'), log('사람들을 입강 뒤편으로 물렸다. 흰 닻의 배가 떠오를 때 부두에는 다친 이들이 남지 않았다.', 'light')] },
     ],
   },
   {
@@ -205,7 +205,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [{ op: 'fame', add: 6 }, log('왕자들은 코팅 항구에 왕궁의 감시소를 세웠다. 징베는 문 앞에서 짧게 말했다. 네가 본 것을 믿어서 다행이었다고.'),
              time('징베와 함께 류구 왕궁에 노예상 사건을 알렸다. 코팅 항구에 감시소가 섰다', 'jinbe'), next('ep_fishman_b_bye')] },
       { label: '왕궁이 이 일을 어떻게 정리하는지 기다린다', hint: '섬은 섬의 방식대로 결론을 낸다', values: { inquiry: D },
-        fx: [next('ep_fishman_b_end2')] },
+        fx: [next('ep_fishman_b_end2'), log('왕궁 포고가 붙는 날까지 입강에 머물렀다. 시엘라는 돌아온 인어와 빈 침대의 이름을 따로 적었다.', 'light')] },
     ],
   },
   {
@@ -278,7 +278,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '창고 문을 부수고 들어간다', hint: '장어 운반책이 다시 튀어나온다. 약방이 얼굴을 기억한다', values: { ambition: D },
         fx: [fight('b_fm_nuru', false, { win: 'ep_fishman_c_4', lose: 'ep_fishman_c_4', back: 'ep_fishman_c_4' })] },
       { label: '창고 바깥의 보급 명단을 몰래 가져온다', hint: '쿠데타의 주전선은 건드리지 않고 약장수의 배달 경로를 알아낸다', special: 'dominion', when: [ready(4)], danger: true, values: { dominion: D },
-        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_hody')] },
+        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_hody'), log('보급 명단 뒤에 숨은 냉동 창고 주소를 찾았다. 광장에서는 이미 반란군의 함성이 들렸다.', 'light')] },
     ],
   },
   {
@@ -287,9 +287,9 @@ export const EP_FISHMAN: Turning[] = [
     body: '약장수의 보급 명단에는 병원 주소와 광장으로 가는 길이 함께 적혀 있다. 토르는 그중 빈칸 하나가 냉동 창고의 뒷문이라고 말한다. 선장의 이름은 보이지 않는다. {name}은(는) 명단을 누구에게 먼저 보여 줄지 정한다.',
     doors: [
       { label: '쫓지 않고 약방의 창고로 돌아선다', hint: '선장의 일은 그 판을 맡을 사람들이 있다', values: { peace: D },
-        fx: [flag('ep_fishman_c_depot'), next('ep_fishman_c_4')] },
+        fx: [flag('ep_fishman_c_depot'), next('ep_fishman_c_4'), log('명단을 접어 토르에게 넘기고 창고 뒷문으로 향했다. 광장의 선장은 다른 이들이 막을 것이다.', 'light')] },
       { label: '명단 뒤에 끼워진 배달 계획서를 줍는다', hint: '광장으로 가는 알약 수레의 순서가 보인다', values: { inquiry: D },
-        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_4')] },
+        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_4'), log('토르가 배달 계획서의 수레마다 시간을 적었다. 광장으로 갈 알약이 어느 길을 지나는지 드러났다.', 'light')] },
     ],
   },
   {
@@ -311,9 +311,9 @@ export const EP_FISHMAN: Turning[] = [
     body: '그날이 왔다. 신어인 해적단이 류구 궁을 점령하고 넵튠 왕을 기온코르드 광장의 처형대에 매달았다. 섬을 비추는 방송 화면에서 붉은 눈의 선장이 인간과 손잡으려는 자는 모두 죽인다고 외치고, 광장 한가운데에는 밀짚모자를 쓴 해적이 내려선다. 광장의 결판은 그곳에 선 사람들의 몫이다. {name}이(가) 선 곳은 광장으로 이어지는 뒷골목, 증원과 알약 상자가 함께 몰려드는 길이다.',
     doors: [
       { label: '골목을 틀어막은 보급 수레를 옆길로 민다', hint: '광장으로 가는 알약 상자와 시민의 피난길을 갈라 놓는다', values: { loyalty: D },
-        fx: [flag('ep_fishman_c_depot'), next('ep_fishman_c_5')] },
+        fx: [flag('ep_fishman_c_depot'), next('ep_fishman_c_5'), log('수레를 옆길로 밀자 시민들이 골목 밖으로 빠졌다. 알약 상자는 좁은 길에 한동안 묶였다.', 'light')] },
       { label: '그림자 속 약상자 운반책을 뒤쫓는다', hint: '기척을 읽으면 창고로 돌아가는 길이 보인다', when: [ready(3)], danger: true, values: { inquiry: D },
-        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_5')] },
+        fx: [flag('ep_fishman_c_roster'), next('ep_fishman_c_5'), log('운반책을 따라가니 얼음 방의 뒷문이 나왔다. 광장으로 향하던 수레가 거기서 다시 채워졌다.', 'light')] },
       { label: '토르와 시민들을 이끌고 바다의 숲으로 빠진다', hint: '산호 그늘은 아직 안전하다', values: { peace: D },
         fx: [flag('ep_fishman_tor_trust'), { op: 'fame', add: 4 }, log('토르가 앞장서고 아이들이 그 등딱지를 붙잡았다. 뒤돌아보니 하늘 같은 바다에 방주 노아가 걸려 있었다.'), next('ep_fishman_c_5')] },
     ],
@@ -372,7 +372,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '부두 옆 두 번째 창고의 알약을 모조리 바닷물에 쏟는다', hint: '약방 주인은 품 안의 알약밖에 남지 않는다', when: [has('ep_fishman_c_roster')], values: { dominion: D }, danger: true,
         fx: [flag('ep_fishman_c_sabotage'), { op: 'hp', add: -6 }, log('붉은 알약이 바닷물에 녹아 흐려졌다. 창고 문을 닫고 나오는데 경비의 작살이 어깨를 스쳤다.'), next('ep_fishman_c_8')] },
       { label: '준비 없이 곧장 부두로 간다', hint: '우츠보는 이미 배에 짐을 싣고 있다', values: { ambition: D },
-        fx: [next('ep_fishman_c_8')] },
+        fx: [next('ep_fishman_c_8'), log('토르의 등불이 부두 끝에서 흔들렸다. 우츠보는 이미 배의 짐칸을 닫고 있었다.', 'light')] },
     ],
   },
   {
@@ -385,7 +385,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '알약을 삼키기 전에 우츠보에게 뛰어든다', hint: '약을 먹은 약사는 빠르고 단단하다. 크게 다칠 각오를 한다', danger: true, values: { romance: D },
         fx: [fight('b_fm_utsubo', false, { win: 'ep_fishman_c_win', lose: 'ep_fishman_c_lose', back: 'ep_fishman_c_lose' })] },
       { label: '싸움에서 물러나 부두의 일꾼들을 뒤로 물린다', hint: '배는 떠난다. 다치는 사람은 줄어든다', values: { freedom: D },
-        fx: [next('ep_fishman_c_lose')] },
+        fx: [next('ep_fishman_c_lose'), log('일꾼들을 창고 뒤로 물렸다. 우츠보의 배가 떠오른 뒤에도 부두에는 붉은 알약 병이 남았다.', 'light')] },
     ],
   },
   {
@@ -424,7 +424,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [{ op: 'fame', add: 6 }, log('징베는 바다의 숲에서 고개를 깊이 숙였다. 광장의 싸움만으로는 이 섬이 낫지 않는다는 것을 아는 얼굴이었다.'),
              time('반란이 끝난 어인섬에서, 징베에게 맡은 알약 창고의 일을 마쳤다', 'jinbe'), next('ep_fishman_c_bye')] },
       { label: '섬이 이 일을 어떻게 정리하는지 지켜본다', hint: '섬은 섬의 방식대로 결론을 낸다', values: { peace: D },
-        fx: [next('ep_fishman_c_end2')] },
+        fx: [next('ep_fishman_c_end2'), log('왕궁이 병원 앞에 포고를 붙였다. 미오는 늙은 젊은이들의 기록지를 들고 서명할 가족을 찾았다.', 'light')] },
     ],
   },
   {
@@ -562,7 +562,7 @@ export const EP_FISHMAN: Turning[] = [
       { label: '바스와 옆길의 바위를 무너뜨려 선단의 뱃길을 막는다', hint: '조합의 선단은 정박장에 묶인다', when: [has('ep_fishman_a_depot')], values: { dominion: D }, danger: true,
         fx: [flag('ep_fishman_a_sabotage'), flag('ep_fishman_bass_trust'), { op: 'hp', add: -6 }, log('바위가 무너지자 옆길의 해류가 뒤집혔다. 선단의 코팅선 둘이 정박장 기둥에 처박혔다.'), next('ep_fishman_a_8')] },
       { label: '준비 없이 곧장 정박장으로 간다', hint: '소렐은 이미 배에 올랐다', values: { ambition: D },
-        fx: [next('ep_fishman_a_8')] },
+        fx: [next('ep_fishman_a_8'), log('바스가 정박장으로 달려왔을 때 소렐의 배는 이미 코팅막을 부풀리고 있었다.', 'light')] },
     ],
   },
   {
@@ -571,11 +571,11 @@ export const EP_FISHMAN: Turning[] = [
     body: '거품 천장 아래 정박장, 마지막 이주선의 막이 부푼다. 갑판에서 마담 소렐이 장총을 겨눈다. 이 뱃길에서 오래 살아남은 장사꾼답게 그녀의 총구는 흔들리지 않는다. 지면 크게 다치고, 배는 이주민을 싣고 떠난다. 정박장 기둥 뒤에서 바스가 지느러미를 펼친다.',
     doors: [
       { label: '루네의 측량도와 가짜 땅문서를 승객들에게 펼친다', hint: '목적지가 없다는 사실을 알면 승객들이 스스로 내린다', when: [has('ep_fishman_rune_trust')], danger: true, values: { justice: D },
-        fx: [flag('ep_fishman_a_sabotage'), next('ep_fishman_a_win')] },
+        fx: [flag('ep_fishman_a_sabotage'), next('ep_fishman_a_win'), log('루네가 가짜 땅문서의 빈 주소를 짚자 승객들이 짐을 들고 계단을 내려왔다. 소렐은 배를 띄우지 못했다.', 'light')] },
       { label: '총구를 향해 곧장 갑판으로 뛰어오른다', hint: '조합장의 총은 멀리서도 맞힌다. 크게 다칠 각오를 한다', danger: true, values: { romance: D },
         fx: [fight('b_fm_sorel', false, { win: 'ep_fishman_a_win', lose: 'ep_fishman_a_lose', back: 'ep_fishman_a_lose' })] },
       { label: '싸움에서 물러나 정박장의 이주민들을 뒤로 물린다', hint: '배는 떠난다. 다치는 사람은 줄어든다', values: { freedom: D },
-        fx: [next('ep_fishman_a_lose')] },
+        fx: [next('ep_fishman_a_lose'), log('정박장 사람들을 총구 밖으로 물렸다. 떠오르는 이주선에서 아이 하나가 난간을 붙잡고 손을 흔들었다.', 'light')] },
     ],
   },
   {
@@ -614,7 +614,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [{ op: 'fame', add: 6 }, log('후카보시는 왕궁이 직접 이주선을 살피는 관청을 세웠다. 첫 장부에 {name}의 이름을 적어 두겠다고 했다.'),
              time('류구 왕국의 큰 왕자 후카보시에게 가짜 이주 조합의 일을 보고했다. 왕궁이 이주의 길을 맡았다'), next('ep_fishman_a_bye')] },
       { label: '왕궁이 이주를 어떻게 정리하는지 지켜본다', hint: '섬은 섬의 방식대로 결론을 낸다', values: { freedom: D },
-        fx: [next('ep_fishman_a_end2')] },
+        fx: [next('ep_fishman_a_end2'), log('왕궁의 새 이주 포고가 광장에 붙었다. 루네는 돌아온 집과 떠난 집을 같은 지도에 표시했다.', 'light')] },
     ],
   },
   {

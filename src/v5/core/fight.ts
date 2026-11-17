@@ -248,6 +248,13 @@ export function ackBattle(s: Life5): void {
   const r = rngOf(s.rng);
   const foe = p.foe;
   const won = p.result === 'win';
+  if (p.minor) {
+    s.stats.fights += 1;
+    if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
+    else if (chance(r, riskOf(s, foe, false).injury)) applyFx(s, [{ op: 'injury', severity: 'light' }]);
+    logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    return;
+  }
   const risk = riskOf(s, foe, p.lethal);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
@@ -300,7 +307,7 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
 }
 
 /**
- * 이름 없는 상대와의 사소한 싸움. 묻지 않는다: 붙을지는 가치관이 정하고, 화면 없이 돌려 기록 한 줄로 끝난다.
+ * 이름 없는 상대와의 사소한 싸움. 붙을지는 가치관이 정하고, 붙으면 전투 창에서 보여 준다.
  * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
@@ -309,9 +316,7 @@ export function minorFight(s: Life5, r: Rng): void {
   const choice = leanPick(s, r, MINOR_FIGHT_CHOICE, (c) => c.lean)!;
   if (!choice.engage) { logLine(s, line('avoid'), 'light', 'battle'); return; }
   const foe = minorFoe(s, r, name);
-  const won = fightBattle(s, foe).result === 'win';
-  s.stats.fights += 1;
-  if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
-  else if (chance(r, riskOf(s, foe, false).injury)) applyFx(s, [{ op: 'injury', severity: 'light' }]);
-  logLine(s, line(won ? 'win' : 'lose'), 'light', 'battle');
+  const battle = fightBattle(s, foe);
+  const result = battle.result ?? 'lose';
+  s.pending = { kind: 'battle', foe, lethal: false, battle, result, minor: { outcomeLine: line(result === 'win' ? 'win' : 'lose') } };
 }

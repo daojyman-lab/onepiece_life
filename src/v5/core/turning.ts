@@ -157,11 +157,6 @@ export function answerDoor(s: Life5, index: number): void {
 
   const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
-  // 이번 선택으로 깊어지는 선을 넘었을 때만 "깊어졌다". 아직 깊지 않거나 이미 깊으면 "기울었다" (인물 칸의 말과 맞춘다)
-  for (const id of rose) {
-    const crossed = before[id] < V.value.deep && isDeep(s, id);
-    logLine(s, crossed ? VALUE_DEEPEN[id] : VALUE_LEAN[id], crossed ? 'heavy' : 'light', 'choice');
-  }
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
   if (!t.id.startsWith(VOYAGE_PREFIX)) p.doors.forEach((d, i) => {   // 항로 고르기의 안 간 섬은 '가지 않은 길'에 넣지 않는다
@@ -180,4 +175,9 @@ export function answerDoor(s: Life5, index: number): void {
   applyFx(s, door.fx);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
+  // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.
+  for (const id of rose) {
+    const crossed = before[id] < V.value.deep && isDeep(s, id);
+    logLine(s, crossed ? VALUE_DEEPEN[id] : VALUE_LEAN[id], crossed ? 'heavy' : 'light', 'choice');
+  }
 }

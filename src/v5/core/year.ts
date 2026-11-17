@@ -58,12 +58,13 @@ export function stepPart(s: Life5): void {
   growPart(s, act, r);
   healInjuries(s);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
-  if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
+  const minorFightDue = s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP);
   if (s.part === V.partsPerYear - 1 && !firstLap(s)) yearTurn(s, r);   // 병 · 기연은 실제 한 해에 한 번
   turningPoint(s, r);
   notePath(s);
   if (s.hero.alive) nextPart(s, r);
   endIfDead(s);
+  if (minorFightDue && s.hero.alive && !s.pending) minorFight(s, r);
 }
 
 /**

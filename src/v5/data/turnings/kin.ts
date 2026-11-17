@@ -23,9 +23,9 @@ const GRANDPARENTS: Turning[] = [
       { label: '흐려진 말끝을 붙잡고 더 묻는다', hint: '처음 듣는 이야기가 하나 섞여 나온다', values: { inquiry: D },
         fx: [flag('grandTold'), heavy('부모는 먼 곳으로 떠났다고 했다. 왜 떠났는지는, 네가 더 크면 이야기해 주마.'), line('보호자에게 부모의 이야기를 들었다')] },
       { label: '무릎을 베고 이야기를 들으며 잠든다', hint: '이야기보다 무릎의 온기가 오래 남는다', values: { peace: D },
-        fx: [{ op: 'hp', add: 5 }, flag('grandLap')] },
+        fx: [{ op: 'hp', add: 5 }, flag('grandLap'), heavy('잠결에 들리는 이야기는 끝을 알 수 없었다. 아침이 오자 무릎을 내어 준 사람의 손이 아직 머리 위에 있었다.')] },
       { label: '언젠가 부모를 찾아내겠다고 말한다', hint: '주름진 손이 잠깐 멈춘다', values: { romance: D },
-        fx: [flag('seekParents'), line('언젠가 부모를 찾겠다고 다짐했다')] },
+        fx: [flag('seekParents'), heavy('보호자는 한동안 아궁이만 바라보다가, 찾게 되면 꼭 소식을 전하라고 말했다.'), line('언젠가 부모를 찾겠다고 다짐했다')] },
     ],
   },
   {
@@ -33,11 +33,11 @@ const GRANDPARENTS: Turning[] = [
     title: '거친 손', body: '새벽마다 먼저 일어나 일을 나가던 손이 요즘은 자주 떨린다. 오늘은 짐을 들다 주저앉았다. 괜찮다고, 늙으면 다 이렇다고 웃는다.',
     doors: [
       { label: '그날부터 짐을 대신 지고 나간다', hint: '어깨가 아프다. 그래도 그 손을 쉬게 할 수 있다', values: { loyalty: D },
-        fx: [{ op: 'base', key: 'vit', add: 1 }, flag('grandCarry')] },
+        fx: [{ op: 'base', key: 'vit', add: 1 }, flag('grandCarry'), heavy('처음 며칠은 어깨에 멍이 들었다. 보호자는 빈손으로 앞서 걷다가 자꾸만 뒤를 돌아보았다.')] },
       { label: '돈을 벌어 오겠다고 일거리를 찾아 나선다', hint: '어린 손으로 할 수 있는 일은 많지 않다', values: { greed: D },
-        fx: [{ op: 'money', add: 300 }, { op: 'hp', add: -5 }] },
+        fx: [{ op: 'money', add: 300 }, { op: 'hp', add: -5 }, heavy('온종일 잔심부름을 하고 동전 몇 닢을 받아 왔다. 보호자는 돈보다 갈라진 손바닥을 먼저 들여다보았다.')] },
       { label: '저 손이 다 낡기 전에 꼭 크게 되겠다고 다짐한다', hint: '그날 밤 오래 잠들지 못한다', values: { ambition: D },
-        fx: [{ op: 'base', key: 'wil', add: 1 }] },
+        fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('잠든 보호자의 손을 가만히 덮었다. 낮에 들지 못한 짐이 눈앞에 남아, 다음 날부터 할 일을 마음속으로 세었다.')] },
     ],
   },
   {
@@ -45,9 +45,9 @@ const GRANDPARENTS: Turning[] = [
     title: '떠나는 날', body: '떠나는 날 아침, 보호자는 아무 말도 하지 않는다. 대신 낡은 보따리 하나를 내민다. 손때 묻은 부적 하나와 마른 주먹밥이 들어 있다. 문간에 선 등이 그새 많이 작아졌다.',
     doors: [
       { label: '부적을 목에 걸고 꼭 돌아오겠다고 말한다', hint: '평생 그 부적을 풀지 않는다', values: { loyalty: D },
-        fx: [flag('grandKeepsake'), line('보호자의 부적을 목에 걸고 길을 떠났다')] },
+        fx: [flag('grandKeepsake'), heavy('부적의 매듭을 묶어 주던 손이 오래 목덜미에 머물렀다. 보호자는 대답 대신 보따리 끈을 한 번 더 조여 주었다.'), line('보호자의 부적을 목에 걸고 길을 떠났다')] },
       { label: '한 해만 더 곁에 있겠다고 보따리를 내려놓는다', hint: '보호자는 화를 내다가 결국 웃는다', values: { peace: D },
-        fx: [{ op: 'hp', add: 10 }, flag('grandStayed')] },
+        fx: [{ op: 'hp', add: 10 }, flag('grandStayed'), heavy('보따리는 문간에 그대로 놓였다. 둘은 그날 주먹밥을 나눠 먹었고, 보호자는 빈자리를 감추려 더 바쁘게 굴었다.')] },
       { label: '돌아보면 못 갈 것 같아 돌아보지 않고 걷는다', hint: '등 뒤에서 이름을 부르는 소리가 들린 것 같다', values: { freedom: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('끝내 돌아보지 않았다. 마을 어귀를 지날 때까지 등이 뜨거웠다.')] },
     ],
@@ -57,11 +57,11 @@ const GRANDPARENTS: Turning[] = [
     title: '마지막 편지', body: '고향에서 편지가 왔다. 보호자가 세상을 떠났다는 소식이다. 편지 끝에는 떨리는 글씨로 쓴 몇 줄이 덧붙어 있다. 네 부모는 죽지 않았다. 바다 어딘가에 살아 있을지도 모른다. 진작 말해 주지 못해 미안하다.',
     doors: [
       { label: '하던 일을 모두 내려놓고 고향의 무덤을 찾아간다', hint: '무덤 앞에서 처음으로 소리 내어 운다', values: { loyalty: D },
-        fx: [...goneGrand, { op: 'hp', add: -5 }, flag('parentsLost'), line('보호자의 무덤 앞에서 울었다')] },
+        fx: [...goneGrand, { op: 'hp', add: -5 }, flag('parentsLost'), heavy('무덤 앞 흙은 이미 굳어 있었다. 편지를 펼쳐 놓고 늦게 와서 미안하다고 말하자, 참아 두었던 울음이 터졌다.'), line('보호자의 무덤 앞에서 울었다')] },
       { label: '편지를 품고 부모를 찾아 나서겠다고 다짐한다', hint: '바다가 조금 다르게 보인다', values: { inquiry: D },
-        fx: [...goneGrand, flag('parentsLost'), flag('seekParents'), line('살아 있을지 모를 부모를 찾아 나섰다')] },
+        fx: [...goneGrand, flag('parentsLost'), flag('seekParents'), heavy('편지의 떨리는 글씨를 몇 번이고 읽었다. 보호자의 마지막 부탁처럼, 부모가 남겼을 흔적을 찾아 항구마다 묻기 시작했다.'), line('살아 있을지 모를 부모를 찾아 나섰다')] },
       { label: '편지를 접어 넣고 묵묵히 하던 길을 간다', hint: '보호자도 그걸 바랐을 거라고 믿는다', values: { ambition: D },
-        fx: [...goneGrand, flag('parentsLost'), { op: 'base', key: 'wil', add: 1 }] },
+        fx: [...goneGrand, flag('parentsLost'), { op: 'base', key: 'wil', add: 1 }, heavy('편지를 품 안 깊숙이 넣었다. 걸음을 멈추지는 않았지만, 그날 밤에는 보호자가 싸 준 주먹밥 맛이 자꾸 떠올랐다.')] },
     ],
   },
   {
@@ -71,7 +71,7 @@ const GRANDPARENTS: Turning[] = [
       { label: '그날 들었던 이야기를 그대로 들려준다', hint: '말끝이 흐려지는 곳까지 똑같다', values: { peace: D },
         fx: [heavy('이야기를 다 듣고 아이가 물었다. 그래서 그 사람은 어떻게 됐어요. 웃으며 답했다. 지금 네 앞에 있지.'), line('보호자에게 들은 이야기를 아이에게 들려주었다')] },
       { label: '부적을 풀어 아이의 목에 걸어 준다', hint: '목이 조금 허전하다. 마음은 가볍다', values: { loyalty: D },
-        fx: [flag('grandPassed'), line('평생 걸었던 부적을 아이에게 건넸다')] },
+        fx: [flag('grandPassed'), heavy('아이는 부적을 두 손으로 감싸 쥐고 왜 자신에게 주느냐고 물었다. {name}은(는) 오래전 같은 부적을 건네던 손을 떠올리며 매듭을 고쳐 주었다.'), line('평생 걸었던 부적을 아이에게 건넸다')] },
     ],
   },
 ];
@@ -83,11 +83,11 @@ const LOST: Turning[] = [
     title: '돌아오지 않는 배', body: '아버지가 탄 배가 약속한 날이 지나도 돌아오지 않는다. 사흘이 지나고 열흘이 지난다. 어른들이 목소리를 낮춰 이야기한다. {name}은(는) 매일 저녁 언덕에 올라 먼 곳을 본다.',
     doors: [
       { label: '돌아올 거라고 믿고 매일 언덕에 오른다', hint: '언덕 위의 바람이 익숙해진다', values: { loyalty: D },
-        fx: [{ op: 'parentMissing' }, flag('lostWaited'), line('부모가 탄 배가 돌아오지 않았다')] },
+        fx: [{ op: 'parentMissing' }, flag('lostWaited'), heavy('날이 어두워져도 배 그림자는 보이지 않았다. 집에서 부르는 소리가 들릴 때까지 언덕에 남는 날이 늘었다.'), line('부모가 탄 배가 돌아오지 않았다')] },
       { label: '남은 식구를 위해 일을 시작한다', hint: '어린 나이에 손이 거칠어진다', values: { peace: D },
-        fx: [{ op: 'parentMissing' }, { op: 'money', add: 200 }, { op: 'base', key: 'vit', add: 1 }, line('부모가 탄 배가 돌아오지 않았다')] },
+        fx: [{ op: 'parentMissing' }, { op: 'money', add: 200 }, { op: 'base', key: 'vit', add: 1 }, heavy('남의 집 일을 거들고 받은 동전을 식탁 위에 올려놓았다. 남은 식구들은 말없이 그 돈을 밀어 돌려주려 했지만, {name}은(는) 손을 거두지 않았다.'), line('부모가 탄 배가 돌아오지 않았다')] },
       { label: '크면 직접 찾으러 가겠다고 다짐한다', hint: '그날부터 먼 곳의 지도를 모은다', values: { romance: D },
-        fx: [{ op: 'parentMissing' }, flag('seekParents'), line('부모가 탄 배가 돌아오지 않았다')] },
+        fx: [{ op: 'parentMissing' }, flag('seekParents'), heavy('배가 다녔다는 항로를 종이마다 베껴 두었다. 모르는 바다 이름이 쌓여도, 아버지의 배를 찾을 곳이 하나씩 생겼다.'), line('부모가 탄 배가 돌아오지 않았다')] },
     ],
   },
   {
@@ -109,7 +109,7 @@ const LOST: Turning[] = [
       { label: '매일 기다렸다고 처음으로 말한다', hint: '부모의 어깨가 떨린다', values: { romance: D },
         fx: [heavy('매일 기다렸다고 했다. 부모는 아무 말 없이 {name}의 손을 잡았다. 어릴 적보다 손이 작게 느껴졌다.')] },
       { label: '이제는 기다리지 않아도 된다고만 말한다', hint: '그걸로 충분하다', values: { peace: D },
-        fx: [{ op: 'hp', add: 10 }] },
+        fx: [{ op: 'hp', add: 10 }, heavy('부모는 한참 수평선을 보다가 {name}의 어깨에 기대었다. 두 사람은 해가 질 때까지 그 자리에 나란히 있었다.')] },
     ],
   },
 ];
@@ -123,9 +123,9 @@ const LONELY: Turning[] = [
       { label: '아무도 필요 없다고 스스로에게 말한다', hint: '마음이 단단해진다. 그만큼 차가워진다', values: { dominion: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('혼자서도 살 수 있다고 몇 번이고 되뇌었다. 그 말은 점점 진짜가 되어 갔다.')] },
       { label: '언젠가 저 창 안에 앉겠다고 생각한다', hint: '그 생각 하나로 겨울을 넘긴다', values: { romance: D },
-        fx: [{ op: 'hp', add: 5 }] },
+        fx: [{ op: 'hp', add: 5 }, heavy('창 안의 웃음소리를 들으며 저 자리에 둘 의자를 상상했다. 빗줄기가 잦아든 뒤에도 그 생각 덕에 몸을 일으킬 수 있었다.')] },
       { label: '남의 부엌에서 먹을 것을 훔친다', hint: '배는 부르다. 아무도 쫓아오지 않는다는 게 더 서럽다', values: { greed: D },
-        fx: [{ op: 'money', add: 50 }] },
+        fx: [{ op: 'money', add: 50 }, heavy('찬 부엌에서 빵과 동전 몇 닢을 쥐고 나왔다. 뒤따르는 발소리가 없어 처마 밑에서 한참 서 있다가 혼자 빵을 베어 물었다.')] },
     ],
   },
 ];
