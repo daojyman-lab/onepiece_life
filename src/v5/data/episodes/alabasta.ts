@@ -8,6 +8,8 @@ import { age, at } from '../turnings/paths';
 const ISL = '알라바스타 왕국';
 
 export const FOES_ALABASTA: FoeDef[] = [
+  // 알라바스타의 미스터 1 (원작 b_mr1은 위대한 항로 입구의 상대라 알라바스타용으로 따로 둔다)
+  { id: 'b_mr1_ab', name: '미스터 1', title: '바로크 워크스 최고 간부', canon: 'daz', p: 44, sea: 'gl_first', bias: { str: 1.2, vit: 1.1 }, fruitClass: 'paramecia', skills: ['fruit:supa:0', 'fruit:supa:1', 'fruit:supa:2', 'sword_cut'], tactic: 'offense' },
   { id: 'b_mr2', name: '봉쿠레', title: '바로크 워크스 미스터 2', canon: 'bonclay', p: 40, sea: 'gl_first', bias: { spd: 1.2, str: 1.1 },
     skills: ['fist_combo', 'fist_counter', 'fist_guard', 'fist_secret'], tactic: 'counter', age: 30 },
 ];
@@ -253,7 +255,7 @@ export const EP_ALABASTA: Turning[] = [
       { label: '시가 연기가 모래 언덕 너머로 사라질 때까지 지켜본다', hint: '그는 이 나라를 돌아보지 않는다', values: { peace: D },
         fx: [flag('ep_alabasta_duel'), time('사막을 지나는 크로커다일을 멀리서 보았다', 'crocodile')] },
       { label: '곁의 칼날 사내에게 먼저 칼끝을 겨눈다', hint: '온몸이 칼인 상대다. 모래의 사내는 구경만 한다', when: [ready(3)], values: { ambition: D }, danger: true,
-        fx: [flag('ep_alabasta_duel'), fight('b_mr1', false, { win: 'ep_alabasta_epilogue', lose: 'ep_alabasta_epilogue', back: 'ep_alabasta_epilogue' })] },
+        fx: [flag('ep_alabasta_duel'), fight('b_mr1_ab', false, { win: 'ep_alabasta_epilogue', lose: 'ep_alabasta_epilogue', back: 'ep_alabasta_epilogue' })] },
     ],
   },
   {

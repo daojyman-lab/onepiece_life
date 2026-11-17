@@ -9,6 +9,8 @@ import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } fro
 import { age, at, st, GROWN } from '../turnings/paths';
 
 export const FOES_LOGUETOWN: FoeDef[] = [
+  // 로그타운 주둔 시절의 스모커 (원작 스모커 b_smoker는 위대한 항로 입구의 상대라 이스트 블루용으로 따로 둔다)
+  { id: 'b_smoker_lt', name: '흰 사냥꾼 스모커', title: '로그타운 해군 대령', canon: 'smoker', p: 40, sea: 'east', bias: { vit: 1.1, wil: 1 }, faction: 'marine', fruitClass: 'logia', armament: 1, skills: ['fruit:moku:0', 'fruit:moku:1', 'fruit:moku:3', 'fist_jab'], tactic: 'defense' },
   { id: 'b_mapcon', name: '먹물손 도링', title: '가짜 지도 사기단 두목', p: 22, sea: 'east', bias: { int: 1.3, vit: 0.9 }, age: 41,
     skills: ['gun_shot', 'gun_quick', 'gun_smoke', 'fist_guard'], tactic: 'counter' },
 ];
@@ -98,7 +100,7 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [{ op: 'base', key: 'spd', add: 1 }, next('ep_loguetown_pre_end')] },
       { label: '짓테 앞에 서서 한 수 겨뤄 달라고 한다', hint: '잡으려는 싸움이 아니다. 대령의 진짜 힘을 몸으로 안다', when: [ready(3)], values: { ambition: D }, danger: true,
         fx: [flag('ep_loguetown_smoker'), { op: 'person', kind: 'rival', relation: '골목에서 겨룬 연기의 대령', canon: 'smoker' },
-             fight('b_smoker', false, { win: 'ep_loguetown_smoke2', lose: 'ep_loguetown_smoke2', back: 'ep_loguetown_smoke2' })] },
+             fight('b_smoker_lt', false, { win: 'ep_loguetown_smoke2', lose: 'ep_loguetown_smoke2', back: 'ep_loguetown_smoke2' })] },
     ],
   },
   {
