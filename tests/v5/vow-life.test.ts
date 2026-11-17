@@ -7,6 +7,8 @@ import { recordVowActivity, recordVowChoice } from '../../src/v5/core/vow';
 import type { HomeId } from '../../src/v5/core/types';
 import { loadEnv } from 'vite';
 import { LIFE_VOW_STORIES } from '../../src/v5/data/vow-life';
+import { rating5, power5 } from '../../src/v5/core/power';
+import { heroFightStats } from '../../src/v5/core/fight';
 import { openTurning } from '../../src/v5/core/turning';
 import type { Turning } from '../../src/v5/core/types';
 
@@ -157,6 +159,10 @@ describe('생애 서약', () => {
         expect(s.pending?.kind === 'door' && s.pending.turning).toBe(`life_vow_settle_${level}_${value}`);
         s = reduce5(s, { type: 'answer', index: 0 });
         expect(s.vows?.history.at(-1)).toEqual({ id: `life_${level}_${value}`, result: 'kept' });
+        const minimum = [500, 770, 5700][level - 1];
+        expect(rating5(s), value).toBeGreaterThanOrEqual(minimum);
+        expect(power5(s), value).toBeGreaterThanOrEqual(minimum);
+        expect(Object.values(heroFightStats(s)).reduce((sum, stat) => sum + stat, 0)).toBeCloseTo(power5(s));
       }
       expect(s.growth.tier.fist, value).toBe(beforeTier + 3);
       expect(s.hero.base[stat], value).toBe(beforeStat + 9);

@@ -3,6 +3,7 @@ import { V } from '../data/balance';
 import { LIFE_VOW_ACTIVITY_NEEDS, LIFE_VOW_AGES, LIFE_VOW_CHOICE_NEEDS, LIFE_VOW_HP_COST, LIFE_VOW_STAT_GAIN, LIFE_VOW_STORIES } from '../data/vow-life';
 import { VOWS } from '../data/vows';
 import { BRANCH_NAME } from '../data/words';
+import { rating5 } from './power';
 import { logLine } from './state';
 import type { Activity, Branch, Life5, ValueId, VowState } from './types';
 
@@ -133,6 +134,7 @@ export function resolveVow(s: Life5, id: string, forcedFail = false): { reward: 
   const keptPromise = !forcedFail && s.hero.alive && personAlive && lifeReady
     && d.steps.every((step) => s.flags.includes(step.flag))
     && d.forbids.every((flag) => !s.flags.includes(flag));
+  const powerBefore = keptPromise ? Math.round(rating5(s)) : 0;
   vows.active = null;
   vows.history.push({ id, result: keptPromise ? 'kept' : 'failed' });
   if (!keptPromise) {
@@ -148,7 +150,7 @@ export function resolveVow(s: Life5, id: string, forcedFail = false): { reward: 
   const gain = LIFE_VOW_STAT_GAIN[n];
   s.hero.base[stat] += gain;
   s.timeline.push({ age: s.age, text: `${active.target}에게 건 ${active.level ?? 1}단계 서약을 지켰다` });
-  logLine(s, `서약 각성. ${d.title}. ${BRANCH_NAME[branch]} ${before}→${after}단계 · ${STAT_NAME[stat]} +${gain}.`, 'heavy', 'growth');
+  logLine(s, `서약 각성. ${d.title}. ${BRANCH_NAME[branch]} ${before}→${after}단계 · ${STAT_NAME[stat]} +${gain} · 전투력 ${powerBefore} → ${Math.round(rating5(s))}.`, 'heavy', 'growth');
   s.queue.push(id === 'sky_tika_guard' ? 'sky_vow_awakening' : `life_vow_awakening_${active.level}_${d.value}`);
   return { reward: null, amount: 0 };
 }

@@ -17,7 +17,7 @@ import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
 import { canUse, effectiveStats5, limbFactor, loseLimb } from './body';
 import { applyFx } from './fx';
-import { BRANCH_ID, power5, tierMult, topTier } from './power';
+import { BRANCH_ID, power5, tierMult } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
 import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext } from './types';
@@ -151,19 +151,18 @@ function aimMult(s: Life5): number {
  * v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다.
  * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
  */
-/** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 뒤 가장 높은 단계의 배율을 곱한다 (heroUnit5와 같다) */
+/** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 능력치의 비율을 유지해 경지와 서약 하한을 적용한다 */
 export function heroFightStats(s: Life5): Stats {
   const st: Stats = effectiveStats5(s);
-  const m = tierMult(topTier(s));
+  const total = sum(st);
+  const m = total > 0 ? power5(s, st) / total : 1;
   for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
   return st;
 }
 
 export function heroUnit5(s: Life5): CUnit {
   const h = s.hero;
-  const st: Stats = effectiveStats5(s);
-  const m = tierMult(topTier(s));
-  for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
+  const st = heroFightStats(s);
   const health = C.hp.healthFloor + (1 - C.hp.healthFloor) * h.hp / V.hp.max;
   const maxHp = Math.round((C.hp.base + st.vit * C.hp.perVit) * health);
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
