@@ -50,7 +50,7 @@ export const V = {
   hardship: { poor: 40, orphan: 60, outcast: 10, limb: 20, loss: 6, defeat: 3, afterFortune: 0.5 },
   fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16 },
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
-  fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25,
+  fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25, healthDamage: 35,
            injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 0.6,
            minPower: 1,                       // 힘이 0이어도 나누기가 되도록
            officerShare: 0.5,                 // 상대의 힘에 더하는 간부의 몫
@@ -70,8 +70,8 @@ export const V = {
   // 아무 열매나 먹을 때 등급(1 쓰레기 ~ 5 전설)마다 뽑힐 가중치. 원작 인물의 열매는 뽑지 않는다
   fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 },
            startTier: 1 },                     // 열매를 먹으면 열매 갈래가 적어도 이 단계에서 시작한다
-  injury: { months: { light: 3, heavy: 9, scar: 0 }, monthsPerPart: 3,   // 흉터(scar)는 낫지 않는다
-            statMult: { light: 0.95, heavy: 0.8 },   // 낫지 않은 상처 하나마다 모든 능력치에 곱한다
+  injury: { months: { light: 6, heavy: 18, scar: 0 }, monthsPerPart: 3, restMonths: 3, medicMonths: 3,
+            statMult: { light: 0.95, heavy: 0.8 }, partMult: { light: 0.85, heavy: 0.6, scar: 0.75 },
             scarAmount: 3 },                         // 흉터가 그 능력치 하나에서 빼는 만큼
   // eye.aim: 잃은 눈 하나마다 주인공의 공격이 덜 닿는 몫 (돈으로 단 눈은 그 절반, 기연으로 얻은 눈은 줄지 않는다)
   limb: { eye: { spd: 0.9, aim: 0.15 }, bothEyes: 0.6, arm: { str: 0.75 }, leg: { spd: 0.65 }, basic: 0.5, superior: 1.1, floor: 0.2,
@@ -79,6 +79,7 @@ export const V = {
   // 뭍에 자리 잡은(settled) · 물러난(retired) 사람이 해마다 버는 살림 돈 (밭 · 가게 · 모아 둔 것). 약값을 낼 수 있게 한다 (3단계 균형 보고)
   income: { settled: 4000, retired: 2500 },
   risk: { illnessP: 0.02, illnessAge: 50, illnessPerYear: 0.005, accidentP: 0.0015, oldFrom: 60, oldK: 0.0015, treatCost: 1200, calmGuard: 0.5,
+          woundInfectionP: 0.08, coldHp: 5, sickHp: 8,
           medicMult: 0.5,                      // 의사 동료가 있으면 병에 걸릴 확률에 곱한다
           monthsPerPart: 3, worsenMonths: 15,  // 못 고친 병은 worsenMonths마다 한 단계 나빠진다. 3단계에서 또 그만큼 버티지 못하면 죽는다
           maxStage: 3,
@@ -104,7 +105,7 @@ export const V = {
             grandOlder: [52, 68],
             // 아무 인연 없이 자란 사람: lonelyFrom살부터 한 해에 lonelyP의 확률로 쓸쓸한 끝을 맞는다
             lonelyFrom: 20, lonelyP: 0.12 },
-  hp: { max: 100 },
+  hp: { max: 100, recovery: 5, chosenRest: 28, medicPer: 10 },
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
   person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝
             // 새 동료의 싸움 자리와 레벨. 힘은 v4 crewPowerFor(지금 바다의 단계, level)

@@ -31,6 +31,14 @@ describe('기연', () => {
     expect(hit).toBeGreaterThan(50);
     expect(match).toBe(hit);
   });
+  it('현재 부성향과 다른 과거의 깊은 가치관도 기연의 실마리로 남는다', () => {
+    const s = newLife5(45); s.pending = null; s.age = 25; s.hero.standing = 'pirate'; s.hardship = 100000;
+    s.values.inquiry = 80;
+    s.personality = { row: 0, col: 1, pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
+    expect(rollFortune(s, () => 0)).toBe(true);
+    const t = TURNINGS.find((x) => x.id === (s.pending as { turning: string }).turning)!;
+    expect(t.fortuneOf).toBe('inquiry');
+  });
   it('기연을 받으면 시련이 절반으로 준다', () => {
     const s = newLife5(2); s.pending = null; s.age = 25; s.hero.standing = 'pirate'; s.hardship = 100000; addValues(s, { loyalty: 80 });
     for (let i = 0; i < 400 && !s.stats.fortunes; i++) rollFortune(s, rngOf(s.rng));

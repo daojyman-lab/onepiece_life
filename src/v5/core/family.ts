@@ -64,7 +64,11 @@ export function familyYear(s: Life5): void {
     if (!p.alive || p.canon || p.crew || !FAMILY_WORDS.includes(p.relation) || p.age < F.oldFrom) continue;
     if (!chance(r, Math.min(F.oldP.cap, F.oldP.start + F.oldP.perYear * (p.age - F.oldFrom)))) continue;
     p.alive = false;
-    logLine(s, `${p.relation}이(가) 세상을 떠났다.`, 'heavy', 'life');
+    const lateReunion = s.hero.lineage === 'orphan' && s.flags.includes('parentFound') && ['아버지', '어머니'].includes(p.relation);
+    const grief = lateReunion
+      ? `늦게 만난 ${p.relation}와(과) 나누지 못한 세월이 떠올라 마음이 먹먹했다.`
+      : '함께한 날들이 떠올라 한동안 마음이 먹먹했다.';
+    logLine(s, `${p.relation}이(가) 세상을 떠났다. ${grief}`, 'heavy', 'life');
   }
 }
 

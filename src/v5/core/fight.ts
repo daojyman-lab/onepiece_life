@@ -15,12 +15,12 @@ import { V } from '../data/balance';
 import { FOE_SEA, FOES, MINOR_FIGHT_CHOICE, MINOR_FIGHT_TEXT, MINOR_FOE_NAMES } from '../data/foes';
 import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
-import { canUse, effectiveStats5, limbFactor, loseLimb } from './body';
+import { canUse, effectiveStats5, limbFactor, loseLimb, WOUND_PART_NAME } from './body';
 import { applyFx } from './fx';
 import { BRANCH_ID, power5, tierMult, topTier } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
-import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext } from './types';
+import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext, WoundPart, WoundKind } from './types';
 import type { CUnit, Skill } from '../../core/types';
 
 const C = B.combat;
@@ -32,6 +32,7 @@ const sum = (st: Stats) => Object.values(st).reduce((a, b) => a + b, 0);
 export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const AFTER_FIGHT = 'after_fight';
+const WOUND_KIND_NAME: Record<WoundKind, string> = { bruise: '타박', cut: '베인', burn: '화상', fracture: '골절' };
 
 /** 정신적 강점 → 싸움에 걸리는 v4의 특성 */
 const STRENGTH_TRAIT: Record<string, string> = {
@@ -248,6 +249,26 @@ export function ackBattle(s: Life5): void {
   const r = rngOf(s.rng);
   const foe = p.foe;
   const won = p.result === 'win';
+  const hero = p.battle.units?.find((u) => u.hero);
+  const damage = hero ? clamp(1 - hero.hp / Math.max(1, hero.maxHp), 0, 1) : 0;
+  if (damage > 0) s.hero.hp = Math.max(1, s.hero.hp - Math.max(1, Math.round(damage * F.healthDamage)));
+  const knockedOut = !!hero && hero.hp <= 0;
+  const woundRisk = riskOf(s, foe, p.lethal).injury * (won ? F.wonMult : 1);
+  if (knockedOut || (damage > 0 && chance(r, woundRisk))) {
+    const severity = knockedOut ? 'heavy' : 'light';
+    const part = pick(r, ['torso', 'armL', 'armR', 'legL', 'legR', 'head', 'eyeL', 'eyeR'] as WoundPart[]);
+    const kind: WoundKind = foe.skills.some((id) => /fire|flame|magma|heat/.test(id)) ? 'burn'
+      : foe.skills.some((id) => /sword|gun|blade/.test(id)) ? 'cut'
+      : knockedOut ? 'fracture' : 'bruise';
+    applyFx(s, [{ op: 'injury', severity, part, kind }]);
+    logLine(s, `싸움에서 ${WOUND_PART_NAME[part]}에 ${WOUND_KIND_NAME[kind]} 상처를 입었다.`, 'heavy', 'danger');
+  }
+  if (p.minor) {
+    s.stats.fights += 1;
+    if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
+    logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    return;
+  }
   const risk = riskOf(s, foe, p.lethal);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
@@ -269,10 +290,6 @@ export function ackBattle(s: Life5): void {
     }
   } else {
     logLine(s, p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`, 'heavy', 'battle');
-  }
-  if (chance(r, risk.injury * mult)) {
-    applyFx(s, [{ op: 'injury', severity: won ? 'light' : 'heavy' }]);
-    logLine(s, won ? '싸움에서 가벼운 상처를 입었다.' : '싸움에서 크게 다쳤다.', 'light', 'danger');
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
@@ -300,7 +317,7 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
 }
 
 /**
- * 이름 없는 상대와의 사소한 싸움. 묻지 않는다: 붙을지는 가치관이 정하고, 화면 없이 돌려 기록 한 줄로 끝난다.
+ * 이름 없는 상대와의 사소한 싸움. 붙을지는 가치관이 정하고, 붙으면 전투 창에서 보여 준다.
  * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
@@ -309,9 +326,7 @@ export function minorFight(s: Life5, r: Rng): void {
   const choice = leanPick(s, r, MINOR_FIGHT_CHOICE, (c) => c.lean)!;
   if (!choice.engage) { logLine(s, line('avoid'), 'light', 'battle'); return; }
   const foe = minorFoe(s, r, name);
-  const won = fightBattle(s, foe).result === 'win';
-  s.stats.fights += 1;
-  if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
-  else if (chance(r, riskOf(s, foe, false).injury)) applyFx(s, [{ op: 'injury', severity: 'light' }]);
-  logLine(s, line(won ? 'win' : 'lose'), 'light', 'battle');
+  const battle = fightBattle(s, foe);
+  const result = battle.result ?? 'lose';
+  s.pending = { kind: 'battle', foe, lethal: false, battle, result, minor: { outcomeLine: line(result === 'win' ? 'win' : 'lose') } };
 }

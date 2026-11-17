@@ -79,7 +79,7 @@ export function doorView(s: Life5, p: Extract<Pending5, { kind: 'door' }>): Door
     body: p.body,
     doors: p.doors.map((d, index) => ({
       index, label: d.label, locked: d.locked, danger: d.danger,
-      hint: d.locked ? `✕ ${d.locked}` : d.hint,
+      hint: d.locked ? `✕ ${d.locked}` : '',
       tags: [
         d.special && { text: '특별한 문', red: false },
         d.tried && { text: '전에 골라 본 문', red: false },

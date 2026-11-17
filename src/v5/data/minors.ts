@@ -6,7 +6,7 @@
 // 물러서는 결과에는 맞서는 가치관이, 맞서는 결과에는 평온이 깊으면 고르지 않는 조건(when)을 붙인다.
 // 해적 · 해군 · 혁명군은 처지가 배를 전제하므로 'ship'을 따로 적지 않는다.
 // id는 전환점과 seen을 함께 쓰므로 'm_'로 시작한다 (기존 시비 사건 'brawl'만 예외).
-// 자리표시: {name} 이름만, {town} 자란 마을, {island} 지금 있는 섬
+// 자리표시: {name} 이름만, {town} 자란 마을, {island} 지금 있는 섬, {parent} 살아 있는 부모의 호칭
 import type { Cond, Minor, SeaId, Standing, ValueId } from '../core/types';
 import { HOME_MINORS } from './minors-homes';
 import { landlockedMinor } from './landlocked';
@@ -266,18 +266,18 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_kid_chores', when: [young], needs: ['parent'], weight: 7, cooldownYears: 1,
     outcomes: [
-      { lean: { justice: 1 }, text: ['아버지 대신 그물 손질을 끝내 놓고 저녁상을 차렸다.', '어머니가 장에 간 사이 빨래를 다 걷어 개 두었다.'], fx: [] },
-      { lean: { inquiry: 1 }, text: ['아버지 가게의 장부를 들여다보며 숫자 맞추는 법을 익혔다.', '어머니에게 생선 값 매기는 법을 물어 수첩에 적었다.'], fx: [] },
+      { lean: { justice: 1 }, text: ['{parent} 대신 그물 손질을 끝내 놓고 저녁상을 차렸다.', '{parent}가 장에 간 사이 빨래를 다 걷어 개 두었다.'], fx: [] },
+      { lean: { inquiry: 1 }, text: ['{parent} 가게의 장부를 들여다보며 숫자 맞추는 법을 익혔다.', '{parent}에게 생선 값 매기는 법을 물어 수첩에 적었다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['집안일을 하다 말고 몰래 빠져나가 바닷가에서 놀았다.', '그물 손질을 하라는 말을 못 들은 척 언덕으로 달아났다.'], fx: [] },
-      { lean: {}, text: ['아버지를 도와 그물을 깁다 손가락을 찔렸다.', '어머니를 도와 하루 종일 생선을 말렸다.'], fx: [] },
+      { lean: {}, text: ['{parent}를 도와 그물을 깁다 손가락을 찔렸다.', '{parent}를 도와 하루 종일 생선을 말렸다.'], fx: [] },
     ],
   },
   {
     id: 'm_kid_storm_night', when: [young], needs: ['parent'], weight: 5, cooldownYears: 2,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['폭풍이 치는 밤, 이웃 꼬마들을 우리 집 다락으로 데려와 재웠다.', '폭풍 속에 혼자 사는 이웃 할머니 집 덧문을 걸어 드렸다.'], fx: [] },
-      { lean: { loyalty: 1 }, text: ['폭풍이 치는 밤, 어머니와 함께 날아가려는 지붕을 밤새 붙잡았다.', '아버지 곁에서 물에 잠긴 마당의 물을 밤새 퍼냈다.'], fx: [{ op: 'hp', add: -2 }] },
-      { lean: { peace: 1 }, text: ['폭풍이 지나가길 기다리며 이불을 뒤집어쓰고 숨죽였다.', '덜컹거리는 창문 소리를 들으며 어머니 품에서 잠들었다.'], fx: [] },
+      { lean: { loyalty: 1 }, text: ['폭풍이 치는 밤, {parent}와 함께 날아가려는 지붕을 밤새 붙잡았다.', '{parent} 곁에서 물에 잠긴 마당의 물을 밤새 퍼냈다.'], fx: [{ op: 'hp', add: -2 }] },
+      { lean: { peace: 1 }, text: ['폭풍이 지나가길 기다리며 이불을 뒤집어쓰고 숨죽였다.', '덜컹거리는 창문 소리를 들으며 {parent} 품에서 잠들었다.'], fx: [] },
       { lean: {}, text: ['폭풍이 지나간 아침, 부서진 울타리 조각을 주워 모았다.', '폭풍에 쓰러진 나무를 보러 동네 아이들과 몰려갔다.'], fx: [] },
     ],
   },
@@ -497,10 +497,10 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_home_letter', when: [adult, free, money(5000)], needs: ['parent'], weight: 4, cooldownYears: 3,
     outcomes: [
-      { lean: { romance: 1 }, text: ['고향에 흉년이 들었다는 어머니의 편지를 받고 모은 돈을 부쳤다.', '{town}의 부모님께 쌀값을 넉넉히 보냈다.'], fx: [{ op: 'money', add: -4000 }] },
-      { lean: { loyalty: 1 }, text: ['흉년 소식에 이웃집 몫까지 나눠 쓰라며 돈을 보냈다.', '어머니의 편지를 받자마자 답장과 함께 약값을 부쳤다.'], fx: [{ op: 'money', add: -4000 }] },
+      { lean: { romance: 1 }, text: ['흉년이 들었다는 {parent}의 편지를 받고 모은 돈을 부쳤다.', '{parent}께 쌀값을 넉넉히 보냈다.'], fx: [{ op: 'money', add: -4000 }] },
+      { lean: { loyalty: 1 }, text: ['흉년 소식에 이웃집 몫까지 나눠 쓰라며 돈을 보냈다.', '{parent}의 편지를 받자마자 답장과 함께 약값을 부쳤다.'], fx: [{ op: 'money', add: -4000 }] },
       { lean: { ambition: 1 }, text: ['돈은 조금만 부치고 더 벌어 크게 갚겠다고 답장을 썼다.', '고향에 보낼 돈을 아껴 일을 늘리는 데 썼다.'], fx: [{ op: 'money', add: -1000 }] },
-      { lean: {}, text: ['어머니의 편지에 안부를 적어 답장하고 동전 몇 닢을 넣었다.', '고향 소식을 듣고 형편대로 조금 부쳤다.'], fx: [{ op: 'money', add: -1000 }] },
+      { lean: {}, text: ['{parent}의 편지에 안부를 적어 답장하고 동전 몇 닢을 넣었다.', '고향 소식을 듣고 형편대로 조금 부쳤다.'], fx: [{ op: 'money', add: -1000 }] },
     ],
   },
   // ---------------- 배를 탄 처지 (해적 · 해군 · 혁명군)

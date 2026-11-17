@@ -16,6 +16,18 @@ const exempt = (id: string, need: Need) => EXEMPT[id]?.need === need;
 /** 효과 목록 안의 모든 효과 (chance의 then · else까지) */
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]);
 
+describe('선의 영입', () => {
+  it('떠돌이 의사를 태우면 치료 능력을 가진 선의가 된다', () => {
+    const event = TURNINGS.find((t) => t.id === 'pirate_doctor');
+    expect(event?.kind).toBe('door');
+    if (event?.kind !== 'door') return;
+    for (const door of [event.doors[0], event.doors[2]]) {
+      const doctor = allFx(door.fx).find((fx) => fx.op === 'person' && fx.kind === 'crew');
+      expect(doctor).toMatchObject({ op: 'person', role: 'medic' });
+    }
+  });
+});
+
 describe('낱말 검사 자체', () => {
   const hits = (text: string) => WORD_NEEDS.filter(([re]) => re.test(text)).map(([, n]) => n);
   it('가족 · 동료 · 헤엄을 전제하는 글은 잡는다', () => {
@@ -40,6 +52,8 @@ describe('사건 데이터의 짜임', () => {
   it('문은 2~3개이고, 특별한 문은 많아야 하나 더', () => {
     for (const t of doorTurnings) {
       const plain = t.doors.filter((d) => !d.special).length, special = t.doors.length - plain;
+      // 크로커다일의 거절은 거래를 제안하지 않고 끝내는 강제 장면이다.
+      if (t.id === 'crocodile_port_dismissed') { expect(plain).toBe(1); continue; }
       expect(plain, t.id).toBeGreaterThanOrEqual(2); expect(plain, t.id).toBeLessThanOrEqual(3); expect(special, t.id).toBeLessThanOrEqual(1);
     }
   });

@@ -21,6 +21,13 @@ export function hpAt(b: BattleState, upto: number): number[] {
   return hp;
 }
 
+/** 실제 참전자 수로 전투 창의 1대1/집단전 화면을 고른다. */
+export function battleFormation(b: BattleState): { mode: 'duel' | 'group'; left: number[]; right: number[] } {
+  const left: number[] = [], right: number[] = [];
+  b.units.forEach((u, i) => (u.side === 'L' ? left : right).push(i));
+  return { mode: left.length === 1 && right.length === 1 ? 'duel' : 'group', left, right };
+}
+
 /** 사건 한 줄의 글 */
 export function battleLine(b: BattleState, e: BattleEvent): string {
   return josa(rawBattleLine(b, e));

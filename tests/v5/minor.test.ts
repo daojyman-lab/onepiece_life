@@ -7,8 +7,35 @@ import { MINORS } from '../../src/v5/data/minors';
 import { LINES } from '../../src/v5/data/lines';
 import { lineFits } from '../../src/v5/core/year';
 import { rngOf } from '../../src/core/rng';
+import { parentFound } from '../../src/v5/core/family';
+import { fillText } from '../../src/v5/core/fx';
 
 describe('자잘한 일', () => {
+  it('고아가 아버지 한 명을 만났을 때 고향 편지에는 살아 있는 아버지만 나온다', () => {
+    const s = Array.from({ length: 100 }, (_, seed) => {
+      const life = newLife5(seed, { lineage: 'orphan' });
+      parentFound(life);
+      return life;
+    }).find((life) => life.people.some((p) => p.alive && p.relation === '아버지'))!;
+    s.age = 47; s.hero.standing = 'civil'; s.hero.money = 99999;
+    s.seen = Object.fromEntries(MINORS.filter((m) => m.id !== 'm_home_letter').map((m) => [m.id, s.age]));
+    let namedFather = false;
+    for (let i = 0; i < 4; i++) {
+      s.seen.m_home_letter = -100;
+      expect(runMinor(s, rngOf(s.rng))).toBe(true);
+      namedFather ||= s.log.at(-1)!.text.includes('아버지');
+      expect(s.log.at(-1)!.text).not.toMatch(/어머니|부모님/);
+    }
+    expect(namedFather).toBe(true);
+  });
+  it('아버지만 살아 있을 때 부모 관련 일상 기록에 어머니가 등장하지 않는다', () => {
+    const s = newLife5(7, { lineage: 'commoner' });
+    s.people.find((p) => p.relation === '어머니')!.alive = false;
+    for (const line of LINES.filter((l) => l.needs?.includes('parent'))) {
+      expect(fillText(s, line.text)).not.toContain('어머니');
+      expect(fillText(s, line.text)).toContain('아버지');
+    }
+  });
   it('플레이어에게 묻지 않고 기록 한 줄로 끝난다', () => {
     const s = newLife5(4); s.pending = null; s.age = 20; s.hero.standing = 'civil';
     const before = s.log.length;
@@ -54,6 +81,8 @@ describe('자잘한 일', () => {
   });
   it('기록 줄도 needs가 맞지 않으면 고르지 않는다', () => {
     const s = newLife5(3); s.age = 10; s.hero.standing = 'child';
+    for (const id of Object.keys(s.values) as (keyof typeof s.values)[]) s.values[id] = 0;
+    s.values.peace = 80;
     s.people = s.people.filter((p) => !['형', '누나', '오빠', '언니', '남동생', '여동생'].includes(p.relation));
     const sib = LINES.filter((l) => l.needs?.includes('sibling'));
     expect(sib.length).toBeGreaterThan(0);

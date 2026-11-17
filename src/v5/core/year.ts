@@ -19,10 +19,12 @@ import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
+import { recoverHealthPart } from './health';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
-import { leanPick } from './values';
+import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
+import { expireVow } from './vow';
 import { buildVoyage, voyageChoices, voyageId } from './voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -43,25 +45,28 @@ function firstLap(s: Life5): boolean {
 }
 
 /** 한 토막을 진행한다. 대기 중인 일이 있으면 아무것도 하지 않는다. */
-export function stepPart(s: Life5): void {
+export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.pending) return;
+  expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
 
   const r = rngOf(s.rng);
   partRisks(s, r);
   if (!s.hero.alive) return;
-  const act = activityOf(s, r);
+  const act = chosenActivity ?? activityOf(s, r);
+  if (chosenActivity === 'rest') logLine(s, '한 철 동안 위험한 일을 멈추고 몸을 쉬게 했다.', 'heavy', 'life');
   dailyLine(s, act, r);
   growPart(s, act, r);
-  healInjuries(s);
+  recoverHealthPart(s, chosenActivity === 'rest' ? 'chosenRest' : act === 'rest' ? 'rest' : 'usual');
   if (chance(r, V.lines.minorP)) runMinor(s, r);
-  if (s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP)) minorFight(s, r);
+  const minorFightDue = chosenActivity !== 'rest' && s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP);
   if (s.part === V.partsPerYear - 1 && !firstLap(s)) yearTurn(s, r);   // 병 · 기연은 실제 한 해에 한 번
   turningPoint(s, r);
   notePath(s);
   if (s.hero.alive) nextPart(s, r);
   endIfDead(s);
+  if (minorFightDue && s.hero.alive && !s.pending) minorFight(s, r);
 }
 
 /**
@@ -140,13 +145,6 @@ export function notePath(s: Life5): void {
   }
 }
 
-/** 한 토막만큼 상처가 아문다. 다 나은 상처는 지운다. 흉터는 낫지 않는다. */
-function healInjuries(s: Life5): void {
-  const h = s.hero;
-  for (const inj of h.injuries) if (inj.severity !== 'scar') inj.monthsLeft -= V.injury.monthsPerPart;
-  h.injuries = h.injuries.filter((inj) => inj.severity === 'scar' || inj.monthsLeft > 0);
-}
-
 /** 한 토막의 활동만큼 자란다: 숙련과 능력치, 단계, 정체와 돌파 */
 export function growPart(s: Life5, act: Activity, r: Rng): void {
   const h = s.hero;
@@ -163,7 +161,7 @@ export function growPart(s: Life5, act: Activity, r: Rng): void {
     case 'family':
       for (const p of s.people) if (p.alive) p.bond = Math.min(V.person.bondMax, p.bond + G.familyBond);
       return;
-    case 'rest': h.hp = Math.min(V.hp.max, h.hp + G.restHp); return;
+    case 'rest': return;
   }
 }
 
@@ -224,7 +222,8 @@ function dailyLine(s: Life5, act: Activity, r: Rng): void {
 /** 이 사람에게 이 기록 줄이 맞는가: 조건(when)과 글이 전제하는 것(needs) */
 export function lineFits(s: Life5, l: DailyLine5): boolean {
   // 돈을 쓰는 줄은 그만한 돈이 있을 때만
-  return checkAll(s, l.when) && needsOk(s, l.needs) && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
+  const personaFits = Object.keys(l.lean).length === 0 || topValues(s, 2).some((id) => (l.lean[id] ?? 0) > 0);
+  return personaFits && checkAll(s, l.when) && needsOk(s, l.needs) && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
 /** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */

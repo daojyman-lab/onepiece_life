@@ -4,7 +4,7 @@ import { newLife5 } from '../../src/v5/core/state';
 import { applyFx } from '../../src/v5/core/fx';
 import { normalizeLife5 } from '../../src/v5/core/load';
 import { personIs } from '../../src/v5/core/needs';
-import { familyYear } from '../../src/v5/core/family';
+import { familyYear, parentFound } from '../../src/v5/core/family';
 import { check } from '../../src/v5/core/cond';
 import { HOMES } from '../../src/v5/data/homes';
 import { TURNING_BY_ID } from '../../src/v5/data/turnings';
@@ -141,8 +141,24 @@ describe('가족의 노환', () => {
     for (let seed = 1; seed <= 50; seed++) {
       const s = ageParent(seed, 100, 20);
       expect(s.people.find((x) => x.relation === '어머니')!.alive).toBe(false);
-      expect(s.log.some((l) => l.text === '어머니가 세상을 떠났다.' && l.weight === 'heavy')).toBe(true);
+      expect(s.log.some((l) => l.text.startsWith('어머니가 세상을 떠났다.') && l.weight === 'heavy')).toBe(true);
     }
+  });
+  it('고아가 뒤늦게 만난 아버지를 잃으면 그 상실감이 부고에 남는다', () => {
+    const s = Array.from({ length: 100 }, (_, seed) => {
+      const life = newLife5(seed, { lineage: 'orphan' });
+      parentFound(life);
+      return life;
+    }).find((life) => life.people.some((p) => p.alive && p.relation === '아버지'))!;
+    s.age = 48;
+    const father = s.people.find((p) => p.relation === '아버지')!;
+    father.age = 100;
+    for (let i = 0; i < 20 && father.alive; i++) familyYear(s);
+    expect(father.alive).toBe(false);
+    const obituary = s.log.find((l) => l.text.startsWith('아버지가 세상을 떠났다.'))!;
+    expect(obituary.weight).toBe('heavy');
+    expect(obituary.text).toMatch(/늦게|뒤늦게/);
+    expect(obituary.text).toMatch(/울|슬픔|그리움|허전|먹먹/);
   });
   it('마흔 살의 가족은 이 일로 죽지 않는다', () => {
     for (let seed = 1; seed <= 50; seed++) expect(ageParent(seed, 40, 20).people.find((x) => x.relation === '어머니')!.alive).toBe(true);

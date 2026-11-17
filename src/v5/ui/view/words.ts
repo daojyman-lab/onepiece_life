@@ -1,20 +1,25 @@
 // 화면의 말씨: 나이, 해 구분선, 가치관을 말로, 수를 띠로 나눈 말.
-import { josa } from '../../../core/josa';
-import { isDeep, topValues } from '../../core/values';
-import { VALUE_NAME } from '../../data/values';
+import { personalityOf } from '../../core/personality';
 import { ageWord } from '../../core/words';
 import type { Life5 } from '../../core/types';
 
 export { ageShort, ageWord } from '../../core/words';
 
-/** 해 구분선: '열일곱 살 · 로그타운' (섬이 없으면 나이만) */
+/** 해 구분선: '열일곱 살 · 장소: 로그타운' (섬이 없으면 나이만) */
 export function yearLabel(l: { age: number; island?: string }): string {
-  return l.island ? `${ageWord(l.age)} · ${l.island}` : ageWord(l.age);
+  return l.island ? `${ageWord(l.age)} · 장소: ${l.island}` : ageWord(l.age);
 }
 
-/** 가장 높은 가치관 두 가지를 말로: 깊으면 '의리가 깊다', 아니면 '의리를 안다' */
+/** 이야기의 옛 기록: 해 시작 위치와 같은 해에 이동한 위치를 구별한다. */
+export function storyYearLabel(l: { age: number; island?: string; moved?: true }): string {
+  if (!l.island) return ageWord(l.age);
+  return `${ageWord(l.age)} · ${l.moved ? '이동한 곳' : '시작한 곳'}: ${l.island}`;
+}
+
+/** 현재 성향표의 행과 칸을 주·부성향으로 보여 준다. */
 export function valueWords(s: Life5): string[] {
-  return topValues(s, 2).map((id) => josa(isDeep(s, id) ? `${VALUE_NAME[id]}이(가) 깊다` : `${VALUE_NAME[id]}을(를) 안다`));
+  const p = personalityOf(s);
+  return p ? [`주성향 ${p.primary}`, `부성향 ${p.secondary}`] : [];
 }
 
 /** 수 x가 처음으로 lim 미만이 되는 띠의 말 (어느 띠에도 들지 않으면 top) */

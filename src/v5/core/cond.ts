@@ -3,7 +3,9 @@ import { josa } from '../../core/josa';
 import { fmtMoney } from '../../core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
+import { GRADES, GRADE_TOP } from '../data/words';
 import { VALUE_NAME } from '../data/values';
+import { rating5 } from './power';
 import { personIs } from './needs';
 import { isDeep } from './values';
 import type { Cond, Life5, Wealth } from './types';
@@ -28,6 +30,8 @@ export function check(s: Life5, c: Cond): boolean {
     case 'strength': return s.strengths.includes(c.id) === c.has;
     case 'money': return h.money >= c.min;
     case 'fame': return h.fame >= c.min;
+    case 'grade': return c.is.includes(GRADES.find(([limit]) => rating5(s) < limit)?.[1] ?? GRADE_TOP);
+    case 'turningSeen': return ((s.seenCount[c.id] ?? 0) > 0) === c.has;
     case 'tier': {
       const t = c.branch === 'any' ? Math.max(...Object.values(s.growth.tier)) : s.growth.tier[c.branch];
       return t >= c.min;
@@ -44,6 +48,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'island': return c.is.includes(h.island) !== (c.not ?? false);
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
+    case 'person': return s.people.some((p) => p.alive && p.relation === c.relation && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -71,6 +76,8 @@ function reason(s: Life5, c: Cond): string {
     case 'strength': return c.has ? `「${strengthName(c.id)}」이(가) 아직 없다` : `이미 「${strengthName(c.id)}」이(가) 있다`;
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
     case 'fame': return '아직 이름이 알려지지 않았다';
+    case 'grade': return '아직 상대가 인정할 전투력이 아니다';
+    case 'turningSeen': return '이미 지나간 만남이다';
     case 'tier': return '아직 그 경지에 이르지 못했다';
     case 'flag': return '때가 맞지 않는다';
     case 'fruit': return c.has ? '열매 능력자만 할 수 있다' : '능력자는 할 수 없다';
@@ -83,6 +90,7 @@ function reason(s: Life5, c: Cond): string {
     case 'island': return '여기서는 일어나지 않는다';
     case 'species': return '종족이 다르다';
     case 'kin': return '때가 맞지 않는다';
+    case 'person': return c.has ? '그 사람과의 인연이 없다' : '이미 그 사람을 알고 있다';
     case 'path': return '걷는 길이 다르다';
     case 'canonAge': return '그 사람과 때가 맞지 않는다';
     case 'dream': return '마음에 품은 것이 다르다';

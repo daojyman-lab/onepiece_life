@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { ageWord, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, peopleView, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
+import { ageWord, battleFormation, battleLine, codexView, doorView, endingView, fightView, hallView, heroWho5, hpAt, matchWord, peopleView, profileView, resultLine, riskWords, sceneOf, speakerOf, storyLines, storyYearLabel, timelineView, unitWho, valueWords, yearLabel } from '../../src/v5/ui/view';
 import type { BattleEvent } from '../../src/core/types';
 import { TURNINGS } from '../../src/v5/data/turnings';
 import { askFight } from '../../src/v5/core/fight';
 import { VALUE_NAME } from '../../src/v5/data/values';
 import type { Pending5 } from '../../src/v5/core/types';
 import { newLife5 } from '../../src/v5/core/state';
+import { applyFx } from '../../src/v5/core/fx';
 import { addValues } from '../../src/v5/core/values';
 import { autoplay5 } from '../../src/v5/core/autoplay';
 import { emptyMeta5, recordLife } from '../../src/v5/core/meta';
@@ -17,21 +18,26 @@ describe('나이를 말로', () => {
     expect(ageWord(n)).toBe(w);
   });
   it('해 구분선', () => {
-    expect(yearLabel({ age: 17, island: '로그타운' })).toBe('열일곱 살 · 로그타운');
+    expect(yearLabel({ age: 17, island: '로그타운' })).toBe('열일곱 살 · 장소: 로그타운');
+    expect(yearLabel({ age: 48, island: '조' })).toBe('마흔여덟 살 · 장소: 조');
     expect(yearLabel({ age: 17 })).toBe('열일곱 살');
+  });
+  it('이야기 구분선은 그해 시작한 섬과 나중에 이동한 섬을 구별한다', () => {
+    expect(storyYearLabel({ age: 48, island: '조' })).toBe('마흔여덟 살 · 시작한 곳: 조');
+    expect(storyYearLabel({ age: 48, island: '드레스로자', moved: true })).toBe('마흔여덟 살 · 이동한 곳: 드레스로자');
   });
   it('0살은 갓난아기', () => {
     expect(ageWord(0)).toBe('갓난아기');
-    expect(yearLabel({ age: 0, island: '푸샤 마을' })).toBe('갓난아기 · 푸샤 마을');
+    expect(yearLabel({ age: 0, island: '푸샤 마을' })).toBe('갓난아기 · 장소: 푸샤 마을');
   });
 });
 
 describe('가치관은 말로만', () => {
-  it('높은 순으로 둘, 깊은 것은 깊다고 적는다', () => {
+  it('숨은 점수만 바꿔서는 표시 성향을 즉시 확정하지 않는다', () => {
     const s = newLife5(1); for (const k of Object.keys(s.values)) s.values[k as keyof typeof s.values] = 0;
     expect(valueWords(s)).toEqual([]);
     addValues(s, { loyalty: V.value.deep + 1, freedom: 10, peace: 5 });
-    expect(valueWords(s)).toEqual(['의리가 깊다', '자유를 안다']);
+    expect(valueWords(s)).toEqual([]);
   });
   it('프로필 어디에도 가치관 숫자가 없다', () => {
     const s = autoplay5(77, 'random').s;
@@ -42,12 +48,19 @@ describe('가치관은 말로만', () => {
 });
 
 describe('프로필', () => {
+  it('확정된 부성향이 과거의 최고 점수와 달라도 현재 칸으로 호칭을 붙인다', () => {
+    const s = newLife5(9);
+    s.hero.standing = 'pirate'; s.hero.fame = 60;
+    s.values.dominion = 80;
+    s.personality = { row: 0, col: 1, pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
+    expect(profileView(s).standing).toBe('의리 있는 이름난 해적');
+  });
   it('해적은 이름값에 따라, 해군은 자리에 따라 이름이 오르고, 신참 · 병사를 벗어나면 가장 높은 가치관의 말이 붙는다', () => {
     const s = newLife5(9); s.hero.standing = 'pirate'; s.values.ambition = 30; s.values.romance = 10;
     s.hero.fame = 5; expect(profileView(s).standing).toBe('신참 해적');
-    s.hero.fame = 60; expect(profileView(s).standing).toBe('야망 있는 이름난 해적');
-    s.hero.fame = 200; expect(profileView(s).standing).toBe('야망 있는 악명 높은 해적');
-    s.hero.fame = 900; expect(profileView(s).standing).toBe('야망 있는 바다를 뒤흔드는 대해적');
+    s.hero.fame = 60; expect(profileView(s).standing).toBe('성취를 좇는 이름난 해적');
+    s.hero.fame = 200; expect(profileView(s).standing).toBe('성취를 좇는 악명 높은 해적');
+    s.hero.fame = 900; expect(profileView(s).standing).toBe('성취를 좇는 바다를 뒤흔드는 대해적');
     const m = newLife5(9); m.hero.standing = 'marine'; m.values.romance = 30;
     expect(profileView(m).standing).toBe('해군 병사');
     m.flags.push('mnOfficer'); expect(profileView(m).standing).toBe('낭만적인 해군 부사관');
@@ -69,6 +82,11 @@ describe('프로필', () => {
     const s = newLife5(1); expect(profileView(s).body).toEqual([]);
     s.hero.limbs.armL = 'lost'; s.hero.limbs.legR = 'basic';
     expect(profileView(s).body.length).toBe(2);
+  });
+  it('부상 부위와 종류를 상태에 표시한다', () => {
+    const s = newLife5(1);
+    s.hero.injuries.push({ severity: 'heavy', monthsLeft: 12, part: 'armL', kind: 'fracture' });
+    expect(profileView(s).hurts).toContain('왼팔 골절 · 무거운 부상');
   });
   it('해적은 현상금으로, 0이면 빈 글자', () => {
     const s = newLife5(1); s.hero.standing = 'pirate'; s.hero.fame = 0;
@@ -157,9 +175,31 @@ describe('선택 창과 싸움 앞의 물음', () => {
     expect(v.heading).toBe(p.title);
     expect(v.doors[0].hint).toBe('✕ 돈이 모자라다');
   });
+  it('선택 전에는 결과 문구를 숨기고 잠긴 까닭은 보여 준다', () => {
+    const s = newLife5(1); if (s.pending?.kind !== 'door') throw new Error();
+    const p = { ...s.pending, doors: [
+      { label: '족쇄를 푼다', hint: '죄수가 달아나고 섬 전체가 쫓는다', locked: null, special: false, tried: false, danger: true },
+      { label: '기록실에 들어간다', hint: '무죄 판결이 없다', locked: '열쇠가 없다', special: false, tried: false, danger: false },
+    ] };
+    const doors = doorView(s, p).doors;
+    expect(doors[0]).toMatchObject({ label: '족쇄를 푼다', hint: '', danger: true });
+    expect(doors[1].hint).toBe('✕ 열쇠가 없다');
+  });
 });
 
 describe('자동 전투 창', () => {
+  it('참전자에 따라 1대1과 집단전의 양쪽 명단을 나눈다', () => {
+    const s = newLife5(1); s.pending = null as Pending5; s.age = 22;
+    askFight(s, 'b_alvida', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    expect(battleFormation(s.pending.battle)).toEqual({ mode: 'duel', left: [0], right: [1] });
+    askFight(s, 'b_morgan', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    expect(battleFormation(s.pending.battle)).toEqual({ mode: 'group', left: [0], right: [1, 2] });
+    const b = s.pending.battle;
+    b.units.splice(1, 0, { ...b.units[0], key: 'crew', name: '동료', hero: false, leader: false });
+    expect(battleFormation(b)).toEqual({ mode: 'group', left: [0, 1], right: [2, 3] });
+  });
   it('전투 재생: 끝까지 가면 진 쪽의 체력이 0이다', () => {
     let s = newLife5(1); s.pending = null as Pending5; s.age = 22; s.hero.standing = 'pirate';   // as: askFight 뒤에도 null로 좁혀지지 않게
     for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 60;
@@ -200,6 +240,11 @@ describe('이야기', () => {
 });
 
 describe('말하는 사람', () => {
+  it('선의의 의료 능력이 동료 목록에 보인다', () => {
+    const s = newLife5(1);
+    applyFx(s, [{ op: 'person', kind: 'crew', relation: '떠돌이 의사', role: 'medic', medicalSkill: 65 }]);
+    expect(peopleView(s).find((p) => p.relation === '떠돌이 의사')?.crew).toContain('의료 65');
+  });
   it('떠 있는 문의 말하는 사람은 이름과 얼굴 열쇠를 가진다', () => {
     const s = newLife5(1);
     if (s.pending?.kind !== 'door') throw new Error('문이 떠 있어야 한다');

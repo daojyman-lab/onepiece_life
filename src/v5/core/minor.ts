@@ -1,9 +1,8 @@
 // 자잘한 일: 플레이어에게 묻지 않는다. 인물이 가치관대로 처리하고 기록 한 줄로 끝난다.
-import { fill } from '../../core/util';
 import { pick, weighted, type Rng } from '../../core/rng';
 import { MINORS } from '../data/minors';
 import { checkAll } from './cond';
-import { applyFx } from './fx';
+import { applyFx, fillText } from './fx';
 import { dayLine, isRecent } from './log';
 import { needsOk } from './needs';
 import { leanPick } from './values';
@@ -25,7 +24,7 @@ export function runMinor(s: Life5, r: Rng): boolean {
   if (!m) return false;
   const out = leanPick(s, r, m.outcomes.filter((o) => checkAll(s, o.when) && needsOk(s, o.needs)), (o) => o.lean);
   if (!out) return false;
-  const texts = out.text.map((t) => fill(t, { name: s.hero.name, town: s.hero.town, island: s.hero.island })).filter((t) => !isRecent(s, t));
+  const texts = out.text.map((t) => fillText(s, t)).filter((t) => !isRecent(s, t));
   if (texts.length === 0) return false;
   dayLine(s, pick(r, texts));
   applyFx(s, out.fx);

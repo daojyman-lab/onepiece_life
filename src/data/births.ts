@@ -250,7 +250,7 @@ export const PARENT_NAMES = { m: ['가렛', '도널', '레온', '헨릭', '오�
 
 export const SPECIES_NAMES: Record<Species, string> = {
   human: '인간', fishman: '어인족', merfolk: '인어족', mink: '밍크족', giant: '거인족', longarm: '수장족', longleg: '족장족',
-  threeeye: '삼목족', tontatta: '소인족', skypiean: '하늘섬 주민', buccaneer: '버커니어족', lunarian: '루나리아족',
+  threeeye: '삼목족', tontatta: '소인족', skypiean: '스카이피안', buccaneer: '버커니어족', lunarian: '루나리아족',
 };
 
 /** 평범한 집안에서 가끔 사람이 아닌 아이가 거둬진다. 이스트 블루에 없는 종족이라 고아가 된다 */

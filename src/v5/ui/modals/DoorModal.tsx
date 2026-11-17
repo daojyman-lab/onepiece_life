@@ -21,7 +21,7 @@ export function DoorModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'do
             onClick={() => dispatch({ type: 'answer', index: d.index })}>
             <b>{d.label}</b>
             {d.tags.map((t) => <span key={t.text} class={`tag ${t.red ? 'red' : ''}`} style={{ marginLeft: 6 }}>{t.text}</span>)}
-            <span class="hint">{d.hint}</span>
+            {d.hint && <span class="hint">{d.hint}</span>}
           </button>
         ))}
       </div>

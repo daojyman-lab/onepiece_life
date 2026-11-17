@@ -301,7 +301,7 @@
 ### 4.7 동료 영입 헬퍼 `recruitNewCompanion(state, preset = null)` (L2781~2823)
 - 원본은 죽은 이벤트에서만 호출되지만 함수 자체는 살아 있고 확장 스크립트 L5003에서 재대입됨.
 - preset 없을 때 역할 풀(6종): 항해사 / 선의(의사) / 조선공 / 전투원(검사) / 요리사 / 저격수 (각 spec 문구 L2784~2789).
-- 이름 `pick(FIRST_NAMES_POOL)`, 종족 `pick(["인간","인간","어인족","밍크족","하늘섬 주민"])`(인간 40%), 성별 무작위, 나이 `randInt(max(15, p.age-3), p.age+6)`.
+- 이름 `pick(FIRST_NAMES_POOL)`, 종족 `pick(["인간","인간","어인족","밍크족","스카이피안"])`(인간 40%), 성별 무작위, 나이 `randInt(max(15, p.age-3), p.age+6)`.
 - 고정 초기값: category "crew", trust 80, caution 5, intimacy 75, task "기본 임무 수행".
 - 무작위 속성: trait 5종(돌파형/분석형/수호형/자유추구형/충성형), weakness 4종(방향치 기질/지나친 호기심/보물 앞에서 눈이 반짝임/선박 멀미), dream 4종(세계 지도를 완성하는 것/만병통치약을 만드는 것/꿈의 바다 올 블루를 찾는 것/최고의 명검을 벼려내는 것).
 - 로그(relation) `🌟 [동료 영입] …` 후 `openPersonDetailModal(newComp, true)`. 인원 상한 검사 없음.

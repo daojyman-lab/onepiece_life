@@ -65,6 +65,7 @@ export interface Loadout {
 
 export interface CrewInfo {
   role: CrewRole; level: number; power: number; skills: string[]; injuredMonths: number;
+  medicalSkill?: number;  // 선의의 치료 솜씨 0~100 (옛 저장은 기본값으로 본다)
   trait?: string;             // 성격 (data/crewTraits.ts). 없으면 id에서 정한다 (예전 저장)
   fruit?: string | null;      // 먹은 악마의 열매
   gear?: number;              // 장비 단계 0~3 (data/upgrades.ts CREW_GEAR)

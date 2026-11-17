@@ -6,6 +6,7 @@ import { oldAgeP, partRisks, yearRisks } from '../../src/v5/core/risk';
 import { applyFx } from '../../src/v5/core/fx';
 import { rngOf } from '../../src/core/rng';
 import { V } from '../../src/v5/data/balance';
+import { profileView } from '../../src/v5/ui/view/profile';
 import type { Life5 } from '../../src/v5/core/types';
 
 function live(seed: number): Life5 {
@@ -26,6 +27,23 @@ function adult(seed: number, age = 30): Life5 {
 }
 
 describe('병, 사고, 굶주림의 규칙', () => {
+  it('현실의 병명이 인물 화면에 보이고 선의가 돈 없이 치료할 수 있다', () => {
+    const s = adult(42); s.hero.money = 0;
+    applyFx(s, [{ op: 'person', kind: 'crew', relation: '선의', role: 'medic' }]);
+    const medic = s.people.find((p) => p.crew?.role === 'medic')!;
+    medic.crew!.medicalSkill = 100;
+    applyFx(s, [{ op: 'illness', id: 'flu' }]);
+    expect(profileView(s).hurts).toContain('독감');
+    partRisks(s, rngOf(s.rng));
+    expect(s.hero.illness).toBeNull();
+    expect(s.hero.money).toBe(0);
+  });
+  it('치료하지 않은 깊은 베인 상처는 감염될 수 있다', () => {
+    const s = adult(43); s.hero.money = 0;
+    s.hero.injuries.push({ severity: 'heavy', monthsLeft: 18, part: 'armL', kind: 'cut' });
+    partRisks(s, () => 0);
+    expect(s.hero.illness?.id).toBe('infection');
+  });
   it('돈이 없으면 병이 깊어지다가 죽고, 돈이 있으면 스스로 고친다', () => {
     const s = adult(1); s.hero.money = 0;
     applyFx(s, [{ op: 'illness', id: 'cough' }]);

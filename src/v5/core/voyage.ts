@@ -7,7 +7,7 @@ import { SEA_BY_ID } from '../../data/seas';
 import { V } from '../data/balance';
 import { DREAMS } from '../data/dreams';
 import { DREAM_ISLANDS, ROUTE, dangerOf } from '../data/voyage';
-import { logLine } from './log';
+import { locationDivider, logLine } from './log';
 import type { DreamId, Door, Fx, Life5, Turning } from './types';
 
 export type Route = 'calm' | 'dream' | 'wild';
@@ -63,6 +63,7 @@ export function sailTo(s: Life5, island: string, route: Route): void {
   const h = s.hero;
   const first = !s.flags.includes(`at:${island}`);
   h.island = island;
+  locationDivider(s);
   if (first) s.flags.push(`at:${island}`);
   logLine(s, josa(first ? `${island}에 처음 닻을 내렸다.` : `다시 ${island}(으)로 뱃머리를 돌렸다.`), 'light');
   if (route === 'calm') h.hp = Math.min(V.hp.max, h.hp + ROUTE.calm.hp);

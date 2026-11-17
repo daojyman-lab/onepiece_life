@@ -12,7 +12,9 @@ import { applyFx } from './fx';
 import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep } from './values';
+import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
+import { advanceVow } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -24,7 +26,8 @@ const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPEN
 
 /** 자리표시 {name}(이름만) {town} {island}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string): string {
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island });
+  const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend });
 }
 
 function speakerOf(s: Life5, t: Turning): string {
@@ -156,11 +159,7 @@ export function answerDoor(s: Life5, index: number): void {
 
   const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
-  // 이번 선택으로 깊어지는 선을 넘었을 때만 "깊어졌다". 아직 깊지 않거나 이미 깊으면 "기울었다" (인물 칸의 말과 맞춘다)
-  for (const id of rose) {
-    const crossed = before[id] < V.value.deep && isDeep(s, id);
-    logLine(s, crossed ? VALUE_DEEPEN[id] : VALUE_LEAN[id], crossed ? 'heavy' : 'light', 'choice');
-  }
+  applyPersonalityChoice(s, door.values ?? {});
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
   if (!t.id.startsWith(VOYAGE_PREFIX)) p.doors.forEach((d, i) => {   // 항로 고르기의 안 간 섬은 '가지 않은 길'에 넣지 않는다
@@ -177,4 +176,11 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  const vow = advanceVow(s, t.id);
+  if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
+  // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.
+  for (const id of rose) {
+    const crossed = before[id] < V.value.deep && isDeep(s, id);
+    logLine(s, crossed ? VALUE_DEEPEN[id] : VALUE_LEAN[id], crossed ? 'heavy' : 'light', 'choice');
+  }
 }

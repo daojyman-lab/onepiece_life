@@ -17,7 +17,7 @@ const CREW_ROLE_NAME: Record<string, string> = { vanguard: '돌격', support: '�
 
 export function peopleView(s: Life5): { id: string; name: string; relation: string; gone: boolean; who: Who; crew: string | null }[] {
   return s.people.map((p) => ({ id: p.id, name: p.name, relation: p.missing ? `${p.relation} · 행방불명` : p.relation, gone: !p.alive, who: personWho5(p),
-    crew: p.alive && p.crew ? `${p.tempUntil !== undefined ? `임시 동행(${Math.max(1, p.tempUntil - s.age)}해 남음) · ` : ''}${bandWord(p.crew.power, GRADES, GRADE_TOP)}급 · ${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
+    crew: p.alive && p.crew ? `${p.tempUntil !== undefined ? `임시 동행(${Math.max(1, p.tempUntil - s.age)}해 남음) · ` : ''}${bandWord(p.crew.power, GRADES, GRADE_TOP)}급 · ${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.role === 'medic' ? ` · 의료 ${p.crew.medicalSkill ?? 50}` : ''}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
 }
 
 function factionOf(st: Standing): NonNullable<Who['faction']> {

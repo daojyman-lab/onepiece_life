@@ -3,14 +3,31 @@ import { stageName } from '../../core/stages';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { drawScene, type SceneInput } from '../../../ui/pixel/pixelArt';
 import { caughtUp, shouldRead } from '../../app/flow';
-import { actions, msSinceWindowClosed, useStore } from '../../app/store';
+import { PERSONALITY_GRID, SECONDARY_NAME, personalityOf } from '../../core/personality';
+import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
 import { Face, Gauge, Panel } from '../common';
-import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, timelineView, yearLabel } from '../view';
+import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, storyYearLabel, timelineView, yearLabel } from '../view';
 
 const SPEEDS = [0, 1, 2, 4, 8] as const;
 /** 인물 칸 머리 글 (v4 포스터와 같다): 해적 · 칠무해는 WANTED, 해군은 MARINE, 그 밖은 PROFILE */
 const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: 'WANTED', marine: 'MARINE' };
+
+function PersonalityMap({ s }: { s: Life5 }) {
+  const current = personalityOf(s)?.value;
+  const groups = ['마음', '진취', '야망'];
+  return <div class="paper t9 personality-map-wrap">
+    <div><b>성향의 자리</b> <span class="soft">· 선택이 쌓이면 한 칸씩 이동</span></div>
+    <div class="personality-map" aria-label="성향표">
+      {PERSONALITY_GRID.map((row, i) => [
+        <span class="personality-group" key={`group-${i}`}>{groups[i]}</span>,
+        ...row.map((id) => <span key={id} class={`personality-cell ${current === id ? 'active' : ''}`}
+          aria-current={current === id ? 'true' : undefined}>{SECONDARY_NAME[id]}</span>),
+      ])}
+    </div>
+    {!current && <div class="soft">아직 성향을 찾는 중</div>}
+  </div>;
+}
 
 /** 최신 줄이 위로 오도록 뒤집는다. 해 구분선(소제목)은 그 해의 일상 줄 위에 남는다 */
 function newestFirst<T extends { weight: string }>(items: T[]): T[] {
@@ -130,7 +147,7 @@ function TopBar({ s }: { s: Life5 }) {
   const at = shownAt(s, st.shownId);
   return (
     <header class="frame topbar">
-      <span class="title">그랜드 트레저</span>
+      <span class="title">원피스 라이프</span>
       <span class="tag">{yearLabel(at)}</span>
       <span class="grow" />
       <SpeedButtons />
@@ -161,7 +178,9 @@ function Profile({ s }: { s: Life5 }) {
         <div class="t9">{p.born}</div>
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
+        {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
+        <PersonalityMap s={s} />
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
         {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
@@ -175,6 +194,7 @@ function Profile({ s }: { s: Life5 }) {
           <div class="row between t9"><span>체력</span><span>{p.hp} / 100</span></div>
           <Gauge value={p.hp} max={100} />
         </div>
+        {s.hero.alive && <button class="btn block" disabled={!!s.pending || !caughtUp(s, st.shownId)} onClick={() => dispatch({ type: 'rest' })}>한 철 쉰다 · 체력 회복</button>}
         {p.hurts.length > 0 && (
           <div class="paper t9" style={{ borderColor: 'var(--red)' }}>
             {p.hurts.map((h, i) => <div key={i} class="red">{h}</div>)}
@@ -270,7 +290,7 @@ function StoryPanel({ s }: { s: Life5 }) {
       <div class="story" ref={box} onScroll={onScroll} aria-live="polite" onWheel={markUser} onTouchMove={markUser} onKeyDown={markUser} onPointerDown={markUser}
         onPointerMove={onPointerMove} onPointerLeave={() => actions.setReading(false)}>
         {newestFirst(items).map((l) => l.weight === 'year'
-          ? <div key={l.id} class={`story-year ${l.id === newest ? 'rise' : ''}`}>{yearLabel(l)}</div>
+          ? <div key={l.id} class={`story-year ${l.id === newest ? 'rise' : ''}`}>{storyYearLabel(l)}</div>
           : <div key={l.id} class={`line ${l.weight} ${l.id === newest ? 'rise' : ''}`}>{l.text}</div>)}
       </div>
       <div class="row between t9" style={{ marginTop: 4 }}>

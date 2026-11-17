@@ -17,11 +17,11 @@ const BORN: Turning[] = [
     title: '수평선 너머', body: '어릴 적 들은 이야기가 아직도 귓가에 맴돈다. 세상 어딘가에 모든 것을 손에 넣은 왕이 남긴 보물이 있다고 했다. 지도에 없는 섬이 아직 수없이 많다고도 했다. {name}은(는) 밤마다 멀리 수평선을 바라본다. 가슴속에서 무언가가 이름을 갖기 시작한다.',
     doors: [
       { label: '누구에게도 매이지 않는 왕이 되겠다고 다짐한다', hint: '가장 높은 곳에서 바람처럼 살고 싶다', values: { freedom: D },
-        fx: [dream('pirateKing')] },
+        fx: [dream('pirateKing'), { op: 'log', text: "{name}은(는) 수평선에 걸린 마지막 빛을 보며 왕의 이름을 입에 올렸다. 누구의 명령도 받지 않는 항해가 그날의 꿈이 되었다.", weight: 'heavy' }] },
       { label: '세상의 끝을 이 눈으로 보겠다고 다짐한다', hint: '아무도 본 적 없는 곳까지 가고 싶다', values: { romance: D },
-        fx: [dream('worldEnd')] },
+        fx: [dream('worldEnd'), { op: 'log', text: "지도 끝의 빈자리를 손가락으로 짚었다. {name}은(는) 그 너머를 제 눈으로 확인할 날을 마음속에 새겼다.", weight: 'heavy' }] },
       { label: '평생 쓰고도 남을 보물을 찾겠다고 다짐한다', hint: '반짝이는 것을 손에 쥐는 상상만으로 가슴이 뛴다', values: { greed: D, dominion: D },
-        fx: [dream('treasure')] },
+        fx: [dream('treasure'), { op: 'log', text: "손에 쥔 작은 동전을 몇 번이고 뒤집어 보았다. 언젠가 세상에서 가장 큰 보물을 찾겠다는 다짐이 그보다 무겁게 남았다.", weight: 'heavy' }] },
     ],
   },
   {
@@ -29,11 +29,11 @@ const BORN: Turning[] = [
     title: '무엇이 되고 싶은가', body: '어른들이 묻는다. 커서 무엇이 될 거냐고. 예전에는 웃으며 아무렇게나 대답했지만, 이제는 그 물음이 조금 무겁다. {name}은(는) 지금까지 본 것들을 하나씩 떠올린다. 억울한 얼굴, 오래된 책, 저녁 밥상에 둘러앉은 사람들.',
     doors: [
       { label: '옳은 것을 지키는 가장 높은 자리에 서겠다고 다짐한다', hint: '억울한 사람이 없는 세상의 꼭대기에 서고 싶다', values: { justice: D },
-        fx: [dream('marineTop')] },
+        fx: [dream('marineTop'), { op: 'log', text: "억울한 얼굴들이 떠올라 {name}은(는) 어른들 앞에서 해군의 가장 높은 자리에 서겠다고 말했다. 웃는 사람도 있었지만 다짐은 거두지 않았다.", weight: 'heavy' }] },
       { label: '세상이 감춘 진실을 알아내겠다고 다짐한다', hint: '책이 말하지 않는 빈칸이 궁금하다', values: { inquiry: D },
-        fx: [dream('truth')] },
+        fx: [dream('truth'), { op: 'log', text: "책의 비어 있는 대목에 표시를 남겼다. 아무도 답하지 못한 질문을 언젠가 직접 풀겠다고 {name}은(는) 결심했다.", weight: 'heavy' }] },
       { label: '소중한 사람들과 오래오래 함께 살겠다고 다짐한다', hint: '크고 먼 것보다 곁에 있는 것을 지키고 싶다', values: { peace: D },
-        fx: [dream('peace')] },
+        fx: [dream('peace'), { op: 'log', text: "저녁 밥상에 둘러앉은 얼굴을 하나씩 바라보았다. {name}은(는) 이 자리를 오래 지키는 삶을 자기 꿈으로 정했다.", weight: 'heavy' }] },
     ],
   },
   {
@@ -41,11 +41,11 @@ const BORN: Turning[] = [
     title: '검 끝의 약속', body: '손바닥의 굳은살이 단단해졌다. 매일 휘두르는 검이 이제는 몸의 일부 같다. 언젠가 들은 이름, 세상에서 가장 강하다는 검객의 이야기가 떠오른다. {name}은(는) 검을 내려다본다. 이 검으로 어디까지 갈 수 있을까.',
     doors: [
       { label: '세상에서 가장 강한 검객이 되겠다고 다짐한다', hint: '정점에 선 검객을 넘어서고 싶다', values: { dominion: D },
-        fx: [dream('bestSword'), { op: 'base', key: 'wil', add: 1 }] },
+        fx: [dream('bestSword'), { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "{name}은(는) 굳은살 박인 손으로 검을 다시 쥐고, 세상에서 가장 강한 검객의 이름을 소리 내어 말했다. 다음 훈련부터는 한 번도 대충 휘두르지 않았다.", weight: 'heavy' }] },
       { label: '이 검으로 누구보다 높은 왕이 되겠다고 다짐한다', hint: '검은 길을 여는 도구다', values: { ambition: D },
-        fx: [dream('pirateKing')] },
+        fx: [dream('pirateKing'), { op: 'log', text: "검끝을 수평선 쪽으로 들어 올렸다. {name}에게 검술은 왕이 되기 위해 바다로 나아가는 첫 길이 되었다.", weight: 'heavy' }] },
       { label: '이 검으로 썩은 세상을 바꾸겠다고 다짐한다', hint: '약한 사람들을 짓밟는 것들을 베고 싶다', values: { justice: D },
-        fx: [dream('changeWorld')] },
+        fx: [dream('changeWorld'), { op: 'log', text: "{name}은(는) 검을 쥔 손을 내려다봤다. 힘없는 사람을 짓밟는 자들 앞에서 이 검을 쓰겠다는 뜻이 분명해졌다.", weight: 'heavy' }] },
     ],
   },
   {
@@ -53,11 +53,11 @@ const BORN: Turning[] = [
     title: '불공평한 세상', body: '높은 사람들이 지나가면 모두가 고개를 숙인다. 이유를 물으면 원래 그런 거라고 한다. {name}은(는) 그 대답이 마음에 들지 않는다. 주먹을 쥐었다 편다. 원래 그런 것을 바꾸는 사람도 있지 않을까.',
     doors: [
       { label: '이 세상을 뿌리부터 바꾸겠다고 다짐한다', hint: '누구도 무릎 꿇지 않는 세상을 꿈꾼다', values: { freedom: D },
-        fx: [dream('changeWorld')] },
+        fx: [dream('changeWorld'), { op: 'log', text: "{name}은(는) 고개를 숙인 사람 곁으로 가서 일어나라고 손을 내밀었다. 오래된 질서를 바꾸겠다는 꿈이 그날부터 말이 아닌 행동이 되었다.", weight: 'heavy' }] },
       { label: '아무도 함부로 못 하는 가장 강한 사람이 되겠다고 다짐한다', hint: '힘이 있으면 아무도 고개를 숙이라고 하지 않는다', values: { dominion: D },
-        fx: [dream('bestSword')] },
+        fx: [dream('bestSword'), { op: 'log', text: "고개를 숙이라는 소리를 들은 밤, {name}은(는) 혼자 남아 검을 쥐었다. 세상에서 가장 강한 검객이 되어 누구의 힘 앞에도 굽히지 않겠다고 정했다.", weight: 'heavy' }] },
       { label: '그 높은 사람들보다 더 높이 오르겠다고 다짐한다', hint: '꼭대기에 서면 세상이 내 말을 듣는다', values: { ambition: D },
-        fx: [dream('pirateKing')] },
+        fx: [dream('pirateKing'), { op: 'log', text: "높은 자들이 사라진 길목에서 {name}은(는) 언젠가 그들보다 높은 자리에 서겠다고 선언했다. 듣는 이가 없어도 그 약속은 남았다.", weight: 'heavy' }] },
     ],
   },
 ];
@@ -70,9 +70,9 @@ const LATER: Turning[] = [
       { label: '처음 품었던 꿈을 끝까지 붙든다', hint: '멀어도 내 꿈이다. 놓으면 내가 아니다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('{name}은(는) 어린 날의 다짐을 다시 한 번 입 밖에 냈다. 꿈은 그대로였다.')] },
       { label: '곁의 사람들을 지키는 삶을 새 꿈으로 삼는다', hint: '크고 먼 것보다 지금 곁에 있는 것', values: { peace: D },
-        fx: [dream('peace')] },
+        fx: [dream('peace'), { op: 'log', text: "{name}은(는) 오래 좇던 목표보다 곁의 사람들과 보내는 시간을 먼저 택했다. 함께 저녁을 먹으며 지금 지킬 삶을 새 꿈으로 받아들였다.", weight: 'heavy' }] },
       { label: '아무도 본 적 없는 곳을 향하는 것으로 꿈을 바꾼다', hint: '정점보다 끝을 보고 싶어졌다', values: { romance: D },
-        fx: [dream('worldEnd')] },
+        fx: [dream('worldEnd'), { op: 'log', text: "오래 품었던 꿈을 가슴에 남긴 채 지도 가장자리에 새 표시를 남겼다. {name}은(는) 아무도 가 보지 못한 곳을 향해 길을 바꿨다.", weight: 'heavy' }] },
     ],
   },
   {

@@ -70,6 +70,20 @@ function bare(seed: number, age = 40, cause = '노환'): Life5 {
 }
 
 describe('엔딩 자료의 세부', () => {
+  it('확정된 주·부성향을 엔딩에서 함께 말한다', () => {
+    const s = bare(19);
+    s.personality = { row: 2, col: 0, pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
+    s.values.ambition = 55;
+    const line = buildEnding(s, emptyMeta5()).persona;
+    expect(line).toContain('야망 · 성취');
+    expect(line).not.toMatch(/\d/);
+  });
+  it('원피스에 대한 답도 현재 부성향을 따른다', () => {
+    const s = bare(20);
+    s.values.greed = 80;
+    s.personality = { row: 0, col: 1, pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
+    expect(buildEnding(s, emptyMeta5()).onePiece).toContain('함께 바다를 건넜던 사람들');
+  });
   it('가치관이 없으면 알 수 없는 사람이었다고 적고, 강점이 있으면 그 구절로 맺는다', () => {
     expect(buildEnding(bare(1), emptyMeta5()).persona).toBe('무엇을 좇았는지 끝내 알 수 없는 사람이었다.');
     const s = bare(1); addValues(s, { loyalty: 40, freedom: 20 }); s.strengths = ['unyielding'];

@@ -31,9 +31,10 @@ export const STANDING_NAME: Record<Standing, string> = {
 
 /** 다친 곳의 이름 */
 export const INJURY_NAME: Record<Injury['severity'], string> = { light: '가벼운 부상', heavy: '무거운 부상', scar: '후유증' };
+export const WOUND_KIND_NAME = { bruise: '타박상', cut: '열상', burn: '화상', fracture: '골절' } as const;
 
 /** 병의 이름 (모르는 id는 '병') */
-export const ILLNESS_NAME: Record<string, string> = { cough: '기침병', fever: '열병' };
+export const ILLNESS_NAME: Record<string, string> = { cold: '감기', flu: '독감', pneumonia: '폐렴', dysentery: '이질', infection: '상처 감염', cough: '폐렴', fever: '열병' };
 
 /**
  * 사람의 관계(Person.relation) 가운데 가족의 갈래. 사건 데이터가 이 갈래의 사람을 만들 때는 이 낱말만 쓴다
@@ -48,7 +49,7 @@ export const RELATION_KIND: Record<'spouse' | 'child' | 'sibling' | 'parent', st
 
 /** 처지 앞에 붙는 가치관의 말 (가장 높은 가치관) */
 export const VALUE_ADJ: Record<ValueId, string> = {
-  justice: '정의로운', greed: '탐욕스러운', ambition: '야망 있는', romance: '낭만적인', inquiry: '탐구심 많은',
+  justice: '정의로운', greed: '탐욕스러운', ambition: '성취를 좇는', romance: '낭만적인', inquiry: '탐구심 많은',
   loyalty: '의리 있는', freedom: '자유로운', dominion: '패도를 걷는', peace: '온화한',
 };
 /** 해적의 이름값(명성)에 따른 이름: [이 명성 미만이면, 이름]. 맨 처음(신참)에는 가치관의 말을 붙이지 않는다 */

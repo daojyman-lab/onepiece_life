@@ -50,8 +50,8 @@ export function Start() {
   return (
     <div class="app start-screen">
       <div class="frame frame-pad" style={{ textAlign: 'center', width: '100%' }}>
-        <h1 class="game-title">GRAND TREASURE</h1>
-        <div class="t9 soft">v6.8 · 갈래 치는 인생 (개발 중)</div>
+        <h1 class="game-title">원피스 라이프</h1>
+        <div class="t9 soft">v6.9 · 갈래 치는 인생 (개발 중)</div>
         <JollyRoger />
 
         {life && (
@@ -110,7 +110,7 @@ export function Start() {
       {show === 'info' && (
         <Modal title="정보" onClose={() => setShow(null)}>
           <div class="scroll">
-            「그랜드 트레저」는 원피스 세계관을 빌린 비영리 팬게임이다. 상업적으로 쓰지 않는다.
+            「원피스 라이프」는 원피스 세계관을 빌린 비영리 팬게임이다. 상업적으로 쓰지 않는다.
             {'\n'}원작의 그림과 음원, 시판 게임에서 추출한 그림을 쓰지 않는다. 인물 그림은 모두 코드로 그린 도트다.
             {'\n\n'}저장: 브라우저에 자동 저장된다. 내보내기로 파일에 남기고, 가져오기로 되살릴 수 있다.
             {'\n'}인생이 끝나면 능력치와 돈은 남지 않는다. 골라 본 문, 먹어 본 열매, 만난 인물이 도감에 남는다.

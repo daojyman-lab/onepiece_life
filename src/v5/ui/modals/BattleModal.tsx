@@ -8,7 +8,7 @@ import { battleSpeedOf } from '../../app/flow';
 import { actions, dispatch, useStore } from '../../app/store';
 import type { Life5, Pending5 } from '../../core/types';
 import { Face, Gauge, Modal } from '../common';
-import { battleLine, hpAt, resultLine, sceneOf, unitWho } from '../view';
+import { battleFormation, battleLine, hpAt, resultLine, sceneOf, unitWho } from '../view';
 
 /** '합' 구분 줄은 이 몫만큼 빨리 넘긴다 (v4와 같다) */
 const ROUND_PACE = 0.6;
@@ -28,6 +28,10 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
     return () => clearTimeout(id);
   }, [idx, total, ms]);
   const hp = useMemo(() => hpAt(b, idx), [b, idx]);
+  const formation = useMemo(() => battleFormation(b), [b]);
+  const current = b.events[idx - 1];
+  const actor = current && 'who' in current ? current.who : -1;
+  const target = current && 'target' in current ? current.target : -1;
   // 한 줄이 재생될 때마다 소리
   useEffect(() => {
     const e = b.events[idx - 1];
@@ -71,13 +75,34 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   }, [foeI, done, round?.n]);
 
   return (
-    <Modal title={p.lethal ? `목숨을 건 싸움 · ${p.foe.name}` : `싸움 · ${p.foe.name}`} cls="pend battle5" wide>
-      <div class="paper duel battle5-vs">
-        {hero && <div class="side"><Face who={unitWho(s, hero)} size="sm" /><div><div class="t9"><b>{hero.name}</b></div><Gauge value={hp[heroI]} max={hero.maxHp} /></div></div>}
-        <div class="t9 soft">VS</div>
-        {foe && <div class="side"><Face who={unitWho(s, foe)} size="sm" /><div><div class="t9"><b>{foe.name}</b></div><Gauge value={hp[foeI]} max={foe.maxHp} /></div></div>}
-      </div>
-      <div class="frame battle5-scene"><canvas ref={cv} class="scene" aria-label="전투 장면" /></div>
+    <Modal title={`${p.lethal ? '목숨을 건 ' : ''}${formation.mode === 'duel' ? '1대1 전투' : '집단전'} · ${p.foe.name}`} cls="pend battle5" wide>
+      {formation.mode === 'duel' ? (
+        <>
+          <div class="paper duel battle5-vs">
+            {hero && <div class="side"><Face who={unitWho(s, hero)} size="sm" /><div><div class="t9"><b>{hero.name}</b></div><Gauge value={hp[heroI]} max={hero.maxHp} /></div></div>}
+            <div class="t9 soft">VS</div>
+            {foe && <div class="side"><Face who={unitWho(s, foe)} size="sm" /><div><div class="t9"><b>{foe.name}</b></div><Gauge value={hp[foeI]} max={foe.maxHp} /></div></div>}
+          </div>
+          <div class="frame battle5-scene"><canvas ref={cv} class="scene" aria-label="전투 장면" /></div>
+        </>
+      ) : (
+        <div class="battle5-groups">
+          {([formation.left, formation.right] as const).map((side, sideIndex) => (
+            <section class="paper battle5-party" key={sideIndex} aria-label={sideIndex === 0 ? '우리 편' : '상대 편'}>
+              <div class="row between t9"><b>{sideIndex === 0 ? '우리 편' : '상대 편'}</b><span>{side.length}명 · {round ? `${round.n}합` : '대치'}</span></div>
+              <div class="battle5-roster">
+                {side.map((i) => {
+                  const u = b.units[i];
+                  return <div key={i} class={`battle5-member ${hp[i] <= 0 ? 'down' : ''} ${i === actor ? 'acting' : ''} ${i === target ? 'targeted' : ''}`}>
+                    <Face who={unitWho(s, u)} size="sm" title={u.name} />
+                    <div class="battle5-member-info"><div class="row between t9"><b>{u.name}</b><span>{hp[i] <= 0 ? '쓰러짐' : `${hp[i]} / ${u.maxHp}`}</span></div><Gauge value={hp[i]} max={u.maxHp} /></div>
+                  </div>;
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
       <div class="paper battle-log" ref={logRef}>
         {b.events.slice(0, idx).map((e, i) => {
           const me = e.k === 'act' && e.who === heroI;

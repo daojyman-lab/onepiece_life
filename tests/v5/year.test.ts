@@ -2,9 +2,13 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5, invariants5 } from '../../src/v5/core/reduce';
+import { lineFits } from '../../src/v5/core/year';
 import { checkAll, whyNot } from '../../src/v5/core/cond';
 import { applyFx } from '../../src/v5/core/fx';
+import { yearDivider } from '../../src/v5/core/log';
+import { sailTo } from '../../src/v5/core/voyage';
 import { V } from '../../src/v5/data/balance';
+import { LINES } from '../../src/v5/data/lines';
 import { autoplay5 } from '../../src/v5/core/autoplay';
 import type { Life5 } from '../../src/v5/core/types';
 
@@ -13,6 +17,38 @@ const step = (s: Life5) => reduce5(s, { type: 'step' });
 function flow(s: Life5, parts: number) { for (let i = 0; i < parts; i++) { s = step({ ...s, pending: null }); } return s; }
 
 describe('한 해의 진행', () => {
+  it('직접 한 철 쉬면 시간과 체력이 함께 회복되고 선의가 회복을 돕는다', () => {
+    const base = newLife5(501); base.pending = null; base.age = 25; base.hero.standing = 'pirate'; base.hero.hp = 30;
+    const without = reduce5(base, { type: 'rest' });
+    expect(without.part).not.toBe(base.part);
+    expect(without.hero.hp).toBeGreaterThan(base.hero.hp + 10);
+    const withMedic = structuredClone(base);
+    applyFx(withMedic, [{ op: 'person', kind: 'crew', relation: '선의', role: 'medic' }]);
+    withMedic.people.find((p) => p.crew?.role === 'medic')!.crew!.medicalSkill = 100;
+    const healed = reduce5(withMedic, { type: 'rest' });
+    expect(healed.hero.hp).toBeGreaterThan(without.hero.hp);
+  });
+  it('떠 있는 선택이 있으면 직접 쉬어서 건너뛸 수 없다', () => {
+    const s = newLife5(502);
+    expect(reduce5(s, { type: 'rest' })).toEqual(s);
+  });
+  it('직접 쉬는 동안 우발적인 잡전투가 발생하지 않는다', () => {
+    const oldChance = V.fight.minorP;
+    (V.fight as { minorP: number }).minorP = 1;
+    try {
+      const s = newLife5(503);
+      s.pending = null;
+      s.age = 25;
+      s.hero.standing = 'pirate';
+      s.stopsThisYear = 999;
+      const before = s.log.filter((line) => line.type === 'battle').length;
+      const after = reduce5(s, { type: 'rest' });
+      expect(after.pending?.kind).not.toBe('battle');
+      expect(after.log.filter((line) => line.type === 'battle')).toHaveLength(before);
+    } finally {
+      (V.fight as { minorP: number }).minorP = oldChance;
+    }
+  });
   it('네 토막이 지나면 한 살을 먹고, 해가 바뀌는 구분 기록이 남는다', () => {
     const s0 = { ...newLife5(3), pending: null };
     const s1 = flow(s0, 4);
@@ -27,6 +63,43 @@ describe('한 해의 진행', () => {
     for (let i = 0; i < 4; i++) s = reduce5({ ...s, pending: null }, { type: 'step' });
     const years = s.log.filter((l) => l.weight === 'year');
     expect(years[years.length - 1]).toMatchObject({ age: V.birth.startAge + 1, island: s.hero.island });
+  });
+  it('탐구와 자유가 두드러진 인물에게 정의 일상 기록은 뜨지 않는다', () => {
+    const s = newLife5(3);
+    s.age = 48;
+    for (const id of Object.keys(s.values) as (keyof typeof s.values)[]) s.values[id] = 0;
+    s.values.inquiry = 70;
+    s.values.freedom = 40;
+    const justice = LINES.find((l) => l.text.includes('일꾼의 품삯을 떼먹'))!;
+    const neutral = LINES.find((l) => l.text === '무릎이 쑤시는 걸 보니 비가 올 모양이었다.')!;
+    expect(lineFits(s, justice)).toBe(false);
+    expect(lineFits(s, neutral)).toBe(true);
+    s.values.justice = 80;
+    expect(lineFits(s, justice)).toBe(true);
+  });
+  it('같은 나이에 섬을 옮기면 뒤따르는 기록 앞에 새 장소가 표시된다', () => {
+    const s = newLife5(3);
+    s.age = 48;
+    s.hero.island = '조';
+    yearDivider(s);
+    applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '새 섬에서 일했다.', weight: 'light' }]);
+    expect(s.log.slice(-2)).toMatchObject([
+      { weight: 'year', age: 48, island: '드레스로자', moved: true },
+      { text: '새 섬에서 일했다.' },
+    ]);
+  });
+  it('항로 이동과 귀향에도 새 장소가 표시되고 같은 섬으로 이동할 때는 중복되지 않는다', () => {
+    const s = newLife5(3);
+    s.age = 48;
+    s.hero.island = '조';
+    const before = s.log.filter((l) => l.weight === 'year').length;
+    sailTo(s, '드레스로자', 'calm');
+    expect(s.log.filter((l) => l.weight === 'year')).toHaveLength(before + 1);
+    expect(s.log.at(-2)).toMatchObject({ weight: 'year', island: '드레스로자', moved: true });
+    applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }]);
+    expect(s.log.filter((l) => l.weight === 'year')).toHaveLength(before + 1);
+    applyFx(s, [{ op: 'moveHome' }]);
+    expect(s.log.at(-1)).toMatchObject({ weight: 'year', island: s.hero.town });
   });
   it('기록에 달 표시가 없다', () => {
     const s = flow({ ...newLife5(3), pending: null }, 40);

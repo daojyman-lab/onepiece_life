@@ -6,9 +6,27 @@ import { reduce5 } from '../../src/v5/core/reduce';
 import { emptyMeta5 } from '../../src/v5/core/meta';
 import { askFight } from '../../src/v5/core/fight';
 import { FOES } from '../../src/v5/data/foes';
+import { valueWords } from '../../src/v5/ui/view/words';
 import type { Pending5 } from '../../src/v5/core/types';
 
 describe('저장 읽기', () => {
+  it('성향 위치가 없는 옛 저장은 가장 깊은 가치관의 칸에서 이어 간다', () => {
+    const s = JSON.parse(JSON.stringify(newLife5(1)));
+    s.values.loyalty = 70;
+    s.values.freedom = 60;
+    delete s.personality;
+    const restored = normalizeLife5(s)!;
+    expect(restored.personality).toMatchObject({ row: 0, col: 1, choices: 3 });
+    expect(restored.values.loyalty).toBe(70);
+    expect(restored.values.freedom).toBe(60);
+    expect(valueWords(restored)).toEqual(['주성향 마음', '부성향 의리']);
+  });
+  it('이전 성향 위치 저장에 확정 상태가 빠져도 현재 칸을 보존한다', () => {
+    const s = JSON.parse(JSON.stringify(newLife5(2)));
+    s.personality = { row: 0, col: 1, pullRow: 1, pullCol: 0, choices: 4 };
+    const restored = normalizeLife5(s)!;
+    expect(restored.personality).toMatchObject({ row: 0, col: 1, pullRow: 1, hold: 0, established: true });
+  });
   it('멀쩡한 인생은 그대로 돌려준다', () => {
     const s = JSON.parse(JSON.stringify(newLife5(1)));
     expect(normalizeLife5(s)).toEqual(s);

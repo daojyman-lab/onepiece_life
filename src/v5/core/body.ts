@@ -4,12 +4,13 @@ import { josa } from '../../core/josa';
 import { pick, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { logLine } from './log';
-import type { Branch, Life5, Limb, LimbState, StatKey, Stats } from './types';
+import type { Branch, Life5, Limb, LimbState, StatKey, Stats, WoundPart } from './types';
 
 export const LIMBS: readonly Limb[] = ['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'];
 export const LIMB_NAME: Record<Limb, string> = {
   eyeL: '왼쪽 눈', eyeR: '오른쪽 눈', armL: '왼팔', armR: '오른팔', legL: '왼쪽 다리', legR: '오른쪽 다리',
 };
+export const WOUND_PART_NAME: Record<WoundPart, string> = { ...LIMB_NAME, head: '머리', torso: '몸통' };
 /** 의수 · 의족을 다는 차례: 다리 → 팔 → 눈 */
 /** 의수 · 의족을 다는 차례. 눈은 달지 않는다 (의안은 그리지 않는다) */
 const FIT_ORDER: readonly Limb[] = ['legL', 'legR', 'armL', 'armR'];
@@ -47,9 +48,10 @@ export function effectiveStats5(s: Life5): Stats {
   for (const inj of h.injuries) {
     if (inj.severity === 'scar') {
       if (inj.stat) st[inj.stat] = Math.max(0, st[inj.stat] - V.injury.scarAmount);
+      if (inj.part) for (const key of WOUND_STATS[inj.part]) st[key] *= V.injury.partMult.scar;
       continue;
     }
-    for (const k of STAT_KEYS) st[k] *= V.injury.statMult[inj.severity];
+    for (const k of inj.part ? WOUND_STATS[inj.part] : STAT_KEYS) st[k] *= inj.part ? V.injury.partMult[inj.severity] : V.injury.statMult[inj.severity];
   }
   for (const l of EYES) st.spd *= limbMult(s, l, V.limb.eye.spd);
   for (const l of ARMS) st.str *= limbMult(s, l, V.limb.arm.str);
@@ -59,6 +61,11 @@ export function effectiveStats5(s: Life5): Stats {
   for (const k of STAT_KEYS) st[k] = Math.max(st[k], h.base[k] * V.limb.floor);
   return st;
 }
+
+const WOUND_STATS: Record<WoundPart, readonly StatKey[]> = {
+  head: ['int', 'wil'], torso: ['vit'], eyeL: ['spd'], eyeR: ['spd'],
+  armL: ['str'], armR: ['str'], legL: ['spd'], legR: ['spd'],
+};
 
 /** 몸이 이 갈래를 허락하는가: 사격은 두 팔, 검과 주먹은 한 팔이면 된다 */
 export function canUse(s: Life5, branch: Branch): boolean {

@@ -2,16 +2,20 @@
 // 플레이어가 고르지 않은 죽음이라 드물고, 노환을 빼면 대개 조짐이 먼저 기록에 떠오른다.
 // 해가 바뀔 때 yearRisks가 걸리는지 굴리고, 토막마다 partRisks가 병의 진행과 폭풍의 결말을 낸다.
 import { TALENT_BY_ID } from '../../data/talents';
-import { chance, type Rng } from '../../core/rng';
+import { chance, pick, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { effectiveStats5 } from './body';
 import { applyFx } from './fx';
 import { logLine } from './state';
+import { medicSkill } from './health';
+import { ILLNESS_NAME } from '../data/words';
 import type { Life5, Standing } from './types';
 
 const R = V.risk;
 const SEA: readonly Standing[] = R.seaStandings;
 const IDLE: readonly Standing[] = R.idleStandings;
+const ORDINARY_ILLNESSES = ['cold', 'cold', 'flu', 'flu', 'pneumonia', 'dysentery'] as const;
+const ILLNESS_PACE: Record<string, number> = { cold: 0, flu: 15, pneumonia: 9, dysentery: 9, infection: 9, cough: 15 };
 
 /** 이 나이에 한 해 동안 노환으로 죽을 확률 (재능 배율 전) */
 export function oldAgeP(age: number): number {
@@ -32,8 +36,9 @@ export function yearRisks(s: Life5, r: Rng): void {
     die(s, '아무도 모르는 곳에서 쓸쓸히'); return;
   }
   if (!s.hero.illness && chance(r, illnessP(s))) {
-    applyFx(s, [{ op: 'illness', id: 'cough' }]);
-    logLine(s, '기침이 멎지 않는다.', 'heavy', 'danger');
+    const id = pick(r, ORDINARY_ILLNESSES);
+    applyFx(s, [{ op: 'illness', id }]);
+    logLine(s, `${ILLNESS_NAME[id]}에 걸렸다.`, 'heavy', 'danger');
   }
   if (SEA.includes(s.hero.standing) && !s.flags.includes('storm') && chance(r, R.accidentP)) {
     s.flags.push('storm');
@@ -46,31 +51,59 @@ export function yearRisks(s: Life5, r: Rng): void {
 export function partRisks(s: Life5, r: Rng): void {
   if (!s.hero.alive || s.pending) return;
   if (s.flags.includes('storm')) storm(s, r);
-  if (s.hero.alive) illness(s);
+  if (!s.hero.alive) return;
+  woundInfection(s, r);
+  illness(s, r);
 }
 
 function illnessP(s: Life5): number {
   const old = s.age >= R.illnessAge ? (s.age - R.illnessAge + 1) * R.illnessPerYear : 0;
-  return (R.illnessP + old) * talentMult(s, 'illness') * (hasCrew(s, 'medic') ? R.medicMult : 1);
+  return (R.illnessP + old) * talentMult(s, 'illness') * (1 - medicSkill(s) / 200);
 }
 
-/** 돈이 있으면 스스로 고친다. 없으면 두 토막마다 한 단계 나빠지고, 마지막 단계에서 버티지 못하면 죽는다 */
-function illness(s: Life5): void {
+function woundInfection(s: Life5, r: Rng): void {
+  if (s.hero.illness) return;
+  const skill = medicSkill(s);
+  for (const wound of s.hero.injuries) {
+    if (wound.treated || wound.severity !== 'heavy' || (wound.kind !== 'cut' && wound.kind !== 'burn')) continue;
+    if (!chance(r, R.woundInfectionP * (1 - skill / 100))) continue;
+    applyFx(s, [{ op: 'illness', id: 'infection' }]);
+    logLine(s, '깊은 상처가 감염됐다.', 'heavy', 'danger');
+    return;
+  }
+}
+
+/** 실제 병명으로 경과를 기록한다. 선의의 치료 능력이 높을수록 비용 없이 고칠 가능성이 크다. */
+function illness(s: Life5, r: Rng): void {
   const h = s.hero;
   const ill = h.illness;
   if (!ill) return;
+  const skill = medicSkill(s);
+  const name = ILLNESS_NAME[ill.id] ?? '병';
+  if (skill > 0 && chance(r, skill / 100)) {
+    h.illness = null;
+    logLine(s, `선의의 치료로 ${name}이(가) 나았다.`, 'heavy', 'life');
+    return;
+  }
   if (h.money >= R.treatCost) {
     h.money -= R.treatCost;
     h.illness = null;
-    logLine(s, '모아 둔 돈을 털어 의원을 찾았다. 오래 끌던 병이 마침내 나았다.', 'light', 'life');
+    logLine(s, `모아 둔 돈을 털어 의원을 찾았다. ${name}이(가) 나았다.`, 'light', 'life');
     return;
   }
+  if (ill.id === 'cold') {
+    h.illness = null;
+    h.hp = Math.max(1, h.hp - R.coldHp);
+    logLine(s, '감기가 가라앉았지만 기운이 빠졌다.', 'light', 'life');
+    return;
+  }
+  h.hp = Math.max(1, h.hp - R.sickHp);
   ill.months += R.monthsPerPart;
-  if (ill.months < R.worsenMonths) return;
+  if (ill.months < (ILLNESS_PACE[ill.id] ?? R.worsenMonths)) return;
   ill.months = 0;
   if (ill.stage < R.maxStage) {
     ill.stage = (ill.stage + 1) as 1 | 2 | 3;
-    logLine(s, '약 살 돈이 없다. 병이 깊어진다.', 'heavy', 'danger');
+    logLine(s, `약 살 돈이 없다. ${name}이(가) 깊어진다.`, 'heavy', 'danger');
     return;
   }
   if (isKid(s)) {

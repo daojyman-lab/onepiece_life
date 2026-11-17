@@ -5,7 +5,7 @@ import { SEA_BY_ID } from '../../../data/seas';
 import type { SceneInput } from '../../../ui/pixel/pixelArt';
 import { SPECIES_NAMES } from '../../../data/births';
 import { fullName } from '../../core/birth';
-import { LIMB_NAME, LIMBS } from '../../core/body';
+import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { V } from '../../data/balance';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
@@ -13,10 +13,10 @@ import { POTENTIALS } from '../../data/stages';
 import { DREAMS } from '../../data/dreams';
 import { stageName } from '../../core/stages';
 import {
-  BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
+  BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE, WOUND_KIND_NAME,
   POWER_TOP, POWER_WORDS, STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
 } from '../../data/words';
-import { topValues } from '../../core/values';
+import { activeValue } from '../../core/personality';
 import { rating5 } from '../../core/power';
 import { bandWord } from './words';
 import { GRADES, GRADE_TOP } from '../../data/words';
@@ -62,7 +62,7 @@ function fameWord(s: Life5): string {
  */
 export function standingTitle(s: Life5): string {
   const h = s.hero;
-  const top = topValues(s, 1)[0];
+  const top = activeValue(s);
   const adj = (base: string) => (top ? `${VALUE_ADJ[top]} ${base}` : base);
   if (h.standing === 'pirate') {
     const fame = Math.round(h.fame);
@@ -79,7 +79,9 @@ export function standingTitle(s: Life5): string {
 
 export function profileView(s: Life5): ProfileView {
   const h = s.hero, g = s.growth;
-  const hurts = h.injuries.map((i) => INJURY_NAME[i.severity]);
+  const hurts = h.injuries.map((i) => i.part && i.kind
+    ? `${WOUND_PART_NAME[i.part]} ${WOUND_KIND_NAME[i.kind]} · ${INJURY_NAME[i.severity]}`
+    : INJURY_NAME[i.severity]);
   if (h.illness) hurts.push(ILLNESS_NAME[h.illness.id] ?? '병');
   return {
     name: fullName(h).trim(),

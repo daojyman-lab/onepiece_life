@@ -3,12 +3,22 @@ export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
 export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
 export type Values = Record<ValueId, number>;                    // 각 0~100
+/** 3×3 성향표의 현재 칸과 아직 칸을 옮기지 못한 선택의 방향. */
+export interface Personality5 {
+  row: number; col: number;
+  pullRow: number; pullCol: number;
+  choices: number;
+  hold: number; established: boolean;
+}
 export type HomeId = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou';
 export type Wealth = 'poor' | 'common' | 'comfortable' | 'noble';
 export type Lineage = 'orphan' | 'commoner' | 'marineFamily' | 'pirateChild' | 'samurai' | 'outcast';
 export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 'bountyHunter' | 'warlord'
   | 'shipwright' | 'cp' | 'settled' | 'prisoner' | 'retired';
 export type Limb = 'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR';
+export type WoundPart = Limb | 'head' | 'torso';
+export type WoundKind = 'bruise' | 'cut' | 'burn' | 'fracture';
+export type Wound5 = Injury & { part?: WoundPart; kind?: WoundKind };
 export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
 export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
 export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
@@ -22,7 +32,7 @@ export interface Hero5 {
   home: HomeId; town: string; wealth: Wealth; lineage: Lineage;
   talents: string[];                           // src/data/talents.ts 의 id
   base: Stats; hp: number;                     // hp 0~100
-  injuries: Injury[]; illness: Illness | null;
+  injuries: Wound5[]; illness: Illness | null;
   limbs: Record<Limb, LimbState>;
   fruit: { id: string; eatenAt: number } | null;
   money: number; fame: number; rank: number;
@@ -33,6 +43,10 @@ export interface Hero5 {
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+export interface VowState {
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
+  history: { id: string; result: 'kept' | 'failed' }[];
+}
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
@@ -41,8 +55,8 @@ export interface Growth5 {
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
-/** 기록 한 줄. island: 해 구분선(weight 'year')에만 있다. 그 해를 시작한 섬 이름 */
-export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string }
+/** 기록 한 줄. island: 나이·장소 구분선(weight 'year')에만 있다. 그 뒤 기록이 일어난 섬 이름 */
+export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string; moved?: true }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
 export interface TimelineEntry {
@@ -61,6 +75,8 @@ export type Cond =
   | { c: 'strength'; id: string; has: boolean }
   | { c: 'money'; min: number }
   | { c: 'fame'; min: number }
+  | { c: 'grade'; is: string[] }                 // 화면에 표시하는 종합 전투 등급
+  | { c: 'turningSeen'; id: string; has: boolean } // 이 인생에서 해당 전환점을 이미 보았는가
   | { c: 'tier'; branch: Branch | 'any'; min: number }
   | { c: 'flag'; id: string; has: boolean }
   | { c: 'fruit'; has: boolean }
@@ -73,6 +89,7 @@ export type Cond =
   | { c: 'island'; is: string[]; not?: boolean } // 지금 있는 섬 (hero.island). not이면 그 섬들이 아닐 때
   | { c: 'species'; is: Species[] }             // 종족
   | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
+  | { c: 'person'; relation: string; has: boolean; kinds?: Person['kind'][] }
   | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
   | { c: 'canonAge'; id: string; min?: number; max?: number }
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
@@ -93,6 +110,8 @@ export type Fx =
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
+  | { op: 'vowStart'; id: string }
+  | { op: 'vowResolve'; id: string }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
@@ -102,13 +121,15 @@ export type Fx =
       age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
       role?: CrewRole;
       level?: number;                          // 동료의 처음 레벨 (이름난 사람은 처음부터 높다). 없으면 V.person.crew.level
+      medicalSkill?: number;                   // 선의의 치료 솜씨. 전투 레벨과 별개
       years?: number }                         // 임시 동행: 이 햇수만 함께하고 제 길로 떠난다 (kind 'crew'에만)                          // 동료(crew)의 싸움 자리. 없으면 V.person.crew.role
   | { op: 'pref'; branch: Branch; add: number } // 그 갈래의 선호도를 올린다 (자잘한 일도 쓸 수 있다)
+  | { op: 'personChange'; relation: string; kind?: Person['kind']; bond?: number }
   | { op: 'crewTrain'; add: number }            // 살아 있는 동료 모두의 레벨을 올린다 (해군 분대를 키운다)
   | { op: 'partCrew'; prefix: string }          // 관계 글이 prefix로 시작하는 동료가 떠난다: 동료에서 빠지고 아는 사람(ally)으로 남는다
   | { op: 'losePerson'; relation: string }
   | { op: 'losePerson'; who: 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' }   // 관계 글과 상관없이 그 갈래의 사람 하나
-  | { op: 'injury'; severity: Injury['severity'] }
+  | { op: 'injury'; severity: Injury['severity']; part?: WoundPart; kind?: WoundKind }
   | { op: 'loseLimb'; limb: Limb | 'random' }
   | { op: 'prosthetic'; grade: 'basic' | 'superior' }
   | { op: 'illness'; id: string }
@@ -157,7 +178,7 @@ export interface ResolvedDoor { label: string; hint: string; locked: string | nu
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext }
-  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; minor?: { outcomeLine: string } }
   | { kind: 'ending'; cause: string }
   | null;
 export interface Stats5 {
@@ -173,7 +194,7 @@ export interface Life5 {
   rng: { seed: number; cursor: number };
   age: number; part: 0 | 1 | 2 | 3;            // 한 해의 네 토막
   hero: Hero5; growth: Growth5;
-  values: Values; strengths: string[]; marks: Record<string, number>;
+  values: Values; personality: Personality5; strengths: string[]; marks: Record<string, number>;
   hardship: number;
   people: Person[];
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
@@ -194,7 +215,9 @@ export interface Life5 {
   prime?: { from: number; until: number; lap: boolean } | null;
   /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
   dream?: { id: DreamId; since: number; done: number | null } | null;
+  /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
+  vows?: VowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
 }
-export type Command5 = { type: 'step' } | { type: 'answer'; index: number };
+export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number };

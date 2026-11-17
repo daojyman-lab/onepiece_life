@@ -15,6 +15,7 @@ import { fullName } from './birth';
 import { fillText } from './fx';
 import type { Meta5 } from './meta';
 import { topValues } from './values';
+import { activeValue, personalityOf } from './personality';
 import { ageShort, ageWord } from './words';
 import type { Fx, Life5, Turning } from './types';
 
@@ -41,9 +42,12 @@ function endOf(s: Life5): { age: number; cause: string } {
 
 /** 가장 높은 가치관 한두 가지의 앞 구절 + 가장 먼저 얻은 강점의 뒤 구절 */
 export function personaOf(s: Life5): string {
+  const personality = personalityOf(s);
+  const first = s.strengths.map((id) => STRENGTHS.find((x) => x.id === id)).find((x) => x !== undefined);
+  if (personality) return `${personality.primary} · ${personality.secondary}의 사람으로 살았고, ${first?.persona ?? PERSONA_PLAIN}.`;
+  if (s.personality.choices > 0) return PERSONA_NONE;
   const top = topValues(s, 2);
   if (top.length === 0) return PERSONA_NONE;
-  const first = s.strengths.map((id) => STRENGTHS.find((x) => x.id === id)).find((x) => x !== undefined);
   return `${top.map((id) => VALUE_PERSONA[id]).join(' ')} 살았고, ${first?.persona ?? PERSONA_PLAIN}.`;
 }
 
@@ -126,7 +130,7 @@ export function buildEnding(s: Life5, meta: Meta5): Ending5 {
   return {
     persona: personaOf(s),
     dream: dreamLine(s),
-    onePiece: onePieceAnswer(s, topValues(s, 1)[0]),
+    onePiece: onePieceAnswer(s, activeValue(s)),
     oneLine: oneLineOf(s),
     remembered: rememberedOf(s),
     canonWords: canonWordsOf(s),

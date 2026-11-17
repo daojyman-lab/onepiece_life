@@ -21,6 +21,7 @@ export function cloneLife(prev: Life5): Life5 {
 export function apply5(s: Life5, cmd: Command5): void {
   switch (cmd.type) {
     case 'step': if (s.pending === null) stepPart(s); break;
+    case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
     case 'answer': answer(s, cmd.index); break;
   }
 }
@@ -52,6 +53,14 @@ export function invariants5(s: Life5, full = false): string[] {
     const v = s.values[id];
     if (!(v >= 0 && v <= V.value.max)) bad.push(`values.${id}=${v}`);
   }
+  const p = s.personality;
+  if (!p || !Number.isInteger(p.row) || p.row < 0 || p.row > 2 ||
+      !Number.isInteger(p.col) || p.col < 0 || p.col > 2 ||
+      !Number.isInteger(p.pullRow) || Math.abs(p.pullRow) >= 3 ||
+      !Number.isInteger(p.pullCol) || Math.abs(p.pullCol) >= 3 ||
+      !Number.isInteger(p.choices) || p.choices < 0 ||
+      !Number.isInteger(p.hold) || p.hold < 0 || p.hold > 3 ||
+      typeof p.established !== 'boolean') bad.push('personality');
   if (s.ended && s.pending?.kind !== 'ending') bad.push('ended without ending pending');
   const n = s.log.length;
   if (n && s.log[n - 1].id >= s.seq) bad.push('log id ahead of seq');

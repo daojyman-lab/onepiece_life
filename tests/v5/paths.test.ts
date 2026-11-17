@@ -66,10 +66,10 @@ describe('길과 바다의 데이터', () => {
     expect(people.length).toBeGreaterThanOrEqual(16);
   });
   // 4단계부터 길과 사람의 사건은 어느 고향에서나 온다(외딴 고향 섬에서는 data/turnings/index.ts의 landlocked가 막는다)
-  it('본문의 자리표시는 {name} {town} {island}뿐이다', () => {
+  it('본문의 자리표시는 인물 이름과 장소만 사용한다', () => {
     for (const t of [...paths, ...people])
       for (const text of [t.title, t.body, ...t.doors.flatMap((d) => [d.label, d.hint])])
-        for (const m of text.match(/\{\w+\}/g) ?? []) expect(['{name}', '{town}', '{island}'], t.id).toContain(m);
+        for (const m of text.match(/\{\w+\}/g) ?? []) expect(['{name}', '{town}', '{island}', '{friend}'], t.id).toContain(m);
   });
   it('문의 가치관 점수는 V.value.door만큼이다', () => {
     for (const t of [...paths, ...people]) for (const d of t.doors)

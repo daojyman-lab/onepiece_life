@@ -129,6 +129,13 @@ describe('신체 손실의 세부', () => {
     expect(effectiveStats5(s).luk).toBeCloseTo(b.luk - V.injury.scarAmount);
     expect(effectiveStats5(s).str).toBeCloseTo(b.str);
   });
+  it('부위가 있는 상처는 해당 부위의 능력만 떨어뜨린다', () => {
+    const s = newLife5(401);
+    s.hero.injuries.push({ severity: 'heavy', monthsLeft: 18, part: 'armL', kind: 'fracture' });
+    const actual = effectiveStats5(s);
+    expect(actual.str).toBeLessThan(s.hero.base.str);
+    expect(actual.spd).toBe(s.hero.base.spd);
+  });
   it('몸을 잃으면 힘이 줄고, 쓸 수 없는 갈래는 주된 갈래가 되지 않는다', () => {
     const s = adult(); const p = power5(s);
     s.growth.tier.gun = 2; s.growth.tier.fist = 1;

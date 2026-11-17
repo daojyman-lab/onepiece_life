@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe } from '../../src/v5/core/fight';
+import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/v5/core/fight';
 import { openTurning } from '../../src/v5/core/turning';
 import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import { crewPowerFor } from '../../src/core/people';
@@ -84,6 +84,11 @@ describe('싸움', () => {
     expect(heroUnit5(b).tactic).toBe('defense');
     expect(heroUnit5(b).retreatAt).toBeGreaterThan(heroUnit5(a).retreatAt);
   });
+  it('현재 부성향과 달라도 깊이 남은 가치관은 전투 습관에 영향을 준다', () => {
+    const s = fighter(27); addValues(s, { dominion: 90 });
+    s.personality = { row: 0, col: 2, pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
+    expect(heroUnit5(s).tactic).toBe('offense');
+  });
   it('반골은 물러나지 않는다', () => {
     const s = fighter(1); s.strengths.push('rebel');
     expect(heroUnit5(s).retreatAt).toBe(0);
@@ -93,14 +98,36 @@ describe('싸움', () => {
     expect(reduce5(JSON.parse(JSON.stringify(s)), { type: 'answer', index: 0 })).toEqual(reduce5(s, { type: 'answer', index: 0 }));
   });
 
-  it('사소한 싸움은 묻지 않고 돌려 기록으로 끝나며, 죽거나 몸을 잃지 않는다', () => {
-    let s = fighter(7, 6); addValues(s, { dominion: 90 });
-    for (let i = 0; i < 200; i++) { s = reduce5({ ...s, pending: null }, { type: 'step' }); s.hero.standing = 'pirate'; }
-    expect(s.stats.fights).toBeGreaterThan(0);
-    // 50년을 돌리므로 노환이나 병으로 끝날 수는 있다. 싸움으로 끝나서는 안 된다.
-    if (s.ended) expect(s.ended.cause).not.toMatch(/에게 쓰러졌다/);
-    expect(s.stats.limbsLost).toBe(0);
-    expect(Object.values(s.hero.limbs).every((l) => l === 'ok')).toBe(true);
+  it('사소한 교전도 결과 확인 전에는 팝업에서 멈추고, 확인 뒤에만 전적을 남긴다', () => {
+    const s = Array.from({ length: 30 }, (_, i) => {
+      const life = fighter(i, 6); addValues(life, { dominion: 90 });
+      minorFight(life, rngOf(life.rng));
+      return life;
+    }).find((life) => life.pending?.kind === 'battle');
+    expect(s?.pending?.kind).toBe('battle');
+    if (!s || s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');
+    expect(s.stats.fights).toBe(0);
+    expect(s.pending.battle.events.length).toBeGreaterThan(0);
+    const after = reduce5(s, { type: 'answer', index: 0 });
+    expect(after.pending).toBeNull();
+    expect(after.stats.fights).toBe(1);
+    expect(after.stats.wins).toBe(s.pending.result === 'win' ? 1 : 0);
+    expect(after.log.some((line) => line.type === 'battle' && /붙어|덤벼들|당하고|두들겨/.test(line.text))).toBe(true);
+    expect(after.stats.limbsLost).toBe(0);
+    expect(after.hero.alive).toBe(true);
+  });
+  it('전투에서 쓰러져 살아남으면 실제 체력이 줄고 부위가 있는 무거운 상처가 남는다', () => {
+    const s = fighter(16, 5);
+    askFight(s, 'b_alvida', false, true);
+    expect(s.pending?.kind).toBe('battle');
+    if (s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');
+    expect(s.pending.result).toBe('lose');
+    expect(s.pending.battle.units.find((u) => u.hero)?.hp).toBe(0);
+    const after = reduce5(s, { type: 'answer', index: 0 });
+    expect(after.hero.hp).toBeLessThan(100);
+    expect(after.hero.injuries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ severity: 'heavy', part: expect.any(String), kind: expect.any(String) }),
+    ]));
   });
   it('강한 상대에게 지면 몸을 잃을 수 있고, 잃으면 큰 계기가 줄을 선다', () => {
     let lost: Life5 | null = null;

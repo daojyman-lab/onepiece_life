@@ -5,7 +5,7 @@ import type { ValueId } from '../core/types';
 export const VALUE_IDS: ValueId[] = ['justice', 'greed', 'ambition', 'romance', 'inquiry', 'loyalty', 'freedom', 'dominion', 'peace'];
 
 export const VALUE_NAME: Record<ValueId, string> = {
-  justice: '정의', greed: '탐욕', ambition: '야망', romance: '낭만', inquiry: '탐구',
+  justice: '정의', greed: '탐욕', ambition: '성취', romance: '낭만', inquiry: '탐구',
   loyalty: '의리', freedom: '자유', dominion: '패도', peace: '평온',
 };
 
@@ -13,7 +13,7 @@ export const VALUE_NAME: Record<ValueId, string> = {
 export const VALUE_LEAN: Record<ValueId, string> = {
   justice: '정의 쪽으로 마음이 기울었다.',
   greed: '탐욕 쪽으로 마음이 기울었다.',
-  ambition: '야망 쪽으로 마음이 기울었다.',
+  ambition: '성취 쪽으로 마음이 기울었다.',
   romance: '낭만 쪽으로 마음이 기울었다.',
   inquiry: '탐구 쪽으로 마음이 기울었다.',
   loyalty: '의리 쪽으로 마음이 기울었다.',
@@ -26,7 +26,7 @@ export const VALUE_LEAN: Record<ValueId, string> = {
 export const VALUE_DEEPEN: Record<ValueId, string> = {
   justice: '정의가 깊어졌다.',
   greed: '탐욕이 깊어졌다.',
-  ambition: '야망이 깊어졌다.',
+  ambition: '성취가 깊어졌다.',
   romance: '낭만이 깊어졌다.',
   inquiry: '탐구가 깊어졌다.',
   loyalty: '의리가 깊어졌다.',
@@ -39,7 +39,7 @@ export const VALUE_DEEPEN: Record<ValueId, string> = {
 export const VALUE_PERSONA: Record<ValueId, string> = {
   justice: '정의를 좇아',
   greed: '제 잇속을 먼저 챙기며',
-  ambition: '야망을 품고',
+  ambition: '성취를 좇아',
   romance: '낭만을 따라',
   inquiry: '탐구에 몸을 바쳐',
   loyalty: '의리를 지키며',

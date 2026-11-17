@@ -21,16 +21,20 @@ import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
+import { locationDivider } from './log';
 import { addMark } from './strengths';
 import { isDeep } from './values';
+import { beginVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
-/** 문장의 자리표시 {name} {town} {island}를 지금 주인공의 것으로 채우고 조사를 고른다 */
+/** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string): string {
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island });
+  const parent = s.people.find((p) => p.alive && personIs(p, 'parent'))?.relation ?? '';
+  const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend });
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
@@ -83,10 +87,19 @@ function applyOne(s: Life5, e: Fx): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'move': h.island = e.island; h.sea = e.sea; return;
-    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
+    case 'move': h.island = e.island; h.sea = e.sea; locationDivider(s); return;
+    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; locationDivider(s); return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
+    case 'vowStart': beginVow(s, e.id); return;
+    case 'vowResolve': {
+      const result = resolveVow(s, e.id);
+      if (result?.reward) {
+        addMastery(s, result.reward, result.amount);
+        s.growth.pref[result.reward] += result.amount * V.growth.pref.fromMastery;
+      }
+      return;
+    }
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'sail': sailTo(s, e.island, e.route); return;
@@ -113,9 +126,26 @@ function applyOne(s: Life5, e: Fx): void {
         const level = Math.min(maxLevel, e.level ?? V.person.crew.level);
         if (e.canon) s.people = s.people.filter((x) => !(x.alive && x.canon === e.canon));   // 이미 아는 사이였으면 그 사람이 배에 오른다 (둘이 되지 않는다)
         if (e.years) p.tempUntil = s.age + e.years;
-        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
+        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0,
+          ...((e.role ?? role) === 'medic' ? { medicalSkill: e.medicalSkill ?? 50 } : {}) };
       }
       s.people.push(p);
+      return;
+    }
+    case 'personChange': {
+      const p = s.people.find((x) => x.alive && x.relation === e.relation);
+      if (!p) return;
+      if (e.bond) p.bond = clamp(p.bond + e.bond, 0, V.person.bondMax);
+      if (e.kind) {
+        p.kind = e.kind;
+        if (e.kind === 'crew' && !p.crew) {
+          const { role, level } = V.person.crew;
+          p.crew = { role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
+        } else if (e.kind !== 'crew') {
+          delete p.crew;
+          delete p.tempUntil;
+        }
+      }
       return;
     }
     case 'crewTrain': {
@@ -143,6 +173,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'die':
       if (!h.alive) return;
       h.alive = false;
+      if (s.vows?.active) resolveVow(s, s.vows.active.id);
       s.ended = { cause: e.cause, age: s.age };
       s.pending = { kind: 'ending', cause: e.cause };
       return;
@@ -163,7 +194,7 @@ function applyOne(s: Life5, e: Fx): void {
       return;
     case 'reveal': revealSurname(s); return;
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
-    case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
+    case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity], ...(e.part ? { part: e.part } : {}), ...(e.kind ? { kind: e.kind } : {}) }); return;
     case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next); return;
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;
