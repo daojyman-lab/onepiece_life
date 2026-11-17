@@ -1,4 +1,5 @@
 // 전환점과 문: 고를 수 있는 문을 풀고, 띄우고, 고른 답을 적용한다.
+import { buildVoyage, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../../core/josa';
 import { fill } from '../../core/util';
 import { chance, weighted, type Rng } from '../../core/rng';
@@ -19,7 +20,7 @@ import type { Life5, ResolvedDoor, Turning } from './types';
  * 상태에는 id만 남기 때문에, 데이터의 전환점은 TURNING_BY_ID에서 찾는다.
  */
 const OPENED_ELSEWHERE = new Map<string, Turning>();
-const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id);
+const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id);
 
 /** 자리표시 {name}(이름만) {town} {island}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string): string {
@@ -162,7 +163,7 @@ export function answerDoor(s: Life5, index: number): void {
   }
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
-  p.doors.forEach((d, i) => {
+  if (!t.id.startsWith(VOYAGE_PREFIX)) p.doors.forEach((d, i) => {   // 항로 고르기의 안 간 섬은 '가지 않은 길'에 넣지 않는다
     if (i !== index && !d.locked) s.unchosen.push({ age: s.age, turning: t.id, title: p.title, door: d.label });
   });
   const key = `${t.id}#${index}`;

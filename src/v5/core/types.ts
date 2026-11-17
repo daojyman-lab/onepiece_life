@@ -92,7 +92,8 @@ export type Fx =
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
-  | { op: 'dream'; id: DreamId }                         // 꿈을 품는다 · 바꾼다
+  | { op: 'dream'; id: DreamId }
+  | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)                         // 꿈을 품는다 · 바꾼다
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
@@ -188,5 +189,7 @@ export interface Life5 {
   prime?: { from: number; until: number; lap: boolean } | null;
   /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
   dream?: { id: DreamId; since: number; done: number | null } | null;
+  /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
+  sail?: boolean;
 }
 export type Command5 = { type: 'step' } | { type: 'answer'; index: number };

@@ -23,6 +23,7 @@ import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import { dreamYear } from './dreams';
+import { buildVoyage, voyageChoices, voyageId } from './voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -78,6 +79,7 @@ function yearTurn(s: Life5, r: Rng): void {
 function turningPoint(s: Life5, r: Rng): void {
   if (s.pending || !wantsStop(s, r)) return;
   s.stats.stopTries += 1;
+  if (s.sail && openVoyage(s, r)) return;          // 섬을 옮길 때면 이번 멈춤은 항로 고르기
   const t = pickTurning(s, r);
   if (!(t && openTurning(s, t))) s.stats.emptyStops += 1;   // 멈추려 했는데 띄울 것이 없었다
 }
@@ -270,14 +272,27 @@ export function voyage(s: Life5): void {
   if (s.queue.length) return;                  // 이어지는 이야기가 줄 서 있으면 그 섬에 머문다
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
-  if (!chance(r, V.voyage.p)) return;
+  const military = h.standing === 'marine' || h.standing === 'cp';
+  if (!s.sail && !chance(r, V.voyage.p)) return;
+  if (!military && !s.sail) { s.sail = true; return; }   // 다음 멈춤에 항로를 고른다
+  s.sail = false;                              // 해군은 명령으로, 고를 틈이 없던 사람은 바람 닿는 대로
   const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island);
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
   const first = !s.flags.includes(`at:${next}`);
   h.island = next;
   if (first) s.flags.push(`at:${next}`);
-  logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
+  if (military) logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${next} 지부에 처음 배속되었다.` : `전근 명령을 받아 다시 ${next}(으)로 배속되었다.`), 'light');
+  else logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
+}
+
+/** 항로 고르기를 띄운다. 띄웠으면 true */
+function openVoyage(s: Life5, r: Rng): boolean {
+  s.sail = false;
+  if (!SEA_STANDINGS.includes(s.hero.standing) || s.hero.standing === 'marine' || s.hero.standing === 'cp') return false;
+  const c = voyageChoices(s, r);
+  const t = c && buildVoyage(voyageId(s, c));
+  return !!t && openTurning(s, t);
 }
 
 /** 뭍에 자리 잡은 사람 · 물러난 사람은 해마다 살림 돈을 번다 (V.income) */
