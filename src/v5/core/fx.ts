@@ -23,6 +23,7 @@ import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
+import { beginVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -87,6 +88,15 @@ function applyOne(s: Life5, e: Fx): void {
     case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
+    case 'vowStart': beginVow(s, e.id); return;
+    case 'vowResolve': {
+      const result = resolveVow(s, e.id);
+      if (result?.reward) {
+        addMastery(s, result.reward, result.amount);
+        s.growth.pref[result.reward] += result.amount * V.growth.pref.fromMastery;
+      }
+      return;
+    }
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'sail': sailTo(s, e.island, e.route); return;
@@ -143,6 +153,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'die':
       if (!h.alive) return;
       h.alive = false;
+      if (s.vows?.active) resolveVow(s, s.vows.active.id);
       s.ended = { cause: e.cause, age: s.age };
       s.pending = { kind: 'ending', cause: e.cause };
       return;

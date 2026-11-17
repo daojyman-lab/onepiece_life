@@ -13,7 +13,7 @@ const isObj = (x: unknown): x is Obj => typeof x === 'object' && x !== null && !
 
 /** 인생의 맨 위 칸 가운데 목록이어야 하는 것과 객체여야 하는 것 */
 const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed', 'recentLines'] as const;
-const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats', 'seenCount'] as const;
+const LIFE_OBJECTS = ['hero', 'growth', 'values', 'stats', 'seenCount', 'vows'] as const;
 
 /**
  * 떠 있는 일의 모양이 맞는가: null이거나, 종류(door · fight · battle · ending)에 따라 화면이 읽는 칸을 갖춘 객체.
@@ -50,11 +50,17 @@ export function normalizeLife5(x: unknown): Life5 | null {
   const s = withDefaults(x, { ...def, standingSince: typeof x.age === 'number' ? x.age : def.standingSince });
   // 큰 칸의 모양이 틀리면(목록이어야 할 곳에 객체가 있는 등) 고쳐 읽지 않는다
   if (LIFE_ARRAYS.some((k) => !Array.isArray(s[k])) || LIFE_OBJECTS.some((k) => !isObj(s[k]))) return null;
+  if (isObj(s.vows) && (!Array.isArray(s.vows.history) || (s.vows.active !== null && !isObj(s.vows.active)))) return null;
   if (!pendingOk(s.pending)) return null;      // 손으로 고친 파일의 깨진 창이 화면을 무너뜨리지 않게
   // 태어난 형편을 모르는 옛 저장은 지금의 형편으로 (몰락을 세지 않는다)
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다.
+  if (life.vows?.active) {
+    life.vows.active.island ??= life.hero.island;
+    life.vows.active.progress ??= [];
+  }
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;
   // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다

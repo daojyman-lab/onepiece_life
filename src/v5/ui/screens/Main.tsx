@@ -145,6 +145,7 @@ function Profile({ s }: { s: Life5 }) {
         <div class="t9">{p.born}</div>
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
+        {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}

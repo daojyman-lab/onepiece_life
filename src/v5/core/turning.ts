@@ -13,6 +13,7 @@ import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep } from './values';
 import { isQuiet } from './year';
+import { advanceVow } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -177,4 +178,6 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  const vow = advanceVow(s, t.id);
+  if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
 }
