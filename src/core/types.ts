@@ -1,467 +1,223 @@
-// 상태와 정적 데이터의 형태. docs/02_설계/02_상태와_데이터.md 를 따른다.
-// 상태에는 값만 둔다. 함수를 넣지 않는다.
+import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
+export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
-export type SeaId =
-  | 'east' | 'west' | 'north' | 'south'
-  | 'gl_entry' | 'gl_first' | 'sabaody' | 'nw_first' | 'nw_late';
-export type Stage = 1 | 2 | 3 | 4 | 5 | 6;
-export type Route = 'none' | 'pirate' | 'marine' | 'revolution';
-export type StatKey = 'str' | 'spd' | 'vit' | 'int' | 'wil' | 'luk';
-export type Stats = Record<StatKey, number>;
-export type BranchId =
-  | 'martial.fist' | 'martial.sword' | 'martial.gun'
-  | 'haki.observation' | 'haki.armament' | 'haki.conqueror'
-  | 'fruit';
-export type Tactic = 'offense' | 'defense' | 'counter' | 'endurance';
-export type CrewRole = 'vanguard' | 'support' | 'medic' | 'navigator' | 'cook' | 'shipwright';
-export type FruitClass = 'paramecia' | 'zoan' | 'logia';
-export type Species = 'human' | 'fishman' | 'merfolk' | 'mink' | 'giant' | 'longarm' | 'longleg' | 'threeeye' | 'tontatta' | 'skypiean' | 'buccaneer' | 'lunarian';
+export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
+export type Values = Record<ValueId, number>;                    // 각 0~100
+/** 3×3 성향표의 현재 칸과 아직 칸을 옮기지 못한 선택의 방향. */
+export interface Personality5 {
+  row: number; col: number;
+  pullRow: number; pullCol: number;
+  choices: number;
+  hold: number; established: boolean;
+}
+export type HomeId = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou';
+export type Wealth = 'poor' | 'common' | 'comfortable' | 'noble';
+export type Lineage = 'orphan' | 'commoner' | 'marineFamily' | 'pirateChild' | 'samurai' | 'outcast';
+export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 'bountyHunter' | 'warlord'
+  | 'shipwright' | 'cp' | 'settled' | 'prisoner' | 'retired';
+export type Limb = 'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR';
+export type WoundPart = Limb | 'head' | 'torso';
+export type WoundKind = 'bruise' | 'cut' | 'burn' | 'fracture';
+export type Wound5 = Injury & { part?: WoundPart; kind?: WoundKind };
+export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
+export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
+export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
+/** 사건의 글이 전제하는 것. 맞지 않으면 그 전환점은 오지 않고, 그 문은 잠긴다 (needs.ts) */
+export type Need = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' | 'swim' | 'sword' | 'gun' | 'fist' | 'arms' | 'ship';
 
-// ---------------------------------------------------------------- 주인공
-
-export interface Injury { severity: 'light' | 'heavy' | 'scar'; monthsLeft: number; stat?: StatKey; treated?: boolean }
-export interface Illness { id: string; stage: 1 | 2 | 3; months: number }
-
-export interface Hero {
-  name: string; surname: string; gender: 'm' | 'f';
-  species: Species;
-  birth: { seaId: SeaId; place: string; household: string; month: number };
-  age: number;
-  route: Route;
-  rank: number;
-  fame: number;
-  money: number;
-  base: Stats;
-  hp: number;                 // 건강 0~100
-  injuries: Injury[];
-  illness: Illness | null;
-  traits: string[];
+export interface Hero5 {
+  name: string; surname: string | null;        // 고아는 null (성을 모름)
+  secretSurname: string | null;                // 숨겨진 진짜 성. 밝혀지면 surname으로 옮긴다
+  gender: 'm' | 'f'; species: Species;
+  home: HomeId; town: string; wealth: Wealth; lineage: Lineage;
+  talents: string[];                           // src/data/talents.ts 의 id
+  base: Stats; hp: number;                     // hp 0~100
+  injuries: Wound5[]; illness: Illness | null;
+  limbs: Record<Limb, LimbState>;
   fruit: { id: string; eatenAt: number } | null;
-  persona?: string;           // 특성 (data/passives.ts HERO_TRAITS)
+  money: number; fame: number; rank: number;
+  standing: Standing; island: string; sea: SeaId;
   alive: boolean;
+  bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
+  potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
+}
+export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
+export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+export interface VowState {
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
+  history: { id: string; result: 'kept' | 'failed' }[];
+}
+export interface Growth5 {
+  tier: Record<Branch, number>;                // 연 오의 단계 0~6
+  mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
+  master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
+  pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
+  path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
+}
+export type LogWeight = 'light' | 'heavy' | 'year';
+/** 기록 한 줄. island: 나이·장소 구분선(weight 'year')에만 있다. 그 뒤 기록이 일어난 섬 이름 */
+export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string; moved?: true }
+export interface Unchosen { age: number; turning: string; title: string; door: string }
+/** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
+export interface TimelineEntry {
+  age: number; text: string; standing?: Standing;
+  canon?: string;                              // 원작 인물 id (3단계부터). 옛 저장에는 표시 이름이 남아 있다. 있는지만 본다
+  limb?: Limb;
 }
 
-// ---------------------------------------------------------------- 성장
-
-export interface Growth {
-  focus: BranchId | null;                 // 주력: 무술 3유파 중 하나
-  secondary: BranchId | null;             // 보조: 무술 3유파 중 하나 (절반 속도)
-  haki?: BranchId | null;                 // 패기 칸: 깨우친 패기 중 하나를 둔다. 주력 · 보조와 따로 자란다
-  skills: Record<string, { mastery: number }>;
-  gates: string[];
-  master: { personId: string; name: string; branch: BranchId; gate: string; monthsLeft: number } | null;
-  focusSince: number;         // 주력이 정해진 나이
-  fruitMastery?: number;      // 열매 숙련 0~100. 패시브의 세기와 각성 조건
-}
-
-export interface Loadout {
-  skills: string[];           // 최대 6
-  tactic: Tactic;
-  retreatAt: 0 | 0.3 | 0.5;
-  weapon: string | null; armor: string | null; charm: string | null;
-  consumables: string[];      // 최대 3
-  crew: { personId: string; role: CrewRole }[];
-}
-
-export interface CrewInfo {
-  role: CrewRole; level: number; power: number; skills: string[]; injuredMonths: number;
-  medicalSkill?: number;  // 선의의 치료 솜씨 0~100 (옛 저장은 기본값으로 본다)
-  trait?: string;             // 성격 (data/crewTraits.ts). 없으면 id에서 정한다 (예전 저장)
-  fruit?: string | null;      // 먹은 악마의 열매
-  gear?: number;              // 장비 단계 0~3 (data/upgrades.ts CREW_GEAR)
-  growth?: number;            // 잠재력: 해마다 자라는 힘 배율 (원작 인물은 1보다 크다)
-}
-
-export interface Person {
-  id: string; name: string; gender: 'm' | 'f'; age: number;
-  kind: 'family' | 'master' | 'crew' | 'rival' | 'enemy' | 'ally';
-  relation: string;           // 아버지, 라이벌, 스승 … 화면용
-  canon: string | null;
-  bond: number;
-  faction: 'civil' | 'pirate' | 'marine' | 'rev';
-  species: Species;
-  crew?: CrewInfo;
-  tempUntil?: number;         // v5 임시 동행: 주인공이 이 나이가 되면 제 길로 떠난다 (없으면 끝까지 함께하는 동료)
-  epithet?: string;           // 이명 (동료). 없으면 성격에서 정한다
-  power?: number;             // 라이벌 같은 비동료의 대략적 힘
-  alive: boolean;
-  missing?: boolean;          // v6.7 행방불명 (alive는 false). 훗날 바다에서 다시 만날 수 있다
-}
-
-export interface MissionProgress {
-  id: string; state: 'open' | 'active' | 'done' | 'failed'; step: number; monthsInStep: number; port: string;
-}
-
-export interface WorldProgress {
-  stage: Stage;
-  seaId: SeaId;
-  missions: MissionProgress[];
-  refillAt: number | null;     // 실패한 임무를 대신할 임무가 뽑히는 달 (절대 달)
-  boss: { id: string; state: 'hidden' | 'revealed' | 'defeated'; attempts: number; nextAskAt: number };
-  ship: string | null;
-  defeated: string[];
-  news: { year: number; text: string }[];
-  apex: boolean;               // 6단계 보스를 넘었다
-  usedEpithets?: string[];
-  usedPortFoes?: string[];     // 이번 인생에서 이미 만난 원작 항구의 인물     // 이번 인생에서 이미 쓴 적의 이명 (겹치지 않게)
-  shipParts?: string[];        // 배 개조 (data/upgrades.ts)
-  firstMate?: string;          // 부선장 (부분대장) personId
-  feastUntil?: number;         // 회식 버프가 끝나는 달 (절대 달)
-  seeking?: { month: number; foundAt: number | null };
-  training?: { left: number; total: number };   // 집중 수련: 남은 달, 전체 달
-  prison?: { left: number; total: number; level: number; asked: boolean };
-  lostShip?: string;
-  trial?: { master: string; branch: BranchId; gate: string; next: string; months: number; step: number };   // 스승의 시험 임무 중
-  masterPromise?: { master: string; gate: string };   // 시험을 통과한 스승이 나중에 다시 와서 가르칠 단계           // 붙잡힐 때 해군에 압수된 배 (옛 동료가 되찾아 올 수 있다)   // 임펠 다운 수감: 남은 달, 형기, 층, 탈옥 제안 여부
-  side?: { id: string; step: number; months: number };   // 진행 중인 곁가지 이야기
-  sideDone?: string[];         // 마친 곁가지 이야기   // 스승을 찾아 나선 중: 몇 달째, 찾게 되는 달 (null이면 못 찾는다)
-}
-
-export interface Inventory {
-  items: { id: string; count: number }[];
-  unknownFruits: { uid: string; fruitId: string; hints: string[]; foundAt: number; asked: boolean }[];
-}
-
-export interface ChoiceTracker {
-  nextAt: number;              // 절대 달
-  thisYear: number;
-  seen: Record<string, number>;   // id → 마지막으로 본 절대 달
-  flags: string[];
-  queue: string[];
-  pauses?: number;             // 올해 멈춘 수 (선택 + 강적 준비). 해가 바뀌면 0
-}
-
-export type LogType = 'info' | 'growth' | 'battle' | 'choice' | 'danger' | 'world' | 'money' | 'good' | 'life' | 'day';
-export interface LogEntry { t: number; text: string; type: LogType; id?: number }
-export interface TimelineEntry { t: number; age: number; text: string }
-
-export interface LifeStats {
-  routineWins: number; routineLosses: number;
-  eliteWins: number; eliteLosses: number;
-  choices: number; maxStage: number; nearDeaths: number;
-  pauses?: number; lifeEvents?: number; autoElite?: number;
-}
-
-// ---------------------------------------------------------------- 전투 (직렬화 가능)
-
-export interface EnemySpec {
-  id: string; name: string; canon: string | null;
-  base: Stats; fruitClass: FruitClass | null; armament: 0 | 1 | 2 | 3; observation: 0 | 1 | 2 | 3;
-  skills: string[]; tactic: Tactic;
-  officers: EnemySpec[];
-  faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
-  title?: string;
-  form?: 'seaking';            // 사람이 아닌 모습 (그림을 다르게 그린다)
-  faceKey?: string;            // 얼굴 그림의 씨앗. 아는 사람이면 사람들 패널과 같은 얼굴이 나오게 한다
-  fruitId?: string;            // 먹은 열매 (없으면 기술 id에서 찾는다)
-}
-
-export interface Encounter {
-  source: 'mission' | 'boss' | 'rival' | 'choice' | 'routine' | 'side';
-  enemy: EnemySpec;
-  elite: boolean;
-  lethal: boolean;
-  spar: boolean;
-  atSea: boolean;
-  missionIdx?: number;
-  reward?: Effect[];           // 이기면
-  onLose?: Effect[];           // 지거나 물러나면
-  solo?: boolean;              // 동료 없이 혼자 싸운다 (1대1)
-}
-
-export interface CUnit {
-  key: string; name: string; side: 'L' | 'R';
-  hero: boolean; leader: boolean; role: CrewRole | 'hero' | 'enemy';
-  maxHp: number; hp: number; maxSp: number; sp: number;
-  st: Stats; def: number; armament: number; observation: number;
-  fruitClass: FruitClass | null;
-  skills: { id: string; mastery: number; cd: number }[];
-  tactic: Tactic; retreatAt: number;
-  weapon: { branch: BranchId; mult: number; seastone: boolean } | null;
-  consumables: string[];
-  guard: number; guardTurns: number; evade: number; evadeTurns: number; buff: number; buffTurns: number;
-  bound: number; sealed: number;
-  pGuard: number; pDodge: number; pBuff: number;   // 장착한 패시브 기술의 상시 효과
-  lastBig: boolean;
-  personId?: string; faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
-  form?: 'seaking';
-  faceKey: string;             // 얼굴 그림의 씨앗 (화면 어디서나 같은 얼굴)
-  mods: import('../data/passives').Mods;   // 특성 · 열매 패시브
-  stood?: boolean;             // 불굴로 한 번 버텼다
-}
-
-export interface Duel { id: number; l: number; r: number; helpersL: number[]; helpersR: number[]; over: boolean; winner: 'L' | 'R' | null }
-
-export type BattleEvent =
-  | { k: 'round'; n: number }
-  | { k: 'act'; d: number; who: number; target: number; skill: string; name: string; dmg: number; crit: boolean; dodge: boolean; note?: string; proc?: boolean }
-  | { k: 'heal'; d: number; who: number; target: number; amount: number; name: string }
-  | { k: 'guard'; d: number; who: number; name: string }
-  | { k: 'down'; d: number; who: number }
-  | { k: 'join'; d: number; who: number; side: 'L' | 'R' }
-  | { k: 'retreat'; who: number; ok: boolean }
-  | { k: 'item'; d: number; who: number; item: string; name: string }
-  | { k: 'drown'; who: number }
-  | { k: 'rest'; who: number }
-  | { k: 'end'; result: 'win' | 'lose' | 'retreat' };
-
-export interface BattleState {
-  round: number;
-  units: CUnit[];
-  duels: Duel[];
-  events: BattleEvent[];
-  result: null | 'win' | 'lose' | 'retreat';
-  rng: { seed: number; cursor: number };
-  usage: Record<string, { uses: number; damage: number }>;
-  awaiting: null | 'intervene';
-  resting: boolean;
-  atSea: boolean;
-  navigator: boolean;
-}
-
-// ---------------------------------------------------------------- 대기 중인 일
-
-export interface ResolvedOption {
-  label: string; hint: string; effects: Effect[]; disabled: string | null; next?: string; danger?: boolean;
-}
-
-export type Pending =
-  | { kind: 'choice'; choiceId: string; category: Choice['category']; title: string; body: string;
-      speaker: { name: string; personId?: string; faceKey?: string; faction?: Person['faction']; species?: Species; gender?: 'm' | 'f'; age?: number } | null;
-      options: ResolvedOption[] }
-  | { kind: 'prep'; encounter: Encounter }
-  | { kind: 'battle'; encounter: Encounter; battle: BattleState; risk: Risk }
-  | { kind: 'intervene'; encounter: Encounter; battle: BattleState; risk: Risk }
-  | { kind: 'ending'; cause: string }
-  | null;
-
-export type Risk = 'safe' | 'danger' | 'lethal';
-
-// ---------------------------------------------------------------- 한 인생
-
-export interface LifeState {
-  schema: 1;
-  rng: { seed: number; cursor: number };
-  time: { year: number; month: number };
-  hero: Hero;
-  growth: Growth;
-  loadout: Loadout;
-  people: Person[];
-  world: WorldProgress;
-  inventory: Inventory;
-  choice: ChoiceTracker;
-  log: LogEntry[];
-  timeline: TimelineEntry[];
-  pending: Pending;
-  stats: LifeStats;
-  lastBattle: { name: string; result: string; summary: { skill: string; name: string; uses: number; damage: number }[] } | null;
-  seq: number;                // 고유 번호 발급기
-  notices: string[];          // 화면이 한 번 보여 주고 지우는 알림
-  metaEvents: MetaEvent[];    // 인생 밖 기록(도감)에 반영할 일. app 층이 MetaState에 옮기고 비운다
-  ended: { cause: string; age: number } | null;
-  known: { fruits: string[]; people: string[] };   // 새 인생을 만들 때 도감에서 옮겨 온 것
-  logSeq?: number;                                  // 기록 번호 발급기. 화면이 한 줄씩 보여 줄 때 쓴다
-}
-
-export type MetaEvent =
-  | { k: 'fruit'; id: string; grade: number }
-  | { k: 'met'; id: string; where: SeaId; taught?: boolean }
-  | { k: 'defeated'; id: string; where: SeaId }
-  | { k: 'skill'; id: string };
-
-// ---------------------------------------------------------------- 인생 밖
-
-export interface HallEntry {
-  name: string; route: Route; ageAtEnd: number; cause: string;
-  stage: number; fame: number; fruit: string | null; topSkills: string[];
-  endedAt: string;
-}
-export interface MetaState {
-  schema: 1;
-  fruitCodex: Record<string, { eaten: number; bestTier: number }>;
-  peopleCodex: Record<string, { met: number; taughtBy: boolean; defeated: boolean; where: SeaId }>;
-  skillCodex: string[];
-  hall: HallEntry[];
-  lives: number;
-}
-
-// ---------------------------------------------------------------- 정적 데이터
-
-export interface SkillEffect { type: 'guard' | 'dodge' | 'heal' | 'buff' | 'debuff' | 'bind'; value: number; turns: number }
-export type SkillWhen = 'always' | 'hpBelow50' | 'enemyHpBelow30' | 'afterEnemyBig' | 'opening' | 'allyDown';
-export type SkillTag = 'armament' | 'area' | 'pierce' | 'heal' | 'bind' | 'transform' | 'awaken';
-
-export interface Skill {
-  id: string; name: string; branch: BranchId; tier: 1 | 2 | 3 | 4 | 5 | 6;
-  kind: 'attack' | 'guard' | 'support' | 'passive';
-  stat: 'str' | 'spd' | 'int' | 'wil';
-  power: number; cost: number; cooldown: number;
-  when: SkillWhen;
-  tags: SkillTag[];
-  effect?: SkillEffect;
-  requires: { skills?: { id: string; mastery: number }[]; base?: Partial<Stats>; gate?: string };
-  text: string;
-}
-
-export interface FruitTemplate {
-  id: string; kind: Skill['kind']; stat: Skill['stat']; power: number; cost: number; cooldown: number;
-  when: SkillWhen; tags: SkillTag[]; effect?: SkillEffect;
-}
-
-export interface Fruit {
-  id: string; name: string; cls: FruitClass;
-  grade: 1 | 2 | 3 | 4 | 5;
-  theme: string;
-  skills: { template: string; name: string }[];
-  canonUser: string | null;
-}
-
-export interface Master {
-  id: string; name: string; canon: string | null; title: string;
-  seas: SeaId[]; minStage: Stage; route: Array<'pirate' | 'marine' | 'any'>;
-  teaches: { branch: BranchId; gate: string; months: number }[];
-  accepts: Condition[];
-  fee: number;
-  faction: Person['faction']; gender: 'm' | 'f'; age: number; species: Species;
-}
-
-export interface Sea {
-  id: SeaId; stage: Stage; name: string; ports: string[]; enemyPower: [number, number];
-  shipRequired: number; armament: 0 | 1 | 2 | 3;
-}
-
-export type MissionStep =
-  | { kind: 'story'; months: number; text: string; effects: Effect[] }
-  | { kind: 'battle'; enemy: string; elite: boolean; atSea?: boolean; text: string };
-
-export interface Mission {
-  id: string; stages: Stage[] | 'any'; route: 'pirate' | 'marine' | 'any';
-  title: string;
-  steps: MissionStep[];
-  reward: Effect[];
-}
-
-export interface Boss extends EnemySpec {
-  sea: SeaId[]; stage: Stage; route: 'pirate' | 'marine' | 'any'; drops: Effect[]; intro: string;
-}
-
-export interface Item {
-  id: string; name: string;
-  kind: 'weapon' | 'armor' | 'charm' | 'consumable';
-  grade: 1 | 2 | 3 | 4 | 5;
-  branch?: BranchId;          // 무기가 맞는 갈래
-  mult?: number;              // 무기 배율
-  armor?: number;             // 방어구 방어
-  bonus?: Partial<Stats>;     // 장신구
-  use?: 'heal' | 'sp' | 'seastone' | 'smoke' | 'net';
-  seastone?: boolean;         // 해루석 무기: 이 무기로 하는 공격은 자연계에 무장색 한 단계만큼 더 닿는다
-  price: number;
-  text: string;
-}
-
-export interface Ship { id: string; name: string; tier: number; crew: number; price: number }
-
-export type ChoiceCategory = 'childhood' | 'entry' | 'master' | 'fruit' | 'career' | 'challenge' | 'bond' | 'crisis' | 'ship';
-
-export interface ChoiceOption {
-  label: string; hint: string; when?: Condition[]; effects: Effect[]; next?: string; danger?: boolean;
-}
-export interface Choice {
-  id: string;
-  category: ChoiceCategory;
-  when: Condition[];
-  weight: number;
-  repeat: 'once' | 'cooldown';
-  cooldownYears?: number;
-  template?: 'fruit' | 'master' | 'challenge' | 'ship' | 'focus' | 'haki' | 'betrayal' | 'child' | 'side' | 'persona' | 'reunion' | 'shipwright';
-  speaker: 'hero' | { person: string } | { canon: string; faction?: Person['faction']; gender?: 'm' | 'f'; age?: number; face?: string; species?: Species };
-  title: string; body: string;
-  options: ChoiceOption[];
-}
-
-// ---------------------------------------------------------------- 조건과 효과
-
-export type Condition =
+export type Cond =
   | { c: 'age'; min?: number; max?: number }
-  | { c: 'route'; is: Route[] }
-  | { c: 'stage'; min?: number; max?: number }
-  | { c: 'base'; key: StatKey; min: number }
-  | { c: 'skill'; id: string; mastery?: number }
-  | { c: 'gate'; id: string; has: boolean }
-  | { c: 'fruit'; has: boolean }
-  | { c: 'flag'; id: string; has: boolean }
-  | { c: 'trait'; id: string; has: boolean }
+  | { c: 'standing'; is: Standing[] }
+  | { c: 'home'; is: HomeId[] }
+  | { c: 'wealth'; min?: Wealth; max?: Wealth }
+  | { c: 'lineage'; is: Lineage[] }
+  | { c: 'value'; id: ValueId; deep: boolean }
+  | { c: 'strength'; id: string; has: boolean }
   | { c: 'money'; min: number }
   | { c: 'fame'; min: number }
-  | { c: 'crew'; min?: number; max?: number }
-  | { c: 'injured'; is: boolean }
-  | { c: 'ill'; is: boolean }
-  | { c: 'birthSea'; is: SeaId[] }
-  | { c: 'focus'; is: (BranchId | null)[] }
-  | { c: 'species'; is: Species[] }
-  | { c: 'person'; kind: Person['kind']; has: boolean }
-  | { c: 'rank'; min?: number; max?: number }
-  | { c: 'place'; is: string[] }                  // 고향
-  | { c: 'sea'; is: SeaId[] };                    // 지금 있는 해역
+  | { c: 'grade'; is: string[] }                 // 화면에 표시하는 종합 전투 등급
+  | { c: 'turningSeen'; id: string; has: boolean } // 이 인생에서 해당 전환점을 이미 보았는가
+  | { c: 'tier'; branch: Branch | 'any'; min: number }
+  | { c: 'flag'; id: string; has: boolean }
+  | { c: 'fruit'; has: boolean }
+  | { c: 'limbLost'; min: number; limbs?: Limb[] }  // limbs가 있으면 그 부위만 센다 (의수 · 의족은 팔다리만)
+  | { c: 'sea'; is: SeaId[] }
+  | { c: 'hardship'; min: number }
+  | { c: 'secret'; known: boolean }
+  | { c: 'town'; is: string[] }                 // 태어난 마을 (hero.town)
+  | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
+  | { c: 'island'; is: string[]; not?: boolean } // 지금 있는 섬 (hero.island). not이면 그 섬들이 아닐 때
+  | { c: 'species'; is: Species[] }             // 종족
+  | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
+  | { c: 'person'; relation: string; has: boolean; kinds?: Person['kind'][] }
+  | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
+  | { c: 'canonAge'; id: string; min?: number; max?: number }
+  | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
-export interface PersonSeed {
-  kind: Person['kind']; relation: string; name?: string; gender?: 'm' | 'f'; age?: number;
-  faction?: Person['faction']; bond?: number; power?: number; tag?: string; canon?: string | null;
-}
-export interface CrewSeed { role: CrewRole; name?: string; gender?: 'm' | 'f'; power?: number; named?: string }
-
-export type Effect =
+export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
   | { op: 'hp'; add: number }
   | { op: 'money'; add: number }
-  | { op: 'moneyPct'; pct: number }
   | { op: 'fame'; add: number }
-  | { op: 'focus'; branch: BranchId | null; slot: 'focus' | 'secondary' | 'haki' }
-  | { op: 'learn'; skill: string }
-  | { op: 'mastery'; skill: string | 'focus'; add: number }
-  | { op: 'gate'; id: string }
-  | { op: 'apprentice'; master: string; branch: BranchId; gate: string; months: number; fee: number }
-  | { op: 'route'; to: Route }
   | { op: 'rank'; add: number }
-  | { op: 'flag'; id: string }
-  | { op: 'unflag'; id: string }
-  | { op: 'trait'; id: string }
-  | { op: 'persona'; id: string }
-  | { op: 'person'; add: PersonSeed }
-  | { op: 'bond'; who: string; add: number }
-  | { op: 'recruit'; crew: CrewSeed }
-  | { op: 'item'; id: string; count: number }
-  | { op: 'findFruit'; pool: 'any' | 'gradeMin3' | string }
-  | { op: 'eatFruit'; uid: string }
-  | { op: 'feedFruit'; uid: string; who: string }
-  | { op: 'family'; act: 'lover' | 'marry' | 'child' | 'breakup'; name?: string; gender?: 'm' | 'f' }
-  | { op: 'crewBond'; add: number }
-  | { op: 'startSide'; id: string }
-  | { op: 'sellFruit'; uid: string }
-  | { op: 'appraise'; uid: string; fee: number }
-  | { op: 'injury'; severity: Injury['severity'] }
-  | { op: 'heal' }
-  | { op: 'sellBest' }
+  | { op: 'standing'; to: Standing }
+  | { op: 'wealth'; to: Wealth }                         // 집안 형편이 바뀐다 (몰락 등)
+  | { op: 'move'; island: string; sea: SeaId }
+  | { op: 'moveHome' }                                  // 태어난 마을과 고향의 바다로 돌아간다
+  | { op: 'mastery'; branch: Branch; add: number }
+  | { op: 'tier'; branch: Branch; to: number }
+  | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
+  | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
+  | { op: 'mark'; id: string }
+  | { op: 'dream'; id: DreamId }
+  | { op: 'vowStart'; id: string }
+  | { op: 'vowResolve'; id: string }
+  | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
+  | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
+  | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
+  | { op: 'hardship'; add: number }
+  // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
+  | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
+      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
+      role?: CrewRole;
+      level?: number;                          // 동료의 처음 레벨 (이름난 사람은 처음부터 높다). 없으면 V.person.crew.level
+      medicalSkill?: number;                   // 선의의 치료 솜씨. 전투 레벨과 별개
+      years?: number }                         // 임시 동행: 이 햇수만 함께하고 제 길로 떠난다 (kind 'crew'에만)                          // 동료(crew)의 싸움 자리. 없으면 V.person.crew.role
+  | { op: 'pref'; branch: Branch; add: number } // 그 갈래의 선호도를 올린다 (자잘한 일도 쓸 수 있다)
+  | { op: 'personChange'; relation: string; kind?: Person['kind']; bond?: number }
+  | { op: 'crewTrain'; add: number }            // 살아 있는 동료 모두의 레벨을 올린다 (해군 분대를 키운다)
+  | { op: 'partCrew'; prefix: string }          // 관계 글이 prefix로 시작하는 동료가 떠난다: 동료에서 빠지고 아는 사람(ally)으로 남는다
+  | { op: 'losePerson'; relation: string }
+  | { op: 'losePerson'; who: 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' }   // 관계 글과 상관없이 그 갈래의 사람 하나
+  | { op: 'injury'; severity: Injury['severity']; part?: WoundPart; kind?: WoundKind }
+  | { op: 'loseLimb'; limb: Limb | 'random' }
+  | { op: 'prosthetic'; grade: 'basic' | 'superior' }
   | { op: 'illness'; id: string }
-  | { op: 'battle'; enemy: string; elite: boolean; lethal: boolean; spar?: boolean; solo?: boolean; win?: Effect[]; lose?: Effect[] }
-  | { op: 'leaveCrew'; who: string; why: 'betray' | 'hurt' | 'expelled' | 'exposed'; takeMoneyPct?: number }
-  | { op: 'ship'; id: string; price: number }
-  | { op: 'hunt'; flee: boolean }
-  | { op: 'capture'; tier: number }
-  | { op: 'release'; broke: boolean }
-  | { op: 'prisonExtend'; months: number }
-  | { op: 'jailbreak' }
-  | { op: 'masterTrial'; master: string; branch: BranchId; gate: string; next: string }
-  | { op: 'trialDone'; ok: boolean }
-  | { op: 'rejoin'; who: string; ship: boolean }
-  | { op: 'partWays'; who: string }
-  | { op: 'loot'; base: number; text: string }      // base × 해역 단계 × 0.7~1.3 베리. text의 {money}에 액수
-  | { op: 'davyBack' }
-  | { op: 'dbfRound'; won: boolean }
-  | { op: 'bossLater'; months: number }
-  | { op: 'queue'; choice: string }
-  | { op: 'log'; text: string; type: LogType }
-  | { op: 'timeline'; text: string }
+  | { op: 'eatFruit'; id: string | 'random' }
+  | { op: 'reveal' }                                    // 숨긴 성씨가 밝혀진다
+  // next: 싸움 뒤에 이어질 전환점 (win 이기면 · lose 지거나 간신히 빠져나오면 · back 맞서지 않고 물러나면). 이기고 win이 없으면 늘 그렇듯 싸움 뒤의 문
+  | { op: 'fight'; foe: string; lethal: boolean; forced: boolean; next?: FightNext }
+  | { op: 'queue'; turning: string }
+  | { op: 'log'; text: string; weight: LogWeight }
+  | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
   | { op: 'die'; cause: string }
-  | { op: 'retire' }
-  | { op: 'chance'; p: number; then: Effect[]; else?: Effect[] };
+  | { op: 'chance'; p: number; then: Fx[]; else?: Fx[] };
+
+export interface FightNext { win?: string; lose?: string; back?: string }
+
+export interface Door {
+  label: string; hint: string;
+  when?: Cond[];                               // 출생 · 처지의 벽. 안 맞으면 잠긴다
+  special?: ValueId;                           // 이 가치관이 깊어야 열리는 특별한 문
+  values?: Partial<Values>;                    // 고르면 오르는 점수
+  mark?: string;                               // 정신적 강점으로 가는 표시
+  fx: Fx[];
+  danger?: boolean;
+  needs?: Need[];                              // 안 맞으면 잠기고 까닭이 보인다
+  closes?: boolean;                            // 이 문을 고르면 이 전환점은 그 인생에서 다시 오지 않는다
+}
+export interface Turning {
+  id: string;
+  kind: 'door' | 'moment' | 'fortune' | 'misfortune';    // moment 큰 계기, misfortune 고를 수 없는 불행 (문 없음)
+  when: Cond[]; weight: number; repeat: 'once' | { years: number };
+  fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
+  speaker: 'hero' | { canon: string } | { relation: string };
+  title: string; body: string;
+  doors: Door[];                               // misfortune은 빈 배열
+  fx?: Fx[];                                   // misfortune이 일으키는 일
+  needs?: Need[];                              // 안 맞으면 뽑히지 않는다
+  max?: number;                                // 한 인생에 많아야 이만큼. 없으면 once는 1, 되풀이는 V.turning.maxRepeat
+}
+export interface Minor {
+  id: string; when: Cond[]; weight: number; cooldownYears: number;
+  needs?: Need[];                              // 안 맞으면 이 일은 일어나지 않는다
+  // lean이 빈 객체면 누구나. needs · when이 안 맞는 결과는 고르지 않는다 (when: 반대쪽 가치관이 깊으면 빼는 데 쓴다)
+  outcomes: { lean: Partial<Values>; text: string[]; fx: Fx[]; needs?: Need[]; when?: Cond[] }[];
+}
+export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
+export type Pending5 =
+  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
+  | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; minor?: { outcomeLine: string } }
+  | { kind: 'ending'; cause: string }
+  | null;
+export interface Stats5 {
+  stops: number; fights: number; wins: number; fortunes: number; limbsLost: number; years: number;
+  named: Record<string, { fights: number; wins: number }>;   // 이름 있는 상대와의 싸움, 상대의 바다(v4 보스의 sea)별
+  stopsAt: number[];                           // 문을 고른(멈춘) 나이들, 멈출 때마다 하나씩
+  stopTries: number;                           // 한 해의 진행이 멈추려 한 횟수
+  emptyStops: number;                          // 그 가운데 띄울 전환점이 없던 횟수
+  namedMet: number;                            // 이름 있는 상대와 마주친 횟수 (싸웠든 물러났든)
+}
+export interface Life5 {
+  schema: 5;
+  rng: { seed: number; cursor: number };
+  age: number; part: 0 | 1 | 2 | 3;            // 한 해의 네 토막
+  hero: Hero5; growth: Growth5;
+  values: Values; personality: Personality5; strengths: string[]; marks: Record<string, number>;
+  hardship: number;
+  people: Person[];
+  flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
+  seenCount: Record<string, number>;           // 전환점 id → 이번 인생에 열린 횟수
+  closed: string[];                            // closes 문으로 닫힌 전환점 id
+  standingSince: number;                       // 지금의 처지가 된 나이
+  queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
+  stopsThisYear: number;
+  unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)
+  known: string[];                             // 지난 인생들에서 골라 본 "전환점id#문번호" (새 인생을 만들 때 도감에서 받는다)
+  log: LogLine[]; timeline: TimelineEntry[];
+  recentLines: string[];                       // 최근에 낸 일상 · 자잘한 일의 글 (V.lines.noRepeat개까지). 이 안의 글은 다시 뽑지 않는다
+  pending: Pending5;
+  stats: Stats5;
+  seq: number;
+  ended: { cause: string; age: number } | null;
+  /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
+  prime?: { from: number; until: number; lap: boolean } | null;
+  /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
+  dream?: { id: DreamId; since: number; done: number | null } | null;
+  /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
+  vows?: VowState;
+  /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
+  sail?: boolean;
+}
+export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number };

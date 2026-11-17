@@ -1,8 +1,8 @@
 // v5 인생 N번을 돌려 설계 7장의 지표를 뽑는다. 사용: npm run simulate5 -- 2000 random
-// 정책: random | first | lean | 가치관 id(예: ambition). 시드는 9000부터 (tests/v5/sim.test.ts와 같다).
-import { autoplay5, summarize, type Policy } from '../src/v5/core/autoplay';
-import { VALUE_IDS } from '../src/v5/data/values';
-import type { Life5, ValueId } from '../src/v5/core/types';
+// 정책: random | first | lean | 가치관 id(예: ambition). 시드는 9000부터 (tests/game/sim.test.ts와 같다).
+import { autoplay5, summarize, type Policy } from '../src/core/autoplay';
+import { VALUE_IDS } from '../src/data/values';
+import type { Life5, ValueId } from '../src/core/types';
 
 declare const process: { argv: string[] };
 

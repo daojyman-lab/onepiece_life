@@ -3,7 +3,7 @@
   "version": "6.9.0",
   "private": true,
   "type": "module",
-  "description": "그랜드 트레저 v5 — 비영리 팬게임",
+  "description": "그랜드 트레저 v6.9 — 비영리 팬게임",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
     "dev:lan": "vite --host 0.0.0.0 --port 5174 --strictPort",

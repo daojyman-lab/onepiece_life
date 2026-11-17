@@ -1,6 +1,6 @@
 // Run: node_modules/.bin/vite-node tools/audit-turning-copy.ts
-import { TURNINGS } from '../src/v5/data/turnings';
-import type { Fx } from '../src/v5/core/types';
+import { TURNINGS } from '../src/data/turnings';
+import type { Fx } from '../src/core/types';
 
 function logs(fx: Fx[]): string[] {
   return fx.flatMap((op) => op.op === 'log' ? [op.text]

@@ -1,6 +1,6 @@
 // Run: node_modules/.bin/vite-node tools/audit-chance-outcomes.ts
-import { TURNINGS } from '../src/v5/data/turnings';
-import type { Fx } from '../src/v5/core/types';
+import { TURNINGS } from '../src/data/turnings';
+import type { Fx } from '../src/core/types';
 
 function hasReaction(fx: Fx[]): boolean {
   let paths = [false];

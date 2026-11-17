@@ -1,6 +1,6 @@
 // Run: node_modules/.bin/vite-node tools/audit-turning-reactions.ts [id-prefix]
-import { TURNINGS } from '../src/v5/data/turnings';
-import type { Fx } from '../src/v5/core/types';
+import { TURNINGS } from '../src/data/turnings';
+import type { Fx } from '../src/core/types';
 declare const process: { argv: string[] };
 
 function narratedPaths(fx: Fx[], narrated = false): boolean[] {

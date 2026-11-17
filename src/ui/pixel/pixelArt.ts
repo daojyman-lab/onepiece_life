@@ -1,6 +1,6 @@
 // 코드로 그리는 도트 캐릭터(얼굴 24×24, 전신 20×24)와 도트 장면. v3.4.0 pixel-art.js 를 옮겼다.
 // 같은 인물은 언제나 같은 모습이다 (docs/01_기획/04_UI_그래픽_방향.md 3장).
-import type { Species } from '../../core/types';
+import type { Species } from '../../shared/core/types';
 
 type Pair = [string, string];
 const SKIN: Record<'human' | 'fish' | 'mink' | 'sky' | 'luna', Pair[]> = {
