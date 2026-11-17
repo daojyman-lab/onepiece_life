@@ -34,8 +34,11 @@ export interface Hero5 {
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
 export interface VowState {
-  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[];
+    level?: 1 | 2 | 3; activities?: Activity[]; choices?: string[]; branch?: Branch; targetPersonId?: string } | null;
   history: { id: string; result: 'kept' | 'failed' }[];
+  declined?: boolean;
+  branch?: Branch;
 }
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
@@ -99,6 +102,8 @@ export type Fx =
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
   | { op: 'vowResolve'; id: string }
+  | { op: 'vowFail'; id: string }
+  | { op: 'vowDecline' }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)

@@ -29,6 +29,7 @@ import { RECRUIT_TURNINGS } from './recruits';
 import { PRIME } from './prime';
 import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
+import { LIFE_VOW_TURNINGS } from './vow-life';
 import { EPISODE_TURNINGS } from '../episodes';
 
 const GROUPS: Turning[][] = [
@@ -62,6 +63,7 @@ const GROUPS: Turning[][] = [
   PRIME,
   DREAM_TURNINGS,
   KIN_TURNINGS,
+  LIFE_VOW_TURNINGS,
   EPISODE_TURNINGS,
 ];
 

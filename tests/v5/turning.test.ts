@@ -164,14 +164,15 @@ describe('전환점의 흐름', () => {
     for (let i = 0; i < 4 * 12 && s.hero.alive; i++) {
       if (s.pending?.kind === 'door') {
         opened.push(s.pending.turning);
-        perYear[s.age] = (perYear[s.age] ?? 0) + 1;
+        if (!s.pending.turning.startsWith('life_vow_') && s.pending.turning !== 'sky_vow_awakening')
+          perYear[s.age] = (perYear[s.age] ?? 0) + 1;
         s = reduce5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
       }
       s = reduce5(s, { type: 'step' });
     }
     expect(opened.length).toBeGreaterThanOrEqual(6);
     expect(new Set(opened).size).toBe(opened.length);
-    expect(s.stats.stops).toBe(opened.length);
+    expect(s.stats.stops).toBe(Object.values(perYear).reduce((a, n) => a + n, 0));
     for (const [age, count] of Object.entries(perYear)) {
       const n = V.stopsPerYear.find((x) => Number(age) <= x.to)!.n;
       expect(count, `${age}살`).toBeLessThanOrEqual(Math.ceil(n) + 1);

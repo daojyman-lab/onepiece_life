@@ -21,9 +21,10 @@ import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
+import { TURNING_BY_ID } from '../data/turnings';
 import { leanPick } from './values';
 import { dreamYear } from './dreams';
-import { expireVow } from './vow';
+import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { buildVoyage, voyageChoices, voyageId } from './voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -49,11 +50,14 @@ export function stepPart(s: Life5): void {
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  const vowTurning = nextLifeVowTurning(s);
+  if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
   const r = rngOf(s.rng);
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = activityOf(s, r);
+  recordVowActivity(s, act);
   dailyLine(s, act, r);
   growPart(s, act, r);
   healInjuries(s);

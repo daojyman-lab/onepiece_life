@@ -13,7 +13,7 @@ import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep } from './values';
 import { isQuiet } from './year';
-import { advanceVow } from './vow';
+import { advanceVow, canBeginVow, recordVowChoice } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -39,6 +39,8 @@ function speakerOf(s: Life5, t: Turning): string {
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
     let locked = whyNot(s, d.when) ?? whyNeed(s, d.needs);
+    const start = d.fx.find((e) => e.op === 'vowStart');
+    if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
     if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
@@ -167,12 +169,16 @@ export function answerDoor(s: Life5, index: number): void {
   if (door.closes && !s.closed.includes(t.id)) s.closed.push(t.id);
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
-  s.stats.stops += 1;
-  s.stats.stopsAt.push(s.age);
-  s.stopsThisYear += 1;
+  // 서약의 제안·결산·각성은 강제로 끼어드는 장면이므로 보통 사건의 멈춤 예산에서 뺀다.
+  if (!t.id.startsWith('life_vow_') && t.id !== 'sky_vow_awakening') {
+    s.stats.stops += 1;
+    s.stats.stopsAt.push(s.age);
+    s.stopsThisYear += 1;
+  }
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
   // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.

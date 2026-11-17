@@ -17,6 +17,7 @@ import type { Life5 } from '../../src/v5/core/types';
 const weak = Object.keys(FOES)[0];
 function fighter(seed: number, stat = 40): Life5 {
   const s = newLife5(seed); s.pending = null; s.age = 22; s.hero.standing = 'pirate';
+  s.vows!.declined = true; // 부상·전투 진행 검증 중 생애 서약 제안이 끼어들지 않게
   for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = stat;
   return s;
 }

@@ -43,13 +43,16 @@ describe('서약', () => {
     expect(s.growth.mastery.sword).toBe(0);
   });
 
-  it('피난 준비와 결전 뒤 피난처까지 완성해야 주력 숙련을 얻고 재수령할 수 없다', () => {
+  it('피난 준비와 결전 뒤 피난처까지 완성해야 첫 각성을 얻고 재수령할 수 없다', () => {
     const s = eligibleLife();
+    const beforeVit = s.hero.base.vit;
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
     s.flags.push('ep_skypiea_b_evac', 'ep_skypiea_b_vow_prepared', 'ep_skypiea_b_vow_refuge');
     applyFx(s, [{ op: 'vowResolve', id: vowId }, { op: 'vowStart', id: vowId }, { op: 'vowResolve', id: vowId }]);
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'kept' }]);
-    expect(s.growth.mastery.sword).toBe(25);
+    expect(s.growth.tier.sword).toBe(1);
+    expect(s.hero.base.vit).toBe(beforeVit + 2);
+    expect(s.queue).toContain('sky_vow_awakening');
   });
 
   it('도란과 거래하면 피난을 준비했어도 서약에 실패한다', () => {
@@ -139,6 +142,7 @@ describe('하늘섬 서약 장편', () => {
 
   it('피난길을 닦고 결전 뒤 피난처를 연 플레이에서 작별 시 보상을 지급한다', () => {
     let s = eligibleLife();
+    const beforeVit = s.hero.base.vit;
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
     const answer = (id: string, label: string) => {
       s.pending = null;
@@ -153,6 +157,7 @@ describe('하늘섬 서약 장편', () => {
     expect(s.vows?.active?.id).toBe(vowId);
     answer('ep_skypiea_b9', '깃 장식을 받는다');
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'kept' }]);
-    expect(s.growth.mastery.sword).toBe(25);
+    expect(s.growth.tier.sword).toBe(1);
+    expect(s.hero.base.vit).toBe(beforeVit + 2);
   });
 });

@@ -60,6 +60,10 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (life.vows?.active) {
     life.vows.active.island ??= life.hero.island;
     life.vows.active.progress ??= [];
+    if (life.vows.active.level) {
+      life.vows.active.activities ??= [];
+      life.vows.active.choices ??= [];
+    }
   }
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;

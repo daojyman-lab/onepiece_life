@@ -23,7 +23,7 @@ import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
-import { beginVow, resolveVow } from './vow';
+import { beginVow, declineVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -89,6 +89,8 @@ function applyOne(s: Life5, e: Fx): void {
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;
+    case 'vowDecline': declineVow(s); return;
+    case 'vowFail': resolveVow(s, e.id, true); return;
     case 'vowResolve': {
       const result = resolveVow(s, e.id);
       if (result?.reward) {
