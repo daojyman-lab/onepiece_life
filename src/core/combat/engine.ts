@@ -139,7 +139,7 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
     u.uses += 1; u.damage += dmg;
   }
   // 열매의 대가: 바다 위에서 체력이 낮을 때 큰 기술을 맞으면 빠질 수 있다
-  if (b.atSea && t.hero && t.fruitClass && !t.mods.noDrown && t.hp > 0 && ratio(t) < C.drown.hpBelow && power >= C.bigPower) {
+  if (b.atSea && t.hero && t.fruitClass && t.hp > 0 && ratio(t) < C.drown.hpBelow && power >= C.bigPower) {
     if (r() < (b.navigator ? C.drown.navigatorP : C.drown.p)) {
       b.events.push({ k: 'drown', who: ti });
       t.hp = 0;

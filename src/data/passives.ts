@@ -1,6 +1,7 @@
 // 패시브: 주인공의 특성과 악마의 열매. 기술이 아니라 늘 걸려 있는 효과다 (2026-11-14 재설계).
 // 전투 규칙은 core/combat/engine.ts가 Mods를 읽어 적용한다. 값만 여기서 고친다.
 import type { Species, Stats } from '../core/types';
+import { FRUITS } from './fruits';
 
 export type Element = 'fire' | 'elec' | 'ice' | 'light' | 'magma' | 'dark' | 'poison' | 'sand' | 'smoke' | 'quake';
 export const ELEMENT_NAMES: Record<Element, string> = {
@@ -32,7 +33,6 @@ export interface Mods {
   atSea?: number;            // 바다 위 전투 피해 +
   counter?: number;          // 받아치기(큰 기술 뒤) 기술 피해 +
   sp?: number;               // 최대 기력 ×
-  noDrown?: boolean;         // 바다에 빠지지 않는다
 }
 
 // ---------------------------------------------------------------- 주인공의 특성
@@ -90,8 +90,6 @@ export const FRUIT_PASSIVES: Record<string, FruitPassive> = {
     awakenText: '사막의 왕: 흡수 20%, 25% 확률로 모래 폭풍(1.6)', awaken: { element: 'sand', drain: 0.2, resist: { sand: 0 }, proc: { p: 0.25, power: 1.6, element: 'sand', name: '모래 폭풍' } } },
   moku: { text: '연기로 감싼다 · 맞히면 15% 확률로 묶는다 · 회피 +5%', mods: { element: 'smoke', bindOnHit: 0.15, dodge: 0.05 },
     awakenText: '흰 사냥꾼: 묶기 25%, 회피 +8%', awaken: { element: 'smoke', bindOnHit: 0.25, dodge: 0.08 } },
-  gomu: { text: '고무 몸 · 전기 공격 피해 반감 · 물리 공격 1.3배', mods: { resist: { elec: 0.5 }, phys: 1.3 },
-    awakenText: '고무가 된 세상: 전기 무효, 물리 1.5배, 맞히면 10% 확률로 묶는다', awaken: { resist: { elec: 0 }, phys: 1.5, bindOnHit: 0.1 } },
   hana: { text: '어디서든 팔이 피어난다 · 25% 확률로 추가 타격(1.0)', mods: { proc: { p: 0.25, power: 1.0, name: '꽃 피는 팔' } },
     awakenText: '거대한 꽃: 추가 타격 40% · 1.6', awaken: { proc: { p: 0.4, power: 1.6, name: '거대 꽃' }, bindOnHit: 0.1 } },
   neko_leo: { text: '표범으로 변한다 · 힘 +30%, 속도 +15%', mods: { stat: { str: 1.3, spd: 1.15 } },
@@ -113,20 +111,46 @@ export const FRUIT_PASSIVES: Record<string, FruitPassive> = {
   ushi_giraffe: { text: '기린으로 변한다 · 힘 +15%, 체력 +10%', mods: { stat: { str: 1.15, vit: 1.1 } } },
   sube: { text: '매끈한 몸 · 회피 +12%', mods: { dodge: 0.12 } },
   buki: { text: '몸이 무기 · 물리 공격 1.12배', mods: { phys: 1.12 } },
-  hanshu: { text: '반사 · 받는 피해 −12%', mods: { take: 0.88 } },
-  setsu: { text: '상처를 이어 붙인다 · 합마다 체력 2.5% 회복', mods: { regen: 0.025 } },
-  zaza: { text: '산토끼 · 속도 +15%', mods: { stat: { spd: 1.15 } } },
   // 쓰레기
   inu_dachs: { text: '닥스훈트가 된다 · 체력 +8% · 귀엽다', mods: { stat: { vit: 1.08 } } },
   kusu: { text: '녹슬게 한다 · 10% 확률로 녹(0.6)', mods: { proc: { p: 0.1, power: 0.6, name: '녹' } } },
-  musu: { text: '매듭을 짓는다 · 맞히면 5% 확률로 묶는다', mods: { bindOnHit: 0.05 } },
-  kan: { text: '완충 · 받는 피해 −5%', mods: { take: 0.95 } },
-  hyo: { text: '표식을 남긴다 · 치명타 확률 +3%', mods: { crit: 0.03 } },
-  zan: { text: '잔향 · 8% 확률로 메아리 타격(0.5)', mods: { proc: { p: 0.08, power: 0.5, name: '메아리' } } },
-  fuhyo: { text: '부표 · 능력자인데도 바다에 빠지지 않는다', mods: { noDrown: true } },
   kame: { text: '등껍질 · 받는 피해 −6%', mods: { guard: 0.06 } },
   beta: { text: '끈적끈적 · 맞히면 6% 확률로 묶는다', mods: { bindOnHit: 0.06 } },
 };
+
+// 새 원작 열매는 계통과 능력 주제에 맞는 기본 전투 효과를 갖는다.
+// 기존의 개별 패시브가 있으면 그 효과를 우선한다.
+for (const fruit of FRUITS) {
+  if (FRUIT_PASSIVES[fruit.id]) continue;
+  if (fruit.id === 'smile_failed') {
+    FRUIT_PASSIVES[fruit.id] = { text: '능력은 얻지 못하고 웃음만 남는다. 헤엄칠 수 없다', mods: {} };
+  } else if (fruit.id.startsWith('smile_')) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme}의 힘 · 힘과 속도 +8%`, mods: { stat: { str: 1.08, spd: 1.08 } } };
+  } else if (fruit.cls === 'zoan') {
+    const str = 1 + fruit.grade * 0.06, vit = 1 + fruit.grade * 0.04;
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} 변신 · 힘 +${Math.round((str - 1) * 100)}%, 체력 +${Math.round((vit - 1) * 100)}%`, mods: { stat: { str, vit } } };
+  } else if (fruit.cls === 'logia') {
+    const dmg = 1 + fruit.grade * 0.04, take = 1 - fruit.grade * 0.02;
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme}의 몸 · 피해 +${Math.round((dmg - 1) * 100)}%, 받는 피해 −${Math.round((1 - take) * 100)}%`, mods: { dmg, take } };
+  } else if (/부활|호르몬|착즙|치유/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 합마다 체력 ${fruit.grade}% 회복`, mods: { regen: fruit.grade / 100 } };
+  } else if (/둔화|감옥|표적|정적|기억|매료|장난감|봉제/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 적중 시 ${fruit.grade * 4}% 확률로 묶기`, mods: { bindOnHit: fruit.grade * 0.04 } };
+  } else if (/성채|문|거울|바위|다이아몬드|재킷|주머니|의복|세탁/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 받는 피해 ${fruit.grade * 4}% 감소`, mods: { guard: fruit.grade * 0.04 } };
+  } else if (/투명|변장|투시|미래|나이|지식|순간이동/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 회피 +${fruit.grade * 3}%, 치명타 +${fruit.grade * 2}%`, mods: { dodge: fruit.grade * 0.03, crit: fruit.grade * 0.02 } };
+  } else if (/무게|중력|거대화/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 힘 +${fruit.grade * 6}%`, mods: { stat: { str: 1 + fruit.grade * 0.06 } } };
+  } else if (/영혼/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 준 피해의 ${fruit.grade * 3}% 회복`, mods: { drain: fruit.grade * 0.03 } };
+  } else if (/요리/.test(fruit.theme)) {
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 최대 체력 +${fruit.grade * 5}%`, mods: { hp: 1 + fruit.grade * 0.05 } };
+  } else {
+    const dmg = 1 + fruit.grade * 0.04;
+    FRUIT_PASSIVES[fruit.id] = { text: `${fruit.theme} · 피해 +${Math.round((dmg - 1) * 100)}%`, mods: { dmg } };
+  }
+}
 
 // ---------------------------------------------------------------- 종족
 /** 종족마다 타고나는 패시브. 원작에서 그 종족이 보여 준 특징을 옮겼다 */
