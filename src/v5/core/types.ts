@@ -33,6 +33,10 @@ export interface Hero5 {
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+export interface VowState {
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
+  history: { id: string; result: 'kept' | 'failed' }[];
+}
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
@@ -93,6 +97,8 @@ export type Fx =
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
+  | { op: 'vowStart'; id: string }
+  | { op: 'vowResolve'; id: string }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
@@ -194,6 +200,8 @@ export interface Life5 {
   prime?: { from: number; until: number; lap: boolean } | null;
   /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
   dream?: { id: DreamId; since: number; done: number | null } | null;
+  /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
+  vows?: VowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
 }

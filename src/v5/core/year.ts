@@ -23,6 +23,7 @@ import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick } from './values';
 import { dreamYear } from './dreams';
+import { expireVow } from './vow';
 import { buildVoyage, voyageChoices, voyageId } from './voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -45,6 +46,7 @@ function firstLap(s: Life5): boolean {
 /** 한 토막을 진행한다. 대기 중인 일이 있으면 아무것도 하지 않는다. */
 export function stepPart(s: Life5): void {
   if (s.pending) return;
+  expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
 
