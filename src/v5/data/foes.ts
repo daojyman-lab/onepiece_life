@@ -1,5 +1,6 @@
 // 싸움의 상대. 이름 있는 상대는 v4의 해역 보스를 그대로 가리키고, 이름 없는 상대는 바다의 세기에 맞춰 만든다.
 import { BOSSES, statsAround } from '../../data/bosses';
+import { EPISODE_FOE_DEFS, EPISODE_FOES } from './episodes';
 import type { EnemySpec, SeaId, Standing, Values } from '../core/types';
 
 /** v4 보스에 없던 이스트 블루의 원작 상대 (과제 10). 힘은 이스트 블루의 보스(모건 26 · 아론 28) 둘레에 둔다 */
@@ -19,11 +20,12 @@ const EAST_FOES: EnemySpec[] = EAST.map(({ p, bias, ...o }) => ({
 }) as EnemySpec);
 
 /** 이름 있는 상대: id → 상대. 약한 바다의 상대부터 */
-export const FOES: Record<string, EnemySpec> = Object.fromEntries([...EAST_FOES, ...BOSSES].map((b) => [b.id, b]));
+export const FOES: Record<string, EnemySpec> = Object.fromEntries([...EAST_FOES, ...BOSSES, ...EPISODE_FOES].map((b) => [b.id, b]));
 /** 이름 있는 상대의 바다 (v4 보스가 나오는 첫 바다) */
 export const FOE_SEA: Record<string, SeaId> = {
   ...Object.fromEntries(EAST_FOES.map((b) => [b.id, 'east' as SeaId])),
   ...Object.fromEntries(BOSSES.map((b) => [b.id, b.sea[0]])),
+  ...Object.fromEntries(EPISODE_FOE_DEFS.map((b) => [b.id, b.sea])),
 };
 
 /** 이름 없는 상대의 이름 */

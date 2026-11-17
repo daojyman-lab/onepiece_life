@@ -161,7 +161,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'reveal': revealSurname(s); return;
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
     case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
-    case 'fight': askFight(s, e.foe, e.lethal, e.forced); return;
+    case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next); return;
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;
     // 이미 앓는 병이 있으면 새로 걸리지 않는다. 진행과 치료는 risk.ts의 partRisks가 맡는다

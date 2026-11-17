@@ -20,7 +20,7 @@ import { applyFx } from './fx';
 import { BRANCH_ID, power5, tierMult, topTier } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
-import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats } from './types';
+import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext } from './types';
 import type { CUnit, Skill } from '../../core/types';
 
 const C = B.combat;
@@ -214,29 +214,30 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
   return runBattle(startBattle(units, assign, seed, false), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean): void {
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
   const battle = fightBattle(s, foe);
-  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose' };
+  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}) };
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
-export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean): void {
+export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean, next?: FightNext): void {
   const known = FOES[foeId];
   if (!known) return;
   if (FOE_SEA[foeId]) s.stats.namedMet += 1;   // 마주친 것만으로 센다 (물러나도)
   const foe = scaleFoe(structuredClone(known), foeId);
-  if (forced) { startFight(s, foe, lethal); return; }
-  s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal) };
+  if (forced) { startFight(s, foe, lethal, next); return; }
+  s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal), ...(next ? { next } : {}) };
 }
 
 /** 싸움 물음에 답한다: 0 붙는다, 1 물러난다 */
 export function answerFight(s: Life5, index: number): void {
   const p = s.pending;
   if (p?.kind !== 'fight') return;
-  if (index === ENGAGE) { startFight(s, p.foe, p.lethal); return; }
+  if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next); return; }
   if (index !== BACK_OFF) return;
   s.pending = null;
   logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다.`, 'heavy', 'battle');
+  if (p.next?.back) applyFx(s, [{ op: 'queue', turning: p.next.back }]);
 }
 
 /** 끝난 전투의 결과를 적용한다: 전적과 명성, 부상, 신체 손실, 죽음, 패배의 앙금 */
@@ -275,7 +276,8 @@ export function ackBattle(s: Life5): void {
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
-    if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
+    if (p.next?.win) applyFx(s, [{ op: 'queue', turning: p.next.win }]);   // 이야기가 이어지는 싸움
+    else if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
     return;
   }
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
@@ -285,6 +287,7 @@ export function ackBattle(s: Life5): void {
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);
+  if (p.next?.lose) applyFx(s, [{ op: 'queue', turning: p.next.lose }]);
 }
 
 // ---------------------------------------------------------------- 사소한 싸움

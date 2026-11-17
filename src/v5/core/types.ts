@@ -75,7 +75,7 @@ export type Cond =
   | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
   | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
   | { c: 'canonAge'; id: string; min?: number; max?: number }
-  | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)   // 그 원작 인물의 지금 나이 (canonAge)
+  | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
@@ -93,7 +93,7 @@ export type Fx =
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
-  | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)                         // 꿈을 품는다 · 바꾼다
+  | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
@@ -112,12 +112,15 @@ export type Fx =
   | { op: 'illness'; id: string }
   | { op: 'eatFruit'; id: string | 'random' }
   | { op: 'reveal' }                                    // 숨긴 성씨가 밝혀진다
-  | { op: 'fight'; foe: string; lethal: boolean; forced: boolean }
+  // next: 싸움 뒤에 이어질 전환점 (win 이기면 · lose 지거나 간신히 빠져나오면 · back 맞서지 않고 물러나면). 이기고 win이 없으면 늘 그렇듯 싸움 뒤의 문
+  | { op: 'fight'; foe: string; lethal: boolean; forced: boolean; next?: FightNext }
   | { op: 'queue'; turning: string }
   | { op: 'log'; text: string; weight: LogWeight }
   | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
   | { op: 'die'; cause: string }
   | { op: 'chance'; p: number; then: Fx[]; else?: Fx[] };
+
+export interface FightNext { win?: string; lose?: string; back?: string }
 
 export interface Door {
   label: string; hint: string;
@@ -151,8 +154,8 @@ export interface Minor {
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
-  | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number } }
-  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat' }
+  | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext }
   | { kind: 'ending'; cause: string }
   | null;
 export interface Stats5 {
