@@ -2,13 +2,13 @@
 // 시나리오 셋 (각각 아홉 주 안팎):
 //  A 원작 전 (주인공 12~20) 「빚으로 사는 투기장」: 투기장의 거간꾼 벨데와 벨데 상회. 진 검투사를 패밀리의 장난감의 집에 팔아넘긴다.
 //    안내자 파코(해바라기 파는 소년) · 기록자 이사벨(콜로세움 등록실 서기). 원작 인물: 외다리 장난감 병정(키로스)이 한 일을 보고 하수도의 길을 연다.
-//    도플라밍고와의 직접 대결은 그린 비트 앞바다의 거래선에서만(경지 5, 치명적). 이겨도 실 분신이 풀릴 뿐 본체는 물러난다.
+//    도플라밍고는 거래선에서 목격만 한다. 플레이어의 사건은 벨데의 인신 착취와 인도장 증거에 한정한다.
 //  B 원작 그 무렵 (21) 「지하 교역항의 회색 장갑」: 지하 중개인 그리지오와 회색 장갑단. 대회 날의 소란을 틈타 인조 열매 상자와 톤타타 일꾼을 빼돌린다.
 //    안내자 트로포(잊힌 양철 기사, 실은 늙은 항만장) · 기록자 피피(톤타타 족 이름 기록관). 원작 인물: 레오가 한 일을 보고 손을 내민다.
 //    새장이 내려온 날 주인공은 땅 밑 부두라는 다른 전선에 있다. 도플라밍고를 쓰러뜨리는 것은 루피다.
-//  C 원작 뒤 (22~) 「웃음을 파는 약방」: 기억의 약장수 레메디오와 약방 일당. 실패한 인조 열매로 '잊는 약 · 채우는 약'을 판다.
+//  C 원작 뒤 (22~) 「두 이름의 민원실」: 레메디오의 위조 신원 확인서와 상속·점포 분쟁.
 //    안내자 엔리코(기억을 되찾은 빵장수) · 기록자 루시아(이름 되찾기 사무소 서기). 원작 인물: 리쿠 왕(곁에 비올라)이 한 일을 보고 왕궁의 손을 빌려준다.
-// 결말은 시나리오마다 두 장면(앞: A · B, 뒤: C · D · 기본 E)으로 나눈다(문은 보통 셋까지). A의 기념품은 C에서, B의 기념품은 C에서 되돌아온다.
+// 초판의 A~E 분기를 남긴 장면도 있으나, 새 시나리오는 그 수와 조직 구조를 따르지 않는다. 앞 편의 기념품은 뒤 편에서 되돌아온다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
 import { age, at } from '../turnings/paths';
@@ -45,14 +45,14 @@ export const FOES_DRESSROSA: FoeDef[] = [
     skills: ['sword_cut', 'sword_flash', 'fist_counter', 'gun_snipe', 'arm_coat', 'obs_read'], tactic: 'counter', armament: 1, observation: 2 },
   { id: 'b_dr_grigio_worn', name: '그리지오', title: '배를 잃은 중개인', p: 94, sea: 'nw_first', age: 46, bias: { spd: 1.2, int: 1.2 },
     skills: ['sword_cut', 'sword_flash', 'fist_counter', 'gun_snipe'], tactic: 'counter', armament: 1, observation: 1 },
-  // C: 레메디오 약방 (오리지널)
-  { id: 'b_dr_chilo', name: '칠로', title: '레메디오 약방의 호객꾼', p: 76, sea: 'nw_first', age: 27, bias: { spd: 1.2, luk: 1.2 },
+  // C: 레메디오 위조 서류상 (오리지널)
+  { id: 'b_dr_chilo', name: '칠로', title: '레메디오 사무소의 호객꾼', p: 76, sea: 'nw_first', age: 27, bias: { spd: 1.2, luk: 1.2 },
     skills: ['fist_jab', 'fist_combo', 'gun_shot', 'gun_smoke'], tactic: 'offense' },
-  { id: 'b_dr_toro', name: '토로', title: '레메디오 약방의 쇠뿔 경호대장', p: 88, sea: 'nw_first', age: 38, bias: { str: 1.3, vit: 1.2, spd: 0.9 },
+  { id: 'b_dr_toro', name: '토로', title: '레메디오 사무소의 쇠뿔 경호대장', p: 88, sea: 'nw_first', age: 38, bias: { str: 1.3, vit: 1.2, spd: 0.9 },
     skills: ['fist_iron', 'fist_quake', 'fist_combo', 'fist_guard', 'arm_hard'], tactic: 'offense', armament: 1 },
-  { id: 'b_dr_remedio', name: '레메디오', title: '기억의 약장수', p: 98, sea: 'nw_first', age: 52, bias: { int: 1.3, wil: 1.2 },
+  { id: 'b_dr_remedio', name: '레메디오', title: '위조 서류상', p: 98, sea: 'nw_first', age: 52, bias: { int: 1.3, wil: 1.2 },
     skills: ['gun_smoke', 'gun_bind', 'sword_cut', 'sword_parry', 'fist_counter', 'obs_sense'], tactic: 'defense', observation: 2 },
-  { id: 'b_dr_remedio_worn', name: '레메디오', title: '약효를 잃은 약장수', p: 88, sea: 'nw_first', age: 52, bias: { int: 1.3, wil: 1.1 },
+  { id: 'b_dr_remedio_worn', name: '레메디오', title: '활자를 잃은 서류상', p: 88, sea: 'nw_first', age: 52, bias: { int: 1.3, wil: 1.1 },
     skills: ['gun_smoke', 'sword_cut', 'sword_parry', 'fist_counter'], tactic: 'defense', observation: 1 },
 ];
 
@@ -157,27 +157,27 @@ const A: Turning[] = [
     ],
   },
   {
-    id: 'ep_dressrosa_a6x', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'doflamingo' },
+    id: 'ep_dressrosa_a6x', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '벨데 상회의 거래 대리인' },
     title: '6주차 · 그린 비트 앞바다의 거래선',
-    body: '안개 낀 그린 비트 앞바다, 상회의 배 갑판에 분홍 깃털 외투가 내려선다. 벨데가 허리를 꺾고, 칠무해이자 드레스로자의 왕이 인도장을 손가락으로 넘긴다. 왕이 손끝을 까딱이자 하늘의 구름에 실이 걸린다. 선글라스 너머의 눈이 {name}에게 멎는다. 후후후, 거간꾼이 새 개를 데려왔군.',
+    body: '안개 낀 그린 비트 앞바다, 상회의 배 갑판에 가면을 쓴 거래 대리인이 오른다. 벨데가 허리를 꺾고, 대리인은 사람의 값이 적힌 인도장을 손가락으로 넘긴다. 본보기로 데려온 이들은 배 아래 칸에 갇혀 있다. 대리인의 시선이 {name}에게 멎는다. 새 일꾼이냐고 묻는다.',
     doors: [
-      { label: '실을 끊고 왕에게 달려든다', hint: '칠무해의 실은 사람의 몸을 꼭두각시로 만든다. 지면 살아남지 못한다', values: { dominion: D }, danger: true, when: [ready(5)],
-        fx: [time('그린 비트 앞바다에서 돈키호테 도플라밍고와 맞섰다', 'doflamingo'), fight('b_doflamingo', true, go('ep_dressrosa_a6w', 'ep_dressrosa_a7'))] },
-      { label: '고개를 숙이고 배의 구조와 호위를 눈에 담는다', hint: '왕의 웃음이 등골을 훑는다. 상회의 짐이 어디로 오가는지 보인다', values: { ambition: D },
-        fx: [flag('ep_dressrosa_a_cellar'), time('그린 비트 앞바다의 거래선에서 돈키호테 도플라밍고를 보았다', 'doflamingo'), next('ep_dressrosa_a7')] },
-      { label: '거래가 끝나기 전에 작은 배로 빠져나간다', hint: '목숨은 건진다. 왕의 웃음소리가 오래 따라온다', values: { freedom: D }, danger: true,
+      { label: '왕이 떠난 뒤 인도장 뭉치를 빼돌린다', hint: '호위의 시선을 피해야 한다. 배에 실린 사람의 명단이 남는다', values: { dominion: D }, danger: true, when: [ready(5)],
+        fx: [flag('ep_dressrosa_a_cellar'), next('ep_dressrosa_a6w')] },
+      { label: '고개를 숙이고 배의 구조와 호위를 눈에 담는다', hint: '상회의 짐이 어디로 오가는지 보인다', values: { ambition: D },
+        fx: [flag('ep_dressrosa_a_cellar'), next('ep_dressrosa_a7')] },
+      { label: '거래가 끝나기 전에 작은 배로 빠져나간다', hint: '목숨은 건진다. 인도장의 이름들이 오래 떠오른다', values: { freedom: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, next('ep_dressrosa_a7')] },
     ],
   },
   {
     id: 'ep_dressrosa_a6w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 실로 엮은 왕',
-    body: '칼끝이 왕의 가슴을 꿰뚫는 순간, 분홍 외투가 하얀 실타래로 풀려 바람에 흩어진다. 실 분신이었다. 안개 너머 다른 배에서 웃음소리가 멀어진다. 갑판에는 끊긴 실과 넋이 나간 벨데, 그리고 사람의 값이 적힌 인도장 뭉치만 남아 있다.',
+    title: '6주차 · 인도장의 뒷면',
+    body: '왕의 배가 안개 너머로 사라진 뒤 벨데는 빈 갑판에서 거래가 끝났다고 웃는다. 그러나 {name}의 손에는 사람의 값이 적힌 인도장 뭉치가 있다. 뒷면에는 그들이 어디로 보내지는지 적혀 있다. 이제 이 종이를 어떻게 쓸지 정해야 한다.',
     doors: [
       { label: '인도장 뭉치를 모두 바다에 흩뿌린다', hint: '이번 거래가 끊긴다. 왕은 이 얼굴을 잊지 않는다', values: { justice: D },
         fx: [{ op: 'fame', add: 60 }, flag('ep_dressrosa_a_sabotage'), next('ep_dressrosa_a7')] },
-      { label: '남은 실을 살펴 그 힘의 결을 익힌다', hint: '다음에 만날 때를 위해서다', values: { inquiry: D },
-        fx: [{ op: 'mastery', branch: 'observation', add: 30 }, next('ep_dressrosa_a7')] },
+      { label: '인도장의 필체와 상회의 장부를 맞춰 본다', hint: '벨데가 지울 수 없는 거래 기록이 된다', values: { inquiry: D },
+        fx: [flag('ep_dressrosa_a_cellar'), next('ep_dressrosa_a7')] },
       { label: '배에 실린 금화 상자를 챙긴다', hint: '무거운 상자다. 그 금화가 무엇의 값인지는 묻지 않는다', values: { greed: D },
         fx: [{ op: 'money', add: 100000 }, next('ep_dressrosa_a7')] },
     ],
@@ -453,18 +453,18 @@ const B: Turning[] = [
   },
 ];
 
-// ================================================================ C. 원작 뒤 (22~): 웃음을 파는 약방
+// ================================================================ C. 원작 뒤 (22~): 가짜 신원 확인서를 파는 사무소
 // 표시: c_enrico_trust c_lucia_trust c_rough c_info c_lab c_list c_royal c_exit c_freed c_fake c_deal c_sabotage c_beaten c_done
 //      (앞 시나리오의 a_keepsake · b_keepsake가 여기서 되돌아온다)
 const C: Turning[] = [
   {
     id: 'ep_dressrosa_c1', kind: 'door', when: at(HERE, age(22), not('ep_dressrosa_c_done')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '1주차 · 리쿠 왕의 나라',
-    body: '왕궁 앞 광장에 늙은 왕 리쿠가 다시 섰다. 장난감이었던 사람들이 제 이름으로 불리고, 해바라기 언덕의 집들이 하나둘 다시 세워진다. 그런데 돌아온 기억이 모두에게 반가운 것은 아니다. 광장 구석에서 호객꾼 칠로가 분홍빛 병을 흔든다. 잊고 싶은 날은 잊게, 비어 있는 날은 채워 드립니다! 병을 비운 노인이 텅 빈 얼굴로 웃는다.',
+    body: '왕궁 앞 광장에 늙은 왕 리쿠가 다시 섰다. 장난감이었던 사람들이 제 이름으로 불리고, 해바라기 언덕의 집들이 하나둘 다시 세워진다. 그러나 집과 빚의 주인을 두고 증언이 엇갈린다. 광장 구석에서 호객꾼 칠로가 왕궁 도장을 흉내 낸 신원 확인서를 흔든다. 잊힌 세월의 소유권을 증명해 준다며 돈을 받는다.',
     doors: [
-      { label: '병을 빼앗고 호객꾼을 붙잡는다', hint: '약장수 일당의 눈에 띈다. 광장의 빵장수가 그 모습을 본다', values: { justice: D }, danger: true,
+      { label: '가짜 확인서를 빼앗고 호객꾼을 붙잡는다', hint: '위조단의 눈에 띈다. 광장의 빵장수가 그 모습을 본다', values: { justice: D }, danger: true,
         fx: [flag('ep_dressrosa_c_enrico_trust'), fight('b_dr_chilo', false, go('ep_dressrosa_c2'))] },
-      { label: '텅 빈 얼굴로 웃는 노인을 집까지 데려다준다', hint: '노인의 집 앞 빵집 주인이 고맙다며 손을 내민다', values: { loyalty: D },
+      { label: '집을 빼앗겼다는 노인을 사무소까지 데려다준다', hint: '노인의 집 앞 빵집 주인이 고맙다며 손을 내민다', values: { loyalty: D },
         fx: [flag('ep_dressrosa_c_enrico_trust'), next('ep_dressrosa_c2')] },
       { label: '새로 짓는 집터에서 망치나 든다', hint: '고된 일이지만 이 나라의 웃음이 진짜가 되어 간다', values: { peace: D },
         fx: [flag('ep_dressrosa_c_done'), { op: 'base', key: 'vit', add: 1 }, time('리쿠 왕이 돌아온 드레스로자에서 무너진 집을 다시 지었다')] },
@@ -473,11 +473,11 @@ const C: Turning[] = [
   {
     id: 'ep_dressrosa_c2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '2주차 · 이름 되찾기 사무소',
-    body: '왕궁 옆에 새로 생긴 이름 되찾기 사무소 앞에 줄이 끝없이 늘어선다. 서기 루시아는 장난감이었던 사람들의 집과 이름을 하나하나 장부에 되돌려 적는다. 그녀가 펜을 멈춘다. 레메디오 약방의 약을 먹은 사람들은 이름을 찾으러 오지 않아요. 찾을 이유가 없대요. 그냥 웃기만 해요. 빵장수 엔리코가 반죽 묻은 손으로 이마를 짚는다. 열 해 동안 장난감이었던 그도 밤마다 그 약 생각이 난다고 털어놓는다.',
+    body: '왕궁 옆 이름 되찾기 사무소 앞에 줄이 끝없이 늘어선다. 서기 루시아는 장난감이었던 사람들의 집과 이름을 장부에 되돌려 적는다. 그런데 같은 집에 서로 다른 소유자가 적힌 확인서가 둘 나왔다. 빵장수 엔리코도 열 해 동안 빈 점포를 지켰는데, 가짜 서류를 든 사람이 가게를 달라고 한다. 루시아의 펜이 멈춘다.',
     doors: [
-      { label: '약방 손님을 붙잡고 약의 출처를 다그친다', hint: '겁먹은 입은 빨리 열린다. 약방도 그만큼 빨리 안다', values: { dominion: D },
+      { label: '서류를 산 사람을 붙잡고 출처를 다그친다', hint: '겁먹은 입은 빨리 열린다. 위조단도 그만큼 빨리 안다', values: { dominion: D },
         fx: [flag('ep_dressrosa_c_rough'), { op: 'base', key: 'str', add: 1 }, next('ep_dressrosa_c3')] },
-      { label: '루시아와 약을 먹은 사람들의 기록을 맞춰 본다', hint: '웃기만 하는 사람들 사이에 같은 날짜와 같은 약병이 되풀이된다', values: { inquiry: D },
+      { label: '루시아와 확인서의 도장과 날짜를 맞춰 본다', hint: '같은 손에서 나온 서류의 흔적이 보인다', values: { inquiry: D },
         fx: [flag('ep_dressrosa_c_lucia_trust'), flag('ep_dressrosa_c_info'), next('ep_dressrosa_c3')] },
       { label: '이사벨이 베껴 준 옛 등록부를 루시아에게 건넨다', hint: '열 해 동안 아무도 기억하지 못한 검투사들의 이름이 장부로 돌아간다', values: { loyalty: D },
         when: [has('ep_dressrosa_a_keepsake')],
@@ -486,36 +486,36 @@ const C: Turning[] = [
   },
   {
     id: 'ep_dressrosa_c3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '3주차 · 다리 밑의 단내',
-    body: '엔리코의 말로는 약방의 약은 밤마다 그린 비트로 건너가는 다리 밑에서 끓인다. 다리 밑 공기에서 설탕 탄 쇠 냄새가 난다. 약방 사람들이 무너진 지하 공장에서 건져 온 상자를 끌고 간다. 상자마다 웃는 얼굴이 그려져 있다. 먹으면 웃는 것밖에 못 하게 된다는, 실패한 인조 열매다.',
+    title: '3주차 · 다리 밑의 잉크 냄새',
+    body: '엔리코의 말로는 위조 확인서가 밤마다 그린 비트로 건너가는 다리 밑에서 인쇄된다. 다리 밑에서는 잉크와 젖은 종이 냄새가 난다. 레메디오의 사람들이 무너진 지하 공장에서 건진 옛 인도장을 본보기로 쓰고 있다. 장난감이었던 사람들의 빈 기록을 골라 값을 매긴다.',
     doors: [
-      { label: '다리 밑 수레 자국을 따라간다', hint: '들키지 않으면 약을 끓이는 곳과 연료 창고가 보인다', values: { freedom: D },
+      { label: '다리 밑 수레 자국을 따라간다', hint: '들키지 않으면 인쇄실과 활자 창고가 보인다', values: { freedom: D },
         fx: [flag('ep_dressrosa_c_lab'), next('ep_dressrosa_c4')] },
-      { label: '약을 사러 온 손님인 척 약방 안쪽까지 들어간다', hint: '누가 약을 사 갔는지 적힌 장부가 보인다. 차 한 잔은 받아 마셔야 한다', values: { romance: D }, danger: true,
+      { label: '확인서를 사러 온 손님처럼 사무소 안쪽까지 들어간다', hint: '누가 서류를 사 갔는지 적힌 장부가 보인다', values: { romance: D }, danger: true,
         fx: [flag('ep_dressrosa_c_list'), { op: 'hp', add: -10 }, next('ep_dressrosa_c4')] },
-      { label: '다리 밑 수레를 가로막는다', hint: '싸움이 난다. 약방이 그 얼굴을 기억한다', values: { dominion: D }, danger: true,
+      { label: '다리 밑 수레를 가로막는다', hint: '싸움이 난다. 사무소가 그 얼굴을 기억한다', values: { dominion: D }, danger: true,
         fx: [flag('ep_dressrosa_c_rough'), flag('ep_dressrosa_c_lab'), fight('b_dr_chilo', false, go('ep_dressrosa_c4'))] },
     ],
   },
   {
     id: 'ep_dressrosa_c4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '4주차 · 왕궁의 청원 마당',
-    body: '리쿠 왕의 청원 마당에서 사람들이 둘로 갈린다. 장난감으로 지낸 날을 잊고 싶은 이들은 약을 금하지 말라고 울고, 웃음만 남은 가족을 둔 이들은 약방을 당장 닫으라고 소리친다. 둘 다 열 해를 빼앗긴 사람들이다. 기둥 옆에서 외다리 사내 키로스가 레베카 곁에 말없이 서 있다.',
+    body: '리쿠 왕의 청원 마당에서 사람들이 둘로 갈린다. 옛 장부를 믿자는 이들과 그동안 점포를 지킨 사람의 삶도 인정하자는 이들이 맞선다. 둘 다 열 해를 빼앗긴 사람들이다. 기둥 옆에서 외다리 사내 키로스가 레베카 곁에 말없이 서 있다.',
     doors: [
-      { label: '약을 원하는 이들의 아픔부터 들어 주자고 한다', hint: '금지보다 먼저 사람을 본다. 우는 쪽의 얼굴이 조금 풀린다', values: { peace: D },
+      { label: '두 사람의 증언을 차례로 듣자고 한다', hint: '도장보다 먼저 살아온 세월을 본다', values: { peace: D },
         fx: [flag('ep_dressrosa_c_enrico_trust'), next('ep_dressrosa_c4k')] },
-      { label: '약방을 당장 닫자는 쪽에 선다', hint: '목소리는 커진다. 약방도 그만큼 서두른다', values: { justice: D },
+      { label: '위조 서류를 당장 압수하자는 쪽에 선다', hint: '목소리는 커진다. 위조단도 서두른다', values: { justice: D },
         fx: [flag('ep_dressrosa_c_rough'), { op: 'fame', add: 10 }, next('ep_dressrosa_c4k')] },
-      { label: '루시아의 장부로 웃음만 남은 사람들을 하나씩 불러 준다', hint: '마당이 조용해진다. 셈 하나하나에 이름이 있다', values: { inquiry: D },
+      { label: '루시아의 장부로 서로 다른 도장을 하나씩 비교한다', hint: '마당이 조용해진다. 셈 하나하나에 이름이 있다', values: { inquiry: D },
         fx: [flag('ep_dressrosa_c_lucia_trust'), next('ep_dressrosa_c4k')] },
     ],
   },
   {
     id: 'ep_dressrosa_c4k', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '돌아온 왕 리쿠' },
     title: '4주차 · 늙은 왕의 물음',
-    body: '청원이 끝난 뒤 리쿠 왕이 {name}을(를) 따로 부른다. 곁에는 왕녀 비올라가 서 있다. 그녀의 눈은 멀리 있는 것과 사람의 속을 함께 본다고들 한다. 늙은 왕이 말한다. 나는 이 나라를 한 번 지키지 못한 왕이오. 약방을 닫는 것은 내가 할 일이지만, 그 전에 그대가 이 나라에서 한 일을 보고 싶소.',
+    body: '청원이 끝난 뒤 리쿠 왕이 {name}을(를) 따로 부른다. 곁에는 왕녀 비올라가 서 있다. 늙은 왕이 말한다. 나는 이 나라를 한 번 지키지 못한 왕이오. 위조 서류를 거두는 것은 내가 할 일이지만, 어떤 기록을 새로 남길지는 사람들이 결정해야 하오. 그 전에 그대가 이 나라에서 한 일을 보고 싶소.',
     doors: [
-      { label: '약을 먹은 사람들의 기록과 약병을 왕 앞에 내놓는다', hint: '왕이 고개를 끄덕인다. 왕궁의 의사와 병사가 뒤를 받친다', values: { inquiry: D },
+      { label: '도장이 다른 확인서와 옛 장부를 왕 앞에 내놓는다', hint: '왕이 고개를 끄덕인다. 왕궁 서기와 병사가 뒤를 받친다', values: { inquiry: D },
         when: [has('ep_dressrosa_c_info'), not('ep_dressrosa_c_rough')], fx: [flag('ep_dressrosa_c_royal'), next('ep_dressrosa_c5')] },
       { label: '엔리코가 광장에서 본 일을 대신 말한다', hint: '빵장수의 말을 들은 왕녀가 먼 곳을 보고 고개를 끄덕인다', values: { loyalty: D },
         when: [has('ep_dressrosa_c_enrico_trust')], fx: [flag('ep_dressrosa_c_royal'), next('ep_dressrosa_c5')] },
@@ -525,27 +525,27 @@ const C: Turning[] = [
   },
   {
     id: 'ep_dressrosa_c5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '5주차 · 다리 밑의 솥',
-    body: '다리 밑 동굴에 커다란 솥들이 끓는다. 실패한 인조 열매를 갈아 넣은 약이 분홍빛으로 졸아들고, 우리 안에는 약을 시험당한 사람들이 멍하니 웃고 있다. 그 앞을 쇠뿔 투구를 쓴 경호대장 토로가 막아선다. 벽에 붙은 주문서에는 바다 건너 웃음을 사들이는 손님들의 이름이 빼곡하다.',
+    title: '5주차 · 다리 밑의 인쇄기',
+    body: '다리 밑 동굴에서 인쇄기가 밤새 돌아간다. 가짜 도장과 빈 확인서가 상자마다 쌓이고, 서류를 빼앗긴 사람들은 문밖에서 자기 집 주소를 외친다. 그 앞을 쇠뿔 투구를 쓴 경호대장 토로가 막아선다. 벽에는 바다 건너 서류를 사들이는 사람의 이름이 빼곡하다.',
     doors: [
-      { label: '왕궁 병사들이 우리를 여는 동안 경호대장을 붙든다', hint: '갇힌 사람들이 풀려난다. 쇠뿔은 이쪽으로 돌진한다', values: { loyalty: D }, danger: true,
+      { label: '왕궁 병사들이 서류 상자를 옮기는 동안 경호대장을 붙든다', hint: '원본이 보존된다. 쇠뿔은 이쪽으로 돌진한다', values: { loyalty: D }, danger: true,
         when: [has('ep_dressrosa_c_royal')], fx: [flag('ep_dressrosa_c_freed'), fight('b_dr_toro', false, go('ep_dressrosa_c6'))] },
-      { label: '이름 두루마리를 보이고 작은 사람들의 손을 빌린다', hint: '그날의 이름을 기억하는 바늘 칼들이 솥 밑의 불을 몰래 끈다', values: { romance: D },
+      { label: '이름 두루마리를 보이고 작은 사람들의 손을 빌린다', hint: '바늘 칼들이 인쇄기의 활자를 몰래 빼낸다', values: { romance: D },
         when: [has('ep_dressrosa_b_keepsake')], fx: [flag('ep_dressrosa_c_sabotage'), flag('ep_dressrosa_c_freed'), next('ep_dressrosa_c6')] },
       { label: '쇠뿔 투구의 경호대장에게 맞선다', hint: '황소 같은 돌진이다. 지면 다치고, 이기면 경호대장이 달아난다', values: { dominion: D }, danger: true,
         fx: [fight('b_dr_toro', false, go('ep_dressrosa_c6'))] },
     ],
   },
   {
-    id: 'ep_dressrosa_c6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '기억의 약장수 레메디오' },
-    title: '6주차 · 약장수의 제안',
-    body: '약방 이층, 흰 가운을 입은 사내가 향긋한 차를 따른다. 레메디오다. 그는 자신을 의사라 부른다. 장난감으로 산 열 해를 기억하며 밤마다 우는 사람에게 웃음을 주는 게 죄인가? 왕은 기억을 돌려주었지만 그 기억을 견디는 법은 주지 않았지. 그가 찻잔을 밀어 준다. 자네가 손을 보태면 이 약을 바다 건너까지 팔 수 있어.',
+    id: 'ep_dressrosa_c6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '위조 서류상 레메디오' },
+    title: '6주차 · 서류상의 제안',
+    body: '사무소 이층, 흰 장갑을 낀 사내가 차를 따른다. 레메디오다. 그는 자신을 권리 중개인이라 부른다. 열 해 동안 남의 집을 지킨 사람에게는 그 집의 몫이 없느냐고 묻는다. 그 말에는 진짜 어려움이 섞여 있지만, 빈 확인서에 판 가짜 도장은 감춘다. 자네가 손을 보태면 바다 건너에서도 돈을 벌 수 있다고 한다.',
     doors: [
-      { label: '찻잔을 내려놓고 거절한다', hint: '약방이 서두른다. 청원 마당 사람들이 그 이야기를 듣는다', values: { justice: D },
+      { label: '찻잔을 내려놓고 거절한다', hint: '위조단이 서두른다. 청원 마당 사람들이 그 이야기를 듣는다', values: { justice: D },
         fx: [flag('ep_dressrosa_c_enrico_trust'), next('ep_dressrosa_c7')] },
-      { label: '손을 잡는 척하며 약을 실어 낼 날과 장부를 캐낸다', hint: '배가 언제 뜨는지 안다. 들키면 찻잔에 무엇이 들었을지 모른다', values: { ambition: D }, danger: true,
+      { label: '손을 잡는 척하며 서류를 실어 낼 날과 장부를 캐낸다', hint: '배가 언제 뜨는지 안다. 들키면 인쇄실에 갇힐 수 있다', values: { ambition: D }, danger: true,
         fx: [flag('ep_dressrosa_c_fake'), flag('ep_dressrosa_c_lab'), next('ep_dressrosa_c7')] },
-      { label: '약 장사의 몫을 받고 손을 잡는다', hint: '돈이 든다. 엔리코의 빵집 문이 닫힌다', values: { greed: D },
+      { label: '서류 장사의 몫을 받고 손을 잡는다', hint: '돈이 든다. 엔리코의 빵집 문이 닫힌다', values: { greed: D },
         fx: [flag('ep_dressrosa_c_deal'), { op: 'money', add: 70000 }, next('ep_dressrosa_c7')] },
       { label: '시험당한 사람들을 풀어 주는 조건으로 입을 다문다', hint: '우리 문은 열린다. 약은 여전히 팔린다', special: 'peace', values: { peace: D },
         fx: [flag('ep_dressrosa_c_freed'), next('ep_dressrosa_c7')] },
@@ -554,55 +554,55 @@ const C: Turning[] = [
   {
     id: 'ep_dressrosa_c7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '7주차 · 첫 배를 앞두고',
-    body: '레메디오가 첫 배에 약을 싣는 날이 다가온다. 엔리코는 다리 밑으로 빵 수레가 드나드는 샛길을 알고, 루시아는 약을 먹은 사람들의 집을 장부로 짚어 낸다. 키로스는 왕궁 병사들이 그날 밤 다리를 지킬 거라고 짧게 말한다. 그 다음은 {name}의 몫이다.',
+    body: '레메디오가 첫 배에 위조 확인서를 싣는 날이 다가온다. 엔리코는 다리 밑으로 빵 수레가 드나드는 샛길을 알고, 루시아는 서류를 산 사람들의 집을 장부로 짚어 낸다. 키로스는 왕궁 병사들이 그날 밤 다리를 지킬 거라고 짧게 말한다. 그 다음은 {name}의 몫이다.',
     doors: [
       { label: '엔리코와 다리 밑 샛길에 피난로를 낸다', hint: '싸움이 어떻게 끝나든 갇힌 사람들이 빠져나갈 길이 생긴다', values: { peace: D },
         fx: [flag('ep_dressrosa_c_exit'), next('ep_dressrosa_c8')] },
-      { label: '솥 밑의 연료 창고에 물을 들이붓는다', hint: '약방의 불이 꺼진다. 들키면 다친다', values: { dominion: D }, danger: true,
+      { label: '인쇄기의 활자 상자를 강에 숨긴다', hint: '위조단의 손발이 묶인다. 들키면 다친다', values: { dominion: D }, danger: true,
         when: [has('ep_dressrosa_c_lab')], fx: [flag('ep_dressrosa_c_sabotage'), { op: 'hp', add: -10 }, next('ep_dressrosa_c8')] },
-      { label: '준비 없이 곧장 약방으로 간다', hint: '시간은 번다. 상대도 온전하다', values: { ambition: D },
+      { label: '준비 없이 곧장 사무소로 간다', hint: '시간은 번다. 상대도 온전하다', values: { ambition: D },
         fx: [next('ep_dressrosa_c8')] },
-      { label: '루시아와 약의 정체를 왕궁 의사에게 밝혀 달라고 한다', hint: '약의 정체가 드러나면 약장수의 말이 힘을 잃는다', special: 'inquiry', values: { inquiry: D },
+      { label: '루시아와 위조 도장을 왕궁 서기에게 감정받는다', hint: '위조가 드러나면 서류상의 말이 힘을 잃는다', special: 'inquiry', values: { inquiry: D },
         fx: [flag('ep_dressrosa_c_lucia_trust'), flag('ep_dressrosa_c_sabotage'), next('ep_dressrosa_c8')] },
     ],
   },
   {
     id: 'ep_dressrosa_c8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 첫 배가 뜨는 밤',
-    body: '그린 비트로 건너가는 다리 끝 부두, 분홍빛 약병이 든 상자가 배에 오른다. 흰 가운의 레메디오가 지팡이를 짚고 서 있다. 지팡이 끝에서 단내 나는 안개가 피어오른다. 그 안개를 마시면 싸울 마음이 웃음으로 흩어진다고 한다. 지면 크게 다칠 것이다. 물러날 길은 아직 열려 있다.',
+    body: '그린 비트로 건너가는 다리 끝 부두, 가짜 확인서가 든 상자가 배에 오른다. 레메디오가 인쇄용 쇠도장을 지팡이처럼 짚고 서 있다. 그가 고용한 경비들이 출구를 막는다. 원본 장부를 확보하면 거래를 멈출 수 있다. 지면 크게 다칠 것이다. 물러날 길은 아직 열려 있다.',
     doors: [
-      { label: '연료도 약효도 잃은 약장수에게 다가간다', hint: '안개가 옅다. 그의 말도 힘을 잃었다', values: { justice: D }, danger: true,
-        when: [has('ep_dressrosa_c_sabotage')], fx: [fight('b_dr_remedio_worn', false, go('ep_dressrosa_c8w', 'ep_dressrosa_c9'))] },
-      { label: '안개를 뚫고 레메디오에게 맞선다', hint: '웃음의 안개가 몸을 잡아끈다. 지면 크게 다친다', values: { dominion: D }, danger: true,
+      { label: '루시아의 원본 장부로 위조를 공개한다', hint: '거래선이 서류를 받지 않고 돌아선다', values: { justice: D }, danger: true,
+        when: [has('ep_dressrosa_c_sabotage')], fx: [flag('ep_dressrosa_c_beaten'), next('ep_dressrosa_c8w')] },
+      { label: '경비를 뚫고 레메디오에게 맞선다', hint: '경비가 많다. 지면 크게 다친다', values: { dominion: D }, danger: true,
         fx: [fight('b_dr_remedio', false, go('ep_dressrosa_c8w', 'ep_dressrosa_c9'))] },
-      { label: '싸움을 접고 물러난다', hint: '목숨은 아낀다. 배는 안개 속으로 떠난다', values: { freedom: D },
+      { label: '싸움을 접고 물러난다', hint: '목숨은 아낀다. 배는 위조 서류를 싣고 떠난다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 2 }, next('ep_dressrosa_c9')] },
     ],
   },
   {
     id: 'ep_dressrosa_c8w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 깨진 약병',
-    body: '레메디오의 지팡이가 부러지고 분홍 약병들이 부두에 깨진다. 그는 웃음기 없는 얼굴로 중얼거린다. 내 약이 없으면 저들은 밤마다 울 거요. 그게 그대가 바라는 거요? 다리 위에서 엔리코와 루시아가 숨을 몰아쉬며 달려온다.',
+    title: '8주차 · 부러진 쇠도장',
+    body: '위조가 드러나자 거래선이 서류 상자를 내려놓는다. 레메디오는 쇠도장을 버리고 도망치려 하며, 가짜 확인서가 부두에 흩어진다. 다리 위에서 엔리코와 루시아가 숨을 몰아쉬며 달려온다. 집의 주인을 가릴 답은 이 서류상의 입이 아니라 주민의 증언에 있다.',
     doors: [
-      { label: '레메디오를 리쿠 왕의 재판정에 넘긴다', hint: '이 나라의 법이 그를 심판한다. 남은 약은 왕궁 의사가 거둔다', values: { justice: D },
+      { label: '레메디오를 리쿠 왕의 재판정에 넘긴다', hint: '이 나라의 법이 그를 심판한다. 원본 장부는 왕궁 서기가 거둔다', values: { justice: D },
         fx: [flag('ep_dressrosa_c_beaten'), next('ep_dressrosa_c9')] },
-      { label: '거래 때 본 장부로 바다 건너 손님까지 밝혀낸다', hint: '약이 갈 길이 통째로 끊긴다', values: { inquiry: D },
+      { label: '거래 때 본 장부로 바다 건너 손님까지 밝혀낸다', hint: '위조 서류가 갈 길이 끊긴다', values: { inquiry: D },
         when: [has('ep_dressrosa_c_fake')], fx: [flag('ep_dressrosa_c_beaten'), flag('ep_dressrosa_c_list'), next('ep_dressrosa_c9')] },
-      { label: '약장수의 남은 금화를 받고 놓아준다', hint: '금화가 무겁다. 그는 다른 섬에서 같은 약을 팔 것이다', values: { greed: D },
+      { label: '서류상의 남은 금화를 받고 놓아준다', hint: '금화가 무겁다. 그는 다른 섬에서 같은 사기를 벌일 것이다', values: { greed: D },
         fx: [flag('ep_dressrosa_c_beaten'), { op: 'money', add: 60000 }, next('ep_dressrosa_c9')] },
     ],
   },
   {
     id: 'ep_dressrosa_c9', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 해바라기 언덕의 결말',
-    body: '첫 배가 뜨던 밤이 지나고 왕궁의 종이 울린다. 약을 끊은 사람들 몇은 밤마다 울고, 몇은 이웃의 문을 두드린다. 콜로세움 앞 계단에서 레베카가 아이들에게 칼 대신 빵을 나눠 준다. 열 해를 잊었던 나라가 이제 그 열 해를 견디는 법을 배우는 중이다.',
+    body: '첫 배가 뜨던 밤이 지나고 왕궁의 종이 울린다. 도장을 되찾은 사람도 집을 돌려받지 못한 사람도 있다. 엔리코는 이웃의 문을 두드리고, 루시아는 서로 다른 증언을 한 줄씩 적는다. 열 해를 잊었던 나라가 이제 그 열 해의 권리를 다시 정하는 중이다.',
     doors: [
-      { label: '시험당했던 사람들과 함께 엔리코의 빵집 문을 연다', hint: '약 대신 아침 빵이 돈다. 우는 밤도 함께 견딘다', values: { peace: D },
+      { label: '점포를 잃은 사람들과 함께 엔리코의 빵집 문을 연다', hint: '문서가 끝내 못 적은 관계를 마을이 기억한다', values: { peace: D },
         when: [has('ep_dressrosa_c_beaten'), has('ep_dressrosa_c_freed'), not('ep_dressrosa_c_deal')],
-        fx: [{ op: 'fame', add: 30 }, time('리쿠 왕의 드레스로자에서 웃음을 파는 약장수를 몰아냈다'), next('ep_dressrosa_c10')] },
-      { label: '루시아의 장부로 약을 먹은 사람들을 하나하나 찾아간다', hint: '웃음만 남은 얼굴에 이름이 다시 붙는다', values: { loyalty: D },
+        fx: [{ op: 'fame', add: 30 }, time('리쿠 왕의 드레스로자에서 위조 신원 서류를 팔던 자를 막았다'), next('ep_dressrosa_c10')] },
+      { label: '루시아의 장부로 집을 잃은 사람들을 찾아간다', hint: '서로 다른 증언을 한곳에 모은다', values: { loyalty: D },
         when: [has('ep_dressrosa_c_lucia_trust'), has('ep_dressrosa_c_list'), not('ep_dressrosa_c_deal')],
-        fx: [time('드레스로자에서 웃음만 남은 사람들에게 이름을 되찾아 주었다'), next('ep_dressrosa_c10')] },
+        fx: [time('드레스로자에서 충돌하는 신원 기록을 주민의 증언으로 바로잡았다'), next('ep_dressrosa_c10')] },
       { label: '왕궁 앞 광장을 천천히 걷는다', hint: '이 나라가 맞은 날들을 제 눈으로 본다', values: { romance: D },
         fx: [next('ep_dressrosa_c9b')] },
     ],
@@ -610,14 +610,14 @@ const C: Turning[] = [
   {
     id: 'ep_dressrosa_c9b', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 광장에 남은 것',
-    body: '광장의 해바라기가 바람에 고개를 숙인다. 골목 어딘가에서는 아직 단내가 나고, 다른 골목에서는 갓 구운 빵 냄새가 난다. 어느 쪽이 이 나라에 오래 남을지는 아직 모른다.',
+    body: '광장의 해바라기가 바람에 고개를 숙인다. 골목 어딘가에는 아직 위조 서류가 돌고, 다른 골목에서는 갓 구운 빵 냄새가 난다. 어느 기록이 이 나라에 오래 남을지는 아직 모른다.',
     doors: [
-      { label: '다리 밑 샛길로 빼낸 사람들의 손을 잡는다', hint: '모두를 구하지는 못했다. 구한 손들이 따뜻하다', values: { loyalty: D },
-        when: [has('ep_dressrosa_c_exit')], fx: [time('드레스로자의 다리 밑에서 약에 갇힌 사람들 몇을 빼냈다'), next('ep_dressrosa_c10')] },
-      { label: '약방의 새 간판 아래 이름을 올린다', hint: '돈은 남는다. 엔리코의 빵집이 더는 문을 열어 주지 않는다', values: { greed: D },
-        when: [has('ep_dressrosa_c_deal')], fx: [{ op: 'money', add: 40000 }, time('드레스로자의 약장수와 손잡고 웃음을 팔았다'), next('ep_dressrosa_c10')] },
-      { label: '해바라기만 바라보다 떠날 채비를 한다', hint: '약방의 단내는 아직 골목에 남아 있다', values: { freedom: D },
-        fx: [time('리쿠 왕의 드레스로자를 지나쳤다. 웃음을 파는 약방은 그대로였다'), next('ep_dressrosa_c10')] },
+      { label: '다리 밑 샛길로 빼낸 사람들의 손을 잡는다', hint: '모두의 집을 되찾지는 못했다. 증언은 남는다', values: { loyalty: D },
+        when: [has('ep_dressrosa_c_exit')], fx: [time('드레스로자의 다리 밑에서 위조 서류의 피해자를 도왔다'), next('ep_dressrosa_c10')] },
+      { label: '사무소의 새 간판 아래 이름을 올린다', hint: '돈은 남는다. 엔리코의 빵집이 더는 문을 열어 주지 않는다', values: { greed: D },
+        when: [has('ep_dressrosa_c_deal')], fx: [{ op: 'money', add: 40000 }, time('드레스로자의 서류상과 손잡고 위조 확인서를 팔았다'), next('ep_dressrosa_c10')] },
+      { label: '해바라기만 바라보다 떠날 채비를 한다', hint: '위조 서류는 아직 골목에 남아 있다', values: { freedom: D },
+        fx: [time('리쿠 왕의 드레스로자를 지나쳤다. 위조 서류상은 그대로였다'), next('ep_dressrosa_c10')] },
     ],
   },
   {

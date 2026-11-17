@@ -2,7 +2,7 @@
 // 시나리오 셋, 저마다 하늘섬에 머무는 두 달(8주):
 //  - 원작 전 (주인공 12~17): 에넬의 지배 아래 엔젤섬. 다이얼 중개인 도란이 「신의 공물」이라며 다이얼을 걷고, 이름을 신관에게 판다.
 //    안내자 티카(웨이버 배달꾼) · 기록꾼 벨라(다이얼 공방). 간 폴이 지금까지 한 일을 보고 판단한다.
-//    에넬과의 직접 대결은 이 시기에만, 경지 5(ready(5))에서 치명적으로. 이겨도 에넬은 따분해하며 물러날 뿐, 신의 자리는 그대로다.
+//    에넬은 통치의 배경으로 남는다. 플레이어는 공물 장부와 운송로를 다루며 직접 대결하지 않는다.
 //  - 원작 그 무렵 (주인공 18): 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
 //    주인공은 다른 전선에 선다: 피난으로 빈 엔젤섬을 노리는 약탈단 구름늑대단(두목 무라크). 안내자 파로 · 진료소의 미나. 코니스가 판단한다.
 //  - 원작 뒤 (주인공 19~): 본보기 SKY_B_01 「잊힌 황금의 수호자」를 그대로 옮긴다. 카르마 · 루미 · 그라몬의 보물 사냥꾼 · 기억의 방 · 와이퍼.
@@ -97,8 +97,8 @@ export const EP_SKYPIEA: Turning[] = [
         fx: [flag(F('b_route')), log('구름 덩굴 아래 바위굴, 창고 문에는 도란 상회의 낙인이 찍혀 있었다.'), next('ep_skypiea_b4')] },
       { label: '짐꾼 무리에 섞여 짐을 나른다', hint: '누가 몇 명인지, 누가 신관과 통하는지 본다', values: { romance: D },
         fx: [flag(F('b_ledger')), log('짐 사이에 끼워진 쪽지에는 이름이 적혀 있었다. 신관에게 올리는 이름이었다.'), next('ep_skypiea_b4')] },
-      { label: '구슬의 숲을 정면으로 가로지른다', hint: '신관이 기다린다. 쉽게 지나가지는 못한다', values: { dominion: D }, danger: true,
-        fx: [fight('b_satori', false, { win: 'ep_skypiea_b4', lose: 'ep_skypiea_b4', back: 'ep_skypiea_b4' })] },
+      { label: '신관의 순찰을 피해 숲의 짐길을 가로지른다', hint: '구슬 구름 사이로 상회의 수레가 보인다', values: { dominion: D }, danger: true,
+        fx: [flag(F('b_route')), { op: 'hp', add: -5 }, next('ep_skypiea_b4')] },
     ],
   },
   {
@@ -108,8 +108,8 @@ export const EP_SKYPIEA: Turning[] = [
     doors: [
       { label: '모아 둔 쪽지와 장부를 노기사 앞에 펼친다', hint: '노기사가 처음으로 입을 연다', when: [has(F('b_ledger'))], values: { justice: D },
         fx: [flag(F('b_knight')), log('간 폴은 장부를 오래 들여다보더니 창을 고쳐 쥐었다. 이름을 판 자를 잡는 일은 그대의 몫이다, 나는 그날 사람들 곁에 서겠다고 했다.'), next('ep_skypiea_b5')] },
-      { label: '숨은 샨디아 전사들 곁에 선다', hint: '불새를 탄 신관이 숲 위를 돈다', values: { loyalty: D }, danger: true,
-        fx: [flag(F('b_shandia')), fight('b_shura', false, { win: 'ep_skypiea_b5', lose: 'ep_skypiea_b5', back: 'ep_skypiea_b5' })] },
+      { label: '숨은 샨디아 전사들에게 피난 길을 알려 준다', hint: '신관의 순찰을 피해야 한다', values: { loyalty: D }, danger: true,
+        fx: [flag(F('b_shandia')), next('ep_skypiea_b5')] },
       { label: '어른들이 스스로 정하게 두고 물러난다', hint: '노기사는 고개만 끄덕인다', values: { peace: D },
         fx: [log('간 폴은 아무 말도 하지 않았다. 지켜보는 눈빛만 남았다.', 'light'), next('ep_skypiea_b5')] },
       { label: '말 많은 어른들을 주먹으로 조용히 시킨다', hint: '방 안이 조용해진다. 노기사의 창끝도 내려가지 않는다', when: [has(F('b_force'))], special: 'dominion', values: { dominion: D },
@@ -166,24 +166,23 @@ export const EP_SKYPIEA: Turning[] = [
         fx: [flag(F('b_sabotage')), log('밤새 다이얼 껍데기를 반 바퀴씩 비틀었다. 겉으로는 아무 일도 없어 보였다.'), next('ep_skypiea_b7')] },
       { label: '티카와 사람들이 숨을 구름길을 닦는다', hint: '싸움이 나도 다치는 사람이 줄어든다', values: { loyalty: D },
         fx: [flag(F('b_evac')), flag(F('tika_trust')), next('ep_skypiea_b7')] },
-      { label: '신전으로 올라가 신에게 직접 따진다', hint: '번개 그 자체와 싸운다. 지면 돌아오지 못한다', when: [ready(5)], values: { dominion: D }, danger: true,
-        fx: [log('거대한 나무 꼭대기, 북을 등에 둘러멘 사내가 사과를 베어 물며 귀를 늘어뜨렸다. 야하하, 네가 오는 소리는 아까부터 들렸다.'),
-             fight('b_enel', true, { win: 'ep_skypiea_b6w', lose: 'ep_skypiea_b7', back: 'ep_skypiea_b7' })] },
+      { label: '신전 쪽으로 향하는 공물 짐길을 끊는다', hint: '도란 상회의 장부와 사람을 빼돌릴 틈을 만든다', when: [ready(5)], values: { dominion: D }, danger: true,
+        fx: [flag(F('b_sabotage')), log('에넬의 신전에는 다가가지 않았다. 공물 짐길을 끊자 도란 상회의 운반책이 흩어졌다.'), next('ep_skypiea_b6w')] },
       { label: '준비 없이 그날을 기다린다', hint: '몸은 쉬었다. 계책은 없다', special: 'ambition', values: { ambition: D },
         fx: [{ op: 'hp', add: 15 }, next('ep_skypiea_b7')] },
     ],
   },
   {
-    id: 'ep_skypiea_b6w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '신 에넬' },
-    title: '6주차 · 따분해진 신',
-    body: '그을린 신전 바닥에 에넬이 주저앉아 귓불을 만지작거린다. 야하하, 재미있군. 하지만 신은 이런 놀이에 오래 매이지 않는다. 사내는 구름 너머를 가리키고는 몸을 번개로 바꾸어 사라진다. 그쪽에서는 밤낮으로 쇠 두드리는 소리가 들린다. 신의 자리는 여전히 그의 것이다.',
+    id: 'ep_skypiea_b6w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
+    title: '6주차 · 끊긴 공물길',
+    body: '신전으로 향하던 짐수레가 구름길 앞에서 멈춘다. 도란 상회의 운반책이 달아나며 장부 한 권을 떨어뜨렸다. 거기에는 다이얼뿐 아니라 값을 치르지 못한 사람들의 이름이 적혀 있다. 하늘의 지배자는 여전히 신전 안에 있고, 이 장부를 어떻게 쓸지는 {name}의 몫이다.',
     doors: [
-      { label: '신이 사라진 구름 너머를 바라본다', hint: '무언가 거대한 것이 만들어지고 있다', values: { inquiry: D },
-        fx: [flag(F('enel')), { op: 'fame', add: 20 }, log('구름 너머에서 거대한 배의 뼈대를 보았다. 신은 언젠가 이 하늘을 떠날 생각이었다.'), time('신 에넬과 맞서 물러나게 했다'), next('ep_skypiea_b7')] },
-      { label: '엔젤섬 사람들에게 신도 피를 흘린다고 알린다', hint: '사람들의 눈빛이 조금 달라진다', values: { justice: D },
-        fx: [flag(F('enel')), { op: 'fame', add: 30 }, log('그날 밤 엔젤섬에서 오래간만에 노랫소리가 났다. 신관들은 못 들은 척했다.'), time('신 에넬과 맞서 물러나게 했다'), next('ep_skypiea_b7')] },
-      { label: '말없이 신전 계단을 내려간다', hint: '신병들이 먼저 길을 비킨다', values: { dominion: D },
-        fx: [flag(F('enel')), log('승리는 {name} 혼자만의 비밀로 남았다.', 'light'), time('신 에넬과 맞서 물러나게 했다'), next('ep_skypiea_b7')] },
+      { label: '장부의 이름을 공방에 가져가 확인한다', hint: '벨라가 빼앗긴 물건과 사람을 맞춰 본다', values: { inquiry: D },
+        fx: [flag(F('b_route')), log('벨라는 손가락으로 이름을 하나씩 짚었다. 도란이 숨긴 거래가 드러났다.'), next('ep_skypiea_b7')] },
+      { label: '운반책을 쫓아 물건부터 되찾는다', hint: '구름길 아래 떨어질 위험이 있다', values: { justice: D }, danger: true,
+        fx: [flag(F('b_evac')), { op: 'hp', add: -6 }, next('ep_skypiea_b7')] },
+      { label: '장부를 감추고 신전의 눈길을 피한다', hint: '이름은 살아남지만 당장 돌려받을 물건은 적다', values: { peace: D },
+        fx: [log('벨라는 장부를 다이얼 껍데기 안에 숨겼다.'), next('ep_skypiea_b7')] },
     ],
   },
   {
@@ -287,8 +286,8 @@ export const EP_SKYPIEA: Turning[] = [
         fx: [flag(F('c_route')), log('구름굴 입구에는 늑대 머리뼈가 걸려 있었다. 뒤쪽으로 좁은 바람길이 하나 더 있었다.'), next('ep_skypiea_c4')] },
       { label: '자루를 나르는 졸개들 틈에 섞인다', hint: '늑대단이 몇이고 무엇을 노리는지 듣는다', values: { romance: D },
         fx: [flag(F('c_list')), log('졸개들은 신이 떠나는 날을 「잔칫날」이라고 불렀다. 그날 털 집 순서까지 정해 두었다.'), next('ep_skypiea_c4')] },
-      { label: '늪의 신관이 선 길을 그대로 지나간다', hint: '신관은 멍해 보여도 신관이다', values: { dominion: D }, danger: true,
-        fx: [fight('b_gedatsu', false, { win: 'ep_skypiea_c4', lose: 'ep_skypiea_c4', back: 'ep_skypiea_c4' })] },
+      { label: '늪의 신관이 선 길 아래로 몸을 숨긴다', hint: '신관의 시선을 피하고 늑대단의 흔적을 놓치지 않는다', values: { dominion: D }, danger: true,
+        fx: [flag(F('c_route')), { op: 'hp', add: -5 }, next('ep_skypiea_c4')] },
       { label: '번개가 떨어지는 버릇을 읽으며 숲을 지나간다', hint: '그 사내와 겨뤄 본 몸이 리듬을 기억한다', when: [has(F('enel'))], special: 'justice', values: { justice: D },
         fx: [flag(F('c_route')), flag(F('c_list')), log('번개가 떨어질 자리를 피해 걸었다. 신관들도 늑대들도 {name}을(를) 보지 못했다.'), next('ep_skypiea_c4')] },
     ],
@@ -300,8 +299,8 @@ export const EP_SKYPIEA: Turning[] = [
     doors: [
       { label: '미나와 함께 피난처로 가는 길을 그려 보인다', hint: '코니스가 그 길을 사람들에게 전하겠다고 한다', when: [has(F('mina_trust'))], values: { justice: D },
         fx: [flag(F('c_conis')), log('코니스는 지도를 오래 들여다보았다. 그날이 오면 제가 먼저 외치겠어요, 하지만 사람들을 끝까지 데려가는 건 당신들 몫이에요.'), next('ep_skypiea_c5')] },
-      { label: '샨디아 노인들을 찾아가 직접 청한다', hint: '숲에서는 철의 신관이 전사들을 사냥하고 있다', values: { loyalty: D }, danger: true,
-        fx: [flag(F('c_shandia')), fight('b_ohm', false, { win: 'ep_skypiea_c5', lose: 'ep_skypiea_c5', back: 'ep_skypiea_c5' })] },
+      { label: '샨디아 노인들을 찾아가 피난처를 청한다', hint: '숲의 신관에게 들키지 않도록 돌아가야 한다', values: { loyalty: D }, danger: true,
+        fx: [flag(F('c_shandia')), next('ep_skypiea_c5')] },
       { label: '노인들끼리 정하게 두고 자리를 뜬다', hint: '코니스는 아무 말도 하지 않는다', values: { peace: D },
         fx: [log('코니스는 고개를 숙였다. 그 눈은 {name}을(를) 섬 밖의 사람처럼 보았다.', 'light'), next('ep_skypiea_c5')] },
       { label: '늑대단을 잡겠다며 회의를 휘어잡는다', hint: '목소리는 커지고 코니스는 한 걸음 물러선다', when: [has(F('c_force'))], special: 'dominion', values: { dominion: D },
@@ -553,8 +552,8 @@ export const EP_SKYPIEA: Turning[] = [
     title: '7주차 · 황금의 수호자',
     body: '그라몬이 조직원들을 이끌고 기억의 방으로 향한다. 유적을 부술 생각은 없지만 필요하면 기둥 몇 개는 무너뜨릴 사내다. 외곽에서는 카르마가 대원들을 막고, 와이퍼는 주민들 앞을 지킨다. 그라몬과의 결판은 와이퍼의 몫이 아니다. 충격 다이얼을 박은 쇠망치가 바닥을 찍을 때마다 통로가 흔들린다. 지금 맞서면 크게 다칠 수 있다. 물러날 길은 아직 열려 있다.',
     doors: [
-      { label: '장비가 빠진 그라몬에게 맞선다', hint: '한 방이 약해졌다. 공격 뒤의 빈틈이 크다', when: [has(F('a_sabotage'))], values: { freedom: D }, danger: true,
-        fx: [fight('b_gramon_worn', false, { win: 'ep_skypiea_a8', lose: 'ep_skypiea_a8b', back: 'ep_skypiea_a8b' })] },
+      { label: '루미의 물품 목록을 운반책에게 보여 준다', hint: '훔친 물건이 드러나자 고용된 운반책들이 짐을 내려놓는다', when: [has(F('a_record'))], values: { inquiry: D }, danger: true,
+        fx: [flag(F('a_sabotage')), next('ep_skypiea_a8')] },
       { label: '그라몬의 쇠망치 앞에 선다', hint: '한 번의 공격이 무겁다. 좁은 통로에서는 더하다', values: { dominion: D }, danger: true,
         fx: [fight('b_gramon', false, { win: 'ep_skypiea_a8', lose: 'ep_skypiea_a8b', back: 'ep_skypiea_a8b' })] },
       { label: '물러나 주민들과 와이퍼에게 맡긴다', hint: '목숨은 남는다. 방이 어떻게 될지는 모른다', values: { peace: D },
@@ -566,7 +565,7 @@ export const EP_SKYPIEA: Turning[] = [
   {
     id: 'ep_skypiea_a8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 남겨진 황금',
-    body: '그라몬은 금 간 쇠망치를 끌고 구름 아래로 물러났다. 조직원들도 흩어졌다. 이제 주민들은 유적과 기록을 어떻게 할지 정해야 한다. {name}은(는) 그 결정에 말을 보탤 수 있지만, 섬의 내일을 혼자 정할 수는 없다.',
+    body: '그라몬은 운반책들이 짐을 내려놓자 금 간 쇠망치를 끌고 구름 아래로 물러났다. 조직원들도 흩어졌다. 이제 주민들은 유적과 기록을 어떻게 할지 정해야 한다. {name}은(는) 그 결정에 말을 보탤 수 있지만, 섬의 내일을 혼자 정할 수는 없다.',
     doors: [
       { label: '두 마을이 함께 기록을 보관하도록 돕는다', hint: '위험한 통로는 감추고 이야기는 나눈다', when: [has(F('karma_trust')), has(F('lumi_trust')), has(F('a_record')), has(F('a_joint')), not(F('a_deal'))], values: { justice: D },
         fx: [{ op: 'fame', add: 15 }, log('루미가 공동 기록의 첫 장을 쓰고, 카르마가 그 상자를 지켰다. 모든 갈등이 사라진 것은 아니었다. 그래도 둘은 같은 탁자에 앉았다.'),

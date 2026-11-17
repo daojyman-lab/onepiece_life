@@ -4,7 +4,7 @@
 //   원작 그 무렵(17~18) 「아르바나의 다른 전선」: 양쪽에 화약을 파는 붉은 낙타단(오르한). 안내 카심 · 기록 레일라 · 판단 코자.
 //     결전 날 밀짚모자는 시계탑의 폭탄과 크로커다일을 맡고, 주인공은 서쪽 저수고를 지킨다.
 //   원작 뒤(20~) 「물길의 주인」: 재건의 물 증서를 사들이는 새물 조합(무스타파). 안내 하리스 · 기록 마이사 · 판단 펠.
-//     임펠 다운을 나온 크로커다일이 사막을 스친다. 직접 대결은 ready(5) · 치명적, 이겨도 모래가 되어 물러날 뿐.
+//     원작 뒤의 크로커다일·미스터 1 재방문을 가정하지 않는다. 위조 증서와 물길의 소유권만 다룬다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
 import { age, at } from '../turnings/paths';
@@ -246,8 +246,8 @@ export const EP_ALABASTA: Turning[] = [
     doors: [
       { label: '창고 앞을 지키는 화약장이 탈리브에게 덤벼든다', hint: '도화선이 사방에 깔려 있다. 창고 안의 장부가 바로 뒤에 있다', values: { ambition: D }, danger: true,
         fx: [flag('ep_alabasta_w_found'), fight('b_talib', false, { win: 'ep_alabasta_w6', lose: 'ep_alabasta_w6', back: 'ep_alabasta_w6' })] },
-      { label: '발끝으로 도는 가짜 왕의 앞을 막아선다', hint: '왕의 주먹이 발레처럼 날아든다. 이 불은 가짜가 지른 것이다', values: { romance: D }, danger: true,
-        fx: [time('나노하나에 나타난 가짜 국왕과 맞섰다', 'bonclay'), fight('b_mr2', false, { win: 'ep_alabasta_w6', lose: 'ep_alabasta_w6', back: 'ep_alabasta_w6' })] },
+      { label: '가짜 왕을 쫓는 대신 불붙은 수레의 바퀴를 끊는다', hint: '사람을 태운 수레가 염전으로 번지는 불을 피한다', values: { romance: D }, danger: true,
+        fx: [flag('ep_alabasta_w_found'), time('가짜 국왕이 나노하나에 나타난 밤, 염전의 사람들을 대피시켰다', 'bonclay'), next('ep_alabasta_w6')] },
       { label: '불을 끄는 사람들 틈에서 밤새 물을 나른다', hint: '창고 하나를 살린다. 붉은 낙타단의 수레는 그사이 떠난다', values: { peace: D },
         fx: [{ op: 'base', key: 'vit', add: 1 }, time('나노하나가 가짜 국왕의 불에 탔다', 'bonclay'), next('ep_alabasta_w6')] },
     ],
@@ -403,24 +403,22 @@ export const EP_ALABASTA: Turning[] = [
     ],
   },
   {
-    id: 'ep_alabasta_a6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'crocodile' },
-    title: '6주차 · 모래 언덕의 시가 연기',
-    body: '무스타파가 레인 디너스 지하 금고의 옛 지도를 누군가에게 팔았다는 소문이 돈다. 그날 밤 모래폭풍 속에서 갈고리 손의 사내가 미스터 1을 데리고 폐허를 걸어 나온다. 임펠 다운을 나온 크로커다일이다. 그는 {name}을(를) 힐끗 보고 시가 연기를 뿜는다. 그 물장수 놈에게 전해라, 지도값은 목숨을 남겨 준 것으로 치겠다고.',
+    id: 'ep_alabasta_a6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '물 증서 등기관 마이사' },
+    title: '6주차 · 사라진 우물 장부',
+    body: '마이사가 등기관의 옛 장부를 펼친다. 새물 조합에 넘어갔다는 우물에는 팔았다는 사람의 도장이 없다. 반대로 조합이 사들였다는 수로에는 여러 사람의 서명이 같은 손글씨다. 무스타파는 장부를 없애려고 사람을 보냈다.',
     doors: [
-      { label: '모래의 사내 앞을 가로막는다', hint: '감옥을 나온 사막의 왕이다. 지면 모래 속에 묻히고, 이겨도 그는 모래가 되어 흩어질 뿐이다', when: [ready(5)], values: { dominion: D }, danger: true,
-        fx: [time('임펠 다운을 나온 크로커다일과 알라바스타의 사막에서 맞붙었다. 그는 모래가 되어 바람 속으로 물러났다', 'crocodile'),
-             { op: 'person', kind: 'rival', relation: '알라바스타의 사막에서 맞붙은 옛 칠무해', canon: 'crocodile' },
-             fight('b_crocodile', true, { win: 'ep_alabasta_a7', lose: 'ep_alabasta_a7', back: 'ep_alabasta_a7' })] },
-      { label: '곁의 칼날 사내에게 먼저 칼끝을 겨눈다', hint: '온몸이 칼인 상대다. 모래의 사내는 구경만 한다', when: [ready(3)], values: { ambition: D }, danger: true,
-        fx: [time('크로커다일 곁의 미스터 1과 사막에서 칼을 맞댔다', 'daz'), fight('b_mr1_ab', false, { win: 'ep_alabasta_a7', lose: 'ep_alabasta_a7', back: 'ep_alabasta_a7' })] },
-      { label: '시가 연기가 언덕 너머로 사라질 때까지 지켜본다', hint: '그는 이 나라를 돌아보지 않는다', values: { peace: D },
-        fx: [time('사막을 지나는 크로커다일을 멀리서 보았다', 'crocodile'), next('ep_alabasta_a7')] },
+      { label: '위조된 서명을 대조해 마이사의 장부에 적는다', hint: '조합의 주장을 뒤집을 증거가 된다', values: { inquiry: D },
+        fx: [flag('ep_alabasta_a_ledger'), next('ep_alabasta_a7')] },
+      { label: '장부를 노리는 사람들을 우물 밖으로 유인한다', hint: '마이사가 원본을 옮길 시간을 번다', when: [ready(3)], values: { ambition: D }, danger: true,
+        fx: [flag('ep_alabasta_maisa_trust'), { op: 'hp', add: -6 }, next('ep_alabasta_a7')] },
+      { label: '우물 이용자들에게 장부를 공개한다', hint: '주민들이 제 서명의 진위를 직접 확인한다', values: { peace: D },
+        fx: [flag('ep_alabasta_a_people'), next('ep_alabasta_a7')] },
     ],
   },
   {
     id: 'ep_alabasta_a7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '새물 조합의 조합장 무스타파' },
     title: '6주차 · 무스타파의 제안',
-    body: '금고 지도값을 떼인 무스타파가 땀을 닦으며 {name}을(를) 사무소로 부른다. 증서는 법이고 나는 값을 치르고 샀다, 가뭄 때 아무도 사지 않던 땅을 내가 샀다고 그는 말한다. 수문만 지켜 주면 물값의 몫을 나눠 주겠다고. 그 말에는 진짜도 섞여 있지만, 판 적 없는 도장 이야기는 한마디도 없다.',
+    body: '위조 장부를 들킨 무스타파가 땀을 닦으며 {name}을(를) 사무소로 부른다. 증서는 법이고 나는 값을 치르고 샀다, 가뭄 때 아무도 사지 않던 땅을 내가 샀다고 그는 말한다. 수문만 지켜 주면 물값의 몫을 나눠 주겠다고. 그 말에는 진짜도 섞여 있지만, 판 적 없는 도장 이야기는 한마디도 없다.',
     doors: [
       { label: '내민 증서 몫을 탁자 위에 그대로 두고 나온다', hint: '무스타파가 혀를 찬다. 수문의 경비가 늘어난다', values: { loyalty: D },
         fx: [flag('ep_alabasta_a_people'), next('ep_alabasta_a8')] },
@@ -450,8 +448,8 @@ export const EP_ALABASTA: Turning[] = [
     title: '8주차 · 닫히는 수문',
     body: '수문 위에서 무스타파가 장총을 들고 서 있다. 늙은 장사꾼이지만 사막의 총잡이로 이름을 날린 시절이 있었다고 한다. 갈대숲마다 조합이 산 칼잡이들이 숨어 있다. 지면 크게 다칠 수 있고, 물러날 길은 아직 열려 있다.',
     doors: [
-      { label: '물이 빠진 저수지를 가로질러 무스타파에게 달려든다', hint: '그의 장총 곁을 지킬 사람이 줄었다', when: [has('ep_alabasta_a_sabotage')], values: { dominion: D }, danger: true,
-        fx: [fight('b_mustafa_worn', false, { win: 'ep_alabasta_a10', lose: 'ep_alabasta_a11', back: 'ep_alabasta_a11' })] },
+      { label: '마이사의 원본 장부를 수문 앞 사람들에게 펼친다', hint: '위조 증서에 기대 선 경비들의 명분이 사라진다', when: [has('ep_alabasta_a_ledger')], values: { inquiry: D }, danger: true,
+        fx: [flag('ep_alabasta_a_win'), next('ep_alabasta_a10')] },
       { label: '수문 위의 무스타파에게 정면으로 올라간다', hint: '장총과 칼잡이들이 한꺼번에 노린다. 다치고 끝날 수도 있다', when: [not('ep_alabasta_a_sabotage')], values: { dominion: D }, danger: true,
         fx: [fight('b_mustafa', false, { win: 'ep_alabasta_a10', lose: 'ep_alabasta_a11', back: 'ep_alabasta_a11' })] },
       { label: '수문이 닫히는 것을 갈대숲 너머에서 지켜본다', hint: '오늘은 싸우지 않는다. 물은 조합의 것이 된다', values: { freedom: D },
@@ -461,7 +459,7 @@ export const EP_ALABASTA: Turning[] = [
   {
     id: 'ep_alabasta_a10', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 다시 흐르는 물',
-    body: '무스타파의 장총이 강물에 떨어지고, 그는 증서 가방만 끌어안고 갈대숲으로 달아난다. 부서진 수문 틈으로 막혀 있던 물이 새 물길을 따라 내려간다. 멀리 유바 쪽에서 아이들의 고함 소리가 들린다.',
+    body: '무스타파는 위조 증서가 드러나자 증서 가방만 끌어안고 갈대숲으로 달아난다. 수문 앞 경비들이 총을 내려놓고 주민과 함께 잠금쇠를 푼다. 막혀 있던 물이 새 물길을 따라 내려간다. 멀리 유바 쪽에서 아이들의 고함 소리가 들린다.',
     doors: [
       { label: '남은 수문 기둥을 뽑아 물을 마을 쪽으로 돌린다', hint: '물길은 다시 모두의 것이 된다. 하리스가 첫 물에 손을 담근다', when: [has('ep_alabasta_haris_trust'), has('ep_alabasta_a_found'), not('ep_alabasta_a_deal')], values: { loyalty: D },
         fx: [flag('ep_alabasta_a_win'), { op: 'fame', add: 25 }, time('되살아난 알라바스타에서 새물 조합의 수문을 부수고 물길을 마을에 돌려주었다'), next('ep_alabasta_a12')] },

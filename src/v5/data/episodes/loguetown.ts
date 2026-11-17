@@ -7,8 +7,8 @@
 //  - 원작 그 무렵 (17) 「벼락이 떨어진 날」: 흑우산 바넷의 검은 우산단. 처형대의 날 폭풍과 소란을 틈타 해군 압수품 창고를 털고, 스모커가 떠난 빈틈에 마지막 한탕을 노린다.
 //    원작의 그 순간(버기의 처형대 · 드래곤의 폭풍 · 스모커의 추격)은 그대로 흐르고 주인공은 광장 가장자리 · 하수도 · 처마 밑의 다른 전선에 선다.
 //    버기와는 처형대가 아니라 이튿날 항구에서만 붙을 수 있다(경지 조건 · 치명적 · 이겨도 버기는 바다로 달아난다).
-//  - 원작 뒤 (19~) 「새 처형대의 신참 조합」: 은반지 카스퍼의 신참 조합. 밀짚모자를 꿈꾸는 풋내기들에게 등록비와 가짜 항로를 팔고, 빚진 풋내기를 빚배에 묶는다.
-// 원작 인물(스모커 · 타시기)은 주인공이 실제로 한 일(표시)을 보고 판단할 뿐, 사건을 대신 풀지 않는다.
+//  - 원작 뒤 (19~) 「출항한 아이들의 빚」: 은반지 카스퍼의 신참 조합. 밀짚모자를 꿈꾸는 풋내기들에게 등록비와 가짜 항로를 팔고, 빚진 풋내기를 빚배에 묶는다.
+// 원작 인물 스모커는 원작 전·그 무렵에만 등장한다. 뒤의 지역 판단자는 페니다.
 import type { Cond, Standing, Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
 import { age, at, st, GROWN } from '../turnings/paths';
@@ -298,9 +298,8 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [flag('ep_loguetown_b_riko'), log('그날 광장에서 뭘 했는지 보면 안다고, 대령은 그 말만 남겼다. 아이들은 해 질 녘에야 풀려났다.', 'light'), next('ep_loguetown_b6')] },
       { label: '그날 광장에서 사람들을 내보낸 일을 묻는 대령에게 고개를 끄덕인다', hint: '대령이 상인회를 돌아보며 시가를 짓씹는다', when: [has('ep_loguetown_b_plaza')], values: { peace: D },
         fx: [flag('ep_loguetown_b_evac'), log('그 녀석이 광장 출구를 열었다, 대령은 상인회에 그 말만 했다. 상인과 짐꾼이 한 조로 밤길을 돌기로 했다.', 'light'), next('ep_loguetown_b6')] },
-      { label: '항구 끝에서 남의 배를 훔치는 광대 선장의 앞을 막는다', hint: '몸이 토막 나는 선장이다. 목숨이 걸리고, 이겨도 그는 바다로 달아난다', special: 'dominion', when: [ready(2)], values: { dominion: D }, danger: true,
-        fx: [time('처형대의 날 이튿날, 로그타운 항구에서 버기의 앞을 막아섰다', 'buggy'),
-             fight('b_buggy', true, { win: 'ep_loguetown_b6', lose: 'ep_loguetown_b6', back: 'ep_loguetown_b6' })] },
+      { label: '항구의 우산단 연락책을 붙잡아 배 이름을 묻는다', hint: '광장의 혼란을 이용한 도둑들의 배를 알아낸다', special: 'dominion', when: [ready(2)], values: { dominion: D }, danger: true,
+        fx: [flag('ep_loguetown_b_vault'), log('연락책의 젖은 장부에 압수품을 실을 배의 이름이 적혀 있었다.'), next('ep_loguetown_b6')] },
     ],
   },
   {
@@ -394,7 +393,7 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_b10', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '9주차 · 처형대가 사라진 광장',
-    body: '두 달이 흘렀다. 처형대가 있던 자리에서 목수들이 새 처형대를 세울 나무를 나른다. 신문에는 밀짚모자의 첫 현상금 이야기가 실린다. 그 폭풍의 날 이 거리에 무엇이 남았는지는 {name}이(가) 한 일에 달렸다.',
+    body: '두 달이 흘렀다. 처형대가 있던 자리에서는 목수들이 광장의 부서진 판자를 치운다. 신문에는 밀짚모자의 첫 현상금 이야기가 실린다. 그 폭풍의 날 이 거리에 무엇이 남았는지는 {name}이(가) 한 일에 달렸다.',
     doors: [
       { label: '누명을 벗은 부두 아이들이 야경 등불을 드는 것을 본다', hint: '리코가 등불을 흔들어 보인다', when: [has('ep_loguetown_b_won'), has('ep_loguetown_b_riko')], values: { loyalty: D },
         fx: [log('결말 · 부두의 등불. 부두 아이들은 그 뒤로 비 오는 밤마다 등불을 들고 선거를 돌았다. 리코가 그 맨 앞에 섰다.'),
@@ -424,11 +423,11 @@ export const EP_LOGUETOWN: Turning[] = [
     ],
   },
 
-  // ================================================================ 원작 뒤 (주인공 19~) · 새 처형대의 신참 조합
+  // ================================================================ 원작 뒤 (주인공 19~) · 출항한 아이들의 빚
   {
     id: 'ep_loguetown_c1', kind: 'door', when: at(LT, age(19, 45), st(...GROWN), not('ep_loguetown_post_done')), weight: 25, repeat: 'once', speaker: 'hero',
-    title: '1주차 · 새 처형대 앞의 호객꾼',
-    body: '광장에 새 처형대가 섰다. 그 앞에 신참 조합이라는 천막이 쳐지고, 밀짚모자를 눌러쓴 풋내기들이 줄을 서서 등록비를 낸다. 밀짚모자가 지나간 항로를 판다는 호객꾼 릴리가 은화를 세며 웃는다. 옛 사기단 창고 자리의 술집 「처형대 아래 한 잔」에서 주인 리코가 손짓하고, 항만 사무소 기록계가 된 페니가 장부를 들고 나온다. 조합에 빚진 배가 또 하나 묶였다고.',
+    title: '1주차 · 옛 광장의 호객꾼',
+    body: '처형대가 있던 광장에 신참 조합이라는 천막이 쳐지고, 밀짚모자를 눌러쓴 풋내기들이 줄을 서서 등록비를 낸다. 밀짚모자가 지나간 항로를 판다는 호객꾼 릴리가 은화를 세며 웃는다. 옛 사기단 창고 자리의 술집 「처형대 아래 한 잔」에서 주인 리코가 손짓하고, 항만 사무소 기록계가 된 페니가 장부를 들고 나온다. 조합에 빚진 배가 또 하나 묶였다고.',
     doors: [
       { label: '등록비를 뜯긴 풋내기 편에 서서 호객꾼을 막는다', hint: '릴리가 치맛자락 밑에서 권총을 뽑는다', values: { justice: D },
         fx: [fight('b_lt_lili', false, { win: 'ep_loguetown_c2', lose: 'ep_loguetown_c2', back: 'ep_loguetown_c2' })] },
@@ -459,23 +458,23 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '빚배의 뒤를 밟아 조합의 창고를 찾는다', hint: '돈과 장부와 쇠사슬 열쇠가 한곳에 있다', values: { freedom: D },
         fx: [flag('ep_loguetown_c_depot'), log('서쪽 선창 끝, 옛 해군 화약고에 조합의 금고와 빚 문서가 쌓여 있었다.', 'light'), next('ep_loguetown_c4')] },
       { label: '리코의 술집에 드나드는 빚배 선원에게 말을 건다', hint: '누가 묶여 있고 누가 감시하는지 듣는다', when: [has('ep_loguetown_c_riko')], values: { romance: D },
-        fx: [flag('ep_loguetown_c_roster'), log('빚배 선원은 술 한 잔에 울음을 터뜨렸다. 감시는 족쇄 덤프 하나, 조합장은 처형대가 보이는 방에서만 지낸다고.', 'light'), next('ep_loguetown_c4')] },
+        fx: [flag('ep_loguetown_c_roster'), log('빚배 선원은 술 한 잔에 울음을 터뜨렸다. 감시는 족쇄 덤프 하나, 조합장은 옛 광장이 보이는 방에서만 지낸다고.', 'light'), next('ep_loguetown_c4')] },
       { label: '선창의 감시꾼을 쓰러뜨리고 쇠사슬을 끊는다', hint: '풋내기 몇이 풀려나지만 조합이 나를 노린다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -8 }, flag('ep_loguetown_c_force'), next('ep_loguetown_c4')] },
     ],
   },
   {
-    id: 'ep_loguetown_c4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'tashigi' },
+    id: 'ep_loguetown_c4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '항만 사무소 기록계 페니' },
     title: '4주차 · 두 개의 깃발',
-    body: '상인회는 조합 덕에 풋내기가 몰려 장사가 된다며 조합을 감싸고, 늙은 어부들은 저건 해적 사냥이 아니라 풋내기 사냥이라고 맞선다. 배가 나온 지부장은 하품만 한다. 그때 위대한 항로에서 옛 지부의 기록을 거두러 왔다는 안경 쓴 해군 장교가 회관 문을 연다. 타시기는 회의 대신 {name}을(를) 본다. 이 거리에서 요 몇 주 무엇을 했는지 들었다고.',
+    body: '상인회는 조합 덕에 풋내기가 몰려 장사가 된다며 조합을 감싸고, 늙은 어부들은 저건 해적 사냥이 아니라 풋내기 사냥이라고 맞선다. 배가 나온 지부장은 하품만 한다. 항만 사무소의 기록계가 된 페니가 옛 지부의 장부를 안고 회관 문을 연다. 그녀는 회의 대신 {name}을(를) 본다. 이 거리에서 요 몇 주 무엇을 했는지 들었다고.',
     doors: [
-      { label: '맞춰 본 장부와 빚배 창고 자리를 내놓는다', hint: '그녀가 안경을 고쳐 쓰고 한 장씩 넘긴다', when: [has('ep_loguetown_c_depot')], values: { justice: D },
-        fx: [flag('ep_loguetown_c_tashigi'), { op: 'person', kind: 'ally', relation: '옛 지부에서 다시 만난 해군 장교', canon: 'tashigi' },
-             log('타시기는 장부를 덮고 말했다. 저는 이틀 뒤면 떠납니다. 그래도 증거가 지부 금고에 남게 하겠습니다. 마무리는 당신이 하셔야 해요.'), next('ep_loguetown_c5')] },
+      { label: '맞춰 본 장부와 빚배 창고 자리를 내놓는다', hint: '페니가 한 장씩 넘기며 옛 장부와 맞춘다', when: [has('ep_loguetown_c_depot')], values: { justice: D },
+        fx: [flag('ep_loguetown_c_tashigi'), { op: 'person', kind: 'ally', relation: '옛 지부의 장부를 맞춰 준 기록계 페니' },
+             log('페니는 증거를 지부 금고에 남기겠다고 했다. 마무리는 당신이 해야 한다고 덧붙였다.'), next('ep_loguetown_c5')] },
       { label: '상인회에 조합 없이도 풋내기를 맞을 길을 내놓자고 한다', hint: '진짜 해도와 정직한 로그 포스를 파는 가게 이야기다', values: { peace: D },
-        fx: [log('상인 몇이 고개를 끄덕였다. 타시기는 그 말을 수첩에 적었을 뿐 아무 편도 들지 않았다.', 'light'), next('ep_loguetown_c5')] },
-      { label: '천막을 걷어찬 일을 따지는 그녀 앞에서 팔짱을 낀다', hint: '칼자루에 손을 얹은 채 그녀가 한 걸음 다가온다', when: [has('ep_loguetown_c_force')], values: { dominion: D },
-        fx: [log('주먹으로 해결하실 생각이면 저는 못 본 척 못 합니다, 타시기는 그렇게만 말하고 수첩을 덮었다.'), next('ep_loguetown_c5')] },
+        fx: [log('상인 몇이 고개를 끄덕였다. 페니는 그 말을 수첩에 적었을 뿐 아무 편도 들지 않았다.', 'light'), next('ep_loguetown_c5')] },
+      { label: '천막을 걷어찬 일을 따지는 페니 앞에서 팔짱을 낀다', hint: '그가 장부를 덮고 한 걸음 다가온다', when: [has('ep_loguetown_c_force')], values: { dominion: D },
+        fx: [log('주먹으로 해결하면 빚 장부는 또 다른 데서 살아난다고 페니가 말했다.'), next('ep_loguetown_c5')] },
     ],
   },
   {
@@ -486,7 +485,7 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '덤프와 맞붙는다', hint: '쇠사슬이 바닥을 쓴다. 지면 다치고 물러난다', values: { dominion: D }, danger: true,
         fx: [fight('b_lt_dump', false, { win: 'ep_loguetown_c6', lose: 'ep_loguetown_c6', back: 'ep_loguetown_c6' })] },
       { label: '덤프가 비운 틈에 빚 문서의 사본을 떠 온다', hint: '조합장이 어디서 무엇을 숨기는지 보인다', when: [has('ep_loguetown_c_roster')], values: { inquiry: D },
-        fx: [flag('ep_loguetown_c_weak'), log('빚 문서 맨 아래에 조합장의 서명과, 처형대가 보이는 방의 금고 번호가 적혀 있었다.', 'light'), next('ep_loguetown_c6')] },
+        fx: [flag('ep_loguetown_c_weak'), log('빚 문서 맨 아래에 조합장의 서명과, 광장이 보이는 방의 금고 번호가 적혀 있었다.', 'light'), next('ep_loguetown_c6')] },
       { label: '벽의 깃발들을 걷어 술집으로 가져간다', hint: '돌려줄 주인을 찾을 수 있을지도 모른다', values: { romance: D },
         fx: [{ op: 'hp', add: -5 }, log('깃발 열넷이 리코의 술집 천장에 걸렸다. 그걸 알아본 풋내기 하나가 그날 밤 내내 울었다.', 'light'), next('ep_loguetown_c6')] },
     ],
@@ -538,11 +537,11 @@ export const EP_LOGUETOWN: Turning[] = [
   },
   {
     id: 'ep_loguetown_c8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '신참 조합 조합장' },
-    title: '8주차 · 처형대가 보이는 방',
-    body: '처형대가 내려다보이는 방에서 은반지 카스퍼가 천천히 장갑을 벗는다. 허리에는 가는 칼, 창틀에는 장전된 장총. 해적왕도 밀짚모자도 결국 저 처형대 앞에서 시작했다고, 시작하는 놈들에게 값을 매기는 게 뭐가 나쁘냐고 웃는다. 조합장은 질 것 같으면 빚배에 불을 지를 사내다.',
+    title: '8주차 · 옛 광장이 보이는 방',
+    body: '옛 광장이 내려다보이는 방에서 은반지 카스퍼가 천천히 장갑을 벗는다. 허리에는 가는 칼, 창틀에는 장전된 장총. 해적왕도 밀짚모자도 결국 저 광장에 이름을 남겼다고, 새로 바다에 나가는 사람에게 값을 매기는 게 뭐가 나쁘냐고 웃는다. 조합장은 질 것 같으면 빚배에 불을 지를 사내다.',
     doors: [
-      { label: '반쪽이 된 장부를 쥐고 허둥대는 조합장에게 파고든다', hint: '문서를 잃은 조합장의 손이 떨린다', when: [has('ep_loguetown_c_sab')], values: { dominion: D }, danger: true,
-        fx: [fight('b_lt_casper_worn', false, { win: 'ep_loguetown_c8w', lose: 'ep_loguetown_c9', back: 'ep_loguetown_c9' })] },
+      { label: '찢긴 빚 장부를 창밖 선원들에게 보여 준다', hint: '피해자들이 계약의 근거가 사라진 것을 확인한다', when: [has('ep_loguetown_c_sab')], values: { dominion: D }, danger: true,
+        fx: [flag('ep_loguetown_c_won'), next('ep_loguetown_c8w')] },
       { label: '은반지의 칼 앞에 선다', hint: '총과 칼이 번갈아 온다. 지면 다치고 조합은 숨는다', values: { justice: D }, danger: true,
         fx: [fight('b_lt_casper', false, { win: 'ep_loguetown_c8w', lose: 'ep_loguetown_c9', back: 'ep_loguetown_c9' })] },
       { label: '창가에서 물러나 방을 나온다', hint: '오늘은 살아남는 쪽을 고른다', values: { peace: D },
@@ -553,13 +552,13 @@ export const EP_LOGUETOWN: Turning[] = [
   },
   {
     id: 'ep_loguetown_c8w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '항만 사무소 기록계 페니' },
-    title: '8주차 · 떨어진 은반지',
-    body: '카스퍼의 은반지가 바닥을 굴러 처형대가 보이는 창틀에 부딪힌다. 조합장은 무릎을 꿇었고 덤프와 졸개들은 선창으로 달아났다. 페니가 숨을 몰아쉬며 들어온다. 지부 금고에 그 장교가 남긴 증거가 아직 있다고.',
+    title: '8주차 · 빚을 거부한 선원들',
+    body: '선창의 선원들이 빚 장부의 빈칸을 보고 카스퍼의 명령을 거부한다. 카스퍼는 칼을 거두고 뒷문으로 달아나려 한다. 페니가 숨을 몰아쉬며 들어온다. 지부 금고에 남겨 둔 증거와 선원들의 증언을 합치면 그를 붙잡을 수 있다.',
     doors: [
-      { label: '타시기가 남긴 증거와 함께 조합장을 지부에 넘긴다', hint: '하품하던 지부장도 이번엔 어쩔 수 없다', when: [has('ep_loguetown_c_tashigi')], values: { justice: D },
+      { label: '페니가 묶은 증거와 함께 조합장을 지부에 넘긴다', hint: '하품하던 지부장도 이번엔 어쩔 수 없다', when: [has('ep_loguetown_c_tashigi')], values: { justice: D },
         fx: [flag('ep_loguetown_c_won'), { op: 'fame', add: 5 },
-             log('결말 · 금고에 남은 증거. 타시기가 지부 금고에 남긴 서류 덕에 카스퍼는 빠져나가지 못했다. 그녀가 보낸 짧은 편지에는 고맙다는 말 대신 다음엔 같이 하죠, 라고 적혀 있었다.'),
-             time('새 처형대의 로그타운에서 풋내기를 등쳐 먹던 신참 조합을 무너뜨렸다', 'tashigi'), next('ep_loguetown_c10')] },
+             log('결말 · 금고에 남은 증거. 페니가 지부 금고에 맡긴 서류와 선원들의 증언 덕에 카스퍼는 빠져나가지 못했다.'),
+             time('로그타운에서 풋내기를 등쳐 먹던 신참 조합을 무너뜨렸다'), next('ep_loguetown_c10')] },
       { label: '조합장을 광장으로 끌고 나가 풋내기들 앞에 세운다', hint: '빚배의 선원들이 하나둘 모여든다', values: { loyalty: D },
         fx: [flag('ep_loguetown_c_won'), next('ep_loguetown_c9')] },
       { label: '조합의 금고를 먼저 연다', hint: '은화가 쏟아진다. 페니가 입술을 깨문다', values: { greed: D },
@@ -569,7 +568,7 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_c9', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '9주차 · 시작과 끝의 마을',
-    body: '석 달이 흘렀다. 저녁 바람에 새 처형대의 밧줄이 삐걱인다. 이 거리에서 해적왕이 죽었고, 고무 소년이 웃었고, 연기의 대령이 떠났다. 오늘 이 광장에 무엇이 남았는지는 {name}이(가) 한 일에 달렸다.',
+    body: '석 달이 흘렀다. 저녁 바람에 처형대가 있던 광장의 간판이 삐걱인다. 이 거리에서 해적왕이 죽었고, 고무 소년이 웃었고, 연기의 대령이 떠났다. 오늘 이 광장에 무엇이 남았는지는 {name}이(가) 한 일에 달렸다.',
     doors: [
       { label: '풀려난 빚배의 풋내기들이 다시 깃발을 올리는 것을 본다', hint: '리코의 술집 천장에서 내려온 깃발들이다', when: [has('ep_loguetown_c_won'), has('ep_loguetown_c_riko')], values: { romance: D },
         fx: [log('결말 · 돌아온 깃발. 빚배에 묶였던 풋내기들이 제 깃발을 돌려받아 다시 바다로 나갔다. 리코는 그 배들이 떠날 때마다 술 한 잔씩을 따라 두었다.'),
@@ -577,8 +576,8 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '항만 사무소 앞에 정직한 항로 게시판이 서는 것을 본다', hint: '페니의 글씨로 적힌 진짜 항로와 조심할 이름들이다', when: [has('ep_loguetown_c_won'), has('ep_loguetown_c_penny')], values: { inquiry: D },
         fx: [log('결말 · 처형대 장부의 두 번째 권. 페니의 게시판 앞에서 풋내기들은 등록비 대신 항로를 받아 적었다. 그 장부의 첫 장은 오래전 처형대 아래서 쓴 것이었다.'),
              time('로그타운 항만에 풋내기를 위한 정직한 항로 게시판을 세웠다')] },
-      { label: '처형대 아래 벤치에 앉아 해가 질 때까지 머문다', hint: '이 거리의 이야기는 이제 지켜보는 쪽이 된다', values: { peace: D },
-        fx: [log('결말 · 벤치의 구경꾼. 조합의 천막은 다른 이름으로 다시 쳐졌다. 처형대 그림자는 어릴 적 본 것과 같았다.'),
+      { label: '광장 옆 벤치에 앉아 해가 질 때까지 머문다', hint: '이 거리의 이야기는 이제 지켜보는 쪽이 된다', values: { peace: D },
+        fx: [log('결말 · 벤치의 구경꾼. 조합의 천막은 다른 이름으로 다시 쳐졌다. 광장의 저녁 그림자는 어릴 적 본 것과 같았다.'),
              time('시작과 끝의 마을 로그타운에서 한 철을 보냈다')] },
     ],
   },
