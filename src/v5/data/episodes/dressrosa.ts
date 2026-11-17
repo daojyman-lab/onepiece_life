@@ -122,9 +122,9 @@ const A: Turning[] = [
     doors: [
       { label: '등록부의 서명과 빚 문서를 병정 앞에 펼친다', hint: '증거를 본 병정이 작은 사람들에게 고개를 끄덕인다', values: { inquiry: D },
         when: [has('ep_dressrosa_a_ledger'), not('ep_dressrosa_a_rough')], fx: [flag('ep_dressrosa_a_tonta'), next('ep_dressrosa_a5')] },
-      { label: '파코와 함께 골목에서 한 일을 털어놓는다', hint: '꽃장수 소년의 말이 병정의 경계를 누그러뜨린다', values: { loyalty: D },
+      { label: '파코와 함께 골목에서 한 일을 털어놓는다', hint: '꽃장수 소년의 말에 병정이 경계를 누그러뜨린다', values: { loyalty: D },
         when: [has('ep_dressrosa_a_paco_trust')], fx: [flag('ep_dressrosa_a_tonta'), next('ep_dressrosa_a5')] },
-      { label: '병정의 경계를 받아들이고 혼자 움직인다', hint: '하수도의 문은 닫힌다. 길은 스스로 찾아야 한다', values: { freedom: D },
+      { label: '병정이 경계하는 걸 받아들이고 혼자 움직인다', hint: '하수도의 문은 닫힌다. 길은 스스로 찾아야 한다', values: { freedom: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, next('ep_dressrosa_a5')] },
     ],
   },

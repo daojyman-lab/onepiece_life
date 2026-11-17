@@ -9,7 +9,7 @@ export const V = {
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.25 }, { to: 200, n: 0.8 } ],
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.1 }, { to: 200, n: 0.8 } ],
   stopsQuiet: 0.4,
   // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
   prime: { minAge: 22, maxAge: 40, years: 5, tier: 3 },
