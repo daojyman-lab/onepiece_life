@@ -58,7 +58,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'pp_wander_master', kind: 'door', when: at(age(14, 45), st('child', ...ACTIVE)),
     weight: 3, repeat: 'once', speaker: { relation: '떠돌이 무인' },
-    title: '밥값 대신', body: '{island} 주막에서 밥값 대신 장작을 패던 떠돌이 무인이 {name}의 손바닥 굳은살을 본다. 밥만 사 주면 몇 해 가르쳐 주겠다고 한다.',
+    title: '밥값 대신', body: '{island}에서 끼니를 얻으려 장작을 패던 떠돌이 무인이 {name}의 손바닥 굳은살을 본다. 밥만 사 주면 몇 해 가르쳐 주겠다고 한다.',
     doors: [
       { label: '스승으로 모신다', hint: '돈은 들지 않지만 끝까지 가르칠 사람은 아니다', values: { inquiry: D }, 
         fx: [{ op: 'master', name: '떠돌이 무인', branch: 'fist', cap: V.growth.noMasterCap, years: 3, paid: false }] },
@@ -69,13 +69,13 @@ export const PEOPLE: Turning[] = [
   {
     id: 'pp_haki_master', kind: 'door', when: at(st(...SEAFARING), sea('gl_first', 'sabaody', 'nw_first', 'nw_late')),
     weight: 3, repeat: { years: 8 }, speaker: { relation: '은퇴한 부선장' },
-    title: '보이지 않는 힘', body: '{island}의 바에서 은발의 노인이 술잔을 굴린다. 이 너머의 바다에서 살아남으려면 보이지 않는 힘을 알아야 한다며, 수업료를 부른다.',
+    title: '보이지 않는 힘', body: '{island}에서 은발의 노인이 작은 동전을 손끝으로 굴린다. 이 너머의 바다에서 살아남으려면 보이지 않는 힘을 알아야 한다며, 수업료를 부른다.',
     doors: [
       { label: '수업료를 내고 몸에 두르는 기운을 배운다', hint: '보이지 않는 갑옷을 입는 법', when: [{ c: 'money', min: HAKI_FEE }], values: { ambition: D },
         fx: [{ op: 'money', add: -HAKI_FEE }, { op: 'master', name: '은퇴한 부선장', branch: 'armament', cap: PAID_CAP, years: 4, paid: true }] },
       { label: '수업료를 내고 기척을 읽는 법을 배운다', hint: '보이지 않는 것을 보는 법', when: [{ c: 'money', min: HAKI_FEE }], values: { peace: D },
         fx: [{ op: 'money', add: -HAKI_FEE }, { op: 'master', name: '은퇴한 부선장', branch: 'observation', cap: PAID_CAP, years: 4, paid: true }] },
-      { label: '술 한 잔만 사고 이야기를 듣는다', hint: '들은 것만으로도 눈이 조금 뜨인다', values: { romance: D }, fx: [{ op: 'mastery', branch: 'observation', add: 10 }] },
+      { label: '수업은 사양하고 이야기만 듣는다', hint: '들은 것만으로도 눈이 조금 뜨인다', values: { romance: D }, fx: [{ op: 'mastery', branch: 'observation', add: 10 }] },
     ],
   },
 
@@ -94,9 +94,9 @@ export const PEOPLE: Turning[] = [
   {
     id: 'pp_traitor', kind: 'door', when: at(st(...GROWN), { c: 'flag', id: 'betrayed', has: true }),
     weight: 8, repeat: 'once', speaker: { relation: '배신한 옛 동료' },
-    title: '배신자와의 재회', body: '몇 해 만에 {island}의 술집에서 그 얼굴을 다시 보았다. {name}을(를) 팔아넘겼던 그자가 들고 있던 잔을 떨어뜨린다.',
+    title: '배신자와의 재회', body: '몇 해 만에 {island}의 길목에서 그 얼굴을 다시 보았다. {name}을(를) 팔아넘겼던 그자가 들고 있던 짐을 떨어뜨린다.',
     doors: [
-      { label: '용서하고 잔을 채워 준다', hint: '오래 묵은 것을 내려놓는다', values: { peace: D },
+      { label: '용서하고 손을 내민다', hint: '오래 묵은 것을 내려놓는다', values: { peace: D },
         fx: [{ op: 'hardship', add: -5 }, { op: 'log', text: '말없이 잔을 채워 주었다. 옛 동료는 고개를 들지 못했다.', weight: 'heavy' }] },
       { label: '빼앗긴 것을 받아 낸다', hint: '그 자리에서 값을 치르게 한다', values: { dominion: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'fame', add: 5 }, { op: 'log', text: '빼앗긴 것을 이자까지 쳐서 받아 냈다.', weight: 'heavy' }] },

@@ -232,7 +232,7 @@ export const MARINE: Turning[] = [
     doors: [
       { label: '해적 끄나풀 하나를 광장에 매달아 본보기로 삼는다', hint: '항구가 조용해지고, 주민들은 {name}을(를) 해적보다 무서워한다', values: { dominion: D },
         fx: [{ op: 'fame', add: 15 }, { op: 'flag', id: 'feared' }, { op: 'person', kind: 'enemy', relation: '항구의 원한' }] },
-      { label: '제복을 벗고 술집에서 주민들과 잔을 나눈다', hint: '마음을 얻기까지 몇 해와 꽤 많은 돈이 든다', values: { romance: D },
+      { label: '제복을 벗고 주민들의 일을 거든다', hint: '마음을 얻기까지 몇 해와 꽤 많은 돈이 든다', values: { romance: D },
         fx: [{ op: 'money', add: -15000 }, { op: 'person', kind: 'ally', relation: '항구의 술집 주인' },
              { op: 'log', text: '몇 달 동안 술값을 냈다. 어느 날 술집 주인이 해적선의 입항 날짜를 쪽지로 건넸다.', weight: 'light' }] },
       { label: '밀수꾼과 손잡고 항구의 질서를 판다', hint: '항구는 조용하고 주머니는 불어난다', values: { greed: D }, 

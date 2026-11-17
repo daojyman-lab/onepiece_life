@@ -63,13 +63,13 @@ export const SEA_LEAVE: Turning[] = [
   },
   {
     id: 'sea_rumor', kind: 'door', when: at(age(17, 45), st(...SEAFARING), sea('east')),
-    weight: 4, repeat: 'once', speaker: { relation: '술집의 늙은 뱃사람' },
-    title: '해적왕이 남긴 말', body: '{island}의 술집에서 늙은 뱃사람이 잔을 내려놓는다. 해적왕이 처형대에서 남긴 그 말 이후로, 모든 보물은 위대한 항로의 끝에 있다고. 이 바다에서 늙어 가는 건 바보들뿐이라고.',
+    weight: 4, repeat: 'once', speaker: { relation: '늙은 뱃사람' },
+    title: '해적왕이 남긴 말', body: '{island}에서 늙은 뱃사람이 해도를 펼친다. 해적왕이 처형대에서 남긴 그 말 이후로, 모든 보물은 위대한 항로의 끝에 있다고. 이 바다에서 늙어 가는 건 바보들뿐이라고.',
     doors: [
       { label: '그 말을 따라 붉은 산으로 뱃머리를 돌린다', hint: '위대한 항로에 들어선다. 이 바다와는 비교가 안 되는 바다다', values: { romance: D },
         fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'log', text: '붉은 산의 물길을 거슬러 올랐다. 바다가 하늘로 솟았다가 떨어졌다.', weight: 'heavy' },
              { op: 'timeline', text: '해적왕의 말을 따라 위대한 항로에 들어섰다' }] },
-      { label: '뱃사람에게 술을 사며 위대한 항로의 해도를 캐묻는다', hint: '떠나기 전에 바다를 안다. 술값이 꽤 든다', values: { inquiry: D },
+      { label: '뱃사람에게 값을 치르고 해도를 캐묻는다', hint: '떠나기 전에 바다를 안다. 해도 값이 꽤 든다', values: { inquiry: D },
         fx: [{ op: 'money', add: -8000 }, { op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'glChart' }] },
       { label: '보물을 쫓는 바보들에게 배와 식량을 비싸게 판다', hint: '이 바다에 남아 돈을 번다', values: { greed: D },
         fx: [{ op: 'money', add: 30000 }] },

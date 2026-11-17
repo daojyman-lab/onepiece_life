@@ -171,11 +171,11 @@ export const PIRATE: Turning[] = [
   {
     id: 'pirate_sniper', kind: 'door', when: at(age(16), PIR), needs: ['ship'],
     weight: 4, repeat: 'once', speaker: { relation: '허풍쟁이 사냥꾼' },
-    title: '바다왕을 쏘았다는 사내', body: '{island} 선술집에서 술 취한 사내가 소리친다. 자기는 바다왕의 눈을 한 방에 쏘아 맞힌 사람이라고. 아무도 믿지 않지만, 벽에 꽂힌 병뚜껑 세 개는 모두 한가운데가 뚫려 있다.',
+    title: '바다왕을 쏘았다는 사내', body: '{island}의 길목에서 허풍쟁이 사내가 소리친다. 자기는 바다왕의 눈을 한 방에 쏘아 맞힌 사람이라고. 아무도 믿지 않지만, 곁의 나무판에 박힌 병뚜껑 세 개는 모두 한가운데가 뚫려 있다.',
     doors: [
       { label: '허풍까지 통째로 믿고 배에 태운다', hint: '총 솜씨와 함께 말썽도 따라온다', values: { romance: D },
         fx: [{ op: 'person', kind: 'crew', relation: '허풍쟁이 저격수' }, { op: 'money', add: -5000 }] },
-      { label: '술값을 내 주고 총 쏘는 법만 배운다', hint: '사내는 섬에 남는다', values: { inquiry: D },
+      { label: '수업료를 내고 총 쏘는 법만 배운다', hint: '사내는 섬에 남는다', values: { inquiry: D },
         fx: [{ op: 'money', add: -10000 }, { op: 'mastery', branch: 'gun', add: 12 }] },
       { label: '사람들 앞에서 허풍을 까발린다', hint: '웃음을 사고 원한도 산다', values: { dominion: D },
         fx: [{ op: 'fame', add: 2 }, { op: 'flag', id: 'sniperGrudge' }] },
@@ -326,7 +326,7 @@ export const PIRATE: Turning[] = [
   {
     id: 'pirate_hunters_ambush', kind: 'door', when: at(age(17), PIR, fame(10)),
     weight: 4, repeat: { years: 5 }, speaker: { relation: '사냥꾼 패거리의 두목' },
-    title: '여관의 포위', body: '{island}의 여관에서 눈을 뜨니 창밖이 조용하다. 너무 조용하다. 칼과 총을 든 현상금 사냥꾼 열댓이 여관을 둘러싸고 {name}의 이름을 부른다.',
+    title: '잠자리의 포위', body: '{island}에서 눈을 뜨니 머물던 곳의 바깥이 조용하다. 너무 조용하다. 칼과 총을 든 현상금 사냥꾼 열댓이 주위를 에워싸고 {name}의 이름을 부른다.',
     doors: [
       { label: '정문으로 뚫고 나간다', hint: '다치지 않고 나갈 수는 없다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.65,
@@ -342,19 +342,19 @@ export const PIRATE: Turning[] = [
   {
     id: 'pirate_tavern_caught', kind: 'door', when: at(age(17), PIR, fame(20)),
     weight: 3, repeat: { years: 6 }, speaker: { relation: '해군 하사' },
-    title: '들통난 얼굴', body: '{island}의 선술집에서 해군 하사가 수배서와 {name}의 얼굴을 번갈아 본다. 손님들 사이로 해군들이 문을 막아선다. 술집 안에는 아이들도 있다.',
+    title: '들통난 얼굴', body: '{island}의 사람들이 오가는 길목에서 해군 하사가 수배서와 {name}의 얼굴을 번갈아 본다. 해군들이 골목 양쪽을 막아선다. 가까이에 아이들도 있다.',
     doors: [
-      { label: '손을 들고 순순히 잡혀 간다', hint: '술집에서 피 흘릴 사람은 없다', values: { loyalty: D },
-        fx: [{ op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '두 손을 들고 걸어 나갔다. 술집 주인이 고개를 숙였다.', weight: 'heavy' },
-             { op: 'timeline', text: '선술집에서 붙잡혀 감옥에 갇혔다' }] },
-      { label: '탁자를 뒤엎고 빠져나간다', hint: '술집은 엉망이 되고, 붙잡힐 수도 있다', values: { dominion: D }, danger: true,
+      { label: '손을 들고 순순히 잡혀 간다', hint: '길목에서 피 흘릴 사람은 없다', values: { loyalty: D },
+        fx: [{ op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '두 손을 들고 걸어 나갔다. 지켜보던 사람들이 길을 비켰다.', weight: 'heavy' },
+             { op: 'timeline', text: '길목에서 붙잡혀 감옥에 갇혔다' }] },
+      { label: '짐을 던져 시선을 돌리고 빠져나간다', hint: '길목이 아수라장이 되고, 붙잡힐 수도 있다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6,
-               then: [{ op: 'hp', add: -15 }, { op: 'fame', add: 8 }],
-               else: [{ op: 'injury', severity: 'light' }, { op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '문턱에서 발이 걸렸다. 쇠고랑이 채워졌다.', weight: 'heavy' }] }] },
-      { label: '술집 주인에게 뒷문을 열어 달라고 눈짓한다', hint: '주인이 해군에게 미움을 산다', values: { loyalty: D },
+               then: [{ op: 'hp', add: -15 }, { op: 'fame', add: 8 }, { op: 'log', text: '흩어진 짐 사이로 해군의 포위망을 뚫었다. 팔을 다쳤지만 아이들이 선 쪽을 피해 골목으로 빠져나왔다.', weight: 'heavy' }],
+               else: [{ op: 'injury', severity: 'light' }, { op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '달아나는 길에 발이 걸렸다. 쇠고랑이 채워졌다.', weight: 'heavy' }] }] },
+      { label: '곁의 주민에게 샛길을 알려 달라고 눈짓한다', hint: '그 주민이 해군에게 미움을 산다', values: { loyalty: D },
         fx: [{ op: 'chance', p: 0.6,
-               then: [{ op: 'person', kind: 'ally', relation: '뒷문을 열어 준 술집 주인' }, { op: 'log', text: '주인이 말없이 부엌 뒷문을 열어 주었다.', weight: 'heavy' }],
-               else: [{ op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '주인은 눈을 피했다. 쇠고랑이 채워졌다.', weight: 'heavy' }] }] },
+               then: [{ op: 'person', kind: 'ally', relation: '샛길을 알려 준 주민' }, { op: 'log', text: '주민이 말없이 샛길을 가리켰다.', weight: 'heavy' }],
+               else: [{ op: 'standing', to: 'prisoner' }, { op: 'unflag', id: 'ship' }, { op: 'unflag', id: 'captain' }, { op: 'log', text: '주민은 눈을 피했다. 쇠고랑이 채워졌다.', weight: 'heavy' }] }] },
     ],
   },
   {

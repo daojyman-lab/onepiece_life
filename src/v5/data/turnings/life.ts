@@ -309,11 +309,11 @@ const BONDS: Turning[] = [
   {
     id: 'life_friend_betrayal', kind: 'door', when: at(age(20, 65), active),
     weight: 4, repeat: 'once', speaker: 'hero',
-    title: '판 쪽에 선 벗', body: '오랜 벗이 {name}의 큰 거래를 남에게 몰래 넘겼다. 거래는 깨졌고, 벗은 그 대가로 받은 돈으로 새 배를 샀다. 벗이 {island}의 술집에 있다는 말이 들린다.',
+    title: '판 쪽에 선 벗', body: '오랜 벗이 {name}의 큰 거래를 남에게 몰래 넘겼다. 거래는 깨졌고, 벗은 그 대가로 받은 돈으로 새 배를 샀다. 벗이 {island}에 있다는 말이 들린다.',
     doors: [
       { label: '벗이 챙긴 몫을 이자까지 쳐서 빼앗아 온다', hint: '돈은 돌아온다. 서로 원수가 된다', values: { greed: D },
         fx: [{ op: 'money', add: 15000 }, { op: 'person', kind: 'rival', relation: '원수가 된 옛 벗' }] },
-      { label: '술집에 가서 까닭을 묻고 용서한다', hint: '손해는 그대로다. 벗은 술잔을 들지 못한다', values: { loyalty: D },
+      { label: '벗을 찾아가 까닭을 묻고 용서한다', hint: '손해는 그대로다. 벗은 눈을 들지 못한다', values: { loyalty: D },
         fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '용서받은 옛 벗' }] }] },
       { label: '아무 말 없이 연을 끊는다', hint: '얽히지 않는다. 다시는 그 이름을 입에 올리지 않는다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 2 }] },
@@ -350,11 +350,11 @@ const BONDS: Turning[] = [
     // v4 bd_rival_reunion: 어릴 적 맞수(표시 'kidRival')와 다시 만난다. pp_promise와 같은 꼴
     id: 'life_rival_reunion', kind: 'door', when: at(age(20, 50), active, has('kidRival')),
     weight: 5, repeat: 'once', speaker: { relation: '어릴 적 맞수' },
-    title: '다시 만난 맞수', body: '{island}의 술집 문이 열리고, 어릴 적 맨날 붙어 싸우던 맞수가 들어온다. 한눈에 서로를 알아본다. 맞수가 웃으며 소매를 걷어붙인다.',
+    title: '다시 만난 맞수', body: '{island}의 길목에서 어릴 적 맨날 붙어 싸우던 맞수와 마주친다. 한눈에 서로를 알아본다. 맞수가 웃으며 소매를 걷어붙인다.',
     doors: [
-      { label: '소매를 걷어붙이고 다시 붙는다', hint: '술집이 박살 난다. 누가 이기든 둘 다 멍투성이다', values: { dominion: D }, mark: 'unyielding',
+      { label: '소매를 걷어붙이고 다시 붙는다', hint: '근처의 물건까지 망가진다. 누가 이기든 둘 다 멍투성이다', values: { dominion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -12 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'money', add: -5000 }] },
-      { label: '술잔을 채워 밀어 준다', hint: '밤새 옛이야기를 한다', values: { peace: D },
+      { label: '먼저 손을 내민다', hint: '밤새 옛이야기를 한다', values: { peace: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '밤새 웃고 떠들었다. 해가 뜨자 맞수는 손을 흔들고 떠났다.', weight: 'light' }] },
       { label: '같이 가자고 손을 내민다', hint: '어제의 맞수가 등을 맡길 사람이 된다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'person', kind: 'crew', relation: '함께하게 된 어릴 적 맞수' }, { op: 'timeline', text: '어릴 적 맞수와 같은 길을 걷게 되었다' }] },

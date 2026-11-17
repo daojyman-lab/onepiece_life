@@ -95,7 +95,7 @@ export const PATHS: Turning[] = [
   {
     id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'standingYears', min: 2 }),
     weight: 8, repeat: 'once', speaker: { relation: '세계 정부의 사자' },
-    title: '칠무해 제의', body: '세계 정부의 사자가 {island}의 여관으로 {name}을(를) 찾아왔다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
+    title: '칠무해 제의', body: '세계 정부의 사자가 {island}에 머무는 {name}을(를) 찾아왔다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
     doors: [
       { label: '제의를 받아들인다', hint: '쫓기지 않는 대신 목줄이 채워진다', values: { ambition: D },
         fx: [{ op: 'standing', to: 'warlord' }, { op: 'fame', add: 100 }, { op: 'timeline', text: '왕의 칠무해가 되었다' }] },
@@ -236,7 +236,7 @@ export const PATHS: Turning[] = [
   {
     id: 'path_rev_turn', kind: 'door', when: at(age(19, 55), st('marine', 'pirate', 'civil', 'bountyHunter', 'cp', 'shipwright', 'settled')),
     weight: 3, repeat: 'once', speaker: { relation: '혁명군 밀사' },
-    title: '전향의 밤', body: '{island}의 허름한 여관방. 혁명군 밀사가 {name} 앞에 지도 한 장을 펼친다. 바다 건너 왕국 하나가 백성을 굶겨 죽이고 있다고.',
+    title: '전향의 밤', body: '{island}의 남들 눈에 띄지 않는 자리. 혁명군 밀사가 {name} 앞에 지도 한 장을 펼친다. 바다 건너 왕국 하나가 백성을 굶겨 죽이고 있다고.',
     doors: [
       { label: '밀사의 손을 잡는다', hint: '지금까지의 처지를 모두 버린다', values: { justice: D },
         fx: [{ op: 'standing', to: 'revolution' }, { op: 'timeline', text: '혁명군으로 돌아섰다' }] },

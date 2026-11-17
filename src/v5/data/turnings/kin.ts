@@ -92,7 +92,7 @@ const LOST: Turning[] = [
   },
   {
     id: 'par_reunion', kind: 'door', when: at(age(20, 55), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright'), has('parentsLost'), not('parentFound'), not('parentRefused')), weight: 4, repeat: 'once', speaker: 'hero',
-    title: '낯선 항구의 노인', body: '{island}의 선술집에서 이름을 대자, 구석에 앉아 있던 늙은 뱃사람이 잔을 떨어뜨린다. 한참을 {name}의 얼굴만 본다. 그리고 떨리는 목소리로 묻는다. 혹시, {town}에서 왔느냐고.',
+    title: '낯선 곳의 노인', body: '{island}에서 이름을 대자, 길가에 앉아 있던 늙은 뱃사람이 손에 든 보따리를 떨어뜨린다. 한참을 {name}의 얼굴만 본다. 그리고 떨리는 목소리로 묻는다. 혹시, {town}에서 왔느냐고.',
     doors: [
       { label: '다가가 그 손을 붙잡는다', hint: '오래 비어 있던 자리가 채워진다', values: { loyalty: D },
         fx: [{ op: 'parentFound' }, { op: 'base', key: 'wil', add: 1 }, heavy('거칠고 주름진 손이었다. 그런데도 어딘가 익숙했다. 둘은 밤새 말없이 앉아 있었다.'), line('바다에서 잃었던 부모를 다시 만났다')] },

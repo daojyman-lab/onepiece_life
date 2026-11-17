@@ -22,6 +22,7 @@ const elder: Cond = { c: 'age', min: 60 };
 const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 const atSea = st('pirate', 'marine', 'revolution');
 const town = (name: string): Cond[] => [{ c: 'town', is: [name] }, kid];
+const island = (...is: string[]): Cond => ({ c: 'island', is });
 const fruit: Cond = { c: 'fruit', has: true };
 /** 지금 걷는 길 (무기를 쥐는 줄은 그 길을 걷는 사람에게만) */
 const path = (...is: (Branch | 'none')[]): Cond => ({ c: 'path', is });
@@ -69,7 +70,7 @@ export const LINES: DailyLine5[] = [
   // ---------------- 낭만
   L(kid, { romance: 1 }, '항구에 들어온 배의 깃발을 하나하나 그려 두었다.'),
   L(kid, { romance: 1 }, '노인에게 바다 건너 하늘섬 이야기를 졸라 들었다.'),
-  L(adult, { romance: 1 }, '술집에서 처음 본 뱃사람들과 밤새 노래를 불렀다.'),
+  L(adult, { romance: 1 }, '처음 만난 길손과 밤늦도록 노래를 주고받았다.'),
   L(adult, { romance: 1 }, '수평선 너머로 지는 해를 끝까지 바라보았다.'),
   L(old, { romance: 1 }, '젊은 날의 이야기를 몇 번이고 되풀이했다.'),
   L(old, { romance: 1 }, '낡은 해도를 펴 놓고 가 보지 못한 섬을 손끝으로 짚었다.'),
@@ -214,7 +215,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('pirate'), { c: 'flag', id: 'captain', has: false }], { ambition: 1 }, '선장이 키를 잡는 손놀림을 어깨너머로 눈에 익혔다.'),
   L([grown, st('pirate'), { c: 'flag', id: 'captain', has: false }], { freedom: 1 }, '선장의 호통을 한 귀로 흘리고 돛대 꼭대기에서 낮잠을 잤다.'),
   L([grown, st('pirate'), { c: 'flag', id: 'captain', has: false }], { justice: 1 }, '고참이 떠넘긴 갑판 청소를 군말 없이 끝냈다.'),
-  L([grown, st('pirate'), { c: 'flag', id: 'captain', has: false }], { loyalty: 1 }, '선장을 비웃는 술꾼과 언성을 높이다 술집에서 쫓겨났다.'),
+  L([grown, st('pirate'), { c: 'flag', id: 'captain', has: false }], { loyalty: 1 }, '선장을 비웃는 사람과 언성을 높이다 스스로 그 자리를 떠났다.'),
   L([grown, st('pirate')], { freedom: 1 }, '깃발을 올리고 바람 부는 대로 뱃머리를 돌렸다.'),
   L([grown, st('pirate'), fierce], { dominion: 1 }, '항구에서 시비를 건 사내에게 먼저 주먹을 날렸다.'),
   L([grown, st('pirate'), calm], { peace: 1 }, '귀찮은 싸움은 웃어넘기고 해안 길로 비켜 갔다.'),
@@ -233,7 +234,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('marine')], { loyalty: 1 }, '함께 입대한 동기의 당번을 말없이 대신 섰다.'),
   L([grown, st('marine')], { freedom: 1 }, '쓸데없는 명령은 못 들은 척하고 맡은 구역만 돌았다.'),
   L([grown, st('marine')], { dominion: 1 }, '대련장에서 덤벼 오는 병사들을 차례로 바닥에 눕혔다.'),
-  L([grown, st('marine')], { peace: 1 }, '술집 소란을 말없이 떼어 놓고 각자 집으로 돌려보냈다.'),
+  L([grown, st('marine')], { peace: 1 }, '길목의 말다툼을 말없이 떼어 놓고 각자 갈 길로 돌려보냈다.'),
   L([grown, st('marine')], {}, '제복 단추를 닦고 군화 끈을 새로 맸다.'),
   L([grown, st('marine')], {}, '기지 마당에서 아침 점호를 받고 구보를 했다.'),
   L([grown, st('marine')], {}, '밀린 보고서를 밤새 썼다.'),
@@ -278,7 +279,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('civil')], { justice: 1 }, '저울을 속이는 상인 앞에서 눈금을 다시 달아 보였다.'),
   L([grown, st('civil')], { ambition: 1 }, '남보다 한 시간 일찍 문을 열고 한 시간 늦게 닫았다.'),
   L([grown, st('civil')], { inquiry: 1 }, '항구에 들어온 신문을 사서 먼 나라 소식을 꼼꼼히 읽었다.'),
-  L([grown, st('civil')], { romance: 1 }, '일을 마치고 선술집 구석에서 낡은 기타를 퉁겼다.'),
+  L([grown, st('civil')], { romance: 1 }, '일을 마치고 문간에 앉아 낡은 기타를 퉁겼다.'),
   L([grown, st('civil')], { loyalty: 1 }, '오래 거래한 집의 물건만은 값이 올라도 계속 받아 썼다.'),
   L([grown, st('civil')], { freedom: 1 }, '하루 일을 쉬고 발길 닿는 대로 섬 반대편까지 걸었다.'),
   L([grown, st('civil'), fierce], { dominion: 1 }, '좋은 좌판 자리를 두고 다투던 장사꾼을 밀어붙여 쫓아냈다.'),
@@ -302,7 +303,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('retired')], { ambition: 1 }, '몸이 허락하는 한 매일 언덕길을 올랐다.'),
   L([grown, st('retired')], { inquiry: 1 }, '서랍 속 항해 책을 펴 가 보지 못한 섬을 찾아보았다.'),
   L([grown, st('retired')], { romance: 1 }, '포구에서 들려오는 뱃노래에 맞춰 잊었던 가락을 흥얼거렸다.'),
-  L([grown, st('retired')], { loyalty: 1 }, '옛 벗의 생일이면 해마다 같은 술집에 들렀다.'),
+  L([grown, st('retired')], { loyalty: 1 }, '옛 벗의 생일이면 해마다 같은 자리에 모였다.'),
   L([grown, st('retired')], { freedom: 1 }, '정해진 끼니 시간도 없이 내키는 대로 먹고 잤다.'),
   L([grown, st('retired'), fierce], { dominion: 1 }, '광장에서 시비를 건 젊은이를 큰소리로 몰아붙였다.'),
   L([grown, st('retired'), calm], { peace: 1 }, '모임에서 다툼이 번지자 조용히 일어나 집으로 돌아왔다.'),
@@ -332,7 +333,12 @@ export const LINES: DailyLine5[] = [
   // ======================================================== 어른 누구나
   L(grown, {}, '{island}의 이름난 요리를 배불리 먹었다.'),
   L(grown, {}, '밧줄에 손바닥이 쓸려 며칠 따끔거렸다.'),
-  L(grown, {}, '{island}의 선술집에서 뱃사람들의 허풍을 들었다.'),
+  L([grown, island('쿠라우 도시', '고래숲', '조우')], {}, '조우에서 먼 바다를 다녀온 밍크족 여행자의 모험담을 들었다.'),
+  L([grown, island('엔젤섬', '스카이피아')], {}, '하늘섬의 구름길에서 아래 바다를 다녀온 방문객의 이야기를 들었다.'),
+  L([grown, island('샨디아 마을')], {}, '샨디아 전사들이 들려주는 오래된 땅의 이야기에 귀를 기울였다.'),
+  L([grown, island('어인가', '류구 왕국', '바다의 숲', '어인섬')], {}, '어인섬에서 지상에 다녀온 이가 들려주는 이야기를 들었다.'),
+  L([grown, island('하나노미야코', '쿠리', '에비스 마을', '와노쿠니')], {}, '와노쿠니에서 떠돌이 낭인이 들려주는 먼 고을 이야기에 귀를 기울였다.'),
+  L([grown, { c: 'island', is: ['쿠라우 도시', '고래숲', '조우', '엔젤섬', '스카이피아', '샨디아 마을', '어인가', '류구 왕국', '바다의 숲', '어인섬', '하나노미야코', '쿠리', '에비스 마을', '와노쿠니'], not: true }], {}, '{island}에서 길손이 들려준 먼 곳의 이야기를 들었다.'),
   L(grown, {}, '차가운 바닷바람에 외투 깃을 세웠다.'),
   L(grown, {}, '{town}의 어머니에게서 몸 성히 지내라는 편지가 왔다.', ['parent']),
   L(grown, { loyalty: 1 }, '동료와 밤새 서로의 꿈 이야기를 나눴다.', ['crew']),

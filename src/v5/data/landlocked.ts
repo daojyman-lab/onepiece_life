@@ -3,10 +3,13 @@
 import { HOMETOWNS } from '../../data/births';
 import type { Cond, Minor } from '../core/types';
 
-/** 바다에 닿지 않는 고향의 마을: 조우(코끼리 등), 하늘섬(구름 위), 어인섬(바닷속) */
-export const INLAND_TOWNS = HOMETOWNS.filter((t) => ['zou', 'sky', 'fishman'].includes(t.home)).map((t) => t.name);
-/** 세계정부와 바다의 사건이 닿지 않는 외딴 고향의 마을: 위의 셋과 쇄국한 와노쿠니 */
-export const ISOLATED_TOWNS = HOMETOWNS.filter((t) => ['zou', 'sky', 'fishman', 'wano'].includes(t.home)).map((t) => t.name);
+/** 바다에 닿지 않는 고향 마을과 항해로 다시 도착했을 때의 섬 이름 */
+export const INLAND_TOWNS = [
+  ...HOMETOWNS.filter((t) => ['zou', 'sky', 'fishman', 'wano'].includes(t.home)).map((t) => t.name),
+  '조우', '스카이피아', '어인섬',
+];
+/** 세계정부와 바다의 사건이 닿지 않는 장소: 위의 셋과 쇄국한 와노쿠니 */
+export const ISOLATED_TOWNS = [...INLAND_TOWNS, '와노쿠니'];
 /** 항구 · 배 · 헤엄 같은 바닷가의 글 */
 export const COASTAL_WORDS = /부두|항구|어부|고깃배|바닷가|해변|갯벌|선창|선착장|등대|배를|배에|배가|배 한|돛|해적선|군함|헤엄|파도|모래사장|짐꾼|뱃사람|선원|바다에 뛰어|앞바다|어촌|포구|조선소|그물|방파제|방조제|해안|바닷물|썰물|밀물/;
 /** 해군 · 현상금 · 세계정부의 글 */

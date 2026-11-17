@@ -1,4 +1,4 @@
-// 유년기 전환점 (3~15살, 이스트 블루의 여덟 마을 어디서나). 문의 말에는 가치관 이름도 점수도 쓰지 않는다. 상황과 일어날 일만 적는다.
+// 유년기 전환점 (3~15살, 공통 사건과 섬별 대체 사건). 문의 말에는 가치관 이름도 점수도 쓰지 않는다. 상황과 일어날 일만 적는다.
 // 자리표시: {name} 이름만, {town} 자란 마을, {island} 섬. 성씨는 쓰지 않는다 (고아는 성이 없다).
 // 마을마다의 전환점은 towns.ts · towns-2.ts에 있다. 여기의 kidIn · leaveTo를 함께 쓴다.
 // 집을 아주 떠난 아이(left_home_young)에게는 고향의 유년기가 더 오지 않고, 떠난 아이의 전환점(kid_away_*)이 온다.
@@ -10,7 +10,7 @@ const D = V.value.door;
 export const LEFT_HOME = 'left_home_young';
 const stayed: Cond = { c: 'flag', id: LEFT_HOME, has: false };
 /** 아직 아이(처지 child)인 사람(어느 고향이든), 이 나이 사이, 고향을 떠나지 않았다. 열다섯 살이라도 죄수나 해적이면 열리지 않는다.
- *  바다 · 항구를 전제하는 글은 index.ts의 landlocked가 바다에 닿지 않는 고향(조우 · 하늘섬 · 어인섬)에서 막는다 */
+ *  바다 · 항구를 전제하는 글은 index.ts의 landlocked가 내륙 고향에서 막는다 */
 export const kid = (min: number, max: number): Cond[] => [{ c: 'age', min, max }, { c: 'standing', is: ['child'] }, stayed];
 /** 그 마을에서 태어나 지금도 그 마을에 사는 아이 */
 export const kidIn = (town: string, min: number, max: number, ...more: Cond[]): Cond[] =>
@@ -39,11 +39,25 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_sailor_tale', kind: 'door', when: kid(3, 9), weight: 10, repeat: 'once', speaker: { relation: '늙은 뱃사람' },
-    title: '늙은 뱃사람의 이야기', body: '{island} 부두의 술집 앞, 다리를 저는 늙은 뱃사람이 위대한 항로 이야기를 들려준다.',
+    title: '늙은 뱃사람의 이야기', body: '{island}의 길목에서 다리를 저는 늙은 뱃사람이 위대한 항로 이야기를 들려준다.',
     doors: [
       { label: '밤늦도록 이야기를 듣는다', hint: '바다 저편이 마음에 오래 남는다', values: { romance: D }, fx: [] },
       { label: '지도를 그려 달라고 조른다', hint: '머릿속에 바닷길이 그려진다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
       { label: '뱃사람의 보물 이야기를 부잣집 아이에게 팔아넘긴다', hint: '몇 닢을 번다. 뱃사람이 다시는 이야기를 들려주지 않는다', values: { greed: D }, fx: [{ op: 'money', add: 2000 }] },
+    ],
+  },
+  {
+    id: 'kid_wano_wanderer_tale', kind: 'door',
+    when: [...kid(3, 9), { c: 'island', is: ['하나노미야코', '쿠리', '에비스 마을'] }],
+    weight: 10, repeat: 'once', speaker: { relation: '떠돌이 낭인' },
+    title: '떠돌이 낭인의 이야기', body: '{island}의 마을 어귀에서 쉬던 떠돌이 낭인이 먼 고을을 걸어온 이야기를 들려준다. 낡은 칼집에는 지나온 길의 흙이 묻어 있다.',
+    doors: [
+      { label: '밤늦도록 이야기를 듣는다', hint: '가 보지 못한 고을이 마음에 오래 남는다', values: { romance: D },
+        fx: [{ op: 'log', text: '주변이 어두워진 뒤에도 낭인은 지나온 고을 이야기를 마저 들려주었다. {name}은(는) 돌아가는 길에 그 지명을 몇 번이고 되뇌었다.', weight: 'light' }] },
+      { label: '지나온 길을 그려 달라고 조른다', hint: '고을과 고을 사이의 길이 머릿속에 그려진다', values: { inquiry: D },
+        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '낭인은 손가락으로 고개와 강을 짚으며 종이에 길을 그렸다. 틀린 지명을 몇 번 고쳐 적다 보니 종이가 손때로 까매졌다.', weight: 'light' }] },
+      { label: '낭인의 보따리에서 동전을 슬쩍 꺼낸다', hint: '몇 닢을 얻는다. 낭인은 다시 이야기를 들려주지 않는다', values: { greed: D },
+        fx: [{ op: 'money', add: 2000 }, { op: 'log', text: '낭인이 보따리의 빈 자리를 눈치챘다. 이튿날 {name}이(가) 다가가자 이야기를 멈추고 자리를 떴다.', weight: 'light' }] },
     ],
   },
   {

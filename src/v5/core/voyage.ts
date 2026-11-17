@@ -48,7 +48,7 @@ export function buildVoyage(id: string): Turning | undefined {
     const d = dreamId !== '-' ? DREAMS[dreamId as DreamId] : null;
     doors.push(d
       ? { label: josa(`${dream}(으)로 뱃머리를 돌린다`), hint: josa(`${d.name}에 한 걸음 가까워질 것 같은 소문이 있다`), fx: [sail(dream, 'dream')] }
-      : { label: josa(`소문을 따라 ${dream}(으)로 간다`), hint: '술집에서 들은 이야기가 자꾸 마음에 걸린다', fx: [sail(dream, 'dream')] });
+      : { label: josa(`소문을 따라 ${dream}(으)로 간다`), hint: '떠도는 소문이 자꾸 마음에 걸린다', fx: [sail(dream, 'dream')] });
   }
   if (wild) doors.push({ label: josa(`험한 바다를 건너 ${wild}(으)로 간다`), hint: '위험하지만 이름을 떨칠 기회가 있다', danger: true, fx: [sail(wild, 'wild')] });
   return {

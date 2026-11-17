@@ -228,7 +228,7 @@ export const SEA_NEW_WORLD: Turning[] = [
   {
     id: 'nw_last_island', kind: 'door', when: at(age(19), st(...SEAFARING), sea('nw_late')),
     weight: 3, repeat: 'once', speaker: { relation: '늙은 고고학자' },
-    title: '마지막 섬의 소문', body: '{island}의 낡은 술집에서 늙은 고고학자가 붉은 돌의 탁본을 펼친다. 네 개의 돌을 모으면 마지막 섬으로 가는 길이 보인다고. 이미 몇몇 해적단이 그 돌을 쫓고 있다.',
+    title: '마지막 섬의 소문', body: '{island}에서 늙은 고고학자가 붉은 돌의 탁본을 펼친다. 네 개의 돌을 모으면 마지막 섬으로 가는 길이 보인다고. 이미 몇몇 해적단이 그 돌을 쫓고 있다.',
     doors: [
       { label: '탁본의 수수께끼를 함께 푼다', hint: '몇 해를 매달릴지 모른다. 세계가 감춘 것에 다가간다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'readForbidden' }, { op: 'chance', p: 0.3, then: [{ op: 'flag', id: 'govEnemy' }] }] },

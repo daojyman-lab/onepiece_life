@@ -87,9 +87,9 @@ export const HUNTER: Turning[] = [
   {
     id: 'hunter_partner', kind: 'door', when: at(age(17), HUNTER_ONLY),
     weight: 5, repeat: 'once', speaker: { relation: '외눈의 사냥꾼' },
-    title: '반씩 나누자', body: '{island} 사냥꾼 술집에서 외눈의 사냥꾼이 맞은편에 앉는다. 혼자서는 큰 사냥감을 못 잡는다며, 앞으로 모든 현상금을 반씩 나누자고 한다.',
+    title: '반씩 나누자', body: '{island}에서 수배서를 살피던 외눈의 사냥꾼이 맞은편에 앉는다. 혼자서는 큰 사냥감을 못 잡는다며, 앞으로 모든 현상금을 반씩 나누자고 한다.',
     doors: [
-      { label: '잔을 부딪치고 동업자가 된다', hint: '등을 맡길 사람과 나눠 가질 사람이 함께 생긴다', values: { loyalty: D },
+      { label: '준비비를 나누고 동업자가 된다', hint: '등을 맡길 사람과 나눠 가질 사람이 함께 생긴다', values: { loyalty: D },
         fx: [{ op: 'person', kind: 'crew', relation: '외눈의 동업자' }, { op: 'money', add: -5000 }] },
       { label: '혼자 사냥하겠다며 자리를 뜬다', hint: '현상금도 위험도 혼자 짊어진다', values: { freedom: D }, fx: [], closes: true },
       { label: '동업하는 척하고 미끼로 쓴다', hint: '큰 사냥감을 잡고 사람 하나를 잃는다', values: { dominion: D },
@@ -148,7 +148,7 @@ export const HUNTER: Turning[] = [
   {
     id: 'hunter_big_game', kind: 'door', when: at(age(18), HUNTER_ONLY, fame(5)),
     weight: 5, repeat: { years: 5 }, speaker: 'hero',
-    title: '거물의 수배서', body: '이 바다에서 가장 큰 현상금이다. 상선 서른 척을 가라앉힌 해적 선장이 {island} 근해에 닻을 내렸다. 사냥꾼들은 술잔만 만지작거릴 뿐 아무도 일어서지 않는다.',
+    title: '거물의 수배서', body: '이 바다에서 가장 큰 현상금이다. 상선 서른 척을 가라앉힌 해적 선장이 {island} 근해에 닻을 내렸다. 사냥꾼들은 수배서만 만지작거릴 뿐 아무도 일어서지 않는다.',
     doors: [
       { label: '혼자 그 배에 오른다', hint: '살아 돌아오면 이름이 바다에 퍼진다', values: { ambition: D }, danger: true,
         fx: [{ op: 'chance', p: 0.4,
@@ -156,9 +156,9 @@ export const HUNTER: Turning[] = [
                       { op: 'log', text: '선장을 갑판에 눕혔다. 사냥꾼 술집이 그날 밤 {name}의 이름으로 들끓었다.', weight: 'heavy' }, { op: 'timeline', text: '거물 해적을 홀로 잡았다' }],
                else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -40 }, { op: 'chance', p: 0.3, then: [{ op: 'loseLimb', limb: 'random' }] },
                       { op: 'log', text: '갑판에 오르자마자 포위되었다. 살아 나온 것만으로 다행이었다.', weight: 'heavy' }] }] },
-      { label: '술집의 사냥꾼들을 모아 함께 친다', hint: '몫은 열로 나뉜다', values: { loyalty: D }, danger: true,
+      { label: '다른 사냥꾼들을 모아 함께 친다', hint: '몫은 열로 나뉜다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'money', add: 25000 }, { op: 'fame', add: 10 }, { op: 'person', kind: 'ally', relation: '함께 싸운 사냥꾼' }] },
-      { label: '목숨이 아까워 수배서를 내려놓는다', hint: '술잔만 만지작거리는 쪽에 낀다', fx: [{ op: 'fame', add: -3 }] },
+      { label: '목숨이 아까워 수배서를 내려놓는다', hint: '사냥에 나서지 않는 쪽에 낀다', fx: [{ op: 'fame', add: -3 }] },
     ],
   },
   {
