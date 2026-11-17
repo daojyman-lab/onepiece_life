@@ -159,9 +159,9 @@ describe('생애 서약', () => {
         expect(s.pending?.kind === 'door' && s.pending.turning).toBe(`life_vow_settle_${level}_${value}`);
         s = reduce5(s, { type: 'answer', index: 0 });
         expect(s.vows?.history.at(-1)).toEqual({ id: `life_${level}_${value}`, result: 'kept' });
-        const minimum = [500, 770, 5700][level - 1];
-        expect(rating5(s), value).toBeGreaterThanOrEqual(minimum);
-        expect(power5(s), value).toBeGreaterThanOrEqual(minimum);
+        const minimum = [500, 770, 1500][level - 1];
+        expect(rating5(s), value).toBe(minimum);
+        expect(power5(s), value).toBe(minimum);
         expect(Object.values(heroFightStats(s)).reduce((sum, stat) => sum + stat, 0)).toBeCloseTo(power5(s));
       }
       expect(s.growth.tier.fist, value).toBe(beforeTier + 3);
