@@ -213,7 +213,7 @@ const PARENT: Turning[] = [
 const GONE: Fx[] = [{ op: 'losePerson', relation: MENTOR }, flag('menGone')];
 const MENTORS: Turning[] = [
   {
-    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor')], weight: 12, repeat: 'once', speaker: 'hero',
+    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 12, repeat: 'once', speaker: 'hero',
     title: '밥 한 그릇', body: '처마 밑에서 비를 긋는 {name} 앞에 늙은 떠돌이 하나가 멈춰 선다. 말없이 제 밥그릇을 반 덜어 내민다. 한쪽 다리를 절고, 허리에는 닳은 목검을 찼다.',
     doors: [
       { label: '밥을 비우고, 허리의 목검을 가리키며 저것을 가르쳐 달라고 한다', hint: '노인은 한참 웃는다. 그날부터 비를 긋는 처마가 하나 생긴다', values: { ambition: D },

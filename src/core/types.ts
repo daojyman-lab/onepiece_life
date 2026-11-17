@@ -84,6 +84,7 @@ export interface Person {
   epithet?: string;           // 이명 (동료). 없으면 성격에서 정한다
   power?: number;             // 라이벌 같은 비동료의 대략적 힘
   alive: boolean;
+  missing?: boolean;          // v6.7 행방불명 (alive는 false). 훗날 바다에서 다시 만날 수 있다
 }
 
 export interface MissionProgress {

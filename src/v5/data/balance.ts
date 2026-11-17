@@ -98,7 +98,12 @@ export const V = {
             siblings: { poor: [2, 3, 3, 2], common: [3, 4, 2, 1], comfortable: [4, 4, 2, 0.5], noble: [5, 3, 1, 0.5] },
             parentAtBirth: 17,                 // 부모는 맏이가 태어날 때도 이 나이 이상이다
             // 가족의 노환: oldFrom살부터 한 해에 oldP.start, 한 살마다 oldP.perYear씩 늘어 oldP.cap까지
-            oldFrom: 70, oldP: { start: 0.04, perYear: 0.01, cap: 0.5 } },
+            oldFrom: 70, oldP: { start: 0.04, perYear: 0.01, cap: 0.5 },
+            // v6.7 고아의 사정 (씨앗으로 정한다, 백분율 구간): grand 조부모 손에 자람 · lost 부모가 행방불명 · lonely 아무 인연 없이 자람(단명)
+            orphan: { grand: 35, lost: 30, lonely: 6 },
+            grandOlder: [52, 68],
+            // 아무 인연 없이 자란 사람: lonelyFrom살부터 한 해에 lonelyP의 확률로 쓸쓸한 끝을 맞는다
+            lonelyFrom: 20, lonelyP: 0.12 },
   hp: { max: 100 },
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
   person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝

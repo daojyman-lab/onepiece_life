@@ -27,6 +27,10 @@ function calmMult(s: Life5): number {
 export function yearRisks(s: Life5, r: Rng): void {
   if (!s.hero.alive || s.pending) return;
   if (chance(r, oldAgeP(s.age) * talentMult(s, 'oldAge') * calmMult(s))) { die(s, '노환'); return; }
+  if (s.flags.includes('lonely') && s.age >= V.family.lonelyFrom && chance(r, V.family.lonelyP)) {   // 아무 인연 없이 자란 사람의 쓸쓸한 끝 (v6.7)
+    logLine(s, '기댈 사람도, 돌아갈 곳도 없었다. 아무도 이름을 불러 주지 않는 밤이 길었다.', 'heavy', 'danger');
+    die(s, '아무도 모르는 곳에서 쓸쓸히'); return;
+  }
   if (!s.hero.illness && chance(r, illnessP(s))) {
     applyFx(s, [{ op: 'illness', id: 'cough' }]);
     logLine(s, '기침이 멎지 않는다.', 'heavy', 'danger');

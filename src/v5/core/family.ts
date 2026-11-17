@@ -19,7 +19,7 @@ function siblingWord(heroGender: 'm' | 'f', gender: 'm' | 'f', older: boolean): 
  */
 export function rollFamily(s: Life5, r: Rng): void {
   const h = s.hero;
-  if (h.lineage === 'orphan') return;
+  if (h.lineage === 'orphan') { orphanFate(s); return; }
   const F = V.family;
   const used = new Set([h.name]);
   const add = (relation: string, gender: 'm' | 'f', age: number) => {
@@ -66,4 +66,55 @@ export function familyYear(s: Life5): void {
     p.alive = false;
     logLine(s, `${p.relation}이(가) 세상을 떠났다.`, 'heavy', 'life');
   }
+}
+
+/**
+ * 고아의 사정 (통합 기획 6.2). 같은 씨앗이면 같은 사정이 되도록 주사위 대신 씨앗을 쓴다.
+ *  - 조부모 손에 자람: 할머니나 할아버지가 보호자다 (가족이 아니라 곁의 사람으로 둔다). 스승 대신 조부모의 이야기가 온다
+ *  - 부모가 행방불명: 부모는 바다로 나가 돌아오지 않았다. 훗날 바다에서 다시 만날 수 있다
+ *  - 아무 인연 없이 자람: 드물다. 기댈 사람 하나 없이 자라 일찍 끝난다 (다음 인생을 부른다)
+ */
+function orphanFate(s: Life5): void {
+  const O = V.family.orphan, h = s.hero;
+  const roll = (Math.imul(s.rng.seed ^ 0x2c1b3c6d, 2246822519) >>> 0) % 100;
+  if (roll < O.grand) {
+    const female = roll % 2 === 0;
+    const [lo, hi] = V.family.grandOlder;
+    s.people.push({
+      id: `p${s.seq++}`, name: pickName(s, female ? 'f' : 'm'), gender: female ? 'f' : 'm', age: s.age + lo + (roll % (hi - lo + 1)),
+      kind: 'ally', relation: female ? '할머니' : '할아버지', canon: null, bond: V.person.bond + 20, faction: 'civil', species: h.species, alive: true,
+    });
+    s.flags.push('grandGuard');
+    if (roll % 3 === 0) s.flags.push('parentsLost');           // 조부모가 감춘 부모의 행방
+  } else if (roll < O.grand + O.lost) s.flags.push('parentsLost');
+  else if (roll >= 100 - O.lonely) s.flags.push('lonely');
+}
+
+function pickName(s: Life5, gender: 'm' | 'f'): string {
+  const all = homeFirstNames(s.hero.home, gender);
+  return all[(s.rng.seed >>> 3) % all.length];
+}
+
+/** 살아 있는 부모 하나(아버지가 먼저)가 행방불명이 된다 */
+export function parentMissing(s: Life5): void {
+  const p = s.people.find((x) => x.alive && x.relation === '아버지') ?? s.people.find((x) => x.alive && x.relation === '어머니');
+  if (!p) return;
+  p.alive = false; p.missing = true;
+  if (!s.flags.includes('parentsLost')) s.flags.push('parentsLost');
+  s.hardship += V.hardship.loss;
+}
+
+/** 행방불명된 부모를 다시 만난다. 기록에 없던 부모(고아)라면 처음 만나는 부모로 들인다 */
+export function parentFound(s: Life5): void {
+  const r = rngOf(s.rng);
+  const p = s.people.find((x) => x.missing);
+  if (p) { p.alive = true; p.missing = false; p.bond = Math.max(p.bond, V.person.bond); }
+  else {
+    const gender = pick(r, ['m', 'f'] as const);
+    s.people.push({
+      id: `p${s.seq++}`, name: pick(r, homeFirstNames(s.hero.home, gender)), gender, age: s.age + int(r, 22, 34),
+      kind: 'family', relation: gender === 'm' ? '아버지' : '어머니', canon: null, bond: V.person.bond, faction: 'civil', species: s.hero.species, alive: true,
+    });
+  }
+  if (!s.flags.includes('parentFound')) s.flags.push('parentFound');
 }
