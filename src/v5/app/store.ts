@@ -5,6 +5,7 @@ import { knownDoors, recordLife, type Meta5 } from '../core/meta';
 import { reduce5 } from '../core/reduce';
 import { newLife5 } from '../core/state';
 import type { Command5, Life5 } from '../core/types';
+import type { CombatStyle } from '../data/combat-styles';
 import { caughtUp, lastLogId, nextHidden, nextTick, shouldSave, windowDelay, windowReady } from './flow';
 import { save, type Settings } from './save';
 
@@ -144,6 +145,14 @@ export const actions = {
   },
   toast,
   setReading(reading: boolean) { if (state.reading !== reading) set({ reading }); },
+  /** 현재 수련할 세부 무술을 바꾼다. 다음 숙련 획득부터 새 유파에 누적된다. */
+  setStyleFocus(style: CombatStyle | null) {
+    if (!state.life) return;
+    const life = structuredClone(state.life);
+    life.growth.styleFocus = style;
+    persistLife(life);
+    set({ life });
+  },
   /** 기다리는 기록을 한꺼번에 보여 준다 (창은 마지막 줄을 읽을 틈을 둔 뒤에 뜬다) */
   showAll() { set({ shownId: lastLogId(state.life), revealedAt: performance.now() }); },
 };
