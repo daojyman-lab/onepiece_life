@@ -61,6 +61,13 @@ describe('패기 획득 전 숙련 제한', () => {
     growPart(s, 'study', rngOf(s.rng));
     expect(s.growth.mastery.observation).toBe(0);
   });
+  it('획득한 패기는 별도 유료 스승 없이도 최고 단계까지 단련할 수 있다', () => {
+    const s = newLife5(1703);
+    applyFx(s, [{ op: 'flag', id: 'haki:armament' }]);
+    for (let i = 0; i < V.growth.maxTier; i++)
+      applyFx(s, [{ op: 'mastery', branch: 'armament', add: V.growth.tierUp }]);
+    expect(s.growth.tier.armament).toBe(V.growth.maxTier);
+  });
   it('획득 플래그가 생긴 뒤에만 패기 숙련이 오른다', () => {
     const s = newLife5(1702);
     s.growth.pref = { fist: 0, sword: 0, gun: 0, observation: 0, armament: 0, conqueror: 0, fruit: 0 };
