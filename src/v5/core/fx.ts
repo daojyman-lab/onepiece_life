@@ -28,6 +28,10 @@ import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+const HAKI_BRANCHES: readonly Branch[] = ['observation', 'armament', 'conqueror'];
+export const isHakiBranch = (b: Branch): boolean => HAKI_BRANCHES.includes(b);
+export const hakiFlag = (b: Branch): string => `haki:${b}`;
+export const hakiUnlocked = (s: Life5, b: Branch): boolean => !isHakiBranch(b) || s.flags.includes(hakiFlag(b));
 
 /** 문장의 자리표시 {name} {town} {island}를 지금 주인공의 것으로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string): string {
