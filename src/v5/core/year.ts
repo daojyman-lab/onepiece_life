@@ -18,7 +18,6 @@ import { canUse } from './body';
 import { addMastery, fillText, hakiUnlocked, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
-import { addStyleMastery } from './styles';
 import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
@@ -194,7 +193,6 @@ function train(s: Life5, r: Rng, age: number): void {
     logLine(s, `수련 중에 무언가를 붙잡았다. ${BRANCH_NAMES[BRANCH_ID[b]]}의 벽 하나가 무너졌다.`, 'heavy', 'growth');
   }
   addMastery(s, b, add);
-  addStyleMastery(s, b, add);
   s.growth.pref[b] += G.pref.train;            // 갈고닦을수록 그 길이 더 좋아진다
   statUp(s, r, G.branchStats[b], G.statP.train * age);
 }
