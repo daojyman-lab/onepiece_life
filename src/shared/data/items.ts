@@ -6,6 +6,7 @@ export const ITEMS: Item[] = [
   { id: 'sw1', name: '무명 검', kind: 'weapon', grade: 1, branch: 'martial.sword', mult: 1.05, price: 3000, text: '대장간에서 흔히 파는 검.' },
   { id: 'sw2', name: '양업물 검', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.15, price: 25000, text: '이름 있는 대장장이의 검.' },
   { id: 'sw3', name: '대업물 검', kind: 'weapon', grade: 3, branch: 'martial.sword', mult: 1.25, price: 150000, text: '세상에 21자루뿐인 명검 중 하나.' },
+  { id: 'sp2', name: '이름난 강철창', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.15, price: 28000, text: '도검과 같은 무기술 갈래로 다루는 장창.' },
   { id: 'sw4', name: '최상대업물 검', kind: 'weapon', grade: 4, branch: 'martial.sword', mult: 1.4, price: 900000, text: '바다에 12자루뿐인 최상의 검.' },
   { id: 'sw_ss', name: '해루석 십수', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.05, seastone: true, price: 18000, text: '끝에 해루석을 박은 쇠몽둥이. 검술 기술이 자연계에 닿는다.' },
   { id: 'sw5', name: '흑도', kind: 'weapon', grade: 5, branch: 'martial.sword', mult: 1.5, price: 0, text: '패기에 길든 검은 칼날. 사고팔 수 없다.' },

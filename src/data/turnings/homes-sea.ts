@@ -200,8 +200,8 @@ export const HOMES_LEAVE: Turning[] = [
     title: '바깥 임무', body: '공작의 명으로 바깥 바다에 나가 동맹의 소식을 알아 올 전사를 뽑는다. 장수는 {name}의 창 솜씨를 보았다고 한다.',
     doors: [
       { label: '임무를 받고 바깥 바다로 나간다', hint: '동맹의 나라를 찾아 떠난다', values: { loyalty: D },
-        fx: [{ op: 'move', island: '와노쿠니', sea: 'nw_late' }, { op: 'fame', add: 5 }, { op: 'log', text: '폭포를 거슬러 오르는 잉어를 타고 쇄국의 나라에 숨어들었다.', weight: 'heavy' },
-             { op: 'timeline', text: '전사의 임무로 바깥 바다에 나갔다' }] },
+        fx: [{ op: 'fame', add: 5 }, { op: 'log', text: '전갈을 기름 먹인 종이에 싸서 품고 배에 올랐다.', weight: 'light' },
+             { op: 'timeline', text: '전사의 임무를 맡아 와노쿠니로 향했다' }, { op: 'move', island: '와노쿠니', sea: 'nw_late' }] },
       { label: '다른 전사에게 양보하고 숲을 지킨다', hint: '고향을 비울 수 없다', values: { justice: D }, fx: [{ op: 'log', text: "장수는 다른 전사에게 공작의 전갈을 맡겼다. {name}은(는) 숲길의 경계를 이어받아 해 질 때까지 순찰했다.", weight: 'light' }] },
     ],
   },
@@ -234,8 +234,8 @@ export const HOMES_RETURN: Turning[] = [
     id: 'wano_return', kind: 'door', when: away('wano', age(22), ROAMING, sea('nw_first', 'nw_late')), weight: 2, repeat: { years: 10 }, speaker: 'hero',
     title: '폭포를 오르는 잉어', body: '{island}의 뱃사람들이, 쇄국의 나라를 두른 폭포를 큰 잉어가 거슬러 오르는 철이라고 한다. 고향의 벚꽃이 필 무렵이다.',
     doors: [
-      { label: '잉어에 매달려 폭포를 오른다', hint: '나라에 몰래 돌아간다. 떨어지면 크게 다친다', values: { loyalty: D }, danger: true,
-        fx: [{ op: 'hp', add: -15 }, { op: 'moveHome' }, { op: 'log', text: '폭포 꼭대기에서 고향의 산이 보였다.', weight: 'heavy' }, { op: 'timeline', text: '폭포를 올라 고향 {town}(으)로 돌아왔다' }] },
+      { label: '폭포 뒤의 비밀 물길을 따라간다', hint: '어릴 때 본 물길을 찾아 고향으로 돌아간다', values: { loyalty: D },
+        fx: [{ op: 'moveHome' }, { op: 'log', text: '물소리가 잦아들자 고향의 산이 보였다.', weight: 'heavy' }, { op: 'timeline', text: '비밀 물길을 따라 고향 {town}(으)로 돌아왔다' }] },
       { label: '고향 쪽 하늘에 술잔을 올린다', hint: '돌아가지 않는다', values: { romance: D }, fx: [{ op: 'log', text: "고향의 벚꽃이 필 하늘을 향해 술을 조금 부었다. 잔을 거둔 뒤 폭포로 향하는 배 대신 제 항로를 택했다.", weight: 'light' }] },
     ],
   },
@@ -252,8 +252,8 @@ export const HOMES_RETURN: Turning[] = [
     id: 'sky_return', kind: 'door', when: away('sky', age(20), ROAMING, sea('gl_entry', 'gl_first')), weight: 2, repeat: { years: 10 }, speaker: 'hero',
     title: '거꾸로 솟는 물기둥', body: '{island} 앞바다에서 바닷물이 하늘로 솟구치는 날이 다가온다고 한다. 그 물기둥을 타면 구름 위까지 오른다.',
     doors: [
-      { label: '물기둥에 배를 맡긴다', hint: '하늘섬으로 돌아간다. 배가 견딜지 모른다', values: { romance: D }, danger: true,
-        fx: [{ op: 'hp', add: -20 }, { op: 'moveHome' }, { op: 'log', text: '물기둥 꼭대기에서 흰 구름 바다가 펼쳐졌다. 고향이었다.', weight: 'heavy' }, { op: 'timeline', text: '물기둥을 타고 하늘섬으로 돌아왔다' }] },
+      { label: '고향의 숨은 구름길을 찾는다', hint: '어릴 때 배운 항로를 따라 하늘섬으로 돌아간다', values: { romance: D },
+        fx: [{ op: 'moveHome' }, { op: 'log', text: '옅은 구름 띠를 지나자 흰 구름 바다가 펼쳐졌다. 고향이었다.', weight: 'heavy' }, { op: 'timeline', text: '숨은 구름길을 따라 하늘섬으로 돌아왔다' }] },
       { label: '청해에 남는다', hint: '이제 이 바다가 사는 곳이다', values: { freedom: D }, fx: [{ op: 'log', text: "물기둥이 솟는 시각을 듣고도 배의 돛을 다른 쪽으로 돌렸다. 하늘로 오르는 항로는 수평선 뒤에 남았다.", weight: 'light' }] },
     ],
   },
@@ -261,8 +261,8 @@ export const HOMES_RETURN: Turning[] = [
     id: 'zou_return', kind: 'door', when: away('zou', age(20), ROAMING, sea('nw_first', 'nw_late')), weight: 2, repeat: { years: 8 }, speaker: 'hero',
     title: '걷는 섬의 발자국', body: '{island}의 뱃사람들이, 바다 위를 걷는 거대한 코끼리를 먼바다에서 봤다고 한다. 지금 가면 따라잡을 수 있다.',
     doors: [
-      { label: '배를 빌려 코끼리를 쫓아간다', hint: '밧줄 길을 타고 고향의 숲으로 돌아간다', values: { inquiry: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'moveHome' }, { op: 'log', text: '코끼리의 다리를 타고 올라가니 숲의 냄새가 그대로였다.', weight: 'heavy' }, { op: 'timeline', text: '걷는 섬을 쫓아 고향 {town}(으)로 돌아왔다' }] },
+      { label: '밍크족 뱃사공과 즈니샤를 따라간다', hint: '고향 사람이 내려 준 밧줄을 타고 오른다', values: { inquiry: D },
+        fx: [{ op: 'moveHome' }, { op: 'log', text: '코끼리의 다리를 타고 올라가니 숲의 냄새가 그대로였다.', weight: 'heavy' }, { op: 'timeline', text: '걷는 섬을 쫓아 고향 {town}(으)로 돌아왔다' }] },
       { label: '코끼리가 가는 쪽으로 고개만 숙인다', hint: '돌아가지 않는다', values: { loyalty: D }, fx: [{ op: 'log', text: "먼바다의 코끼리가 걷는 쪽을 향해 고개를 숙였다. 배는 그 뒤를 쫓지 않고 정해 둔 항로를 이어 갔다.", weight: 'light' }] },
     ],
   },

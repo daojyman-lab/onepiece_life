@@ -4,6 +4,7 @@
 import { V } from '../balance';
 import { CANON } from '../canon';
 import { RECRUITS, TEMPS, type RecruitRow, type TempRow } from '../recruits';
+import { ZOU_CARD } from '../voyage';
 import { SQUAD } from './marine';
 import { age, at, sea, st } from './paths';
 import type { SeaId } from '../../core/types';
@@ -56,9 +57,18 @@ function recruit(row: RecruitRow, i: number): Turning {
     { label: '목에 걸린 값이 있는지 수배서부터 뒤져 본다', hint: '쓸 만한 값이면 초소에 귀띔한다. 주머니가 조금 찬다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }, { op: 'log', text: `${name}의 이름이 적힌 수배서를 찾아 초소에 정보를 팔았다. 손에 쥔 돈은 묵직했지만 서로의 인연은 거기서 끝났다.`, weight: 'light' }] },
   ];
   const p = i % 4 === 3 && faction !== 'pirate' ? 1 : i % 4;
+  const friendly = meet[(i + 1) % 4];
+  if (id === 'lindbergh' || id === 'pekoms' || id === 'pedro') {
+    for (const door of [join, friendly]) {
+      if (door.fx?.some((e) => e.op === 'person' && (e.kind === 'ally' || e.kind === 'crew'))) {
+        door.fx.push({ op: 'flag', id: ZOU_CARD },
+          { op: 'log', text: '밍크 전사가 고향으로 갈 때 쓰라며 비브르 카드 조각을 건넸다.', weight: 'light' });
+      }
+    }
+  }
   return {
     id: `rec_${id}`, kind: 'door', when: at(age(16), WHO[who], place(island), ...(GATE[id] ?? [])), weight: 3, repeat: 'once', speaker: { canon: id },
-    title: `「${epithet}」 ${name}`, body, doors: [join, meet[(i + 1) % 4], pass[p]],
+    title: `「${epithet}」 ${name}`, body, doors: [join, friendly, pass[p]],
   };
 }
 

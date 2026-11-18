@@ -3,6 +3,7 @@
 // 약한 사람에게는 숨기 · 달아나기 · 흥정하기 · 빌붙기의 문이 늘 하나 이상 열려 있다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
+import { COATING_CONTACT } from '../voyage';
 import { SEAFARING, age, at, sea, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
@@ -113,9 +114,10 @@ export const SEA_GRAND_LINE: Turning[] = [
     title: '코팅의 값', body: '배를 비눗방울로 감싸야 깊은 바닷속 길을 지나 신세계에 갈 수 있다. 코팅 장인이 부른 값은 가진 돈의 몇 배다. 사흘이 걸리고, 그동안 이 섬에서는 해군 대장의 그림자가 어른거린다.',
     doors: [
       { label: '장인 밑에서 일해 코팅 값을 갚는다', hint: '한 해를 이 섬에서 보낸다. 손은 고되지만 빚은 없다', values: { loyalty: D },
-        fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'str', add: 1 }, { op: 'log', text: "장인의 일터에서 거품 막을 덧입히고 새는 부분을 막았다. 손은 상했지만 코팅 값을 치른 뒤 빚 장부가 비었다.", weight: 'light' }] },
-      { label: '코팅을 마친 큰 해적단의 배에 빌붙어 함께 내려간다', hint: '남의 깃발 밑에서 신세계에 간다. 그 선장의 심부름을 해야 한다', values: { ambition: D },
-        fx: [{ op: 'move', island: '어인섬', sea: 'sabaody' }, { op: 'flag', id: 'underling' }, { op: 'log', text: '남의 배 갑판 구석에 앉아 깊은 바닷속으로 내려갔다. 빛이 사라지고 물고기들이 지나갔다.', weight: 'heavy' }] },
+        fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'str', add: 1 }, { op: 'flag', id: COATING_CONTACT }, { op: 'log', text: "장인의 일터에서 거품 막을 덧입히고 새는 부분을 막았다. 손은 상했지만 코팅 값을 치른 뒤 빚 장부가 비었다. 장인은 다음에도 도움이 필요하면 찾아오라 했다.", weight: 'light' }] },
+      { label: '큰 해적단의 도움으로 심해 항로를 준비한다', hint: '선장의 심부름을 맡고 코팅 장인을 소개받는다', values: { ambition: D },
+        fx: [{ op: 'flag', id: 'underling' }, { op: 'flag', id: COATING_CONTACT },
+             { op: 'log', text: '선장의 소개장을 받아 코팅 수지 냄새가 나는 작업장으로 향했다.', weight: 'light' }, { op: 'move', island: '어인섬', sea: 'sabaody' }] },
       { label: '이 섬에 눌러앉아 놀이공원 뒷일을 한다', hint: '신세계는 접는다. 비눗방울 섬의 일상이 시작된다', values: { peace: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 5000 }, { op: 'timeline', text: '샤본디 제도에 눌러앉았다' }, { op: 'log', text: "놀이공원 뒤편에서 잡일을 시작했다. 신세계로 갈 배들은 거품을 입고 내려갔고 {name}에게는 첫 품삯이 남았다.", weight: 'light' }] },
     ],

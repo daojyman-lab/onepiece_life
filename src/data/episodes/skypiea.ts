@@ -1,11 +1,11 @@
 // 섬 장편 에피소드: skypiea (v6.8). 규칙: docs/02_설계/섬_장편_에피소드_작성규칙.md
-// 시나리오 셋, 저마다 하늘섬에 머무는 두 달(8주):
+// 원작 전 · 그 무렵 · 원작 뒤에 하늘섬에서 겪는 시나리오 셋:
 //  - 원작 전 (주인공 12~17): 에넬의 지배 아래 엔젤섬. 다이얼 중개인 도란이 「신의 공물」이라며 다이얼을 걷고, 이름을 신관에게 판다.
 //    안내자 티카(웨이버 배달꾼) · 기록꾼 벨라(다이얼 공방). 간 폴이 지금까지 한 일을 보고 판단한다.
 //    에넬은 통치의 배경으로 남는다. 플레이어는 공물 장부와 운송로를 다루며 직접 대결하지 않는다.
 //  - 원작 그 무렵 (주인공 18): 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
 //    주인공은 다른 전선에 선다: 피난으로 빈 엔젤섬을 노리는 약탈단 구름늑대단(두목 무라크). 안내자 파로 · 진료소의 미나. 코니스가 판단한다.
-//  - 원작 뒤 (주인공 19~): 본보기 SKY_B_01 「잊힌 황금의 수호자」를 그대로 옮긴다. 카르마 · 루미 · 그라몬의 보물 사냥꾼 · 기억의 방 · 와이퍼.
+//  - 원작 뒤 (주인공 19~): 샨도라 유적을 노리는 도굴꾼 그라몬을 막는다. 유적을 지킬 방법은 두 마을 주민이 결정한다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
 import { age, at } from '../turnings/paths';
@@ -60,29 +60,39 @@ export const EP_SKYPIEA: Turning[] = [
   // 표시: tika_trust bella_trust b_cold b_force b_route b_ledger b_shandia b_knight b_record b_deal b_sabotage b_evac enel / before_done
   {
     id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done'))), weight: 30, repeat: 'once', speaker: 'hero',
-    title: '1주차 · 번개 아래의 다이얼 시장',
-    body: '몇 해 전 맑은 하늘에서 번개가 쏟아지고 에넬이라는 사내가 스스로를 신이라 부른 뒤로, 엔젤섬 사람들은 시장에서도 목소리를 낮춘다. 비단 조끼를 입은 상인 도란의 짐꾼들이 늙은 노점상의 다이얼 상자를 들어 올리며 신께 바치는 공물이라고 말한다. 웨이버를 끌던 배달꾼 소녀 티카가 이를 갈고, 다이얼 공방의 기록꾼 벨라는 말없이 낡은 장부에 무언가를 적는다.',
+    title: '공물이라고 빼앗긴 물건',
+    intro: [
+      '엔젤섬 시장에서 처음 보는 조개 장치가 손님을 부른다. 노점상이 다이얼 뚜껑을 열자 안쪽에서 밝은 빛이 난다.',
+      '손님들 틈을 비집고 온 짐꾼이 “에넬 님께 바치는 거다”라며 다이얼 상자를 빼앗는다. 빈 수레를 붙든 노점상은 입을 열다 만다.',
+      '공방에서 나온 벨라는 빼앗긴 물건을 장부에 적는다. 맞은편에선 배달꾼이 짐꾼을 쫓으려 작은 배에 오른다.',
+    ],
+    body: '짐꾼이 상자를 들고 골목으로 간다. 막아설지, 어디로 가는지 볼 수 있다.',
     doors: [
-      { label: '짐꾼의 손목을 붙잡는다', hint: '상자는 돌려받을지 몰라도 눈에 띈다', values: { justice: D }, danger: true,
-        fx: [fight('b_doran_runner', false, { win: 'ep_skypiea_b2', lose: 'ep_skypiea_b2', back: 'ep_skypiea_b2' })] },
+      { label: '짐꾼을 붙잡으러 골목으로 뛰어간다', hint: '상자를 든 짐꾼이 무기를 뽑는다', values: { justice: D }, danger: true,
+        fx: [log('짐꾼이 상자를 내려놓고 권총을 꺼낸다. 노점상이 골목 건너에서 수레를 끌고 온다.', 'light'),
+             log('전투 · 엔젤섬 시장 골목 / 도란 상회 짐꾼'), fight('b_doran_runner', false, { win: 'ep_skypiea_b2', lose: 'ep_skypiea_b2', back: 'ep_skypiea_b2' }, true)] },
       { label: '벨라 곁에서 빼앗긴 물건을 하나하나 적는다', hint: '오래된 장부의 새 줄을 함께 쓴다', values: { inquiry: D },
         fx: [flag(F('bella_trust')), log('벨라는 안경을 밀어 올리며 장부를 내밀었다. 빼앗긴 다이얼, 날짜, 주인의 이름. 기억하는 사람이 있어야 돌려받을 날도 온다고 했다.'), next('ep_skypiea_b2')] },
       { label: '고개를 숙이고 시장을 지나간다', hint: '이 섬에서는 다들 그렇게 산다', values: { peace: D },
         fx: [flag(F('b_cold')), next('ep_skypiea_b2'), log('노점상의 상자가 도란의 수레에 실렸다. 티카가 {name}의 옆을 지나쳐 그 뒤를 쫓았다.', 'light')] },
-      { label: '티카의 웨이버 뒷자리에 올라 짐꾼을 쫓는다', hint: '구름 위를 달리며 짐이 가는 곳을 본다', special: 'freedom', values: { freedom: D },
+      { label: '배달꾼의 작은 배를 타고 짐꾼을 쫓는다', hint: '구름 위를 달리며 짐이 가는 곳을 본다', special: 'freedom', values: { freedom: D },
         fx: [flag(F('tika_trust')), flag(F('b_route')), log('티카의 웨이버는 바람 다이얼 소리를 내며 구름을 갈랐다. 짐은 구름 끝이 아니라 어퍼 야드 쪽으로 사라졌다.'), next('ep_skypiea_b2')] },
     ],
   },
   {
     id: 'ep_skypiea_b2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '다이얼 공방의 기록꾼 벨라' },
-    title: '2주차 · 신의 공물이라는 거짓말',
-    body: '벨라가 공방 구석에서 빛바랜 장부를 펼친다. 신의 군대는 다이얼을 걷지 않는다고, 걷는 것은 도란뿐이라고. 게다가 도란의 가게에 값을 따지러 갔던 사람들 몇이 얼마 뒤 신의 심판을 받았다. 누군가 신관들에게 이름을 팔고 있다.',
+    title: '도란의 장부',
+    intro: [
+      '공방의 벨라가 장부에서 두 줄을 짚는다. 다이얼을 빼앗긴 날과 그 주인이 번개에 맞은 날이다.',
+      '“신의 군대가 걷는 공물이 아니에요. 상인 도란이 물건은 제 창고에 두고, 따지러 온 사람 이름만 신관에게 넘겨요.”',
+    ],
+    body: '짐꾼을 따라가면 도란이 훔친 물건을 숨긴 곳을 찾을 수 있다.',
     doors: [
       { label: '골목에서 짐꾼 하나를 붙잡아 캐묻는다', hint: '빠르지만 엔젤섬에 말이 돈다', values: { dominion: D },
         fx: [flag(F('b_force')), flag(F('b_route')), log('짐꾼은 벽에 등을 붙인 채 털어놓았다. 짐은 어퍼 야드 가장자리 바위굴로 간다고.'), next('ep_skypiea_b3')] },
-      { label: '장부와 심판받은 이름들을 맞춰 본다', hint: '이름들 사이에 같은 가게가 겹친다', values: { loyalty: D },
+      { label: '장부와 심판받은 이름들을 맞춰 본다', hint: '번개를 맞은 사람들이 도란과 거래했는지 확인한다', values: { loyalty: D },
         fx: [flag(F('bella_trust')), flag(F('b_ledger')), log('심판받은 이름 일곱 가운데 다섯이 도란의 가게에서 다이얼을 팔기를 거부한 사람이었다.'), next('ep_skypiea_b3')] },
-      { label: '티카와 하루 종일 짐길을 지켜본다', hint: '짐이 어디로 사라지는지 제 눈으로 본다', values: { freedom: D },
+      { label: '배달꾼 티카와 짐꾼을 따라간다', hint: '짐이 어디로 사라지는지 제 눈으로 본다', values: { freedom: D },
         fx: [flag(F('tika_trust')), flag(F('b_route')), next('ep_skypiea_b3'), log('티카가 짐꾼을 뒤따르는 동안 웨이버 바람을 낮췄다. 상자는 어퍼 야드 가장자리로 들어갔다.', 'light')] },
       { label: '도란의 가게에서 다이얼을 싸게 사 둔다', hint: '값은 싸다. 출처는 묻지 않는다', special: 'greed', values: { greed: D },
         fx: [{ op: 'money', add: 15000 }, log('싸게 산 다이얼 바닥에는 긁어 지운 이름 자국이 있었다.'), next('ep_skypiea_b3')] },
@@ -90,8 +100,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '3주차 · 어퍼 야드의 구슬',
-    body: '도란의 짐은 밤마다 신의 땅 어퍼 야드의 가장자리, 구슬의 시련이 열리는 숲으로 들어간다. 거대한 나무 사이로 구름 덩이가 둥둥 떠다니고, 어디선가 호호, 하는 웃음이 들린다. 신관의 땅을 지나는 짐을 신관이 모를 리 없다.',
+    title: '어퍼 야드의 구슬',
+    body: '밤이 되자 짐꾼들이 다이얼 상자를 들고 신관들이 지키는 숲으로 들어간다. 발밑에 떠다니던 구름 하나가 나무를 치자 숲 안쪽에서 웃음소리가 난다. 한 걸음 더 가면 나도 들킬 수 있다.',
     doors: [
       { label: '발자국을 따라 창고까지 숨어 간다', hint: '어디에 무엇을 쌓아 두는지 알게 된다', values: { inquiry: D },
         fx: [flag(F('b_route')), log('구름 덩굴 아래 바위굴, 창고 문에는 도란 상회의 낙인이 찍혀 있었다.'), next('ep_skypiea_b4')] },
@@ -103,8 +113,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'ganfall' },
-    title: '4주차 · 두 쪽의 분노',
-    body: '엔젤섬의 어른들이 몰래 모인다. 도란에게 돈을 더 내고 이름을 지켜 달라고 하자는 쪽과, 숲에서 다친 샨디아 전사들을 숨겨 주자는 쪽이 갈린다. 샨디아를 감싸면 심판이 오고, 도란에게 굽히면 끝이 없다. 문가에 붕대를 감은 노기사 간 폴이 서 있다. 그는 묻지 않는다. 이 사람이 지난 몇 주 무엇을 했는지 이미 들었다.',
+    title: '간 폴이 찾는 피난처',
+    intro: [
+      '어른들이 도란에게 돈을 더 주면 번개만이라도 피할 수 있을지 의논한다. 문밖에선 들것을 내려놓는 소리가 난다.',
+      '에넬에게 자리를 빼앗긴 옛 신 간 폴이 다친 샨디아 전사들을 데려왔다. “이 사람들 이름이 신관 귀에 들어가기 전에 숨겨야 하오.”',
+    ],
+    body: '간 폴에게 내가 알아낸 일을 말하거나, 숲에서 온 사람들의 피난길을 열 수 있다.',
     doors: [
       { label: '모아 둔 쪽지와 장부를 노기사 앞에 펼친다', hint: '노기사가 처음으로 입을 연다', when: [has(F('b_ledger'))], values: { justice: D },
         fx: [flag(F('b_knight')), log('간 폴은 장부를 오래 들여다보더니 창을 고쳐 쥐었다. 이름을 판 자를 잡는 일은 그대의 몫이다, 나는 그날 사람들 곁에 서겠다고 했다.'), next('ep_skypiea_b5')] },
@@ -118,11 +132,11 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '5주차 · 구름 밑 창고',
-    body: '바위굴 창고 안에는 엔젤섬 사람들이 빼앗긴 다이얼이 산처럼 쌓여 있다. 플레임, 임팩트, 톤 다이얼. 안쪽 책상에는 이름이 빼곡한 장부가 놓였다. 그 앞을 신병 갑옷을 걸친 사내, 갈고리 바르크가 막아선다. 신의 군대에 몸담고 도란에게 돈을 받는 자다.',
+    title: '구름 밑 창고',
+    body: '바위굴 안에 시장에서 빼앗긴 다이얼이 쌓여 있다. 책상에는 신관에게 넘길 이름이 적힌 장부가 보인다. 도란이 고용한 경비 바르크가 갈고리를 들어 통로를 막는다.',
     doors: [
       { label: '바르크와 맞선다', hint: '창고를 지키는 자를 넘어야 장부에 닿는다', values: { ambition: D }, danger: true,
-        fx: [fight('b_doran_chief', false, { win: 'ep_skypiea_b5r', lose: 'ep_skypiea_b6', back: 'ep_skypiea_b6' })] },
+        fx: [log('전투 · 어퍼 야드 바위굴 입구 / 도란의 창고지기 바르크'), fight('b_doran_chief', false, { win: 'ep_skypiea_b5r', lose: 'ep_skypiea_b6', back: 'ep_skypiea_b6' })] },
       { label: '알아 둔 뒷굴로 돌아 장부만 빼낸다', hint: '싸움 없이 증거를 손에 넣는다', when: [has(F('b_route'))], values: { inquiry: D },
         fx: [flag(F('b_record')), log('바르크가 하품하는 사이, 장부가 품 안으로 들어왔다.'), next('ep_skypiea_b6')] },
       { label: '창고를 그대로 두고 빠져나온다', hint: '싸움은 피한다. 증거도 놓친다', values: { freedom: D },
@@ -131,8 +145,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b5r', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '구름 해안의 배달꾼 티카' },
-    title: '5주차 · 장부의 이름들',
-    body: '바르크가 바위굴 밖으로 달아나자 티카가 다이얼 더미로 달려든다. 이거 옆집 할머니 거야, 하나도 빠짐없이 돌려줘야 해. 벨라는 장부를 끌어안는다. 이 이름들은 증거다, 함부로 꺼내면 신관들이 먼저 알아챈다고.',
+    title: '장부의 이름들',
+    body: '경비가 달아나자 배달꾼 티카가 상자 하나를 끌어안는다. 「옆집 할머니 건데. 오늘 밤에라도 돌려주고 싶어.」 책상에는 주민들의 이름을 신관에게 넘겼다는 증거도 펼쳐져 있다.',
     doors: [
       { label: '티카와 밤새 다이얼을 주인에게 돌려준다', hint: '엔젤섬 문간마다 작은 등불이 켜진다', values: { romance: D },
         fx: [flag(F('tika_trust')), log('새벽이 올 때까지 웨이버로 문간을 돌았다. 다이얼을 받은 노인들은 아무것도 묻지 않고 등불을 켰다.'), next('ep_skypiea_b6')] },
@@ -144,23 +158,27 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '다이얼 중개인 도란' },
-    title: '6주차 · 도란의 제안',
-    body: '도란이 공방 문을 열고 들어와 모자를 벗는다. 손가락마다 다이얼 반지가 번쩍인다. 나는 장사꾼이다, 신은 언젠가 이 하늘을 떠나고 그때 하늘의 다이얼은 청해에서 열 배 값이 된다. 장부만 넘기면 몫을 떼어 주지. 아니면 네 이름도 그 장부에 오를 거다.',
+    title: '장부 한 권의 값',
+    intro: [
+      '도란이 공방에 찾아와 모자를 탁자에 올려놓고 돈을 내 쪽으로 민다. “다이얼 한 상자가 아래 바다에선 얼마인 줄 알아? 네 몫도 여기 있어.”',
+      '그는 빈 장부 한 줄을 손가락으로 긋는다. “거절하면 이제 신관한테 불러 줄 이름은 네 이름이고.”',
+    ],
+    body: '도란은 장부에 대해 입을 닫으면 돈을 주겠다고 한다.',
     doors: [
-      { label: '모자를 집어 문밖으로 던진다', hint: '도란의 웃음이 싸늘해진다. 엔젤섬이 그 소식을 듣는다', values: { justice: D },
-        fx: [{ op: 'fame', add: 5 }, log('도란은 문밖에 떨어진 모자를 주워 털었다. 그날 밤 공방 앞 골목에 상회 사람들이 서성였다.'), next('ep_skypiea_b6v')] },
-      { label: '받아들이는 척 손을 잡는다', hint: '그의 다음 수를 안에서 본다', values: { ambition: D },
+      { label: '도란의 모자를 집어 문밖에 던지고 거래를 거절한다', hint: '도란이 경계한다. 공방 앞을 상회 사람들이 지켜본다', values: { justice: D },
+        fx: [{ op: 'fame', add: 5 }, log('도란이 돈을 챙겨 문밖에서 모자를 줍는다. 날이 어두워져도 공방 앞 골목에는 상회 사람들이 서성인다.'), next('ep_skypiea_b6v')] },
+      { label: '동업할 척 도란의 운송 계획을 묻는다', hint: '다이얼을 내릴 날짜와 창고 열쇠를 숨긴 곳을 알아낸다', values: { ambition: D },
         fx: [flag(F('b_route')), log('도란은 기분 좋게 짐을 내릴 날과 창고의 열쇠 자리를 흘렸다.'), next('ep_skypiea_b6v')] },
-      { label: '장부를 넘기고 몫을 받는다', hint: '주머니는 무거워지고 공방의 문은 닫힌다', values: { greed: D },
+      { label: '장부 이야기를 덮기로 하고 돈을 받는다', hint: '도란이 값을 치른다. 벨라가 공방 문을 잠근다', values: { greed: D },
         fx: [flag(F('b_deal')), { op: 'money', add: 80000 }, log('벨라는 그날 이후 공방 문을 열어 주지 않았다.'), next('ep_skypiea_b6v')] },
-      { label: '이름을 파는 일만 멈추면 장사는 눈감겠다고 한다', hint: '절반의 약속이 오간다', special: 'peace', values: { peace: D },
+      { label: '주민 이름을 넘기는 일만 멈추라고 한다', hint: '신관에게 넘어가는 이름은 줄지만 다이얼은 계속 사라진다', special: 'peace', values: { peace: D },
         fx: [log('도란은 웃으며 고개를 끄덕였다. 장부의 새 이름은 줄었지만, 다이얼은 여전히 구름 아래로 내려갔다.'), next('ep_skypiea_b6v')] },
     ],
   },
   {
     id: 'ep_skypiea_b6v', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 구름길에서의 약속',
-    body: '티카가 낡은 웨이버를 손질한다. 도란이 짐을 내리는 날, 짐길 아래 집들까지 휩쓸릴 수 있다. 티카는 사람들을 데리고 구름길로 빠지겠다고 한다. 그 길을 맡는다면 다른 준비를 할 시간은 없다.',
+    title: '구름길에서의 약속',
+    body: '티카가 작은 배의 바람 다이얼을 조인다. 「도란이 짐을 내릴 때 아래쪽 집들도 위험해. 내가 사람들을 태울게. 길만 열어 줄래?」 그 길을 맡으면 도란의 무기를 손볼 시간은 줄어든다.',
     doors: [
       { label: '티카가 이끄는 길을 끝까지 지키겠다고 약속한다', hint: '물러설 길을 미리 마련해야 한다. 적을 약하게 만들 시간은 줄어든다',
         when: [has(F('tika_trust')), has(F('b_ledger')), not(F('b_deal'))], special: 'loyalty', values: { loyalty: D },
@@ -173,8 +191,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b6p', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 번개가 오기 전에',
-    body: '도란은 남은 다이얼을 한꺼번에 청해로 내릴 날을 정했다. 그날은 상회 사람들이 모두 짐길에 나온다. 남은 며칠 동안 무엇부터 할지 정해야 한다. 멀리 어퍼 야드 꼭대기 신전에서 북소리 같은 천둥이 울린다.',
+    title: '다이얼이 섬을 떠나기 전에',
+    intro: [
+      '공방으로 돌아오니 티카가 구름 아래로 내려가는 짐길을 지도에 그려 둔다. 도란이 그 길로 마지막 상자를 내보낼 거라고 한다.',
+      '신전 쪽에서 천둥이 울린다. 주민들은 짐을 싸다가도 소리가 날 때마다 멈춘다.',
+    ],
+    body: '짐을 실어 보내기 전에 운송로를 막거나, 싸움에 휘말릴 주민들을 먼저 옮길 수 있다.',
     doors: [
       { label: '창고에 숨어들어 짐 다이얼의 껍데기를 비틀어 둔다', hint: '그날 상회의 무기가 제대로 울리지 않는다', when: [has(F('b_route'))], values: { freedom: D },
         fx: [flag(F('b_sabotage')), log('밤새 다이얼 껍데기를 반 바퀴씩 비틀었다. 겉으로는 아무 일도 없어 보였다.'), next('ep_skypiea_b7')] },
@@ -188,8 +210,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b6w', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 끊긴 공물길',
-    body: '신전으로 향하던 짐수레가 구름길 앞에서 멈춘다. 도란 상회의 운반책이 달아나며 장부 한 권을 떨어뜨렸다. 거기에는 다이얼뿐 아니라 값을 치르지 못한 사람들의 이름이 적혀 있다. 하늘의 지배자는 여전히 신전 안에 있고, 이 장부를 어떻게 쓸지는 {name}의 몫이다.',
+    title: '끊긴 공물길',
+    body: '신전으로 가던 짐수레가 멈추고, 운반책이 달아나며 장부를 떨어뜨린다. 물건을 빼앗긴 사람과 공물을 못 낸 사람의 이름이 같은 줄에 적혀 있다. 다시 신관 손에 들어가면 그 사람들부터 위험하다.',
     doors: [
       { label: '장부의 이름을 공방에 가져가 확인한다', hint: '벨라가 빼앗긴 물건과 사람을 맞춰 본다', values: { inquiry: D },
         fx: [flag(F('b_route')), log('벨라는 손가락으로 이름을 하나씩 짚었다. 도란이 숨긴 거래가 드러났다.'), next('ep_skypiea_b7')] },
@@ -201,13 +223,17 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '7주차 · 구름 끝의 짐길',
-    body: '해 질 녘, 도란 상회의 짐 썰매가 구름 끝으로 줄지어 간다. 다이얼 수십 상자, 그리고 장부의 사본. 도란은 맨 앞에서 다이얼을 박은 지팡이를 짚고 외친다. 막아서는 자는 신관님들께 이름을 올리겠다. 지금 맞서면 크게 다칠 수 있다. 물러나도 아무도 탓하지 않는다.',
+    title: '구름 나루를 지키는 도란',
+    intro: [
+      '빼앗긴 다이얼을 잔뜩 실은 썰매가 구름 끝에 선다. 뒤쪽 상자에는 신관에게 팔 이름을 옮겨 적은 종이도 들어 있다.',
+      '도란이 짐꾼들을 물리고 팔을 걷는다. “이 값은 내가 받는다. 막아서면 네 이름도 넘겨 주마.”',
+    ],
+    body: '도란이 다이얼 지팡이를 겨눈다. 썰매가 구름 아래로 내려가기 직전이다.',
     doors: [
-      { label: '헛도는 다이얼째로 도란을 덮친다', hint: '상회의 무기가 헛바람만 낸다', when: [has(F('b_sabotage'))], values: { freedom: D }, danger: true,
-        fx: [fight('b_doran_worn', false, { win: 'ep_skypiea_b8', lose: 'ep_skypiea_b8b', back: 'ep_skypiea_b8b' })] },
-      { label: '도란의 앞을 막아선다', hint: '다이얼 지팡이의 충격이 온다', values: { justice: D }, danger: true,
-        fx: [fight('b_doran', false, { win: 'ep_skypiea_b8', lose: 'ep_skypiea_b8b', back: 'ep_skypiea_b8b' })] },
+      { label: '다이얼이 헛도는 틈에 도란을 덮친다', hint: '손봐 둔 지팡이에서 약한 바람만 나온다', when: [has(F('b_sabotage'))], values: { freedom: D }, danger: true,
+        fx: [log('전투 · 구름 나루 / 무기가 약해진 도란'), fight('b_doran_worn', false, { win: 'ep_skypiea_b8', lose: 'ep_skypiea_b8b', back: 'ep_skypiea_b8b' })] },
+      { label: '썰매 앞을 막고 도란과 싸운다', hint: '이기면 훔친 다이얼과 장부를 실은 썰매를 세운다', values: { justice: D }, danger: true,
+        fx: [log('전투 · 구름 나루 / 다이얼 중개인 도란'), fight('b_doran', false, { win: 'ep_skypiea_b8', lose: 'ep_skypiea_b8b', back: 'ep_skypiea_b8b' })] },
       { label: '물러나 구름 그늘에 숨는다', hint: '짐은 내려가고 목숨은 남는다', values: { peace: D },
         fx: [next('ep_skypiea_b8b'), log('구름 그늘에서 썰매의 짐이 아래로 내려가는 걸 봤다. 도란은 한 번도 뒤돌아보지 않았다.', 'light')] },
       { label: '도란의 짐 썰매를 끌어 준다', hint: '약속한 몫의 나머지가 기다린다', when: [has(F('b_deal'))], special: 'greed', values: { greed: D },
@@ -216,8 +242,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '구름 해안의 배달꾼 티카' },
-    title: '8주차 · 장부가 사라진 엔젤섬',
-    body: '도란은 지팡이를 잃고 구름 아래로 달아났다. 상회 사람들도 흩어졌다. 그래도 신은 여전히 신전에 있고, 신관들은 여전히 숲을 돈다. 티카가 웨이버에 기대어 묻는다. 이제 우리는 뭘 지키면 돼?',
+    title: '되찾은 다이얼과 남은 이름',
+    intro: [
+      '도란이 지팡이를 놓치고 달아난다. 짐꾼들도 손을 놓자 티카가 쓰러진 상자부터 붙잡는다.',
+      '“물건은 돌려주면 되는데 이름이 문제야. 그걸 쥔 놈이 또 누구를 신관한테 팔지 어떻게 알아?”',
+    ],
+    body: '다이얼을 되찾았다. 주민을 지킬 방법은 아직 남아 있다.',
     doors: [
       { label: '벨라와 장부의 이름을 하나씩 지워 태운다', hint: '이름을 팔 자도 살 자도 더는 없다', when: [has(F('tika_trust')), has(F('bella_trust')), has(F('b_record')), not(F('b_deal'))], values: { loyalty: D },
         fx: [{ op: 'fame', add: 10 }, log('장부가 공방 화로에서 천천히 탔다. 벨라는 이름 하나하나를 소리 내어 읽고 나서 불에 넣었다. 기억은 장부가 아니라 사람들이 한다고.'),
@@ -231,8 +261,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b8b', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 신의 하늘 아래에서',
-    body: '도란이 남긴 빈 창고와 다이얼을 잃은 집들. 얼마가 구름 아래로 내려갔는지 아무도 모른다. 신전 쪽에서는 오늘도 천둥이 울리고, 엔젤섬 사람들은 발밑의 구름만 내려다본다. {name}이(가) 이 두 달 동안 한 일은 이 섬에 무엇으로 남을까.',
+    title: '신의 하늘 아래에서',
+    body: '창고를 나서니 구름길 너머로 옅은 불이 켜진다. 빈손으로 장사를 접은 노점상은 오늘도 소리가 들릴 때마다 에넬의 신전을 올려다본다.',
     doors: [
       { label: '노기사의 순찰에 길잡이로 남는다', hint: '피리 소리가 들리면 구름길을 함께 달린다', when: [has(F('b_knight')), not(F('b_deal'))], values: { justice: D },
         fx: [{ op: 'person', kind: 'ally', relation: '구름 숲의 노기사', canon: 'ganfall' }, { op: 'mastery', branch: 'sword', add: 8 },
@@ -246,17 +276,17 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_b9', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 구름 해안의 작별',
-    body: '두 달의 일이 끝나고, {name}은(는) 제 길로 돌아갈 채비를 한다. 티카는 웨이버 바람 다이얼을 손질하며 딴청을 피우고, 벨라는 공방 문간에 서서 안경을 닦는다. 어퍼 야드 쪽 하늘에서 오늘도 천둥이 낮게 굴러간다.',
+    title: '구름 해안의 작별',
+    body: '엔젤섬을 떠날 채비를 하자 티카가 구름 나루까지 작은 배를 끌고 온다. 공방의 벨라는 문간에 서서 두 손으로 접은 종이를 만지작거린다.',
     doors: [
       { label: '티카에게서 웨이버 깃 장식을 받는다', hint: '구름길을 달리던 바람이 묻어 있다', when: [has(F('tika_trust'))], values: { freedom: D },
-        fx: [flag(F('before_done')), { op: 'person', kind: 'ally', relation: '구름 해안의 배달꾼 티카' }, { op: 'base', key: 'spd', add: 1 }, log('하얀 깃 장식이 바람에 떨렸다. 다음에 오면 구름 끝까지 경주하자고 티카가 말했다.')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'ally', relation: '구름 해안의 배달꾼 티카' }, { op: 'base', key: 'spd', add: 1 }, log('하얀 깃 장식이 바람에 떨렸다. 다음에 오면 구름 끝까지 경주하자고 티카가 말했다.')] },
       { label: '벨라에게서 공방의 다이얼 노트를 받는다', hint: '다이얼 고치는 법과 빼앗긴 이름들이 적혀 있다', when: [has(F('bella_trust'))], values: { inquiry: D },
-        fx: [flag(F('before_done')), { op: 'person', kind: 'ally', relation: '다이얼 공방의 기록꾼 벨라' }, { op: 'base', key: 'int', add: 1 }, log('벨라는 낡은 노트의 첫 장에 돌려받은 집들의 이름을 적었다. 도란의 장부와 필체가 달랐다.', 'light')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'ally', relation: '다이얼 공방의 기록꾼 벨라' }, { op: 'base', key: 'int', add: 1 }, log('벨라는 낡은 노트의 첫 장에 돌려받은 집들의 이름을 적었다. 도란의 장부와 필체가 달랐다.', 'light')] },
       { label: '아무 말 없이 구름길을 내려간다', hint: '돌아보는 사람은 없다', values: { ambition: D },
         fx: [flag(F('before_done')), log('구름길 끝에서 한 번 돌아보았다. 엔젤섬은 여전히 조용했다.', 'light')] },
       { label: '티카에게 함께 가자고 청한다', hint: '웨이버 하나가 길을 따라나선다', when: [has(F('tika_trust')), has(F('bella_trust'))], special: 'romance', values: { romance: D },
-        fx: [flag(F('before_done')), { op: 'person', kind: 'crew', relation: '웨이버를 모는 티카', gender: 'f', years: 1 }, log('티카는 벨라에게 한참 혼나고 나서야 웨이버를 실었다. 딱 한 해만이라고 했다.')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'crew', relation: '웨이버를 모는 티카', gender: 'f', years: 1 }, log('티카는 벨라에게 한참 혼나고 나서야 웨이버를 실었다. 딱 한 해만이라고 했다.')] },
     ],
   },
 
@@ -265,11 +295,16 @@ export const EP_SKYPIEA: Turning[] = [
   // 표시: paro_trust mina_trust c_cold c_force c_route c_list c_shandia c_conis c_record c_deal c_sabotage c_evac / canon_done
   {
     id: 'ep_skypiea_c1', kind: 'door', when: at(SKY, age(18, 18), not(F('canon_done'))), weight: 30, repeat: 'once', speaker: 'hero',
-    title: '1주차 · 망치 소리가 그치지 않는 하늘',
-    body: '어퍼 야드 너머에서 밤낮으로 쇠 두드리는 소리가 들린다. 신이 무언가를 만들고 있다는 소문에 엔젤섬 사람들은 짐을 꾸렸다 풀었다 한다. 그 틈을 타 밤마다 빈집이 털린다. 웨이버 배달꾼 파로가 털린 집 앞에서 발을 구르고, 진료소의 미나는 다친 노인의 이마에 붕대를 감는다. 골목 끝에서 늑대 가죽을 걸친 사내들이 자루를 메고 달아난다.',
+    title: '노인의 집을 턴 사람들',
+    intro: [
+      '엔젤섬에선 요 며칠 숲 너머에서 들리는 망치 소리에 창문을 닫고 잔다고 한다. 지금 내가 선 골목에선 다른 소리가 난다. 누군가 문짝을 걷어차는 소리다.',
+      '늑대 가죽을 걸친 사내들이 자루를 메고 나온다. 담에 부딪혀 쓰러진 노인의 이마에 진료소의 미나가 붕대를 감는다.',
+      '노인이 내게 골목 끝을 가리킨다. “저 자루에 우리 집 물건이 있어요.”',
+    ],
+    body: '지금 뛰면 노인의 물건을 가져간 자들을 붙잡을 수 있다.',
     doors: [
       { label: '자루를 멘 사내들을 쫓는다', hint: '골목 끝에서 늑대들이 돌아선다', values: { freedom: D }, danger: true,
-        fx: [fight('b_murak_looter', false, { win: 'ep_skypiea_c2', lose: 'ep_skypiea_c2', back: 'ep_skypiea_c2' })] },
+        fx: [log('전투 · 엔젤섬 진료소 옆 골목 / 구름늑대단 약탈꾼'), fight('b_murak_looter', false, { win: 'ep_skypiea_c2', lose: 'ep_skypiea_c2', back: 'ep_skypiea_c2' })] },
       { label: '미나를 도와 털린 집과 다친 사람을 적는다', hint: '진료소의 기록에 이름 하나가 더해진다', values: { loyalty: D },
         fx: [flag(F('mina_trust')), log('미나는 붕대를 감던 손을 멈추지 않고 말했다. 털린 집은 벌써 열한 채라고, 다들 신이 무서워 말을 안 한다고.'), next('ep_skypiea_c2')] },
       { label: '제 집 문단속만 단단히 한다', hint: '남의 집 일은 남의 일이다', values: { greed: D },
@@ -278,8 +313,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '웨이버 배달꾼 파로' },
-    title: '2주차 · 늑대 가죽의 사내들',
-    body: '파로가 늑대 털 한 줌을 내민다. 구름늑대단, 어퍼 야드 가장자리 구름굴에 사는 놈들이라고. 두목 무라크는 신의 군대에서 쫓겨난 사내다. 신이 하늘을 버리는 날이 오면 섬을 통째로 털겠다고 큰소리친다는 소문이다.',
+    title: '늑대 가죽의 사내들',
+    body: '배달꾼 파로가 뜯긴 문고리에서 늑대 털을 떼어 낸다. 「구름늑대단이야. 에넬 때문에 주민들이 달아나면 빈집을 전부 털겠다고 하더라.」 다음엔 누구 집일지 아직 모른다.',
     doors: [
       { label: '술집에서 늑대단 졸개를 붙잡아 흔든다', hint: '굴의 자리를 듣는다. 늑대들도 들었다는 걸 안다', values: { dominion: D },
         fx: [flag(F('c_force')), flag(F('c_route')), next('ep_skypiea_c3'), log('붙잡힌 졸개가 구름굴 입구를 말했다. 다음 날 늑대 가죽을 쓴 사내들이 술집을 둘러봤다.', 'light')] },
@@ -293,14 +328,14 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '3주차 · 늪과 철의 숲',
-    body: '늑대단의 짐길은 어퍼 야드의 시련 숲 가장자리를 스친다. 신관들의 땅이다. 바닥 구름이 질척하게 꺼지고, 멀리 나무 사이로 철조망 같은 구름이 번득인다. 멍한 눈의 신관 하나가 입을 반쯤 벌린 채 길 한가운데 서 있다.',
+    title: '늪과 철의 숲',
+    body: '자루를 든 늑대단 일원들이 구름이 푹 꺼지는 숲으로 들어간다. 길 한가운데 에넬의 신관이 서 있다. 서두르면 놈들을 놓치지 않겠지만, 신관 눈에 띌 수도 있다.',
     doors: [
       { label: '늪을 돌아 늑대단의 구름굴까지 몰래 따라간다', hint: '굴의 입구와 나가는 길을 알게 된다', values: { inquiry: D },
         fx: [flag(F('c_route')), log('구름굴 입구에는 늑대 머리뼈가 걸려 있었다. 뒤쪽으로 좁은 바람길이 하나 더 있었다.'), next('ep_skypiea_c4')] },
       { label: '자루를 나르는 졸개들 틈에 섞인다', hint: '늑대단이 몇이고 무엇을 노리는지 듣는다', values: { romance: D },
         fx: [flag(F('c_list')), log('졸개들은 신이 떠나는 날을 「잔칫날」이라고 불렀다. 그날 털 집 순서까지 정해 두었다.'), next('ep_skypiea_c4')] },
-      { label: '늪의 신관이 선 길 아래로 몸을 숨긴다', hint: '신관의 시선을 피하고 늑대단의 흔적을 놓치지 않는다', values: { dominion: D }, danger: true,
+      { label: '신관 눈을 피해 구름길 아래로 돌아간다', hint: '신관의 시선을 피하고 늑대단의 흔적을 놓치지 않는다', values: { dominion: D }, danger: true,
         fx: [flag(F('c_route')), { op: 'hp', add: -5 }, next('ep_skypiea_c4'), log('게다츠가 하품하며 지나갈 때 몸을 낮췄다. 젖은 구름 위에 늑대단 자루의 끌린 자국이 남았다.', 'light')] },
       { label: '번개가 떨어지는 버릇을 읽으며 숲을 지나간다', hint: '그 사내와 겨뤄 본 몸이 리듬을 기억한다', when: [has(F('enel'))], special: 'justice', values: { justice: D },
         fx: [flag(F('c_route')), flag(F('c_list')), log('번개가 떨어질 자리를 피해 걸었다. 신관들도 늑대들도 {name}을(를) 보지 못했다.'), next('ep_skypiea_c4')] },
@@ -308,8 +343,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'conis' },
-    title: '4주차 · 구름 끝의 피난처',
-    body: '진료소의 미나가 피난처 계획을 내놓는다. 신이 무슨 일을 벌이면 엔젤섬 사람들이 숨을 곳이 필요하다고. 하지만 그 구름 끝은 샨디아 마을 가까이다. 샨디아와 한 땅에 숨을 수는 없다는 엔젤섬 노인들, 하늘 사람을 들일 수 없다는 샨디아 노인들. 구석에서 듣던 코니스가 {name}을(를) 본다. 털린 집들을 돌며, 이 사람이 지난 몇 주 무엇을 했는지 이미 들었다.',
+    title: '코니스가 연 피난길',
+    intro: [
+      '코니스는 지난번 천둥이 치자 마을 끝의 아이들이 밤새 잠들지 못했다고 말한다. 섬을 비우게 되면 모두가 쉴 곳이 필요하다.',
+      '그녀가 지도에서 가장 가까운 장소를 짚는다. 샨디아 마을 옆이다. 두 마을은 오래 싸워 왔고, 피난민을 들인다는 약속은 아직 없다.',
+    ],
+    body: '코니스는 나와 함께 사람들에게 어느 길을 알려 줄지 정하려 한다.',
     doors: [
       { label: '미나와 함께 피난처로 가는 길을 그려 보인다', hint: '코니스가 그 길을 사람들에게 전하겠다고 한다', when: [has(F('mina_trust'))], values: { justice: D },
         fx: [flag(F('c_conis')), log('코니스는 지도를 오래 들여다보았다. 그날이 오면 제가 먼저 외치겠어요, 하지만 사람들을 끝까지 데려가는 건 당신들 몫이에요.'), next('ep_skypiea_c5')] },
@@ -323,11 +362,11 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '5주차 · 늑대의 굴',
-    body: '구름굴 깊은 곳에 털린 물건이 산더미다. 다이얼, 장신구, 아이들 장난감까지. 안쪽 벽에는 엔젤섬 지도와 잔칫날 털 집의 순서가 적혀 있다. 여우 가면을 쓴 여자가 쌍갈고리를 들고 일어선다. 늑대단의 현장 대장, 시바.',
+    title: '늑대의 굴',
+    body: '도둑들의 굴에서 아이가 차고 놀던 구름 공이 발에 걸린다. 벽에는 다음에 털 집이 지도에 순서대로 표시돼 있다. 가면을 쓴 현장 대장 시바가 갈고리를 들어 그 앞을 막는다.',
     doors: [
       { label: '시바와 맞선다', hint: '가면 너머의 칼끝이 빠르다', values: { ambition: D }, danger: true,
-        fx: [fight('b_murak_chief', false, { win: 'ep_skypiea_c5r', lose: 'ep_skypiea_c6', back: 'ep_skypiea_c6' })] },
+        fx: [log('전투 · 구름늑대단 은신처 / 현장 대장 시바'), fight('b_murak_chief', false, { win: 'ep_skypiea_c5r', lose: 'ep_skypiea_c6', back: 'ep_skypiea_c6' })] },
       { label: '알아 둔 교대 틈에 털 집 순서만 베껴 나온다', hint: '싸우지 않고 그날의 지도를 손에 넣는다', when: [has(F('c_list'))], values: { inquiry: D },
         fx: [flag(F('c_record')), next('ep_skypiea_c6'), log('시바가 돌아오기 전에 벽의 지도를 접어 품었다. 늑대단이 먼저 털 집들이 적혀 있었다.', 'light')] },
       { label: '굴을 그대로 두고 빠져나온다', hint: '늑대들은 아무것도 모른 채 자루를 꿰맨다', values: { freedom: D },
@@ -336,8 +375,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c5r', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '진료소의 미나' },
-    title: '5주차 · 털린 물건의 주인',
-    body: '시바가 연기를 남기고 굴 밖으로 달아나자 파로가 장물 더미로 달려든다. 이건 빵집 아저씨 다이얼이야, 이건 꼬마들 구름 공. 미나는 벽의 지도를 떼어 낸다. 이걸 가져가면 그날 늑대들이 어디부터 올지 알 수 있다고.',
+    title: '털린 물건의 주인',
+    body: '시바가 달아나자 진료소의 미나가 벽에서 지도를 떼어 낸다. 「이걸 보면 어느 집부터 대피시킬지 알 수 있어요.」 구석에서 파로가 돌려줘야 할 물건을 하나씩 자루에 담는다.',
     doors: [
       { label: '파로와 장물을 주인에게 돌려준다', hint: '웨이버가 밤새 엔젤섬을 돈다', values: { romance: D },
         fx: [flag(F('paro_trust')), next('ep_skypiea_c6'), log('파로의 웨이버에 장물을 나눠 실었다. 첫집의 노인은 잃었던 다이얼을 보자 문간에 주저앉았다.', 'light')] },
@@ -349,23 +388,27 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '구름늑대단 두목 무라크' },
-    title: '6주차 · 무라크의 제안',
-    body: '늑대 머리 가죽을 뒤집어쓴 사내가 진료소 지붕에 걸터앉아 있다. 곧 신이 하늘을 버린다, 그날 이 섬은 주인 없는 창고가 된다. 같이 털면 반을 주지. 막으면 그날 네가 지키는 집부터 턴다. 쫓겨난 신병의 창 자국이 그의 팔에 길게 남아 있다.',
+    title: '진료소를 노리는 무라크',
+    intro: [
+      '밤에 진료소 문이 열리고 무라크가 지붕 위에서 나를 부른다. “주민들이 에넬을 피해 뛰어가면 집이 몽땅 비어. 나랑 반씩 챙겨.”',
+      '대답을 기다리던 무라크가 진료소 문을 발끝으로 가리킨다. “막으면 애써 지키는 여기부터 털고.”',
+    ],
+    body: '무라크가 약탈에 가담하라고 한다. 거절하면 진료소를 지킬 준비가 필요하다.',
     doors: [
-      { label: '지붕에서 내려오라고 맞받아친다', hint: '늑대가 이빨을 드러낸다. 이웃들이 창문을 연다', values: { justice: D },
+      { label: '진료소에 손대지 말라고 맞받아친다', hint: '무라크가 물러나고 이웃들은 밤새 진료소를 지켜본다', values: { justice: D },
         fx: [{ op: 'fame', add: 5 }, log('무라크는 침을 뱉고 지붕에서 뛰어내렸다. 그날 밤 진료소 창문마다 등불이 켜졌다.'), next('ep_skypiea_c6p')] },
-      { label: '같이 털겠다고 고개를 끄덕인다', hint: '늑대들의 잔칫날 계획을 안에서 듣는다', values: { ambition: D },
+      { label: '같이 털겠다고 속이고 배를 숨겨 둔 곳을 묻는다', hint: '약탈단이 쓰는 구름길과 배가 있는 곳을 알아낸다', values: { ambition: D },
         fx: [flag(F('c_route')), log('무라크는 껄껄 웃으며 굴의 바람길과 웨이버를 매어 두는 자리를 일러 주었다.'), next('ep_skypiea_c6p')] },
       { label: '털 집 순서를 함께 짠다', hint: '반은 내 몫이다. 진료소의 문은 닫힌다', values: { greed: D },
         fx: [flag(F('c_deal')), { op: 'money', add: 70000 }, log('미나는 그 뒤로 진료소 문을 걸어 잠갔다.'), next('ep_skypiea_c6p')] },
-      { label: '진료소와 피난처만은 건드리지 말라고 흥정한다', hint: '늑대가 반쯤 약속한다', special: 'peace', values: { peace: D },
+      { label: '진료소와 피난처만은 건드리지 말라고 흥정한다', hint: '무라크가 받아들인다. 약속을 지킬지는 알 수 없다', special: 'peace', values: { peace: D },
         fx: [log('무라크는 좋다고 했다. 늑대의 약속이 얼마나 갈지는 아무도 몰랐다.'), next('ep_skypiea_c6p')] },
     ],
   },
   {
     id: 'ep_skypiea_c6p', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 그날을 기다리며',
-    body: '망치 소리가 그쳤다. 대신 낯선 소문이 내려온다. 밀짚모자를 쓴 청해의 해적들이 천국의 문을 넘어왔다고. 늑대단은 굴에서 자루를 꿰매고 있다. 남은 날이 많지 않다.',
+    title: '그날을 기다리며',
+    body: '일대의 망치 소리가 뚝 끊긴 날, 루피 일행이 들어왔다는 소식이 들린다. 늑대단은 주민들이 에넬을 피해 떠나기만을 기다리고 있다. 지금이면 놈들의 배를 막거나 피난길을 열 시간이 있다.',
     doors: [
       { label: '늑대단의 웨이버에서 바람 다이얼을 빼 둔다', hint: '그날 늑대들이 빨리 달리지 못한다', when: [has(F('c_route'))], values: { freedom: D },
         fx: [flag(F('c_sabotage')), next('ep_skypiea_c7'), log('늑대단 웨이버의 바람 다이얼이 손에서 빠졌다. 아침에 졸개들은 배를 밀어도 나아가지 못했다.', 'light')] },
@@ -379,15 +422,19 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '7주차 · 신이 놀이를 시작한 날',
-    body: '어퍼 야드에서 신관과 신병, 샨디아 전사와 청해의 해적들이 한꺼번에 뒤엉킨다. 코니스가 섬을 떠나라고 외치고, 엔젤섬 사람들이 구름 끝으로 쏟아진다. 그 빈 골목으로 늑대단이 몰려든다. 맨 앞에서 무라크가 다이얼을 박은 쇠몽둥이를 끈다. 숲의 싸움은 남의 몫이다. 이 골목이 {name}의 전선이다. 지금 맞서면 크게 다칠 수 있다.',
+    title: '사람들이 빠져나가는 골목',
+    intro: [
+      '코니스가 섬을 떠나야 한다고 외치자 사람들이 짐도 내려놓고 골목을 빠져나간다. 멀리 숲 쪽에선 루피 일행이 에넬에게 맞서고 있다.',
+      '마지막 주민이 빠져나가기도 전에 무라크가 빈집 문을 걷어찬다. 약탈단이 그를 따라 골목으로 몰려든다.',
+    ],
+    body: '피난 행렬의 끝이 막 골목을 돈다. 여기서 놈들을 막을지, 주민을 따라갈지 골라야 한다.',
     doors: [
       { label: '발이 묶인 늑대들 한가운데로 뛰어든다', hint: '바람을 잃은 늑대는 느리다', when: [has(F('c_sabotage'))], values: { freedom: D }, danger: true,
         fx: [time('밀짚모자 일당이 어퍼 야드에 들어선 날, 비어 가는 엔젤섬에서 약탈단을 막아섰다', 'luffy'),
-             fight('b_murak_worn', false, { win: 'ep_skypiea_c8', lose: 'ep_skypiea_c8b', back: 'ep_skypiea_c8b' })] },
+             log('전투 · 엔젤섬 피난 골목 / 발이 묶인 무라크'), fight('b_murak_worn', false, { win: 'ep_skypiea_c8', lose: 'ep_skypiea_c8b', back: 'ep_skypiea_c8b' })] },
       { label: '무라크의 앞을 막아선다', hint: '쇠몽둥이가 구름 바닥을 찍는다', values: { dominion: D }, danger: true,
         fx: [time('밀짚모자 일당이 어퍼 야드에 들어선 날, 비어 가는 엔젤섬에서 약탈단을 막아섰다', 'luffy'),
-             fight('b_murak', false, { win: 'ep_skypiea_c8', lose: 'ep_skypiea_c8b', back: 'ep_skypiea_c8b' })] },
+             log('전투 · 엔젤섬 피난 골목 / 약탈단 두목 무라크'), fight('b_murak', false, { win: 'ep_skypiea_c8', lose: 'ep_skypiea_c8b', back: 'ep_skypiea_c8b' })] },
       { label: '피난 행렬의 끝을 지키며 구름 끝으로 물러난다', hint: '빈집은 털리고 사람은 산다', values: { peace: D },
         fx: [time('밀짚모자 일당이 어퍼 야드에 들어선 날, 엔젤섬의 피난 행렬을 따라 구름 끝으로 갔다', 'luffy'), next('ep_skypiea_c8b'), log('피난 행렬 끝에서 마지막 웨이버를 밀었다. 뒤쪽 빈집 문이 뜯기는 소리가 들렸다.', 'light')] },
       { label: '늑대단의 자루를 함께 멘다', hint: '약속한 반이 기다린다', when: [has(F('c_deal'))], special: 'greed', values: { greed: D },
@@ -396,8 +443,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 하늘에 울린 종',
-    body: '무라크가 쇠몽둥이를 버리고 구름 아래로 달아난다. 그때 하늘을 뒤덮은 먹구름에서 번개가 비처럼 쏟아지고, 황금빛 배가 떠오른다. 한참 뒤 거대한 덩굴 꼭대기에서 소리가 퍼진다. 댕, 댕. 사백 년 만에 울린 황금의 종소리다. 누가 울렸는지는 몰라도, 끝났다는 것은 안다.',
+    title: '약탈이 멎고 울린 종',
+    intro: [
+      '무라크가 쇠몽둥이를 버리고 달아난다. 약탈단도 하나둘 자루를 내려놓고 그를 따라 사라진다.',
+      '머리 위를 가르던 번개가 멎더니 멀리서 큰 종이 울린다. 대피소 쪽에서 기다리던 이름을 부르는 소리가 들린다.',
+    ],
+    body: '진료소와 피난길을 살펴볼 때다.',
     doors: [
       { label: '미나와 피난민 명단을 맞춰 한 사람씩 이름을 부른다', hint: '빠진 사람이 없다', when: [has(F('paro_trust')), has(F('mina_trust')), has(F('c_record')), not(F('c_deal'))], values: { loyalty: D },
         fx: [{ op: 'fame', add: 15 }, log('미나가 마지막 이름을 부르자 구름 끝에 모인 사람들이 함께 대답했다. 털린 집은 있었어도 잃은 사람은 없었다.'),
@@ -411,8 +462,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c8b', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 종소리 아래의 빈집',
-    body: '종소리가 하늘섬과 그 아래 청해까지 내려간다. 신은 떠났고, 엔젤섬 골목에는 문이 뜯긴 집들이 남았다. 구름 끝에서는 엔젤섬 사람들과 샨디아 사람들이 처음으로 같은 불 앞에 앉는다. 그 불빛 속에 {name}의 자리는 어디쯤일까.',
+    title: '한 불을 나누는 두 마을',
+    intro: [
+      '루피가 에넬을 막고, 황금의 종소리가 구름 아래까지 퍼진다. 집에서 나올 때까지 말이 없던 노인이 그제야 고개를 든다.',
+      '문짝을 잃은 골목 너머로 불빛이 보인다. 샨디아와 엔젤섬 사람들이 구름 끝에서 불 하나를 나눠 쬐고 있다.',
+    ],
+    body: '잠깐 몸을 녹이거나, 모여 있는 사람들을 도울 수 있다.',
     doors: [
       { label: '샨디아와 엔젤섬 사람들 사이에서 물과 담요를 나눈다', hint: '코니스가 곁에서 같은 일을 한다', when: [has(F('c_conis')), has(F('c_shandia')), not(F('c_deal'))], values: { justice: D },
         fx: [{ op: 'person', kind: 'ally', relation: '엔젤섬 구름 해안의 친구', canon: 'conis' },
@@ -427,17 +482,17 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_c9', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 잔치가 끝난 아침',
-    body: '사백 년 만의 잔치가 끝난 아침, 엔젤섬 사람들은 뜯긴 문을 고친다. 파로는 웨이버를 닦으며 휘파람을 불고, 미나는 진료소 앞에 남은 붕대를 개어 쌓는다. {name}도 이제 제 길로 갈 때다.',
+    title: '잔치가 끝난 아침',
+    body: '파로는 흙탕이 묻은 배를 닦고, 미나는 진료소 문 앞에 남은 붕대를 챙긴다. 문을 고치는 망치 소리 사이로 누군가 어젯밤의 종소리를 흉내 낸다. 나도 떠날 준비를 한다.',
     doors: [
       { label: '파로의 바람 다이얼을 받는다', hint: '그날 노인들을 실어 나른 바람이 들어 있다', when: [has(F('paro_trust'))], values: { freedom: D },
-        fx: [flag(F('canon_done')), { op: 'person', kind: 'ally', relation: '웨이버 배달꾼 파로' }, { op: 'base', key: 'spd', add: 1 }, log('파로가 작은 바람 다이얼을 손에 쥐여 줬다. 그날 노인들을 태웠던 웨이버의 흠집이 남아 있었다.', 'light')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('canon_done')), { op: 'person', kind: 'ally', relation: '웨이버 배달꾼 파로' }, { op: 'base', key: 'spd', add: 1 }, log('파로가 작은 바람 다이얼을 손에 쥐여 줬다. 그날 노인들을 태웠던 웨이버의 흠집이 남아 있었다.', 'light')] },
       { label: '미나의 피난민 명단 사본을 받는다', hint: '그날 구름 끝에 모인 이름들이다', when: [has(F('mina_trust'))], values: { loyalty: D },
-        fx: [flag(F('canon_done')), { op: 'person', kind: 'ally', relation: '엔젤섬 진료소의 미나' }, { op: 'base', key: 'wil', add: 1 }, log('미나가 명단을 접어 건넸다. 구름 끝에서 구한 가족들의 이름에 붕대 자국이 묻어 있었다.', 'light')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('canon_done')), { op: 'person', kind: 'ally', relation: '엔젤섬 진료소의 미나' }, { op: 'base', key: 'wil', add: 1 }, log('미나가 명단을 접어 건넸다. 구름 끝에서 구한 가족들의 이름에 붕대 자국이 묻어 있었다.', 'light')] },
       { label: '종소리를 톤 다이얼에 담아 품에 넣는다', hint: '어디에 가든 이 소리를 꺼내 들을 수 있다', values: { romance: D },
-        fx: [flag(F('canon_done')), log('작은 조개 안에서 종소리가 언제까지나 울렸다.', 'light')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('canon_done')), log('작은 조개 안에서 종소리가 언제까지나 울렸다.', 'light')] },
       { label: '파로에게 아래 세상을 같이 보자고 한다', hint: '웨이버 하나가 구름 아래로 따라나선다', when: [has(F('paro_trust')), has(F('mina_trust'))], special: 'freedom', values: { freedom: D },
-        fx: [flag(F('canon_done')), { op: 'person', kind: 'crew', relation: '구름 아래를 보러 따라나선 파로', gender: 'm', years: 2 }, log('파로는 미나에게 붕대 한 꾸러미를 받아 들고 웨이버를 실었다.')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('canon_done')), { op: 'person', kind: 'crew', relation: '구름 아래를 보러 따라나선 파로', gender: 'm', years: 2 }, log('파로는 미나에게 붕대 한 꾸러미를 받아 들고 웨이버를 실었다.')] },
     ],
   },
 
@@ -445,27 +500,32 @@ export const EP_SKYPIEA: Turning[] = [
   // 표시: karma_trust lumi_trust a_clue a_respect a_force a_cold a_depot a_shandia a_joint a_open a_record a_deal a_sabotage a_evac / after_done
   {
     id: 'ep_skypiea_a1', kind: 'door', when: at(SKY, age(19, 60), not(F('after_done'))), weight: 25, repeat: 'once', speaker: 'hero',
-    title: '1주차 · 구름 위의 낯선 손님',
-    body: '에넬이 떠난 하늘섬은 일상을 되찾는 중이다. 엔젤섬 시장에는 샨디아의 직물과 하늘섬의 다이얼이 나란히 놓인다. 그런데 샨도라 유적 쪽 구름길에서 낯선 청해 사람들이 다이얼과 유물 상자를 나른다. 상인이라면서 주민의 물음에는 답하지 않는다. 기록 조사자 루미가 사라진 물품 목록을 흔들며 달려오고, 얼굴에 문신을 한 젊은 샨디아 전사 카르마가 {name}을(를) 경계하는 눈으로 본다.',
+    title: '유적에서 나오는 상자',
+    intro: [
+      '에넬이 떠난 하늘섬의 장터에서 이웃끼리 다이얼을 고쳐 준다. 길가에서는 예전처럼 밥 짓는 냄새가 난다.',
+      '유적길로 들어선 짐꾼들이 상자를 옮긴다. 지나가던 주민이 어디로 가느냐고 묻자 상자를 가린 채 성큼성큼 지나간다.',
+      '유적 기록을 맡은 루미가 상자에 찍힌 표식을 보고 내게 낮게 말한다. “어제 보관실에서 사라진 물건에도 저 표식이 있어요.”',
+    ],
+    body: '짐꾼들이 골목을 돈다. 따라잡거나, 도난 목록을 먼저 살펴볼 수 있다.',
     doors: [
       { label: '운반책을 곧장 쫓는다', hint: '상자를 버리고 돌아서는 자들이 있다', values: { freedom: D }, danger: true,
-        fx: [fight('b_gramon_scout', false, { win: 'ep_skypiea_a2', lose: 'ep_skypiea_a2', back: 'ep_skypiea_a2' })] },
+        fx: [log('전투 · 유적길 입구 / 그라몬 일당 정찰병'), fight('b_gramon_scout', false, { win: 'ep_skypiea_a2', lose: 'ep_skypiea_a2', back: 'ep_skypiea_a2' })] },
       { label: '루미와 함께 물품의 출처를 짚어 본다', hint: '목록의 빈칸이 하나씩 채워진다', values: { inquiry: D },
         fx: [flag(F('a_clue')), log('루미의 목록에는 유적의 황금 장식과 함께 엔젤섬 부엌의 다이얼이 적혀 있었다.'), next('ep_skypiea_a2')] },
       { label: '제 일정을 먼저 챙긴다', hint: '남의 섬 일은 남의 일이다', values: { peace: D },
         fx: [flag(F('a_cold')), next('ep_skypiea_a2'), log('운반책들의 뒷모습이 유적길로 사라졌다. 루미는 빈 물품 목록을 접지 못하고 서 있었다.', 'light')] },
-      { label: '카르마에게 본 것을 넘기고 판단을 맡긴다', hint: '샨디아 전사의 눈빛이 조금 풀린다', special: 'loyalty', values: { loyalty: D },
+      { label: '유적지 경비에게 짐꾼을 봤다고 알린다', hint: '유적을 지키는 카르마가 이야기를 듣는다', special: 'loyalty', values: { loyalty: D },
         fx: [flag(F('a_respect')), log('카르마는 고맙다는 말 대신 짧게 고개를 끄덕였다.'), next('ep_skypiea_a2')] },
     ],
   },
   {
     id: 'ep_skypiea_a2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '스카이피아의 기록 조사자 루미' },
-    title: '2주차 · 황금보다 오래된 것',
-    body: '루미가 목록을 펼친다. 사라진 것의 절반은 유적의 황금이 아니라 엔젤섬 사람들이 날마다 쓰는 다이얼이다. 그들은 황금만이 아니라 하늘섬의 생활을 통째로 실어 가려 한다고. 시장, 유적 외곽, 기록. 어디서부터 볼지는 {name}의 몫이다.',
+    title: '황금보다 오래된 것',
+    body: '루미가 목록에서 몇 줄을 짚는다. 유적의 금장식뿐 아니라 일을 하거나 밥을 지을 때 쓰는 다이얼도 사라졌다. 고장 난 아궁이를 고치러 왔던 주민이 빈 선반을 보고 돌아간다.',
     doors: [
       { label: '밀수꾼과 거래한 상인을 윽박지른다', hint: '빠르게 알아낸다. 시장 사람들이 수군댄다', values: { dominion: D },
         fx: [flag(F('a_force')), flag(F('a_clue')), log('상인은 떨며 털어놓았다. 청해에서 온 그라몬이라는 사내가 값을 두 배로 쳐 준다고.'), next('ep_skypiea_a3')] },
-      { label: '카르마와 함께 주민의 허락을 얻어 유적 외곽을 살핀다', hint: '함부로 손대지 않는 외부인을 카르마가 지켜본다', values: { loyalty: D },
+      { label: '카르마와 함께 유적을 살필 허락을 받는다', hint: '함부로 손대지 않는 외부인을 카르마가 지켜본다', values: { loyalty: D },
         fx: [flag(F('a_respect')), flag(F('karma_trust')), log('카르마는 무너진 벽 앞에서 걸음을 멈추고 기도했다. {name}도 기다렸다. 그것으로 충분했다.'), next('ep_skypiea_a3')] },
       { label: '루미의 문서와 유물 목록을 하나하나 대조한다', hint: '물건이 아니라 그 물건의 내력이 보인다', values: { romance: D },
         fx: [flag(F('lumi_trust')), flag(F('a_clue')), next('ep_skypiea_a3'), log('루미가 다이얼 바닥의 옛 주인 표식을 찾았다. 사라진 황금보다 먼저 찾을 집들이 생겼다.', 'light')] },
@@ -475,8 +535,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '3주차 · 구름 숲의 발자국',
-    body: '보물 사냥꾼들은 유적 외곽의 닫힌 길로 짐을 나른다. 구름에 익숙하지 않은 발이 숲 바닥에 자국을 남긴다. 카르마가 앞장서고, 루미는 언덕 위에서 거울 다이얼로 신호를 보낸다. 통로 안쪽에서 누군가 벽을 두드리는 소리. 그들은 유적 안쪽으로 이어지는 길을 찾고 있다.',
+    title: '구름 숲의 발자국',
+    body: '유적을 지키는 샨디아 전사 카르마가 구름 위에 남은 발자국을 보여 준다. 짐꾼들은 닫힌 길로 돌아들어 갔다. 통로 너머에서 돌벽을 두드리는 소리가 난다.',
     doors: [
       { label: '발자국을 쫓아 보급 창고를 찾아낸다', hint: '그들의 물자가 어디에 쌓이는지 안다', when: [has(F('a_clue'))], values: { inquiry: D },
         fx: [flag(F('a_depot')), log('구름 숲 안쪽 쓰러진 나무 아래, 충격 다이얼과 화약 상자가 쌓여 있었다.'), next('ep_skypiea_a4')] },
@@ -485,13 +545,17 @@ export const EP_SKYPIEA: Turning[] = [
                then: [flag(F('a_depot')), log('정찰병 열둘, 다이얼 함정꾼 하나, 그리고 아직 모습을 보이지 않는 두목. 창고 자리도 알았다.')],
                else: [{ op: 'hp', add: -15 }, log('짐꾼 하나가 얼굴을 알아보았다. 도망쳐 나오는 데 그쳤다.')] }, next('ep_skypiea_a4')] },
       { label: '좁은 통로로 정면 돌파한다', hint: '싸움이 난다. 조직이 {name}을(를) 알게 된다', values: { dominion: D }, danger: true,
-        fx: [fight('b_gramon_scout', false, { win: 'ep_skypiea_a4', lose: 'ep_skypiea_a4', back: 'ep_skypiea_a4' })] },
+        fx: [log('전투 · 구름 숲 좁은 통로 / 그라몬 일당 정찰병'), fight('b_gramon_scout', false, { win: 'ep_skypiea_a4', lose: 'ep_skypiea_a4', back: 'ep_skypiea_a4' })] },
     ],
   },
   {
     id: 'ep_skypiea_a4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'wiper' },
-    title: '4주차 · 두 마을의 다른 기억',
-    body: '도굴 소식이 퍼지자 주민 회의가 열린다. 샨디아 노인들은 외부인의 출입을 막자 하고, 엔젤섬 사람들은 함께 관리하고 기록을 열자 한다. 둘 다 지난 사백 년이 가르친 대로 말한다. 회의장 뒤편에서 바주카를 멘 와이퍼가 담배를 문 채 {name}을(를) 본다. 말로 묻지 않는다. 이 외부인이 지난 몇 주 실제로 무엇을 했는지, 그는 이미 들었다.',
+    title: '와이퍼의 질문',
+    intro: [
+      '샨디아 사람들은 유적 문을 닫자고 한다. 엔젤섬 쪽은 두 마을이 함께 지켜야 짐꾼을 막을 수 있다고 한다.',
+      '샨디아 전사 와이퍼가 두 마을 대표 사이에 선다. “무엇을 잃었는지부터 알아야 지키지. 네가 직접 본 게 뭐지?”',
+    ],
+    body: '와이퍼는 내가 본 일을 듣고 유적 바깥을 지킬 사람들을 모으려 한다.',
     doors: [
       { label: '샨디아 쪽의 유적 보호안에 힘을 싣는다', hint: '와이퍼가 처음으로 담배를 내린다', when: [has(F('a_respect')), not(F('a_force'))], values: { loyalty: D },
         fx: [flag(F('a_shandia')), flag(F('karma_trust')), log('와이퍼는 짧게 고개를 끄덕였다. 말보다 지난 몇 주가 먼저 와 있었다. 그날이 오면 주민들 앞은 내가 막는다, 놈은 네가 상대해라.'), next('ep_skypiea_a5')] },
@@ -505,11 +569,11 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '5주차 · 기억의 방',
-    body: '그라몬의 조직이 유적 아래 통로를 찾아냈다는 소식이 들어온 밤, 루미가 옛 기록과 새 표식을 맞춰 숨은 공간을 찾아낸다. 다이얼 장치로 잠긴 문, 무너진 통로, 벽화. 고대의 무기나 세계의 비밀 같은 건 없다. 샨도라 사람들이 남긴 작은 보관소다. 그 문 앞에서 보물 사냥꾼의 현장 책임자, 함정꾼 볼트가 장치를 만지고 있다.',
+    title: '기억의 방',
+    body: '루미가 오래된 기록을 보고 숨은 보관실을 찾아낸다. 벽에는 옛 마을 사람들이 남긴 그림이 있다. 문 앞에서는 도굴꾼의 현장 책임자 볼트가 다이얼 장치를 뜯고 있다.',
     doors: [
       { label: '볼트와 맞선다', hint: '통로마다 함정이 깔려 있다', values: { ambition: D }, danger: true,
-        fx: [fight('b_gramon_chief', false, { win: 'ep_skypiea_a5r', lose: 'ep_skypiea_a6', back: 'ep_skypiea_a6' })] },
+        fx: [log('전투 · 샨도라 지하 보관실 앞 / 도굴 현장 책임자 볼트'), fight('b_gramon_chief', false, { win: 'ep_skypiea_a5r', lose: 'ep_skypiea_a6', back: 'ep_skypiea_a6' })] },
       { label: '루미가 짚은 벽화의 길로 돌아 들어가 기록부터 챙긴다', hint: '잘못된 길을 피하면 싸우지 않고 닿는다', when: [has(F('lumi_trust'))], values: { inquiry: D },
         fx: [flag(F('a_record')), log('벽화의 새가 가리키는 쪽으로만 걸었다. 볼트가 문을 여는 사이 기록 상자는 루미의 품에 있었다.'), next('ep_skypiea_a6')] },
       { label: '함정투성이 통로에서 물러난다', hint: '목숨은 지킨다. 방은 남의 손에 남는다', values: { peace: D },
@@ -518,8 +582,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a5r', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '샨디아의 젊은 전사 카르마' },
-    title: '5주차 · 황금 장식과 오래된 기록',
-    body: '볼트가 연막 다이얼을 터뜨리고 달아난 뒤, 방 안에는 황금 장식 몇 점과 빛바랜 기록이 남아 있다. 기록의 값은 금보다 역사에 있다. 루미는 기록을 옮겨 적자고 하고, 카르마는 이곳이 알려지는 것 자체가 위험하다고 한다.',
+    title: '황금 장식과 오래된 기록',
+    body: '볼트가 달아난 방에 금장식과 빛바랜 기록이 남았다. 카르마가 문가에 선다. 「이 방을 누가 또 찾아낼지 몰라. 남길 거라면 지금 정해.」',
     doors: [
       { label: '루미의 뜻대로 기록을 옮겨 적는다', hint: '사라질 뻔한 이야기가 종이에 남는다', values: { romance: D },
         fx: [flag(F('lumi_trust')), flag(F('a_record')), next('ep_skypiea_a6'), log('루미가 벽화의 문장을 새 종이에 옮겼다. 오래전 이 방을 지킨 사람들의 이름이 남았다.', 'light')] },
@@ -533,14 +597,18 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '보물 사냥꾼 그라몬' },
-    title: '6주차 · 그라몬의 제안',
-    body: '쇠망치를 어깨에 걸친 덩치 큰 사내가 {name}의 숙소 앞에 앉아 있다. 그라몬. 나는 도굴꾼이 아니라 사업가다, 유적 일부를 값을 받고 바깥에 보이면 주민들한테도 이득이지. 반쯤은 맞는 말이다. 나머지 반은 유물을 몽땅 실어 청해의 암시장에 내다 파는 계획이다.',
+    title: '보물을 파는 그라몬',
+    intro: [
+      '도굴꾼을 이끄는 그라몬이 숙소 앞에서 내게 자리를 권한다. “저기 있는 거 다 아래에선 돈이야. 마을 사람들은 한 번도 만져 보지 못할 만큼.”',
+      '그가 유적 입구 쪽으로 쇠망치를 뉜다. “문이 안 열리면 부술 거야. 돈을 받을지 그 문 앞에 서 있을지 정해.”',
+    ],
+    body: '그라몬이 도굴에 가담하면 값을 나눠 주겠다고 한다.',
     doors: [
       { label: '제안을 거절하고 계획을 캐묻는다', hint: '그라몬의 경계가 높아진다. 주민들이 그 소식을 듣는다', values: { justice: D },
         fx: [{ op: 'fame', add: 5 }, log('그라몬은 웃으며 일어섰다. 아깝군. 그날 엔젤섬 사람들이 {name}에게 먼저 인사했다.'), next('ep_skypiea_a6p')] },
       { label: '받아들이는 척 손을 잡는다', hint: '조직의 배치와 창고를 안에서 본다', values: { ambition: D },
         fx: [flag(F('a_depot')), log('그라몬은 술잔을 채우며 보급 창고와 기억의 방으로 갈 날을 털어놓았다.'), next('ep_skypiea_a6p')] },
-      { label: '손을 잡고 유물 확보를 돕는다', hint: '돈과 장비가 생긴다. 두 사람의 얼굴이 굳는다', values: { greed: D },
+      { label: '돈을 받고 도굴에 가담한다', hint: '그라몬이 선금을 준다. 루미가 더는 기록을 보여 주지 않는다', values: { greed: D },
         fx: [flag(F('a_deal')), { op: 'money', add: 90000 }, log('루미는 그날 이후 기록 일부를 {name}에게 보여 주지 않았다.'), next('ep_skypiea_a6p')] },
       { label: '기록만 보고 유물은 두고 가라고 흥정한다', hint: '그라몬이 고개를 끄덕인다. 진심인지는 모른다', special: 'peace', values: { peace: D },
         fx: [log('그라몬은 좋다고 했다. 그날 밤에도 창고에는 화약 상자가 들어갔다.'), next('ep_skypiea_a6p')] },
@@ -548,28 +616,33 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a6p', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '6주차 · 결전 준비',
-    body: '그라몬이 조직원들을 이끌고 기억의 방으로 갈 날이 정해졌다. 남은 며칠 동안 무엇을 할지 정해야 한다. 카르마는 창끝을 갈고, 루미는 다이얼 장치의 도면을 펼친다.',
+    title: '결전 준비',
+    body: '그라몬이 며칠 뒤 보관실을 비울 거라는 소식이 온다. 카르마는 유적 밖에 사람을 세우고, 루미는 방을 잠글 장치를 살펴본다. 나는 남은 시간을 어디에 쓸지 정해야 한다.',
     doors: [
-      { label: '보급 창고를 습격해 장비를 줄인다', hint: '그날 그라몬의 망치가 가벼워진다', when: [has(F('a_depot'))], values: { freedom: D },
-        fx: [flag(F('a_sabotage')), log('충격 다이얼 상자 절반을 구름 아래로 굴려 버렸다.'), next('ep_skypiea_a7')] },
+      { label: '보급 창고로 들어가 훔친 물건의 목록을 챙긴다', hint: '상자에서 운송 목록을 빼낼 수 있다. 창고 경비가 달려든다', when: [has(F('a_depot'))], values: { freedom: D }, danger: true,
+        fx: [flag(F('a_record')), log('상자에 붙은 운송 목록을 빼내 안주머니에 넣는다. 목록에는 다이얼을 가져온 집까지 적혀 있다. 창고 경비가 소리를 듣고 달려든다.', 'light'),
+             log('전투 · 구름 숲 보급 창고 / 그라몬 일당 정찰병'), fight('b_gramon_scout', false, { win: 'ep_skypiea_a7', lose: 'ep_skypiea_a7', back: 'ep_skypiea_a7' }, true)] },
       { label: '주민들과 피난로를, 카르마와 진입로를 점검한다', hint: '그날 다치는 사람이 줄어든다', values: { loyalty: D },
         fx: [flag(F('a_evac')), flag(F('karma_trust')), next('ep_skypiea_a7'), log('카르마와 주민들이 유적 밖 안전한 길을 먼저 비웠다. 짐을 나르던 아이들이 그 길로 빠졌다.', 'light')] },
       { label: '준비 없이 곧장 결전에 나선다', hint: '계책은 없다. 망설임도 없다', values: { dominion: D },
         fx: [next('ep_skypiea_a7'), log('그라몬의 쇠망치 소리가 가까워졌다. 카르마가 길을 묻기 전 좁은 통로로 들어갔다.', 'light')] },
-      { label: '루미에게 다이얼 장치의 약점을 조사하게 한다', hint: '그날 강한 한 방을 미리 막을 수 있다', when: [has(F('lumi_trust'))], special: 'inquiry', values: { inquiry: D },
-        fx: [flag(F('a_sabotage')), log('루미는 도면 귀퉁이를 짚었다. 이 판을 빼면 충격이 절반도 안 나온다고.'), next('ep_skypiea_a7')] },
+      { label: '루미와 도난 물품에 찍힌 표식을 정리한다', hint: '짐꾼들 앞에서 어느 집 물건을 훔쳤는지 보여 줄 수 있다', when: [has(F('lumi_trust'))], special: 'inquiry', values: { inquiry: D },
+        fx: [flag(F('a_record')), log('루미와 목록을 펼쳐 도난당한 물건마다 주인의 표식을 옮겨 그린다. 짐꾼에게 상자 안을 확인해 보라고 할 수 있다.', 'light'), next('ep_skypiea_a7')] },
     ],
   },
   {
     id: 'ep_skypiea_a7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '7주차 · 황금의 수호자',
-    body: '그라몬이 조직원들을 이끌고 기억의 방으로 향한다. 유적을 부술 생각은 없지만 필요하면 기둥 몇 개는 무너뜨릴 사내다. 외곽에서는 카르마가 대원들을 막고, 와이퍼는 주민들 앞을 지킨다. 그라몬과의 결판은 와이퍼의 몫이 아니다. 충격 다이얼을 박은 쇠망치가 바닥을 찍을 때마다 통로가 흔들린다. 지금 맞서면 크게 다칠 수 있다. 물러날 길은 아직 열려 있다.',
+    title: '망치 앞의 보관실',
+    intro: [
+      '와이퍼가 주민을 구름 숲 밖으로 내보내는 사이 그라몬이 유적 안으로 들어온다. 그가 쇠망치로 기둥을 찍자 벽의 그림 위로 돌가루가 쏟아진다.',
+      '짐꾼들은 상자를 안은 채 서 있다. 그들 가운데 시장에서 물건을 잃어버린 이도 있다.',
+    ],
+    body: '그라몬 바로 뒤에 기록을 보관한 방이 있다. 짐꾼들을 설득하거나 그라몬을 직접 막을 수 있다.',
     doors: [
-      { label: '루미의 물품 목록을 운반책에게 보여 준다', hint: '훔친 물건이 드러나자 고용된 운반책들이 짐을 내려놓는다', when: [has(F('a_record'))], values: { inquiry: D }, danger: true,
-        fx: [flag(F('a_sabotage')), next('ep_skypiea_a8'), log('루미의 목록에서 자기 물건을 알아본 운반책이 상자를 내려놨다. 다른 이들도 손을 떼기 시작했다.', 'light')] },
-      { label: '그라몬의 쇠망치 앞에 선다', hint: '한 번의 공격이 무겁다. 좁은 통로에서는 더하다', values: { dominion: D }, danger: true,
-        fx: [fight('b_gramon', false, { win: 'ep_skypiea_a8', lose: 'ep_skypiea_a8b', back: 'ep_skypiea_a8b' })] },
+      { label: '운반책에게 기록을 보여 주고 상자를 열어 보라고 한다', hint: '자기 물건이 든 걸 본 주민들이 하나씩 짐을 내린다', when: [has(F('a_record'))], values: { inquiry: D }, danger: true,
+        fx: [flag(F('a_sabotage')), next('ep_skypiea_a8'), log('내가 내민 기록을 보며 상자를 연 짐꾼이 제 집 표식이 새겨진 다이얼을 꺼낸다. 다른 짐꾼도 하나씩 상자를 내려놓자 그라몬은 남은 인원을 데리고 물러난다.', 'light')] },
+      { label: '그라몬과 싸워 보관실을 지킨다', hint: '좁은 통로에서 쇠망치를 상대한다. 이기면 보관실을 되찾는다', values: { dominion: D }, danger: true,
+        fx: [log('전투 · 샨도라 유적 안쪽 / 도굴꾼 두목 그라몬'), fight('b_gramon', false, { win: 'ep_skypiea_a8', lose: 'ep_skypiea_a8b', back: 'ep_skypiea_a8b' })] },
       { label: '물러나 주민들과 와이퍼에게 맡긴다', hint: '목숨은 남는다. 방이 어떻게 될지는 모른다', values: { peace: D },
         fx: [next('ep_skypiea_a8b'), log('와이퍼가 주민들과 통로를 지키는 동안 물러났다. 기억의 방 앞에는 그라몬의 사람들이 남았다.', 'light')] },
       { label: '그라몬의 유물 상자를 구름 끝까지 날라 준다', hint: '약속한 몫이 기다린다', when: [has(F('a_deal'))], special: 'greed', values: { greed: D },
@@ -578,8 +651,12 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 남겨진 황금',
-    body: '그라몬은 운반책들이 짐을 내려놓자 금 간 쇠망치를 끌고 구름 아래로 물러났다. 조직원들도 흩어졌다. 이제 주민들은 유적과 기록을 어떻게 할지 정해야 한다. {name}은(는) 그 결정에 말을 보탤 수 있지만, 섬의 내일을 혼자 정할 수는 없다.',
+    title: '지켜 낸 기록을 펼치다',
+    intro: [
+      '그라몬이 물러나고, 주민들이 유적 문 앞에 모인다. 루미는 발에 밟힌 종이를 펴서 누구의 물건인지 확인한다.',
+      '샨디아 사람은 기록을 빼앗기지 않을 곳을 찾고, 엔젤섬 사람은 무엇을 발견했는지 알고 싶어 한다. 루미가 탁자 한쪽을 비워 둔다.',
+    ],
+    body: '남은 기록을 어디에 보관할지 두 마을이 결정한다. 내가 가져온 것을 탁자에 올릴 수 있다.',
     doors: [
       { label: '두 마을이 함께 기록을 보관하도록 돕는다', hint: '위험한 통로는 감추고 이야기는 나눈다', when: [has(F('karma_trust')), has(F('lumi_trust')), has(F('a_record')), has(F('a_joint')), not(F('a_deal'))], values: { justice: D },
         fx: [{ op: 'fame', add: 15 }, log('루미가 공동 기록의 첫 장을 쓰고, 카르마가 그 상자를 지켰다. 모든 갈등이 사라진 것은 아니었다. 그래도 둘은 같은 탁자에 앉았다.'),
@@ -593,8 +670,8 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a8b', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 사람들의 결정',
-    body: '그라몬이 물러나거나 유물 몇 점과 함께 사라진 뒤, 두 마을 사람들이 다시 모인다. 무너진 통로, 비어 버린 진열 자리, 남은 기록. 누가 무엇을 지켰고 누가 무엇을 놓쳤는지, 사람들은 다 알고 있다.',
+    title: '사람들의 결정',
+    body: '두 마을 대표가 다시 유적에 모인다. 부서진 통로 앞에서 살아남은 기록을 점검하니, 어떤 물건을 지켜 냈는지가 하나씩 드러난다.',
     doors: [
       { label: '열린 유적을 찾아올 손님들을 맞을 채비를 돕는다', hint: '교류가 생기고 위험도 함께 온다', when: [has(F('lumi_trust')), has(F('a_open')), has(F('a_record')), not(F('a_deal'))], values: { inquiry: D },
         fx: [{ op: 'fame', add: 10 }, log('샨도라의 이야기 일부가 청해의 학자들에게 전해졌다. 루미는 안내문을 쓰고, 노인들은 걱정스러운 얼굴로 그것을 읽었다.'),
@@ -609,19 +686,19 @@ export const EP_SKYPIEA: Turning[] = [
   },
   {
     id: 'ep_skypiea_a9', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '8주차 · 이어지는 바다',
-    body: '떠나기 전날, 구름 끝에 카르마와 루미가 나와 있다. 와이퍼는 멀찍이 서서 선물 대신 짧게 고개만 끄덕인다. 하늘섬은 세계의 역사를 바꾸지 않았다. 다만 {name}의 인생에 두 달이 남았다.',
+    title: '이어지는 바다',
+    body: '떠나기 전날 루미가 구름 나루에 나와 있다. 멀찍이 서 있는 와이퍼가 눈이 마주치자 짧게 고개를 끄덕인다. 유적을 처음 봤을 때처럼 낯선 눈은 아니다.',
     doors: [
       { label: '카르마에게서 샨디아 문양 장식을 받는다', hint: '유적을 함께 지킨 증표다', when: [has(F('karma_trust'))], values: { loyalty: D },
-        fx: [flag(F('after_done')), { op: 'person', kind: 'ally', relation: '샨디아의 젊은 전사 카르마' }, { op: 'base', key: 'wil', add: 1 },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('after_done')), { op: 'person', kind: 'ally', relation: '샨디아의 젊은 전사 카르마' }, { op: 'base', key: 'wil', add: 1 },
              log('카르마는 문양이 새겨진 작은 장식을 손바닥에 올려 주었다. 다음에 오면 이번엔 손님으로 맞겠다고.')] },
       { label: '루미에게서 다이얼과 유적 기록 노트를 받는다', hint: '하늘섬의 지식이 종이에 담겨 있다', when: [has(F('lumi_trust'))], values: { inquiry: D },
-        fx: [flag(F('after_done')), { op: 'person', kind: 'ally', relation: '스카이피아의 기록 조사자 루미' }, { op: 'base', key: 'int', add: 1 },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('after_done')), { op: 'person', kind: 'ally', relation: '스카이피아의 기록 조사자 루미' }, { op: 'base', key: 'int', add: 1 },
              log('노트 첫 장에는 다이얼 다루는 법이, 마지막 장에는 {name}의 이름이 적혀 있었다.')] },
       { label: '구름 바다를 벗어나 청해로 내려간다', hint: '하늘섬이 점점 멀어진다', values: { ambition: D },
         fx: [flag(F('after_done')), log('구름 바다가 등 뒤에서 닫혔다. 이곳에 무엇을 남겼는지 오래 돌아보았다.', 'light')] },
       { label: '카르마에게 청해를 함께 보자고 한다', hint: '샨디아 전사 하나가 구름 아래 세상을 보러 따라나선다', when: [has(F('karma_trust')), has(F('lumi_trust')), not(F('a_deal'))], special: 'romance', values: { romance: D },
-        fx: [flag(F('after_done')), { op: 'person', kind: 'crew', relation: '청해를 보러 따라나선 샨디아 전사 카르마', years: 1 },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('after_done')), { op: 'person', kind: 'crew', relation: '청해를 보러 따라나선 샨디아 전사 카르마', years: 1 },
              log('카르마는 와이퍼에게 한참 고개를 숙이고 나서야 짐을 들었다. 한 해만, 바다 아래 세상을 보고 돌아오겠다고.')] },
     ],
   },

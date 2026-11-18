@@ -25,7 +25,9 @@ import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow } from './vow';
-import { buildVoyage, voyageChoices, voyageId } from './voyage';
+import { buildVoyage, ENTRY_PREFIX, requestArrival, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
+import { gateOf } from '../data/voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -55,18 +57,21 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = chosenActivity ?? activityOf(s, r);
+  const island = s.hero.island;
   if (chosenActivity === 'rest') logLine(s, '한 철 동안 위험한 일을 멈추고 몸을 쉬게 했다.', 'heavy', 'life');
   dailyLine(s, act, r);
   growPart(s, act, r);
   recoverHealthPart(s, chosenActivity === 'rest' ? 'chosenRest' : act === 'rest' ? 'rest' : 'usual');
+  applyEnvironmentPart(s, act, act === 'train' ? mainBranch(s) : null);
   if (chance(r, V.lines.minorP)) runMinor(s, r);
-  const minorFightDue = chosenActivity !== 'rest' && s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, V.fight.minorP);
+  const minorFightDue = chosenActivity !== 'rest' && s.hero.alive && MINOR_FIGHT_STANDINGS.includes(s.hero.standing) && chance(r, localFightChance(s));
   if (s.part === V.partsPerYear - 1 && !firstLap(s)) yearTurn(s, r);   // 병 · 기연은 실제 한 해에 한 번
   turningPoint(s, r);
   notePath(s);
   if (s.hero.alive) nextPart(s, r);
   endIfDead(s);
-  if (minorFightDue && s.hero.alive && !s.pending) minorFight(s, r);
+  if (minorFightDue && s.hero.alive && !s.pending && gateOf(s.hero.island) === gateOf(island)) minorFight(s, r);
+  if (s.hero.island === island) delete s.hero.skyAcclimating;
 }
 
 /**
@@ -154,7 +159,7 @@ export function growPart(s: Life5, act: Activity, r: Rng): void {
     case 'train': train(s, r, ageMult(s.age)); return;
     case 'study':
       statUp(s, r, ['int'], G.statP.study * age);
-      addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation'));
+      addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation') * growthMultiplier(s, 'observation'));
       return;
     case 'roam': statUp(s, r, ['luk', 'spd'], G.statP.roam * age); return;
     case 'work': h.money += s.age <= V.activity.kidAge ? G.kidWorkMoney : G.workMoney; return;   // 아이의 품삯은 대개 식구의 밥이 된다
@@ -182,7 +187,7 @@ function train(s: Life5, r: Rng, age: number): void {
     add += G.breakAdd;
     logLine(s, `수련 중에 무언가를 붙잡았다. ${BRANCH_NAMES[BRANCH_ID[b]]}의 벽 하나가 무너졌다.`, 'heavy', 'growth');
   }
-  addMastery(s, b, add);
+  addMastery(s, b, add * growthMultiplier(s, b));
   s.growth.pref[b] += G.pref.train;            // 갈고닦을수록 그 길이 더 좋아진다
   statUp(s, r, G.branchStats[b], G.statP.train * age);
 }
@@ -271,21 +276,18 @@ function partCompanions(s: Life5): void {
 /** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
 export function voyage(s: Life5): void {
   const h = s.hero;
-  if (s.queue.length) return;                  // 이어지는 이야기가 줄 서 있으면 그 섬에 머문다
+  const scene = s.pending?.kind === 'door' ? s.pending.turning : '';
+  if (s.queue.length || scene.startsWith('ep_') || scene.startsWith(VOYAGE_PREFIX) || scene.startsWith(ENTRY_PREFIX)) return;
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
   const military = h.standing === 'marine' || h.standing === 'cp';
   if (!s.sail && !chance(r, V.voyage.p)) return;
   if (!military && !s.sail) { s.sail = true; return; }   // 다음 멈춤에 항로를 고른다
   s.sail = false;                              // 해군은 명령으로, 고를 틈이 없던 사람은 바람 닿는 대로
-  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island);
+  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island && (!military || gateOf(p) !== 'wano'));
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
-  const first = !s.flags.includes(`at:${next}`);
-  h.island = next;
-  if (first) s.flags.push(`at:${next}`);
-  if (military) logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${next} 지부에 처음 배속되었다.` : `전근 명령을 받아 다시 ${next}(으)로 배속되었다.`), 'light');
-  else logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
+  requestArrival(s, next, h.sea, military ? 'orders' : 'drift');
 }
 
 /** 항로 고르기를 띄운다. 띄웠으면 true */

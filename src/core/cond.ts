@@ -8,6 +8,7 @@ import { VALUE_NAME } from '../data/values';
 import { rating5 } from './power';
 import { personIs } from './needs';
 import { isDeep } from './values';
+import { hasEntryContact } from './voyage';
 import type { Cond, Life5, Wealth } from './types';
 
 const WEALTH_ORDER: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
@@ -29,6 +30,8 @@ export function check(s: Life5, c: Cond): boolean {
     case 'value': return isDeep(s, c.id) === c.deep;
     case 'strength': return s.strengths.includes(c.id) === c.has;
     case 'money': return h.money >= c.min;
+    case 'entryContact': return hasEntryContact(s, c.gate);
+    case 'weapon': return (h.weapon === c.id) === c.has;
     case 'fame': return h.fame >= c.min;
     case 'grade': return c.is.includes(GRADES.find(([limit]) => rating5(s) < limit)?.[1] ?? GRADE_TOP);
     case 'turningSeen': return ((s.seenCount[c.id] ?? 0) > 0) === c.has;
@@ -75,6 +78,8 @@ function reason(s: Life5, c: Cond): string {
     case 'value': return c.deep ? `${VALUE_NAME[c.id]}이(가) 아직 깊지 않다` : `${VALUE_NAME[c.id]}이(가) 너무 깊다`;
     case 'strength': return c.has ? `「${strengthName(c.id)}」이(가) 아직 없다` : `이미 「${strengthName(c.id)}」이(가) 있다`;
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
+    case 'entryContact': return c.gate === 'zou' ? '비브르 카드가 없다' : '코팅을 도와줄 장인 인연이 없다';
+    case 'weapon': return c.has ? '이 무기를 가지고 있지 않다' : '이미 이 무기를 가지고 있다';
     case 'fame': return '아직 이름이 알려지지 않았다';
     case 'grade': return '아직 상대가 인정할 전투력이 아니다';
     case 'turningSeen': return '이미 지나간 만남이다';

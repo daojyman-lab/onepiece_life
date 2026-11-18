@@ -157,7 +157,7 @@ function die(s: Life5, cause: string): void {
 }
 
 function hasCrew(s: Life5, role: 'medic' | 'navigator'): boolean {
-  return s.people.some((p) => p.alive && p.crew?.role === role);
+  return s.people.some((p) => p.alive && p.crew?.role === role && p.crew.injuredMonths <= 0 && !p.crew.separatedMonths);
 }
 
 function talentMult(s: Life5, key: 'illness' | 'oldAge'): number {

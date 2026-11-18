@@ -1,6 +1,8 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
 import { V } from '../data/balance';
 import { RETIRED_FRUIT_IDS } from '../shared/data/fruits';
+import { EPISODE_TURNINGS } from '../data/episodes';
+import { entryPass } from '../data/voyage';
 import { VALUE_IDS } from '../data/values';
 import { personalityCell } from './personality';
 import { topValues } from './values';
@@ -13,6 +15,11 @@ import type { Life5 } from './types';
 type Obj = Record<string, unknown>;
 
 const isObj = (x: unknown): x is Obj => typeof x === 'object' && x !== null && !Array.isArray(x);
+
+const ENTRY_PASS_CHOICES = EPISODE_TURNINGS.flatMap((scene) => scene.doors.flatMap((door, i) =>
+  door.fx.flatMap((effect) => effect.op === 'entryPass'
+    ? [{ choice: `${scene.id}#${i}`, flag: entryPass(effect.gate), home: effect.gate }] : []),
+));
 
 /** 인생의 맨 위 칸 가운데 목록이어야 하는 것과 객체여야 하는 것 */
 const LIFE_ARRAYS = ['log', 'timeline', 'people', 'flags', 'queue', 'tried', 'known', 'closed', 'recentLines'] as const;
@@ -60,6 +67,10 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  // 증표 기능이 생기기 전에 보상 문을 고른 인생도 그 선택을 인정한다.
+  for (const { choice, flag, home } of ENTRY_PASS_CHOICES) {
+    if (life.hero.home !== home && life.tried.includes(choice) && !life.flags.includes(flag)) life.flags = [...life.flags, flag];
+  }
   if (life.hero.fruit?.id === 'gomu') life.hero.fruit.id = 'nika';
   else if (life.hero.fruit && RETIRED_FRUIT_IDS.has(life.hero.fruit.id)) {
     life.hero.fruit = null;

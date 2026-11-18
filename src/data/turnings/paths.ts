@@ -441,9 +441,8 @@ export const PATHS: Turning[] = [
       { label: '바늘을 따라 사막의 왕국으로 간다', hint: '위대한 항로 깊숙이 들어간다', values: { romance: D },
         fx: [{ op: 'move', island: '알라바스타 왕국', sea: 'gl_first' }, { op: 'log', text: '모래바람을 헤치고 사막의 왕국 알라바스타에 닿았다.', weight: 'heavy' }] },
       { label: '이 바다에서 더 단련한다', hint: '서두르지 않는다', values: { peace: D }, fx: [ { op: 'log', text: '기록 지침을 내려놓고 익숙한 바다에서 다시 돛을 손봤다. 사막 쪽 바람은 뒤로 흘렀다.', weight: 'light' }] },
-      { label: '바늘 대신 하늘섬의 소문을 쫓는다', hint: '돌아오지 못할 수도 있다', special: 'inquiry', values: { inquiry: D }, danger: true,
-        fx: [{ op: 'hp', add: -15 }, { op: 'move', island: '스카이피아', sea: 'gl_first' }, { op: 'base', key: 'int', add: 1 },
-             { op: 'log', text: '솟구치는 해류를 타고 구름 위의 섬 스카이피아에 올랐다.', weight: 'heavy' }, { op: 'timeline', text: '하늘섬에 올랐다' }] },
+      { label: '바늘 대신 하늘섬의 소문을 쫓는다', hint: '자야 앞바다에서 구름 위로 오르는 길을 찾는다', special: 'inquiry', values: { inquiry: D },
+        fx: [{ op: 'log', text: '하늘섬 이야기를 들은 곳에 작은 표시를 하고 자야 쪽으로 돛을 올렸다.', weight: 'light' }, { op: 'move', island: '스카이피아', sea: 'gl_first' }] },
     ],
   },
   {
@@ -479,7 +478,7 @@ export const PATHS: Turning[] = [
     title: '사황의 바다', body: '신세계의 더 깊은 곳, 사황들이 다스리는 바다의 소문이 들려온다. 그 끝에 마지막 섬이 있다고 한다.',
     doors: [
       { label: '닫힌 나라 와노쿠니로 간다', hint: '사무라이와 괴물의 나라다', values: { ambition: D },
-        fx: [{ op: 'move', island: '와노쿠니', sea: 'nw_late' }, { op: 'log', text: '폭포를 거슬러 올라 닫힌 나라 와노쿠니에 들어섰다.', weight: 'heavy' }, { op: 'timeline', text: '와노쿠니에 닿았다' }] },
+        fx: [{ op: 'log', text: '출항 전에 거센 물살을 견디도록 밧줄을 한 번 더 묶었다.', weight: 'light' }, { op: 'move', island: '와노쿠니', sea: 'nw_late' }] },
       { label: '이 바다에 머문다', hint: '여기서도 충분히 험하다', values: { peace: D }, fx: [ { op: 'log', text: '사황의 바다로 가는 해도는 접어 뒀다. 지금 항로의 거친 물살도 가볍지 않았다.', weight: 'light' }] },
       { label: '거인의 나라를 찾아간다', hint: '전사들의 나라에서 무엇을 얻을지 모른다', values: { romance: D },
         fx: [{ op: 'move', island: '엘바프', sea: 'nw_late' }, { op: 'base', key: 'str', add: 1 },

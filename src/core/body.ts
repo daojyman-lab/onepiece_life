@@ -4,6 +4,7 @@ import { josa } from '../shared/core/josa';
 import { pick, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { logLine } from './log';
+import { altitudeEffect } from './environment';
 import type { Branch, Life5, Limb, LimbState, StatKey, Stats, WoundPart } from './types';
 
 export const LIMBS: readonly Limb[] = ['eyeL', 'eyeR', 'armL', 'armR', 'legL', 'legR'];
@@ -59,6 +60,8 @@ export function effectiveStats5(s: Life5): Stats {
   const blind = EYES.every((l) => factorOf(s, l) === 0);
   if (blind && s.growth.tier.observation < V.limb.blindSight) for (const k of STAT_KEYS) st[k] *= V.limb.bothEyes;
   for (const k of STAT_KEYS) st[k] = Math.max(st[k], h.base[k] * V.limb.floor);
+  const altitude = altitudeEffect(s);
+  if (altitude) for (const k of ['str', 'spd', 'vit'] as const) st[k] *= altitude.physical;
   return st;
 }
 

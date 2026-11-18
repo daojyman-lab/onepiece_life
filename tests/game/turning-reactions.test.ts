@@ -11,7 +11,7 @@ function reactionPaths(fx: Fx[], reacted = false): boolean[] {
         ...reactionPaths(op.then, seen),
         ...reactionPaths(op.else ?? [], seen),
       ]);
-    } else if (op.op === 'log' || op.op === 'fight' || op.op === 'die') {
+    } else if (op.op === 'log' || op.op === 'fight' || op.op === 'die' || op.op === 'buyWeapon' || op.op === 'serviceWeapon') {
       paths = paths.map(() => true);
     }
   }

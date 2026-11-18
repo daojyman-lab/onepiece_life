@@ -2,6 +2,7 @@
 import { B } from '../shared/data/balance';
 import { makeEnemy } from '../shared/data/bosses';
 import { FRUIT_BY_ID } from '../shared/data/fruits';
+import { ITEM_BY_ID } from '../shared/data/items';
 import { HERO_TRAIT_BY_ID, SPECIES_PASSIVES } from '../shared/data/passives';
 import { SEA_BY_ID, SEAS } from '../shared/data/seas';
 import { TALENT_BY_ID } from '../shared/data/talents';
@@ -17,6 +18,7 @@ import { VALUE_TACTIC } from '../data/values';
 import { fullName } from './birth';
 import { canUse, effectiveStats5, limbFactor, loseLimb, WOUND_PART_NAME } from './body';
 import { applyFx } from './fx';
+import { environmentOf, islandImmunity } from './environment';
 import { BRANCH_ID, power5, tierMult, topTier } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
@@ -79,13 +81,14 @@ export function dangerOf(s: Life5): number {
 }
 
 /** 상대의 힘 ÷ 내 힘. 1보다 크면 상대가 세다 */
-export function gapOf(s: Life5, e: EnemySpec): number {
-  return foePower(e) / Math.max(F.minPower, power5(s));
+export function gapOf(s: Life5, e: EnemySpec, atSea?: true): number {
+  return foePower(e) / Math.max(F.minPower, power5(s) * pressureMultiplier(s, atSea));
 }
 
 /** 졌을 때 다치고, 몸 한 곳을 잃고, 죽을 확률. 목숨을 걸지 않은 싸움에서는 죽지 않는다 */
-export function riskOf(s: Life5, e: EnemySpec, lethal: boolean): { injury: number; limb: number; death: number } {
-  const gap = gapOf(s, e);
+export function riskOf(s: Life5, e: EnemySpec, lethal: boolean, atSea?: true): { injury: number; limb: number; death: number } {
+  if (e.spar) return { injury: 0, limb: 0, death: 0 };
+  const gap = gapOf(s, e, atSea);
   return {
     injury: clamp(F.injuryBase + F.injuryPerGap * (gap - F.injuryGapFrom), F.injuryFloor, F.injuryCap),
     limb: clamp(F.limbPerGap * (gap - F.limbGapFrom), 0, F.limbCap),
@@ -153,23 +156,26 @@ function aimMult(s: Life5): number {
  * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
  */
 /** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 뒤 가장 높은 단계의 배율을 곱한다 (heroUnit5와 같다) */
-export function heroFightStats(s: Life5): Stats {
+export function heroFightStats(s: Life5, atSea?: true): Stats {
   const st: Stats = effectiveStats5(s);
-  const m = tierMult(topTier(s));
+  const m = tierMult(topTier(s)) * pressureMultiplier(s, atSea);
   for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
   return st;
 }
 
-export function heroUnit5(s: Life5): CUnit {
+function pressureMultiplier(s: Life5, atSea?: true): number {
+  return atSea && s.hero.fruit && !islandImmunity(s) ? environmentOf(s)?.pressure?.combat ?? 1 : 1;
+}
+
+export function heroUnit5(s: Life5, atSea?: true): CUnit {
   const h = s.hero;
-  const st: Stats = effectiveStats5(s);
-  const m = tierMult(topTier(s));
-  for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
+  const st = heroFightStats(s, atSea);
   const health = C.hp.healthFloor + (1 - C.hp.healthFloor) * h.hp / V.hp.max;
   const maxHp = Math.round((C.hp.base + st.vit * C.hp.perVit) * health);
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
   const top = topValues(s, 1)[0];
   const aim = aimMult(s);
+  const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
   const traits = s.strengths.filter((id) => STRENGTH_TRAIT[id]).map((id) => HERO_TRAIT_BY_ID[STRENGTH_TRAIT[id]]?.mods);
   const u: CUnit = {
     key: 'hero', name: fullName(h), side: 'L', hero: true, leader: true, role: 'hero',
@@ -180,7 +186,7 @@ export function heroUnit5(s: Life5): CUnit {
     skills: heroSkills(s),
     tactic: top ? VALUE_TACTIC[top] : 'endurance',
     retreatAt: s.strengths.includes('rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
-    weapon: null, consumables: [],
+    weapon: item?.branch && item.mult ? { branch: item.branch, mult: item.mult, seastone: item.seastone ?? false } : null, consumables: [],
     guard: 0, guardTurns: 0, evade: 0, evadeTurns: 0, buff: 0, buffTurns: 0, bound: 0, sealed: 0,
     pGuard: 0, pDodge: 0, pBuff: 0, lastBig: false,
     faction: FACTION[h.standing] ?? 'civil', species: h.species, gender: h.gender, age: s.age,
@@ -198,10 +204,14 @@ export function heroUnit5(s: Life5): CUnit {
  * 주인공과 동료, 상대와 간부로 전투를 꾸려 끝까지 자동으로 돌린다.
  * 짝 짓기는 v4 defaultAssign과 같다: 주인공은 우두머리, 싸우는 동료(선봉 · 지원)는 간부를 차례로 맡고 남으면 우두머리.
  */
-function fightBattle(s: Life5, foe: EnemySpec): BattleState {
-  const crew = s.people.filter((p) => p.alive && p.kind === 'crew' && p.crew && p.crew.injuredMonths <= 0);
+export function combatCrew(s: Life5): Person[] {
+  return s.people.filter((p) => p.alive && p.kind === 'crew' && p.crew && p.crew.injuredMonths <= 0 && !p.crew.separatedMonths);
+}
+
+function fightBattle(s: Life5, foe: EnemySpec, atSea?: true): BattleState {
+  const crew = foe.spar ? [] : combatCrew(s);
   const stage = SEA_BY_ID[s.hero.sea].stage;   // v5에는 단계가 없으니 지금 있는 바다의 단계로
-  const units: CUnit[] = [heroUnit5(s), ...crew.map((p) => crewUnit(p, stage))];
+  const units: CUnit[] = [heroUnit5(s, atSea), ...crew.map((p) => crewUnit(p, stage))];
   const enemyStart = units.length;
   units.push(enemyUnit(foe, true, 0));
   foe.officers.forEach((o, i) => units.push(enemyUnit(o, false, i + 1)));
@@ -215,26 +225,26 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
   return runBattle(startBattle(units, assign, seed, false), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
-  const battle = fightBattle(s, foe);
-  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}) };
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, atSea?: true): void {
+  const battle = fightBattle(s, foe, atSea);
+  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}), ...(atSea ? { atSea } : {}) };
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
-export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean, next?: FightNext): void {
+export function askFight(s: Life5, foeId: string, lethal: boolean, forced: boolean, next?: FightNext, atSea?: true): void {
   const known = FOES[foeId];
   if (!known) return;
-  if (FOE_SEA[foeId]) s.stats.namedMet += 1;   // 마주친 것만으로 센다 (물러나도)
+  if (FOE_SEA[foeId] && !known.spar) s.stats.namedMet += 1;   // 마주친 것만으로 센다 (물러나도)
   const foe = scaleFoe(structuredClone(known), foeId);
-  if (forced) { startFight(s, foe, lethal, next); return; }
-  s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal), ...(next ? { next } : {}) };
+  if (forced) { startFight(s, foe, lethal, next, atSea); return; }
+  s.pending = { kind: 'fight', foe, lethal, risk: riskOf(s, foe, lethal, atSea), ...(next ? { next } : {}), ...(atSea ? { atSea } : {}) };
 }
 
 /** 싸움 물음에 답한다: 0 붙는다, 1 물러난다 */
 export function answerFight(s: Life5, index: number): void {
   const p = s.pending;
   if (p?.kind !== 'fight') return;
-  if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next); return; }
+  if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next, p.atSea); return; }
   if (index !== BACK_OFF) return;
   s.pending = null;
   logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다.`, 'heavy', 'battle');
@@ -246,14 +256,20 @@ export function ackBattle(s: Life5): void {
   const p = s.pending;
   if (p?.kind !== 'battle') return;
   s.pending = null;
-  const r = rngOf(s.rng);
   const foe = p.foe;
   const won = p.result === 'win';
+  if (foe.spar) {
+    logLine(s, won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`, 'heavy', 'battle');
+    const next = won ? p.next?.win : p.next?.lose;
+    if (next) applyFx(s, [{ op: 'queue', turning: next }]);
+    return;
+  }
+  const r = rngOf(s.rng);
   const hero = p.battle.units?.find((u) => u.hero);
   const damage = hero ? clamp(1 - hero.hp / Math.max(1, hero.maxHp), 0, 1) : 0;
   if (damage > 0) s.hero.hp = Math.max(1, s.hero.hp - Math.max(1, Math.round(damage * F.healthDamage)));
   const knockedOut = !!hero && hero.hp <= 0;
-  const woundRisk = riskOf(s, foe, p.lethal).injury * (won ? F.wonMult : 1);
+  const woundRisk = riskOf(s, foe, p.lethal, p.atSea).injury * (won ? F.wonMult : 1);
   if (knockedOut || (damage > 0 && chance(r, woundRisk))) {
     const severity = knockedOut ? 'heavy' : 'light';
     const part = pick(r, ['torso', 'armL', 'armR', 'legL', 'legR', 'head', 'eyeL', 'eyeR'] as WoundPart[]);
@@ -269,7 +285,7 @@ export function ackBattle(s: Life5): void {
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
     return;
   }
-  const risk = riskOf(s, foe, p.lethal);
+  const risk = riskOf(s, foe, p.lethal, p.atSea);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
 
@@ -321,7 +337,8 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
  * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
-  const name = pick(r, MINOR_FOE_NAMES);
+  const env = environmentOf(s);
+  const name = pick(r, env?.localFights?.foes ?? MINOR_FOE_NAMES);
   const line = (k: keyof typeof MINOR_FIGHT_TEXT) => fill(pick(r, MINOR_FIGHT_TEXT[k]), { foe: name });
   const choice = leanPick(s, r, MINOR_FIGHT_CHOICE, (c) => c.lean)!;
   if (!choice.engage) { logLine(s, line('avoid'), 'light', 'battle'); return; }

@@ -1,11 +1,13 @@
 // 인물 칸 · 장면 · 기록 · 연표.
 import { fmtMoney } from '../../shared/core/util';
 import { FRUIT_BY_ID } from '../../shared/data/fruits';
+import { ITEM_BY_ID } from '../../shared/data/items';
 import { SEA_BY_ID } from '../../shared/data/seas';
 import type { SceneInput } from '../pixel/pixelArt';
 import { SPECIES_NAMES } from '../../shared/data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
+import { altitudeEffect } from '../../core/environment';
 import { V } from '../../data/balance';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
@@ -40,6 +42,7 @@ export interface ProfileView {
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
+  weapon: string | null;
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
@@ -83,6 +86,7 @@ export function profileView(s: Life5): ProfileView {
     ? `${WOUND_PART_NAME[i.part]} ${WOUND_KIND_NAME[i.kind]} · ${INJURY_NAME[i.severity]}`
     : INJURY_NAME[i.severity]);
   if (h.illness) hurts.push(ILLNESS_NAME[h.illness.id] ?? '병');
+  if (altitudeEffect(s)) hurts.push('고산병');
   return {
     name: fullName(h).trim(),
     age: ageWord(s.age),
@@ -104,6 +108,7 @@ export function profileView(s: Life5): ProfileView {
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
+    weapon: h.weapon ? ITEM_BY_ID[h.weapon]?.name ?? null : null,
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
@@ -125,7 +130,7 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const hero = heroWho5(s);
   return {
     hero,
-    crew: s.people.filter((x) => x.alive && x.kind === 'crew').slice(0, SCENE_CREW).map(personWho5),
+    crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),
     foe,
     sailing: false,
     place: h.island ? `${sea.name} · ${h.island}` : sea.name,

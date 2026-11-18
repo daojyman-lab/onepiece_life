@@ -2,6 +2,7 @@
 import { pick, weighted, type Rng } from '../shared/core/rng';
 import { MINORS } from '../data/minors';
 import { checkAll } from './cond';
+import { environmentOf, tradeEffects } from './environment';
 import { applyFx, fillText } from './fx';
 import { dayLine, isRecent } from './log';
 import { needsOk } from './needs';
@@ -20,7 +21,9 @@ function cooledDown(s: Life5, m: Minor): boolean {
  * 고른 결과의 글이 모두 최근에 낸 것이면 이 토막에는 일이 일어나지 않는다
  */
 export function runMinor(s: Life5, r: Rng): boolean {
-  const m = weighted(r, MINORS.filter((x) => checkAll(s, x.when) && needsOk(s, x.needs) && cooledDown(s, x)), (x) => x.weight);
+  const commerce = environmentOf(s)?.commerce?.events;
+  const m = weighted(r, MINORS.filter((x) => checkAll(s, x.when) && needsOk(s, x.needs) && cooledDown(s, x)),
+    (x) => commerce && x.outcomes.some((o) => tradeEffects(o.fx)) ? x.weight * commerce : x.weight);
   if (!m) return false;
   const out = leanPick(s, r, m.outcomes.filter((o) => checkAll(s, o.when) && needsOk(s, o.needs)), (o) => o.lean);
   if (!out) return false;

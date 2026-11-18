@@ -6,7 +6,7 @@ import type { Cond, Minor } from '../core/types';
 /** 바다에 닿지 않는 고향 마을과 항해로 다시 도착했을 때의 섬 이름 */
 export const INLAND_TOWNS = [
   ...HOMETOWNS.filter((t) => ['zou', 'sky', 'fishman', 'wano'].includes(t.home)).map((t) => t.name),
-  '조우', '스카이피아', '어인섬',
+  '조', '조우', '모코모 공국', '스카이피아', '어인섬',
 ];
 /** 세계정부와 바다의 사건이 닿지 않는 장소: 위의 셋과 쇄국한 와노쿠니 */
 export const ISOLATED_TOWNS = [...INLAND_TOWNS, '와노쿠니'];

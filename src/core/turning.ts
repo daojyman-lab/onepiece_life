@@ -1,5 +1,5 @@
 // 전환점과 문: 고를 수 있는 문을 풀고, 띄우고, 고른 답을 적용한다.
-import { buildVoyage, VOYAGE_PREFIX } from './voyage';
+import { buildEntryGate, buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../shared/core/josa';
 import { fill } from '../shared/core/util';
 import { chance, weighted, type Rng } from '../shared/core/rng';
@@ -15,6 +15,8 @@ import { addValues, isDeep } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
 import { advanceVow } from './vow';
+import { EPISODE_NATIVE_TRUST } from '../data/episodes';
+import { environmentOf, isNative, tradeEffects } from './environment';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -22,7 +24,7 @@ import type { Life5, ResolvedDoor, Turning } from './types';
  * 상태에는 id만 남기 때문에, 데이터의 전환점은 TURNING_BY_ID에서 찾는다.
  */
 const OPENED_ELSEWHERE = new Map<string, Turning>();
-const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id);
+export const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id) ?? buildEntryGate(id);
 
 /** 자리표시 {name}(이름만) {town} {island} {parent}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string): string {
@@ -71,13 +73,21 @@ export function openTurning(s: Life5, t: Turning): boolean {
   if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
-  if (TURNING_BY_ID[t.id] !== t) OPENED_ELSEWHERE.set(t.id, t);
-  s.pending = {
+  if (TURNING_BY_ID[t.id] !== t && !t.id.startsWith(ENTRY_PREFIX)) OPENED_ELSEWHERE.set(t.id, t);
+  for (const line of t.intro ?? []) logLine(s, fillTurning(s, line), 'light');
+  const automatic = t.automatic && !checkAll(s, t.automatic.unless) ? t.automatic.fx : undefined;
+  if (!automatic) s.pending = {
     kind: 'door', turning: t.id, moment: t.kind === 'moment',
     title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
   };
   s.seen[t.id] = s.age;
   s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
+  const trust = EPISODE_NATIVE_TRUST[t.id];
+  if (trust && isNative(s, s.hero.island) && !s.flags.includes(trust)) {
+    s.flags.push(trust);
+    logLine(s, '고향 사정을 아는 사람이라며 마을의 안내자가 먼저 마음을 열었다.', 'light');
+  }
+  if (automatic) applyFx(s, automatic);
   return true;
 }
 
@@ -119,7 +129,9 @@ function fits(s: Life5, t: Turning): boolean {
 export function takeQueued(s: Life5, count = true): Turning | null {
   for (let i = 0; i < s.queue.length;) {
     const id = s.queue[i];
-    const t = TURNING_BY_ID[id];
+    const entry = buildEntryGate(id);
+    const t = entry ?? TURNING_BY_ID[id];
+    if (entry && !checkAll(s, entry.when)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
     if (t && !stillOpen(s, t)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
     if (t && fits(s, t)) {
       s.queue.splice(i, 1); delete s.queueTries[id];
@@ -146,7 +158,8 @@ export function pickTurning(s: Life5, r: Rng): Turning | null {
   const queued = takeQueued(s, false);
   if (queued) return queued;
   const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
-  return weighted(r, pool, (t) => t.weight);
+  const commerce = environmentOf(s)?.commerce?.events;
+  return weighted(r, pool, (t) => commerce && t.doors.some((d) => tradeEffects(d.fx)) ? t.weight * commerce : t.weight);
 }
 
 /** 떠 있는 문 가운데 index번째를 고른다. 잠긴 문이나 없는 문이면 아무것도 하지 않는다. */
@@ -157,13 +170,14 @@ export function answerDoor(s: Life5, index: number): void {
   const t = turningOf(p.turning);
   const door = t?.doors[index];
   if (!chosen || chosen.locked || !t || !door) return;
+  if (t.id.startsWith(ENTRY_PREFIX) && !checkAll(s, door.when)) return;
 
   const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
   applyPersonalityChoice(s, door.values ?? {});
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
-  if (!t.id.startsWith(VOYAGE_PREFIX)) p.doors.forEach((d, i) => {   // 항로 고르기의 안 간 섬은 '가지 않은 길'에 넣지 않는다
+  if (!t.id.startsWith(VOYAGE_PREFIX) && !t.id.startsWith(ENTRY_PREFIX)) p.doors.forEach((d, i) => {
     if (i !== index && !d.locked) s.unchosen.push({ age: s.age, turning: t.id, title: p.title, door: d.label });
   });
   const key = `${t.id}#${index}`;

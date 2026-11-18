@@ -1,4 +1,6 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
+import type { EntryGate } from '../data/voyage';
+import type { ArrivalRoute } from './voyage';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
 export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
@@ -40,6 +42,8 @@ export interface Hero5 {
   alive: boolean;
   bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
   potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
+  skyAcclimating?: true;                       // 하늘섬에 닿은 뒤 첫 토막
+  weapon?: string;                             // 전투에 가져가는 무기의 상품 ID
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
@@ -74,6 +78,8 @@ export type Cond =
   | { c: 'value'; id: ValueId; deep: boolean }
   | { c: 'strength'; id: string; has: boolean }
   | { c: 'money'; min: number }
+  | { c: 'entryContact'; gate: 'fishman' | 'zou' }
+  | { c: 'weapon'; id: string; has: boolean }
   | { c: 'fame'; min: number }
   | { c: 'grade'; is: string[] }                 // 화면에 표시하는 종합 전투 등급
   | { c: 'turningSeen'; id: string; has: boolean } // 이 인생에서 해당 전환점을 이미 보았는가
@@ -115,6 +121,11 @@ export type Fx =
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
+  | { op: 'entry'; gate: EntryGate; island: string; sea: SeaId; route: ArrivalRoute; option: number }
+  | { op: 'entryPass'; gate: EntryGate }
+  | { op: 'deepWater' }
+  | { op: 'buyWeapon'; id: string }
+  | { op: 'serviceWeapon' }
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
@@ -136,7 +147,7 @@ export type Fx =
   | { op: 'eatFruit'; id: string | 'random' }
   | { op: 'reveal' }                                    // 숨긴 성씨가 밝혀진다
   // next: 싸움 뒤에 이어질 전환점 (win 이기면 · lose 지거나 간신히 빠져나오면 · back 맞서지 않고 물러나면). 이기고 win이 없으면 늘 그렇듯 싸움 뒤의 문
-  | { op: 'fight'; foe: string; lethal: boolean; forced: boolean; next?: FightNext }
+  | { op: 'fight'; foe: string; lethal: boolean; forced: boolean; next?: FightNext; atSea?: true }
   | { op: 'queue'; turning: string }
   | { op: 'log'; text: string; weight: LogWeight }
   | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
@@ -163,6 +174,8 @@ export interface Turning {
   fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
   speaker: 'hero' | { canon: string } | { relation: string };
   title: string; body: string;
+  intro?: readonly string[];                   // 선택창이 열리기 전에 이야기 창에 한 줄씩 보여 준다
+  automatic?: { unless: Cond[]; fx: Fx[] };     // 조건을 채우지 못하면 선택 대신 즉시 일어나는 일
   doors: Door[];                               // misfortune은 빈 배열
   fx?: Fx[];                                   // misfortune이 일으키는 일
   needs?: Need[];                              // 안 맞으면 뽑히지 않는다
@@ -177,8 +190,8 @@ export interface Minor {
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
-  | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext }
-  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; minor?: { outcomeLine: string } }
+  | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string } }
   | { kind: 'ending'; cause: string }
   | null;
 export interface Stats5 {

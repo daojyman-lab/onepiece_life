@@ -1,7 +1,7 @@
 // 자동 플레이와 요약 (설계 7장의 시뮬레이터가 쓴다). 순수 함수다: 시각도 Math.random도 쓰지 않는다.
 // 정책이 고를 때 쓰는 난수는 인생의 난수(s.rng)와 따로 둔다. 그래야 고르는 방식이 인생의 주사위를 흐트러뜨리지 않는다.
 import { chance, pick, rngOf, type Rng } from '../shared/core/rng';
-import { TURNING_BY_ID } from '../data/turnings';
+import { turningOf } from './turning';
 import { BACK_OFF, ENGAGE } from './fight';
 import { apply5, invariants5 } from './reduce';
 import { newLife5 } from './state';
@@ -27,7 +27,7 @@ export function choose(s: Life5, policy: Policy, r: Rng): number {
     const open = p.doors.map((d, i) => (d.locked ? -1 : i)).filter((i) => i >= 0);
     if (policy === 'first') return open[0];
     if (policy === 'random') return pick(r, open);
-    const doors = TURNING_BY_ID[p.turning]?.doors;
+    const doors = turningOf(p.turning)?.doors;
     if (policy === 'lean') return leanPick(s, r, open, (i) => doors?.[i]?.values ?? {}) ?? pick(r, open);
     const gain = (i: number) => doors?.[i]?.values?.[policy.value] ?? 0;
     const best = Math.max(...open.map(gain));

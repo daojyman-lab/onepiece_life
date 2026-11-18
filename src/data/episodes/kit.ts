@@ -14,7 +14,8 @@ export const next = (turning: string): Fx => ({ op: 'queue', turning });
 export const log = (text: string, weight: 'light' | 'heavy' = 'heavy'): Fx => ({ op: 'log', text, weight });
 export const time = (text: string, canon?: string): Fx => ({ op: 'timeline', text, ...(canon ? { canon } : {}) });
 /** 이름 있는 상대와의 싸움. lethal이면 지면 죽을 수 있다. n: 싸움 뒤에 이어질 장면 */
-export const fight = (foe: string, lethal: boolean, n?: FightNext, forced = false): Fx => ({ op: 'fight', foe, lethal, forced, ...(n ? { next: n } : {}) });
+export const fight = (foe: string, lethal: boolean, n?: FightNext, forced = false): Extract<Fx, { op: 'fight' }> =>
+  ({ op: 'fight', foe, lethal, forced, ...(n ? { next: n } : {}) });
 export const ready = (min: number): Cond => ({ c: 'tier', branch: 'any', min });
 
 /** 에피소드에 새로 나오는 이름 있는 상대. p: 힘(바다의 보스 둘레, 이스트 블루 20~28 · 위대한 항로 전반 40~70 · 어인섬 ~90 · 신세계 100~180) */
@@ -24,6 +25,7 @@ export interface FoeDef {
   faction?: EnemySpec['faction']; gender?: 'm' | 'f'; age?: number;
   skills: string[]; tactic: EnemySpec['tactic'];
   armament?: number; observation?: number; fruitClass?: EnemySpec['fruitClass']; species?: EnemySpec['species'];
+  spar?: EnemySpec['spar'];
 }
 export function makeFoes(defs: FoeDef[]): EnemySpec[] {
   return defs.map(({ p, bias, sea, armament, observation, fruitClass, species, canon, faction, gender, age, ...o }) => ({

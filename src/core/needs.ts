@@ -12,7 +12,8 @@ const usable = (x: string) => x !== 'lost';
 
 export function needOk(s: Life5, n: Need): boolean {
   switch (n) {
-    case 'crew': case 'spouse': case 'child': case 'sibling': case 'parent': return s.people.some((p) => p.alive && personIs(p, n));
+    case 'crew': return s.people.some((p) => p.alive && p.crew && !p.crew.separatedMonths);
+    case 'spouse': case 'child': case 'sibling': case 'parent': return s.people.some((p) => p.alive && personIs(p, n));
     case 'swim': return s.hero.fruit === null;
     case 'sword': case 'gun': case 'fist': return s.growth.tier[n] >= 1;
     case 'arms': return usable(s.hero.limbs.armL) || usable(s.hero.limbs.armR);

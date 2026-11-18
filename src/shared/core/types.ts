@@ -65,6 +65,7 @@ export interface Loadout {
 
 export interface CrewInfo {
   role: CrewRole; level: number; power: number; skills: string[]; injuredMonths: number;
+  separatedMonths?: number;
   medicalSkill?: number;  // 선의의 치료 솜씨 0~100 (옛 저장은 기본값으로 본다)
   trait?: string;             // 성격 (data/crewTraits.ts). 없으면 id에서 정한다 (예전 저장)
   fruit?: string | null;      // 먹은 악마의 열매
@@ -151,6 +152,7 @@ export interface EnemySpec {
   officers: EnemySpec[];
   faction: Person['faction']; species: Species; gender: 'm' | 'f'; age: number;
   title?: string;
+  spar?: true;                 // 인생 모드의 일대일 대련. 실제 부상과 전적을 남기지 않는다
   form?: 'seaking';            // 사람이 아닌 모습 (그림을 다르게 그린다)
   faceKey?: string;            // 얼굴 그림의 씨앗. 아는 사람이면 사람들 패널과 같은 얼굴이 나오게 한다
   fruitId?: string;            // 먹은 열매 (없으면 기술 id에서 찾는다)

@@ -1,10 +1,12 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { setDream } from './dreams';
 import { parentFound, parentMissing } from './family';
-import { sailTo } from './voyage';
+import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
+import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
 import { enterPrime } from './stages';
 import { FRUIT_BY_ID, NATURAL_FRUITS, SMILE_FRUITS } from '../shared/data/fruits';
+import { ITEM_BY_ID } from '../shared/data/items';
 import { SEA_BY_ID } from '../shared/data/seas';
 import { BRANCH_NAMES } from '../shared/data/skills';
 import { crewPowerFor } from '../shared/core/people';
@@ -21,7 +23,6 @@ import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
-import { locationDivider } from './log';
 import { addMark } from './strengths';
 import { isDeep } from './values';
 import { beginVow, resolveVow } from './vow';
@@ -71,7 +72,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'base':
       for (const k of e.key === 'all' ? STAT_KEYS : [e.key]) h.base[k] = Math.max(0, h.base[k] + e.add);
       return;
-    case 'hp': h.hp = clamp(h.hp + e.add, 0, V.hp.max); return;
+    case 'hp': h.hp = clamp(h.hp + (e.add > 0 ? Math.round(e.add * recoveryMultiplier(s)) : e.add), 0, V.hp.max); return;
     case 'money': { // 탐욕이 깊으면 들어오는 돈이 불어난다 (나가는 돈은 그대로)
       const add = e.add > 0 && isDeep(s, 'greed') ? Math.round(e.add * V.value.greedMoney) : e.add;
       h.money = Math.max(0, h.money + add); return;
@@ -87,8 +88,8 @@ function applyOne(s: Life5, e: Fx): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'move': h.island = e.island; h.sea = e.sea; locationDivider(s); return;
-    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; locationDivider(s); return;
+    case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
+    case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;
@@ -103,6 +104,24 @@ function applyOne(s: Life5, e: Fx): void {
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'sail': sailTo(s, e.island, e.route); return;
+    case 'entry': resolveEntry(s, e); return;
+    case 'entryPass': awardEntryPass(s, e.gate); return;
+    case 'deepWater': deepWater(s); return;
+    case 'buyWeapon': {
+      const item = ITEM_BY_ID[e.id];
+      if (item?.kind !== 'weapon' || !item.price || h.money < item.price || h.weapon === item.id) return;
+      h.money -= item.price;
+      h.weapon = item.id;
+      logLine(s, `${item.name}을(를) 장만해 전투에 쓰기로 했다.`, 'heavy', 'growth');
+      return;
+    }
+    case 'serviceWeapon': {
+      const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
+      const branch = item && (['sword', 'gun', 'fist'] as const).find((b) => BRANCH_ID[b] === item.branch);
+      if (branch) addMastery(s, branch, 4);
+      logLine(s, branch ? '장인이 무기를 손질하고 손잡이를 손에 맞춰 줬다.' : '공방 뒤뜰에서 장인들의 이야기를 들으며 한숨 돌렸다.', 'light');
+      return;
+    }
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
     case 'mark': {
       const got = addMark(s, e.id);
@@ -181,7 +200,7 @@ function applyOne(s: Life5, e: Fx): void {
       applyFx(s, chance(rngOf(s.rng), e.p) ? e.then : (e.else ?? []));
       return;
     case 'mastery':
-      addMastery(s, e.branch, e.add);
+      addMastery(s, e.branch, e.add > 0 ? e.add * growthMultiplier(s, e.branch) : e.add);
       if (e.add > 0) s.growth.pref[e.branch] += e.add * V.growth.pref.fromMastery;
       return;
     case 'pref': s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
@@ -195,7 +214,7 @@ function applyOne(s: Life5, e: Fx): void {
     case 'reveal': revealSurname(s); return;
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
     case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity], ...(e.part ? { part: e.part } : {}), ...(e.kind ? { kind: e.kind } : {}) }); return;
-    case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next); return;
+    case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next, e.atSea); return;
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;
     // 이미 앓는 병이 있으면 새로 걸리지 않는다. 진행과 치료는 risk.ts의 partRisks가 맡는다

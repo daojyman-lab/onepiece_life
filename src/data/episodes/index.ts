@@ -33,3 +33,13 @@ export const EPISODE_TURNINGS = [
 ];
 export const EPISODE_FOE_DEFS = [...FOES_LOGUETOWN, ...FOES_ALABASTA, ...FOES_SKYPIEA, ...FOES_FISHMAN, ...FOES_DRESSROSA, ...FOES_WANO];
 export const EPISODE_FOES = makeFoes(EPISODE_FOE_DEFS);
+
+/** 현지 출신에게 첫 장면에서 먼저 말을 건네는 인물 */
+export const EPISODE_NATIVE_TRUST: Partial<Record<string, string>> = {
+  ep_fishman_b_1: 'ep_fishman_siella_trust',
+  ep_fishman_c_1: 'ep_fishman_mio_trust',
+  ep_fishman_a_1: 'ep_fishman_rune_trust',
+  ep_wano_pre_1: 'ep_wano_pre_yuki_trust',
+  ep_wano_raid_1: 'ep_wano_raid_sosuke_trust',
+  ep_wano_after_1: 'ep_wano_after_hanae_trust',
+};
