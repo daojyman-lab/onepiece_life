@@ -65,6 +65,20 @@ export function normalizeLife5(x: unknown): Life5 | null {
       life.vows.active.choices ??= [];
     }
   }
+  // 패기 경로 개편: 기존 저장에서 실제 단계/스승 수련을 이미 얻은 패기는 해금 상태로 이관한다.
+  // 해금 전 자습으로 쌓인 숙련도만 있던 저장은 패기 숙련을 0으로 돌린다.
+  for (const b of ['observation', 'armament', 'conqueror'] as const) {
+    const hadMasterTraining = life.growth.master?.branch === b && life.growth.mastery[b] > 0;
+    if (life.growth.tier[b] > 0 || hadMasterTraining) {
+      const flag = `haki:${b}`;
+      if (!life.flags.includes(flag)) life.flags.push(flag);
+    } else {
+      life.growth.mastery[b] = 0;
+      life.growth.pref[b] = 0;
+    }
+  }
+  if (life.growth.master && ['observation', 'armament', 'conqueror'].includes(life.growth.master.branch))
+    life.growth.master = null;
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;
   // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다
