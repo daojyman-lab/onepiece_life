@@ -22,6 +22,7 @@ import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
+import { addStyleMastery } from './styles';
 import { isDeep } from './values';
 import { beginVow, declineVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
@@ -51,6 +52,7 @@ export function addMastery(s: Life5, b: Branch, add: number): boolean {
   if (!hakiUnlocked(s, b)) return false;
   const g = s.growth;
   g.mastery[b] = Math.max(0, g.mastery[b] + add);
+  addStyleMastery(s, b, add);
   if (g.mastery[b] < V.growth.tierUp) return true;
   if (g.tier[b] >= tierCap(s, b)) { g.mastery[b] = V.growth.tierUp; return true; }
   g.tier[b] += 1;
