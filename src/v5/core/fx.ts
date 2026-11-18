@@ -40,6 +40,7 @@ export function fillText(s: Life5, text: string): string {
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
 export function tierCap(s: Life5, b: Branch): number {
+  if (isHakiBranch(b) && hakiUnlocked(s, b)) return V.growth.maxTier;
   const m = s.growth.master;
   if (!m || m.branch !== b) return V.growth.noMasterCap;
   return Math.max(V.growth.noMasterCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
