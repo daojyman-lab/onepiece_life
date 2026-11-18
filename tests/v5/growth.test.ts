@@ -192,6 +192,7 @@ describe('선호도와 걷는 길', () => {
 describe('체술·무기술 세부 유파', () => {
   it('권법과 각법은 독립적으로 쌓이고 체술 공통 숙련도는 둘의 합이다', () => {
     const s = newLife5(1901);
+    s.growth.pref.fist = 50;
     setStyleFocus(s, 'boxing');
     growPart(s, 'train', rngOf(s.rng));
     const boxing = s.growth.styleMastery.boxing;
@@ -207,6 +208,7 @@ describe('체술·무기술 세부 유파', () => {
   });
   it('이도류·삼도류·창술은 각각 독립 숙련도를 가지며 무기술 공통 숙련도에 합산된다', () => {
     const s = newLife5(1902);
+    s.growth.pref.sword = 50;
     setStyleFocus(s, 'dualWield');
     growPart(s, 'train', rngOf(s.rng));
     setStyleFocus(s, 'threeSword');
