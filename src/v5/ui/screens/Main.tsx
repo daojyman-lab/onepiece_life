@@ -168,6 +168,23 @@ function Profile({ s }: { s: Life5 }) {
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
         {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
+        <div class="paper t9">
+          <div class="row between"><b>세부 무술 숙련</b><span class="soft">체술 {Math.round(p.martialMastery)} · 무기술 {Math.round(p.weaponMastery)}</span></div>
+          <label class="row between" style={{ marginTop: 5 }}>
+            <span>집중 유파</span>
+            <select value={s.growth.styleFocus ?? ''} onChange={(e) => actions.setStyleFocus((e.currentTarget.value || null) as import('../../data/combat-styles').CombatStyle | null)}>
+              <option value="">계통 기본 유파</option>
+              <optgroup label="체술">{p.styles.filter((x) => x.group === 'martial').map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup>
+              <optgroup label="무기술">{p.styles.filter((x) => x.group === 'weapon').map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup>
+            </select>
+          </label>
+          <details style={{ marginTop: 5 }}>
+            <summary>세부 숙련도 보기</summary>
+            <div class="stack" style={{ marginTop: 5 }}>
+              {p.styles.map((x) => <div key={x.id} class="row between"><span>{x.name}</span><b>{Math.round(x.mastery)}</b></div>)}
+            </div>
+          </details>
+        </div>
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
