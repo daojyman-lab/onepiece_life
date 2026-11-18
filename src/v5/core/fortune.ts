@@ -24,6 +24,25 @@ export function fortuneP(s: Life5): number {
  * (가치관이 하나도 없으면 아무 기연이나). 올해 멈춘 횟수와는 상관없다.
  * 이미 떠 있는 일이 있으면 덮지 않는다. 띄웠으면 시련이 줄어든다.
  */
+/**
+ * 수련기 전체 누적 1.5%를 6개 연간 판정으로 분배한다.
+ * Haki 전용 기연만 대상으로 하며, 여러 인물/사건이 있어도 전체 획득 확률은 불어나지 않는다.
+ */
+export function rollTrainingHakiFortune(s: Life5, r: Rng): boolean {
+  if (s.pending || s.age < 10 || s.age > 15) return false;
+  const total = V.fortune.hakiTrainingP;
+  const annual = 1 - Math.pow(1 - total, 1 / 6);
+  if (!chance(r, annual)) return false;
+  const pool = TURNINGS.filter((t) => t.kind === 'fortune' && t.id.startsWith('fortune_haki_')
+    && checkAll(s, t.when) && needsOk(s, t.needs) && repeatAllows(s, t)
+    && resolveDoors(s, t).some((d) => !d.locked));
+  const t = weighted(r, pool, (x) => x.weight);
+  if (!t || !openTurning(s, t)) return false;
+  s.stats.fortunes += 1;
+  s.hardship *= V.hardship.afterFortune;
+  return true;
+}
+
 export function rollFortune(s: Life5, r: Rng): boolean {
   if (s.pending || !chance(r, fortuneP(s))) return false;
   const top = topValues(s, 1)[0];
