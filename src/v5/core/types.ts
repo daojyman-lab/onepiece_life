@@ -11,6 +11,7 @@ export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 
 export type Limb = 'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR';
 export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
 export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
+import type { CombatStyle } from '../data/combat-styles';
 export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
 /** 사건의 글이 전제하는 것. 맞지 않으면 그 전환점은 오지 않고, 그 문은 잠긴다 (needs.ts) */
 export type Need = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' | 'swim' | 'sword' | 'gun' | 'fist' | 'arms' | 'ship';
@@ -46,6 +47,8 @@ export interface Growth5 {
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
   pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
+  styleMastery: Record<CombatStyle, number>;   // 세부 체술·무기술의 누적 숙련도 (공통값은 합산)
+  styleFocus: CombatStyle | null;              // 현재 집중하는 세부 유파
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 해 구분선(weight 'year')에만 있다. 그 해를 시작한 섬 이름 */
