@@ -85,9 +85,12 @@ export function storyInterlude(s: Life5): boolean {
   if (!storyQueued(s)) { s.storyRest = 0; return false; }
   s.storyRest -= 1;
   const r = storyRng(s);
-  const fresh = (l: DailyLine5) => lineFits(s, l) && !isRecent(s, fillText(s, l.text));
-  const own = STORY_LINES.filter(fresh);
-  const pool = own.length ? own : GENERIC_STORY_LINES.filter(fresh);
+  // 한 장편(두 달) 안에서는 같은 줄을 다시 내지 않는다: 최근 기록 V.story.memory줄에 없는 섬 줄 → 공용 줄 → (다 떨어지면) 최근 몇 줄만 피한다
+  const shown = new Set(s.log.slice(-V.story.memory).map((l) => l.text));
+  const unseen = (l: DailyLine5) => lineFits(s, l) && !shown.has(fillText(s, l.text));
+  const notRecent = (l: DailyLine5) => lineFits(s, l) && !isRecent(s, fillText(s, l.text));
+  const tiers = [STORY_LINES.filter(unseen), GENERIC_STORY_LINES.filter(unseen), STORY_LINES.filter(notRecent), GENERIC_STORY_LINES.filter(notRecent)];
+  const pool = tiers.find((t) => t.length) ?? [];
   const line = leanPick(s, r, pool, (l) => l.lean);
   if (line) dayLine(s, fillText(s, line.text));
   return true;
