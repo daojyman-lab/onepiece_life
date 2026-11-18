@@ -209,5 +209,7 @@ export interface Life5 {
   vows?: VowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
+  /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
+  passage?: import('./passage').Passage | null;
 }
 export type Command5 = { type: 'step' } | { type: 'answer'; index: number };

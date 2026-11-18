@@ -84,8 +84,8 @@ function applyOne(s: Life5, e: Fx): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'move': h.island = e.island; h.sea = e.sea; return;
-    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
+    case 'move': s.passage = null; h.island = e.island; h.sea = e.sea; return;          // 옮겨지면 하던 항해는 끝난다
+    case 'moveHome': s.passage = null; h.island = h.town; h.sea = HOMES[h.home].sea; return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;

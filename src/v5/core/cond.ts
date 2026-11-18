@@ -41,7 +41,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
     case 'town': return c.is.includes(h.town);
     case 'standingYears': return s.age - s.standingSince >= c.min;
-    case 'island': return c.is.includes(h.island) !== (c.not ?? false);
+    case 'island': return c.is.includes(s.passage ? '' : h.island) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');

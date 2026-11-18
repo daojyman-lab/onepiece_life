@@ -6,8 +6,8 @@ import { pick, weighted, type Rng } from '../../core/rng';
 import { SEA_BY_ID } from '../../data/seas';
 import { V } from '../data/balance';
 import { DREAMS } from '../data/dreams';
-import { DREAM_ISLANDS, ROUTE, dangerOf } from '../data/voyage';
-import { logLine } from './log';
+import { DREAM_ISLANDS, dangerOf } from '../data/voyage';
+import { depart } from './passage';
 import type { DreamId, Door, Fx, Life5, Turning } from './types';
 
 export type Route = 'calm' | 'dream' | 'wild';
@@ -58,19 +58,7 @@ export function buildVoyage(id: string): Turning | undefined {
   };
 }
 
-/** 고른 섬으로 간다 */
+/** 고른 섬으로 출항한다. 섬은 바다를 건너 닿을 때 바뀐다 (core/passage.ts) */
 export function sailTo(s: Life5, island: string, route: Route): void {
-  const h = s.hero;
-  const first = !s.flags.includes(`at:${island}`);
-  h.island = island;
-  if (first) s.flags.push(`at:${island}`);
-  logLine(s, josa(first ? `${island}에 처음 닻을 내렸다.` : `다시 ${island}(으)로 뱃머리를 돌렸다.`), 'light');
-  if (route === 'calm') h.hp = Math.min(V.hp.max, h.hp + ROUTE.calm.hp);
-  else if (route === 'dream') h.base.wil += ROUTE.dream.wil;
-  else {
-    h.hp = Math.max(1, h.hp + ROUTE.wild.hp);
-    h.fame += ROUTE.wild.fame;
-    s.hardship += ROUTE.wild.hardship;
-    logLine(s, '거친 파도와 낯선 적을 헤치고 겨우 닿았다. 그 뱃길을 건넜다는 소문이 먼저 퍼졌다.', 'light');
-  }
+  depart(s, island, route);
 }

@@ -1,4 +1,5 @@
 // 인물 칸 · 장면 · 기록 · 연표.
+import { josa } from '../../../core/josa';
 import { fmtMoney } from '../../../core/util';
 import { FRUIT_BY_ID } from '../../../data/fruits';
 import { SEA_BY_ID } from '../../../data/seas';
@@ -125,8 +126,8 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
     hero,
     crew: s.people.filter((x) => x.alive && x.kind === 'crew').slice(0, SCENE_CREW).map(personWho5),
     foe,
-    sailing: false,
-    place: h.island ? `${sea.name} · ${h.island}` : sea.name,
+    sailing: !!s.passage,
+    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}` : sea.name,
     islandColor: ISLAND_COLORS[sea.stage - 1] ?? ISLAND_COLORS[0],
     flag: hero.faction ?? 'civil',
     aura: h.fruit ? '#c890ff' : s.growth.tier.armament > 0 ? '#ff7060' : null,

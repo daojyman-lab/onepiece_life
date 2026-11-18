@@ -26,6 +26,7 @@ import { leanPick } from './values';
 import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { buildVoyage, voyageChoices, voyageId } from './voyage';
+import { depart, passagePart } from './passage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -54,6 +55,7 @@ export function stepPart(s: Life5): void {
   if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
   const r = rngOf(s.rng);
+  if (s.passage) passagePart(s, r);            // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = activityOf(s, r);
@@ -273,10 +275,10 @@ function partCompanions(s: Life5): void {
   }
 }
 
-/** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
+/** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬으로 떠난다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
 export function voyage(s: Life5): void {
   const h = s.hero;
-  if (s.queue.length) return;                  // 이어지는 이야기가 줄 서 있으면 그 섬에 머문다
+  if (s.queue.length || s.passage) return;     // 이어지는 이야기가 줄 서 있으면 그 섬에 머물고, 이미 바다 위면 그대로 간다
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
   const military = h.standing === 'marine' || h.standing === 'cp';
@@ -286,11 +288,7 @@ export function voyage(s: Life5): void {
   const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island);
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
-  const first = !s.flags.includes(`at:${next}`);
-  h.island = next;
-  if (first) s.flags.push(`at:${next}`);
-  if (military) logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${next} 지부에 처음 배속되었다.` : `전근 명령을 받아 다시 ${next}(으)로 배속되었다.`), 'light');
-  else logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
+  depart(s, next, 'drift', military);         // 바다를 건너 닿는다 (core/passage.ts)
 }
 
 /** 항로 고르기를 띄운다. 띄웠으면 true */
