@@ -10,6 +10,8 @@ import { applyFx } from '../../src/v5/core/fx';
 import { effectiveStats5 } from '../../src/v5/core/body';
 import { rngOf } from '../../src/core/rng';
 import { V } from '../../src/v5/data/balance';
+import { aggregateStyleMastery, aggregateBranchStyleMastery, setStyleFocus } from '../../src/v5/core/styles';
+import { normalizeLife5 } from '../../src/v5/core/load';
 import type { Life5, ValueId } from '../../src/v5/core/types';
 
 function grow(seed: number, v: ValueId, wealth: 'poor' | 'common' = 'common') {
@@ -183,5 +185,47 @@ describe('선호도와 걷는 길', () => {
     for (const l of LINES.filter((x) => /목검을|칼 쓰는/.test(x.text))) expect(l.when.some((c) => c.c === 'path' && !c.is.includes('fist') && !c.is.includes('gun')), l.text).toBe(true);
     const m = MINORS.find((x) => x.id === 'm_kid_wooden_sword')!;
     expect(m.when).toContainEqual({ c: 'path', is: ['sword', 'none'] });
+  });
+});
+
+
+describe('체술·무기술 세부 유파', () => {
+  it('권법과 각법은 독립적으로 쌓이고 체술 공통 숙련도는 둘의 합이다', () => {
+    const s = newLife5(1901);
+    setStyleFocus(s, 'boxing');
+    growPart(s, 'train', rngOf(s.rng));
+    const boxing = s.growth.styleMastery.boxing;
+    setStyleFocus(s, 'kicking');
+    growPart(s, 'train', rngOf(s.rng));
+    expect(s.growth.styleMastery.boxing).toBe(boxing);
+    expect(s.growth.styleMastery.kicking).toBeGreaterThan(0);
+    expect(aggregateStyleMastery(s, 'martial')).toBe(
+      s.growth.styleMastery.boxing + s.growth.styleMastery.kicking +
+      s.growth.styleMastery.karate + s.growth.styleMastery.fishmanKarate +
+      s.growth.styleMastery.rokushiki + s.growth.styleMastery.sumo
+    );
+  });
+  it('이도류·삼도류·창술은 각각 독립 숙련도를 가지며 무기술 공통 숙련도에 합산된다', () => {
+    const s = newLife5(1902);
+    setStyleFocus(s, 'dualWield');
+    growPart(s, 'train', rngOf(s.rng));
+    setStyleFocus(s, 'threeSword');
+    growPart(s, 'train', rngOf(s.rng));
+    setStyleFocus(s, 'spear');
+    growPart(s, 'train', rngOf(s.rng));
+    expect(s.growth.styleMastery.dualWield).toBeGreaterThan(0);
+    expect(s.growth.styleMastery.threeSword).toBeGreaterThan(0);
+    expect(s.growth.styleMastery.spear).toBeGreaterThan(0);
+    expect(aggregateStyleMastery(s, 'weapon')).toBe(
+      aggregateBranchStyleMastery(s, 'sword') + aggregateBranchStyleMastery(s, 'gun')
+    );
+  });
+  it('기존 저장의 검술 숙련은 일도류, 사격 숙련은 권총 사격으로 이관한다', () => {
+    const s = newLife5(1903);
+    s.growth.mastery.sword = 35;
+    s.growth.mastery.gun = 22;
+    const loaded = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+    expect(loaded.growth.styleMastery.singleSword).toBe(35);
+    expect(loaded.growth.styleMastery.pistol).toBe(22);
   });
 });
