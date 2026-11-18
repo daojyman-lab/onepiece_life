@@ -7,6 +7,7 @@ import { activityOf, growPart, mainBranch, notePath, power5 } from '../../src/v5
 import { LINES } from '../../src/v5/data/lines';
 import { MINORS } from '../../src/v5/data/minors';
 import { applyFx } from '../../src/v5/core/fx';
+import { effectiveStats5 } from '../../src/v5/core/body';
 import { rngOf } from '../../src/core/rng';
 import { V } from '../../src/v5/data/balance';
 import type { Life5, ValueId } from '../../src/v5/core/types';
@@ -64,6 +65,29 @@ describe('패기 획득 전 숙련 제한', () => {
     applyFx(s, [{ op: 'flag', id: 'haki:observation' }, { op: 'mastery', branch: 'observation', add: 40 }]);
     expect(s.growth.mastery.observation).toBe(40);
     expect(mainBranch(s)).toBe('observation');
+  });
+});
+
+describe('패기별 능력치 버프', () => {
+  it('무장색·견문색·패왕색의 서로 다른 버프가 곱연산으로 중첩된다', () => {
+    const s = newLife5(1710);
+    s.hero.base = { str: 100, spd: 100, vit: 100, int: 100, wil: 100, luk: 100 };
+    applyFx(s, [
+      { op: 'flag', id: 'haki:armament' }, { op: 'tier', branch: 'armament', to: 2 },
+      { op: 'flag', id: 'haki:observation' }, { op: 'tier', branch: 'observation', to: 3 },
+      { op: 'flag', id: 'haki:conqueror' }, { op: 'tier', branch: 'conqueror', to: 1 },
+    ]);
+    const st = effectiveStats5(s);
+    expect(st.str).toBeCloseTo(100 * 1.10 * 1.03);
+    expect(st.vit).toBeCloseTo(100 * 1.14 * 1.03);
+    expect(st.spd).toBeCloseTo(100 * 1.18 * 1.03);
+    expect(st.int).toBeCloseTo(100 * 1.03);
+  });
+  it('패왕색 단계가 전체 전투 능력치의 공통 최고 단계 배율을 대신하지 않는다', () => {
+    const s = newLife5(1711);
+    s.hero.base = { str: 10, spd: 10, vit: 10, int: 10, wil: 10, luk: 10 };
+    applyFx(s, [{ op: 'flag', id: 'haki:conqueror' }, { op: 'tier', branch: 'conqueror', to: 6 }]);
+    expect(power5(s)).toBeLessThan(60 * V.growth.tierCurve[6]);
   });
 });
 
