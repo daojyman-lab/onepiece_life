@@ -1,7 +1,7 @@
 // tests/v5/fortune.test.ts
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
-import { fortuneP, rollFortune, rollMisfortune, revealSurname } from '../../src/v5/core/fortune';
+import { fortuneP, rollFortune, rollMisfortune, rollTrainingHakiFortune, revealSurname } from '../../src/v5/core/fortune';
 import { applyFx } from '../../src/v5/core/fx';
 import { reduce5 } from '../../src/v5/core/reduce';
 import { addValues } from '../../src/v5/core/values';
@@ -21,6 +21,27 @@ describe('기연', () => {
   it('어린아이에게는 오지 않는다', () => {
     const s = newLife5(1); s.age = V.fortune.minAge - 1; s.hardship = 100;
     expect(fortuneP(s)).toBe(0);
+  });
+  it('수련기 패기 기연은 6년 전체 누적 1~2%이며, 한 번만 열린다', () => {
+    let hits = 0;
+    for (let seed = 0; seed < 10000; seed++) {
+      const s = newLife5(seed); s.pending = null; s.hero.home = 'loguetown'; s.hero.island = '로그타운'; s.hero.standing = 'child';
+      const r = rngOf(s.rng);
+      let hit = false;
+      for (let age = 10; age <= 15; age++) {
+        s.age = age;
+        if (rollTrainingHakiFortune(s, r)) { hit = true; break; }
+      }
+      if (hit) hits++;
+    }
+    expect(hits).toBeGreaterThan(90);
+    expect(hits).toBeLessThan(220);
+  });
+  it('수련기 범위 밖에서는 조기 패기 기연을 굴리지 않는다', () => {
+    const s = newLife5(77); s.pending = null; s.age = 9;
+    expect(rollTrainingHakiFortune(s, rngOf(s.rng))).toBe(false);
+    s.age = 16;
+    expect(rollTrainingHakiFortune(s, rngOf(s.rng))).toBe(false);
   });
   it('가장 높은 가치관에 맞는 기연이 온다', () => {
     let hit = 0, match = 0;
