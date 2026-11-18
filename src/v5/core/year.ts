@@ -13,7 +13,7 @@ import { checkAll } from './cond';
 import { familyYear } from './family';
 import { minorFight } from './fight';
 import { needsOk } from './needs';
-import { rollFortune, rollMisfortune } from './fortune';
+import { rollFortune, rollMisfortune, rollTrainingHakiFortune } from './fortune';
 import { canUse } from './body';
 import { addMastery, fillText, hakiUnlocked, tierCap } from './fx';
 import { runMinor } from './minor';
