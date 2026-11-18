@@ -5,6 +5,9 @@ export const V = {
   // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
   // 화면과 싸움의 기본 계산식은 다르지만 서약으로 보장하는 하한은 같다. 등급 경계는 data/words.ts의 GRADES
   grade: { fruit: 0.5, haki: 0.25 },
+  // 패기 능력치 버프: 단계마다 곱해지며, 서로 다른 패기의 버프는 중첩한다.
+  haki: { armament: { strPerTier: 0.05, vitPerTier: 0.07 },
+          observation: { spdPerTier: 0.06 }, conqueror: { allPerTier: 0.03 } },
   vow: { powerFloors: [0, 500, 770, 1500] }, // B, A, S
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
