@@ -62,7 +62,8 @@ export const V = {
            retreat: { calm: 0.5, usual: 0.3, never: 0 },
            retreatDeath: 0.5,
            backOffLethal: 0.15,
-           deathmatchSurvive: 0.4,            // 빈사로 바뀐 싸움에서 죽을 판정이 나와도 주사위로 이 확률이면 큰 부상을 입고 살아남는다               // 목숨을 건 상대 앞에서 물러날 때 주사위 확률에서 빼는 몫                 // 목숨을 건 싸움에서 몸을 빼낸 사람이 죽을 확률 = 죽을 확률 × 이것
+           deathmatchSurvive: 0.4,
+           minorDeathMult: 0.2,               // 시정잡배와의 싸움이 빈사로 바뀌어 지면 목숨을 건 싸움의 죽을 확률에 이것을 곱한다 (낮지만 죽을 수 있다)            // 빈사로 바뀐 싸움에서 죽을 판정이 나와도 주사위로 이 확률이면 큰 부상을 입고 살아남는다               // 목숨을 건 상대 앞에서 물러날 때 주사위 확률에서 빼는 몫                 // 목숨을 건 싸움에서 몸을 빼낸 사람이 죽을 확률 = 죽을 확률 × 이것
            famePerPower: 0.1, minorFame: 1,
            // 이름 있는 상대의 능력치(간부 포함)에 곱하는 배율, 상대가 나오는 바다별 (v4 보스는 v4의 레벨 성장에 맞춰져 있다)
            foeScale: { east: 0.4, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.2, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },

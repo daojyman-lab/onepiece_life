@@ -265,6 +265,8 @@ export function ackBattle(s: Life5): void {
     if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
     else if (chance(r, riskOf(s, foe, false).injury)) applyFx(s, [{ op: 'injury', severity: 'light' }]);
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    // 빈사로 바뀐 싸움에서 지면 시정잡배에게도 죽을 수 있다 (목숨을 건 싸움의 죽을 확률 × minorDeathMult)
+    if (!won && p.battle.deathmatch && chance(r, riskOf(s, foe, true).death * F.minorDeathMult)) dieOrSurvive(s, r, foe);
     return;
   }
   // 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었다면(switched) 죽을 위험도 목숨을 건 싸움의 것이다
@@ -304,17 +306,21 @@ export function ackBattle(s: Life5): void {
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
   if (chance(r, risk.death * (p.result === 'lose' ? 1 : F.retreatDeath))) {
     // 빈사로 바뀐 싸움이면 주사위를 한 번 더 굴려, 붙으면 큰 부상을 입고 살아남는다
-    const live = switched ? rollDice(r, F.deathmatchSurvive) : null;
-    if (!live?.ok) {
-      applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
-      return;
-    }
-    applyFx(s, [{ op: 'injury', severity: 'heavy' }]);
-    logLine(s, `죽음의 문턱까지 갔지만 숨이 붙어 있었다. 큰 부상을 입고 간신히 살아남았다. [주사위 ${live.roll} / ${live.need} 이하 생존]`, 'heavy', 'danger');
+    if (!switched) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return; }
+    if (!dieOrSurvive(s, r, foe)) return;
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);
   if (p.next?.lose) applyFx(s, [{ op: 'queue', turning: p.next.lose }]);
+}
+
+/** 빈사로 바뀐 싸움에서 죽을 판정이 났을 때: 생존 주사위에 붙으면 큰 부상을 입고 살아남는다. 살아남았으면 true */
+function dieOrSurvive(s: Life5, r: Rng, foe: EnemySpec): boolean {
+  const live = rollDice(r, F.deathmatchSurvive);
+  if (!live.ok) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return false; }
+  applyFx(s, [{ op: 'injury', severity: 'heavy' }]);
+  logLine(s, `죽음의 문턱까지 갔지만 숨이 붙어 있었다. 큰 부상을 입고 간신히 살아남았다. [주사위 ${live.roll} / ${live.need} 이하 생존]`, 'heavy', 'danger');
+  return true;
 }
 
 // ---------------------------------------------------------------- 사소한 싸움
@@ -328,7 +334,7 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
 
 /**
  * 이름 없는 상대와의 사소한 싸움. 붙을지는 가치관이 정하고, 붙으면 전투 창에서 보여 준다.
- * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
+ * 신체는 잃지 않는다. 지면 가볍게 다칠 수 있고, 빈사로 바뀐 싸움에서 지면 낮은 확률로 죽을 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
   const name = pick(r, MINOR_FOE_NAMES);

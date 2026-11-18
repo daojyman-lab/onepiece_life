@@ -1,7 +1,9 @@
 // tests/v5/deathmatch.test.ts — 빈사가 되면 목숨을 건 싸움으로 바뀌고 물러날 수 없다. 물러나기는 주사위로 판정한다
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
-import { askFight, heroUnit5 } from '../../src/v5/core/fight';
+import { askFight, heroUnit5, minorFoe } from '../../src/v5/core/fight';
+import { reduce5 } from '../../src/v5/core/reduce';
+import { V } from '../../src/v5/data/balance';
 import { retreatChance, rollDice, runBattle, startBattle } from '../../src/core/combat/engine';
 import { enemyUnit } from '../../src/core/combat/units';
 import { makeEnemy } from '../../src/data/bosses';
@@ -65,5 +67,26 @@ describe('목숨을 건 싸움으로의 전환', () => {
       if (p.battle.deathmatch) switched++;
     }
     expect(switched).toBeGreaterThan(0);
+  });
+  it('시정잡배와의 싸움도 빈사로 바뀌어 지면 낮은 확률로 죽거나 큰 부상을 입고 살아남는다', () => {
+    let lost = 0, died = 0, survived = 0, plainDeath = 0;
+    for (let seed = 1; seed <= 600; seed++) {
+      let s: Life5 = hero(seed);
+      for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 5;
+      const r = rngOf({ seed, cursor: 0 });
+      const foe = minorFoe(s, r);
+      foe.base = { ...foe.base, str: foe.base.str * 3, vit: foe.base.vit * 3 };
+      const u = heroUnit5(s);
+      const units = [u, enemyUnit(foe, true, 0)];
+      const battle = runBattle(startBattle(units, { 0: 1 }, seed, false), true);
+      s.pending = { kind: 'battle', foe, lethal: false, battle, result: battle.result ?? 'lose', minor: { outcomeLine: '졌다.' } };
+      s = reduce5(s, { type: 'answer', index: 0 });
+      if (battle.result !== 'win') lost++;
+      if (!s.hero.alive) { died++; if (!battle.deathmatch) plainDeath++; }
+      if (s.log.some((l) => l.text.includes('간신히 살아남았다'))) survived++;
+    }
+    expect(plainDeath).toBe(0);
+    expect(died + survived).toBeGreaterThan(0);
+    expect(died).toBeLessThan(lost * V.fight.deathCap * V.fight.minorDeathMult + 10);
   });
 });
