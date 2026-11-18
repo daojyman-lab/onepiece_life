@@ -171,7 +171,7 @@ function Profile({ s }: { s: Life5 }) {
         <div class="paper t9">
           <div class="row between"><b>세부 무술 숙련</b><span class="soft">체술 {Math.round(p.martialMastery)} · 무기술 {Math.round(p.weaponMastery)}</span></div>
           <label class="row between" style={{ marginTop: 5 }}>
-            <span>집중 유파</span>
+            <span>기본 유파</span>
             <select value={s.growth.styleFocus ?? ''} onChange={(e) => actions.setStyleFocus((e.currentTarget.value || null) as import('../../data/combat-styles').CombatStyle | null)}>
               <option value="">계통 기본 유파</option>
               <optgroup label="체술">{p.styles.filter((x) => x.group === 'martial').map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup>
