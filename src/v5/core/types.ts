@@ -168,7 +168,7 @@ export interface ResolvedDoor { label: string; hint: string; locked: string | nu
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext }
-  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; minor?: { outcomeLine: string } }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; minor?: { outcomeLine: string }; escape?: { roll: number; need: number } }   // escape: 싸움 앞에서 물러나려다 실패한 주사위
   | { kind: 'ending'; cause: string }
   | null;
 export interface Stats5 {

@@ -396,3 +396,7 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .fight-stat .bar.foe i { background: var(--red); }
 /* 인연 칸의 작은 탭 (인연 · 동료) */
 .people-tabs { display: flex; gap: 4px; margin-bottom: 6px; }
+
+/* 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었을 때의 경고 */
+.deathmatch-alert { border-color: var(--red, #c0392b); animation: deathmatch-blink 0.5s steps(2) 3; }
+@keyframes deathmatch-blink { 50% { opacity: 0.35; } }

@@ -5,7 +5,7 @@ import { FRUIT_BY_ID } from '../../data/fruits';
 import { HERO_TRAIT_BY_ID, SPECIES_PASSIVES } from '../../data/passives';
 import { SEA_BY_ID, SEAS } from '../../data/seas';
 import { TALENT_BY_ID } from '../../data/talents';
-import { runBattle, startBattle } from '../../core/combat/engine';
+import { retreatChance, rollDice, runBattle, startBattle } from '../../core/combat/engine';
 import { fruitMods, mergeMods } from '../../core/combat/mods';
 import { crewUnit, enemyUnit } from '../../core/combat/units';
 import { branchSkills, getSkill } from '../../core/growth/skillbook';
@@ -213,9 +213,15 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
   return runBattle(startBattle(units, assign, seed, false), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, escape?: { roll: number; need: number }): void {
   const battle = fightBattle(s, foe);
-  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}) };
+  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}), ...(escape ? { escape } : {}) };
+}
+
+/** 싸움 앞에서 물러날 확률 (0~1): 속도의 몫으로 정하고, 목숨을 건 상대 앞이면 backOffLethal만큼 낮다 */
+export function backOffChance(s: Life5, foe: EnemySpec, lethal: boolean): number {
+  const p = retreatChance(heroFightStats(s).spd, foe.base.spd);
+  return Math.max(C.retreat.min, p - (lethal ? F.backOffLethal : 0));
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
@@ -234,8 +240,15 @@ export function answerFight(s: Life5, index: number): void {
   if (p?.kind !== 'fight') return;
   if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next); return; }
   if (index !== BACK_OFF) return;
+  // 물러나기도 주사위로 판정한다. 실패하면 붙잡혀 그대로 싸운다
+  const { roll, need, ok } = rollDice(rngOf(s.rng), backOffChance(s, p.foe, p.lethal));
+  if (!ok) {
+    logLine(s, `${p.foe.name}에게서 물러나려 했지만 붙잡혔다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
+    startFight(s, p.foe, p.lethal, p.next, { roll, need });
+    return;
+  }
   s.pending = null;
-  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다.`, 'heavy', 'battle');
+  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
   if (p.next?.back) applyFx(s, [{ op: 'queue', turning: p.next.back }]);
 }
 
@@ -254,6 +267,7 @@ export function ackBattle(s: Life5): void {
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
     return;
   }
+  // 빈사로 바뀐 싸움(battle.deathmatch)은 물러날 수 없을 뿐, 죽을 위험은 처음 정한 대로다 (결판이 나는 싸움은 거의 다 빈사를 거친다)
   const risk = riskOf(s, foe, p.lethal);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;

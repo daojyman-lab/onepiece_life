@@ -118,7 +118,11 @@ export const B = {
     helperPower: 0.5, supportHelperPower: 0.7,
     medicEvery: 3, medicHeal: 0.15,
     restSp: 0.2,
-    retreat: { base: 0.5, perSpd: 0.01, min: 0.2, max: 0.9 },
+    // 물러나기 주사위: 성공 확률 = base + perShare × (내 속도 몫 − 0.5), 내 속도 몫 = 내 속도 ÷ (내 속도 + 상대 속도).
+    // 연막(smoke)은 확률에 smoke를 더한다. 확률은 min~max로 묶는다 (실패할 수 없는 물러나기는 없다)
+    retreat: { base: 0.5, perShare: 0.8, min: 0.15, max: 0.9, smoke: 0.3 },
+    // 누구라도 체력이 이 몫 아래(빨간 막대)로 떨어지면 목숨을 건 싸움으로 바뀌고 더는 물러날 수 없다
+    deathmatchBelow: 0.3,
     drown: { hpBelow: 0.3, p: 0.2, navigatorP: 0.1 },
     seastoneSeal: 3,
     preview: { runs: 200, noiseBase: 15, noisePerInt: 0.1 },

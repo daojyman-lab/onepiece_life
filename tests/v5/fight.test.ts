@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/v5/core/fight';
+import { askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/v5/core/fight';
 import { openTurning } from '../../src/v5/core/turning';
 import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import { crewPowerFor } from '../../src/core/people';
@@ -29,11 +29,29 @@ describe('싸움', () => {
     const p = s.pending as Extract<Life5['pending'], { kind: 'fight' }>;
     for (const v of Object.values(p.risk)) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThanOrEqual(1); }
   });
-  it('물러나면 싸우지 않는다', () => {
-    let s = fighter(1); askFight(s, weak, true, false);
-    s = reduce5(s, { type: 'answer', index: 1 });
-    expect(s.pending).toBeNull();
-    expect(s.stats.fights).toBe(0);
+  it('물러나기는 주사위로 판정한다: 성공하면 싸우지 않고, 실패하면 붙잡혀 싸운다', () => {
+    let ok = 0, caught = 0;
+    for (let seed = 1; seed <= 60; seed++) {
+      let s = fighter(seed); askFight(s, weak, true, false);
+      s = reduce5(s, { type: 'answer', index: 1 });
+      if (s.pending === null) { ok++; expect(s.stats.fights).toBe(0); }
+      else {
+        caught++;
+        expect(s.pending.kind).toBe('battle');
+        const p = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
+        expect(p.escape!.roll).toBeGreaterThan(p.escape!.need);
+      }
+    }
+    expect(ok).toBeGreaterThan(0);
+    expect(caught).toBeGreaterThan(0);
+  });
+  it('물러날 확률은 속도가 빠를수록 높고, 목숨을 건 상대 앞에서는 낮다. 100%는 없다', () => {
+    const slow = fighter(1, 10), fast = fighter(1, 10);
+    fast.hero.base.spd = 400;
+    const foe = FOES[weak];
+    expect(backOffChance(fast, foe, false)).toBeGreaterThan(backOffChance(slow, foe, false));
+    expect(backOffChance(fast, foe, true)).toBeLessThan(backOffChance(fast, foe, false));
+    expect(backOffChance(fast, foe, false)).toBeLessThan(1);
   });
   it('물러날 수 없는 싸움은 묻지 않고 싸운다', () => {
     const s = fighter(1); askFight(s, weak, false, true);

@@ -2,6 +2,7 @@
 // (v4 src/ui/modals/BattleModal.tsx의 재생 타이머 · 소리 · 장면을 옮기고, 개입 · 준비 · 물건 · 물러나기 단추는 뺀다)
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sfx } from '../../../app/sound';
+import { josa } from '../../../core/josa';
 import { B } from '../../../data/balance';
 import { drawScene } from '../../../ui/pixel/pixelArt';
 import { battleSpeedOf } from '../../app/flow';
@@ -37,7 +38,7 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
     const e = b.events[idx - 1];
     if (!e) return;
     if (e.k === 'act') sfx(e.dodge ? 'miss' : e.crit ? 'crit' : e.dmg > 0 ? 'hit' : 'tick');
-    else if (e.k === 'down') sfx('danger');
+    else if (e.k === 'down' || e.k === 'deathmatch') sfx('danger');
     else if (e.k === 'heal' || e.k === 'item') sfx('treasure');
     else if (e.k === 'end') sfx(e.result === 'win' ? 'win' : 'lose');
   }, [idx]);
@@ -50,6 +51,9 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   const foeI = duel ? duel.r : b.units.findIndex((u) => u.side === 'R' && u.leader);
   const hero = b.units[heroI], foe = b.units[foeI];
   const round = [...b.events.slice(0, idx)].reverse().find((e) => e.k === 'round') as { n: number } | undefined;
+  // 누군가 빈사가 된 순간부터 목숨을 건 싸움: 경고를 띄우고 제목도 바꾼다
+  const dm = b.events.slice(0, idx).find((e) => e.k === 'deathmatch') as { who: number } | undefined;
+  const lethalNow = p.lethal || !!dm;
 
   // 장면: v4와 같은 캔버스. 공격하는 쪽이 번갈아 자세를 잡는다. 이기고 나면 상대가 사라진다
   const cv = useRef<HTMLCanvasElement>(null);
@@ -75,7 +79,7 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   }, [foeI, done, round?.n]);
 
   return (
-    <Modal title={`${p.lethal ? '목숨을 건 ' : ''}${formation.mode === 'duel' ? '1대1 전투' : '집단전'} · ${p.foe.name}`} cls="pend battle5" wide>
+    <Modal title={`${lethalNow ? '목숨을 건 ' : ''}${formation.mode === 'duel' ? '1대1 전투' : '집단전'} · ${p.foe.name}`} cls="pend battle5" wide>
       {formation.mode === 'duel' ? (
         <>
           <div class="paper duel battle5-vs">
@@ -103,10 +107,12 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
           ))}
         </div>
       )}
+      {p.escape && <div class="paper red t9" style={{ textAlign: 'center' }}><b>물러나려 했지만 붙잡혔다! [주사위 {p.escape.roll} / {p.escape.need} 이하 성공]</b></div>}
+      {dm && <div class="paper red deathmatch-alert" role="alert" style={{ textAlign: 'center' }}><b>⚠ {josa(`${b.units[dm.who]?.name ?? '누군가'}이(가) 빈사 상태다!`)}<br />목숨을 건 싸움으로 바뀌었다 — 이제 물러날 수 없다!</b></div>}
       <div class="paper battle-log" ref={logRef}>
         {b.events.slice(0, idx).map((e, i) => {
           const me = e.k === 'act' && e.who === heroI;
-          return <div key={i} class={`${e.k === 'act' && e.crit ? 'crit' : ''} ${me ? 'me' : ''}`}>{battleLine(b, e)}</div>;
+          return <div key={i} class={`${e.k === 'act' && e.crit ? 'crit' : ''} ${me ? 'me' : ''} ${e.k === 'deathmatch' ? 'red' : ''}`}>{battleLine(b, e)}</div>;
         })}
       </div>
       {done ? (
