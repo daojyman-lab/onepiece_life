@@ -229,3 +229,26 @@ describe('체술·무기술 세부 유파', () => {
     expect(loaded.growth.styleMastery.pistol).toBe(22);
   });
 });
+
+describe('스승의 기술 전수와 특훈', () => {
+  it('새 스승에게 기술을 배워도 기존 집중 유파는 바뀌지 않고 숙련과 이력이 쌓인다', () => {
+    const s = newLife5(2001);
+    setStyleFocus(s, 'threeSword');
+    applyFx(s, [{ op: 'learnTechnique', teacher: '미호크', branch: 'sword', name: '흑도 받아내기', add: 24 }]);
+    expect(s.growth.styleFocus).toBe('threeSword');
+    expect(s.growth.styleMastery.threeSword).toBe(24);
+    expect(s.growth.mentorHistory.at(-1)).toMatchObject({ kind: 'technique', teacher: '미호크', detail: '흑도 받아내기', style: 'threeSword', mastery: 24 });
+  });
+  it('특훈은 유파를 바꾸거나 숙련을 덮지 않고 능력치와 이력을 올린다', () => {
+    const s = newLife5(2002);
+    setStyleFocus(s, 'boxing');
+    s.growth.styleMastery.boxing = 17;
+    const before = { ...s.hero.base };
+    applyFx(s, [{ op: 'specialTraining', teacher: '가프', training: '군함 백 훈련', stats: { str: 3, vit: 2 } }]);
+    expect(s.growth.styleFocus).toBe('boxing');
+    expect(s.growth.styleMastery.boxing).toBe(17);
+    expect(s.hero.base.str).toBe(before.str + 3);
+    expect(s.hero.base.vit).toBe(before.vit + 2);
+    expect(s.growth.mentorHistory.at(-1)).toMatchObject({ kind: 'training', teacher: '가프', detail: '군함 백 훈련', stats: { str: 3, vit: 2 } });
+  });
+});
