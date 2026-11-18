@@ -13,7 +13,7 @@ export const LINEAGE_NAME: Record<Lineage, string> = {
 };
 
 export const BRANCH_NAME: Record<Branch, string> = Object.fromEntries(
-  (Object.keys(BRANCH_ID) as Branch[]).map((b) => [b, BRANCH_NAMES[BRANCH_ID[b]]]),
+  (Object.keys(BRANCH_ID) as Branch[]).map((b) => [b, b === 'sword' ? '무기술' : BRANCH_NAMES[BRANCH_ID[b]]]),
 ) as Record<Branch, string>;
 
 export const LIMB_STATE_WORD: Record<Exclude<LimbState, 'ok'>, string> = {
