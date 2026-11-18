@@ -29,6 +29,7 @@ import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+const branchLabel = (b: Branch) => b === 'sword' ? '무기술' : BRANCH_NAMES[BRANCH_ID[b]];
 const HAKI_BRANCHES: readonly Branch[] = ['observation', 'armament', 'conqueror'];
 export const isHakiBranch = (b: Branch): boolean => HAKI_BRANCHES.includes(b);
 export const hakiFlag = (b: Branch): string => `haki:${b}`;
@@ -57,7 +58,7 @@ export function addMastery(s: Life5, b: Branch, add: number): boolean {
   if (g.tier[b] >= tierCap(s, b)) { g.mastery[b] = V.growth.tierUp; return true; }
   g.tier[b] += 1;
   g.mastery[b] = 0;
-  logLine(s, `${BRANCH_NAMES[BRANCH_ID[b]]}이(가) ${g.tier[b]}단계에 올랐다.`, 'heavy', 'growth');
+  logLine(s, `${branchLabel(b)}이(가) ${g.tier[b]}단계에 올랐다.`, 'heavy', 'growth');
   return true;
 }
 
