@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5, invariants5 } from '../../src/v5/core/reduce';
-import { lineFits } from '../../src/v5/core/year';
+import { lineFits, stepPart } from '../../src/v5/core/year';
 import { checkAll, whyNot } from '../../src/v5/core/cond';
 import { applyFx } from '../../src/v5/core/fx';
 import { yearDivider } from '../../src/v5/core/log';
@@ -76,6 +76,38 @@ describe('한 해의 진행', () => {
     expect(lineFits(s, neutral)).toBe(true);
     s.values.justice = 80;
     expect(lineFits(s, justice)).toBe(true);
+  });
+  it('강자 소문은 성취욕이 깊고 평온을 우선하지 않는 젊은 인물에게만 맞는다', () => {
+    const line = LINES.find((l) => /센 사람이|강하다는 싸움꾼/.test(l.text))!;
+    const s = newLife5(3); s.age = 24;
+    for (const id of Object.keys(s.values) as (keyof typeof s.values)[]) s.values[id] = 0;
+    s.values.ambition = 40;
+    expect(lineFits(s, line)).toBe(false);
+    s.values.ambition = 80;
+    expect(lineFits(s, line)).toBe(true);
+    s.values.peace = 70;
+    expect(lineFits(s, line)).toBe(false);
+    s.values.peace = 0; s.age = 40;
+    expect(lineFits(s, line)).toBe(false);
+  });
+  it('강자 소문은 한 인생에 한 번만 기록된다', () => {
+    const line = LINES.find((l) => /센 사람이|강하다는 싸움꾼/.test(l.text))!;
+    const originalLines = [...LINES];
+    const lineRates = V.lines as { dailyP: number; minorP: number };
+    const dailyP = lineRates.dailyP, minorP = lineRates.minorP;
+    try {
+      LINES.splice(0, LINES.length, line);
+      lineRates.dailyP = 1; lineRates.minorP = 0;
+      const s = newLife5(11);
+      s.pending = null; s.age = 24; s.hero.standing = 'civil';
+      for (const id of Object.keys(s.values) as (keyof typeof s.values)[]) s.values[id] = 0;
+      s.values.ambition = 80;
+      for (let i = 0; i < 16; i++) { s.pending = null; s.recentLines = []; stepPart(s); }
+      expect(s.log.filter((l) => l.text === line.text)).toHaveLength(1);
+    } finally {
+      LINES.splice(0, LINES.length, ...originalLines);
+      lineRates.dailyP = dailyP; lineRates.minorP = minorP;
+    }
   });
   it('같은 나이에 섬을 옮기면 뒤따르는 기록 앞에 새 장소가 표시된다', () => {
     const s = newLife5(3);

@@ -216,6 +216,7 @@ function dailyLine(s: Life5, act: Activity, r: Rng): void {
   const line = leanPick(s, r, pool, (l) => l.lean, (l) => (fits(l.lean) ? V.activity.lineBoost : 1));
   if (!line) return;
   dayLine(s, fillText(s, line.text));
+  if (line.onceKey) s.seen[`daily:${line.onceKey}`] = s.age;
   if (line.money) s.hero.money = Math.max(0, s.hero.money + line.money);   // 글이 말하는 돈이 실제로 오간다
 }
 
@@ -223,7 +224,9 @@ function dailyLine(s: Life5, act: Activity, r: Rng): void {
 export function lineFits(s: Life5, l: DailyLine5): boolean {
   // 돈을 쓰는 줄은 그만한 돈이 있을 때만
   const personaFits = Object.keys(l.lean).length === 0 || topValues(s, 2).some((id) => (l.lean[id] ?? 0) > 0);
-  return personaFits && checkAll(s, l.when) && needsOk(s, l.needs) && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
+  return personaFits && checkAll(s, l.when) && needsOk(s, l.needs)
+    && (!l.onceKey || s.seen[`daily:${l.onceKey}`] === undefined)
+    && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
 /** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */

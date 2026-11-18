@@ -1,0 +1,1352 @@
+[
+ {
+  "text": "풍차의 날개가 도는 동안 우물가에서 물을 길었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "마키노의 술집 앞을 쓸고 손님들이 남긴 병을 정리했다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "코르보 산에서 들려온 고함에 귀를 기울이다 장작을 날랐다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "부두에 묶인 작은 배들의 이름을 하나씩 외웠다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "바람이 거센 언덕에 올라 빨랫줄의 옷가지를 걷었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "술집에 늦게 온 손님에게 남은 빵을 건넸다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "후샤 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "쓰레기 산에서 쓸 만한 판자를 골라 낡은 지붕을 고쳤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "성벽 너머 귀족 거리를 바라보며 낡은 구두를 닦았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "버려진 깡통을 모으는 아이들에게 무거운 자루를 들어줬다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "높은 성벽 아래 돌 틈에 핀 풀을 매일 살폈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "폐품에서 나온 천 조각으로 바람막이를 만들어 걸었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "그 골목의 작은 가게가 문을 닫을 때까지 곁을 지켰다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "고아 왕국 그레이 터미널",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "해군 기지 앞을 지날 때마다 반듯한 제복을 바라봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "대령의 동상이 드리운 그늘에서 바닥의 먼지를 털었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "훈련장 구령에 맞춰 골목에서 발걸음을 맞춰 걸었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "담벼락에 떨어진 모자를 주워 초소에 가져다줬다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "기지 근처에서 버려진 종이쪽지를 주워 글자를 익혔다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "군악 소리가 멎은 뒤에도 광장에 남아 행진을 지켜봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "셸스 타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "애완동물 먹이 가게 앞에서 굶은 개에게 물을 놓았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "가게 주인이 문을 닫을 때까지 진열대를 정돈했다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "항구에 들어오는 상자의 표식을 빠짐없이 읽어봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "낯선 개가 짖어도 먹이를 든 손을 거두지 않았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "골목의 빈 그릇을 모아 가게 뒤편에 가지런히 놓았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "지붕 위에서 마을 종소리가 퍼지는 방향을 살폈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "오렌지 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "언덕 위 저택의 창문에 켜진 불빛을 멀리서 바라봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "양 치는 언덕에서 흩어진 양들을 천천히 모아들였다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "거짓말쟁이 소년의 이야기를 듣고도 끝까지 웃어줬다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "저택으로 향하는 돌계단의 이끼를 작은 솔로 털어냈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "언덕에 누워 구름이 바뀌는 모양을 오래 지켜봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "우리 문이 헐거워지자 남은 나무로 경첩을 고쳤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시럽 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "귤밭 사이를 지나며 떨어진 열매를 바구니에 담았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "풍차 모양 순경 모자를 쓴 어른에게 길을 물었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "바다 건너 낯선 어인 이야기를 듣고 파도만 바라봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "잘 익은 귤을 골라 이웃집 문 앞에 놓아두었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "나무마다 열린 열매를 세며 가지 사이를 누볐다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "바닷바람에 쓰러진 바구니를 세워 수확을 도왔다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "코코야시 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "검술 도장 바깥에서 나무검 부딪는 소리를 들었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "논두렁을 따라 걸으며 물길에 막힌 흙을 걷어냈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "대숲이 흔들릴 때마다 잎사귀 사이의 하늘을 올려다봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "도장 마당을 쓸고 가지런히 놓인 신발을 정리했다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "별빛을 보려고 늦게까지 논둑에 앉아 있었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "대숲에서 곧은 대나무를 골라 작은 피리를 깎았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "시모츠키 마을",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "처형대 아래 광장을 쓸며 돌바닥의 얼룩을 닦았다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "무기점 진열창에 놓인 칼날의 모양을 유심히 살폈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "바람 센 항구에서 모자가 날아가지 않도록 끈을 묶었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "시작과 끝의 마을이라는 별칭을 듣고 항구를 오래 걸었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "광장에 모인 뱃사람들의 목적지를 조용히 받아 적었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "비바람에 기울어진 좌판을 붙들어 장사꾼을 도왔다.",
+  "age": "kid",
+  "standing": "child",
+  "town": "로그타운",
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "낡은 신발을 꿰매 신고도 골목 청소를 먼저 끝냈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "장난으로 약한 아이를 밀친 무리를 어른에게 알렸다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "빈터에 돌을 세워 작은 훈련장을 만들었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "장터에서 들은 먼 섬 이야기를 종이에 그려두었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "도서관 문턱에 앉아 지도 가장자리의 글자를 읽었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "친구가 꾸중을 들을 때 곁에 남아 함께 설명했다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "심부름 길을 벗어나 낯선 골목들을 끝까지 돌아봤다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "놀이에서 진 뒤 다시 겨루자며 먼저 손을 들었다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "소란이 시작되자 사람 없는 둑길로 걸음을 옮겼다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "비가 그친 뒤 처마 밑에 고인 물을 쓸어냈다.",
+  "age": "kid",
+  "standing": "child",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "창고에 흩어진 밧줄을 감아 통로 한쪽에 정리했다.",
+  "age": "youth",
+  "standing": "pirate",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "항구의 부당한 징수에 맞서 빼앗긴 짐을 되찾았다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "빈 창고에서 남은 식량을 찾아 낯선 항구에 나눴다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "지도에 표시되지 않은 해안선을 따라 걸었다.",
+  "age": "youth",
+  "standing": "pirate",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "술집의 연주에 맞춰 남은 동전을 전부 내놓았다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "고향에서 맡은 귀환 소식을 끝까지 전하겠다는 약속을 지켰다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "보수가 맞지 않는 계약을 거절하고 곧바로 항구를 떠났다.",
+  "age": "youth",
+  "standing": "pirate",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "항구에서 시비를 건 사내에게 먼저 주먹을 날렸다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "귀찮은 싸움은 웃어넘기고 바닷가 길로 자리를 옮겼다.",
+  "age": "any",
+  "standing": "pirate",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "공구를 챙기고 해가 뜨기 전 항구를 떠났다.",
+  "age": "youth",
+  "standing": "pirate",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "초소 앞에서 쓰러진 행인을 부축해 진료소로 옮겼다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "규정에 어긋난 상급자의 지시를 기록해 보고했다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "훈련이 끝난 뒤에도 모래밭을 달리며 기록을 줄였다.",
+  "age": "youth",
+  "standing": "marine",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "항해 기록에 없는 섬의 이름을 지도에 적어두었다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "휴식 시간에 낡은 바이올린을 꺼내 짧은 곡을 연주했다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "약속한 초소 근무를 끝까지 지키고 장비를 반납했다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "불필요한 명령에 따르지 않고 맡은 구역만 순찰했다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "훈련장에서 도전자를 연달아 제압하며 실력을 보였다.",
+  "age": "youth",
+  "standing": "marine",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "술집에서 벌어진 소란을 말없이 분리해 돌려보냈다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "제복의 단추를 닦고 순찰로의 낙엽을 치웠다.",
+  "age": "any",
+  "standing": "marine",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "검문에 걸린 노인의 짐을 대신 들어 골목으로 옮겼다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "약탈당한 곡식의 행방을 찾아 마을 사람들에게 돌려줬다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "숨겨진 연락 지점을 외우며 지도를 여러 번 다시 그렸다.",
+  "age": "youth",
+  "standing": "revolution",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "벽보 뒤에 남은 기록을 모아 이름을 비교했다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "멀리 떠나는 배를 그리며 낯선 노래를 흥얼거렸다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "위험한 길목을 비우지 않고 마지막까지 자리를 지켰다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "상부의 지시와 달리 주민들의 대피를 먼저 도왔다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "길을 막은 경비병에게 정면으로 달려들어 돌파했다.",
+  "age": "youth",
+  "standing": "revolution",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "충돌을 피하려고 어두운 뒷골목으로 우회했다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "새벽 시장에서 빵을 사며 평범한 손님처럼 행동했다.",
+  "age": "any",
+  "standing": "revolution",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "현상금이 걸리지 않은 도망자를 찾아 집까지 돌려보냈다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "의뢰인이 남긴 보수를 쪼개 길 잃은 아이에게 건넸다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "더 높은 현상금을 노리고 격투장의 상대를 연달아 꺾었다.",
+  "age": "youth",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "의뢰서의 작은 흔적을 대조하며 행선지를 추적했다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "싸움 대신 노점 악사의 연주를 끝까지 들었다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "맡은 의뢰를 끝까지 수행하고 보수는 약속대로 나눴다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "큰 보수를 제시한 의뢰를 거절하고 곧바로 마을을 떠났다.",
+  "age": "youth",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "도전장을 보낸 사내를 먼저 찾아가 결투를 걸었다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "시비를 거는 술꾼을 지나쳐 빈자리에서 식사를 마쳤다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "장비를 손질하고 시장에 나온 소문을 확인했다.",
+  "age": "any",
+  "standing": "bountyHunter",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "수리비가 모자란 어선의 갈라진 널빤지를 고쳐줬다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "불량 목재를 납품한 상인의 거래 장부를 공개했다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "튼튼한 연결부를 만들려고 같은 모형을 반복해서 깎았다.",
+  "age": "youth",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "선박 설계도를 펼쳐 결합 방식을 비교했다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "쓸모없는 나무 조각으로 바람개비를 만들어 창에 달았다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "작업장에 맡겨진 수리를 끝까지 마무리하고 공구를 닦았다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "견습 계약을 끊고 더 넓은 항구의 작업장을 찾아 나섰다.",
+  "age": "youth",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "작업 순서를 무시한 장인을 밀어내고 공구를 빼앗았다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "말다툼이 붙자 작업장을 비우고 물건부터 정리했다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "대패 날을 갈고 목재 가루를 쓸어 담았다.",
+  "age": "any",
+  "standing": "shipwright",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "시장에 남은 음식을 모아 허기진 이웃에게 나눠줬다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "저울을 속인 상인의 눈앞에서 무게추를 바로잡았다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "문을 열기 전부터 손님 응대 순서를 연습했다.",
+  "age": "youth",
+  "standing": "civil",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "먼 나라의 지도와 항구 소식을 신문에서 찾아 읽었다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "손해를 감수하고 오래된 악보를 사서 밤새 연주했다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "처음 정한 몫을 그대로 남기며 가게를 끝까지 지켰다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "정해진 거래처를 떠나 낯선 시장에서 장사를 시작했다.",
+  "age": "youth",
+  "standing": "civil",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "경쟁 가게의 좌판을 밀어내고 가장 좋은 자리를 차지했다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "수익을 포기하고 손님 사이의 다툼을 중재했다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "영업을 마친 뒤 바닥을 닦고 장부를 정리했다.",
+  "age": "any",
+  "standing": "civil",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "마을 우물에 물을 채워 지나가는 사람도 쓰게 했다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "공동 창고의 새는 지붕을 고치고 장부를 공개했다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "밭의 경계를 넓히려고 돌밭을 묵묵히 개간했다.",
+  "age": "youth",
+  "standing": "settled",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "해변에 떠밀려온 낯선 물건의 출처를 조사했다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "장터가 끝난 뒤 빈 광장에서 혼자 춤을 췄다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "오래전 한 약속을 잊지 않고 같은 나무를 돌봤다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "정착지의 규칙에 묶이지 않으려고 외곽의 빈집으로 옮겼다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "수확한 곡식을 독차지하려고 창고 문을 잠갔다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "이웃의 다툼에 끼어들어 양쪽을 차분히 달랬다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "집 앞 마당의 잡초를 뽑고 빗물을 받아두었다.",
+  "age": "any",
+  "standing": "settled",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "시장 골목에 나온 낡은 의자를 고쳐 아이들에게 내주었다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "억울한 벌금을 물게 된 장사꾼을 대신해 증언했다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "몸이 허락하는 동안 매일 언덕길을 오르며 걸음을 다졌다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "서랍 속 항해책을 펼쳐 가보지 못한 섬을 찾아봤다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "잔잔한 포구의 노랫소리를 듣고 잊고 있던 선율을 흥얼거렸다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "오래 지킨 약속을 끝내기 위해 마지막 밭고랑을 정리했다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "붙잡아 두려는 권유를 뒤로하고 홀로 먼 길을 떠났다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "광장에서 시비를 건 젊은이를 큰소리로 몰아붙였다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "모임에서 번진 다툼을 피하려고 조용히 집으로 돌아왔다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "해질 무렵 창틀을 닦고 오래된 찻잔을 가지런히 놓았다.",
+  "age": "old",
+  "standing": "retired",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "배급에서 남은 빵을 몸이 약한 수감자에게 건넸다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "devotion",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "죄를 뒤집어쓴 사람의 억울함을 간수 앞에서 증언했다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "justice",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "좁은 감방에서도 매일 팔굽혀펴기를 멈추지 않았다.",
+  "age": "youth",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "ambition",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "벽에 새겨진 표식의 순서를 맞추며 뜻을 추측했다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "inquiry",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "종이 조각에 바다의 풍경을 그리며 시간을 보냈다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "romance",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "맡겨진 비밀을 끝까지 입 밖에 내지 않았다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "loyalty",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "탈출을 권하는 거래에 응하지 않고 혼자 틈을 살폈다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "감방을 위협한 사내를 먼저 밀어붙여 물러서게 했다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "dominion",
+  "avoid": "peace",
+  "needs": []
+ },
+ {
+  "text": "복도에서 들려온 시비에 반응하지 않고 자리를 지켰다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": "peace",
+  "avoid": "dominion",
+  "needs": []
+ },
+ {
+  "text": "바닥의 금을 따라 걸으며 벽돌 틈의 먼지를 털었다.",
+  "age": "any",
+  "standing": "prisoner",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "누구의 부탁도 받지 않은 채 낡은 표지판을 바로 세웠다.",
+  "age": "any",
+  "standing": "any",
+  "town": null,
+  "lean": null,
+  "avoid": null,
+  "needs": []
+ },
+ {
+  "text": "익숙한 길을 벗어나 바다 냄새가 짙은 곳까지 걸었다.",
+  "age": "any",
+  "standing": "any",
+  "town": null,
+  "lean": "freedom",
+  "avoid": null,
+  "needs": []
+ }
+]

@@ -6,7 +6,7 @@
 import type { Branch, Cond, Need, Standing, ValueId, Values } from '../core/types';
 
 /** money: 글이 말하는 돈의 오감 (보냈다 · 써 버렸다면 음수, 주웠다 · 받아 냈다면 양수). 쓰는 줄은 그만한 돈이 있어야 나온다 */
-export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[]; money?: number }
+export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[]; money?: number; onceKey?: string }
 
 // ---------------- 나이대
 const kid: Cond = { c: 'age', min: 3, max: 15 };
@@ -348,7 +348,9 @@ export const LINES: DailyLine5[] = [
   M(youth, { freedom: 1 }, '손에 쥔 큰돈을 하루 만에 다 써 버렸다.', -10000),
   L(youth, {}, '밤새 뛰어다니고도 아침이면 몸이 가뿐했다.'),
   L(youth, { romance: 1 }, '항구 축제에서 처음 본 사람과 밤새 이야기를 나눴다.'),
-  L(youth, { ambition: 1 }, '나보다 센 사람이 있다는 소문을 들으면 잠이 오지 않았다.'),
+  { ...L([youth, { c: 'value', id: 'ambition', deep: true }, fierce], { ambition: 1 },
+    '자기보다 강하다는 싸움꾼이 결투에서 상대가 칼을 뽑기도 전에 넘어뜨렸다는 소문이 돌았다. 어떤 발놀림이었는지 끝까지 캐묻고, 잠자리에 들어서도 그 움직임을 막을 방법을 몇 번이고 그려 보았다.'),
+    onceKey: 'stronger_rumor' },
   // ---------------- 한창때 (36~59)
   L(prime, {}, '어깨가 결려 아침 수련을 짧게 끝냈다.'),
   L(prime, {}, '젊은 날의 무모한 일을 떠올리며 혀를 찼다.'),
