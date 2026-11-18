@@ -45,7 +45,11 @@ function rawBattleLine(b: BattleState, e: BattleEvent): string {
     case 'guard': return `${n(e.who)} 「${e.name}」`;
     case 'down': return `${n(e.who)}이(가) 쓰러졌다!`;
     case 'join': return `${n(e.who)}이(가) ${e.side === 'L' ? '우리 편 싸움에 합세했다' : '적의 싸움에 합세했다'}`;
-    case 'retreat': return e.ok ? `${n(e.who)}이(가) 물러났다` : `${n(e.who)}이(가) 물러나려다 실패했다`;
+    case 'retreat': {
+      const dice = e.roll !== undefined ? ` [주사위 ${e.roll} / ${e.need} 이하 성공]` : '';
+      return (e.ok ? `${n(e.who)}이(가) 물러났다` : `${n(e.who)}이(가) 물러나려다 실패했다`) + dice;
+    }
+    case 'deathmatch': return `⚠ ${n(e.who)}이(가) 빈사 상태다! 목숨을 건 싸움으로 바뀌었다. 이제 물러날 수 없다!`;
     case 'item': return `${n(e.who)}이(가) ${e.name}을(를) 썼다`;
     case 'drown': return `${n(e.who)}이(가) 바다에 빠졌다! 힘이 빠진다…`;
     case 'rest': return `${n(e.who)}이(가) 숨을 고른다`;

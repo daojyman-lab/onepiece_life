@@ -5,7 +5,7 @@ import { FRUIT_BY_ID } from '../../data/fruits';
 import { SPECIES_PASSIVES } from '../../data/passives';
 import { SEA_BY_ID, SEAS } from '../../data/seas';
 import { hasTrait, traitModifiers, traitFactor, recordTraitEvent } from './traits';
-import { runBattle, startBattle } from '../../core/combat/engine';
+import { retreatChance, rollDice, runBattle, startBattle } from '../../core/combat/engine';
 import { fruitMods, mergeMods } from '../../core/combat/mods';
 import { crewUnit, enemyUnit } from '../../core/combat/units';
 import { branchSkills, getSkill } from '../../core/growth/skillbook';
@@ -209,9 +209,15 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
   return runBattle(startBattle(units, assign, seed, !!s.passage || !!s.traitScene?.includes('sea')), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, escape?: { roll: number; need: number }): void {
   const battle = fightBattle(s, foe);
-  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}) };
+  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}), ...(escape ? { escape } : {}) };
+}
+
+/** 싸움 앞에서 물러날 확률 (0~1): 속도의 몫으로 정하고, 목숨을 건 상대 앞이면 backOffLethal만큼 낮다 */
+export function backOffChance(s: Life5, foe: EnemySpec, lethal: boolean): number {
+  const p = retreatChance(heroFightStats(s).spd, foe.base.spd);
+  return Math.max(C.retreat.min, p - (lethal ? F.backOffLethal : 0));
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
@@ -230,8 +236,15 @@ export function answerFight(s: Life5, index: number): void {
   if (p?.kind !== 'fight') return;
   if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next); return; }
   if (index !== BACK_OFF) return;
+  // 물러나기도 주사위로 판정한다. 실패하면 붙잡혀 그대로 싸운다
+  const { roll, need, ok } = rollDice(rngOf(s.rng), backOffChance(s, p.foe, p.lethal));
+  if (!ok) {
+    logLine(s, `${p.foe.name}에게서 물러나려 했지만 붙잡혔다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
+    startFight(s, p.foe, p.lethal, p.next, { roll, need });
+    return;
+  }
   s.pending = null;
-  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다.`, 'heavy', 'battle');
+  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
   if (p.next?.back) applyFx(s, [{ op: 'queue', turning: p.next.back }]);
 }
 
@@ -248,9 +261,13 @@ export function ackBattle(s: Life5): void {
     if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
     else if (chance(r, riskOf(s, foe, false).injury)) applyFx(s, [{ op: 'injury', severity: 'light' }]);
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    // 빈사로 바뀐 싸움에서 지면 시정잡배에게도 죽을 수 있다 (목숨을 건 싸움의 죽을 확률 × minorDeathMult)
+    if (!won && p.battle.deathmatch && chance(r, riskOf(s, foe, true).death * F.minorDeathMult)) dieOrSurvive(s, r, foe);
     return;
   }
-  const risk = riskOf(s, foe, p.lethal);
+  // 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었다면(switched) 죽을 위험도 목숨을 건 싸움의 것이다
+  const switched = !p.lethal && !!p.battle.deathmatch;
+  const risk = riskOf(s, foe, p.lethal || switched);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
 
@@ -288,12 +305,22 @@ export function ackBattle(s: Life5): void {
   }
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
   if (chance(r, risk.death * (p.result === 'lose' ? 1 : F.retreatDeath))) {
-    applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
-    return;
+    // 빈사로 바뀐 싸움이면 주사위를 한 번 더 굴려, 붙으면 큰 부상을 입고 살아남는다
+    if (!switched) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return; }
+    if (!dieOrSurvive(s, r, foe)) return;
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);
   if (p.next?.lose) applyFx(s, [{ op: 'queue', turning: p.next.lose }]);
+}
+
+/** 빈사로 바뀐 싸움에서 죽을 판정이 났을 때: 생존 주사위에 붙으면 큰 부상을 입고 살아남는다. 살아남았으면 true */
+function dieOrSurvive(s: Life5, r: Rng, foe: EnemySpec): boolean {
+  const live = rollDice(r, F.deathmatchSurvive);
+  if (!live.ok) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return false; }
+  applyFx(s, [{ op: 'injury', severity: 'heavy' }]);
+  logLine(s, `죽음의 문턱까지 갔지만 숨이 붙어 있었다. 큰 부상을 입고 간신히 살아남았다. [주사위 ${live.roll} / ${live.need} 이하 생존]`, 'heavy', 'danger');
+  return true;
 }
 
 // ---------------------------------------------------------------- 사소한 싸움
@@ -307,7 +334,7 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
 
 /**
  * 이름 없는 상대와의 사소한 싸움. 붙을지는 가치관이 정하고, 붙으면 전투 창에서 보여 준다.
- * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
+ * 신체는 잃지 않는다. 지면 가볍게 다칠 수 있고, 빈사로 바뀐 싸움에서 지면 낮은 확률로 죽을 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
   const name = pick(r, MINOR_FOE_NAMES);

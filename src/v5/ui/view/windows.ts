@@ -1,6 +1,6 @@
 // 싸움 앞의 물음과 선택 창.
 import type { Who } from '../../../ui/pixel/pixelArt';
-import { foePower, gapOf, heroFightStats } from '../../core/fight';
+import { backOffChance, foePower, gapOf, heroFightStats } from '../../core/fight';
 import { TURNING_BY_ID } from '../../data/turnings';
 import type { EnemySpec, Life5, Pending5 } from '../../core/types';
 import { foeWho, speakerOf } from './faces';
@@ -41,6 +41,8 @@ export interface FightView {
   crew: number;                        // 함께 싸울 동료 수
   /** 전투 등급 (종합 전투력: 능력치 · 무술 · 열매 · 패기): 나, 상대(간부 포함), 함께 싸울 동료들 */
   grade: { me: string; foe: string; crew: string[] };
+  /** 물러나기 주사위의 성공 확률 (%). 실패하면 붙잡혀 싸운다 */
+  backOff: number;
 }
 
 /** 싸움 앞의 물음: 상대, 상대의 격, 위험 세 줄. 목숨을 걸지 않은 싸움은 죽을 위험이 '없다' */
@@ -48,6 +50,7 @@ export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): Fi
   const w = riskWords(p.risk, p.lethal);
   return {
     name: p.foe.name, who: foeWho(p.foe), match: matchWord(s, p.foe), lethal: p.lethal,
+    backOff: Math.round(backOffChance(s, p.foe, p.lethal) * 100),
     stats: (() => { const me = heroFightStats(s); return STAT_LABEL.map(([k, label]) => ({ label, me: Math.round(me[k]), foe: Math.round((p.foe.base[k] ?? 0) / 10) * 10 })); })(),
     crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).length,
     grade: {

@@ -198,7 +198,8 @@ export type BattleEvent =
   | { k: 'guard'; d: number; who: number; name: string }
   | { k: 'down'; d: number; who: number }
   | { k: 'join'; d: number; who: number; side: 'L' | 'R' }
-  | { k: 'retreat'; who: number; ok: boolean }
+  | { k: 'retreat'; who: number; ok: boolean; roll?: number; need?: number }   // 주사위: roll(1~100)이 need 이하면 성공
+  | { k: 'deathmatch'; who: number }   // 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었다
   | { k: 'item'; d: number; who: number; item: string; name: string }
   | { k: 'drown'; who: number }
   | { k: 'rest'; who: number }
@@ -216,6 +217,7 @@ export interface BattleState {
   resting: boolean;
   atSea: boolean;
   navigator: boolean;
+  deathmatch?: boolean;   // 누군가 빈사가 된 뒤: 물러날 수 없다
 }
 
 // ---------------------------------------------------------------- 대기 중인 일
