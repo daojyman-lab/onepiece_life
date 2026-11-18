@@ -10,6 +10,7 @@ import { LIMBS } from './body';
 import { logLine, yearDivider } from './log';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
+import { COMBAT_STYLE_IDS } from '../data/combat-styles';
 import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
 
 export { fullName } from './birth';
@@ -48,7 +49,8 @@ export function emptyLife(seed: number): Life5 {
       alive: true,
       bornWealth: 'common',
     },
-    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null },
+    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null,
+      styleMastery: fill(COMBAT_STYLE_IDS, 0), styleFocus: null },
     values, strengths: [], marks: {},
     hardship: 0,
     people: [],
