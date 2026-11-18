@@ -42,7 +42,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    // 도장의 문이 셋을 넘지 않도록 권법 사범은 따로 온다
+    // 도장의 문이 지나치게 많아지지 않도록 권법 사범은 따로 온다
     id: 'pp_fist_dojo', kind: 'door', when: at(age(12, 40), st('child', 'civil', 'pirate', 'marine', 'bountyHunter', 'shipwright', 'settled', 'revolution')),
     weight: 4, repeat: { years: 6 }, speaker: { relation: '권법 사범' },
     title: '권법 도장', body: '{island} 부둣가의 권법 도장에서는 맨주먹으로 뱃사람들을 바닥에 눕힌다. 수업료를 내면 누구든 받지만, 첫날은 사범에게 얻어맞는 것으로 시작한다고 한다.',
