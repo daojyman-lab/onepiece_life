@@ -99,10 +99,8 @@ function applyOne(s: Life5, e: Fx): void {
     case 'vowFail': resolveVow(s, e.id, true); return;
     case 'vowResolve': {
       const result = resolveVow(s, e.id);
-      if (result?.reward) {
-        addMastery(s, result.reward, result.amount);
+      if (result?.reward && addMastery(s, result.reward, result.amount))
         s.growth.pref[result.reward] += result.amount * V.growth.pref.fromMastery;
-      }
       return;
     }
     case 'parentMissing': parentMissing(s); return;
