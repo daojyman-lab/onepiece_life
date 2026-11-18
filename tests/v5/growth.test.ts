@@ -52,6 +52,7 @@ describe('패기 획득 전 숙련 제한', () => {
   it('획득 전에는 자습·효과·자동 수련으로 패기 숙련이 오르지 않는다', () => {
     const s = newLife5(1701);
     s.pending = null;
+    s.growth.pref = { fist: 0, sword: 0, gun: 0, observation: 0, armament: 0, conqueror: 0, fruit: 0 };
     s.growth.pref.observation = 80;
     applyFx(s, [{ op: 'mastery', branch: 'observation', add: 60 }, { op: 'tier', branch: 'observation', to: 2 }]);
     expect(s.growth.mastery.observation).toBe(0);
@@ -62,6 +63,7 @@ describe('패기 획득 전 숙련 제한', () => {
   });
   it('획득 플래그가 생긴 뒤에만 패기 숙련이 오른다', () => {
     const s = newLife5(1702);
+    s.growth.pref = { fist: 0, sword: 0, gun: 0, observation: 0, armament: 0, conqueror: 0, fruit: 0 };
     applyFx(s, [{ op: 'flag', id: 'haki:observation' }, { op: 'mastery', branch: 'observation', add: 40 }]);
     expect(s.growth.mastery.observation).toBe(40);
     expect(mainBranch(s)).toBe('observation');
