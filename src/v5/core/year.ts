@@ -79,6 +79,7 @@ function yearTurn(s: Life5, r: Rng): void {
   yearRisks(s, r);
   if (!s.hero.alive) return;
   rollMisfortune(s, r);
+  rollTrainingHakiFortune(s, r);
   rollFortune(s, r);
 }
 
