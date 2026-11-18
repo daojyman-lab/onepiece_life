@@ -72,7 +72,7 @@ export function normalizeLife5(x: unknown): Life5 | null {
     const value = life.growth.styleMastery[id];
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) life.growth.styleMastery[id] = 0;
   }
-  if (life.growth.styleFocus === undefined) life.growth.styleFocus = null;
+  if (life.growth.styleFocus === undefined || !COMBAT_STYLE_BY_ID[life.growth.styleFocus]) life.growth.styleFocus = null;
   for (const [branch, style] of [['fist', DEFAULT_STYLE.fist], ['sword', DEFAULT_STYLE.sword], ['gun', DEFAULT_STYLE.gun]] as const) {
     const hasBranchStyleProgress = COMBAT_STYLE_IDS.some((id) =>
       COMBAT_STYLE_BY_ID[id].branch === branch && life.growth.styleMastery[id] > 0);
