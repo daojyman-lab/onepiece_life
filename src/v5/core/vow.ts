@@ -1,4 +1,5 @@
 // 서약의 선언, 생애에 걸친 실천, 결산과 각성을 한곳에서 판정한다.
+import { opensSpecial } from './values';
 import { V } from '../data/balance';
 import { LIFE_VOW_ACTIVITY_NEEDS, LIFE_VOW_AGES, LIFE_VOW_CHOICE_NEEDS, LIFE_VOW_HP_COST, LIFE_VOW_STAT_GAIN, LIFE_VOW_STORIES } from '../data/vow-life';
 import { VOWS } from '../data/vows';
@@ -54,14 +55,18 @@ export function nextLifeVowTurning(s: Life5): string | null {
 export function canBeginVow(s: Life5, id: string): boolean {
   const d = VOWS[id];
   const vows = state(s);
-  if (!d || vows.active || vows.history.some((entry) => entry.id === id) || ended(s)) return false;
+  if (!d || vows.active || vows.history.some((entry) => entry.id === id)) return false;
   if (d.level) {
+    if (ended(s)) return false;
     const level = nextLevel(s);
     const previous = kept(s).at(-1);
     return level === d.level && s.age >= LIFE_VOW_AGES[level - 1]
       && (!previous || VOWS[previous.id]?.value === d.value);
   }
-  return !vows.history.length && s.values[d.value] >= V.value.deep
+  // 섬 서약은 첫 서약의 자리를 대신한다 (지키면 인생 서약 사다리의 첫 칸이 된다). 아직 건 서약이 없어야 하지만,
+  // 10살의 인생 서약 제안을 거절한 것만으로는 막지 않는다 (그 제안과 12~17살의 하늘섬 장편이 늘 겹쳤다).
+  // 앞선 선택의 표시(requires)로 잠긴 특별한 문에서 걸리므로 그 문과 같은 문턱을 쓴다 (깊음 55는 12~17살에 닿지 않았다)
+  return !vows.history.length && opensSpecial(s, d.value, true)
     && d.requires.every((flag) => s.flags.includes(flag))
     && d.forbids.every((flag) => !s.flags.includes(flag));
 }

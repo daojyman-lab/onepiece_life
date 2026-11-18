@@ -57,7 +57,7 @@ export const FOES_SKYPIEA: FoeDef[] = [
 
 export const EP_SKYPIEA: Turning[] = [
   // ================================================================ 원작 전: 번개 아래의 장부 (주인공 12~17)
-  // 표시: tika_trust bella_trust b_cold b_force b_route b_ledger b_shandia b_knight b_record b_deal b_sabotage b_evac enel / before_done
+  // 표시: tika_trust bella_trust b_cold b_force b_route b_ledger b_shandia b_knight b_record b_deal b_sabotage b_evac / before_done (C3의 특별한 문이 본다)
   {
     id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done'))), weight: 30, repeat: 'once', speaker: 'hero',
     title: '1주차 · 번개 아래의 다이얼 시장',
@@ -302,7 +302,7 @@ export const EP_SKYPIEA: Turning[] = [
         fx: [flag(F('c_list')), log('졸개들은 신이 떠나는 날을 「잔칫날」이라고 불렀다. 그날 털 집 순서까지 정해 두었다.'), next('ep_skypiea_c4')] },
       { label: '늪의 신관이 선 길 아래로 몸을 숨긴다', hint: '신관의 시선을 피하고 늑대단의 흔적을 놓치지 않는다', values: { dominion: D }, danger: true,
         fx: [flag(F('c_route')), { op: 'hp', add: -5 }, next('ep_skypiea_c4'), log('게다츠가 하품하며 지나갈 때 몸을 낮췄다. 젖은 구름 위에 늑대단 자루의 끌린 자국이 남았다.', 'light')] },
-      { label: '번개가 떨어지는 버릇을 읽으며 숲을 지나간다', hint: '그 사내와 겨뤄 본 몸이 리듬을 기억한다', when: [has(F('enel'))], special: 'justice', values: { justice: D },
+      { label: '번개가 떨어지는 버릇을 읽으며 숲을 지나간다', hint: '번개 아래에서 자란 몸이 리듬을 기억한다', when: [has(F('before_done'))], special: 'justice', values: { justice: D },
         fx: [flag(F('c_route')), flag(F('c_list')), log('번개가 떨어질 자리를 피해 걸었다. 신관들도 늑대들도 {name}을(를) 보지 못했다.'), next('ep_skypiea_c4')] },
     ],
   },

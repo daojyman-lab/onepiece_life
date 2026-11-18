@@ -11,7 +11,7 @@ import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
 import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
-import { addValues, isDeep } from './values';
+import { addValues, isDeep, opensSpecial } from './values';
 import { isQuiet } from './year';
 import { advanceVow, canBeginVow, recordVowChoice } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
@@ -41,7 +41,8 @@ export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
     let locked = whyNot(s, d.when) ?? whyNeed(s, d.needs);
     const start = d.fx.find((e) => e.op === 'vowStart');
     if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
-    if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
+    const earned = (d.when ?? []).some((c) => c.c === 'flag' && c.has);   // 앞선 선택의 표시로 잠긴 문
+    if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
       label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,

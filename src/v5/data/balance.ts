@@ -9,7 +9,12 @@ export const V = {
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
-           soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
+           soften: 0.85,                       // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
+           // 특별한 문의 문턱: 그 나이(to살까지)에 이만큼 쌓였으면 연다. 그 가치관을 꾸준히 고른 사람의 나이별 중앙값 둘레다
+           // (깊음 deep은 30살 무렵에야 닿아서, 유년기 · 섬 장편의 특별한 문이 열리지 않았다). 30살부터는 deep과 같다
+           special: [ { to: 7, need: 6 }, { to: 9, need: 12 }, { to: 11, need: 17 }, { to: 13, need: 22 }, { to: 15, need: 27 },
+                      { to: 17, need: 32 }, { to: 19, need: 36 }, { to: 21, need: 40 }, { to: 24, need: 45 }, { to: 29, need: 50 },
+                      { to: Infinity, need: 55 } ] },
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.1 }, { to: 200, n: 0.8 } ],
   stopsQuiet: 0.4,
   // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
