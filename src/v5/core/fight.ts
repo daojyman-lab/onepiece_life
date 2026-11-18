@@ -267,8 +267,9 @@ export function ackBattle(s: Life5): void {
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
     return;
   }
-  // 빈사로 바뀐 싸움(battle.deathmatch)은 물러날 수 없을 뿐, 죽을 위험은 처음 정한 대로다 (결판이 나는 싸움은 거의 다 빈사를 거친다)
-  const risk = riskOf(s, foe, p.lethal);
+  // 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었다면(switched) 죽을 위험도 목숨을 건 싸움의 것이다
+  const switched = !p.lethal && !!p.battle.deathmatch;
+  const risk = riskOf(s, foe, p.lethal || switched);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
 
@@ -302,8 +303,14 @@ export function ackBattle(s: Life5): void {
   }
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
   if (chance(r, risk.death * (p.result === 'lose' ? 1 : F.retreatDeath))) {
-    applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
-    return;
+    // 빈사로 바뀐 싸움이면 주사위를 한 번 더 굴려, 붙으면 큰 부상을 입고 살아남는다
+    const live = switched ? rollDice(r, F.deathmatchSurvive) : null;
+    if (!live?.ok) {
+      applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
+      return;
+    }
+    applyFx(s, [{ op: 'injury', severity: 'heavy' }]);
+    logLine(s, `죽음의 문턱까지 갔지만 숨이 붙어 있었다. 큰 부상을 입고 간신히 살아남았다. [주사위 ${live.roll} / ${live.need} 이하 생존]`, 'heavy', 'danger');
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);

@@ -88,13 +88,21 @@ describe('싸움', () => {
     expect(superior).toBeCloseTo(whole);
     expect(aim((s) => { s.hero.limbs.eyeL = 'lost'; s.hero.limbs.eyeR = 'lost'; })).toBeLessThan(one);
   });
-  it('목숨을 걸지 않은 싸움에서는 죽지 않는다', () => {
+  it('목숨을 걸지 않은 싸움은 빈사를 거치지 않으면 죽지 않고, 빈사로 바뀌면 죽거나 큰 부상을 입고 살아남는다', () => {
     expect(riskOf(fighter(1, 5), FOES[weak], false).death).toBe(0);
-    for (let i = 0; i < 60; i++) {
+    let died = 0, survived = 0;
+    for (let i = 0; i < 120; i++) {
       let s = fighter(i, 5); askFight(s, weak, false, false);
-      s = reduce5(s, { type: 'answer', index: 0 }); s = reduce5(s, { type: 'answer', index: 0 });
-      expect(s.hero.alive).toBe(true);
+      s = reduce5(s, { type: 'answer', index: 0 });
+      const p = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
+      const switched = !!p.battle.deathmatch;
+      s = reduce5(s, { type: 'answer', index: 0 });
+      if (!switched) expect(s.hero.alive).toBe(true);
+      if (!s.hero.alive) died++;
+      if (s.log.some((l) => l.text.includes('간신히 살아남았다'))) { survived++; expect(s.hero.injuries.some((x) => x.severity === 'heavy')).toBe(true); }
     }
+    expect(died).toBeGreaterThan(0);
+    expect(survived).toBeGreaterThan(0);
   });
   it('어떻게 싸우는지는 가치관이 정한다', () => {
     const a = fighter(1); addValues(a, { dominion: 90 });
