@@ -2,7 +2,7 @@
 import { buildVoyage, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../../core/josa';
 import { fill } from '../../core/util';
-import { chance, weighted, type Rng } from '../../core/rng';
+import { chance, int, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
@@ -110,6 +110,35 @@ function fits(s: Life5, t: Turning): boolean {
   return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
 }
 
+/** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
+export const STORY_PREFIX = 'ep_';
+
+/**
+ * 장편의 쉼에만 쓰는 곁 난수. 인생의 난수 줄(s.rng)을 밀지 않아서, 쉼을 넣어도 나머지 인생의 주사위가 그대로다.
+ * 기록 번호(s.seq)가 줄마다 오르므로 토막마다 다른 값이 나온다
+ */
+export function storyRng(s: Life5): Rng {
+  return rngOf({ seed: (s.rng.seed ^ 0x5eed5) >>> 0, cursor: s.seq * 4 });
+}
+
+/** 장면 제목의 「N주차」. 없으면 id 자체(어느 장면과도 다른 주로 본다) */
+function storyWeek(id: string): string {
+  return TURNING_BY_ID[id]?.title.match(/^(\d+)주차/)?.[1] ?? id;
+}
+
+/**
+ * 섬 장편의 다음 장면이 줄 섰을 때, 방금 고른 장면과 다른 주(週)의 장면이면 그 사이에 섬의 며칠을 둔다
+ * (V.story.rest 토막, year.ts의 storyInterlude). 같은 주의 장면(싸움 바로 뒤, 같은 날의 선택)은 곧장 잇는다.
+ * 문을 고른 뒤(answerDoor)와 이야기가 이어지는 싸움이 끝난 뒤(fight.ts) 부른다.
+ */
+export function storyPause(s: Life5): void {
+  const next = s.queue.find((id) => id.startsWith(STORY_PREFIX));
+  if (!next) return;
+  const last = [...s.tried].reverse().find((k) => k.startsWith(STORY_PREFIX))?.split('#')[0];
+  if (!last || storyWeek(last) === storyWeek(next)) { s.storyRest = 0; return; }
+  s.storyRest = int(storyRng(s), V.story.rest[0], V.story.rest[1]);
+}
+
 /**
  * 줄에서 지금 열 수 있는(조건이 맞고 열린 문이 있는) 첫 전환점을 꺼낸다. 앞의 것이 막혀 있으면 건너뛴다.
  * 닫혔거나 한 인생의 상한에 닿은 전환점은 열지 않고 바로 버린다.
@@ -179,6 +208,7 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  if (t.id.startsWith(STORY_PREFIX)) storyPause(s);   // 끼어든 다른 계기(부상 등)를 고른 뒤에는 쉼을 다시 세지 않는다
   if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);

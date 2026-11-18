@@ -192,6 +192,7 @@ export interface Life5 {
   closed: string[];                            // closes 문으로 닫힌 전환점 id
   standingSince: number;                       // 지금의 처지가 된 나이
   queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
+  storyRest: number;                           // 섬 장편의 다음 장면까지 남은 일상 토막 (V.story.rest)
   stopsThisYear: number;
   unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)
   known: string[];                             // 지난 인생들에서 골라 본 "전환점id#문번호" (새 인생을 만들 때 도감에서 받는다)
