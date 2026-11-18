@@ -22,7 +22,7 @@ import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
 import { logLine } from './state';
 import { addMark } from './strengths';
-import { addStyleMastery } from './styles';
+import { addStyleMastery, styleForBranch } from './styles';
 import { isDeep } from './values';
 import { beginVow, declineVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
@@ -181,10 +181,30 @@ function applyOne(s: Life5, e: Fx): void {
     case 'tier':
       if (!hakiUnlocked(s, e.branch)) return;
       s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
+    case 'learnTechnique': {
+      const style = e.style ?? styleForBranch(s, e.branch);
+      if (!style) return;
+      s.growth.styleMastery[style] = Math.max(0, (s.growth.styleMastery[style] ?? 0) + e.add);
+      s.growth.mentorHistory.push({ kind: 'technique', teacher: e.teacher, age: s.age, detail: e.name, style, mastery: e.add });
+      logLine(s, `${e.teacher}에게 「${e.name}」을(를) 배웠다. ${e.add}만큼 숙련이 쌓였다.`, 'heavy', 'growth');
+      return;
+    }
+    case 'specialTraining': {
+      const gains: Partial<import('../../core/types').Stats> = {};
+      for (const [key, value] of Object.entries(e.stats) as [StatKey, number][]) {
+        if (!Number.isFinite(value) || value <= 0) continue;
+        h.base[key] = Math.max(0, h.base[key] + value);
+        gains[key] = value;
+      }
+      s.growth.mentorHistory.push({ kind: 'training', teacher: e.teacher, age: s.age, detail: e.training, stats: gains });
+      const labels: Record<StatKey, string> = { str: '근력', spd: '민첩', vit: '체력', int: '지능', wil: '의지', luk: '행운' };
+      const gained = (Object.entries(gains) as [StatKey, number][]).map(([key, value]) => `${labels[key]} +${value}`).join(' · ');
+      logLine(s, `${e.teacher}와 특훈을 마쳤다. ${e.training} — ${gained}.`, 'heavy', 'growth');
+      return;
+    }
     case 'master':
       if (isHakiBranch(e.branch)) return;
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
-      // 스승을 들이면 그 갈래가 앞선다. 길이 바뀌면 year.ts의 notePath가 큰 일로 남긴다
       s.growth.pref[e.branch] = Math.max(...Object.values(s.growth.pref)) + V.growth.pref.masterLead;
       return;
     case 'reveal': revealSurname(s); return;
