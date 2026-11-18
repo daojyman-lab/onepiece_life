@@ -188,7 +188,7 @@ const EAST_ARC: Turning[] = [
       { label: '목검으로 여검사와 한 판 겨뤄 본다', hint: '해군 쪽 사람들에게 솜씨가 알려진다. 입대하라는 말을 듣는다', values: { ambition: D },
         fx: [{ op: "log", text: "목검을 맞대자 여검사가 빠르게 빈틈을 찔렀다. 겨루기가 끝난 뒤 지켜보던 해군이 입대할 생각은 없느냐고 물었다.", weight: "light" }, { op: 'hp', add: -8 }, { op: 'mastery', branch: 'sword', add: 8 }, { op: 'person', kind: 'ally', relation: '명검을 쫓는 여검사', canon: 'tashigi' }, { op: 'flag', id: 'marineContact' }] },
       { label: '해적이 사 가기 전에 그 낡은 칼을 산다', hint: '모아 둔 돈이 다 나간다. 칼은 손에 착 감긴다', values: { romance: D },
-        fx: [{ op: "log", text: "돈을 치르고 칼을 빼자 낡은 칼집과 달리 날이 곧게 빛났다. 타시기는 칼의 이름을 다시 한번 알려 주었다.", weight: "light" }, { op: 'money', add: -20000 }, { op: 'mastery', branch: 'sword', add: 10 }, { op: 'flag', id: 'meitoBought' },
+        fx: [{ op: "log", text: "돈을 치르고 칼을 빼자 낡은 칼집과 달리 날이 곧게 빛났다. 타시기는 칼의 이름을 다시 한번 알려 주었다.", weight: "light" }, { op: 'money', add: -20000, trade: true }, { op: 'mastery', branch: 'sword', add: 10 }, { op: 'flag', id: 'meitoBought' },
              { op: 'timeline', text: '로그타운 무기점에서 명검 한 자루를 손에 넣었다', canon: 'tashigi' }] },
       { label: '칼의 내력을 함께 뒤적이며 이야기를 나눈다', hint: '칼을 보는 눈이 트인다. 손에 남는 것은 없다', values: { inquiry: D },
         fx: [{ op: "log", text: "무기점 장부를 함께 뒤지며 칼에 남은 문양을 읽었다. 타시기는 다음에 다른 명검을 보면 알려 달라고 했다.", weight: "light" }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '칼 이야기를 나눈 여검사', canon: 'tashigi' }] },

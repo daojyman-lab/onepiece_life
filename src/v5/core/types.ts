@@ -65,6 +65,7 @@ export type Cond =
   | { c: 'wealth'; min?: Wealth; max?: Wealth }
   | { c: 'lineage'; is: Lineage[] }
   | { c: 'value'; id: ValueId; deep: boolean }
+  | { c: 'trait'; id: string; has: boolean }
   | { c: 'strength'; id: string; has: boolean }
   | { c: 'money'; min: number }
   | { c: 'fame'; min: number }
@@ -87,7 +88,7 @@ export type Cond =
 export type Fx =
   | { op: 'base'; key: StatKey | 'all'; add: number }
   | { op: 'hp'; add: number }
-  | { op: 'money'; add: number }
+  | { op: 'money'; add: number; trade?: boolean }
   | { op: 'fame'; add: number }
   | { op: 'rank'; add: number }
   | { op: 'standing'; to: Standing }
@@ -96,6 +97,7 @@ export type Fx =
   | { op: 'moveHome' }                                  // 태어난 마을과 고향의 바다로 돌아간다
   | { op: 'mastery'; branch: Branch; add: number }
   | { op: 'tier'; branch: Branch; to: number }
+  | { op: 'traitAwaken'; branch: Branch }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
@@ -131,7 +133,7 @@ export type Fx =
   | { op: 'log'; text: string; weight: LogWeight }
   | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
   | { op: 'die'; cause: string }
-  | { op: 'chance'; p: number; then: Fx[]; else?: Fx[] };
+  | { op: 'chance'; p: number; skillCheck?: boolean; then: Fx[]; else?: Fx[] };
 
 export interface FightNext { win?: string; lose?: string; back?: string }
 
@@ -140,6 +142,7 @@ export interface Door {
   when?: Cond[];                               // 출생 · 처지의 벽. 안 맞으면 잠긴다
   special?: ValueId;                           // 이 가치관이 깊어야 열리는 특별한 문
   values?: Partial<Values>;                    // 고르면 오르는 점수
+  meal?: boolean;
   mark?: string;                               // 정신적 강점으로 가는 표시
   fx: Fx[];
   danger?: boolean;
@@ -155,6 +158,7 @@ export interface Turning {
   title: string; body: string;
   doors: Door[];                               // misfortune은 빈 배열
   fx?: Fx[];                                   // misfortune이 일으키는 일
+  tags?: ('sea' | 'night' | 'underground')[];
   needs?: Need[];                              // 안 맞으면 뽑히지 않는다
   max?: number;                                // 한 인생에 많아야 이만큼. 없으면 once는 1, 되풀이는 V.turning.maxRepeat
 }
@@ -179,7 +183,17 @@ export interface Stats5 {
   emptyStops: number;                          // 그 가운데 띄울 전환점이 없던 횟수
   namedMet: number;                            // 이름 있는 상대와 마주친 횟수 (싸웠든 물러났든)
 }
+export interface TraitState {
+  earned: string[];
+  active: string[];
+  evidence: Record<string, string[]>;
+  changedAt: number | null;
+  crewSeen: string[];
+}
 export interface Life5 {
+  traits?: TraitState;
+  traitScene?: ('sea' | 'night' | 'underground')[];
+  traitSource?: string;
   schema: 5;
   rng: { seed: number; cursor: number };
   age: number; part: 0 | 1 | 2 | 3;            // 한 해의 네 토막
@@ -212,4 +226,4 @@ export interface Life5 {
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
   passage?: import('./passage').Passage | null;
 }
-export type Command5 = { type: 'step' } | { type: 'answer'; index: number };
+export type Command5 = { type: 'step' } | { type: 'answer'; index: number } | { type: 'traits'; ids: string[] };

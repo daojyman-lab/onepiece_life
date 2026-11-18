@@ -280,7 +280,7 @@ export const WATER7: Turning[] = [
     title: '해일이 지나간 뒤', body: '아쿠아 라구나가 아랫동네를 휩쓸었다. 시장은 아랫동네를 비우고 윗동네만 다시 짓자고 한다. 아랫동네 사람들은 갈 곳이 없다.',
     doors: [
       { label: '아랫동네 사람들과 집을 다시 세운다', hint: '돈도 시간도 든다. 사람들이 남는다', values: { inquiry: D }, fx: [{ op: "log", text: "아랫동네 사람들과 젖은 벽돌을 걷어 내고 새 터를 높였다. 지붕이 올라가자 떠나려던 이웃도 문패를 다시 걸었다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '아랫동네 사람들' }] },
-      { label: '비워진 아랫동네 땅을 헐값에 사들인다', hint: '언젠가 값이 오른다. 원망을 산다', values: { greed: D }, fx: [{ op: 'money', add: -20000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 90000 }, { op: 'log', text: '물길이 정비되자 사들인 땅의 값이 뛰었다. 떠난 주민들은 그 자리를 볼 때마다 얼굴을 굳혔다.', weight: 'light' }], else: [{ op: 'log', text: '새 물길은 끝내 아랫동네까지 닿지 않았다. 땅은 빈 채 남았고, 떠난 주민들의 원망만 돌아왔다.', weight: 'light' }] }, { op: 'person', kind: 'enemy', relation: '땅을 빼앗긴 아랫동네 사람' }] },
+      { label: '비워진 아랫동네 땅을 헐값에 사들인다', hint: '언젠가 값이 오른다. 원망을 산다', values: { greed: D }, fx: [{ op: 'money', add: -20000, trade: true }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 90000 }, { op: 'log', text: '물길이 정비되자 사들인 땅의 값이 뛰었다. 떠난 주민들은 그 자리를 볼 때마다 얼굴을 굳혔다.', weight: 'light' }], else: [{ op: 'log', text: '새 물길은 끝내 아랫동네까지 닿지 않았다. 땅은 빈 채 남았고, 떠난 주민들의 원망만 돌아왔다.', weight: 'light' }] }, { op: 'person', kind: 'enemy', relation: '땅을 빼앗긴 아랫동네 사람' }] },
       { label: '해일을 막는 새 둑을 설계해 시장에게 낸다', hint: '받아들여질지 모른다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'chance', p: 0.4, then: [{ op: 'fame', add: 5 }, { op: 'log', text: '시장이 새 둑의 설계도를 받아 들었다. 아랫동네 사람들도 그림을 보러 모여들었다.', weight: 'light' }], else: [{ op: 'log', text: '시장은 설계도를 돌려주며 당장은 둑을 지을 돈이 없다고 했다. 접힌 종이만 손에 남았다.', weight: 'light' }] }] },
     ],
   },

@@ -3,8 +3,9 @@ import { stageName } from '../../core/stages';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { drawScene, type SceneInput } from '../../../ui/pixel/pixelArt';
 import { caughtUp, shouldRead } from '../../app/flow';
-import { actions, msSinceWindowClosed, useStore } from '../../app/store';
+import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
+import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
 import { VOWS } from '../../data/vows';
 import { Face, Gauge, Panel } from '../common';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, timelineView, yearLabel } from '../view';
@@ -143,6 +144,28 @@ function TopBar({ s }: { s: Life5 }) {
   );
 }
 
+function TraitPicker({ s }: { s: Life5 }) {
+  const active = activeTraitIds(s);
+  const [draft, setDraft] = useState<string[] | null>(null);
+  const chosen = draft ?? active;
+  const owned = ownedTraitIds(s);
+  return <div class="paper t9">
+    <b>특성 {active.length} / 5</b>
+    {owned.map(id => <label key={id} style={{ display: 'block', marginTop: 6 }}>
+      <input type="checkbox" checked={chosen.includes(id)} disabled={!canSelectTraits(s)}
+        onChange={() => setDraft(chosen.includes(id) ? chosen.filter(x => x !== id) : [...chosen, id])} />
+      <b>{traitName(id)}</b> · {traitDescription(id)}
+    </label>)}
+    {draft && traitSelectionError(s, draft) && <div class='soft'>{traitSelectionError(s, draft)}</div>}
+    {draft && <div class="row" style={{ marginTop: 6 }}>
+      <button class="btn small" disabled={!!traitSelectionError(s, draft)}
+        onClick={() => { dispatch({ type: 'traits', ids: draft }); setDraft(null); }}>적용</button>
+      <button class="btn small" onClick={() => setDraft(null)}>취소</button>
+    </div>}
+    {!canSelectTraits(s) && <div class="soft">사건과 항해를 마친 뒤 연 1회 정리할 수 있다.</div>}
+  </div>;
+}
+
 function Profile({ s }: { s: Life5 }) {
   const st = useStore();
   const p = profileView(s);
@@ -165,7 +188,7 @@ function Profile({ s }: { s: Life5 }) {
         {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}
         {!!s.vows?.history.some((v) => v.result === 'kept') && <div class="t9"><b>서약 각성</b> {s.vows.history.filter((v) => v.result === 'kept').length}단계 · {VOWS[s.vows.history.filter((v) => v.result === 'kept').at(-1)!.id]?.title}</div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
-        {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
+        <TraitPicker s={s} />
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
         {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}

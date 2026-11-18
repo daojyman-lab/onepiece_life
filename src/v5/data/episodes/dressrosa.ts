@@ -295,7 +295,7 @@ const B: Turning[] = [
       { label: '피피와 이름 두루마리와 하역 일지를 맞춰 본다', hint: '사라진 이름들과 사라진 상자들이 같은 밤에 움직였다', values: { inquiry: D },
         fx: [flag('ep_dressrosa_b_pipi_trust'), flag('ep_dressrosa_b_info'), next('ep_dressrosa_b3'), log("피피의 이름 두루마리와 선적표를 겹치자 잊힌 일꾼들이 과일 상자 운반 명단에 나타난다. 피피가 그 줄에 표시를 남긴다.", 'light')] },
       { label: '투기장 노름꾼에게 술을 사며 소문을 산다', hint: '돈이 든다. 노름꾼은 상자가 대회 날 옮겨진다고 흘린다', values: { greed: D },
-        fx: [{ op: 'money', add: -10000 }, flag('ep_dressrosa_b_info'), next('ep_dressrosa_b3'), log("도박꾼들이 술잔을 비우며 회색 장갑의 하역 시간을 떠벌린다. 돈을 낸 만큼 비밀 항구의 교대 시간도 알아낸다.", 'light')] },
+        fx: [{ op: 'money', add: -10000, trade: true }, flag('ep_dressrosa_b_info'), next('ep_dressrosa_b3'), log("도박꾼들이 술잔을 비우며 회색 장갑의 하역 시간을 떠벌린다. 돈을 낸 만큼 비밀 항구의 교대 시간도 알아낸다.", 'light')] },
     ],
   },
   {

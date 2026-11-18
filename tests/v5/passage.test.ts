@@ -14,6 +14,7 @@ import type { Life5 } from '../../src/v5/core/types';
 function pirate(seed = 3): Life5 {
   const s = newLife5(seed);
   s.pending = null;
+  s.vows!.declined = true;
   s.age = 20;
   s.hero.standing = 'pirate';
   s.hero.sea = 'east';

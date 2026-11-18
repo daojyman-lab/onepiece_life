@@ -1,4 +1,5 @@
 // 갈래 id와 대략의 힘. fx · fight · year가 모두 쓰므로, 그 셋을 가져오지 않는 잎 모듈로 둔다.
+import { coordinationPower } from './traits';
 import { V } from '../data/balance';
 import { effectiveStats5 } from './body';
 import type { BranchId } from '../../core/types';
@@ -36,11 +37,13 @@ export function rating5(s: Life5): number {
   const martial = tierMult(Math.max(t.fist, t.sword, t.gun));
   const fruit = s.hero.fruit ? tierMult(t.fruit) - 1 : 0;
   const haki = (tierMult(t.observation) - 1) + (tierMult(t.armament) - 1) + (tierMult(t.conqueror) - 1);
-  return Math.max(sum * (martial + V.grade.fruit * fruit + V.grade.haki * haki), vowPowerFloor(s));
+  const own = Math.max(sum * (martial + V.grade.fruit * fruit + V.grade.haki * haki), vowPowerFloor(s));
+  return own + coordinationPower(s, own);
 }
 
 /** 대략의 힘: 상처와 몸을 반영한 능력치 합에 단계 배율을 곱하고 서약 하한을 적용한다. */
 export function power5(s: Life5, stats = effectiveStats5(s)): number {
   const sum = Object.values(stats).reduce((a, b) => a + b, 0);
-  return Math.max(sum * tierMult(topTier(s)), vowPowerFloor(s));
+  const own = Math.max(sum * tierMult(topTier(s)), vowPowerFloor(s));
+  return own + coordinationPower(s, own);
 }

@@ -29,6 +29,7 @@ import { RECRUIT_TURNINGS } from './recruits';
 import { PRIME } from './prime';
 import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
+import { TRAIT_AWAKENINGS } from './trait-awakening';
 import { LIFE_VOW_TURNINGS } from './vow-life';
 import { EPISODE_TURNINGS } from '../episodes';
 
@@ -93,5 +94,13 @@ function anchored(t: Turning): Turning {
   return t;
 }
 
-export const TURNINGS: Turning[] = GROUPS.flat().map(anchored).map(landlocked);
+function withSceneTags(t: Turning): Turning {
+  const tags = t.tags ?? [];
+  if (/야간|새벽|밤 보초|밤의|전야|잠입의 밤/.test(t.title)) tags.push('night');
+  if (/지하|밑창|선창|갱도|감옥/.test(t.title)) tags.push('underground');
+  if (/해상|갑판|호송선|추격선|수평선의 상선/.test(t.title)) tags.push('sea');
+  t.tags = [...new Set(tags)];
+  return t;
+}
+export const TURNINGS: Turning[] = [...GROUPS.flat(), ...TRAIT_AWAKENINGS].map(anchored).map(landlocked).map(withSceneTags);
 export const TURNING_BY_ID: Record<string, Turning> = Object.fromEntries(TURNINGS.map((t) => [t.id, t]));

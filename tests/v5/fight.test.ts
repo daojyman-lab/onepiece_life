@@ -86,7 +86,7 @@ describe('싸움', () => {
     expect(heroUnit5(b).retreatAt).toBeGreaterThan(heroUnit5(a).retreatAt);
   });
   it('반골은 물러나지 않는다', () => {
-    const s = fighter(1); s.strengths.push('rebel');
+    const s = fighter(1); s.strengths.push('rebel'); s.traits!.active = ['rebel'];
     expect(heroUnit5(s).retreatAt).toBe(0);
   });
   it('싸움 물음이 떠 있는 상태를 JSON으로 되살려도 같은 결과가 나온다', () => {

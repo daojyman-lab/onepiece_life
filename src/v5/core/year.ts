@@ -1,6 +1,6 @@
 // 한 해를 네 토막으로 나눈 진행. 토막마다 가치관이 정한 일을 하고, 그만큼 자란다.
 import { BRANCH_NAMES } from '../../data/skills';
-import { TALENT_BY_ID } from '../../data/talents';
+import { traitMastery, traitEffects, traitFactor, recordTraitEvent, nextTraitAwakening } from './traits';
 import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { josa } from '../../core/josa';
 import { SEA_BY_ID } from '../../data/seas';
@@ -54,12 +54,17 @@ export function stepPart(s: Life5): void {
   const vowTurning = nextLifeVowTurning(s);
   if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
+  const awakening = nextTraitAwakening(s);
+  if (awakening && openTurning(s, TURNING_BY_ID[awakening])) return;
+  s.traitScene = [];
+  delete s.traitSource;
   const r = rngOf(s.rng);
   if (s.passage) passagePart(s, r);            // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = activityOf(s, r);
   recordVowActivity(s, act);
+  recordTraitEvent(s, 'activity', act, String(s.age));
   dailyLine(s, act, r);
   growPart(s, act, r);
   healInjuries(s);
@@ -104,6 +109,7 @@ export function activityOf(s: Life5, r: Rng): Activity {
   }
   if (h.wealth === 'poor') w.work += s.age <= A.kidAge ? A.poorKidWork : A.poorWork;
   if (h.standing === 'marine' || h.standing === 'cp') w.work += A.dutyWork;
+  for (const e of traitEffects(s)) for (const a of ACTIVITIES) w[a] *= e.activity?.[a] ?? 1;
   return weighted(r, ACTIVITIES, (a) => w[a])!;
 }
 
@@ -168,11 +174,16 @@ export function growPart(s: Life5, act: Activity, r: Rng): void {
       addMastery(s, 'observation', G.perPart * G.studyObs * age * talentMult(s, 'observation'));
       return;
     case 'roam': statUp(s, r, ['luk', 'spd'], G.statP.roam * age); return;
-    case 'work': h.money += s.age <= V.activity.kidAge ? G.kidWorkMoney : G.workMoney; return;   // 아이의 품삯은 대개 식구의 밥이 된다
+    case 'work': h.money += Math.round((s.age <= V.activity.kidAge ? G.kidWorkMoney : G.workMoney) * traitFactor(s, 'income')); return;   // 아이의 품삯은 대개 식구의 밥이 된다
     case 'family':
-      for (const p of s.people) if (p.alive) p.bond = Math.min(V.person.bondMax, p.bond + G.familyBond);
+      for (const p of s.people) if (p.alive) p.bond = Math.min(V.person.bondMax, p.bond + G.familyBond * traitFactor(s, 'bond'));
       return;
-    case 'rest': h.hp = Math.min(V.hp.max, h.hp + G.restHp); return;
+    case 'rest': {
+      const before = h.hp;
+      h.hp = Math.min(V.hp.max, h.hp + Math.round(G.restHp * traitFactor(s, 'healing')));
+      if (h.hp > before && before < 70) recordTraitEvent(s, 'recover', '', String(s.age));
+      return;
+    }
   }
 }
 
@@ -187,6 +198,7 @@ function train(s: Life5, r: Rng, age: number): void {
   age *= potentialMult(s, b);
   if (!b) { statUp(s, r, G.bareStats, G.statP.train * age); return; }
   const m = s.growth.master;
+  if (m && m.branch === b) recordTraitEvent(s, 'master', b, `${m.name}:${s.age}`);
   let add = G.perPart * age * talentMult(s, b) * (m && m.branch === b ? G.masterMult : 1);
   const capped = s.growth.tier[b] >= tierCap(s, b) && s.growth.mastery[b] >= G.tierUp;
   if (roll < G.stallP + G.breakP && age > 0 && !capped) {
@@ -208,13 +220,7 @@ function ageMult(age: number): number {
 }
 
 /** 타고난 재능의 숙련 배율. 갈래 자신, 'all', 패기 갈래면 'haki'를 모두 곱한다 */
-function talentMult(s: Life5, b: Branch): number {
-  const id = BRANCH_ID[b];
-  const keys = id.startsWith('haki.') ? [id, 'all', 'haki'] as const : [id, 'all'] as const;
-  let m = 1;
-  for (const t of s.hero.talents) for (const k of keys) m *= TALENT_BY_ID[t]?.mastery?.[k] ?? 1;
-  return m;
-}
+function talentMult(s: Life5, b: Branch): number { return traitMastery(s, b); }
 
 /**
  * 일상 기록 한 줄 (가치관 쪽으로 기울고, 이 토막의 활동과 같은 쪽으로 기운 줄을 먼저 고른다).

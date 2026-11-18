@@ -65,7 +65,7 @@ export const PATHS: Turning[] = [
     title: '깃발을 올리다', body: '{island} 부두에 낡은 배 한 척이 헐값에 나왔다. 해골 깃발 하나만 그려 넣으면 내일이라도 바다로 나갈 수 있다.',
     doors: [
       { label: '배를 사서 해골 깃발을 올린다', hint: '오늘부터 쫓기는 몸이 된다', values: { freedom: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
+        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
              { op: 'log', text: '낡은 돛대 끝에 직접 그린 해골 깃발이 펄럭였다.', weight: 'heavy' }, { op: 'timeline', text: '해적 깃발을 올렸다' }] },
       { label: '이름난 해적선에 견습으로 오른다', hint: '남의 깃발 아래서 바다를 배운다', values: { romance: D }, 
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },

@@ -100,6 +100,7 @@ export const FORTUNES: Turning[] = [
     ],
   }),
   fortune('fortune_kings_aura', 'dominion', {
+    when: [{ c: 'trait', id: 'conqueror', has: true }],
     speaker: 'hero',
     title: '사지에서 깨어난 기운', body: '포위당해 끝장이라고 생각한 순간, {name}의 안에서 무언가가 터져 나왔다. 둘러싼 자들이 하나둘 쓰러진다.',
     doors: [

@@ -301,7 +301,7 @@ const BONDS: Turning[] = [
       { label: '은인의 빚을 대신 갚아 다시 일어서게 한다', hint: '모아 둔 돈이 크게 나간다', values: { justice: D },
         fx: [{ op: 'money', add: -50000 }, { op: 'chance', p: 0.5, then: [{ op: 'money', add: 30000 }, { op: 'log', text: '다시 일어선 은인이 몇 해 뒤 갚은 돈을 두 배로 돌려주었다.', weight: 'heavy' }] , else: [{ op: 'log', text: '빚은 갚았지만 은인은 한동안 빈 가게 앞을 떠나지 못했다. 다시 물건을 들이기까지 시간이 걸렸다.', weight: 'light' }]}] },
       { label: '은인의 남은 물건을 헐값에 사서 되판다', hint: '팔리면 돈이 남고, 안 팔리면 산 값만 날린다. 은인은 고맙다며 떠난다', values: { greed: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'hardship', add: 1 },
+        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'hardship', add: 1 },
              { op: 'chance', p: 0.6, then: [{ op: 'money', add: 45000 }, { op: 'log', text: '사들인 물건이 웃돈을 받고 팔려 나갔다.', weight: 'light' }],
                else: [{ op: 'log', text: '사들인 물건은 끝내 팔리지 않았다. 창고 구석에서 먼지만 쌓였다.', weight: 'light' }] }] },
     ],

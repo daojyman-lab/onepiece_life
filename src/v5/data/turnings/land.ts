@@ -41,7 +41,7 @@ const CIVIL: Turning[] = [
         fx: [{ op: 'money', add: -30000 }, { op: 'standing', to: 'settled' }, { op: 'flag', id: 'shop' }, { op: 'flag', id: 'shopShared' },
              { op: 'timeline', text: '{island} 시장 끝에 가게를 열었다' }, { op: 'log', text: '첫 손님이 들어오자 주인은 계산대 옆에 제 몫을 적을 장부를 놓았다.', weight: 'light' }] },
       { label: '모은 돈을 다 털어 점포를 통째로 산다', hint: '빈털터리가 되지만 누구에게도 매이지 않는다', when: [{ c: 'money', min: SHOP_COST }], values: { freedom: D },
-        fx: [{ op: 'money', add: -SHOP_COST }, { op: 'standing', to: 'settled' }, { op: 'flag', id: 'shop' }, { op: 'timeline', text: '{island}에 제 가게를 샀다' }, { op: 'log', text: '문서에 도장을 찍었다. 텅 빈 주머니에는 가게 열쇠만 남았다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -SHOP_COST, trade: true }, { op: 'standing', to: 'settled' }, { op: 'flag', id: 'shop' }, { op: 'timeline', text: '{island}에 제 가게를 샀다' }, { op: 'log', text: '문서에 도장을 찍었다. 텅 빈 주머니에는 가게 열쇠만 남았다.', weight: 'light' }] },
       { label: '점포를 빌려 동네 아이들의 글방으로 쓴다', hint: '돈은 나가기만 하고, 아이들이 글을 깨친다', values: { freedom: D },
         fx: [{ op: 'money', add: -15000 }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '글방에 다니던 아이', age: { younger: 15 } }, { op: 'log', text: '빈 점포에 아이들의 서툰 글씨가 차올랐다. 훈장은 분필을 내주었다.', weight: 'light' }] },
     ],
@@ -52,7 +52,7 @@ const CIVIL: Turning[] = [
     title: '빈 금고', body: '가게의 금고가 비었다. 함께 장사를 꾸려 온 사람이 노름빚에 몰려 돈을 빼 갔다고 털어놓는다. 거래처에 갚을 외상값이 다음 달이다.',
     doors: [
       { label: '해군 초소에 넘겨 죗값을 치르게 한다', hint: '돈의 일부는 돌아오고, 그 사람의 식구들이 {name}을(를) 원망한다', values: { justice: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'person', kind: 'rival', relation: '감옥에 보낸 옛 동업자' }, { op: 'log', text: '해군이 옛 동업자를 데려갔다. 그 집 식구들은 가게 앞을 돌아갔다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'person', kind: 'rival', relation: '감옥에 보낸 옛 동업자' }, { op: 'log', text: '해군이 옛 동업자를 데려갔다. 그 집 식구들은 가게 앞을 돌아갔다.', weight: 'light' }] },
       { label: '한 번은 눈감아 주고 함께 빚을 메운다', hint: '몇 해는 허리띠를 졸라맨다. 두 번째는 없다고 못 박는다', values: { loyalty: D },
         fx: [{ op: 'money', add: -40000 }, { op: 'hardship', add: 2 }, { op: 'person', kind: 'ally', relation: '다시 믿어 준 동업자' }, { op: 'log', text: '둘이 외상 장부를 밤새 맞췄다. 동업자는 금고 열쇠를 내밀었다.', weight: 'light' }] },
       { label: '가게를 접고 남은 물건을 팔아 외상을 갚는다', hint: '빚은 사라지고 간판도 사라진다', values: { freedom: D },
@@ -118,7 +118,7 @@ const CIVIL: Turning[] = [
         fx: [{ op: 'fame', add: 3 }, { op: 'chance', p: 0.3, then: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '창고 문을 부순 우두머리로 {name}이(가) 끌려갔다. 이웃들이 감옥 담 너머로 빵을 던져 주었다.', weight: 'heavy' }],
                else: [{ op: 'person', kind: 'rival', relation: '창고를 털린 곡물상' }, { op: 'log', text: '창고 문이 무너지고 곡식이 광장에 쏟아졌다. 이웃들은 자루를 나눠 들었다.', weight: 'light' }] }] },
       { label: '남은 돈으로 곡식을 사들였다가 봄에 되판다', hint: '값이 오르면 이웃들이 머리를 숙이고 곡식을 산다. 봄이 일찍 오면 산 값만 날린다', values: { greed: D },
-        fx: [{ op: 'money', add: -15000 }, { op: 'chance', p: 0.65, then: [{ op: 'money', add: 60000 }, { op: 'log', text: '봄까지 곡식값이 올랐다. 이웃들이 고개를 숙이고 곡식을 사 갔다.', weight: 'light' }], else: [{ op: 'log', text: '봄비가 일찍 와 곡식값이 내렸다. 사 둔 곡식은 헐값에 넘겼다.', weight: 'light' }] }, { op: 'hardship', add: 2 }, { op: 'flag', id: 'famineProfit' }] },
+        fx: [{ op: 'money', add: -15000, trade: true }, { op: 'chance', p: 0.65, then: [{ op: 'money', add: 60000 }, { op: 'log', text: '봄까지 곡식값이 올랐다. 이웃들이 고개를 숙이고 곡식을 사 갔다.', weight: 'light' }], else: [{ op: 'log', text: '봄비가 일찍 와 곡식값이 내렸다. 사 둔 곡식은 헐값에 넘겼다.', weight: 'light' }] }, { op: 'hardship', add: 2 }, { op: 'flag', id: 'famineProfit' }] },
     ],
   },
   {

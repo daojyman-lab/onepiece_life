@@ -1,3 +1,4 @@
+import { recordTraitEvent, traitFactor, hasTrait, traitStats } from './traits';
 // 항해 (v3의 항해를 되살린다): 섬을 옮기면 바로 닿지 않고, 몇 토막 동안 바다 위에 있다가 닿는다.
 // 토막마다 그 바다의 날씨를 굴린다(data/weather.ts). 폭풍은 고른 뱃길대로 피항 · 우회 · 돌파한다.
 // 바다 위에 있는 동안에는 섬에 묶인 전환점이 열리지 않는다(cond.ts island). 닿으면 그 섬의 이야기가 열린다.
@@ -129,7 +130,7 @@ export function rollPassage(p: Passage, sea: string, navigator: number, r: Rng, 
 /** 항해 실력: 항해사 동료가 있으면 2, 글을 잘 알면 1 더 (0~3) */
 export function navigatorLevel(s: Life5): number {
   const crewNav = s.people.some((x) => x.alive && x.kind === 'crew' && x.crew?.role === 'navigator') ? 2 : 0;
-  return Math.min(3, crewNav + (s.hero.base.int >= V.passage.navInt ? 1 : 0));
+  return Math.min(3, crewNav + (traitStats(s).int >= V.passage.navInt ? 1 : 0));
 }
 
 /** 바다 위의 한 토막: 날씨를 굴려 적용하고, 닿았으면 섬을 옮긴다 */
@@ -138,9 +139,9 @@ export function passagePart(s: Life5, r: Rng): void {
   if (!p) return;
   const h = s.hero;
   if (!SEA_STANDINGS.includes(h.standing)) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다
-  const step = rollPassage(p, h.sea, navigatorLevel(s), r);
+  const step = rollPassage(p, h.sea, Math.max(0, Math.min(3, navigatorLevel(s) + (hasTrait(s, 'orientation') ? 1 : hasTrait(s, 'lostWay') ? -1 : 0))), r);
   for (const line of step.lines) logLine(s, line, 'light');
-  if (step.hp) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + step.hp));   // 날씨로는 죽지 않는다
+  if (step.hp) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + (step.hp < 0 ? Math.round(step.hp * traitFactor(s, 'danger')) : Math.round(step.hp * traitFactor(s, 'healing')))));   // 날씨로는 죽지 않는다
   if (step.fame) h.fame += step.fame;
   if (step.next) { s.passage = step.next; return; }
   arrive(s, p);
@@ -150,6 +151,7 @@ export function passagePart(s: Life5, r: Rng): void {
 export function arrive(s: Life5, p: Passage): void {
   const h = s.hero;
   const first = !s.flags.includes(`at:${p.to}`);
+  recordTraitEvent(s, 'voyage', '', p.to);
   s.passage = null;
   h.island = p.to;
   if (first) s.flags.push(`at:${p.to}`);

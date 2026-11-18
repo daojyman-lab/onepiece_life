@@ -162,7 +162,7 @@ export const PIRATE: Turning[] = [
       { label: '항해사로 모신다', hint: '등대는 비고, 배는 길을 잃지 않는다', values: { inquiry: D },
         fx: [{ op: 'person', kind: 'crew', relation: '등대지기 항해사', age: { older: 40 } }, { op: 'base', key: 'int', add: 1 }, { op: 'log', text: '노인은 해도를 말아 들고 평생 지키던 등대 문을 닫았다. 첫 항해부터 별자리를 짚어 주자 배는 헤매지 않고 다음 섬에 닿았다.', weight: 'heavy' }] },
       { label: '해도 한 장을 사서 그 끝의 섬을 찾아 나선다', hint: '가진 돈을 털어 아무도 가 보지 않은 바다로 간다', values: { romance: D },
-        fx: [{ op: 'money', add: -20000 }, { op: 'flag', id: 'oldChart' }, { op: 'hp', add: -10 },
+        fx: [{ op: 'money', add: -20000, trade: true }, { op: 'flag', id: 'oldChart' }, { op: 'hp', add: -10 },
              { op: 'log', text: '해도의 끝에는 이름 없는 모래섬 하나가 있었다. 아무것도 없었지만 오래 기억에 남았다.', weight: 'heavy' }] },
       { label: '해도를 모두 빼앗아 간다', hint: '노인은 등대에 홀로 남는다', values: { dominion: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'stoleCharts' }, { op: 'hardship', add: 1 }, { op: 'log', text: '해도를 모두 챙겨 배로 돌아오자 노인은 등대 계단에서 내려오지 않았다. {name}은(는) 훔친 항로를 읽으면서도 등대 불빛을 오래 바라보았다.', weight: 'light' }] },

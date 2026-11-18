@@ -1,4 +1,5 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
+import { normalizeTraits } from './traits';
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { mainBranch } from './year';
@@ -56,6 +57,9 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (life.traits !== undefined && !isObj(life.traits)) return null;
+  if (!Array.isArray(life.hero.talents) || !Array.isArray(life.strengths)) return null;
+  normalizeTraits(life);
   // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다.
   if (life.vows?.active) {
     life.vows.active.island ??= life.hero.island;

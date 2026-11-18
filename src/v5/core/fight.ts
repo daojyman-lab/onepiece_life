@@ -2,9 +2,9 @@
 import { B } from '../../data/balance';
 import { makeEnemy } from '../../data/bosses';
 import { FRUIT_BY_ID } from '../../data/fruits';
-import { HERO_TRAIT_BY_ID, SPECIES_PASSIVES } from '../../data/passives';
+import { SPECIES_PASSIVES } from '../../data/passives';
 import { SEA_BY_ID, SEAS } from '../../data/seas';
-import { TALENT_BY_ID } from '../../data/talents';
+import { hasTrait, traitModifiers, traitFactor, recordTraitEvent } from './traits';
 import { runBattle, startBattle } from '../../core/combat/engine';
 import { fruitMods, mergeMods } from '../../core/combat/mods';
 import { crewUnit, enemyUnit } from '../../core/combat/units';
@@ -32,11 +32,6 @@ const sum = (st: Stats) => Object.values(st).reduce((a, b) => a + b, 0);
 export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const AFTER_FIGHT = 'after_fight';
-
-/** 정신적 강점 → 싸움에 걸리는 v4의 특성 */
-const STRENGTH_TRAIT: Record<string, string> = {
-  unyielding: 'tenacity', obsession: 'vampire', composure: 'coolhead', fellowship: 'comrade', daring: 'gambler', rebel: 'fighting',
-};
 
 const FACTION: Partial<Record<Standing, Person['faction']>> = {
   pirate: 'pirate', warlord: 'pirate', marine: 'marine', cp: 'marine', revolution: 'rev',
@@ -85,10 +80,11 @@ export function gapOf(s: Life5, e: EnemySpec): number {
 /** 졌을 때 다치고, 몸 한 곳을 잃고, 죽을 확률. 목숨을 걸지 않은 싸움에서는 죽지 않는다 */
 export function riskOf(s: Life5, e: EnemySpec, lethal: boolean): { injury: number; limb: number; death: number } {
   const gap = gapOf(s, e);
+  const danger = traitFactor(s, 'danger');
   return {
-    injury: clamp(F.injuryBase + F.injuryPerGap * (gap - F.injuryGapFrom), F.injuryFloor, F.injuryCap),
-    limb: clamp(F.limbPerGap * (gap - F.limbGapFrom), 0, F.limbCap),
-    death: lethal ? clamp(F.deathPerGap * (gap - F.deathGapFrom), 0, F.deathCap) : 0,
+    injury: Math.min(1, danger * clamp(F.injuryBase + F.injuryPerGap * (gap - F.injuryGapFrom), F.injuryFloor, F.injuryCap)),
+    limb: Math.min(1, danger * clamp(F.limbPerGap * (gap - F.limbGapFrom), 0, F.limbCap)),
+    death: lethal ? Math.min(1, danger * clamp(F.deathPerGap * (gap - F.deathGapFrom), 0, F.deathCap)) : 0,
   };
 }
 
@@ -168,7 +164,7 @@ export function heroUnit5(s: Life5): CUnit {
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
   const top = topValues(s, 1)[0];
   const aim = aimMult(s);
-  const traits = s.strengths.filter((id) => STRENGTH_TRAIT[id]).map((id) => HERO_TRAIT_BY_ID[STRENGTH_TRAIT[id]]?.mods);
+  const traits = traitModifiers(s);
   const u: CUnit = {
     key: 'hero', name: fullName(h), side: 'L', hero: true, leader: true, role: 'hero',
     maxHp, hp: maxHp, maxSp, sp: maxSp,
@@ -177,13 +173,13 @@ export function heroUnit5(s: Life5): CUnit {
     fruitClass: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.cls ?? null : null,
     skills: heroSkills(s),
     tactic: top ? VALUE_TACTIC[top] : 'endurance',
-    retreatAt: s.strengths.includes('rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
+    retreatAt: hasTrait(s, 'rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
     weapon: null, consumables: [],
     guard: 0, guardTurns: 0, evade: 0, evadeTurns: 0, buff: 0, buffTurns: 0, bound: 0, sealed: 0,
     pGuard: 0, pDodge: 0, pBuff: 0, lastBig: false,
     faction: FACTION[h.standing] ?? 'civil', species: h.species, gender: h.gender, age: s.age,
     faceKey: `hero:${s.rng.seed}`,
-    mods: mergeMods(SPECIES_PASSIVES[h.species]?.mods, ...h.talents.map((t) => TALENT_BY_ID[t]?.mods), ...traits,
+    mods: mergeMods(SPECIES_PASSIVES[h.species]?.mods, traits,
       fruitMods(h.fruit?.id, skillMastery(s.growth.tier.fruit), false), aim < 1 ? { dmg: aim } : undefined),
   };
   applyPassives(u);
@@ -210,7 +206,7 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
     assign[i + 1] = enemyStart + (fights && next <= foe.officers.length ? next++ : 0);
   });
   const seed = hashString(String(rngOf(s.rng)()));
-  return runBattle(startBattle(units, assign, seed, false), true);
+  return runBattle(startBattle(units, assign, seed, !!s.passage || !!s.traitScene?.includes('sea')), true);
 }
 
 function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
@@ -265,8 +261,11 @@ export function ackBattle(s: Life5): void {
     n.fights += 1;
     if (won) n.wins += 1;
   }
+  s.traitSource = 'battle:' + foe.id;
+  if (!won) recordTraitEvent(s, 'loss', '', s.traitSource);
   if (won) {
     s.stats.wins += 1;
+    recordTraitEvent(s, 'win', s.hero.sea, foe.id);
     s.hero.fame += Math.round(foePower(foe) * F.famePerPower);
     logLine(s, `${foe.name}을(를) 쓰러뜨렸다.`, 'heavy', 'battle');
     if (s.flags.includes(grudge)) {           // 한 번 졌던 상대를 다시 붙어 이겼다
@@ -277,8 +276,9 @@ export function ackBattle(s: Life5): void {
     logLine(s, p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`, 'heavy', 'battle');
   }
   if (chance(r, risk.injury * mult)) {
+    const beforeInjuries = s.hero.injuries.length;
     applyFx(s, [{ op: 'injury', severity: won ? 'light' : 'heavy' }]);
-    logLine(s, won ? '싸움에서 가벼운 상처를 입었다.' : '싸움에서 크게 다쳤다.', 'light', 'danger');
+    logLine(s, s.hero.injuries.length === beforeInjuries ? '싸움에서 입은 상처가 곧 가라앉았다.' : won ? '싸움에서 가벼운 상처를 입었다.' : '싸움에서 크게 다쳤다.', 'light', 'danger');
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {

@@ -28,10 +28,10 @@ describe('출생 주사위', () => {
     }
     expect(many.some((s) => s.hero.secretSurname)).toBe(true);
   });
-  it('재능은 둘이나 셋이고, 고아와 가난은 시련을 안고 시작한다', () => {
+  it('재능은 둘에서 다섯이고, 고아와 가난은 시련을 안고 시작한다', () => {
     for (const s of many) {
       expect(s.hero.talents.length).toBeGreaterThanOrEqual(2);
-      expect(s.hero.talents.length).toBeLessThanOrEqual(3);
+      expect(s.hero.talents.length).toBeLessThanOrEqual(5);
       if (s.hero.lineage === 'orphan') expect(s.hardship).toBeGreaterThanOrEqual(V.hardship.orphan);
     }
   });

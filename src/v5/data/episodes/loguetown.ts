@@ -254,7 +254,7 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '페니와 배달소의 날씨 기록을 뒤진다', hint: '이 철에 남쪽에서 큰 비구름이 온다', values: { inquiry: D },
         fx: [flag('ep_loguetown_b_penny'), PENNY('날씨 기록을 함께 뒤진 페니'), log('바넷은 비가 오는 날을 기다리고 있다. 사람도 발자국도 빗속에선 흐려지니까.', 'light'), next('ep_loguetown_b3')] },
       { label: '부두 짐꾼들에게 술을 돌리며 소문을 산다', hint: '우산단이 일꾼을 사들이고 있다고 한다', values: { greed: D },
-        fx: [{ op: 'money', add: -1500 }, flag('ep_loguetown_b_roster'), next('ep_loguetown_b3'), log('술잔을 비운 짐꾼이 우산단에 고용된 동료의 이름을 말했다. 페니가 수첩에 적었다.', 'light')] },
+        fx: [{ op: 'money', add: -1500, trade: true }, flag('ep_loguetown_b_roster'), next('ep_loguetown_b3'), log('술잔을 비운 짐꾼이 우산단에 고용된 동료의 이름을 말했다. 페니가 수첩에 적었다.', 'light')] },
     ],
   },
   {

@@ -99,7 +99,7 @@ export const V = {
           idleStandings: ['child', 'retired'],
           kidAge: 15, kidHp: 30 },             // 이 나이 이하는 병 · 사고 · 굶주림으로 죽지 않고 체력만 잃는다
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },
-  birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
+  birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 5 }, startAge: 3 },
   // 출생 때의 가족 (고아는 없다): 부모 둘은 주인공보다 parentOlder 사이로 많고, 형제는 0~maxSiblings명, 주인공과 siblingGap 차이.
   // siblings[형편][n]: 형제가 n명일 가중치. 가난한 집일수록 많다
   family: { parentOlder: [20, 38], maxSiblings: 3, siblingGap: [1, 8], olderP: 0.5,   // olderP: 형제가 손위일 확률

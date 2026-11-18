@@ -1,7 +1,7 @@
 // 싸움 밖의 죽음 (설계 5.7): 병, 사고(난파), 굶주림, 노환.
 // 플레이어가 고르지 않은 죽음이라 드물고, 노환을 빼면 대개 조짐이 먼저 기록에 떠오른다.
 // 해가 바뀔 때 yearRisks가 걸리는지 굴리고, 토막마다 partRisks가 병의 진행과 폭풍의 결말을 낸다.
-import { TALENT_BY_ID } from '../../data/talents';
+import { traitFactor } from './traits';
 import { chance, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { effectiveStats5 } from './body';
@@ -127,8 +127,4 @@ function hasCrew(s: Life5, role: 'medic' | 'navigator'): boolean {
   return s.people.some((p) => p.alive && p.crew?.role === role);
 }
 
-function talentMult(s: Life5, key: 'illness' | 'oldAge'): number {
-  let m = 1;
-  for (const t of s.hero.talents) m *= TALENT_BY_ID[t]?.[key] ?? 1;
-  return m;
-}
+function talentMult(s: Life5, key: 'illness' | 'oldAge'): number { return traitFactor(s, key); }

@@ -1,4 +1,5 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
+import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, traitMastery } from './traits';
 import { setDream } from './dreams';
 import { parentFound, parentMissing } from './family';
 import { sailTo } from './voyage';
@@ -68,10 +69,18 @@ function applyOne(s: Life5, e: Fx): void {
     case 'base':
       for (const k of e.key === 'all' ? STAT_KEYS : [e.key]) h.base[k] = Math.max(0, h.base[k] + e.add);
       return;
-    case 'hp': h.hp = clamp(h.hp + e.add, 0, V.hp.max); return;
+    case 'hp': {
+      const before = h.hp;
+      h.hp = clamp(h.hp + (e.add > 0 ? Math.round(e.add * traitFactor(s, 'healing')) : e.add), 0, V.hp.max);
+      if (h.hp > before && before < 70) recordTraitEvent(s, 'recover', '', s.traitSource ?? String(s.age));
+      return;
+    }
     case 'money': { // 탐욕이 깊으면 들어오는 돈이 불어난다 (나가는 돈은 그대로)
       const add = e.add > 0 && isDeep(s, 'greed') ? Math.round(e.add * V.value.greedMoney) : e.add;
-      h.money = Math.max(0, h.money + add); return;
+      const cost = e.trade && add < 0 ? -tradeCost(s, -add) : add;
+      h.money = Math.max(0, h.money + cost);
+      if (e.trade && add < 0) recordTraitEvent(s, 'trade', '', s.traitSource ?? String(s.age));
+      return;
     }
     case 'fame': h.fame = Math.max(0, h.fame + e.add); return;
     case 'rank': h.rank = Math.max(0, h.rank + e.add); return;
@@ -122,12 +131,18 @@ function applyOne(s: Life5, e: Fx): void {
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
         const { role, maxLevel } = V.person.crew;
-        const level = Math.min(maxLevel, e.level ?? V.person.crew.level);
+        const traits = initializeTraits(s);
+        const identity = e.canon ?? e.name ?? e.relation;
+        const known = traits.crewSeen.includes(identity);
+        if (!known) traits.crewSeen.push(identity);
+        const bonus = !known && !e.years && hasTrait(s, 'charisma') ? 2 : 0;
+        const level = Math.min(maxLevel, (e.level ?? V.person.crew.level) + bonus);
         if (e.canon) s.people = s.people.filter((x) => !(x.alive && x.canon === e.canon));   // 이미 아는 사이였으면 그 사람이 배에 오른다 (둘이 되지 않는다)
         if (e.years) p.tempUntil = s.age + e.years;
         p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
       }
       s.people.push(p);
+      if (p.crew && !e.years) recordTraitEvent(s, 'crew', '', e.canon ?? e.name ?? e.relation);
       return;
     }
     case 'crewTrain': {
@@ -146,6 +161,7 @@ function applyOne(s: Life5, e: Fx): void {
       const p = s.people.find((x) => x.alive && ('who' in e ? personIs(x, e.who) : x.relation === e.relation));
       if (!p) return;
       p.alive = false;
+      recordTraitEvent(s, 'loss', '', p.id);
       s.hardship += V.hardship.loss;
       return;
     }
@@ -160,14 +176,25 @@ function applyOne(s: Life5, e: Fx): void {
       s.pending = { kind: 'ending', cause: e.cause };
       return;
     case 'chance':
-      applyFx(s, chance(rngOf(s.rng), e.p) ? e.then : (e.else ?? []));
+      applyFx(s, chance(rngOf(s.rng), e.skillCheck && e.p > 0 && e.p < 1 ? clamp(e.p + traitFactor(s, 'chance'), 0, 1) : e.p) ? e.then : (e.else ?? []));
       return;
-    case 'mastery':
-      addMastery(s, e.branch, e.add);
-      if (e.add > 0) s.growth.pref[e.branch] += e.add * V.growth.pref.fromMastery;
+    case 'mastery': {
+      const gain = e.add > 0 ? e.add * traitMastery(s, e.branch) : e.add;
+      addMastery(s, e.branch, gain);
+      if (gain > 0) s.growth.pref[e.branch] += gain * V.growth.pref.fromMastery;
       return;
+    }
     case 'pref': s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
     // 단계를 그 자리까지 끌어올린다. 이미 더 높으면 그대로 둔다
+    case 'traitAwaken': {
+      if (s.growth.tier[e.branch] > 0 || (e.branch === 'conqueror' && !hasTrait(s, 'conqueror'))) return;
+      const success = e.branch === 'conqueror' || chance(rngOf(s.rng), .4 + (hasTrait(s, 'hakiTalent') ? .25 : 0));
+      if (success) {
+        s.growth.tier[e.branch] = e.branch === 'conqueror' ? 2 : 1;
+        logLine(s, '배운 감각이 힘으로 이어졌다. 새로운 패기가 열렸다.', 'heavy', 'growth');
+      } else logLine(s, '잠깐 스친 감각을 놓쳤다. 훈련을 이어가면 다음 해에 한 번 더 시도할 수 있다.', 'light');
+      return;
+    }
     case 'tier': s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
     case 'master':
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
@@ -176,7 +203,15 @@ function applyOne(s: Life5, e: Fx): void {
       return;
     case 'reveal': revealSurname(s); return;
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
-    case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
+    case 'injury': {
+      if (e.severity === 'scar') { h.injuries.push({ severity: e.severity, monthsLeft: 0 }); return; }
+      const parts = V.injury.months[e.severity] * traitFactor(s, 'injury') / V.injury.monthsPerPart;
+      const whole = Math.floor(parts);
+      const fraction = parts - whole;
+      const duration = (whole + (fraction > 0 && chance(rngOf(s.rng), fraction) ? 1 : 0)) * V.injury.monthsPerPart;
+      if (duration > 0) h.injuries.push({ severity: e.severity, monthsLeft: duration });
+      return;
+    }
     case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next); return;
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;

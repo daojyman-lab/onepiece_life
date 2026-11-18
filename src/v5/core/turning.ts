@@ -13,6 +13,7 @@ import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep, opensSpecial } from './values';
 import { isQuiet } from './year';
+import { recordTraitEvent, tradeCost } from './traits';
 import { advanceVow, canBeginVow, recordVowChoice } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
@@ -38,14 +39,17 @@ function speakerOf(s: Life5, t: Turning): string {
 /** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
-    let locked = whyNot(s, d.when) ?? whyNeed(s, d.needs);
+    const price = d.fx.filter(e => e.op === 'money' && e.trade && e.add < 0).reduce((n, e) => n - (e as { add: number }).add, 0);
+    const conditions = d.when?.map(c => c.c === 'money' && price > 0 && c.min === price ? { ...c, min: tradeCost(s, price) } : c);
+    let locked = whyNot(s, conditions) ?? whyNeed(s, d.needs);
+    if (!locked && price > 0 && s.hero.money < tradeCost(s, price)) locked = '거래 비용이 부족하다';
     const start = d.fx.find((e) => e.op === 'vowStart');
     if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
     const earned = (d.when ?? []).some((c) => c.c === 'flag' && c.has);   // 앞선 선택의 표시로 잠긴 문
     if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
-      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,
+      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint) + (price > 0 ? ` · 거래 ${tradeCost(s, price).toLocaleString('ko-KR')} 베리` : ''), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
@@ -158,6 +162,8 @@ export function answerDoor(s: Life5, index: number): void {
   const door = t?.doors[index];
   if (!chosen || chosen.locked || !t || !door) return;
 
+  s.traitSource = t.id;
+  s.traitScene = t.tags ?? [];
   const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
@@ -171,7 +177,7 @@ export function answerDoor(s: Life5, index: number): void {
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
   // 서약의 제안·결산·각성은 강제로 끼어드는 장면이므로 보통 사건의 멈춤 예산에서 뺀다.
-  if (!t.id.startsWith('life_vow_') && t.id !== 'sky_vow_awakening') {
+  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening') {
     s.stats.stops += 1;
     s.stats.stopsAt.push(s.age);
     s.stopsThisYear += 1;
@@ -179,6 +185,8 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
+  for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
   if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);

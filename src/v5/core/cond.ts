@@ -1,4 +1,5 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
+import { hasTrait } from './traits';
 import { josa } from '../../core/josa';
 import { fmtMoney } from '../../core/util';
 import { canonAge } from '../data/canon';
@@ -25,7 +26,8 @@ export function check(s: Life5, c: Cond): boolean {
       c.min === undefined ? undefined : wealthRank(c.min), c.max === undefined ? undefined : wealthRank(c.max));
     case 'lineage': return c.is.includes(h.lineage);
     case 'value': return isDeep(s, c.id) === c.deep;
-    case 'strength': return s.strengths.includes(c.id) === c.has;
+    case 'trait': return hasTrait(s, c.id) === c.has;
+    case 'strength': return hasTrait(s, c.id) === c.has;
     case 'money': return h.money >= c.min;
     case 'fame': return h.fame >= c.min;
     case 'tier': {
@@ -68,6 +70,7 @@ function reason(s: Life5, c: Cond): string {
     case 'wealth': return c.min !== undefined && wealthRank(s.hero.wealth) < wealthRank(c.min) ? '집안 형편이 따라 주지 않는다' : '집안이 너무 넉넉하다';
     case 'lineage': return '핏줄이 다르다';
     case 'value': return c.deep ? `${VALUE_NAME[c.id]}이(가) 아직 깊지 않다` : `${VALUE_NAME[c.id]}이(가) 너무 깊다`;
+    case 'trait': return '필요한 특성이 적용되어 있지 않다';
     case 'strength': return c.has ? `「${strengthName(c.id)}」이(가) 아직 없다` : `이미 「${strengthName(c.id)}」이(가) 있다`;
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
     case 'fame': return '아직 이름이 알려지지 않았다';

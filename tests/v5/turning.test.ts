@@ -164,7 +164,7 @@ describe('전환점의 흐름', () => {
     for (let i = 0; i < 4 * 12 && s.hero.alive; i++) {
       if (s.pending?.kind === 'door') {
         opened.push(s.pending.turning);
-        if (!s.pending.turning.startsWith('life_vow_') && s.pending.turning !== 'sky_vow_awakening')
+        if (!s.pending.turning.startsWith('life_vow_') && !s.pending.turning.startsWith('trait_awaken_') && s.pending.turning !== 'sky_vow_awakening')
           perYear[s.age] = (perYear[s.age] ?? 0) + 1;
         s = reduce5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
       }
