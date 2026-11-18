@@ -84,6 +84,7 @@ export function storyInterlude(s: Life5): boolean {
   if (s.storyRest <= 0) return false;
   if (!storyQueued(s)) { s.storyRest = 0; return false; }
   s.storyRest -= 1;
+  if (s.storyNote) { logLine(s, `── ${s.storyNote} ──`, 'heavy', 'info'); s.storyNote = ''; }   // 막이 바뀐다
   const r = storyRng(s);
   // 한 장편(두 달) 안에서는 같은 줄을 다시 내지 않는다: 최근 기록 V.story.memory줄에 없는 섬 줄 → 공용 줄 → (다 떨어지면) 최근 몇 줄만 피한다
   const shown = new Set(s.log.slice(-V.story.memory).map((l) => l.text));

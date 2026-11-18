@@ -22,9 +22,9 @@ export const V = {
   // 노화: from살부터 한 해에 rolls번, 확률 start + perYear×(나이−from) + wear×(잃은 부위 + 부상)로 근력 · 속도 · 체력 하나가 1 줄어든다 (cap까지)
   aging: { from: 50, start: 0.25, perYear: 0.03, wear: 0.1, cap: 0.9, rolls: 2, lineP: 0.35 },                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
-  // 섬 장편의 장면 사이에 흐르는 며칠: 장면에서 문을 고르면 다음 장면까지 rest[0]~rest[1] 토막(클릭)을 섬의 일상 한 줄씩으로 보낸다.
-  // 이 토막에는 나이 · 성장 · 위험이 흐르지 않는다(장편 전체가 두 달 남짓이므로). 싸움 뒤 이어지는 장면은 기다리지 않는다
-  story: { rest: [2, 3] as [number, number],
+  // 섬 장편의 장면 사이에 흐르는 시간 (data/episodes/pacing.ts의 막 구성): 실시간 장면은 곧장, 같은 막 안은 beat, 막이 바뀌면 act 토막(클릭).
+  // 쉬는 토막마다 그 섬의 일상 한 줄이 나오고, 나이 · 성장 · 위험 · 항해는 흐르지 않는다 (장편 전체가 두 달 남짓이므로)
+  story: { beat: [1, 2] as [number, number], act: [3, 4] as [number, number],
            memory: 150 },                      // 일상 줄은 최근 기록 이만큼 안에 나온 것을 다시 내지 않는다 (장편 하나를 덮는 길이)
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3,

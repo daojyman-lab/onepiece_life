@@ -6,6 +6,7 @@ import { chance, int, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
+import { STORY_PACE } from '../data/episodes/pacing';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
@@ -72,6 +73,7 @@ export function openTurning(s: Life5, t: Turning): boolean {
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
   if (TURNING_BY_ID[t.id] !== t) OPENED_ELSEWHERE.set(t.id, t);
+  storyOpening(s, t);
   s.pending = {
     kind: 'door', turning: t.id, moment: t.kind === 'moment',
     title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
@@ -121,22 +123,30 @@ export function storyRng(s: Life5): Rng {
   return rngOf({ seed: (s.rng.seed ^ 0x5eed5) >>> 0, cursor: s.seq * 4 });
 }
 
-/** 장면 제목의 「N주차」. 없으면 id 자체(어느 장면과도 다른 주로 본다) */
-function storyWeek(id: string): string {
-  return TURNING_BY_ID[id]?.title.match(/^(\d+)주차/)?.[1] ?? id;
-}
-
 /**
- * 섬 장편의 다음 장면이 줄 섰을 때, 방금 고른 장면과 다른 주(週)의 장면이면 그 사이에 섬의 며칠을 둔다
- * (V.story.rest 토막, year.ts의 storyInterlude). 같은 주의 장면(싸움 바로 뒤, 같은 날의 선택)은 곧장 잇는다.
+ * 섬 장편의 다음 장면이 줄 섰을 때 그 사이에 흐를 시간을 정한다 (data/episodes/pacing.ts의 막 구성).
+ *  - 실시간으로 이어지는 장면: 쉬지 않는다
+ *  - 같은 막 안: V.story.beat 토막 / 막이 바뀜: V.story.act 토막, 쉼이 시작될 때 막 제목을 기록에 띄운다
+ * 쉬는 토막은 year.ts의 storyInterlude가 섬의 하루로 보낸다.
  * 문을 고른 뒤(answerDoor)와 이야기가 이어지는 싸움이 끝난 뒤(fight.ts) 부른다.
  */
 export function storyPause(s: Life5): void {
+  s.storyRest = 0; s.storyNote = '';
   const next = s.queue.find((id) => id.startsWith(STORY_PREFIX));
   if (!next) return;
   const last = [...s.tried].reverse().find((k) => k.startsWith(STORY_PREFIX))?.split('#')[0];
-  if (!last || storyWeek(last) === storyWeek(next)) { s.storyRest = 0; return; }
-  s.storyRest = int(storyRng(s), V.story.rest[0], V.story.rest[1]);
+  const to = STORY_PACE[next];
+  if (!last || to?.cont) return;
+  const newAct = !to || STORY_PACE[last]?.act !== to.act;
+  const [lo, hi] = newAct ? V.story.act : V.story.beat;
+  s.storyRest = int(storyRng(s), lo, hi);
+  if (newAct && to) s.storyNote = to.act;
+}
+
+/** 장편의 첫 장면을 띄울 때 첫 막의 제목을 기록에 남긴다 */
+function storyOpening(s: Life5, t: Turning): void {
+  const p = STORY_PACE[t.id];
+  if (t.id.startsWith(STORY_PREFIX) && t.weight > 0 && p) logLine(s, `── ${p.act} ──`, 'heavy', 'info');
 }
 
 /**
