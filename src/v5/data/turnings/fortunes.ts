@@ -28,7 +28,7 @@ export const FORTUNES: Turning[] = [
     title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name}의 수완을 오래 지켜봤다고 한다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
     doors: [
       { label: '장부에 이름을 올리고 총잡이를 받는다', hint: '어둠의 거래에 발을 들인다. 그 총잡이는 끝까지 가르친다', values: { greed: D },
-        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 75000 }, { op: 'log', text: '장부에 이름이 올라가자 계약금이 손에 들어왔다. 큰손이 붙인 총잡이는 그날 밤부터 사격 자세를 고쳐 주었다.', weight: 'heavy' }] },
+        fx: [{ op: 'learnTechnique', teacher: '암시장의 총잡이', branch: 'gun', name: '속사', add: 18 }, { op: 'money', add: 75000 }, { op: 'log', text: '장부에 이름이 올라가자 계약금이 손에 들어왔다. 큰손이 붙인 총잡이는 그날 밤부터 사격 자세를 고쳐 주었다.', weight: 'heavy' }] },
       decline('총잡이를 받지 않는다', '그 돈의 냄새가 싫다', '암시장의 장부를 덮고 돌아섰다. 큰손은 총잡이를 다른 손님에게 붙였다.'),
     ],
   }),
@@ -47,7 +47,7 @@ export const FORTUNES: Turning[] = [
     title: '난파선의 검객', body: '부서진 배 위에서 홀로 칼을 닦던 검객이 {name}에게 칼끝을 겨눈다. 견뎌 내면 가르쳐 주겠다고 한다.',
     doors: [
       { label: '검객의 시험을 받는다', hint: '죽을 만큼 몰아붙여진다. 견디면 칼의 끝을 본다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -20 }, { op: 'master', name: '난파선의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'log', text: '검객의 칼끝을 피하다 온몸에 상처가 났다. 끝내 검을 놓지 않자 그가 칼을 내리고 수련을 허락했다.', weight: 'heavy' }] },
+        fx: [{ op: 'hp', add: -20 }, { op: 'learnTechnique', teacher: '난파선의 검객', branch: 'sword', name: '흐름을 끊는 발도', add: 22 }, { op: 'log', text: '검객의 칼끝을 피하다 온몸에 상처가 났다. 끝내 검을 놓지 않자 그가 칼을 내리고 수련을 허락했다.', weight: 'heavy' }] },
       decline('시험을 받지 않는다', '칼끝을 피해 물러난다', '검객의 칼끝에서 한 걸음 물러섰다. 그는 다시 칼을 닦기 시작했다.'),
     ],
   }),
@@ -85,7 +85,7 @@ export const FORTUNES: Turning[] = [
     title: '늙은 권법가', body: '곁의 사람들을 등지지 않고 끝까지 버티는 {name}을(를) 지켜보던 늙은 권법가가 다가온다. 그런 사람에게만 가르친다고 한다.',
     doors: [
       { label: '권법가의 가르침을 받는다', hint: '돈으로는 들일 수 없는 스승이다', values: { loyalty: D },
-        fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 15, paid: false }, { op: 'log', text: '권법가는 곁의 사람들부터 지켜 보라고 했다. {name}이(가) 그 말을 받아들이자 직접 주먹을 가르치기 시작했다.', weight: 'heavy' }] },
+        fx: [{ op: 'learnTechnique', teacher: '늙은 권법가', branch: 'fist', name: '상대의 힘을 흘리는 받아치기', add: 20 }, { op: 'log', text: '권법가는 곁의 사람들부터 지켜 보라고 했다. {name}이(가) 그 말을 받아들이자 직접 주먹을 가르치기 시작했다.', weight: 'heavy' }] },
       decline('가르침을 받지 않는다', '지금 곁의 사람들과 함께 자라겠다', '권법가에게 인사하고 곁의 사람들에게 돌아갔다. 수련장은 뒤에 남았다.'),
     ],
   }),
@@ -179,7 +179,7 @@ export const FORTUNES: Turning[] = [
     title: '정점의 초대', body: '세상에 이름이 자자한 늙은 검객이 {name}의 승부 기록을 품에 넣고 찾아왔다. 제 검을 완성할 마지막 상대를 찾고 있다고, 이기든 지든 가진 것을 모두 보여 주겠다고 한다.',
     doors: [
       { label: '검객의 초대를 받는다', hint: '사흘 밤낮을 겨루며 정점의 검을 몸으로 익힌다. 돈으로는 들일 수 없는 스승이다', values: { ambition: D },
-        fx: [{ op: 'master', name: '전설의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'hp', add: -20 }, { op: 'log', text: '사흘 밤낮의 승부 끝에 {name}은(는) 상처투성이로 검을 내렸다. 늙은 검객은 그제야 자신의 마지막 제자로 인정했다.', weight: 'heavy' }] },
+        fx: [{ op: 'learnTechnique', teacher: '전설의 검객', branch: 'sword', name: '간격을 지배하는 검격', add: 25 }, { op: 'hp', add: -20 }, { op: 'log', text: '사흘 밤낮의 승부 끝에 {name}은(는) 상처투성이로 검을 내렸다. 늙은 검객은 그제야 자신의 마지막 제자로 인정했다.', weight: 'heavy' }] },
       decline('초대를 받지 않는다', '제 검은 제가 완성하겠다고 답한다', '검을 거두고 혼자 수련하겠다고 답했다. 상대는 더 권하지 않았다.'),
     ],
   }),
