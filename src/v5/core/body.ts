@@ -57,6 +57,19 @@ export function effectiveStats5(s: Life5): Stats {
   const blind = EYES.every((l) => factorOf(s, l) === 0);
   if (blind && s.growth.tier.observation < V.limb.blindSight) for (const k of STAT_KEYS) st[k] *= V.limb.bothEyes;
   for (const k of STAT_KEYS) st[k] = Math.max(st[k], h.base[k] * V.limb.floor);
+
+  // 패기는 획득한 뒤의 단계만큼 특정 능력치를 강화한다. 여러 패기의 버프는 곱연산으로 중첩한다.
+  const tier = s.growth.tier;
+  if (s.flags.includes('haki:armament')) {
+    st.str *= 1 + tier.armament * V.haki.armament.strPerTier;
+    st.vit *= 1 + tier.armament * V.haki.armament.vitPerTier;
+  }
+  if (s.flags.includes('haki:observation'))
+    st.spd *= 1 + tier.observation * V.haki.observation.spdPerTier;
+  if (s.flags.includes('haki:conqueror')) {
+    const mult = 1 + tier.conqueror * V.haki.conqueror.allPerTier;
+    for (const k of STAT_KEYS) st[k] *= mult;
+  }
   return st;
 }
 
