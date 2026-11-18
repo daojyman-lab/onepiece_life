@@ -18,7 +18,7 @@ describe('특별한 문은 모두 열릴 수 있다', () => {
     // Early Alabasta chapters require a rare intersection of arrival age and values.
     // Replay verified complete lives rather than depending on a sample finding them.
     if (key === 'ep_alabasta_p4#3') {
-      it(key, () => { expect(tryReach(d, 51558, 'water7', false)).toBe(true); }, 120_000);
+      it(key, () => { expect(tryReach(d, 52011, 'water7', false)).toBe(true); }, 120_000);
     } else if (key === 'ep_alabasta_p6#3') {
       it(key, () => { expect(tryReach(d, 50039, 'sky', true)).toBe(true); }, 120_000);
     } else {

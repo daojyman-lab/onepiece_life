@@ -2,10 +2,11 @@
 import { buildVoyage, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../../core/josa';
 import { fill } from '../../core/util';
-import { chance, weighted, type Rng } from '../../core/rng';
+import { chance, int, rngOf, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
+import { STORY_PACE } from '../data/episodes/pacing';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
@@ -76,6 +77,7 @@ export function openTurning(s: Life5, t: Turning): boolean {
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
   if (TURNING_BY_ID[t.id] !== t) OPENED_ELSEWHERE.set(t.id, t);
+  storyOpening(s, t);
   s.pending = {
     kind: 'door', turning: t.id, moment: t.kind === 'moment',
     title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
@@ -112,6 +114,43 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
   return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
+}
+
+/** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
+export const STORY_PREFIX = 'ep_';
+
+/**
+ * 장편의 쉼에만 쓰는 곁 난수. 인생의 난수 줄(s.rng)을 밀지 않아서, 쉼을 넣어도 나머지 인생의 주사위가 그대로다.
+ * 기록 번호(s.seq)가 줄마다 오르므로 토막마다 다른 값이 나온다
+ */
+export function storyRng(s: Life5): Rng {
+  return rngOf({ seed: (s.rng.seed ^ 0x5eed5) >>> 0, cursor: s.seq * 4 });
+}
+
+/**
+ * 섬 장편의 다음 장면이 줄 섰을 때 그 사이에 흐를 시간을 정한다 (data/episodes/pacing.ts의 막 구성).
+ *  - 실시간으로 이어지는 장면: 쉬지 않는다
+ *  - 같은 막 안: V.story.beat 토막 / 막이 바뀜: V.story.act 토막, 쉼이 시작될 때 막 제목을 기록에 띄운다
+ * 쉬는 토막은 year.ts의 storyInterlude가 섬의 하루로 보낸다.
+ * 문을 고른 뒤(answerDoor)와 이야기가 이어지는 싸움이 끝난 뒤(fight.ts) 부른다.
+ */
+export function storyPause(s: Life5): void {
+  s.storyRest = 0; s.storyNote = '';
+  const next = s.queue.find((id) => id.startsWith(STORY_PREFIX));
+  if (!next) return;
+  const last = [...s.tried].reverse().find((k) => k.startsWith(STORY_PREFIX))?.split('#')[0];
+  const to = STORY_PACE[next];
+  if (!last || to?.cont) return;
+  const newAct = !to || STORY_PACE[last]?.act !== to.act;
+  const [lo, hi] = newAct ? V.story.act : V.story.beat;
+  s.storyRest = int(storyRng(s), lo, hi);
+  if (newAct && to) s.storyNote = to.act;
+}
+
+/** 장편의 첫 장면을 띄울 때 첫 막의 제목을 기록에 남긴다 */
+function storyOpening(s: Life5, t: Turning): void {
+  const p = STORY_PACE[t.id];
+  if (t.id.startsWith(STORY_PREFIX) && t.weight > 0 && p) logLine(s, `── ${p.act} ──`, 'heavy', 'info');
 }
 
 /**
@@ -187,6 +226,7 @@ export function answerDoor(s: Life5, index: number): void {
   applyFx(s, door.fx);
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
+  if (t.id.startsWith(STORY_PREFIX)) storyPause(s);   // 끼어든 다른 계기(부상 등)를 고른 뒤에는 쉼을 다시 세지 않는다
   if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);

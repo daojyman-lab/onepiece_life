@@ -33,7 +33,7 @@ describe('엔딩 자료', () => {
   });
   it('한 줄 인생에 태어난 곳과 죽은 나이가 들어 있다', () => {
     expect(e.oneLine).toContain(s.hero.town);
-    expect(e.oneLine).toMatch(new RegExp(`${s.ended!.age}|죽`));
+    expect(e.oneLine).toContain(`${ageShort(s.ended!.age)}에`);
   });
   it('가지 않은 길은 셋 이하이고, 깨진 글자가 없다', () => {
     expect(e.unchosen.length).toBeLessThanOrEqual(3);

@@ -52,7 +52,7 @@ export function emptyLife(seed: number): Life5 {
     values, strengths: [], marks: {},
     hardship: 0,
     people: [],
-    flags: [], seen: {}, seenCount: {}, closed: [], standingSince: 0, queue: [], queueTries: {},
+    flags: [], seen: {}, seenCount: {}, closed: [], standingSince: 0, queue: [], queueTries: {}, storyRest: 0, storyNote: '',
     stopsThisYear: 0,
     unchosen: [], tried: [], known: [],
     log: [], timeline: [], recentLines: [],

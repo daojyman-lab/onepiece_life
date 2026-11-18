@@ -7,6 +7,7 @@ import { SEA_BY_ID } from '../../data/seas';
 import { V } from '../data/balance';
 import { SEA_STANDINGS } from '../data/landlocked';
 import { LINES, type DailyLine5 } from '../data/lines';
+import { GENERIC_STORY_LINES, STORY_LINES } from '../data/storyLines';
 import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { checkAll } from './cond';
@@ -20,7 +21,7 @@ import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
-import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, STORY_PREFIX, storyRng, wantsStop } from './turning';
 import { TURNING_BY_ID } from '../data/turnings';
 import { leanPick } from './values';
 import { dreamYear } from './dreams';
@@ -51,6 +52,7 @@ export function stepPart(s: Life5): void {
   if (s.pending) return;
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
+  if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
   const vowTurning = nextLifeVowTurning(s);
   if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
@@ -78,6 +80,30 @@ export function stepPart(s: Life5): void {
   if (s.hero.alive) nextPart(s, r);
   endIfDead(s);
   if (minorFightDue && s.hero.alive && !s.pending) minorFight(s, r);
+}
+
+/** 줄 선 것 가운데 섬 장편의 장면이 있는가 */
+const storyQueued = (s: Life5) => s.queue.some((id) => id.startsWith(STORY_PREFIX));
+
+/**
+ * 섬 장편의 장면 사이에 흐르는 하루. 쉴 토막(storyRest)이 남았고 다음 장면이 줄 서 있으면
+ * 그 섬의 일상 한 줄을 내고 토막을 하나 줄인다. 나이 · 성장 · 위험 · 항해는 흐르지 않는다. 보냈으면 true
+ */
+export function storyInterlude(s: Life5): boolean {
+  if (s.storyRest <= 0) return false;
+  if (!storyQueued(s)) { s.storyRest = 0; return false; }
+  s.storyRest -= 1;
+  if (s.storyNote) { logLine(s, `── ${s.storyNote} ──`, 'heavy', 'info'); s.storyNote = ''; }   // 막이 바뀐다
+  const r = storyRng(s);
+  // 한 장편(두 달) 안에서는 같은 줄을 다시 내지 않는다: 최근 기록 V.story.memory줄에 없는 섬 줄 → 공용 줄 → (다 떨어지면) 최근 몇 줄만 피한다
+  const shown = new Set(s.log.slice(-V.story.memory).map((l) => l.text));
+  const unseen = (l: DailyLine5) => lineFits(s, l) && !shown.has(fillText(s, l.text));
+  const notRecent = (l: DailyLine5) => lineFits(s, l) && !isRecent(s, fillText(s, l.text));
+  const tiers = [STORY_LINES.filter(unseen), GENERIC_STORY_LINES.filter(unseen), STORY_LINES.filter(notRecent), GENERIC_STORY_LINES.filter(notRecent)];
+  const pool = tiers.find((t) => t.length) ?? [];
+  const line = leanPick(s, r, pool, (l) => l.lean);
+  if (line) dayLine(s, fillText(s, line.text));
+  return true;
 }
 
 /**

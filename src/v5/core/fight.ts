@@ -1,4 +1,5 @@
 // 싸움: 붙을지 물러날지를 묻고, 붙으면 v4의 자동 전투로 끝까지 돌린 뒤 결과를 몸과 마음에 남긴다.
+import { storyPause } from './turning';
 import { B } from '../../data/balance';
 import { makeEnemy } from '../../data/bosses';
 import { FRUIT_BY_ID } from '../../data/fruits';
@@ -245,7 +246,7 @@ export function answerFight(s: Life5, index: number): void {
   }
   s.pending = null;
   logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
-  if (p.next?.back) applyFx(s, [{ op: 'queue', turning: p.next.back }]);
+  if (p.next?.back) { applyFx(s, [{ op: 'queue', turning: p.next.back }]); storyPause(s); }
 }
 
 /** 끝난 전투의 결과를 적용한다: 전적과 명성, 부상, 신체 손실, 죽음, 패배의 앙금 */
@@ -299,7 +300,7 @@ export function ackBattle(s: Life5): void {
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
-    if (p.next?.win) applyFx(s, [{ op: 'queue', turning: p.next.win }]);   // 이야기가 이어지는 싸움
+    if (p.next?.win) { applyFx(s, [{ op: 'queue', turning: p.next.win }]); storyPause(s); }   // 이야기가 이어지는 싸움
     else if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
     return;
   }
@@ -311,7 +312,7 @@ export function ackBattle(s: Life5): void {
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);
-  if (p.next?.lose) applyFx(s, [{ op: 'queue', turning: p.next.lose }]);
+  if (p.next?.lose) { applyFx(s, [{ op: 'queue', turning: p.next.lose }]); storyPause(s); }
 }
 
 /** 빈사로 바뀐 싸움에서 죽을 판정이 났을 때: 생존 주사위에 붙으면 큰 부상을 입고 살아남는다. 살아남았으면 true */
