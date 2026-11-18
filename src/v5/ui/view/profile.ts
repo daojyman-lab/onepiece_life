@@ -47,6 +47,7 @@ export interface ProfileView {
   styleFocus: string | null;
   styles: { id: string; name: string; mastery: number; group: 'martial' | 'weapon' }[];
   martialMastery: number; weaponMastery: number;
+  mentorHistory: { kind: string; teacher: string; age: number; detail: string; result: string }[];
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
   money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
   hp: number; hurts: string[];                         // 부상과 병의 이름
@@ -109,6 +110,9 @@ export function profileView(s: Life5): ProfileView {
     styles: COMBAT_STYLES.map((x) => ({ id: x.id, name: x.name, mastery: g.styleMastery[x.id] ?? 0, group: x.group })),
     martialMastery: aggregateStyleMastery(s, 'martial'),
     weaponMastery: aggregateStyleMastery(s, 'weapon'),
+    mentorHistory: g.mentorHistory.map((m) => ({ kind: m.kind === 'technique' ? '기술 전수' : '특훈', teacher: m.teacher, age: m.age, detail: m.detail,
+      result: m.kind === 'technique' ? `${COMBAT_STYLES.find((x) => x.id === m.style)?.name ?? '기본 유파'} 숙련도 +${m.mastery ?? 0}`
+        : Object.entries(m.stats ?? {}).map(([k, v]) => `${({str:'근력',spd:'민첩',vit:'체력',int:'지능',wil:'의지',luk:'행운'} as Record<string,string>)[k]} +${v}`).join(' · ') })),
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
