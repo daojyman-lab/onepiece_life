@@ -68,6 +68,20 @@ describe('기연', () => {
     for (let i = 0; i < 200; i++) expect(rollFortune(s, rngOf(s.rng))).toBe(false);
     expect(s.pending).toEqual(before);
   });
+  it('패기는 유료 스승이 아니라 해금 기연으로만 얻는다', () => {
+    expect(TURNINGS.some((t) => t.id === 'pp_haki_master')).toBe(false);
+    for (const t of TURNINGS) for (const d of t.doors) {
+      for (const e of d.fx) {
+        if (e.op === 'master') expect(['observation', 'armament', 'conqueror']).not.toContain(e.branch);
+        if (e.op === 'tier' && ['observation', 'armament', 'conqueror'].includes(e.branch)) {
+          const flag = d.fx.findIndex((x) => x.op === 'flag' && x.id === `haki:${e.branch}`);
+          const tier = d.fx.indexOf(e);
+          expect(flag, t.id).toBeGreaterThanOrEqual(0);
+          expect(flag, t.id).toBeLessThan(tier);
+        }
+      }
+    }
+  });
   it('기연에는 받는 문과 받지 않는 문이 있다', () => {
     for (const t of TURNINGS.filter((x) => x.kind === 'fortune')) {
       expect(t.doors.some((d) => d.label.includes('받지 않는다')), t.id).toBe(true);
