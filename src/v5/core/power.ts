@@ -18,9 +18,10 @@ export function tierMult(tier: number): number {
   return lo >= c.length - 1 ? c[c.length - 1] : c[lo] + (c[lo + 1] - c[lo]) * (t - lo);
 }
 
-/** 가장 높은 단계 */
+/** 전투력에 공통 배율로 적용할 무술/열매 단계. 패기는 종류별 능력치 버프로 따로 반영한다. */
 export function topTier(s: Life5): number {
-  return Math.max(...Object.values(s.growth.tier));
+  const t = s.growth.tier;
+  return Math.max(t.fist, t.sword, t.gun, t.fruit);
 }
 
 function vowPowerFloor(s: Life5): number {
