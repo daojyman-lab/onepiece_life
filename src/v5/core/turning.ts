@@ -24,10 +24,11 @@ import type { Life5, ResolvedDoor, Turning } from './types';
 const OPENED_ELSEWHERE = new Map<string, Turning>();
 const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id);
 
-/** 자리표시 {name}(이름만) {town} {island}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
+/** 자리표시 {name}(이름만) {town} {island} {parent}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string): string {
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend });
+  const parent = s.people.find((p) => p.alive && (p.relation === '아버지' || p.relation === '어머니'))?.relation ?? '';
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent });
 }
 
 function speakerOf(s: Life5, t: Turning): string {
