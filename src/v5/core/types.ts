@@ -53,7 +53,7 @@ export interface MentorRecord {
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
-  master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
+  master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null; // 이전 저장 호환용 스승 수련 상태
   pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
   styleMastery: Record<CombatStyle, number>;   // 세부 체술·무기술의 누적 숙련도 (공통값은 합산)
