@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { apply5, reduce5 } from '../../src/v5/core/reduce';
 import { addValues } from '../../src/v5/core/values';
-import { activityOf, mainBranch, notePath, power5 } from '../../src/v5/core/year';
+import { activityOf, growPart, mainBranch, notePath, power5 } from '../../src/v5/core/year';
 import { LINES } from '../../src/v5/data/lines';
 import { MINORS } from '../../src/v5/data/minors';
 import { applyFx } from '../../src/v5/core/fx';
@@ -44,6 +44,26 @@ describe('가치관이 정하는 한 해', () => {
   it('스승이 없으면 3단계를 넘지 못한다', () => {
     const s = grow(9, 'ambition');
     expect(s.growth.tier.sword).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('패기 획득 전 숙련 제한', () => {
+  it('획득 전에는 자습·효과·자동 수련으로 패기 숙련이 오르지 않는다', () => {
+    const s = newLife5(1701);
+    s.pending = null;
+    s.growth.pref.observation = 80;
+    applyFx(s, [{ op: 'mastery', branch: 'observation', add: 60 }, { op: 'tier', branch: 'observation', to: 2 }]);
+    expect(s.growth.mastery.observation).toBe(0);
+    expect(s.growth.tier.observation).toBe(0);
+    expect(mainBranch(s)).not.toBe('observation');
+    growPart(s, 'study', rngOf(s.rng));
+    expect(s.growth.mastery.observation).toBe(0);
+  });
+  it('획득 플래그가 생긴 뒤에만 패기 숙련이 오른다', () => {
+    const s = newLife5(1702);
+    applyFx(s, [{ op: 'flag', id: 'haki:observation' }, { op: 'mastery', branch: 'observation', add: 40 }]);
+    expect(s.growth.mastery.observation).toBe(40);
+    expect(mainBranch(s)).toBe('observation');
   });
 });
 
