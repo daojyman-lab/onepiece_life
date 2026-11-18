@@ -5,7 +5,7 @@ import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
 import { emptyLife } from './state';
-import { COMBAT_STYLE_IDS, DEFAULT_STYLE } from '../data/combat-styles';
+import { COMBAT_STYLE_IDS, COMBAT_STYLE_BY_ID, DEFAULT_STYLE } from '../data/combat-styles';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -73,10 +73,10 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) life.growth.styleMastery[id] = 0;
   }
   if (life.growth.styleFocus === undefined) life.growth.styleFocus = null;
-  for (const [branch, style] of Object.entries(DEFAULT_STYLE) as [keyof typeof DEFAULT_STYLE, typeof DEFAULT_STYLE[keyof typeof DEFAULT_STYLE]][]) {
-    const hasStyleProgress = Object.entries(life.growth.styleMastery).some(([id, value]) =>
-      typeof value === 'number' && value > 0 && (id === style || (id in DEFAULT_STYLE && id === style)));
-    if (!hasStyleProgress && life.growth.mastery[branch] > 0) {
+  for (const [branch, style] of [['fist', DEFAULT_STYLE.fist], ['sword', DEFAULT_STYLE.sword], ['gun', DEFAULT_STYLE.gun]] as const) {
+    const hasBranchStyleProgress = COMBAT_STYLE_IDS.some((id) =>
+      COMBAT_STYLE_BY_ID[id].branch === branch && life.growth.styleMastery[id] > 0);
+    if (!hasBranchStyleProgress && life.growth.mastery[branch] > 0) {
       life.growth.styleMastery[style] += life.growth.mastery[branch];
     }
   }
