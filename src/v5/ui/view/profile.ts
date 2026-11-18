@@ -11,6 +11,8 @@ import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
 import { DREAMS } from '../../data/dreams';
+import { COMBAT_STYLES } from '../../data/combat-styles';
+import { aggregateStyleMastery } from '../../core/styles';
 import { stageName } from '../../core/stages';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
@@ -42,6 +44,9 @@ export interface ProfileView {
   master: string | null; fruit: string | null;
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
+  styleFocus: string | null;
+  styles: { id: string; name: string; mastery: number; group: 'martial' | 'weapon' }[];
+  martialMastery: number; weaponMastery: number;
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
   money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
   hp: number; hurts: string[];                         // 부상과 병의 이름
@@ -100,6 +105,10 @@ export function profileView(s: Life5): ProfileView {
     skills: BRANCHES.filter((b) => g.tier[b] >= 1).map((b) => ({ name: BRANCH_NAME[b], tier: TIER_WORD[g.tier[b]] ?? '' })),
     path: g.path ? BRANCH_NAME[g.path] : null,
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
+    styleFocus: g.styleFocus ? COMBAT_STYLES.find((x) => x.id === g.styleFocus)?.name ?? null : null,
+    styles: COMBAT_STYLES.map((x) => ({ id: x.id, name: x.name, mastery: g.styleMastery[x.id] ?? 0, group: x.group })),
+    martialMastery: aggregateStyleMastery(s, 'martial'),
+    weaponMastery: aggregateStyleMastery(s, 'weapon'),
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
