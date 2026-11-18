@@ -46,14 +46,16 @@ export function tierCap(s: Life5, b: Branch): number {
 }
 
 /** 숙련을 더한다. tierUp에 닿으면 단계를 하나 올리고 숙련을 0으로 돌린다. 상한에 닿으면 숙련은 tierUp에서 멈춘다. */
-export function addMastery(s: Life5, b: Branch, add: number): void {
+export function addMastery(s: Life5, b: Branch, add: number): boolean {
+  if (!hakiUnlocked(s, b)) return false;
   const g = s.growth;
   g.mastery[b] = Math.max(0, g.mastery[b] + add);
-  if (g.mastery[b] < V.growth.tierUp) return;
-  if (g.tier[b] >= tierCap(s, b)) { g.mastery[b] = V.growth.tierUp; return; }
+  if (g.mastery[b] < V.growth.tierUp) return true;
+  if (g.tier[b] >= tierCap(s, b)) { g.mastery[b] = V.growth.tierUp; return true; }
   g.tier[b] += 1;
   g.mastery[b] = 0;
   logLine(s, `${BRANCH_NAMES[BRANCH_ID[b]]}이(가) ${g.tier[b]}단계에 올랐다.`, 'heavy', 'growth');
+  return true;
 }
 
 export function applyFx(s: Life5, fx: Fx[]): void {
@@ -167,13 +169,18 @@ function applyOne(s: Life5, e: Fx): void {
       applyFx(s, chance(rngOf(s.rng), e.p) ? e.then : (e.else ?? []));
       return;
     case 'mastery':
-      addMastery(s, e.branch, e.add);
+      if (!addMastery(s, e.branch, e.add)) return;
       if (e.add > 0) s.growth.pref[e.branch] += e.add * V.growth.pref.fromMastery;
       return;
-    case 'pref': s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
-    // 단계를 그 자리까지 끌어올린다. 이미 더 높으면 그대로 둔다
-    case 'tier': s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
+    case 'pref':
+      if (!hakiUnlocked(s, e.branch)) return;
+      s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
+    // 패기는 먼저 획득해야 단계를 올릴 수 있다.
+    case 'tier':
+      if (!hakiUnlocked(s, e.branch)) return;
+      s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
     case 'master':
+      if (isHakiBranch(e.branch)) return;
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
       // 스승을 들이면 그 갈래가 앞선다. 길이 바뀌면 year.ts의 notePath가 큰 일로 남긴다
       s.growth.pref[e.branch] = Math.max(...Object.values(s.growth.pref)) + V.growth.pref.masterLead;
