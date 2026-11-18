@@ -15,7 +15,7 @@ import { minorFight } from './fight';
 import { needsOk } from './needs';
 import { rollFortune, rollMisfortune } from './fortune';
 import { canUse } from './body';
-import { addMastery, fillText, tierCap } from './fx';
+import { addMastery, fillText, hakiUnlocked, tierCap } from './fx';
 import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
@@ -111,11 +111,11 @@ export function activityOf(s: Life5, r: Rng): Activity {
  */
 export function mainBranch(s: Life5): Branch | null {
   const m = s.growth.master;
-  if (m && canUse(s, m.branch)) return m.branch;
+  if (m && canUse(s, m.branch) && hakiUnlocked(s, m.branch)) return m.branch;
   // 선호도가 가장 높은 갈래 (같으면 더 멀리 간 갈래). 선호도가 하나도 없으면 가장 멀리 간 갈래
   const pref = (b: Branch) => s.growth.pref[b] ?? 0;
   const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
-  const usable = (Object.keys(BRANCH_ID) as Branch[]).filter((b) => canUse(s, b));
+  const usable = (Object.keys(BRANCH_ID) as Branch[]).filter((b) => canUse(s, b) && hakiUnlocked(s, b));
   const liked = usable.filter((b) => pref(b) > 0);
   const pool = liked.length ? liked : usable.filter((b) => progress(b) > 0);
   let best: Branch | null = null;
