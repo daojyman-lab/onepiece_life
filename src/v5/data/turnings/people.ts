@@ -11,7 +11,6 @@ import type { Cond, Door, Turning, Values } from '../../core/types';
 const D = V.value.door;
 const PAID_CAP = V.growth.paidCap;
 const DOJO_FEE = 250000;
-const HAKI_FEE = 300000;
 const PROSTHETIC_COST = 40000;
 const ALL_IN_MIN = 50000;
 
@@ -66,19 +65,6 @@ export const PEOPLE: Turning[] = [
       { label: '무인이 잠든 사이 비급만 베껴 팔아넘긴다', hint: '돈이 생긴다. 무인은 그 길로 떠난다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }, { op: 'log', text: '잠든 무인 곁에서 비급을 베껴 팔았다. 아침에는 장작 패던 자리가 비었다.', weight: 'light' }] },
     ],
   },
-  {
-    id: 'pp_haki_master', kind: 'door', when: at(st(...SEAFARING), sea('gl_first', 'sabaody', 'nw_first', 'nw_late')),
-    weight: 3, repeat: { years: 8 }, speaker: { relation: '은퇴한 부선장' },
-    title: '보이지 않는 힘', body: '{island}의 바에서 은발의 노인이 술잔을 굴린다. 이 너머의 바다에서 살아남으려면 보이지 않는 힘을 알아야 한다며, 수업료를 부른다.',
-    doors: [
-      { label: '수업료를 내고 몸에 두르는 기운을 배운다', hint: '보이지 않는 갑옷을 입는 법', when: [{ c: 'money', min: HAKI_FEE }], values: { ambition: D },
-        fx: [{ op: 'money', add: -HAKI_FEE }, { op: 'master', name: '은퇴한 부선장', branch: 'armament', cap: PAID_CAP, years: 4, paid: true }, { op: 'log', text: '노인이 주먹을 내밀라고 했다. 보이지 않는 기운이 팔을 감싸자 술잔이 깨졌다.', weight: 'light' }] },
-      { label: '수업료를 내고 기척을 읽는 법을 배운다', hint: '보이지 않는 것을 보는 법', when: [{ c: 'money', min: HAKI_FEE }], values: { peace: D },
-        fx: [{ op: 'money', add: -HAKI_FEE }, { op: 'master', name: '은퇴한 부선장', branch: 'observation', cap: PAID_CAP, years: 4, paid: true }, { op: 'log', text: '노인이 눈을 감으라고 했다. 바 안쪽에서 떨어지는 동전 소리가 먼저 들렸다.', weight: 'light' }] },
-      { label: '술 한 잔만 사고 이야기를 듣는다', hint: '들은 것만으로도 눈이 조금 뜨인다', values: { romance: D }, fx: [{ op: 'mastery', branch: 'observation', add: 10 }, { op: 'log', text: '술잔을 비우며 노인의 이야기를 들었다. 다음 거리에서 낯선 발소리가 유난히 또렷했다.', weight: 'light' }] },
-    ],
-  },
-
   // ---------------------------------------------------------------- 동료 · 배신 · 약속
   {
     id: 'pp_crew', kind: 'door', when: at(age(16), st('pirate', 'revolution', 'bountyHunter', 'warlord')),
