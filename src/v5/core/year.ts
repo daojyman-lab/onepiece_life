@@ -27,6 +27,7 @@ import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { buildVoyage, voyageChoices, voyageId } from './voyage';
 import { depart, passagePart } from './passage';
+import { climatePart } from './climate';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -60,6 +61,7 @@ export function stepPart(s: Life5): void {
   delete s.traitSource;
   const r = rngOf(s.rng);
   if (s.passage) passagePart(s, r);            // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
+  else climatePart(s);                         // 섬 위: 그 섬의 기후가 끼어든다 (펑크 해저드 · 하늘섬 · 조우 …). 따로 된 주사위를 쓴다
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = activityOf(s, r);
