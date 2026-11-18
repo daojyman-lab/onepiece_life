@@ -6,7 +6,6 @@ import { V } from '../balance';
 import type { Door, Turning, ValueId } from '../../core/types';
 
 const D = V.value.door;
-const TOP = V.growth.maxTier;                  // 기연의 스승은 끝까지 가르친다
 const LEAP = V.growth.paidCap + 1;             // 돈으로는 닿지 못하는 단계로 단번에
 
 const decline = (label: string, hint: string, result: string): Door => ({ label, hint, fx: [{ op: 'log', text: result, weight: 'light' }] });
