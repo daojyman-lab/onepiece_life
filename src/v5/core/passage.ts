@@ -10,6 +10,7 @@ import {
   ANOMALY_KINDS, CALM_BELT_ISLANDS, DRIFT_CHANCE, SEA_KING_CHANCE, WEATHER_EFFECT, WEATHER_LINES,
   WEATHER_TABLE, YEAR_WEATHER, zoneOf, type SeaZone, type Weather,
 } from '../data/weather';
+import { climateOf } from '../data/climates';
 import { logLine } from './log';
 import type { Life5 } from './types';
 
@@ -54,10 +55,11 @@ const ROUTE_TILT: Record<PassageRoute, Partial<Record<Weather, number>>> = {
   drift: {},
 };
 
-export function rollWeather(zone: SeaZone, route: PassageRoute, year: number | undefined, r: Rng): Weather {
+export function rollWeather(zone: SeaZone, route: PassageRoute, year: number | undefined, r: Rng, place?: Partial<Record<Weather, number>>): Weather {
   const w = { ...WEATHER_TABLE[zone] };
   if (zone !== 'calmBelt') {
     for (const [k, d] of Object.entries(ROUTE_TILT[route])) w[k as Weather] += d!;
+    if (place) for (const [k, d] of Object.entries(place)) w[k as Weather] += d!;   // 가는 섬의 바다 (스릴러 바크의 안개, 펑크 해저드의 불타는 바다)
     if (zone === 'blue') w.anomaly = 0;          // 이상기후는 위대한 항로부터
   }
   const tilt = year != null ? YEAR_WEATHER[year]?.[zone] : undefined;
@@ -93,7 +95,7 @@ export interface PassageStep {
 export function rollPassage(p: Passage, sea: string, navigator: number, r: Rng, year?: number): PassageStep {
   const nav = Math.max(0, Math.min(3, navigator));
   const zone: SeaZone = CALM_BELT_ISLANDS.includes(p.to) && p.partsSpent === 0 ? 'calmBelt' : zoneOf(sea);
-  const weather = rollWeather(zone, p.route, year, r);
+  const weather = rollWeather(zone, p.route, year, r, climateOf(p.to)?.approach?.tilt);
   const out: PassageStep = { next: null, weather, lines: [], hp: WEATHER_EFFECT[weather].hp, fame: 0, seaKing: false };
   let progress = WEATHER_EFFECT[weather].progress;
 
@@ -138,7 +140,7 @@ export function passagePart(s: Life5, r: Rng): void {
   if (!p) return;
   const h = s.hero;
   if (!SEA_STANDINGS.includes(h.standing)) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다
-  const step = rollPassage(p, h.sea, navigatorLevel(s), r);
+  const step = rollPassage(p, h.sea, navigatorLevel(s), r, canonYear(s.age));
   for (const line of step.lines) logLine(s, line, 'light');
   if (step.hp) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + step.hp));   // 날씨로는 죽지 않는다
   if (step.fame) h.fame += step.fame;
@@ -153,6 +155,11 @@ export function arrive(s: Life5, p: Passage): void {
   s.passage = null;
   h.island = p.to;
   if (first) s.flags.push(`at:${p.to}`);
+  const way = climateOf(p.to)?.approach;       // 하늘섬의 노크업 스트림, 조우의 코끼리 다리처럼 닿는 길이 특별한 섬
+  if (way?.arrive) {
+    logLine(s, way.arrive, 'light');
+    if (way.hp && !(h.town === p.to)) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + way.hp));
+  }
   if (p.order) {
     logLine(s, josa(first ? `${p.to} 지부에 처음 배속되었다.` : `다시 ${p.to} 지부로 배속되었다.`), 'light');
     return;
@@ -167,4 +174,9 @@ export function arrive(s: Life5, p: Passage): void {
     s.hardship += ROUTE.wild.hardship;
     logLine(s, '거친 파도와 낯선 적을 헤치고 겨우 닿았다. 그 뱃길을 건넜다는 소문이 먼저 퍼졌다.', 'light');
   }
+}
+
+/** 주인공의 나이를 해원력으로: 열일곱 살이 원작이 시작하는 해(V.canon) */
+export function canonYear(age: number): number {
+  return V.canon.startYear + (age - V.canon.heroAge);
 }

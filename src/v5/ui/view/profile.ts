@@ -12,6 +12,7 @@ import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
 import { DREAMS } from '../../data/dreams';
+import { climateOf } from '../../data/climates';
 import { stageName } from '../../core/stages';
 import {
   BRANCH_NAME, ILLNESS_NAME, INJURY_NAME, LIMB_STATE_WORD, LINEAGE_NAME, MARINE_OFFICER_RANK, MARINE_TITLES, PIRATE_TITLES, PIRATE_TOP_TITLE,
@@ -127,7 +128,7 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
     crew: s.people.filter((x) => x.alive && x.kind === 'crew').slice(0, SCENE_CREW).map(personWho5),
     foe,
     sailing: !!s.passage,
-    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}` : sea.name,
+    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}${climateOf(h.island) ? ` · ${climateOf(h.island)!.name}` : ''}` : sea.name,
     islandColor: ISLAND_COLORS[sea.stage - 1] ?? ISLAND_COLORS[0],
     flag: hero.faction ?? 'civil',
     aura: h.fruit ? '#c890ff' : s.growth.tier.armament > 0 ? '#ff7060' : null,
