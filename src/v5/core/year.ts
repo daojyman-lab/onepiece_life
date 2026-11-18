@@ -31,6 +31,7 @@ import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
 const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
 const LEAN: Record<ValueId, Partial<Record<Activity, number>>> = V.activity.lean;
+const branchLabel = (b: Branch) => b === 'sword' ? '무기술' : BRANCH_NAMES[BRANCH_ID[b]];
 
 export { power5 } from './power';
 
@@ -136,7 +137,7 @@ export function notePath(s: Life5): void {
   const was = s.growth.path;
   if (now === was || now === null) return;
   s.growth.path = now;
-  const name = (b: Branch) => BRANCH_NAMES[BRANCH_ID[b]];
+  const name = (b: Branch) => branchLabel(b);
   const m = s.growth.master;
   const by = m && m.branch === now ? `${m.name}을(를) 만나 ` : '';
   if (was === null) {
@@ -180,7 +181,7 @@ function train(s: Life5, r: Rng, age: number): void {
   const b = mainBranch(s);
   const roll = r();
   if (roll < G.stallP) {
-    logLine(s, b ? `${BRANCH_NAMES[BRANCH_ID[b]]} 수련이 제자리걸음이었다.` : '몸이 무거워 수련이 손에 잡히지 않았다.', 'light', 'growth');
+    logLine(s, b ? `${branchLabel(b)} 수련이 제자리걸음이었다.` : '몸이 무거워 수련이 손에 잡히지 않았다.', 'light', 'growth');
     return;
   }
   age *= potentialMult(s, b);
