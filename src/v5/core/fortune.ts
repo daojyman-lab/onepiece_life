@@ -20,11 +20,6 @@ export function fortuneP(s: Life5): number {
 }
 
 /**
- * 해가 바뀔 때 한 번 부른다. 확률에 걸리면 가장 높은 가치관에 맞는 기연을 띄운다
- * (가치관이 하나도 없으면 아무 기연이나). 올해 멈춘 횟수와는 상관없다.
- * 이미 떠 있는 일이 있으면 덮지 않는다. 띄웠으면 시련이 줄어든다.
- */
-/**
  * 수련기 전체 누적 1.5%를 6개 연간 판정으로 분배한다.
  * Haki 전용 기연만 대상으로 하며, 여러 인물/사건이 있어도 전체 획득 확률은 불어나지 않는다.
  */
@@ -43,6 +38,11 @@ export function rollTrainingHakiFortune(s: Life5, r: Rng): boolean {
   return true;
 }
 
+/**
+ * 해가 바뀔 때 한 번 부른다. 확률에 걸리면 가장 높은 가치관에 맞는 기연을 띄운다
+ * (가치관이 하나도 없으면 아무 기연이나). 올해 멈춘 횟수와는 상관없다.
+ * 이미 떠 있는 일이 있으면 덮지 않는다. 띄웠으면 시련이 줄어든다.
+ */
 export function rollFortune(s: Life5, r: Rng): boolean {
   if (s.pending || !chance(r, fortuneP(s))) return false;
   const top = topValues(s, 1)[0];
