@@ -41,6 +41,15 @@ export interface VowState {
   declined?: boolean;
   branch?: Branch;
 }
+export interface MentorRecord {
+  kind: 'technique' | 'training';
+  teacher: string;
+  age: number;
+  detail: string;
+  style?: CombatStyle;
+  mastery?: number;
+  stats?: Partial<Stats>;
+}
 export interface Growth5 {
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
@@ -48,7 +57,8 @@ export interface Growth5 {
   pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
   styleMastery: Record<CombatStyle, number>;   // 세부 체술·무기술의 누적 숙련도 (공통값은 합산)
-  styleFocus: CombatStyle | null;              // 현재 집중하는 세부 유파
+  styleFocus: CombatStyle | null;              // 기본으로 삼는 세부 유파. 스승을 만나도 바뀌지 않는다
+  mentorHistory: MentorRecord[];               // 스승에게 배운 기술과 특훈 이력
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 해 구분선(weight 'year')에만 있다. 그 해를 시작한 섬 이름 */
@@ -100,6 +110,8 @@ export type Fx =
   | { op: 'mastery'; branch: Branch; add: number }
   | { op: 'tier'; branch: Branch; to: number }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
+  | { op: 'learnTechnique'; teacher: string; branch: Extract<Branch, 'fist' | 'sword' | 'gun'>; name: string; add: number; style?: CombatStyle }
+  | { op: 'specialTraining'; teacher: string; training: string; stats: Partial<Stats> }
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
