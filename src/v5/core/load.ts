@@ -5,6 +5,7 @@ import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
 import { emptyLife } from './state';
+import { COMBAT_STYLE_IDS, DEFAULT_STYLE } from '../data/combat-styles';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -63,6 +64,20 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.vows.active.level) {
       life.vows.active.activities ??= [];
       life.vows.active.choices ??= [];
+    }
+  }
+  // 세부 무술 숙련도 저장 이관: 기존 주먹/검/총 숙련은 각 계통의 기본 유파로 옮긴다.
+  if (!isObj(life.growth.styleMastery)) life.growth.styleMastery = {} as Life5['growth']['styleMastery'];
+  for (const id of COMBAT_STYLE_IDS) {
+    const value = life.growth.styleMastery[id];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) life.growth.styleMastery[id] = 0;
+  }
+  if (life.growth.styleFocus === undefined) life.growth.styleFocus = null;
+  for (const [branch, style] of Object.entries(DEFAULT_STYLE) as [keyof typeof DEFAULT_STYLE, typeof DEFAULT_STYLE[keyof typeof DEFAULT_STYLE]][]) {
+    const hasStyleProgress = Object.entries(life.growth.styleMastery).some(([id, value]) =>
+      typeof value === 'number' && value > 0 && (id === style || (id in DEFAULT_STYLE && id === style)));
+    if (!hasStyleProgress && life.growth.mastery[branch] > 0) {
+      life.growth.styleMastery[style] += life.growth.mastery[branch];
     }
   }
   // 패기 경로 개편: 기존 저장에서 실제 단계/스승 수련을 이미 얻은 패기는 해금 상태로 이관한다.
