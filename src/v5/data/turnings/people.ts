@@ -9,7 +9,6 @@ import { ACTIVE, GROWN, HUNTED, LAWFUL, SEAFARING, age, at, sea, st } from './pa
 import type { Cond, Door, Turning, Values } from '../../core/types';
 
 const D = V.value.door;
-const PAID_CAP = V.growth.paidCap;
 const DOJO_FEE = 250000;
 const PROSTHETIC_COST = 40000;
 const ALL_IN_MIN = 50000;
