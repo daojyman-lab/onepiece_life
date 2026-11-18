@@ -1,5 +1,6 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../../core/types';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
+import type { CombatStyle } from '../data/combat-styles';
 
 export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
 export type Values = Record<ValueId, number>;                    // 각 0~100
@@ -11,7 +12,6 @@ export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 
 export type Limb = 'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR';
 export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
 export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
-import type { CombatStyle } from '../data/combat-styles';
 export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
 /** 사건의 글이 전제하는 것. 맞지 않으면 그 전환점은 오지 않고, 그 문은 잠긴다 (needs.ts) */
 export type Need = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' | 'swim' | 'sword' | 'gun' | 'fist' | 'arms' | 'ship';
