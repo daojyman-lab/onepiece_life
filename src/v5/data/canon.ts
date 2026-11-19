@@ -12,6 +12,7 @@ type Row = [name: string, gender: 'm' | 'f', ageAtStart: number, faction: Person
 
 const ROWS: Record<string, Row> = {
   // 밀짚모자와 그 둘레
+  kuma: ['바솔로뮤 쿠마', 'm', 45, 'rev', 'buccaneer'],
   luffy: ['몽키 D. 루피', 'm', 17, 'pirate'],
   zoro: ['롤로노아 조로', 'm', 19, 'pirate'],
   nami: ['나미', 'f', 18, 'pirate'],

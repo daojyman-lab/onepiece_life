@@ -35,7 +35,7 @@ describe('연결된 섬 항로', () => {
     expect(choices.calm).toBe('알라바스타 왕국');
     const doors = buildVoyage(voyageId(s, choices))!.doors;
     expect(doors.filter(d => d.fx.some(f => f.op === 'sail'))).toHaveLength(1);
-    expect(doors.some(d => d.label.includes('토리노 왕국'))).toBe(true);
+    expect(doors.some(d => d.label.includes('토리노 왕국'))).toBe(false);
     expect(doors.at(-1)?.label).toBe('이곳에 더 머문다');
     sailTo(s, '알라바스타 왕국', 'calm');
     expect(s.hero.sea).toBe('gl_first');

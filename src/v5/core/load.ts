@@ -70,8 +70,9 @@ export function normalizeLife5(x: unknown): Life5 | null {
     !['calm', 'dream', 'wild', 'drift', 'transfer'].includes(life.passage.route))) return null;
   if (!Number.isInteger(life.hero.provisions) || life.hero.provisions < 0 || life.hero.provisions > V.voyage.storesMax) return null;
   const p = life.pending;
-  if (life.age > 18 && p?.kind === 'door' && typeof p.turning === 'string' && p.turning.startsWith(VOYAGE_PREFIX) && p.turning.includes('스릴러 바크')) {
-    const updated = buildVoyage(p.turning.replaceAll('스릴러 바크', '플로리안 트라이앵글'))!;
+  if (p?.kind === 'door' && typeof p.turning === 'string' && p.turning.startsWith(VOYAGE_PREFIX)) {
+    const id = life.age > 18 ? p.turning.replaceAll('스릴러 바크', '플로리안 트라이앵글') : p.turning;
+    const updated = buildVoyage(id)!;
     life.pending = { ...p, turning: updated.id, doors: resolveDoors(life, updated) };
   }
   if (life.hero.island === '조') life.hero.island = '조우';

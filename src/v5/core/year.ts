@@ -11,6 +11,8 @@ import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { connectedPorts, destinationAt, portOf } from '../data/navigation';
 import { ROUTE_ARRIVALS } from '../data/turnings/route-stories';
 import { RESUPPLY_STORIES } from '../data/turnings/ports';
+import { KUMA_MET, kumaSighting } from '../data/kuma';
+import { trainingLanding } from '../data/training-routes';
 import { TURNING_BY_ID } from '../data/turnings';
 import { TRAINING } from '../data/turnings/training';
 import { INCIDENTS_BY_TOWN } from '../data/childhood-incidents';
@@ -60,13 +62,15 @@ export function stepPart(s: Life5): void {
     if (openTurning(s, scene)) return;
   }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  const sighting = kumaSighting(s);
+  if (sighting && !s.flags.includes(KUMA_MET) && !s.queue.some(id => id.startsWith('ep_')) && openTurning(s, TURNING_BY_ID[sighting.id])) return;
   if (openChildhoodStory(s)) return;
 
   // 옛 저장이나 오래 머무른 배에서도 현재 연표에 맞는 안개 해역으로 이어 간다.
   if (s.hero.island === '스릴러 바크') s.hero.island = destinationAt(s.hero.island, s.age);
   const arrivalPort = portOf(s.hero.island);
   const arrivalId = arrivalPort === '리틀 가든' && s.age <= 18 && !s.seenCount.garden_giants && !s.seenCount.garden_1
-    ? 'garden_giants' : ROUTE_ARRIVALS[arrivalPort];
+    ? 'garden_giants' : trainingLanding(arrivalPort, s.flags) ?? ROUTE_ARRIVALS[arrivalPort];
   const arrival = arrivalId ? TURNING_BY_ID[arrivalId] : undefined;
   const hasArrived = s.hero.island !== s.hero.town || s.flags.includes(`at:${arrivalPort}`);
   if (hasArrived && arrival && checkAll(s, arrival.when) && repeatAllows(s, arrival) && openTurning(s, arrival)) return;

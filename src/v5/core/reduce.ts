@@ -3,7 +3,6 @@ import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
 import { answerDoor } from './turning';
-import { takeTrainingLine } from './training-travel';
 import { stepPart } from './year';
 import type { Command5, Life5 } from './types';
 
@@ -21,7 +20,6 @@ export function cloneLife(prev: Life5): Life5 {
 /** 명령을 받은 상태에 그대로 적용한다 (복사하지 않는다) */
 export function apply5(s: Life5, cmd: Command5): void {
   switch (cmd.type) {
-    case 'trainingTrip': takeTrainingLine(s, cmd.line); break;
     case 'step': if (s.pending === null) stepPart(s); break;
     case 'answer': answer(s, cmd.index); break;
   }

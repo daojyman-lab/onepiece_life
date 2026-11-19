@@ -31,6 +31,7 @@ import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
 import { EPISODE_TURNINGS } from '../episodes';
 import { TRAINING } from './training';
+import { KUMA_ENCOUNTERS } from '../kuma';
 import { TRAINING_STORIES } from './training-islands';
 import { ROUTE_STORIES } from './route-stories';
 import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
@@ -74,7 +75,7 @@ const GROUPS: Turning[][] = [
   KIN_TURNINGS,
   EPISODE_TURNINGS,
   TRAINING,
-  ROUTE_STORIES, TRAINING_STORIES,
+  ROUTE_STORIES, KUMA_ENCOUNTERS, TRAINING_STORIES,
   PORT_STORIES,
   RESUPPLY_STORIES,
 ];

@@ -7,7 +7,7 @@ const practice = (label: string, hint: string, text: string, turning: string): D
   label, hint, fx: [log(text), { op: 'queue', turning: 'field_' + turning }],
 });
 const retreat = (label: string, text: string): Door => ({
-  label, hint: '귀항편을 타고 출발지로 돌아간다', fx: [log(text), { op: 'trainingReturn' }],
+  label, hint: '섬에서 만난 사람들의 배편을 이용한다', fx: [log(text), { op: 'trainingReturn' }],
 });
 const finish = (course: string, label: string, hint: string, text: string, memory: string, growth: Fx): Door => ({
   label, hint, fx: [log(text), growth, { op: 'flag', id: 'training:done:' + course },
@@ -17,7 +17,7 @@ const finish = (course: string, label: string, hint: string, text: string, memor
 const scenes: Scene[] = [
   {
     id: 'rusukaina', title: '루스카이나 · 숲이 조용해질 때',
-    body: '경비선이 넓적한 바위에 붉은 깃발을 꽂고 물러난다. 일 년에 마흔여덟 번 계절이 바뀌는 무인도다. 낙엽 위로 우박이 튀는데도 숲 한쪽만 소리가 없다. 돌아갈 배가 보일 때까지 물통 하나를 지켜야 한다.',
+    body: '해변에 나서자 쿠자 경비선이 보인다. 경비대는 넓적한 바위에 붉은 깃발과 물통을 내려놓고 해가 기울 때 다시 오겠다는 손짓을 한다. 일 년에 마흔여덟 번 계절이 바뀌는 무인도다. 낙엽 위로 우박이 튀는데도 숲 한쪽만 소리가 없다. 돌아갈 배가 보일 때까지 물통 하나를 지켜야 한다.',
     doors: [
       practice('눈을 감고 끊어진 벌레 소리를 따라간다', '숲 가장자리에서 짐승의 움직임을 듣는다', '벌레가 잠잠해지는 자리가 조금씩 오른쪽으로 옮겨 갔다.', 'rusukaina_sound'),
       practice('발자국 위에 쌓이는 우박을 살핀다', '먼저 지나간 짐승과 방금 지나간 짐승을 가른다', '발굽 자국에는 얼음이 고였지만 그 위에 찍힌 앞발 자국 바닥은 젖어 있었다.', 'rusukaina_tracks'),
@@ -71,7 +71,7 @@ const scenes: Scene[] = [
     doors: [
       practice('열매 대신 잎 가장자리의 씨앗을 살핀다', '먹이를 끌어당기는 잎에서 표본을 구한다', '안쪽의 열매가 굴러가도 가장자리 씨방은 줄기에 붙어 있었다.', 'boin_seed'),
       practice('사다리부터 묶고 돌아갈 발판에 천을 맨다', '잎이 접힐 때에도 배를 찾을 수 있게 한다', '천 조각이 차례로 일어서더니 배 쪽의 마지막 조각만 누워 있었다.', 'boin_escape'),
-      retreat('사다리를 잡고 탐사선으로 물러난다', '발을 떼자 방금 서 있던 자리에서 달콤한 즙이 솟았다.'),
+      retreat('사다리를 잡고 잎 바깥의 탐사선에 오른다', '발을 떼자 방금 서 있던 자리에서 달콤한 즙이 솟았다.'),
     ],
   },
   {
@@ -92,11 +92,11 @@ const scenes: Scene[] = [
   },
   {
     id: 'weatheria', title: '웨더리아 · 지붕에 드리운 두 그림자',
-    body: '관측 기구를 내리자 섬 가장자리에 널어 둔 풍향 주머니가 보인다. 지붕 위 주머니는 동쪽을 가리키는데 바닥의 조그만 주머니는 축 처졌다. 아래를 지나는 우편선이 비구름에 들어가기 전에 관측값을 전해야 한다.',
+    body: '관측실 문을 열자 섬 가장자리에 널어 둔 풍향 주머니가 보인다. 지붕 위 주머니는 동쪽을 가리키는데 바닥의 조그만 주머니는 축 처졌다. 아래를 지나는 우편선이 비구름에 들어가기 전에 관측값을 전해야 한다.',
     doors: [
       practice('주머니를 서로 다른 높이에 걸어 바람을 잰다', '구름 위와 아래의 바람을 나눠 읽는다', '가운데 주머니만 옆구리부터 부풀었다. 높이를 한 칸 낮추자 끈이 반대로 휘었다.', 'weatheria_layers'),
       practice('모눈종이에 구름 그림자와 배의 위치를 찍는다', '하늘섬이 움직인 거리도 함께 기록한다', '돛대 그림과 섬 그림 사이가 종을 칠 때마다 한 칸씩 벌어졌다.', 'weatheria_shadow'),
-      retreat('관측반의 하강 기구에 다시 오른다', '지상으로 보낼 빈 우편 자루를 발치에 끼웠다.'),
+      retreat('관측반에 지상으로 내려가는 기구를 부탁한다', '지상으로 보낼 빈 우편 자루를 발치에 끼웠다.'),
     ],
   },
   {

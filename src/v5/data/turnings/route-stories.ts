@@ -1,4 +1,3 @@
-import { TRAINING_LINES } from '../training-routes';
 import type { Fx, Turning } from '../../core/types';
 
 const next = (turning: string): Fx => ({ op: 'queue', turning });
@@ -7,7 +6,6 @@ export const DEFERRED_ROUTE = 'route:deferred';
 
 /** 첫 방문에 바로 제안한다. 후속 장면은 선택한 경우에만 대기열에 넣는다. */
 export const ROUTE_ARRIVALS: Record<string, string> = {
-  ...Object.fromEntries(TRAINING_LINES.map(line => [line.island, 'field_' + line.course])),
   '셸스 타운': 'shells_ledger', '오렌지 마을': 'orange_sign', '시모츠키 마을': 'shimotsuki_dojo',
   '진귀한 동물의 섬': 'rare_tracks', '롱 링 롱 랜드': 'longring_tide',
   '스릴러 바크': 'bark_bell', '플로리안 트라이앵글': 'florian_bell',

@@ -1,32 +1,44 @@
 import type { Life5 } from './types';
-import { trainingReturn, type TrainingLine } from '../data/training-routes';
-import { availableTrainingLines, seaOfPort } from '../data/navigation';
+import { KUMA_MET, kumaDestination, kumaSighting, landingTrace } from '../data/kuma';
+import { trainingReturn } from '../data/training-routes';
+import { seaOfPort } from '../data/navigation';
 import { logLine } from './log';
-import { sailTo, moveTo } from './voyage';
+import { moveTo, sailTo } from './voyage';
 
-function ride(s: Life5, line: TrainingLine, back: boolean) {
-  const to = back ? line.from : line.island;
-  logLine(s, back ? line.homeward : line.outward, 'light');
-  if (line.id === 'balloon') {
-    moveTo(s, to, seaOfPort(to)!);
-    if (!s.flags.includes('at:' + to)) s.flags.push('at:' + to);
-  } else {
-    sailTo(s, to, 'drift');
+export function finishKumaFight(s: Life5, result: 'win' | 'lose' | 'retreat') {
+  if (!s.flags.includes(KUMA_MET) || s.flags.includes('kuma:resolved') || !kumaSighting(s)) return;
+  s.flags.push('kuma:resolved');
+  s.stats.fights++;
+  if (result === 'win') s.stats.wins++;
+  const origin = s.hero.island;
+  if (result !== 'lose') {
+    const text = result === 'win'
+      ? '쿠마가 손을 내뻗기 전에 마지막 들것이 빠져나갔다. 길을 확보하고 물러나자 쿠마도 추격을 멈췄다.'
+      : '쿠마의 손이 닿기 전에 옆길로 몸을 빼냈다. 멀어지는 발소리가 잦아들기를 기다렸다.';
+    logLine(s, text, 'heavy', 'battle');
+    s.timeline.push({ age: s.age, text, canon: 'kuma' });
+    return;
   }
-}
-
-export function takeTrainingLine(s: Life5, id: string) {
-  const line = availableTrainingLines(s).find(candidate => candidate.id === id);
-  if (!line) return;
-  const back = s.hero.island === line.island;
-  if (!back) {
-    s.flags = s.flags.filter(flag => !flag.startsWith('training:line:'));
-    s.flags.push('training:line:' + line.id);
-  }
-  ride(s, line, back);
+  const site = kumaDestination(s);
+  logLine(s, '쿠마의 손바닥이 몸에 닿았다. 땅이 발밑에서 멀어지고 사흘 밤낮 바람 소리만 들렸다.', 'heavy', 'battle');
+  s.flags = s.flags.filter(flag => !flag.startsWith('training:line:'));
+  // 토리노에서 돌아가는 구호선은 게임의 주 항로인 드럼에 닿는다.
+  s.flags.push('training:line:' + (site.course === 'torino' ? 'relief' : site.id));
+  s.sail = false;
+  moveTo(s, site.island, site.sea);
+  if (!s.flags.includes('at:' + site.island)) s.flags.push('at:' + site.island);
+  logLine(s, landingTrace[site.course], 'heavy', 'life');
+  s.timeline.push({ age: s.age, text: origin + '에서 쿠마에게 밀려 ' + site.island + '에 떨어졌다', canon: 'kuma' });
 }
 
 export function returnFromTraining(s: Life5) {
   const line = trainingReturn(s.hero.island, s.flags);
-  if (line && !s.passage) ride(s, line, true);
+  if (!line || s.passage) return;
+  logLine(s, line.homeward, 'light');
+  if (line.id === 'balloon') {
+    moveTo(s, line.from, seaOfPort(line.from)!);
+    if (!s.flags.includes('at:' + line.from)) s.flags.push('at:' + line.from);
+  } else {
+    sailTo(s, line.from, 'drift');
+  }
 }

@@ -1,6 +1,6 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { setDream } from './dreams';
-import { returnFromTraining, takeTrainingLine } from './training-travel';
+import { returnFromTraining } from './training-travel';
 import { childhoodWords, rememberChildhood } from './childhood-memory';
 import { markPersonDead, parentFound, parentMissing, separateSpouse } from './family';
 import { moveTo, resumeVoyage, sailTo } from './voyage';
@@ -18,7 +18,7 @@ import { HOMES } from '../data/homes';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
-import { askFight, rivalCombatStat, startRivalDuel } from './fight';
+import { askFight, rivalCombatStat, startKumaFight, startRivalDuel } from './fight';
 import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
@@ -93,7 +93,7 @@ function applyOne(s: Life5, e: Fx): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'trainingTrip': takeTrainingLine(s, e.line); return;
+    case 'kumaFight': startKumaFight(s); return;
     case 'trainingReturn': returnFromTraining(s); return;
     case 'move': moveTo(s, e.island, e.sea); return;
     case 'moveHome': moveTo(s, h.town, HOMES[h.home].sea); return;

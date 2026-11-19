@@ -1,5 +1,7 @@
 // 싸움: 붙을지 물러날지를 묻고, 붙으면 v4의 자동 전투로 끝까지 돌린 뒤 결과를 몸과 마음에 남긴다.
 import { B } from '../../data/balance';
+import { KUMA_FOE, KUMA_MET, kumaSighting } from '../data/kuma';
+import { finishKumaFight } from './training-travel';
 import { makeEnemy } from '../../data/bosses';
 import { FRUIT_BY_ID } from '../../data/fruits';
 import { HERO_TRAIT_BY_ID, SPECIES_PASSIVES } from '../../data/passives';
@@ -241,6 +243,23 @@ export function rivalCombatStat(p: Person): number {
   return Math.max(1, Math.round((p.power ?? 135) / RIVAL_STAT_TOTAL));
 }
 
+/** 피난로에서 주인공 한 사람이 버티는 싸움. 쿠마의 본편 임무와 전적은 건드리지 않는다. */
+export function startKumaFight(s: Life5) {
+  if (!kumaSighting(s) || s.flags.includes(KUMA_MET)) return;
+  s.flags.push(KUMA_MET);
+  const foe = makeEnemy({
+    id: KUMA_FOE, canon: 'kuma', name: '바솔로뮤 쿠마', title: '왕의 부하 칠무해', age: 45,
+    faction: 'rev', species: 'buccaneer', p: 82, fruitClass: 'paramecia',
+    skills: ['fruit:nikyu:0', 'fruit:nikyu:1', 'fruit:nikyu:2', 'fist_guard'],
+  });
+  const hero = heroUnit5(s);
+  hero.retreatAt = 0;
+  const seed = hashString(String(rngOf(s.rng)()));
+  const battle = startBattle([hero, enemyUnit(foe, true, 0)], { 0: 1 }, seed, false);
+  const resolved = runBattle(battle, true);
+  s.pending = { kind: 'battle', foe, lethal: false, battle: resolved, result: resolved.result ?? 'lose' };
+}
+
 export function startRivalDuel(s: Life5): void {
   const rival = rivalPerson(s);
   if (!rival?.alive || rival.kind === 'crew') return;
@@ -278,6 +297,7 @@ export function ackBattle(s: Life5): void {
   const p = s.pending;
   if (p?.kind !== 'battle') return;
   s.pending = null;
+  if (p.foe.id === KUMA_FOE) { finishKumaFight(s, p.result); return; }
   if (p.foe.id === RIVAL_DUEL) {
     const won = p.result === 'win';
     s.stats.fights += 1;
