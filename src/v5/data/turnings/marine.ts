@@ -340,13 +340,13 @@ export const MARINE: Turning[] = [
     // 그 이듬해(주인공 열여덟 무렵)부터는 본부에서 가프에게 따로 훈련받으므로 열일곱 한 해만 연다
     id: 'mn_coby', kind: 'door', when: at(st('marine'), age(17, 17), sea('east')),
     weight: 6, repeat: 'once', speaker: { canon: 'coby' },
-    title: '잡일하는 두 신병', body: '보급차 들른 군함에서 분홍 머리 신병과 턱이 뾰족한 신병이 갑판을 닦고 있다. 분홍 머리는 언젠가 해군 대장이 되겠다고 말하고, 턱이 뾰족한 쪽은 한때 대령 집안의 도련님이었다고 수군거린다.',
+    title: '잡일하는 두 신병', body: '보급을 받으러 들른 군함에서 신병 둘이 갑판을 닦는다. 코비가 걸레를 짜며 해군 대장이 되는 게 꿈이라고 털어놓는다. 헤르메포는 벌써 대장을 대하듯 경례하고는 닦을 계단 쪽으로 양동이를 밀어 준다.',
     doors: [
-      { label: '밤마다 분홍 머리의 대련 상대가 되어 준다', hint: '겁 많던 신병이 조금씩 단단해진다. {name}의 쉴 틈이 사라진다', values: { freedom: D },
+      { label: '밤마다 코비의 대련 상대가 되어 준다', hint: '연습을 끝낼 때마다 코비는 한 번 더 겨루자고 청한다. 다음 날엔 둘 다 걸레 짤 때 팔이 후들거린다', values: { freedom: D },
         fx: [{ op: 'person', kind: 'ally', relation: '대련을 청하던 신병', canon: 'coby' }, { op: 'mastery', branch: 'fist', add: 5 }, { op: 'hp', add: -5 }] },
-      { label: '대장이 되겠다는 꿈에 누가 먼저 닿나 내기를 건다', hint: '평생 견줄 이름이 하나 생긴다', values: { ambition: D },
+      { label: '코비에게 누가 먼저 대장 코트를 입나 내기를 건다', hint: '늦은 쪽이 갑판을 혼자 닦기로 하고 코비와 새끼손가락을 건다', values: { ambition: D },
         fx: [{ op: 'person', kind: 'rival', relation: '먼저 대장이 되겠다던 신병', canon: 'coby' }, { op: 'base', key: 'wil', add: 1 }] },
-      { label: '도련님 신병에게 갑판 일을 곱절로 몰아준다', hint: '거들먹거리던 버릇이 꺾이고, 원한도 남는다', values: { dominion: D },
+      { label: '양동이를 발로 밀던 신병에게 계단 청소까지 맡긴다', hint: '씩씩대며 양동이를 든 신병이 지나가면서 {name}의 명찰을 흘끗 본다', values: { dominion: D },
         fx: [{ op: 'person', kind: 'rival', relation: '얼차려를 받던 도련님 신병', canon: 'helmeppo' }, { op: 'fame', add: 2 }] },
     ],
   },

@@ -54,6 +54,25 @@ export function rollFamily(s: Life5, r: Rng): void {
 
 const FAMILY_WORDS: readonly string[] = Object.values(RELATION_KIND).flat();
 
+export function markPersonDead(s: Life5, p: Person): void {
+  p.alive = false;
+  if (RELATION_KIND.spouse.includes(p.relation)) s.flags = s.flags.filter(f => f !== 'married');
+}
+
+export function separateSpouse(s: Life5): void {
+  const spouse = s.people.find(p => p.alive && RELATION_KIND.spouse.includes(p.relation));
+  if (!spouse) return;
+  if (s.rivalLove?.personId === spouse.id) {
+    spouse.relation = '어릴 적 맞수';
+    s.rivalLove = { personId: spouse.id, status: 'friends', since: s.age };
+  } else {
+    spouse.relation = '헤어진 배우자';
+    if (spouse.kind === 'family') spouse.kind = 'ally';
+  }
+  s.flags = s.flags.filter(f => f !== 'married');
+  s.hardship += V.hardship.loss;
+}
+
 /**
  * 한 해가 지날 때: 늙은 가족(가족 관계 낱말의 사람. 원작 인물 · 함께 싸우는 동료는 빼고)이 노환으로 세상을 떠날 수 있다.
  * V.family.oldFrom살부터 해마다 확률이 오른다. 떠나면 무거운 기록 한 줄을 남긴다.
@@ -63,7 +82,7 @@ export function familyYear(s: Life5): void {
   for (const p of s.people) {
     if (!p.alive || p.canon || p.crew || !FAMILY_WORDS.includes(p.relation) || p.age < F.oldFrom) continue;
     if (!chance(r, Math.min(F.oldP.cap, F.oldP.start + F.oldP.perYear * (p.age - F.oldFrom)))) continue;
-    p.alive = false;
+    markPersonDead(s, p);
     logLine(s, `${p.relation}이(가) 세상을 떠났다.`, 'heavy', 'life');
   }
 }

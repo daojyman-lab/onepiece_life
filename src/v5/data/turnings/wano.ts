@@ -198,7 +198,7 @@ export const WANO: Turning[] = [
     title: '열린 나라', body: '새 쇼군이 나라를 연다고 했다. 공장이 멈추고 검은 강이 맑아지기 시작했다. 폭포 아래로 내려가는 배가 처음으로 떳떳하게 떠난다.',
     doors: [
       { label: '그 배를 타고 바깥 바다를 보러 간다', hint: '열린 나라의 첫 손님이 된다', values: { romance: D },
-        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '폭포 아래의 바다는 넓었다. 나라는 등 뒤에서 작아졌다.', weight: 'heavy' }, { op: 'timeline', text: '나라가 열린 해 바깥 바다로 나갔다' }] },
+        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '폭포 아래의 바다는 넓었다. 나라는 등 뒤에서 작아졌다.', weight: 'heavy' }, { op: 'timeline', text: '해방 뒤 개국을 기다리는 나라에서 바깥 바다로 나갔다' }] },
       { label: '맑아진 강가에 논을 다시 일군다', hint: '나라 안에서 새로 시작한다', values: { peace: D }, fx: [{ op: 'standing', to: 'settled' }, { op: 'timeline', text: '나라가 열린 해 맑아진 강가에 논을 일궜다' }] },
       { label: '바깥 상인들과 거래를 튼다', hint: '쇄국이 풀린 틈에 돈이 돈다', values: { ambition: D }, fx: [{ op: 'money', add: 30000 }] },
     ],

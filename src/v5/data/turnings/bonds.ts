@@ -39,7 +39,7 @@ const SIBLING: Turning[] = [
       { label: '뒤돌아보지 않고 나무를 먼저 짚는다', hint: '올해의 승자가 된다. 형제는 무릎을 털며 내년을 벼른다', values: { ambition: D }, mark: 'obsession',
         fx: [flag('sibHill'), flag('sibWon'), { op: 'base', key: 'spd', add: 1 }] },
       { label: '돌아가 형제를 업고 꼭대기까지 오른다', hint: '시합은 없던 일이 된다. 등이 며칠 뻐근하다', values: { loyalty: D }, mark: 'fellowship',
-        fx: [flag('sibHill'), flag('sibCarried'), { op: 'base', key: 'vit', add: 1 }, heavy('형제를 업고 나무 아래까지 올랐다. 등 뒤에서 형제가 작게 말했다. 다음에는 내가 업을게.')] },
+        fx: [flag('sibHill'), flag('sibCarried'), { op: 'base', key: 'vit', add: 1 }, heavy('형제를 업고 나무 아래까지 올랐다. 등에 업힌 형제는 다음번엔 자기가 업어 주겠다고 약속했다.')] },
       { label: '일으켜 세우고 그 자리에서 다시 겨룬다', hint: '봐주지 않는 시합이 된다. 누가 이기든 둘 다 숨이 턱에 닿는다', values: { justice: D },
         fx: [flag('sibHill'), { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }], else: [{ op: 'log', text: '한 걸음 차이로 졌다. 형제가 나무를 짚고 돌아보며 웃었다.', weight: 'light' }] }] },
     ],
@@ -75,7 +75,7 @@ const SIBLING: Turning[] = [
       { label: '질 수 없다며 소식지를 접어 품에 넣는다', hint: '그날부터 잠을 줄인다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 1 }] },
       { label: '잘했다고 짧은 편지를 부친다', hint: '답장은 계절이 바뀐 뒤에야 온다', values: { peace: D },
-        fx: [{ op: 'money', add: -1000 }, heavy('계절이 바뀌고 답장이 왔다. 한 줄뿐이었다. 「너도 잘하고 있다고 들었다.」')] },
+        fx: [{ op: 'money', add: -1000 }, heavy('계절이 바뀌고 한 줄짜리 답장이 왔다. 형제도 {name}이(가) 잘 지낸다는 소식을 듣고 있었다.')] },
       { label: '형제의 이름을 대고 외상을 긋는다', hint: '술값과 밥값이 굳는다. 형제의 귀에 들어갈지도 모른다', values: { greed: D },
         fx: [{ op: 'money', add: 12000 }, { op: 'chance', p: 0.4, then: [flag('sibGrudge'), { op: 'log', text: '외상 장부가 형제에게까지 갔다는 소문이 들렸다.', weight: 'light' }] }] },
     ],
@@ -86,7 +86,7 @@ const SIBLING: Turning[] = [
     doors: [
       { label: '어릴 적처럼 등을 맞대고 싸운다', hint: '둘 다 멍투성이가 된다. 골목에는 둘만 서 있게 된다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -12 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'fame', add: 5 }, flag('sibBackToBack'),
-             heavy('마지막 건달이 달아났다. 형제가 터진 입술로 웃었다. 너, 어릴 때보다 주먹이 느려졌다.')] },
+             heavy('마지막 건달이 달아났다. 형제는 터진 입술로 웃으며 {name}의 주먹이 어릴 때보다 느려졌다고 놀렸다.')] },
       { label: '형제의 손목을 잡고 골목을 내달린다', hint: '깨진 항아리를 두고 달아나던 날처럼 뛴다', values: { freedom: D },
         fx: [{ op: 'base', key: 'spd', add: 1 }] },
       { label: '건달 두목이 무엇을 바라는지부터 캐묻는다', hint: '주먹 대신 돈이 나간다', values: { inquiry: D },
@@ -113,7 +113,7 @@ const SIBLING: Turning[] = [
       { label: '돌아가서 숨이 턱에 닿도록 달린다', hint: '무릎이 예전 같지 않다. 형제의 무릎도 그렇다', values: { ambition: D },
         fx: [{ op: 'moveHome' }, { op: 'hp', add: -5 }, heavy('둘 다 중턱에서 주저앉아 웃었다. 나무는 끝내 아무도 먼저 짚지 못했다.'), line('형제와 고향 언덕을 마지막으로 달렸다')] },
       { label: '돌아가서 이번에는 나란히 걸어 오른다', hint: '이기는 사람도 지는 사람도 없다', values: { romance: D },
-        fx: [{ op: 'moveHome' }, heavy('나무 아래에서 형제가 말했다. 넘어졌던 그해, 실은 네가 돌아봐 주기를 기다렸다고.'), line('형제와 고향 언덕을 나란히 올랐다')] },
+        fx: [{ op: 'moveHome' }, heavy('나무 아래에서 형제는 넘어졌던 그해에 {name}이(가) 돌아봐 주기를 기다렸다고 털어놓았다.'), line('형제와 고향 언덕을 나란히 올랐다')] },
       { label: '갈 수 없다고 답장을 쓴다', hint: '나무는 기다려 주지 않는다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 2 }, heavy('이듬해 봄, 형제가 나무껍질 한 조각을 편지에 넣어 보냈다.')] },
     ],
@@ -140,7 +140,7 @@ const PARENT: Turning[] = [
     doors: [
       { label: '내일부터 일을 거들겠다고 한다', hint: '손에 물집이 잡힌다. 저녁상의 말수가 는다', values: { peace: D }, mark: 'fellowship',
         fx: [{ op: 'base', key: 'vit', add: 1 }, flag('parHelped')] },
-      { label: '나는 저렇게 살지 않겠다고 속으로 다짐한다', hint: '부모에게는 끝내 말하지 않는다', values: { ambition: D },
+      { label: '부모의 일을 물려받겠느냐는 말에 고개를 젓는다', hint: '하고 싶은 일을 직접 고르겠다고 하자 머리를 쓰다듬던 손이 멎는다', values: { ambition: D },
         fx: [flag('parDefy'), { op: 'base', key: 'wil', add: 1 }] },
       { label: '그 일이 어떻게 돌아가는지 하나하나 묻는다', hint: '부모는 귀찮아하면서도 다 일러 준다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 1 }] },
@@ -176,11 +176,11 @@ const PARENT: Turning[] = [
     title: '목말, 다시', body: '오랜만에 {town}에 들렀다. 부모는 한 뼘은 작아져 있다. 마을 잔칫날, 부모가 사람들 어깨 너머를 보려고 까치발을 든다. 어릴 적 {name}이(가) 그랬던 것처럼.',
     doors: [
       { label: '말없이 부모를 등에 업는다', hint: '오래전에 한 말을 지킨다', values: { loyalty: D },
-        fx: [{ op: 'moveHome' }, { op: 'base', key: 'wil', add: 1 }, heavy('등에 업힌 부모는 놀랄 만큼 가벼웠다. 부모가 말했다. 세상이 참 넓구나.'), line('늙은 부모를 업고 잔치를 구경했다')] },
+        fx: [{ op: 'moveHome' }, { op: 'base', key: 'wil', add: 1 }, heavy('등에 업힌 부모는 놀랄 만큼 가벼웠다. 부모는 사람들 어깨 너머로 펼쳐진 잔치 마당을 한참 바라보았다.'), line('늙은 부모를 업고 잔치를 구경했다')] },
       { label: '사람들을 헤치고 맨 앞에 자리를 낸다', hint: '아무도 {name}의 앞을 막지 않는다', values: { dominion: D },
         fx: [{ op: 'moveHome' }, heavy('부모는 맨 앞자리에 앉아서도 잔치보다 {name}의 얼굴을 더 오래 보았다.'), line('늙은 부모와 잔치를 구경했다')] },
       { label: '곁에 서서 보이는 것을 하나하나 일러 준다', hint: '부모는 고개를 끄덕이며 듣는다', values: { peace: D },
-        fx: [{ op: 'moveHome' }, heavy('부모가 웃으며 말했다. 네가 어릴 때는 내가 그렇게 일러 주었지.'), line('늙은 부모와 잔치를 구경했다')] },
+        fx: [{ op: 'moveHome' }, heavy('부모는 어린 {name}에게 잔치 구경을 시켜 주던 때를 떠올리며 웃었다.'), line('늙은 부모와 잔치를 구경했다')] },
     ],
   },
   {
@@ -200,9 +200,9 @@ const PARENT: Turning[] = [
     title: '물려주는 것', body: '{name}은(는) 품에서 낡은 물건을 꺼낸다. 부모가 젊은 날 품고 다녔고, {name}이(가) 평생 지녀 온 것이다. 다 자란 자식이 그것을 바라본다.',
     doors: [
       { label: '부모가 했던 말을 그대로 건넨다', hint: '건네는 손이 조금 떨린다', values: { romance: D },
-        fx: [heavy('이제 네 것이다. 그 말을 하고서야, 그날 부모의 손이 왜 떨렸는지 알았다.'), line('부모에게 물려받은 것을 자식에게 물려주었다')] },
+        fx: [heavy('자식의 손에 물건을 쥐여 주고서야 그날 부모의 손이 왜 떨렸는지 알았다.'), line('부모에게 물려받은 것을 자식에게 물려주었다')] },
       { label: '이것이 지나온 길을 처음부터 들려준다', hint: '이야기는 부모의 젊은 날에서 시작한다', values: { inquiry: D },
-        fx: [heavy('이야기를 다 듣고 자식이 물었다. 그럼 다음 이야기는 제가 잇는 건가요.'), line('부모에게 물려받은 것을 자식에게 물려주었다')] },
+        fx: [heavy('이야기를 다 들은 자식이 다음 이야기는 자기가 이어 가는 거냐고 물었다.'), line('부모에게 물려받은 것을 자식에게 물려주었다')] },
       { label: '아직은 내가 지니겠다며 도로 품에 넣는다', hint: '품 안이 여전히 조금 무겁다', values: { freedom: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }] },
     ],
@@ -213,7 +213,7 @@ const PARENT: Turning[] = [
 const GONE: Fx[] = [{ op: 'losePerson', relation: MENTOR }, flag('menGone')];
 const MENTORS: Turning[] = [
   {
-    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 12, repeat: 'once', speaker: 'hero',
+    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('clinicApprentice'), not('grandGuard'), not('lonely')], weight: 12, repeat: 'once', speaker: 'hero',
     title: '밥 한 그릇', body: '처마 밑에서 비를 긋는 {name} 앞에 늙은 떠돌이 하나가 멈춰 선다. 말없이 제 밥그릇을 반 덜어 내민다. 한쪽 다리를 절고, 허리에는 닳은 목검을 찼다.',
     doors: [
       { label: '밥을 비우고, 허리의 목검을 가리키며 저것을 가르쳐 달라고 한다', hint: '노인은 한참 웃는다. 그날부터 비를 긋는 처마가 하나 생긴다', values: { ambition: D },
@@ -238,13 +238,13 @@ const MENTORS: Turning[] = [
   },
   {
     id: 'men_back', kind: 'door', when: [...kid(12, 15), has('mentor'), has('menLesson'), not('menGone')], weight: 14, repeat: 'once', speaker: { relation: MENTOR },
-    title: '스승의 등', body: '산적 떼가 마을을 덮쳤다. 달아나던 {name}의 앞을 칼 든 사내들이 막아선다. 그때 절뚝이는 발소리가 끼어든다. 스승이 닳은 목검 하나로 {name}의 앞에 선다. 돌아보지 않고 말한다. 달려라.',
+    title: '스승의 등', body: '산적 떼가 마을을 덮쳤다. 달아나던 {name}의 앞을 칼 든 사내들이 막아선다. 그때 절뚝이는 발소리가 끼어든다. 스승이 닳은 목검 하나로 {name}의 앞에 선다. 뒤를 돌아보지 않은 채 제자에게 달아나라고 한다.',
     doors: [
       { label: '이를 악물고 달린다', hint: '뒤에서 나는 소리를 평생 잊지 못한다', values: { freedom: D },
         fx: [...GONE, flag('menRan'), heavy('스승은 돌아오지 않았다. 불탄 자리에는 닳은 목검만 남아 있었다.'), line('스승이 대신 막아서고 돌아오지 못했다')] },
       { label: '돌아서서 스승의 곁에 선다', hint: '스승의 말을 처음으로 어긴다. 크게 다친다', values: { loyalty: D }, danger: true,
         fx: [...GONE, flag('menStood'), { op: 'hp', add: -30 }, { op: 'injury', severity: 'light' }, { op: 'mastery', branch: 'sword', add: 15 },
-             heavy('둘이서 버텼다. 산적들이 물러갔을 때, 스승은 {name}의 어깨에 기댄 채 말했다. 잘 컸구나. 그것이 마지막 말이었다.'), line('스승이 대신 막아서고 돌아오지 못했다')] },
+             heavy('둘이서 버텼다. 산적들이 물러갔을 때, 스승은 {name}의 어깨에 기대어 제자가 잘 자랐다며 웃었다. 그것이 스승의 마지막 말이었다.'), line('스승이 대신 막아서고 돌아오지 못했다')] },
       { label: '몸을 숨기고 스승의 마지막 칼을 눈에 새긴다', hint: '한 번 본 것을 평생 되풀이해 휘두르게 된다', values: { inquiry: D },
         fx: [...GONE, flag('menWatched'), { op: 'pref', branch: 'sword', add: 15 }, { op: 'mastery', branch: 'sword', add: 25 },
              heavy('다리를 저는 노인의 칼이 그렇게 빠를 줄은 몰랐다. 스승은 셋을 쓰러뜨리고 넷째의 칼에 쓰러졌다.'), line('스승이 대신 막아서고 돌아오지 못했다')] },
@@ -267,7 +267,7 @@ const MENTORS: Turning[] = [
     id: 'men_echo_stand', kind: 'door', when: at(age(34, 72), grown, has('menGone')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '그 자리에 서다', body: '{island}의 장터에 무뢰배들이 들이닥쳤다. 달아나는 사람들 틈에서 아이 하나가 넘어진다. 칼 든 사내가 아이 앞에 선다. 정신을 차려 보니 {name}이(가) 그 사이에 서 있다. 그날 스승이 서 있던 자리다.',
     doors: [
-      { label: '돌아보지 않고 말한다. 달려라', hint: '그날 들었던 말을 이번에는 건넨다', values: { loyalty: D }, danger: true,
+      { label: '등 뒤의 아이에게 달아나라고 한다', hint: '그날 들었던 말을 이번에는 건넨다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'fame', add: 10 }, { op: 'chance', p: 0.3, then: [{ op: 'injury', severity: 'light' }] },
              heavy('아이는 달렸다. {name}은(는) 그날 스승의 등이 왜 그렇게 커 보였는지 이제야 알았다.'), line('스승이 섰던 자리에 섰다')] },
       { label: '무뢰배를 쓰러뜨리고 갈 곳 없는 아이를 거둔다', hint: '비를 긋는 처마가 하나 더 생긴다', values: { dominion: D }, danger: true,

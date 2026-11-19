@@ -1,7 +1,8 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { setDream } from './dreams';
-import { parentFound, parentMissing } from './family';
-import { sailTo } from './voyage';
+import { childhoodWords, rememberChildhood } from './childhood-memory';
+import { markPersonDead, parentFound, parentMissing, separateSpouse } from './family';
+import { moveTo, resumeVoyage, sailTo } from './voyage';
 import { npcName } from './names';
 import { enterPrime } from './stages';
 import { FRUIT_BY_ID, FRUITS } from '../../data/fruits';
@@ -16,10 +17,11 @@ import { HOMES } from '../data/homes';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
-import { askFight } from './fight';
+import { askFight, rivalCombatStat, startRivalDuel } from './fight';
 import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
+import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
@@ -30,14 +32,21 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 
 /** 문장의 자리표시 {name} {town} {island}를 지금 주인공의 것으로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string): string {
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island });
+  const vars: Record<string, string> = { name: s.hero.name, town: s.hero.town, island: s.hero.island, destination: s.passage?.destination ?? '' };
+  if (text.includes('{rival}')) vars.rival = rivalPerson(s)?.name ?? '맞수';
+  if (text.includes('{rivalPost}')) vars.rivalPost = rivalPosition(s);
+  if (text.includes('{crisis')) Object.assign(vars, childhoodWords(s));
+  if (text.includes('{mentor}')) vars.mentor = s.people.find(p => p.alive && p.relation === '스승')?.name ?? '스승';
+  if (text.includes('{parent}')) vars.parent = s.people.find(p => p.alive && personIs(p, 'parent'))?.relation ?? '부모';
+  return fill(text, vars);
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
 export function tierCap(s: Life5, b: Branch): number {
   const m = s.growth.master;
-  if (!m || m.branch !== b) return V.growth.noMasterCap;
-  return Math.max(V.growth.noMasterCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
+  const independentCap = s.flags.includes('focused_training') && ['fist', 'sword', 'gun'].includes(b) ? 4 : V.growth.noMasterCap;
+  if (!m || m.branch !== b) return independentCap;
+  return Math.max(independentCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
 }
 
 /** 숙련을 더한다. tierUp에 닿으면 단계를 하나 올리고 숙련을 0으로 돌린다. 상한에 닿으면 숙련은 tierUp에서 멈춘다. */
@@ -83,13 +92,15 @@ function applyOne(s: Life5, e: Fx): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'move': h.island = e.island; h.sea = e.sea; return;
-    case 'moveHome': h.island = h.town; h.sea = HOMES[h.home].sea; return;
+    case 'move': moveTo(s, e.island, e.sea); return;
+    case 'moveHome': moveTo(s, h.town, HOMES[h.home].sea); return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
     case 'dream': setDream(s, e.id); return;
+    case 'rememberChildhood': rememberChildhood(s, e.storyId, e.outcome); return;
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'sail': sailTo(s, e.island, e.route); return;
+    case 'resumeVoyage': resumeVoyage(s, e.stores); return;
     case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
     case 'mark': {
       const got = addMark(s, e.id);
@@ -102,10 +113,13 @@ function applyOne(s: Life5, e: Fx): void {
       const r = rngOf(s.rng);
       const c = e.canon ? CANON[e.canon] : undefined;
       const gender = c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
+      const localCompanion = e.relation === '어릴 적 맞수' || e.relation === '스승';
+      const natives = HOMES[h.home].species;
       const p: Person = {
         id: `p${s.seq++}`, name: c?.name ?? e.name ?? npcName(s, r, gender), gender, age: personAge(s, e),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
-        bond: V.person.bond, faction: c?.faction ?? 'civil', species: c?.species ?? 'human', alive: true,
+        bond: V.person.bond, faction: c?.faction ?? 'civil',
+        species: c?.species ?? (localCompanion ? (natives.includes(h.species) ? h.species : natives[0]) : 'human'), alive: true,
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
@@ -113,7 +127,8 @@ function applyOne(s: Life5, e: Fx): void {
         const level = Math.min(maxLevel, e.level ?? V.person.crew.level);
         if (e.canon) s.people = s.people.filter((x) => !(x.alive && x.canon === e.canon));   // 이미 아는 사이였으면 그 사람이 배에 오른다 (둘이 되지 않는다)
         if (e.years) p.tempUntil = s.age + e.years;
-        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0 };
+        const power = e.canon === 'bellamy' ? 580 : crewPowerFor(SEA_BY_ID[h.sea].stage, level);
+        p.crew = { role: e.role ?? role, level, power, skills: [], injuredMonths: 0 };
       }
       s.people.push(p);
       return;
@@ -133,11 +148,12 @@ function applyOne(s: Life5, e: Fx): void {
     case 'losePerson': {
       const p = s.people.find((x) => x.alive && ('who' in e ? personIs(x, e.who) : x.relation === e.relation));
       if (!p) return;
-      p.alive = false;
+      markPersonDead(s, p);
       s.hardship += V.hardship.loss;
       return;
     }
     case 'queue': if (!s.queue.includes(e.turning)) s.queue.push(e.turning); return;
+    case 'separateSpouse': separateSpouse(s); return;
     case 'log': logLine(s, fillText(s, e.text), e.weight); return;
     case 'timeline': s.timeline.push({ age: s.age, text: fillText(s, e.text), ...(e.canon ? { canon: e.canon } : {}) }); return;
     case 'die':
@@ -165,6 +181,16 @@ function applyOne(s: Life5, e: Fx): void {
     // 흉터는 낫지 않는다 (monthsLeft를 줄이지 않는다)
     case 'injury': h.injuries.push({ severity: e.severity, monthsLeft: V.injury.months[e.severity] }); return;
     case 'fight': askFight(s, e.foe, e.lethal, e.forced, e.next); return;
+    case 'rivalDuel': startRivalDuel(s); return;
+    case 'recruitRival': {
+      const rival = rivalPerson(s);
+      if (!rival?.alive || rival.kind === 'crew' || h.standing === 'marine' || !s.flags.includes('rival:free')) return;
+      rival.kind = 'crew';
+      rival.crew = { role: rivalCrewRole(s), level: V.person.crew.level, power: rivalCombatStat(rival), skills: [], injuredMonths: 0 };
+      s.flags = s.flags.filter(id => id !== 'rival:free');
+      s.timeline.push({ age: s.age, text: fillText(s, '어릴 적 맞수 {rival}과(와) 동료가 되었다.') });
+      return;
+    }
     case 'loseLimb': loseLimb(s, e.limb, rngOf(s.rng)); return;
     case 'prosthetic': fitProsthetic(s, e.grade); return;
     // 이미 앓는 병이 있으면 새로 걸리지 않는다. 진행과 치료는 risk.ts의 partRisks가 맡는다

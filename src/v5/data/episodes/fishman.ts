@@ -131,7 +131,7 @@ export const EP_FISHMAN: Turning[] = [
   {
     id: 'ep_fishman_b_6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '흰 닻 상회의 두목 그레이브' },
     title: '6주차 · 흰 닻 두목의 제안',
-    body: '코팅 항구의 선술집, 하얀 코트를 입은 인간이 {name}의 맞은편에 앉는다. 흰 닻 상회의 두목 그레이브다. 그는 술잔을 밀며 말한다. 어인섬은 어차피 인간을 미워하고, 사봉디는 어차피 인어를 산다. 그 사이에 다리를 놓는 게 장사라고. 인어 하나 값이면 코팅선 한 척이고, 함께하면 배는 네 몫이라고 한다. 그의 말 가운데 어인가의 미움이 그물을 도왔다는 대목만은 거짓이 아니다.',
+    body: '코팅 항구의 선술집, 하얀 코트를 입은 인간이 {name}의 맞은편에 앉는다. 흰 닻 상회의 두목 그레이브다. 그레이브는 술잔을 밀며 어인섬의 반감과 사봉디의 노예 시장을 자기 장사의 구실로 삼는다. 인어 하나 값이 코팅선 한 척과 맞먹는다며 동업하면 {name}에게 그 배를 주겠다고 한다. 그의 말 가운데 어인가의 미움이 그물을 도왔다는 대목만은 거짓이 아니다.',
     doors: [
       { label: '술잔을 엎고 일어선다', hint: '상회가 출항을 서두른다. 섬 사람들은 그 뒷모습을 본다', values: { loyalty: D },
         fx: [{ op: 'fame', add: 2 }, log('그레이브는 엎어진 술잔을 내려다보며 웃었다. 그럼 출항하는 날 보자고.'), next('ep_fishman_b_7')] },
@@ -298,7 +298,7 @@ export const EP_FISHMAN: Turning[] = [
     body: '류구 병원 앞에 두 줄이 섰다. 한 줄은 알약을 먹고 늙어 버린 젊은이들의 가족이고, 다른 한 줄은 그 젊은이들을 감옥에 넣으라는 이웃들이다. 늙은 얼굴의 어머니도, 알약 먹은 이웃에게 맞은 노인도 거짓말을 하지 않는다. 그 사이에 고래상어 어인 징베가 서 있다. 그는 섬에 돌아온 지 얼마 안 됐고, 누구 편도 들지 않는다. 다만 {name}이(가) 이 거리에서 무엇을 했는지는 묻는다.',
     doors: [
       { label: '징베에게 냉동 창고의 알약 상자를 그대로 보여 준다', hint: '말보다 상자가 먼저다', when: [has('ep_fishman_c_depot')], values: { justice: D },
-        fx: [flag('ep_fishman_c_jinbe'), log('징베는 얼음 방의 상자를 오래 보았다. 이 섬에 곧 큰일이 난다, 그날 이 창고를 맡아 줄 수 있겠느냐고 물었다. 대신 해 주겠다는 말은 없었다.'), next('ep_fishman_c_coup')] },
+        fx: [flag('ep_fishman_c_jinbe'), log('징베는 얼음 방의 상자를 오래 보았다. 징베는 섬에 곧 큰일이 날 것 같다며 그때 창고를 맡아 달라고 부탁했다. 대신 해 주겠다는 말은 없었다.'), next('ep_fishman_c_coup')] },
       { label: '두 줄 사이에 서서 먹은 사람도 치료받게 해 달라고 한다', hint: '양쪽에서 욕을 듣는다', values: { romance: D },
         fx: [flag('ep_fishman_mio_trust'), { op: 'hp', add: -4 }, log('누군가 던진 산호 조각이 이마를 스쳤다. 미오가 그날 병원 문을 한 시간 더 열었다. 징베는 아무 말 없이 줄 끝에 섰다.'), next('ep_fishman_c_coup')] },
       { label: '알약 먹은 자들을 모조리 가두자는 줄에 선다', hint: '거리는 조용해지고, 징베는 등을 돌린다', values: { dominion: D },
@@ -501,7 +501,7 @@ export const EP_FISHMAN: Turning[] = [
   {
     id: 'ep_fishman_a_4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '류구 왕국의 큰 왕자 후카보시' },
     title: '4주차 · 떠나려는 사람과 남으려는 사람',
-    body: '류구 궁 앞마당에 사람들이 모였다. 한쪽은 해를 너무 오래 기다렸으니 지금 떠나겠다는 사람들이고, 다른 쪽은 지상은 아직 믿을 수 없으니 이주 이야기를 접자는 사람들이다. 둘 다 오토히메 왕비를 그리워한다. 큰 왕자 후카보시가 단상에서 내려와 {name}에게 묻는다. 당신이 이 섬에서 이번 달에 한 일을 말해 달라고. 약속이 아니라 한 일을.',
+    body: '류구 궁 앞마당에 사람들이 모였다. 한쪽은 해를 너무 오래 기다렸으니 지금 떠나겠다는 사람들이고, 다른 쪽은 지상은 아직 믿을 수 없으니 이주 이야기를 접자는 사람들이다. 둘 다 오토히메 왕비를 그리워한다. 큰 왕자 후카보시가 단상에서 내려온다. 앞으로의 약속에 앞서, 그는 {name}이(가) 지난 한 달 동안 섬에서 무엇을 했는지 듣고 싶어 한다.',
     doors: [
       { label: '정박장의 쇠고랑과 먼저 떠난 이름들을 그대로 보여 준다', hint: '왕자의 얼굴이 굳는다', when: [has('ep_fishman_a_depot')], values: { justice: D },
         fx: [flag('ep_fishman_a_prince'), log('후카보시는 쇠고랑을 손에 들고 오래 서 있었다. 이주를 멈출 수는 없지만, 조합의 배는 왕궁이 살피겠다고 했다. 그 배를 막는 일은 네가 본 것을 믿는 자들의 몫이라며.'), next('ep_fishman_a_5')] },
@@ -642,7 +642,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [flag('ep_fishman_a_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 가오리 어인 도선사', years: 2 },
              log('바스는 뱃머리에 올라 앞길을 읽기 시작했다. 루네가 지도 한 장을 던져 주며 다 그리면 돌아오라고 했다.')] },
       { label: '루네가 건네는 그리다 만 지상 지도를 받는다', hint: '어인을 받아 줄 섬을 찾으면 표시해 달라고 한다', when: [has('ep_fishman_rune_trust')], values: { inquiry: D },
-        fx: [flag('ep_fishman_a_done'), { op: 'base', key: 'int', add: 1 }, log('지도의 빈칸에는 루네의 글씨로 여기를 채워 줘, 라고 적혀 있었다.')] },
+        fx: [flag('ep_fishman_a_done'), { op: 'base', key: 'int', add: 1 }, log('지도 여백에는 빈칸을 마저 채워 달라는 루네의 부탁이 적혀 있었다.')] },
       { label: '공주에게 손을 흔들고 배에 오른다', hint: '빛줄기 사이로 섬이 작아진다', values: { romance: D },
         fx: [flag('ep_fishman_a_done'), log('시라호시 공주의 손이 빛줄기 사이에서 오래 흔들렸다.', 'light')] },
     ],

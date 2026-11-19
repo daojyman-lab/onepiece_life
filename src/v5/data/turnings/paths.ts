@@ -4,6 +4,7 @@
 // 원작 인물은 주인공의 나이에 맞춰 나온다 (주인공 열일곱 살 무렵이 원작의 시작).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
+import { ISOLATED_TOWNS } from '../landlocked';
 import type { Cond, HomeId, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -318,6 +319,17 @@ export const PATHS: Turning[] = [
     ],
   },
   {
+    id: 'prison_local_release', kind: 'door', when: at(st('prisoner'), { c: 'island', is: ISOLATED_TOWNS }),
+    weight: 6, repeat: { years: 1 }, speaker: { relation: '간수' },
+    title: '돌려받은 짐', body: '간수가 형기를 확인하고 창고에서 {name}의 짐을 찾아왔다. 옷을 갈아입는 동안 바깥문의 빗장이 열렸다.',
+    doors: [
+      { label: '짐을 챙겨 집으로 돌아간다', hint: '마을에서 다시 일거리를 찾는다', values: { peace: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'timeline', text: '{island}에서 형기를 마치고 풀려났다' }] },
+      { label: '옥에서 알게 된 이의 가족을 찾아간다', hint: '남은 형기와 안부를 전한다', values: { loyalty: D },
+        fx: [{ op: 'standing', to: 'civil' }, { op: 'timeline', text: '풀려난 날 같은 방에 있던 사람의 가족에게 소식을 전했다' }] },
+    ],
+  },
+  {
     id: 'prison_release', kind: 'door', when: at(st('prisoner')),
     weight: 4, repeat: { years: 1 }, speaker: { relation: '간수' },
     title: '형기를 마치다', body: '녹슨 문이 열린다. 간수가 {name}의 짐 꾸러미를 바닥에 던지며, 다시는 보지 말자고 한다.',
@@ -454,9 +466,9 @@ export const PATHS: Turning[] = [
       { label: '비눗방울 섬으로 배를 몬다', hint: '이름난 자들이 모이는 곳으로 간다', values: { ambition: D },
         fx: [{ op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'log', text: '비눗방울이 떠오르는 섬, 샤본디 제도에 닻을 내렸다.', weight: 'heavy' }] },
       { label: '이 바다에 머문다', hint: '아직은 이 바다가 맞다', values: { peace: D }, fx: [] },
-      { label: '안개 속의 거대한 유령선에 다가간다', hint: '살아서 나올 수 있을지 모른다', values: { romance: D }, danger: true,
-        fx: [{ op: 'hp', add: -25 }, { op: 'move', island: '스릴러 바크', sea: 'sabaody' },
-             { op: 'log', text: '안개 속의 유령섬 스릴러 바크에 발을 들였다. 그림자가 멋대로 움직였다.', weight: 'heavy' }] },
+      { label: '짙은 안개 속에서 들리는 종소리를 따라간다', hint: '플로리안 트라이앵글에서 길을 잃을 수 있다', values: { romance: D }, danger: true,
+        fx: [{ op: 'hp', add: -25 }, { op: 'move', island: '플로리안 트라이앵글', sea: 'sabaody' },
+             { op: 'log', text: '안개 속에서 망을 서다 멀리서 오는 종소리를 들었다.', weight: 'heavy' }] },
     ],
   },
   {

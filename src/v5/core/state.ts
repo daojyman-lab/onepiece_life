@@ -43,7 +43,7 @@ export function emptyLife(seed: number): Life5 {
       injuries: [], illness: null,
       limbs,
       fruit: null,
-      money: 0, fame: 0, rank: 0,
+      money: 0, fame: 0, rank: 0, provisions: 0,
       standing: 'child', island: '', sea: 'east',
       alive: true,
       bornWealth: 'common',

@@ -5,11 +5,12 @@ export const V = {
   // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
   // 싸움의 계산(power5)은 바꾸지 않는다. 등급의 경계는 data/words.ts의 GRADES
   grade: { fruit: 0.5, haki: 0.25 },
-  voyage: { p: 0.45, minAge: 16, fresh: 3 },
+  voyage: { p: 0.45, minAge: 16, fresh: 3, longDays: 7, stopoverP: 0.35, storesMax: 6, rationHp: 3 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
+           greedProfit: 1.5,                   // 제 잇속을 택해 실제로 돈을 챙기는 선택
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.1 }, { to: 200, n: 0.8 } ],
+  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 2.5 }, { to: 200, n: 0.9 } ],
   stopsQuiet: 0.4,
   // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
   prime: { minAge: 22, maxAge: 40, years: 5, tier: 3 },
@@ -63,8 +64,7 @@ export const V = {
            famePerPower: 0.1, minorFame: 1,
            // 이름 있는 상대의 능력치(간부 포함)에 곱하는 배율, 상대가 나오는 바다별 (v4 보스는 v4의 레벨 성장에 맞춰져 있다)
            foeScale: { east: 0.4, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.2, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },
-           dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
-           minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
+           dangerKidAge: 15 },                // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
   fame: { bounty: 1000000 },                   // 명성 1 = 현상금(해군은 공적) 100만 베리
   // 아무 열매나 먹을 때 등급(1 쓰레기 ~ 5 전설)마다 뽑힐 가중치. 원작 인물의 열매는 뽑지 않는다

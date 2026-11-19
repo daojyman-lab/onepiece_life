@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/v5/core/state';
 import { reduce5 } from '../../src/v5/core/reduce';
-import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe } from '../../src/v5/core/fight';
+import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe, scaleFoe } from '../../src/v5/core/fight';
 import { openTurning } from '../../src/v5/core/turning';
 import { TURNING_BY_ID } from '../../src/v5/data/turnings';
 import { crewPowerFor } from '../../src/core/people';
@@ -135,6 +135,31 @@ describe('싸움', () => {
     askFight(s, weak, false, true);
     const b = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
     expect(b.battle.units.some((u) => u.personId === mate.id && u.side === 'L')).toBe(true);
+  });
+  it('성인의 길거리 상대는 해역에 따라 F급부터 C급까지 오른다', () => {
+    const s = fighter(3);
+    s.age = 25;
+    for (const [sea, low, high] of [['east', 0, 60], ['gl_entry', 60, 100], ['gl_first', 100, 240], ['sabaody', 100, 240], ['nw_first', 240, 500], ['nw_late', 240, 500]] as const) {
+      s.hero.sea = sea;
+      for (let i = 0; i < 40; i++) {
+        const power = foePower(minorFoe(s, rngOf(s.rng)));
+        expect(power).toBeGreaterThanOrEqual(low);
+        expect(power).toBeLessThan(high);
+      }
+    }
+  });
+  it('이름 있는 지역 두목은 B급이고 약화 분기는 C급이다', () => {
+    for (const id of ['b_gramon', 'b_fm_utsubo', 'b_dr_remedio']) {
+      const power = foePower(scaleFoe(FOES[id], id));
+      const worn = foePower(scaleFoe(FOES[id + '_worn'], id + '_worn'));
+      expect(power).toBeGreaterThanOrEqual(500);
+      expect(power).toBeLessThan(770);
+      expect(worn).toBeGreaterThanOrEqual(240);
+      expect(worn).toBeLessThan(500);
+    }
+    const s = fighter(3);
+    applyFx(s, [{ op: 'person', kind: 'crew', canon: 'bellamy', relation: '하이에나' }]);
+    expect(s.people.at(-1)?.crew?.power).toBe(580);
   });
   it('부상은 기록되고 시간이 지나면 낫는다', () => {
     let s = fighter(1); applyFx(s, [{ op: 'injury', severity: 'light' }]);

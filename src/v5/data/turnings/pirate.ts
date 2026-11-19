@@ -22,7 +22,7 @@ export const PIRATE: Turning[] = [
   {
     id: 'crew_raid', kind: 'door', when: at(age(16), PIR, noFlag('captain')),
     weight: 8, repeat: { years: 3 }, speaker: { relation: '선장' },
-    title: '선장의 명령', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이다. 선장이 칼을 뽑아 들고 외친다. 건너가라. {name}은(는) 밧줄을 쥔 선원들 틈에 서 있다.',
+    title: '선장의 명령', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이다. 선장이 칼을 뽑아 들고 상선으로 건너가라는 명령을 내린다. {name}은(는) 밧줄을 쥔 선원들 틈에 서 있다.',
     doors: [
       { label: '맨 먼저 밧줄을 타고 건너간다', hint: '선장의 눈에 든다. 맨 앞은 칼도 먼저 맞는다', values: { ambition: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 12 }, { op: 'money', add: 15000 }, { op: 'flag', id: 'captainsEye' },
@@ -57,7 +57,7 @@ export const PIRATE: Turning[] = [
         fx: [{ op: 'flag', id: 'firstMate' }, { op: 'fame', add: 10 }, { op: 'money', add: 10000 }, { op: 'timeline', text: '해적선의 부선장이 되었다' }] },
       { label: '언젠가 제 깃발을 올릴 거라고 털어놓는다', hint: '선장은 크게 웃고, 떠나는 날 밑천을 쥐여 주겠다고 한다', values: { ambition: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'flag', id: 'ownFlagDream' },
-             { op: 'log', text: '선장이 말했다. 나도 네 나이 때 남의 배에서 똑같은 소리를 했지.', weight: 'heavy' }] },
+             { op: 'log', text: '선장은 젊을 때 남의 배를 타면서 같은 말을 한 적이 있다고 했다.', weight: 'heavy' }] },
       { label: '자리는 사양하고 지금처럼 밧줄이나 잡겠다고 한다', hint: '매이는 것이 없다. 언제든 내릴 수 있다', values: { freedom: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }] },
     ],

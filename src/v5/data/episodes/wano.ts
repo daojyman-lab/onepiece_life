@@ -71,7 +71,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_1', kind: 'door', when: at(WANO, age(12, 20), not('ep_wano_pre_done')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '1주차 · 검은 강의 쿠리',
-    body: '산 너머 공장 굴뚝에서 쇠 냄새 섞인 연기가 밤낮없이 오르고, 쿠리의 강물은 먹물처럼 검다. 숯 가마 앞에서 만난 숯장이 타케조가 「이번 달에만 셋이 사라졌다」고 이를 간다. 그때 흑연조 완장을 찬 사내가 수레에 노인을 실어 끌고 가고, 그 뒤를 붓과 장부를 든 처녀 오유키가 몰래 따라간다.',
+    body: '산 너머 공장 굴뚝에서 쇠 냄새 섞인 연기가 밤낮없이 오르고, 쿠리의 강물은 먹물처럼 검다. 숯 가마 앞에서 만난 숯장이 타케조가 이번 달에만 세 사람이 사라졌다며 이를 간다. 그때 흑연조 완장을 찬 사내가 수레에 노인을 실어 끌고 가고, 그 뒤를 붓과 장부를 든 처녀 오유키가 몰래 따라간다.',
     doors: [
       { label: '수레 앞을 막아서 노인을 내려 달라고 한다', hint: '연기꾼이 총을 뽑는다. 타케조가 눈여겨본다', values: { justice: D }, danger: true,
         fx: [flag('ep_wano_pre_takezo_trust'), fight('b_wano_saburo', false, { win: 'ep_wano_pre_2', lose: 'ep_wano_pre_2', back: 'ep_wano_pre_2' })] },
@@ -84,10 +84,10 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '끌려간 이들의 장부를 쓰는 오유키' },
     title: '2주차 · 사라진 사람들의 장부',
-    body: '오유키는 쌀 창고 다락에서 장부를 편다. 「쇼군께 올리는 일꾼 할당은 한 달에 열. 그런데 쿠리에서 사라진 사람은 서른이 넘어요.」 남는 사람들이 어디로 가는지, 흑연조 두목 겐바가 무엇을 만드는지 아무도 모른다. 술집에는 흑연조 졸개들이, 공장 문 앞에는 품삯을 받는 서기가 있다.',
+    body: '오유키는 쌀 창고 다락에서 장부를 편다. 장부에 적힌 일꾼 할당은 한 달에 열 명인데 쿠리에서 사라진 사람은 서른이 넘는다. 나머지가 어디로 끌려갔는지, 흑연조 두목 겐바가 무엇을 만드는지 아무도 모른다. 술집에는 흑연조 졸개들이, 공장 문 앞에는 품삯을 받는 서기가 있다.',
     doors: [
       { label: '술 취한 흑연조 졸개를 골목으로 끌고 가 캐묻는다', hint: '빨리 알아낸다. 소문도 빨리 돈다', values: { dominion: D },
-        fx: [log('졸개는 코피를 흘리며 「성터 밑에 화로가 하나 더 있다」고 불었다. 다음 날 흑연조가 골목마다 사람을 세웠다.', 'light'), next('ep_wano_pre_3')] },
+        fx: [log('졸개는 코피를 흘리며 성터 밑에 숨겨 둔 화로가 하나 더 있다고 털어놓았다. 다음 날 흑연조가 골목마다 사람을 세웠다.', 'light'), next('ep_wano_pre_3')] },
       { label: '오유키와 장부를 공장의 할당 게시판과 맞춰 본다', hint: '숫자가 어긋나는 자리에 답이 있다', values: { inquiry: D },
         fx: [flag('ep_wano_pre_ledger'), flag('ep_wano_pre_yuki_trust'), log('할당보다 많은 사람, 쇼군께 바치는 것보다 많은 칼. 겐바는 남는 칼을 따로 팔고 있었다.'), next('ep_wano_pre_3')] },
       { label: '남의 일이라며 품삯 일만 하고 지낸다', hint: '배는 부르다. 오유키가 장부를 덮는다', values: { greed: D },
@@ -99,7 +99,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '쿠리의 숯장이 타케조' },
     title: '3주차 · 숯길 아래의 수레',
-    body: '자정이 지나면 공장 뒷문에서 거적 덮인 수레가 나온다. 타케조는 숯을 나르던 산길이라면 눈을 감고도 걷는다고 한다. 「놈들은 쿠리 성터 쪽으로 간다. 화약 냄새가 나.」 산 아래로는 공장 일꾼들이 교대하러 줄지어 들어간다.',
+    body: '자정이 지나면 공장 뒷문에서 거적 덮인 수레가 나온다. 타케조는 숯을 나르던 산길이라면 눈을 감고도 걷는다고 한다. 타케조는 화약 냄새를 맡고 수레가 향하는 쿠리 성터를 가리킨다. 산 아래로는 공장 일꾼들이 교대하러 줄지어 들어간다.',
     doors: [
       { label: '타케조와 숯길을 타고 수레를 뒤쫓는다', hint: '놈들의 화약고가 어디 있는지 안다', values: { freedom: D },
         fx: [flag('ep_wano_pre_depot'), flag('ep_wano_pre_takezo_trust'), log('성터 아래 동굴 입구에 화약 통이 산처럼 쌓여 있었다. 타케조가 숯으로 바위에 표시를 그었다.'), next('ep_wano_pre_4')] },
@@ -112,14 +112,14 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'denjiro' },
     title: '4주차 · 꽃의 도시의 뒷방',
-    body: '쿠리 사람들은 공장에 불을 지르자고 하고, 꽃의 도시 상인들은 그랬다가는 백수 해적단이 마을 하나를 통째로 태울 거라며 고개를 젓는다. 둘 다 누군가를 잃어 본 얼굴이다. 노름판 뒷방에서 야쿠자 두목 쿄시로가 긴 머리를 쓸어 넘기며 {name}을(를) 훑어본다. 「쿠리에서 무얼 하고 다녔는지는 이미 들었다. 말 말고, 한 일을 보여 봐라.」',
+    body: '쿠리 사람들은 공장에 불을 지르자고 하고, 꽃의 도시 상인들은 그랬다가는 백수 해적단이 마을 하나를 통째로 태울 거라며 고개를 젓는다. 둘 다 누군가를 잃어 본 얼굴이다. 노름판 뒷방에서 야쿠자 두목 쿄시로가 긴 머리를 쓸어 넘기며 {name}을(를) 훑어본다. 쿄시로는 소문은 이미 들었다며 쿠리에서 무슨 일을 했는지 증거를 요구한다.',
     doors: [
       { label: '쿠리 사람들 편에 서서 함께 일어서자고 한다', hint: '타케조가 고개를 끄덕인다. 쇼군의 눈이 쿠리로 향한다', values: { loyalty: D },
-        fx: [flag('ep_wano_pre_takezo_trust'), log('쿄시로는 칼을 무릎에 올린 채 웃기만 했다. 「불은 한 번 붙으면 누구 집을 태울지 모른다.」'), next('ep_wano_pre_5')] },
+        fx: [flag('ep_wano_pre_takezo_trust'), log('쿄시로는 칼을 무릎에 올린 채 웃기만 했다. 그는 공장에서 번진 불이 민가까지 덮칠 수 있다고 경고했다.'), next('ep_wano_pre_5')] },
       { label: '불은 미루고 끌려간 사람부터 빼내자고 설득한다', hint: '양쪽 다 조금씩 불만이다. 사람은 덜 죽는다', values: { peace: D },
         fx: [log('상인들은 숨은 산마을로 가는 길을 내주겠다고 했다. 쿠리 사람들은 마지못해 낫을 내려놓았다.', 'light'), next('ep_wano_pre_5')] },
       { label: '오유키의 장부를 쿄시로 앞에 펼친다', hint: '두목의 웃음이 잠깐 멎는다', when: [has('ep_wano_pre_ledger')], values: { justice: D },
-        fx: [flag('ep_wano_pre_kyoshiro'), log('「나는 아무것도 보지 못했다.」 쿄시로는 그렇게 말하며 장부 사본을 품에 넣었다. 그리고 성터로 가는 밤길의 검문을 하룻밤 비워 두겠다고 했다.'), next('ep_wano_pre_5')] },
+        fx: [flag('ep_wano_pre_kyoshiro'), log('쿄시로는 오늘 일은 못 본 셈 치겠다며 장부 사본을 품에 넣었다. 그리고 성터로 가는 밤길의 검문을 하룻밤 비워 두겠다고 했다.'), next('ep_wano_pre_5')] },
     ],
   },
   {
@@ -138,10 +138,10 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '흑연조 두목 쿠로가네 겐바' },
     title: '6주차 · 겐바의 술상',
-    body: '공장 위층 다다미방, 흑연조 두목 겐바가 손수 술을 따른다. 「쇼군도 해적도 숫자만 맞으면 묻지 않는다. 남는 칼을 팔아 그 돈으로 쿠리 사람 몇은 먹여 살리고 있지. 너 같은 놈이 감독 자리에 앉으면 더 많이 살릴 수도 있다.」 그 말에는 거짓과 참이 반씩 섞여 있다.',
+    body: '공장 위층 다다미방, 흑연조 두목 겐바가 손수 술을 따른다. 겐바는 쇼군과 해적이 납품 수량만 확인한다는 허점을 이용해 남는 칼을 팔아 왔다. 그 돈으로 먹여 살린 이들도 있다며 {name}에게 공장 감독 자리를 권한다.',
     doors: [
       { label: '술잔을 엎고 일어선다', hint: '흑연조의 경계가 높아진다. 쿠리 사람들은 그 이야기를 듣는다', values: { justice: D },
-        fx: [flag('ep_wano_pre_takezo_trust'), log('겐바는 엎어진 술을 내려다보며 「아깝군」 한마디만 했다.'), next('ep_wano_pre_7')] },
+        fx: [flag('ep_wano_pre_takezo_trust'), log('겐바는 술이 아깝다는 듯 엎어진 잔만 내려다봤다.'), next('ep_wano_pre_7')] },
       { label: '받아들이는 척 화약고 자리를 캐낸다', hint: '들키면 끝이다. 놈들의 보급을 알게 된다', values: { ambition: D }, danger: true,
         fx: [flag('ep_wano_pre_depot'), log('겐바는 새 감독에게 창고 열쇠 자리까지 일러 주었다. 웃는 얼굴로 끝까지 받아 적었다.'), next('ep_wano_pre_7')] },
       { label: '감독 자리를 받고 쿠리 쪽 일은 잊는다', hint: '두둑한 돈과 좋은 칼. 타케조가 등을 돌린다', values: { greed: D },
@@ -153,7 +153,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '쿠리의 숯장이 타케조' },
     title: '7주차 · 결전 전야',
-    body: '겐바가 쿠리 마을을 「정리」하러 온다는 소식이 돈다. 이번엔 할당이 아니라 본보기다. 타케조가 숯 묻은 손으로 산길 지도를 그리고, 오유키는 장부를 기름종이에 싸서 품에 넣는다. 「무얼 먼저 할지 정해 줘. 다 할 시간은 없어.」',
+    body: '겐바가 쿠리 마을을 본보기로 짓밟으러 온다는 소식이 돈다. 이번에는 일꾼을 징발하는 데서 끝날 것 같지 않다. 타케조가 숯 묻은 손으로 산길 지도를 그리고, 오유키는 장부를 기름종이에 싸서 품에 넣는다. 둘은 겐바가 도착하기 전에 무엇부터 챙길지 {name}에게 묻는다.',
     doors: [
       { label: '노인과 아이들을 숨은 산마을로 먼저 피신시킨다', hint: '싸움이 나도 마을은 비어 있다', values: { romance: D },
         fx: [flag('ep_wano_pre_evac'), log('밤새 등불 없이 산을 넘었다. 새벽에 돌아보니 쿠리에는 연기 한 줄 오르지 않았다.'), next('ep_wano_pre_8')] },
@@ -183,9 +183,9 @@ export const EP_WANO: Turning[] = [
     title: '8주차 · 연기 속으로 사라진 두목',
     body: '새벽이 오자 흑연조는 물러갔지만 겐바는 쓰러지지 않았다. 불탄 헛간 몇 채, 다친 사람들, 그리고 공장 굴뚝은 여전히 연기를 뿜는다. 겐바가 해골 섬에서 내려온 대간부의 배로 피했다는 말이 들린다. 불꽃 같은 날개를 단 사내라고 했다.',
     doors: [
-      { label: '다친 사람들을 업어 의원에게 나른다', hint: '오늘 할 수 있는 일을 한다', values: { loyalty: D },
+      { label: '다친 사람들을 업어 의원에게 나른다', hint: '등에 업힌 사람이 자꾸 뒤를 본다. 헛간을 대신 살펴 주기로 하고 어디를 다쳤는지 묻는다', values: { loyalty: D },
         fx: [flag('ep_wano_pre_lost'), { op: 'base', key: 'vit', add: 1 }, next('ep_wano_pre_end1')] },
-      { label: '굴뚝을 노려보며 다음을 다짐한다', hint: '이 나라는 아직 끝나지 않았다', values: { ambition: D },
+      { label: '불탄 헛간에서 다시 쓸 기둥을 골라낸다', hint: '마을 사람과 양 끝을 맞들어 그을린 기둥을 옮긴다', values: { ambition: D },
         fx: [flag('ep_wano_pre_lost'), { op: 'base', key: 'wil', add: 1 }, next('ep_wano_pre_end1')] },
       { label: '겐바가 달아난 뱃길의 흔적을 적어 둔다', hint: '대간부를 쫓지 않고 공장과 항구의 연결만 확인한다', when: [ready(5)], values: { dominion: D }, danger: true,
         fx: [flag('ep_wano_pre_lost'), flag('ep_wano_pre_sabotage'), next('ep_wano_pre_end1')] },
@@ -210,9 +210,9 @@ export const EP_WANO: Turning[] = [
     body: '타케조의 숯 가마에 다시 불이 들고, 오유키는 장부 마지막 장에 무언가를 적는다. 공장 굴뚝 하나는 꺼졌고, 하나는 아직 연기를 뿜는다. 오로치의 나라는 그대로지만 쿠리의 밤은 조금 달라졌다.',
     doors: [
       { label: '쿠리 사람들 손으로 지하 화로의 문을 닫는다', hint: '그들이 지킨 마을이다', when: [has('ep_wano_pre_takezo_trust'), not('ep_wano_pre_lost'), not('ep_wano_pre_deal'), not('ep_wano_pre_idle')], values: { loyalty: D },
-        fx: [{ op: 'fame', add: 12 }, log('타케조가 마지막 사슬을 화로에 던져 넣었다. 「이건 쿠리가 한 일이다.」'), time('쿠리 사람들과 함께 흑연조의 지하 화로를 닫았다'), next('ep_wano_pre_dep')] },
+        fx: [{ op: 'fame', add: 12 }, log('타케조가 마지막 사슬을 화로에 던져 넣었다. 타케조는 화로 곁에 모인 쿠리 사람들에게 공을 돌렸다.'), time('쿠리 사람들과 함께 흑연조의 지하 화로를 닫았다'), next('ep_wano_pre_dep')] },
       { label: '장부를 꽃의 도시 뒷방에 맡긴다', hint: '언젠가 그날이 오면 이름들이 불린다', when: [has('ep_wano_pre_yuki_trust'), has('ep_wano_pre_kyoshiro'), not('ep_wano_pre_deal')], values: { justice: D },
-        fx: [{ op: 'base', key: 'int', add: 1 }, log('쿄시로는 장부를 받아 들고 「이건 내가 맡은 적이 없는 물건이다」라고 웃었다. 그 눈은 웃지 않았다.'), time('끌려간 쿠리 사람들의 이름을 적은 장부를 지켜 냈다', 'denjiro'), next('ep_wano_pre_dep')] },
+        fx: [{ op: 'base', key: 'int', add: 1 }, log('쿄시로는 장부를 받아 들고 장부를 맡은 일은 비밀로 해 달라며 웃었다. 그 눈은 웃지 않았다.'), time('끌려간 쿠리 사람들의 이름을 적은 장부를 지켜 냈다', 'denjiro'), next('ep_wano_pre_dep')] },
       { label: '검은 강을 내려다보며 그저 철이 지나가게 둔다', hint: '아무것도 바꾸지 못했다. 그래도 다음 철은 온다', values: { peace: D },
         fx: [time('오로치의 와노에서 두 달을 보냈다. 굴뚝의 연기는 그대로였다'), next('ep_wano_pre_dep')] },
     ],
@@ -220,7 +220,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_pre_dep', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '쿠리의 숯장이 타케조' },
     title: '9주차 · 폭포 아래의 작별',
-    body: '와노는 닫힌 나라다. 폭포를 내려가는 배는 해적의 보급선뿐이고, 짐 상자에 사람 하나쯤 숨길 수 있다고 늙은 뱃사공이 속삭인다. 타케조는 숯 묻은 손을 바지에 닦고, 오유키는 장부 한 장을 찢어 접는다. 「또 올 거지?」',
+    body: '와노는 닫힌 나라다. 폭포를 내려가는 배는 해적의 보급선뿐이고, 짐 상자에 사람 하나쯤 숨길 수 있다고 늙은 뱃사공이 속삭인다. 타케조는 숯 묻은 손을 바지에 닦고, 오유키는 장부 한 장을 찢어 접는다. 오유키는 접은 종이를 내밀며 쿠리에 다시 올 생각인지 묻는다.',
     doors: [
       { label: '타케조가 내미는 숯 부적을 받는다', hint: '불이 꺼지지 않게 해 주는 부적이라고 한다', when: [has('ep_wano_pre_takezo_trust')], values: { romance: D },
         fx: [flag('ep_wano_pre_charm'), flag('ep_wano_pre_done'), log('검게 그을린 나무 부적에 「쿠리」 두 글자가 새겨져 있었다.')] },
@@ -228,7 +228,7 @@ export const EP_WANO: Turning[] = [
         fx: [flag('ep_wano_pre_charm'), flag('ep_wano_pre_done'), { op: 'person', kind: 'crew', relation: '쿠리에서 함께 폭포를 내려온 숯장이 타케조', years: 1 },
              time('숯장이 타케조와 함께 보급선에 숨어 닫힌 나라 와노를 빠져나갔다'), { op: 'move', island: '드레스로자', sea: 'nw_first' }] },
       { label: '쿠리의 강가에 남아 다음 철을 맞는다', hint: '닫힌 나라에서 하루하루를 산다', values: { loyalty: D },
-        fx: [flag('ep_wano_pre_done'), log('「스무 해 뒤에.」 처형대 앞에서 남겼다는 그 말을, 쿠리 사람들은 아직 귀신처럼 믿는다.', 'light')] },
+        fx: [flag('ep_wano_pre_done'), log('쿠리 사람들은 처형대 앞에서 전해진 예언을 믿으며 스무 해 뒤의 약속을 기다린다.', 'light')] },
       { label: '검은 강 상류의 남은 노동자를 찾는다', hint: '강의 근원을 살피면 아직 돌아오지 못한 사람들을 구할 수 있다', special: 'dominion', when: [ready(6)], values: { dominion: D }, danger: true,
         fx: [flag('ep_wano_pre_done'), next('ep_wano_pre_kaido')] },
     ],
@@ -275,7 +275,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_1', kind: 'door', when: at(WANO, age(21, 22), not('ep_wano_raid_done')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '1주차 · 토코 항구의 젖은 상자',
-    body: '불의 축제를 두 달 앞둔 토코 항구, 생선 비린내 사이로 기름 먹인 나무 상자들이 밤마다 배에 실린다. 뱃사공 오린이 노를 멈추고 「저 상자는 생선이 아니야. 덜그럭 소리가 쇠야」라고 속삭인다. 부둣가 대장간 견습 소스케는 스승이 벼린 칼이 사라졌다며 울상이다. 그때 상자를 나르던 날랜 사내가 이쪽을 보고 칼자루에 손을 얹는다.',
+    body: '불의 축제를 두 달 앞둔 토코 항구, 생선 비린내 사이로 기름 먹인 나무 상자들이 밤마다 배에 실린다. 뱃사공 오린이 노를 멈추고 생선 상자에서 쇠붙이 부딪치는 소리가 난다고 귀띔한다. 부둣가 대장간 견습 소스케는 스승이 벼린 칼이 사라졌다며 울상이다. 그때 상자를 나르던 날랜 사내가 이쪽을 보고 칼자루에 손을 얹는다.',
     doors: [
       { label: '상자를 나르던 사내를 붙잡는다', hint: '물쥐처럼 빠른 놈이다. 오린이 노를 쥔다', values: { justice: D }, danger: true,
         fx: [flag('ep_wano_raid_orin_trust'), fight('b_wano_goro', false, { win: 'ep_wano_raid_2', lose: 'ep_wano_raid_2', back: 'ep_wano_raid_2' })] },
@@ -288,12 +288,12 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '대장간 견습 소스케' },
     title: '2주차 · 녹슨 칼의 출처',
-    body: '소스케가 대장간 바닥에 칼 목록을 펼친다. 사라진 것은 칼만이 아니다. 실력 좋은 대장장이 셋이 「바깥에 일자리가 있다」는 말을 듣고 떠난 뒤 소식이 끊겼다. 항구 사람들은 쿠치나와 일가라는 이름을 입에 올리다가 이내 입을 다문다. 놈들의 품삯으로 먹고사는 집이 많다.',
+    body: '소스케가 대장간 바닥에 칼 목록을 펼친다. 사라진 것은 칼만이 아니다. 실력 좋은 대장장이 셋이 나라 밖에서 일자리를 주겠다는 제안을 받고 떠난 뒤 소식이 끊겼다. 항구 사람들은 쿠치나와 일가라는 이름을 입에 올리다가 이내 입을 다문다. 놈들의 품삯으로 먹고사는 집이 많다.',
     doors: [
       { label: '쿠치나와 일가의 노름판을 뒤집어엎는다', hint: '놈들이 누가 캐고 다니는지 알게 된다', values: { dominion: D },
         fx: [log('뒤집힌 노름판 밑에서 폭포 밖 항구의 이름이 적힌 운송장이 나왔다.', 'light'), next('ep_wano_raid_3')] },
       { label: '대장장이들이 마지막으로 쓴 편지를 하나하나 읽는다', hint: '떠난 날짜와 만난 사람이 겹친다', values: { inquiry: D },
-        fx: [flag('ep_wano_raid_sosuke_trust'), log('세 통의 편지 모두에 같은 말이 있었다. 「폭포 뒤에서 배를 기다린다.」'), next('ep_wano_raid_3')] },
+        fx: [flag('ep_wano_raid_sosuke_trust'), log('세 통의 편지에는 모두 폭포 뒤에서 배를 기다리고 있다는 내용이 적혀 있었다.'), next('ep_wano_raid_3')] },
       { label: '축제 준비로 바쁜 꽃의 도시로 돈벌이를 간다', hint: '밀수꾼 일은 밀수꾼 일이다', values: { greed: D },
         fx: [flag('ep_wano_raid_idle'), { op: 'money', add: 10000 }, next('ep_wano_raid_3')] },
       { label: '밀수꾼의 짐꾼으로 들어가 품삯을 받으며 엿듣는다', hint: '돈도 벌고 말도 듣는다', special: 'greed', values: { greed: D },
@@ -303,7 +303,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '토코 항구의 뱃사공 오린' },
     title: '3주차 · 폭포 뒤의 물길',
-    body: '오린의 작은 배가 안개 낀 수로를 거슬러 오른다. 폭포 바로 옆, 물보라에 가려진 바위 틈으로 배 한 척이 겨우 드나든다. 「아버지가 저 물길에서 돌아오지 못했어.」 바위 위에는 쿠치나와 일가의 망꾼이 졸고 있다.',
+    body: '오린의 작은 배가 안개 낀 수로를 거슬러 오른다. 폭포 바로 옆, 물보라에 가려진 바위 틈으로 배 한 척이 겨우 드나든다. 오린은 아버지가 저 물길로 들어갔다가 돌아오지 못했다고 털어놓는다. 바위 위에는 쿠치나와 일가의 망꾼이 졸고 있다.',
     doors: [
       { label: '물보라 속으로 노를 저어 바위 틈을 지난다', hint: '놈들의 배가 어디 묶여 있는지 안다', values: { freedom: D }, danger: true,
         fx: [flag('ep_wano_raid_route'), flag('ep_wano_raid_orin_trust'), { op: 'hp', add: -8 }, log('바위 틈 안쪽에 칼 상자를 가득 실은 배 세 척이 묶여 있었다.'), next('ep_wano_raid_4')] },
@@ -316,7 +316,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '4주차 · 폭포 뒤의 창고',
-    body: '폭포 뒤 동굴 창고에는 와노의 칼이 볏단처럼 쌓여 있고, 안쪽 우리에는 떠났던 대장장이들이 망치를 쥔 채 갇혀 있다. 창고지기 사비메 오카네가 녹슨 붉은 칼을 뽑으며 웃는다. 「바깥에선 와노 칼 한 자루면 집 한 채야. 사람째로 실어 가면 더 비싸지.」',
+    body: '폭포 뒤 동굴 창고에는 와노의 칼이 볏단처럼 쌓여 있고, 안쪽 우리에는 떠났던 대장장이들이 망치를 쥔 채 갇혀 있다. 창고지기 사비메 오카네가 녹슨 붉은 칼을 뽑으며 웃는다. 오카네는 나라 밖에서 와노의 칼 한 자루면 집 한 채 값이고 대장장이까지 데려가면 더 받는다며 자랑한다.',
     doors: [
       { label: '창고지기 오카네와 칼을 맞댄다', hint: '빠르고 끈질긴 칼이다', values: { dominion: D }, danger: true,
         fx: [fight('b_wano_okane', false, { win: 'ep_wano_raid_5', lose: 'ep_wano_raid_5', back: 'ep_wano_raid_5' })] },
@@ -329,10 +329,10 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '쿠치나와 일가의 두목 반조' },
     title: '5주차 · 반조의 제안',
-    body: '찻집 이층, 뱀 비늘 문신을 한 쿠치나와 반조가 찻잔을 굴린다. 「축제 밤엔 이 나라가 뒤집힌다. 해골 섬에서 큰 싸움이 난다는 건 개도 안다. 그 틈에 칼과 사람을 바깥으로 빼면, 누가 이기든 우린 손해가 없지. 너도 한몫 껴라.」 그의 말대로라면 항구 사람들 품삯도 끊기지 않는다.',
+    body: '찻집 이층, 뱀 비늘 문신을 한 쿠치나와 반조가 찻잔을 굴린다. 반조는 축제 밤에 해골 섬에서 벌어질 싸움을 틈타 칼과 대장장이들을 나라 밖으로 빼돌릴 작정이다. 그 일에 끼면 이익을 나눠 주겠다고 한다. 그의 말대로라면 항구 사람들 품삯도 끊기지 않는다.',
     doors: [
       { label: '찻잔을 내려놓고 등을 돌린다', hint: '놈들이 경계한다. 항구 사람들이 그 얼굴을 본다', values: { justice: D },
-        fx: [flag('ep_wano_raid_orin_trust'), log('반조는 웃으며 「축제 밤에 보자」고만 했다.'), next('ep_wano_raid_6')] },
+        fx: [flag('ep_wano_raid_orin_trust'), log('반조는 웃으며 축제 밤에 다시 보자는 말만 남겼다.'), next('ep_wano_raid_6')] },
       { label: '한몫 끼는 척 출항 시각과 배를 캐낸다', hint: '들키면 끝이다. 놈들의 배를 안다', values: { ambition: D }, danger: true,
         fx: [flag('ep_wano_raid_route'), log('반조는 새 패거리에게 자정의 신호까지 일러 주었다. 붉은 등 두 개, 그리고 북 세 번.'), next('ep_wano_raid_6')] },
       { label: '몫을 받고 축제 밤 배를 지켜 주기로 한다', hint: '큰돈이 들어온다. 오린이 노를 내던진다', values: { greed: D },
@@ -344,20 +344,20 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'hyogoro' },
     title: '6주차 · 노름판의 회합',
-    body: '우동의 감옥이 뚫렸다는 소문과 함께, 젊음을 되찾은 꽃의 효고로가 야쿠자 두목들을 불러 모은다. 항구 사람들은 축제 밤에 소동이 나면 쇼군이 항구부터 태울 거라 두려워하고, 야쿠자들은 그 김에 밀수꾼 배를 모조리 불태우자고 한다. 효고로가 담뱃대를 털며 {name}을(를) 본다. 「네놈이 이 항구에서 무얼 했는지 들었다. 누굴 지켰는지 말해 봐라.」',
+    body: '우동의 감옥이 뚫렸다는 소문과 함께, 젊음을 되찾은 꽃의 효고로가 야쿠자 두목들을 불러 모은다. 항구 사람들은 축제 밤에 소동이 나면 쇼군이 항구부터 태울 거라 두려워하고, 야쿠자들은 그 김에 밀수꾼 배를 모조리 불태우자고 한다. 효고로가 담뱃대를 털며 {name}을(를) 본다. 효고로는 항구에서 누구를 지켰는지 직접 말해 달라고 한다.',
     doors: [
       { label: '항구 사람들 편에서 배를 태우지 말자고 한다', hint: '품삯이 끊기면 굶는 집이 있다', values: { peace: D },
-        fx: [log('효고로는 고개를 끄덕였다. 「불보다 먼저 쌀을 생각하는군.」 야쿠자들은 투덜댔다.', 'light'), next('ep_wano_raid_7')] },
+        fx: [log('효고로는 고개를 끄덕였다. 밀수선을 태우기 전에 주민들 먹을 쌀부터 챙기겠다는 뜻을 알아들은 것이다. 야쿠자들은 투덜댔다.', 'light'), next('ep_wano_raid_7')] },
       { label: '야쿠자들과 함께 밀수꾼 배를 치자고 한다', hint: '피가 끓는다. 항구가 휘말린다', values: { dominion: D },
         fx: [log('야쿠자들이 술잔을 깨며 함성을 질렀다. 효고로는 아무 말 없이 담배만 피웠다.', 'light'), next('ep_wano_raid_7')] },
       { label: '오린과 지켜 온 항구 사람들을 효고로 앞에 세운다', hint: '말보다 한 일이 앞에 선다', when: [has('ep_wano_raid_orin_trust')], values: { loyalty: D },
-        fx: [flag('ep_wano_raid_hyogoro'), log('효고로는 오린의 손을 잡고 한참을 웃었다. 「좋다. 축제 밤 꽃의 도시 부두 길목은 내 아이들이 막아 주마. 배를 멈추는 건 네 몫이다.」'), time('꽃의 효고로가 꽃의 도시 부두 길목에 야쿠자들을 세워 주었다', 'hyogoro'), next('ep_wano_raid_7')] },
+        fx: [flag('ep_wano_raid_hyogoro'), log('효고로는 오린의 손을 잡고 한참을 웃었다. 축제 밤 꽃의 도시 부두 길목은 야쿠자들에게 맡기고 밀수선을 막아 달라고 부탁했다.'), time('꽃의 효고로가 꽃의 도시 부두 길목에 야쿠자들을 세워 주었다', 'hyogoro'), next('ep_wano_raid_7')] },
     ],
   },
   {
     id: 'ep_wano_raid_7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'kikunojo' },
     title: '7주차 · 달이 차기 전',
-    body: '축제 전날 밤, 여인처럼 고운 무사가 오린의 배에 조용히 오른다. 스무 해 전 모습 그대로라는 소문의 그 무사다. 「내일 밤 해골 섬에서 이 나라의 새벽을 되찾습니다. 용은 그분들이 맡습니다. 당신은 이 항구에서 쌓은 것이 있지요. 그 자리를 지켜 주세요.」 키쿠노조는 그 말만 남기고 안개 속으로 사라진다.',
+    body: '축제 전날 밤, 여인처럼 고운 무사가 오린의 배에 조용히 오른다. 스무 해 전 모습 그대로라는 소문의 그 무사다. 키쿠노조는 내일 밤 해골 섬에서 카이도와 싸울 사람들이 따로 있다며 {name}에게 항구를 지켜 달라고 당부한다. 용건을 마친 무사는 안개 속으로 사라진다.',
     doors: [
       { label: '부두 근처 사람들을 축제 밤 전에 내륙으로 피신시킨다', hint: '싸움이 나도 부두는 비어 있다', values: { romance: D },
         fx: [flag('ep_wano_raid_evac'), log('축제 등불을 들고 사람들을 산 쪽 절로 옮겼다. 아이들은 소풍인 줄 알았다.'), next('ep_wano_raid_8')] },
@@ -366,7 +366,7 @@ export const EP_WANO: Turning[] = [
       { label: '준비 없이 축제 밤을 맞는다', hint: '부두에서 놈들을 기다린다', values: { dominion: D },
         fx: [next('ep_wano_raid_8')] },
       { label: '키쿠노조를 따라 해골 섬으로 가겠다고 한다', hint: '무사가 고개를 젓는다', special: 'loyalty', values: { loyalty: D },
-        fx: [flag('ep_wano_raid_evac'), log('「저쪽에는 저쪽의 싸움이, 이쪽에는 당신의 싸움이 있어요.」 키쿠노조는 그 대신 부두 사람들을 옮길 배 두 척을 남겨 주었다.'), next('ep_wano_raid_8')] },
+        fx: [flag('ep_wano_raid_evac'), log('키쿠노조는 부두 사람들을 먼저 대피시켜 달라고 부탁하고 배 두 척을 남겨 주었다.'), next('ep_wano_raid_8')] },
     ],
   },
   {
@@ -396,7 +396,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_raid_end1', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '9주차 · 와노의 해가 뜬다',
-    body: '해골 섬 꼭대기에서 하얗게 웃는 거인이 용을 땅 밑으로 내리꽂는다. 꽃의 도시 바로 위에서 해골 섬이 멈추고, 스무 해 동안 걷히지 않던 하늘이 갈라진다. 누군가 「카이도가 졌다」고 외치고, 웃음밖에 모르던 사람들이 처음으로 소리 내어 운다. 그 새벽의 부두에서 {name}이(가) 지킨 것과 놓친 것이 함께 빛을 받는다.',
+    body: '해골 섬 꼭대기에서 하얗게 웃는 거인이 용을 땅 밑으로 내리꽂는다. 꽃의 도시 바로 위에서 해골 섬이 멈추고, 스무 해 동안 걷히지 않던 하늘이 갈라진다. 카이도가 졌다는 외침이 부두까지 전해지고, 웃음밖에 모르던 사람들이 처음으로 소리 내어 운다. 그 새벽의 부두에서 {name}이(가) 지킨 것과 놓친 것이 함께 빛을 받는다.',
     doors: [
       { label: '반조가 남긴 몫을 세며 해를 맞는다', hint: '돈은 남았다. 항구에서 그 얼굴을 반기는 이는 없다', when: [has('ep_wano_raid_deal')], values: { greed: D },
         fx: [{ op: 'money', add: 30000 }, time('불의 축제 밤, 밀수꾼의 배를 지켜 주고 몫을 받았다. 그 새벽 밀짚모자의 루피가 카이도를 쓰러뜨렸다', 'luffy'), next('ep_wano_raid_dep')] },
@@ -412,7 +412,7 @@ export const EP_WANO: Turning[] = [
     body: '축제 등불이 꺼진 토코 항구에 아침 배들이 돌아온다. 오린은 노를 씻고, 소스케는 되찾은 칼과 되찾지 못한 칼의 목록을 나란히 적는다. 나라가 바뀐 날이지만, 항구의 하루는 늘 그렇듯 생선 비린내로 시작한다.',
     doors: [
       { label: '오린과 함께 폭포 뒤 물길을 바위로 막는다', hint: '그 물길로 다시는 아무도 사라지지 않는다', when: [has('ep_wano_raid_orin_trust'), not('ep_wano_raid_lost'), not('ep_wano_raid_deal'), not('ep_wano_raid_idle')], values: { loyalty: D },
-        fx: [{ op: 'fame', add: 12 }, log('마지막 바위가 물길을 막자 오린이 노를 높이 들었다. 「아버지, 이제 됐어.」'), time('카이도가 쓰러진 새벽, 뱃사공 오린과 폭포 뒤 밀수 물길을 막았다', 'luffy'), next('ep_wano_raid_dep')] },
+        fx: [{ op: 'fame', add: 12 }, log('마지막 바위가 물길을 막자 오린이 노를 높이 들었다. 아버지를 앗아간 뱃길이 마침내 닫혔다.'), time('카이도가 쓰러진 새벽, 뱃사공 오린과 폭포 뒤 밀수 물길을 막았다', 'luffy'), next('ep_wano_raid_dep')] },
       { label: '소스케와 되찾은 대장장이들의 대장간에 불을 지핀다', hint: '와노의 쇠는 와노에서 벼린다', when: [has('ep_wano_raid_sosuke_trust'), has('ep_wano_raid_freed'), not('ep_wano_raid_deal')], values: { justice: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, log('돌아온 대장장이들이 첫 망치질을 했다. 새 나라의 첫 칼이라고 소스케가 웃었다.'), time('카이도가 쓰러진 새벽, 밀수꾼에게서 대장장이들을 되찾았다', 'luffy'), next('ep_wano_raid_dep')] },
       { label: '항구의 아침을 멀거니 바라본다', hint: '나라는 바뀌었다. 이 항구에서 한 일은 많지 않다', values: { peace: D },
@@ -451,7 +451,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_after_2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '새 부교소의 서기 하나에' },
     title: '2주차 · 헐값의 땅문서',
-    body: '부교소 서고에 땅문서가 산처럼 쌓인다. 「한 달 사이에 쿠리 땅 넷 중 하나가 금저울 상회로 넘어갔어요. 값은 쌀 한 섬도 안 돼요.」 굶주린 세월을 겪은 사람들은 당장의 돈을 거절하기 어렵다. 상회는 꽃의 도시에 큰 가게를 냈고, 그 뒤에는 옛 기프터들이 서성인다.',
+    body: '부교소 서고에 땅문서가 산처럼 쌓인다. 기록을 맞춰 보니 한 달 사이에 쿠리 땅의 사분의 일이 금저울 상회로 넘어갔다. 쌀 한 섬 값도 못 받고 판 땅이 수두룩하다. 굶주린 세월을 겪은 사람들은 당장의 돈을 거절하기 어렵다. 상회는 꽃의 도시에 큰 가게를 냈고, 그 뒤에는 옛 기프터들이 서성인다.',
     doors: [
       { label: '상회 가게에 쳐들어가 장부를 내놓으라 한다', hint: '빨리 안다. 상회가 이 얼굴을 기억한다', values: { dominion: D },
         fx: [log('뒤엎은 계산대 밑에서 산속 옛 공장의 열쇠 꾸러미가 나왔다.', 'light'), next('ep_wano_after_3')] },
@@ -466,7 +466,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_after_3', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '쿠리의 젊은 농부 키스케' },
     title: '3주차 · 다시 켜진 굴뚝',
-    body: '꺼졌던 산속 공장 굴뚝 하나에서 밤마다 연기가 오른다. 키스케가 논물을 손에 떠 보이며 이를 간다. 「물이 또 검어지기 시작했어.」 산길에는 금저울 깃발을 단 수레가 오르내리고, 공장 앞에는 웃음을 멈추지 못하는 사내들이 짐을 진다.',
+    body: '꺼졌던 산속 공장 굴뚝 하나에서 밤마다 연기가 오른다. 키스케가 손으로 논물을 떠 보이자 손금마다 검은 찌꺼기가 낀다. 산길에는 금저울 깃발을 단 수레가 오르내리고, 공장 앞에는 웃음을 멈추지 못하는 사내들이 짐을 진다.',
     doors: [
       { label: '키스케와 수레 바퀴 자국을 따라 산을 오른다', hint: '상회의 화약과 기름을 쌓아 둔 곳을 안다', values: { freedom: D },
         fx: [flag('ep_wano_after_depot'), flag('ep_wano_after_kisuke_trust'), log('공장 뒤 동굴에 바깥에서 들여온 화약 통과 기름 통이 쌓여 있었다.'), next('ep_wano_after_4')] },
@@ -479,20 +479,20 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_after_4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'hiyori' },
     title: '4주차 · 쿠리 성터의 회합',
-    body: '새 기둥이 선 쿠리 성터에서 회합이 열린다. 땅을 판 사람들은 「굶은 세월을 아느냐」고 소리치고, 지킨 사람들은 「또 굴뚝 아래 살고 싶으냐」고 맞선다. 둘 다 틀린 말이 아니다. 히요리가 조용히 자리에서 일어나 {name}을(를) 바라본다. 「아버님이 지키려던 땅이에요. 당신이 이 땅에서 무얼 해 왔는지, 먼저 듣고 싶어요.」',
+    body: '새 기둥이 선 쿠리 성터에서 회합이 열린다. 땅을 판 사람들은 당장 식구들을 먹여 살려야 했다고 목소리를 높이고, 지킨 사람들은 다시 공장 밑에서 살 수는 없다고 맞선다. 둘 다 틀린 말이 아니다. 히요리가 조용히 자리에서 일어나 {name}을(를) 바라본다. 히요리는 아버지가 지키려 했던 이 땅에서 지금까지 무엇을 보았는지 묻는다.',
     doors: [
       { label: '땅을 지킨 사람들 편에 선다', hint: '키스케가 고개를 끄덕인다. 판 사람들이 등을 돌린다', values: { loyalty: D },
         fx: [flag('ep_wano_after_kisuke_trust'), log('히요리는 아무 말 없이 고개를 숙였다. 판 사람들의 눈길은 차가웠다.', 'light'), next('ep_wano_after_5')] },
       { label: '판 사람들이 굶지 않을 길부터 찾자고 한다', hint: '양쪽 다 조금씩 물러선다', values: { peace: D },
         fx: [log('부교소에서 쌀을 꾸어 주기로 하자, 손도장을 찍으려던 몇 사람이 붓을 내려놓았다.', 'light'), next('ep_wano_after_5')] },
       { label: '하나에와 칠한 물길 지도를 히요리 앞에 펼친다', hint: '말보다 한 일이 먼저 선다', when: [has('ep_wano_after_deed')], values: { justice: D },
-        fx: [flag('ep_wano_after_hiyori'), log('히요리는 지도를 오래 들여다보았다. 「이건 땅이 아니라 물을 사는 거네요.」 그녀는 부교소에 거래를 잠시 멈추라 청하겠다고 했다. 막는 것은 당신들 몫이라고도 했다.'), time('쿠리 성터의 회합에서 히요리에게 금저울 상회의 속셈을 보였다', 'hiyori'), next('ep_wano_after_5')] },
+        fx: [flag('ep_wano_after_hiyori'), log('히요리는 지도를 오래 들여다보았다. 상회가 사들인 땅이 모두 물길을 끼고 있다는 점을 짚었다. 그녀는 부교소에 거래를 잠시 멈추라 청하겠다고 했다. 막는 것은 당신들 몫이라고도 했다.'), time('쿠리 성터의 회합에서 히요리에게 금저울 상회의 속셈을 보였다', 'hiyori'), next('ep_wano_after_5')] },
     ],
   },
   {
     id: 'ep_wano_after_5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '5주차 · 산속 공장',
-    body: '공장 안에서는 해적의 무기 대신 바깥으로 팔 쇠붙이를 녹인다. 빚 문서에 묶인 웃는 사내들이 쇳물을 나르고, 그들을 부리는 것은 뿔이 반쯤 잘린 옛 기프터 가몬이다. 「나도 저들과 같았지. 이제는 부리는 쪽이 됐을 뿐이다.」 벽에는 빚 문서 꾸러미가 걸려 있다.',
+    body: '공장 안에서는 해적의 무기 대신 바깥으로 팔 쇠붙이를 녹인다. 빚 문서에 묶인 웃는 사내들이 쇳물을 나르고, 그들을 부리는 것은 뿔이 반쯤 잘린 옛 기프터 가몬이다. 가몬은 자신도 한때 저들처럼 쇳물을 날랐다고 한다. 벽에는 빚 문서 꾸러미가 걸려 있다.',
     doors: [
       { label: '가몬에게 곧장 달려든다', hint: '짐승의 힘이 반쯤 남은 주먹이다', values: { dominion: D }, danger: true,
         fx: [fight('b_wano_gamon', false, { win: 'ep_wano_after_6', lose: 'ep_wano_after_6', back: 'ep_wano_after_6' })] },
@@ -505,29 +505,29 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_after_6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '금저울 상회의 바스크' },
     title: '6주차 · 바스크의 저울',
-    body: '꽃의 도시 상회 이층, 은테 안경을 쓴 바스크가 금빛 저울에 쌀 한 줌과 금화 한 닢을 올린다. 「이 나라는 스무 해를 굶었소. 나는 일자리와 돈을 가져왔지. 물이 좀 검어진들, 굶는 것보단 낫지 않소? 당신이 쿠리 쪽을 맡아 주면 모두 편해질 거요.」 그 말이 전부 거짓은 아니어서 더 무겁다.',
+    body: '꽃의 도시 상회 이층, 은테 안경을 쓴 바스크가 금빛 저울에 쌀 한 줌과 금화 한 닢을 올린다. 바스크는 스무 해를 굶주린 사람들에게 상회가 일자리를 마련해 줬다고 강조한다. 오염된 논물 얘기는 흘려듣고 {name}에게 쿠리의 일을 맡긴다며 거래를 제안한다.',
     doors: [
       { label: '저울을 밀어 넘어뜨린다', hint: '상회의 경계가 높아진다. 쿠리 사람들이 그 이야기를 듣는다', values: { justice: D },
-        fx: [flag('ep_wano_after_kisuke_trust'), log('바스크는 굴러간 금화를 주워 들며 「값을 모르는 사람이군」 하고 웃었다.'), next('ep_wano_after_7')] },
+        fx: [flag('ep_wano_after_kisuke_trust'), log('바스크는 굴러간 금화를 주워 들며 금화의 가치를 모른다며 비웃었다.'), next('ep_wano_after_7')] },
       { label: '맡겠다고 하며 화약선이 언제 오는지 캐낸다', hint: '들키면 끝이다. 놈들의 보급을 안다', values: { ambition: D }, danger: true,
         fx: [flag('ep_wano_after_depot'), log('바스크는 새 대리인에게 다음 화약선이 들어올 날과 창고 열쇠를 맡겼다.'), next('ep_wano_after_7')] },
       { label: '대리인 자리를 받고 쿠리 땅을 넘겨받는다', hint: '큰돈과 땅이 생긴다. 키스케가 등을 돌린다', values: { greed: D },
         fx: [flag('ep_wano_after_deal'), { op: 'money', add: 60000 }, next('ep_wano_after_7')] },
       { label: '빚 문서를 없애 주면 땅 일은 눈감겠다고 흥정한다', hint: '바스크는 셈이 빠르다. 사내들은 풀려난다', special: 'peace', values: { peace: D },
-        fx: [flag('ep_wano_after_freed'), log('바스크는 빚 문서 한 꾸러미를 난로에 던졌다. 「싸게 먹혔군.」'), next('ep_wano_after_7')] },
+        fx: [flag('ep_wano_after_freed'), log('바스크는 빚 문서 한 꾸러미를 난로에 던졌다. 빚 몇 건을 지우는 걸로 거래가 성사된 데 만족하는 눈치였다.'), next('ep_wano_after_7')] },
     ],
   },
   {
     id: 'ep_wano_after_7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'yamato' },
     title: '7주차 · 폭포 앞의 전야',
-    body: '바스크가 물길을 막고 쿠리 논에 공장 둑을 쌓겠다며 일꾼과 총잡이를 모은다는 소식이 돈다. 그날 밤, 쇠몽둥이를 멘 거구의 젊은이가 논두렁에 털썩 앉는다. 「나는 오뎅이다! …라고 말하고 다니는 야마토야. 이 마을 이야기는 들었어. 네가 무얼 해 왔는지도.」',
+    body: '바스크가 물길을 막고 쿠리 논에 공장 둑을 쌓겠다며 일꾼과 총잡이를 모은다는 소식이 돈다. 그날 밤, 쇠몽둥이를 멘 거구의 젊은이가 논두렁에 털썩 앉는다. 오뎅을 자처하는 야마토다. 마을에서 들은 이야기를 꺼내며 {name}이(가) 해 온 일에 관심을 보인다.',
     doors: [
       { label: '노인과 아이들을 성터로 먼저 피신시킨다', hint: '싸움이 나도 논은 비어 있다', values: { romance: D },
         fx: [flag('ep_wano_after_evac'), log('밤새 등불을 들고 사람들을 성터로 옮겼다. 키스케가 마지막으로 논을 돌아보았다.'), next('ep_wano_after_8')] },
       { label: '알아 둔 화약 창고에 물길을 터서 잠근다', hint: '상회의 총과 화약이 반은 젖는다', when: [has('ep_wano_after_depot')], values: { freedom: D }, danger: true,
         fx: [flag('ep_wano_after_sabotage'), { op: 'hp', add: -10 }, log('둑을 무너뜨리자 검은 물이 창고로 쏟아져 들어갔다. 화약 냄새가 물 냄새에 묻혔다.'), next('ep_wano_after_8')] },
       { label: '야마토에게 마을 어귀를 부탁한다', hint: '히요리가 들은 이야기가 야마토에게도 닿았다', when: [has('ep_wano_after_hiyori')], values: { loyalty: D },
-        fx: [flag('ep_wano_after_yamato'), log('「좋아. 어귀는 내가 막을게. 그 바스크라는 녀석은 네가 상대해. 이건 네가 시작한 싸움이잖아.」 야마토가 쇠몽둥이를 땅에 꽂았다.'), time('야마토가 쿠리 마을 어귀를 지켜 주었다', 'yamato'), next('ep_wano_after_8')] },
+        fx: [flag('ep_wano_after_yamato'), log('야마토는 마을 어귀에 쇠몽둥이를 세웠다. 여기는 자신이 지킬 테니 바스크를 맡아 달라고 했다.'), time('야마토가 쿠리 마을 어귀를 지켜 주었다', 'yamato'), next('ep_wano_after_8')] },
       { label: '준비 없이 곧장 상회의 둑으로 간다', hint: '기다리는 동안 물이 더 검어진다', special: 'dominion', values: { dominion: D },
         fx: [next('ep_wano_after_8')] },
     ],
@@ -535,7 +535,7 @@ export const EP_WANO: Turning[] = [
   {
     id: 'ep_wano_after_8', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: 'hero',
     title: '8주차 · 저울이 부러지는 밤',
-    body: '쿠리 강 상류에 금저울 깃발이 늘어서고, 총잡이들이 둑 위에서 등불을 흔든다. 그 한가운데 바스크가 장총을 어깨에 걸고 서 있다. 「값을 매길 수 없는 땅은 없소.」 지면 쿠리의 물길은 상회의 것이 된다. 물러난다면 지금이다.',
+    body: '쿠리 강 상류에 금저울 깃발이 늘어서고, 총잡이들이 둑 위에서 등불을 흔든다. 그 한가운데 바스크가 장총을 어깨에 걸고 서 있다. 바스크는 쿠리의 논도 돈이면 살 수 있다고 주장한다. 지면 쿠리의 물길은 상회의 것이 된다. 물러난다면 지금이다.',
     doors: [
       { label: '하나에의 땅문서를 둑의 일꾼들에게 보여 준다', hint: '상회가 물길까지 사들였다는 거짓말이 드러난다', when: [has('ep_wano_after_deed')], values: { inquiry: D }, danger: true,
         fx: [flag('ep_wano_after_sabotage'), next('ep_wano_after_end1')] },
@@ -550,9 +550,9 @@ export const EP_WANO: Turning[] = [
     title: '8주차 · 쌓여 가는 둑',
     body: '날이 밝자 강 상류에 둑이 반쯤 쌓여 있다. 바스크는 상처를 싸매고 꽃의 도시로 돌아갔고, 상회의 깃발은 여전히 펄럭인다. 쿠리 사람들은 말없이 논물을 바라본다.',
     doors: [
-      { label: '다친 사람들을 성터 의원에게 나른다', hint: '오늘 할 수 있는 일을 한다', values: { loyalty: D },
+      { label: '다친 사람들을 성터 의원에게 나른다', hint: '다친 사람이 한 명 더 있다고 알리자 의원이 안쪽에 자리를 편다', values: { loyalty: D },
         fx: [flag('ep_wano_after_lost'), { op: 'base', key: 'vit', add: 1 }, next('ep_wano_after_end1')] },
-      { label: '쌓이는 둑을 노려보며 다음을 다짐한다', hint: '저울은 언젠가 부러진다', values: { ambition: D },
+      { label: '논 어귀에 말뚝을 박고 오늘 물높이에 금을 긋는다', hint: '이튿날 물이 얼마나 줄었는지 확인해 상회에 따지기로 한다', values: { ambition: D },
         fx: [flag('ep_wano_after_lost'), { op: 'base', key: 'wil', add: 1 }, next('ep_wano_after_end1')] },
     ],
   },
@@ -575,9 +575,9 @@ export const EP_WANO: Turning[] = [
     body: '논에 벼가 고개를 숙이고, 아이들이 수수경단 바구니를 들고 논두렁을 뛴다. 하나에는 부교소 서고에서 땅문서를 정리하고, 키스케는 햇볕에 그을린 얼굴로 둑 쪽을 본다. 지배가 끝난 뒤 처음 맞는 가을이다.',
     doors: [
       { label: '키스케와 함께 상회의 둑을 허물어 물길을 되돌린다', hint: '그들이 지킨 논이다', when: [has('ep_wano_after_kisuke_trust'), not('ep_wano_after_lost'), not('ep_wano_after_deal'), not('ep_wano_after_idle')], values: { loyalty: D },
-        fx: [{ op: 'fame', add: 12 }, log('둑의 마지막 돌이 굴러떨어지자 맑은 물이 논으로 쏟아졌다. 「이건 쿠리가 한 일이야.」 키스케가 웃었다.'), time('카이도 패배 뒤, 쿠리 사람들과 함께 금저울 상회의 둑을 허물었다'), next('ep_wano_after_dep')] },
+        fx: [{ op: 'fame', add: 12 }, log('둑의 마지막 돌이 굴러떨어지자 맑은 물이 논으로 쏟아졌다. 키스케가 둑을 함께 허문 이웃들을 돌아보며 웃었다.'), time('카이도 패배 뒤, 쿠리 사람들과 함께 금저울 상회의 둑을 허물었다'), next('ep_wano_after_dep')] },
       { label: '하나에와 넘어간 땅문서를 부교소에서 무효로 돌린다', hint: '붓 한 자루로 땅이 돌아온다', when: [has('ep_wano_after_hanae_trust'), has('ep_wano_after_deed'), not('ep_wano_after_deal')], values: { justice: D },
-        fx: [{ op: 'base', key: 'int', add: 1 }, log('하나에가 마지막 문서에 붉은 줄을 그었다. 「물길은 사고팔 수 없다. 이제 법에 그렇게 적혔어요.」'), time('부교소 서기 하나에와 함께 헐값에 넘어간 쿠리 땅을 되찾았다'), next('ep_wano_after_dep')] },
+        fx: [{ op: 'base', key: 'int', add: 1 }, log('하나에가 마지막 문서에 붉은 줄을 그었다. 이제 쿠리의 물길은 법으로 보호받아 상회가 사들일 수 없다고 했다.'), time('부교소 서기 하나에와 함께 헐값에 넘어간 쿠리 땅을 되찾았다'), next('ep_wano_after_dep')] },
       { label: '선착장의 적막을 바라보며 철을 보낸다', hint: '아무것도 바꾸지 못했다. 나라는 아직 닫혀 있다', values: { peace: D },
         fx: [time('와노에서 두 달을 보냈다. 쿠리의 물길은 남의 손에 넘어갔다'), next('ep_wano_after_dep')] },
     ],
@@ -588,7 +588,7 @@ export const EP_WANO: Turning[] = [
     body: '폭포 아래로 내려가는 길은 여전히 험하고 나라의 문도 닫혀 있다. 축제 등불은 꽃의 도시와 쿠리를 잇고, 에비스 마을의 웃음소리는 예전과 다르게 들린다. 키스케가 볍씨 주머니를 만지작거리고, 하나에는 부교소 도장을 찍은 종이 한 장을 접는다.',
     doors: [
       { label: '키스케가 건네는 쿠리 볍씨 주머니를 받는다', hint: '어느 땅에 뿌려도 잘 자란다고 한다', when: [has('ep_wano_after_kisuke_trust')], values: { romance: D },
-        fx: [flag('ep_wano_done'), { op: 'hp', add: 10 }, log('작은 주머니에서 햇볕 냄새가 났다. 「쿠리의 첫 볍씨야. 잊지 마.」')] },
+        fx: [flag('ep_wano_done'), { op: 'hp', add: 10 }, log('작은 주머니에서 햇볕 냄새가 났다. 주머니에는 쿠리에서 처음 거둔 볍씨가 담겨 있었다.')] },
       { label: '바깥 바다를 보고 싶다는 키스케와 함께 폭포를 내려간다', hint: '논은 하나에가 지킨다고 했다', when: [has('ep_wano_after_kisuke_trust'), has('ep_wano_after_hanae_trust'), not('ep_wano_after_deal')], values: { freedom: D },
         fx: [flag('ep_wano_done'), { op: 'person', kind: 'crew', relation: '쿠리에서 함께 폭포를 내려온 농부 키스케', years: 1 },
              time('쿠리의 농부 키스케와 함께 폭포를 내려갔다'), { op: 'move', island: '드레스로자', sea: 'nw_first' }] },

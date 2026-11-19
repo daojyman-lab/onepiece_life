@@ -8,6 +8,7 @@ import { TALENT_BY_ID } from '../../data/talents';
 import { runBattle, startBattle } from '../../core/combat/engine';
 import { fruitMods, mergeMods } from '../../core/combat/mods';
 import { crewUnit, enemyUnit } from '../../core/combat/units';
+import { faceKeyOf } from '../../core/people';
 import { branchSkills, getSkill } from '../../core/growth/skillbook';
 import { chance, hashString, int, pick, rngOf, type Rng } from '../../core/rng';
 import { fill } from '../../core/util';
@@ -18,6 +19,7 @@ import { fullName } from './birth';
 import { canUse, effectiveStats5, limbFactor, loseLimb } from './body';
 import { applyFx } from './fx';
 import { BRANCH_ID, power5, tierMult, topTier } from './power';
+import { rivalCombatSkills, rivalPerson, rivalPosition, RIVAL_STAT_TOTAL } from './rival';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
 import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext } from './types';
@@ -32,6 +34,7 @@ const sum = (st: Stats) => Object.values(st).reduce((a, b) => a + b, 0);
 export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const AFTER_FIGHT = 'after_fight';
+const RIVAL_DUEL = 'childhood_rival_duel';
 
 /** 정신적 강점 → 싸움에 걸리는 v4의 특성 */
 const STRENGTH_TRAIT: Record<string, string> = {
@@ -51,8 +54,15 @@ function soloPower(e: EnemySpec): number {
 }
 
 /** 이름 있는 상대를 v5의 잣대로: 상대가 나오는 바다의 배율(V.fight.foeScale)을 우두머리와 간부의 능력치에 곱한다 */
+const LOCAL_LEADER_POWER: Record<string, number> = {
+  b_gramon: 540, b_gramon_worn: 440,
+  b_fm_utsubo: 550, b_fm_utsubo_worn: 450,
+  b_dr_remedio: 585, b_dr_remedio_worn: 475,
+};
+
 export function scaleFoe(e: EnemySpec, id: string): EnemySpec {
-  const k = F.foeScale[FOE_SEA[id] as keyof typeof F.foeScale] ?? 1;
+  const target = LOCAL_LEADER_POWER[id];
+  const k = target ? target / foePower(e) : F.foeScale[FOE_SEA[id] as keyof typeof F.foeScale] ?? 1;
   const scale = (st: Stats): Stats => {
     const out = { ...st };
     for (const key of Object.keys(out) as (keyof Stats)[]) out[key] = Math.round(out[key] * k);
@@ -197,10 +207,18 @@ export function heroUnit5(s: Life5): CUnit {
  * 주인공과 동료, 상대와 간부로 전투를 꾸려 끝까지 자동으로 돌린다.
  * 짝 짓기는 v4 defaultAssign과 같다: 주인공은 우두머리, 싸우는 동료(선봉 · 지원)는 간부를 차례로 맡고 남으면 우두머리.
  */
-function fightBattle(s: Life5, foe: EnemySpec): BattleState {
+function fightBattle(s: Life5, foe: EnemySpec, rival?: Person): BattleState {
+  const seed = hashString(String(rngOf(s.rng)()));
+  if (rival) {
+    const hero = heroUnit5(s);
+    hero.retreatAt = 0;
+    const opponent = enemyUnit(foe, true, 0);
+    opponent.personId = rival.id;
+    return runBattle(startBattle([hero, opponent], { 0: 1 }, seed, false), true);
+  }
   const crew = s.people.filter((p) => p.alive && p.kind === 'crew' && p.crew && p.crew.injuredMonths <= 0);
   const stage = SEA_BY_ID[s.hero.sea].stage;   // v5에는 단계가 없으니 지금 있는 바다의 단계로
-  const units: CUnit[] = [heroUnit5(s), ...crew.map((p) => crewUnit(p, stage))];
+  const units: CUnit[] = [heroUnit5(s), ...crew.map((p) => crewUnit(p, stage, p.id === s.rival?.personId ? rivalCombatSkills(s) : undefined))];
   const enemyStart = units.length;
   units.push(enemyUnit(foe, true, 0));
   foe.officers.forEach((o, i) => units.push(enemyUnit(o, false, i + 1)));
@@ -210,13 +228,28 @@ function fightBattle(s: Life5, foe: EnemySpec): BattleState {
     const fights = p.crew!.role === 'vanguard' || p.crew!.role === 'support';
     assign[i + 1] = enemyStart + (fights && next <= foe.officers.length ? next++ : 0);
   });
-  const seed = hashString(String(rngOf(s.rng)()));
   return runBattle(startBattle(units, assign, seed, false), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext): void {
-  const battle = fightBattle(s, foe);
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, rival?: Person): void {
+  const battle = fightBattle(s, foe, rival);
   s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}) };
+}
+
+/** 맞수의 기록에는 총 전투력을, makeEnemy와 crewUnit에는 statsAround의 기준 능력치를 쓴다. */
+export function rivalCombatStat(p: Person): number {
+  return Math.max(1, Math.round((p.power ?? 135) / RIVAL_STAT_TOTAL));
+}
+
+export function startRivalDuel(s: Life5): void {
+  const rival = rivalPerson(s);
+  if (!rival?.alive || rival.kind === 'crew') return;
+  const foe = makeEnemy({
+    id: RIVAL_DUEL, name: rival.name, title: rivalPosition(s), faceKey: faceKeyOf(rival),
+    p: rivalCombatStat(rival), age: rival.age, species: rival.species, gender: rival.gender, faction: rival.faction,
+    skills: rivalCombatSkills(s) ?? ['fist_jab', 'fist_combo', 'fist_guard'],
+  });
+  startFight(s, foe, false, undefined, rival);
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
@@ -245,6 +278,15 @@ export function ackBattle(s: Life5): void {
   const p = s.pending;
   if (p?.kind !== 'battle') return;
   s.pending = null;
+  if (p.foe.id === RIVAL_DUEL) {
+    const won = p.result === 'win';
+    s.stats.fights += 1;
+    if (won) s.stats.wins += 1;
+    const text = fill(`어릴 적 맞수 {rival}과(와) 겨뤄 ${won ? '이겼다' : '졌다'}.`, { rival: p.foe.name });
+    logLine(s, text, 'heavy', 'battle');
+    s.timeline.push({ age: s.age, text });
+    return;
+  }
   const r = rngOf(s.rng);
   const foe = p.foe;
   const won = p.result === 'win';
@@ -292,11 +334,14 @@ export function ackBattle(s: Life5): void {
 
 // ---------------------------------------------------------------- 사소한 싸움
 
-/** 이름 없는 상대. 힘은 지금 사는 곳의 위험(dangerOf)을 가운데로 그 위아래 minorSpread만큼에서 뽑는다 */
+/** 능력치 합 기준으로 시작 바다 F, 입구 E, 전반·어인섬 D, 신세계 C. */
+const STREET_STATS = [[6, 10], [13, 19], [22, 32], [32, 45], [49, 66], [68, 84]] as const;
+
 export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAMES)): EnemySpec {
-  const mid = dangerOf(s);
-  const half = mid * F.minorSpread;
-  return makeEnemy({ id: 'minor', name, p: int(r, Math.round(mid - half), Math.round(mid + half)) });
+  const atHome = s.age <= F.dangerKidAge && s.hero.island === s.hero.town;
+  const stage = atHome ? 1 : SEA_BY_ID[s.hero.sea].stage;
+  const [lo, hi] = STREET_STATS[stage - 1];
+  return makeEnemy({ id: 'minor', name, p: int(r, lo, hi) });
 }
 
 /**

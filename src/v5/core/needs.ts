@@ -1,7 +1,16 @@
 // 사건의 글이 전제하는 것(동료, 가족, 헤엄, 칼 …)이 이 사람에게 있는가.
 // 전환점의 needs가 안 맞으면 그 전환점은 오지 않고, 문의 needs가 안 맞으면 그 문은 잠긴다.
 import { RELATION_KIND } from '../data/words';
+import { rivalPerson } from './rival';
 import type { Life5, Need, Person } from './types';
+
+export function livingRelation(s: Life5, relation: string): Person | undefined {
+  if (relation === '어릴 적 맞수') {
+    const p = rivalPerson(s);
+    return p?.alive ? p : undefined;
+  }
+  return s.people.find(p => p.alive && p.relation === relation);
+}
 
 /** 이 사람이 그 갈래(함께 싸우는 동료, 배우자 · 자식 · 형제 · 부모)인가 */
 export function personIs(p: Person, who: 'crew' | keyof typeof RELATION_KIND): boolean {

@@ -3,9 +3,18 @@ import { josa } from '../../../core/josa';
 import { isDeep, topValues } from '../../core/values';
 import { VALUE_NAME } from '../../data/values';
 import { ageWord } from '../../core/words';
-import type { Life5 } from '../../core/types';
+import type { Life5, Person } from '../../core/types';
+import { GRADES, GRADE_TOP } from '../../data/words';
+import { RIVAL_STAT_TOTAL } from '../../core/rival';
 
 export { ageShort, ageWord } from '../../core/words';
+
+/** 맞수는 대련에서 쓰던 총 전투력으로 영입 후에도 같은 등급을 표시한다. */
+export function crewGrade(s: Life5, p: Person): string {
+  const power = p.crew?.power ?? 0;
+  const total = p.id === s.rival?.personId && p.power !== undefined ? Math.max(p.power, Math.round(power * RIVAL_STAT_TOTAL)) : power;
+  return bandWord(total, GRADES, GRADE_TOP);
+}
 
 /** 해 구분선: '열일곱 살 · 로그타운' (섬이 없으면 나이만) */
 export function yearLabel(l: { age: number; island?: string }): string {

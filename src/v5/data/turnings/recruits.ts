@@ -25,6 +25,7 @@ const LEVEL: Record<string, number> = {
 };
 /** 아무나 태울 수 없는 사람: 이름값이 있어야 말을 붙일 수 있고, 쿠잔은 해군을 떠난 뒤(원작 두 해 뒤)에만 만난다 */
 const GATE: Record<string, Cond[]> = {
+  perona: [age(16, 18)], absalom: [age(16, 18)], hogback: [age(16, 18)], lola: [age(18, 18)],
   mihawk: [fame(300), { c: 'tier', branch: 'any', min: 4 }], kuzan: [fame(150), { c: 'canonAge', id: 'kuzan', min: 49 }],
   yamato: [fame(100)], killer: [fame(60)],
   zoro: [{ c: 'age', min: 16, max: 17 }], vivi: [{ c: 'age', min: 17, max: 19 }], ace: [{ c: 'age', min: 16, max: 19 }],
@@ -43,15 +44,15 @@ function recruit(row: RecruitRow, i: number): Turning {
         fx: [{ op: 'person', kind: 'crew', relation: epithet, canon: id, role, ...(LEVEL[id] ? { level: LEVEL[id] } : {}) }, { op: 'fame', add: 5 },
              { op: 'log', text: `${name}이(가) 배에 올랐다.`, weight: 'heavy' }, { op: 'timeline', text: `${name}을(를) 배에 태웠다`, canon: id }] };
   const meet: Door[] = [
-    { label: '술 한잔을 나누고 이름만 주고받는다', hint: '인연은 남는다', values: { romance: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }] },
-    { label: '사정을 끝까지 들어 준다', hint: '다시 만나면 알아볼 사이가 된다', values: { inquiry: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }, { op: 'base', key: 'int', add: 1 }] },
-    { label: '가진 것을 조금 나눠 주고 헤어진다', hint: '빚을 진 쪽은 잊지 않는다', values: { peace: D }, fx: [{ op: 'money', add: -2000 }, { op: 'person', kind: 'ally', relation: epithet, canon: id }] },
+    { label: '마실 것을 나눠 들고 먼저 제 이름을 댄다', hint: '헤어질 때는 서로 이름을 불러 인사한다', values: { romance: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }] },
+    { label: '같이 앉아 여기까지 어떻게 왔는지 묻는다', hint: '이야기에 낯선 지명이 나오면 다시 물어 수첩에 적는다', values: { inquiry: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }, { op: 'base', key: 'int', add: 1 }] },
+    { label: '주머니에서 여비를 덜어 건넨다', hint: '이천 베리를 건네고 다음에 만나면 밥 한 끼 사 달라고 한다', values: { peace: D }, fx: [{ op: 'money', add: -2000 }, { op: 'person', kind: 'ally', relation: epithet, canon: id }] },
     { label: '한판 붙어 누가 위인지 가린다', hint: '멍이 든다. 서로 얼굴은 잊지 않는다', values: { dominion: D }, fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: epithet, canon: id }] },
   ];
   const pass: Door[] = [
-    { label: '갈 길이 다르다며 지나친다', hint: '아무 일도 일어나지 않는다', values: { freedom: D }, fx: [] },
+    { label: '고개를 숙여 인사하고 먼저 길을 뜬다', hint: '몇 걸음 뒤에서 돌아보니 저쪽도 제 갈 길을 가고 있다', values: { freedom: D }, fx: [] },
     { label: '억울한 사정이 있는지만 묻고 지나친다', hint: '대답은 듣지 못한다', values: { justice: D }, fx: [] },
-    { label: '솜씨만 눈여겨보고 떠난다', hint: '본 것은 남는다', values: { ambition: D }, fx: [{ op: 'base', key: 'wil', add: 1 }] },
+    { label: '제일 자신 있는 재주를 한 번만 보여 달라고 한다', hint: '헤어진 뒤 방금 본 동작을 혼자 흉내 내 본다. 첫 동작부터 막힌다', values: { ambition: D }, fx: [{ op: 'base', key: 'wil', add: 1 }] },
     { label: '목에 걸린 값이 있는지 수배서부터 뒤져 본다', hint: '쓸 만한 값이면 초소에 귀띔한다. 주머니가 조금 찬다', values: { greed: D }, fx: [{ op: 'money', add: 12000 }] },
   ];
   const p = i % 4 === 3 && faction !== 'pirate' ? 1 : i % 4;
@@ -71,10 +72,10 @@ function companion(row: TempRow, i: number): Turning {
     fx: [{ op: 'person', kind: 'crew', relation: `임시 동행 · ${epithet}`, canon: id, role: 'vanguard', level, years }, { op: 'fame', add: 8 },
          { op: 'log', text: `${name}과(와) 한동안 같은 길을 가기로 했다.`, weight: 'heavy' }, { op: 'timeline', text: `${name}과(와) 한동안 동행했다`, canon: id }],
   };
-  const meet: Door = { label: '길은 따로 가되 소식은 주고받기로 한다', hint: '인연은 남는다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }] };
+  const meet: Door = { label: '소식을 받을 곳을 종이에 적어 건넨다', hint: '주소 아래에 제 이름을 적고 헤어진 뒤에도 가끔 안부를 전하기로 한다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: epithet, canon: id }] };
   const pass: Door = i % 2 === 0
-    ? { label: '얽히면 일이 커진다며 물러선다', hint: '아무 일도 일어나지 않는다', values: { freedom: D }, fx: [] }
-    : { label: '무엇을 쫓는 사람인지만 캐묻고 헤어진다', hint: '세상 돌아가는 것이 조금 보인다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] };
+    ? { label: '고개를 젓고 옆으로 한 걸음 비켜선다', hint: '상대가 지나가도록 길을 내준 뒤 원래 가던 길로 간다', values: { freedom: D }, fx: [] }
+    : { label: '다음 행선지와 거기로 가는 까닭을 묻는다', hint: '헤어지고 나서 방금 들은 지명을 지도에서 찾아본다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] };
   return {
     id: `tmp_${id}`, kind: 'door', when: at(age(16), WHO[who], place(where), ...(GATE[id] ?? [])), weight: 5, repeat: 'once', speaker: { canon: id },
     title: `「${epithet}」 ${name}`, body, doors: [go, meet, pass],

@@ -88,7 +88,7 @@ export const CANON_SEA: Turning[] = [
     // 정상결전. 해적 쪽이면 흰수염의 편에 설지, 해군이면 그 바다에 설지
     id: 'cn_whitebeard_war', kind: 'door', when: at(age(19, 20), st(...SEAFARING), sea('gl_first', 'sabaody')),
     weight: 6, repeat: 'once', speaker: { canon: 'whitebeard' },
-    title: '정상결전', body: '해군 본부가 불주먹의 처형을 알렸다. 흰수염이 식구라 부르는 해적들을 모두 이끌고 마린포드로 간다. 샤본디의 거리마다 영상 전전충 앞에 사람들이 모였다. 바다를 가르는 웃음소리가 화면 너머로 울린다. 그라라라라라.',
+    title: '정상결전', body: '해군 본부가 불주먹의 처형을 알렸다. 흰수염이 식구라 부르는 해적들을 모두 이끌고 마린포드로 간다. 샤본디의 거리마다 영상 전전충 앞에 사람들이 모였다. 화면 너머로 흰수염의 우렁찬 웃음소리가 들린다.',
     doors: [
       { label: '배를 몰아 마린포드로 간다', hint: '세계에서 가장 큰 싸움이다. 살아 돌아올지 모른다', values: { loyalty: D }, danger: true, when: [{ c: 'standing', is: ['pirate', 'revolution', 'warlord'] }],
         fx: [{ op: 'hp', add: -35 }, { op: 'fame', add: 40 }, { op: 'person', kind: 'ally', relation: '세상을 흔든 늙은 선장', canon: 'whitebeard' },

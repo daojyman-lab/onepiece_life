@@ -61,11 +61,11 @@ const BEFORE: Turning[] = [
     // 가프가 손자를 산적 일가에 맡기러 들른다
     id: 'cn_garp_fusha', kind: 'door', when: at(age(8, 13), KID, not('left_home_young'), ...town('후샤 마을')),
     weight: 8, repeat: 'once', speaker: { canon: 'garp' },
-    title: '해군 영웅의 주먹', body: '군함이 후샤 마을 부두에 닿고, 해군 영웅 가프가 내렸다. 손자 녀석을 찾는다며 마을을 휘젓더니 {name}을(를) 보고 멈춰 선다. 다부진 녀석이라며, 해군이 되겠다면 지금부터 단련해 주겠다고 한다.',
+    title: '해군 영웅의 주먹', body: '군함이 후샤 마을 부두에 닿고, 해군 영웅 가프가 내렸다. 손자 녀석을 찾는다며 마을을 휘젓더니 {name}을(를) 보고 멈춰 선다. 가프는 해군이 될 생각이 있으면 함께 산까지 뛰어 보자고 한다.',
     doors: [
-      { label: '해군이 되겠다고 가슴을 편다', hint: '그 자리에서 산길 달리기와 주먹 세례가 시작된다. 몸이 남아나지 않는다', values: { justice: D }, mark: 'unyielding',
+      { label: '가프 옆에 서서 바짓단을 걷어 올린다', hint: '가프는 마을 뒤 산을 가리키고 먼저 뛴다. 길을 물어볼 틈도 없이 뒤를 쫓는다', values: { justice: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -15 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'person', kind: 'ally', relation: '주먹이 무거운 해군 영웅', canon: 'garp' }, { op: 'flag', id: 'garpPromise' }] },
-      { label: '해적이 될 거라고 대꾸한다', hint: '사랑의 주먹이 정수리에 떨어진다. 영웅은 웃으며 녀석들은 다 똑같다고 한다', values: { freedom: D }, mark: 'rebel',
+      { label: '가프에게 해적선 선장이 되고 싶다고 대꾸한다', hint: '사랑의 주먹이 정수리에 떨어진다. 영웅은 웃으며 녀석들은 다 똑같다고 한다', values: { freedom: D }, mark: 'rebel',
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '꿀밤을 먹인 해군 영웅', canon: 'garp' }] },
       { label: '손자가 숨은 산길을 알려 주고 센베이를 얻는다', hint: '영웅은 기뻐하고, 산속의 손자는 {name}을(를) 고자질쟁이로 기억한다', values: { greed: D }, 
         fx: [{ op: 'money', add: 2000 }, { op: 'flag', id: 'toldGarp' }] },

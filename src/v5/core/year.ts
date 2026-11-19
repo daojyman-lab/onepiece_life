@@ -3,12 +3,18 @@ import { BRANCH_NAMES } from '../../data/skills';
 import { TALENT_BY_ID } from '../../data/talents';
 import { chance, pick, rngOf, weighted, type Rng } from '../../core/rng';
 import { josa } from '../../core/josa';
-import { SEA_BY_ID } from '../../data/seas';
 import { V } from '../data/balance';
 import { SEA_STANDINGS } from '../data/landlocked';
 import { LINES, type DailyLine5 } from '../data/lines';
 import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
+import { connectedPorts, destinationAt, portOf } from '../data/navigation';
+import { ROUTE_ARRIVALS } from '../data/turnings/route-stories';
+import { RESUPPLY } from '../data/turnings/ports';
+import { TURNING_BY_ID } from '../data/turnings';
+import { TRAINING } from '../data/turnings/training';
+import { INCIDENTS_BY_TOWN } from '../data/childhood-incidents';
+import { CHILDHOOD_MEMORIES } from '../data/turnings/childhood-crises';
 import { checkAll } from './cond';
 import { familyYear } from './family';
 import { minorFight } from './fight';
@@ -20,10 +26,12 @@ import { runMinor } from './minor';
 import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
-import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, repeatAllows, wantsStop } from './turning';
 import { leanPick } from './values';
 import { dreamYear } from './dreams';
-import { buildVoyage, voyageChoices, voyageId } from './voyage';
+import { rivalPerson, updateRival } from './rival';
+import { advanceRivalAffection } from './rival-romance';
+import { buildVoyage, sailTo, voyageChoices, voyageId } from './voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
@@ -46,7 +54,32 @@ function firstLap(s: Life5): boolean {
 export function stepPart(s: Life5): void {
   if (s.pending) return;
   if (!s.hero.alive) { endIfDead(s); return; }
+  if (s.passage && openTurning(s, RESUPPLY)) return;
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  if (openChildhoodStory(s)) return;
+
+  // 옛 저장이나 오래 머무른 배에서도 현재 연표에 맞는 안개 해역으로 이어 간다.
+  if (s.hero.island === '스릴러 바크') s.hero.island = destinationAt(s.hero.island, s.age);
+  const arrivalPort = portOf(s.hero.island);
+  const arrivalId = arrivalPort === '리틀 가든' && s.age <= 18 && !s.seenCount.garden_giants && !s.seenCount.garden_1
+    ? 'garden_giants' : ROUTE_ARRIVALS[arrivalPort];
+  const arrival = arrivalId ? TURNING_BY_ID[arrivalId] : undefined;
+  const hasArrived = s.hero.island !== s.hero.town || s.flags.includes(`at:${arrivalPort}`);
+  if (hasArrived && arrival && checkAll(s, arrival.when) && repeatAllows(s, arrival) && openTurning(s, arrival)) return;
+
+  updateRival(s);
+  if (openRivalErrand(s)) return;
+  advanceRivalAffection(s);
+  if (s.rival && s.age >= 20 && s.rival.port === arrivalPort) {
+    const rival = rivalPerson(s), reunion = TURNING_BY_ID.life_rival_reunion;
+    if (rival?.alive && !rival.crew && repeatAllows(s, reunion) && checkAll(s, reunion.when) && openTurning(s, reunion)) {
+      if (s.flags.includes('homeCrisis:copy') && !s.flags.includes('homeCrisis:delivered')) {
+        logLine(s, fillText(s, '고향에서 베껴 둔 기록을 {rival}에게 건넸다. {crisisLandmark} 그림 아래, {crisisTown}에서 함께 나섰던 두 사람의 이름이 나란히 적혀 있었다.'), 'heavy');
+        s.flags.push('homeCrisis:delivered');
+      }
+      return;
+    }
+  }
 
   const r = rngOf(s.rng);
   partRisks(s, r);
@@ -64,6 +97,36 @@ export function stepPart(s: Life5): void {
   endIfDead(s);
 }
 
+function openRivalErrand(s: Life5): boolean {
+  if (!s.flags.includes('kidRival')) return false;
+  let id: string;
+  if (s.age >= 10 && s.age <= 11 && s.hero.island === s.hero.town && !s.flags.includes('left_home_young')) {
+    id = 'bond_rival_errand';
+  } else if (s.age >= 24 && s.age <= 34 && s.seenCount.bond_rival_errand && s.rival?.port &&
+    !rivalPerson(s)?.crew && (['loguetown', 'water7'].includes(s.hero.home) || portOf(s.hero.island) === s.rival.port)) {
+    id = 'bond_rival_ledger';
+  } else return false;
+  const t = TURNING_BY_ID[id];
+  return repeatAllows(s, t) && checkAll(s, t.when) && openTurning(s, t);
+}
+
+/** 고향 위기는 일반 사건 추첨에 묻히지 않게 연다. 그 전에 인연을 만날 기회가 한 번 있다. */
+function openChildhoodStory(s: Life5): boolean {
+  if (s.age >= 12 && s.age <= 15 && s.flags.includes('homeCrisis')) {
+    const memory = CHILDHOOD_MEMORIES.find(t => repeatAllows(s, t) && checkAll(s, t.when));
+    if (memory) return openTurning(s, memory);
+  }
+  if (s.age < 6 || s.age > 9 || s.hero.standing !== 'child' || s.hero.island !== s.hero.town || s.flags.includes('left_home_young')) return false;
+  if (s.age < 8) {
+    const familyAtHome = needsOk(s, ['parent']) || s.flags.includes('grandGuard');
+    const t = TURNING_BY_ID[s.age === 6 ? 'kid_rival' : familyAtHome ? 'child_clinic_apprentice' : 'men_meet'];
+    return repeatAllows(s, t) && checkAll(s, t.when) && openTurning(s, t);
+  }
+  const options = INCIDENTS_BY_TOWN[s.hero.town];
+  if (!options || s.flags.includes('homeCrisis')) return false;
+  return openTurning(s, TURNING_BY_ID['child_crisis_' + pick(rngOf(s.rng), options)]);
+}
+
 /**
  * 해가 바뀌는 자리(한 해의 마지막 토막)에서 한 번: 병 · 사고 · 노환 → 고를 수 없는 불행 → 기연.
  * 전환점보다 먼저 굴려서, 기연이 뜨면 그 토막의 전환점이 기연에게 자리를 내준다.
@@ -77,7 +140,10 @@ function yearTurn(s: Life5, r: Rng): void {
 
 /** 멈출 차례면 전환점 하나를 띄운다 */
 function turningPoint(s: Life5, r: Rng): void {
-  if (s.pending || !wantsStop(s, r)) return;
+  if (s.pending) return;
+  const lesson = TRAINING.find((t) => checkAll(s, t.when) && repeatAllows(s, t));
+  if (lesson && openTurning(s, lesson)) return;
+  if (!wantsStop(s, r)) return;
   s.stats.stopTries += 1;
   if (s.sail && openVoyage(s, r)) return;          // 섬을 옮길 때면 이번 멈춤은 항로 고르기
   const t = pickTurning(s, r);
@@ -269,28 +335,27 @@ function partCompanions(s: Life5): void {
 /** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
 export function voyage(s: Life5): void {
   const h = s.hero;
-  if (s.queue.length) return;                  // 이어지는 이야기가 줄 서 있으면 그 섬에 머문다
+  if (s.queue.length || s.passage) return;
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
   const military = h.standing === 'marine' || h.standing === 'cp';
   if (!s.sail && !chance(r, V.voyage.p)) return;
   if (!military && !s.sail) { s.sail = true; return; }   // 다음 멈춤에 항로를 고른다
+  if (s.pending) return;                       // 현재 장면의 답을 다른 장소에서 실행하지 않는다
   s.sail = false;                              // 해군은 명령으로, 고를 틈이 없던 사람은 바람 닿는 대로
-  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island);
+  const ports = connectedPorts(h.island, h.sea, s.flags, s.age);
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
-  const first = !s.flags.includes(`at:${next}`);
-  h.island = next;
-  if (first) s.flags.push(`at:${next}`);
-  if (military) logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${next} 지부에 처음 배속되었다.` : `전근 명령을 받아 다시 ${next}(으)로 배속되었다.`), 'light');
-  else logLine(s, josa(first ? `${next}에 처음 닻을 내렸다.` : `다시 ${next}(으)로 뱃머리를 돌렸다.`), 'light');
+  sailTo(s, next, military ? 'transfer' : 'drift');
 }
 
 /** 항로 고르기를 띄운다. 띄웠으면 true */
 function openVoyage(s: Life5, r: Rng): boolean {
   s.sail = false;
   if (!SEA_STANDINGS.includes(s.hero.standing) || s.hero.standing === 'marine' || s.hero.standing === 'cp') return false;
-  const c = voyageChoices(s, r);
+  // 이 토막을 넘긴 뒤 화면에 선택지가 뜬다. 연말에는 실제로 출항할 때의 연표를 쓴다.
+  const departureAge = s.part === V.partsPerYear - 1 && !firstLap(s) ? s.age + 1 : s.age;
+  const c = voyageChoices(s, r, departureAge);
   const t = c && buildVoyage(voyageId(s, c));
   return !!t && openTurning(s, t);
 }

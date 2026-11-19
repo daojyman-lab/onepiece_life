@@ -18,14 +18,14 @@ const goneGrand: Fx[] = [{ op: 'losePerson', relation: '할머니' }, { op: 'los
 const GRANDPARENTS: Turning[] = [
   {
     id: 'grand_tale', kind: 'door', when: [...kid(5, 10), has('grandGuard')], weight: 12, repeat: 'once', speaker: 'hero',
-    title: '아궁이 앞의 옛이야기', body: '아궁이 불이 사위어 간다. 주름진 손이 {name}의 머리를 쓸어 넘긴다. 네 부모 이야기를 해 줄까. 늘 하던 말을 꺼내다가, 오늘은 말끝이 조금 흐려진다.',
+    title: '아궁이 앞의 옛이야기', body: '아궁이 불이 사위어 간다. 주름진 손이 {name}의 머리를 쓸어 넘긴다. 부모가 떠나던 날 아침 이야기를 꺼내다가 한동안 불만 바라본다.',
     doors: [
-      { label: '흐려진 말끝을 붙잡고 더 묻는다', hint: '처음 듣는 이야기가 하나 섞여 나온다', values: { inquiry: D },
-        fx: [flag('grandTold'), heavy('부모는 먼 곳으로 떠났다고 했다. 왜 떠났는지는, 네가 더 크면 이야기해 주마.'), line('보호자에게 부모의 이야기를 들었다')] },
+      { label: '부모가 그날 어디로 떠났는지 묻는다', hint: '장작을 한 토막 더 넣고 대답을 기다린다', values: { inquiry: D },
+        fx: [flag('grandTold'), heavy('부모는 먼 곳으로 떠났다고 했다. 왜 떠났는지는 조금 더 자라면 알려 주겠다고 했다.'), line('보호자에게 부모의 이야기를 들었다')] },
       { label: '무릎을 베고 이야기를 들으며 잠든다', hint: '이야기보다 무릎의 온기가 오래 남는다', values: { peace: D },
         fx: [{ op: 'hp', add: 5 }, flag('grandLap')] },
-      { label: '언젠가 부모를 찾아내겠다고 말한다', hint: '주름진 손이 잠깐 멈춘다', values: { romance: D },
-        fx: [flag('seekParents'), line('언젠가 부모를 찾겠다고 다짐했다')] },
+      { label: '부모를 찾아가면 자신을 알아볼지 묻는다', hint: '주름진 손이 잠깐 멈춘다', values: { romance: D },
+        fx: [flag('seekParents'), line('아궁이 앞에서 부모가 자신을 알아볼지 물었다')] },
     ],
   },
   {
@@ -36,7 +36,7 @@ const GRANDPARENTS: Turning[] = [
         fx: [{ op: 'base', key: 'vit', add: 1 }, flag('grandCarry')] },
       { label: '돈을 벌어 오겠다고 일거리를 찾아 나선다', hint: '어린 손으로 할 수 있는 일은 많지 않다', values: { greed: D },
         fx: [{ op: 'money', add: 300 }, { op: 'hp', add: -5 }] },
-      { label: '저 손이 다 낡기 전에 꼭 크게 되겠다고 다짐한다', hint: '그날 밤 오래 잠들지 못한다', values: { ambition: D },
+      { label: '짐수레가 있으면 혼자서도 나를 수 있는지 묻는다', hint: '첫 품삯으로 짐수레를 사 드리기로 한다', values: { ambition: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }] },
     ],
   },
@@ -54,11 +54,11 @@ const GRANDPARENTS: Turning[] = [
   },
   {
     id: 'grand_letter', kind: 'door', when: at(age(18, 40), st(...ACTIVE), has('grandGuard'), not('grandGone')), weight: 8, repeat: 'once', speaker: 'hero',
-    title: '마지막 편지', body: '고향에서 편지가 왔다. 보호자가 세상을 떠났다는 소식이다. 편지 끝에는 떨리는 글씨로 쓴 몇 줄이 덧붙어 있다. 네 부모는 죽지 않았다. 바다 어딘가에 살아 있을지도 모른다. 진작 말해 주지 못해 미안하다.',
+    title: '마지막 편지', body: '고향에서 편지가 왔다. 보호자가 세상을 떠났다는 소식이다. 편지 끝에는 떨리는 글씨로 쓴 몇 줄이 덧붙어 있다. 부모가 바다 어딘가에 살아 있을지도 모른다는 내용이다. 마지막 줄에는 이 소식을 뒤늦게 전한 미안함이 담겨 있다.',
     doors: [
       { label: '하던 일을 모두 내려놓고 고향의 무덤을 찾아간다', hint: '무덤 앞에서 처음으로 소리 내어 운다', values: { loyalty: D },
         fx: [...goneGrand, { op: 'hp', add: -5 }, flag('parentsLost'), line('보호자의 무덤 앞에서 울었다')] },
-      { label: '편지를 품고 부모를 찾아 나서겠다고 다짐한다', hint: '바다가 조금 다르게 보인다', values: { inquiry: D },
+      { label: '고향에서 온 사람들에게 부모의 소식을 묻는다', hint: '부모의 이름을 적어 보여 주고 최근에 두 사람을 만난 이가 있는지 알아본다', values: { inquiry: D },
         fx: [...goneGrand, flag('parentsLost'), flag('seekParents'), line('살아 있을지 모를 부모를 찾아 나섰다')] },
       { label: '편지를 접어 넣고 묵묵히 하던 길을 간다', hint: '보호자도 그걸 바랐을 거라고 믿는다', values: { ambition: D },
         fx: [...goneGrand, flag('parentsLost'), { op: 'base', key: 'wil', add: 1 }] },
@@ -69,7 +69,7 @@ const GRANDPARENTS: Turning[] = [
     title: '아궁이 앞에서', body: '{name}은(는) 어느새 그날의 보호자만큼 늙었다. 동네 아이 하나가 무릎 곁에 쪼그려 앉아 옛날이야기를 조른다. 목에 건 낡은 부적이 불빛에 흔들린다.',
     doors: [
       { label: '그날 들었던 이야기를 그대로 들려준다', hint: '말끝이 흐려지는 곳까지 똑같다', values: { peace: D },
-        fx: [heavy('이야기를 다 듣고 아이가 물었다. 그래서 그 사람은 어떻게 됐어요. 웃으며 답했다. 지금 네 앞에 있지.'), line('보호자에게 들은 이야기를 아이에게 들려주었다')] },
+        fx: [heavy('아이는 이야기 속 꼬마가 어떻게 됐는지 물었다. 그 꼬마가 바로 {name}이란 걸 알고는 이야기를 처음부터 다시 들려 달라고 졸랐다.'), line('보호자에게 들은 이야기를 아이에게 들려주었다')] },
       { label: '부적을 풀어 아이의 목에 걸어 준다', hint: '목이 조금 허전하다. 마음은 가볍다', values: { loyalty: D },
         fx: [flag('grandPassed'), line('평생 걸었던 부적을 아이에게 건넸다')] },
     ],
@@ -79,20 +79,20 @@ const GRANDPARENTS: Turning[] = [
 // ================================================================ 행방불명된 부모
 const LOST: Turning[] = [
   {
-    id: 'par_lost', kind: 'door', when: [...kid(6, 12), { c: 'wealth', max: 'common' }], needs: ['parent'], weight: 1, repeat: 'once', speaker: 'hero',
+    id: 'par_lost', kind: 'door', when: [...kid(6, 12), { c: 'wealth', max: 'common' }, { c: 'relation', is: '아버지' }], needs: ['parent'], weight: 1, repeat: 'once', speaker: 'hero',
     title: '돌아오지 않는 배', body: '아버지가 탄 배가 약속한 날이 지나도 돌아오지 않는다. 사흘이 지나고 열흘이 지난다. 어른들이 목소리를 낮춰 이야기한다. {name}은(는) 매일 저녁 언덕에 올라 먼 곳을 본다.',
     doors: [
       { label: '돌아올 거라고 믿고 매일 언덕에 오른다', hint: '언덕 위의 바람이 익숙해진다', values: { loyalty: D },
         fx: [{ op: 'parentMissing' }, flag('lostWaited'), line('부모가 탄 배가 돌아오지 않았다')] },
       { label: '남은 식구를 위해 일을 시작한다', hint: '어린 나이에 손이 거칠어진다', values: { peace: D },
         fx: [{ op: 'parentMissing' }, { op: 'money', add: 200 }, { op: 'base', key: 'vit', add: 1 }, line('부모가 탄 배가 돌아오지 않았다')] },
-      { label: '크면 직접 찾으러 가겠다고 다짐한다', hint: '그날부터 먼 곳의 지도를 모은다', values: { romance: D },
+      { label: '항구에서 뱃사람들에게 아버지의 행방을 묻는다', hint: '아버지가 탔던 배 이름을 대고, 마지막으로 그 배를 본 곳이 어디인지 묻는다', values: { romance: D },
         fx: [{ op: 'parentMissing' }, flag('seekParents'), line('부모가 탄 배가 돌아오지 않았다')] },
     ],
   },
   {
     id: 'par_reunion', kind: 'door', when: at(age(20, 55), st('pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'cp', 'shipwright'), has('parentsLost'), not('parentFound'), not('parentRefused')), weight: 4, repeat: 'once', speaker: 'hero',
-    title: '낯선 항구의 노인', body: '{island}의 선술집에서 이름을 대자, 구석에 앉아 있던 늙은 뱃사람이 잔을 떨어뜨린다. 한참을 {name}의 얼굴만 본다. 그리고 떨리는 목소리로 묻는다. 혹시, {town}에서 왔느냐고.',
+    title: '낯선 항구의 노인', body: '{island}의 선술집에서 이름을 대자, 구석에 앉아 있던 늙은 뱃사람이 잔을 떨어뜨린다. 한참을 {name}의 얼굴만 본다. 떨리는 목소리로 {town}에서 왔는지 묻는다.',
     doors: [
       { label: '다가가 그 손을 붙잡는다', hint: '오래 비어 있던 자리가 채워진다', values: { loyalty: D },
         fx: [{ op: 'parentFound' }, { op: 'base', key: 'wil', add: 1 }, heavy('거칠고 주름진 손이었다. 그런데도 어딘가 익숙했다. 둘은 밤새 말없이 앉아 있었다.'), line('바다에서 잃었던 부모를 다시 만났다')] },
@@ -104,7 +104,7 @@ const LOST: Turning[] = [
   },
   {
     id: 'par_reunion_echo', kind: 'door', when: at(age(30, 80), st(...GROWN), has('parentFound')), needs: ['parent'], weight: 8, repeat: 'once', speaker: 'hero',
-    title: '함께 보는 수평선', body: '다시 만난 부모는 이제 많이 늙었다. 둘은 언덕에 나란히 앉아 먼 곳을 본다. 어릴 적 매일 오르던 그 언덕이다. 부모가 묻는다. 그때도 여기서 기다렸느냐고.',
+    title: '함께 보는 수평선', body: '다시 만난 부모는 이제 많이 늙었다. 둘은 언덕에 나란히 앉아 먼 곳을 본다. 어릴 적 매일 오르던 그 언덕이다. 부모는 그때도 여기서 기다렸는지 묻는다.',
     doors: [
       { label: '매일 기다렸다고 처음으로 말한다', hint: '부모의 어깨가 떨린다', values: { romance: D },
         fx: [heavy('매일 기다렸다고 했다. 부모는 아무 말 없이 {name}의 손을 잡았다. 어릴 적보다 손이 작게 느껴졌다.')] },

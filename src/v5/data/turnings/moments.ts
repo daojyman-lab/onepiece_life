@@ -20,27 +20,27 @@ export const MOMENTS: Turning[] = [
     ],
   }),
   moment('moment_loss', {
-    title: '남겨진 사람', body: '아끼던 사람이 더는 곁에 없다. 텅 빈 자리를 바라보며 {name}은(는) 한참을 움직이지 못한다.',
+    title: '그날 저녁의 식탁', body: '그날 일을 겪은 사람들이 한 상에 둘러앉았다. 국은 식었고 누구도 먼저 숟가락을 들지 않는다. 맞은편에 앉은 이가 {name}에게 오늘 밤 묵을 만한 곳을 아는지 묻는다.',
     doors: [
-      { label: '남은 사람들을 끝까지 지킨다', hint: '다시는 누구도 잃지 않겠다고 다짐한다', values: { loyalty: D }, mark: 'fellowship', fx: [] },
-      { label: '그 사람이 꿈꾸던 곳으로 떠난다', hint: '못다 한 길을 대신 걷는다', values: { romance: D }, fx: [] },
-      { label: '이렇게 만든 세상을 바로잡는다', hint: '같은 일이 다시 없도록 맞서기로 한다', values: { justice: D }, fx: [] },
+      { label: '잘 곳을 구한 사람부터 손을 들어 보라고 한다', hint: '묵을 곳이 없는 사람과 함께 잠자리를 알아본다', values: { loyalty: D }, mark: 'fellowship', fx: [] },
+      { label: '식탁 한쪽을 비우고 지도를 펼친다', hint: '맞은편 사람이 가 보고 싶어 하던 곳을 짚으며 내일 함께 떠나자고 제안한다', values: { romance: D }, fx: [] },
+      { label: '그날 각자 본 일을 한 장에 받아 적는다', hint: '전해 들은 소문은 빼고 각자가 직접 본 일만 남긴다', values: { justice: D }, fx: [] },
     ],
   }),
   moment('moment_defeat', {
     title: '바닥에 쓰러진 날', body: '온 힘을 다했지만 상대에게 닿지도 못했다. 흙바닥에 엎드린 {name}의 귀에 비웃음이 남는다.',
     doors: [
-      { label: '더 강해져서 다시 찾아간다', hint: '이 패배를 잊지 않는다', values: { ambition: D }, mark: 'unyielding', fx: [] },
-      { label: '왜 졌는지 처음부터 되짚는다', hint: '힘보다 앎이 모자랐다고 여긴다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
-      { label: '싸움에서 한 걸음 물러선다', hint: '이기고 지는 것이 다가 아니라고 받아들인다', values: { peace: D }, fx: [] },
+      { label: '흙 묻은 무릎을 털고 다시 일어선다', hint: '다음에 다시 겨루자고 청한다', values: { ambition: D }, mark: 'unyielding', fx: [] },
+      { label: '눈을 감고 넘어지기 직전의 소리를 떠올린다', hint: '오늘 패배를 곱씹자 놓친 소리 하나가 떠오른다. 등 뒤에서 모래가 밟히던 소리다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
+      { label: '다시 덤비라는 말에 손바닥의 흙부터 턴다', hint: '비웃음이 들려도 돌아보지 않고 자리를 뜬다', values: { peace: D }, fx: [] },
     ],
   }),
   moment('moment_saved', {
     title: '내밀어진 손', body: '모든 것이 끝났다고 여긴 순간, 이름도 모르는 누군가가 {name}을(를) 끌어올렸다. 그는 대가를 묻지 않았다.',
     doors: [
-      { label: '그 은혜를 평생 갚는다', hint: '그 사람의 뒤를 따르기로 한다', values: { loyalty: D }, fx: [] },
-      { label: '받은 만큼 다른 이에게 베푼다', hint: '언젠가 누군가에게 같은 손을 내민다', values: { justice: D }, fx: [] },
-      { label: '고맙다는 말만 남기고 길을 떠난다', hint: '누구에게도 매이지 않는다', values: { freedom: D }, fx: [] },
+      { label: '돌아서려는 사람을 불러 세워 이름을 묻는다', hint: '나중에 보답할 수 있도록 어디로 찾아가면 되는지도 묻는다', values: { loyalty: D }, fx: [] },
+      { label: '일어서자마자 뒤에 남은 사람이 있는지 살핀다', hint: '도움이 필요한 사람을 큰 소리로 부르고 대답을 기다린다', values: { justice: D }, fx: [] },
+      { label: '고맙다는 말만 남기고 길을 떠난다', hint: '혼자 걸을 수 있을 때까지 곁에 있어 준 사람에게 인사한다', values: { freedom: D }, fx: [] },
     ],
   }),
   moment('moment_betrayed', {
@@ -72,9 +72,9 @@ export const MOMENTS: Turning[] = [
   moment('moment_demoted', {
     title: '외딴 초소', body: '바람만 부는 초소에서 {name}은(는) 떨어진 계급장을 손바닥에 올려놓는다. 덮어쓴 죄는 끝내 벗겨지지 않았다.',
     doors: [
-      { label: '여기서부터 다시 올라간다', hint: '누구보다 먼저 일어나 누구보다 늦게 잔다', values: { ambition: D }, mark: 'unyielding', fx: [] },
-      { label: '죄를 씌운 윗선을 끝까지 밝힌다', hint: '제복 안의 썩은 곳을 들춘다', values: { justice: D }, mark: 'rebel', fx: [] },
-      { label: '초소의 사람들과 조용히 산다', hint: '자리를 다투는 일에서 물러난다', values: { peace: D }, fx: [] },
+      { label: '근무표의 첫 당번 칸에 제 이름을 적는다', hint: '아침 점호 때 인원을 세는 일부터 맡는다', values: { ambition: D }, mark: 'unyielding', fx: [] },
+      { label: '그날 받은 명령서와 징계 통지서를 나란히 편다', hint: '명령을 내린 사람과 책임자로 적힌 사람의 이름에 각각 밑줄을 긋는다', values: { justice: D }, mark: 'rebel', fx: [] },
+      { label: '계급장을 서랍에 넣고 식사 당번 옆에 앉는다', hint: '식사 당번이 건넨 소쿠리에 양파를 까 담는다', values: { peace: D }, fx: [] },
     ],
   }),
 ];

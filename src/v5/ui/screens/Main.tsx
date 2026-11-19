@@ -155,6 +155,7 @@ function Profile({ s }: { s: Life5 }) {
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
         <div class="t9"><b>전투력</b> {p.power}</div>
         <div class="row between"><span>돈</span><b class={s.hero.money < 0 ? 'red' : ''}>{p.money}</b></div>
+        {(s.hero.provisions > 0 || s.passage) && <div class="row between"><span>항해 식량</span><b>{s.hero.provisions}몫</b></div>}
         <div>
           <div class="row between t9"><span>체력</span><span>{p.hp} / 100</span></div>
           <Gauge value={p.hp} max={100} />

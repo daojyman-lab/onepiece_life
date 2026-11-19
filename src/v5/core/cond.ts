@@ -4,7 +4,8 @@ import { fmtMoney } from '../../core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
 import { VALUE_NAME } from '../data/values';
-import { personIs } from './needs';
+import { livingRelation, personIs } from './needs';
+import { single } from './rival-romance';
 import { isDeep } from './values';
 import type { Cond, Life5, Wealth } from './types';
 
@@ -19,6 +20,7 @@ export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
     case 'age': return inRange(s.age, c.min, c.max);
+    case 'rivalAtWork': return s.rival?.career === c.career && s.people.some(p => p.id === s.rival!.personId && p.alive && !p.crew);
     case 'standing': return c.is.includes(h.standing);
     case 'home': return c.is.includes(h.home);
     case 'wealth': return inRange(wealthRank(h.wealth),
@@ -44,6 +46,8 @@ export function check(s: Life5, c: Cond): boolean {
     case 'island': return c.is.includes(h.island) !== (c.not ?? false);
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
+    case 'relation': return !!livingRelation(s, c.is);
+    case 'single': return single(s);
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -63,6 +67,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
     case 'age': return c.min !== undefined && s.age < c.min ? `아직 ${c.min}살이 되지 않았다` : `${c.max}살을 넘겼다`;
+    case 'rivalAtWork': return '그 일을 하는 맞수에게서 온 편지가 없다';
     case 'standing': return '지금 처지로는 할 수 없다';
     case 'home': return '고향이 다르다';
     case 'wealth': return c.min !== undefined && wealthRank(s.hero.wealth) < wealthRank(c.min) ? '집안 형편이 따라 주지 않는다' : '집안이 너무 넉넉하다';
@@ -83,6 +88,8 @@ function reason(s: Life5, c: Cond): string {
     case 'island': return '여기서는 일어나지 않는다';
     case 'species': return '종족이 다르다';
     case 'kin': return '때가 맞지 않는다';
+    case 'relation': return `곁에 ${c.is}이(가) 없다`;
+    case 'single': return '이미 마음을 약속한 사람이 있다';
     case 'path': return '걷는 길이 다르다';
     case 'canonAge': return '그 사람과 때가 맞지 않는다';
     case 'dream': return '마음에 품은 것이 다르다';

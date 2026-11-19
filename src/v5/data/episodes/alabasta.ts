@@ -105,7 +105,7 @@ export const EP_ALABASTA: Turning[] = [
   {
     id: 'ep_alabasta_p6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '모래시계 상단의 우두머리 하잠' },
     title: '6주차 · 하잠의 찻잔',
-    body: '하잠이 천막으로 {name}을(를) 불러 얼음이 뜬 차를 내민다. 이 사막에서 얼음 한 조각이 얼마인지 아느냐고 웃는다. 나는 비를 훔친 적이 없다, 귀한 것에 값을 매겼을 뿐이다, 내가 잠그지 않으면 우물은 굶주린 무리가 하루 만에 말려 버린다. 그러면서 손을 내민다. 그 손등에 레인베이스의 카지노 칩이 굴러다닌다.',
+    body: '하잠이 천막으로 {name}을(를) 불러 얼음이 뜬 차를 내민다. 이 사막에서 얼음 한 조각이 얼마인지 아느냐고 웃는다. 하잠은 귀한 물에 값을 매겼을 뿐이라고 주장한다. 우물을 잠그지 않으면 사람들이 하루 만에 물을 바닥낼 거라는 게 그의 말이다. 그러면서 손을 내민다. 그 손등에 레인베이스의 카지노 칩이 굴러다닌다.',
     doors: [
       { label: '찻잔을 엎고 일어선다', hint: '하잠이 웃는다. 그날 밤부터 상단의 경계가 두 배로 는다', values: { justice: D },
         fx: [flag('ep_alabasta_p_people'), next('ep_alabasta_p7')] },
@@ -255,7 +255,7 @@ export const EP_ALABASTA: Turning[] = [
   {
     id: 'ep_alabasta_w6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '붉은 낙타단의 우두머리 오르한' },
     title: '6주차 · 오르한의 계산',
-    body: '카트레아로 돌아온 {name} 앞에 오르한이 웃으며 나타난다. 반란군은 곧 수도로 간다, 그날 왕궁도 반란군도 서쪽 저수고는 돌아볼 틈이 없다. 싸움이 끝난 뒤 물을 쥔 자가 이 나라를 쥔다. 그는 이미 반란군에게도 왕궁에도 화약을 팔았고, 이제 마지막 셈만 남았다고 말한다.',
+    body: '카트레아로 돌아온 {name} 앞에 오르한이 웃으며 나타난다. 오르한은 반란군이 수도로 떠나기를 기다리고 있다. 그날 왕궁과 반란군이 비워 둘 서쪽 저수고를 차지하면 싸움이 끝난 뒤 나라의 물을 손에 넣을 수 있다. 그는 이미 반란군에게도 왕궁에도 화약을 팔았고, 이제 마지막 셈만 남았다고 말한다.',
     doors: [
       { label: '오르한의 손을 쳐내고 등을 돌린다', hint: '그가 어깨를 으쓱한다. 그날 저수고에서 다시 보자고', values: { justice: D },
         fx: [flag('ep_alabasta_kasim_trust'), next('ep_alabasta_w7')] },
@@ -386,7 +386,7 @@ export const EP_ALABASTA: Turning[] = [
       { label: '회의는 이 나라 사람들에게 맡기고 자리를 뜬다', hint: '펠은 외지인을 붙잡지 않는다', values: { peace: D },
         fx: [next('ep_alabasta_a5')] },
       { label: '조합 사무소를 부순 일을 자랑삼아 늘어놓는다', hint: '회의장이 술렁인다. 펠의 눈이 차가워진다', special: 'dominion', when: [has('ep_alabasta_a_force')],
-        fx: [log('펠이 낮게 말했다. 이 나라는 주먹으로 둘로 갈라졌던 곳이다. 같은 길로 고치지는 않는다.'), next('ep_alabasta_a5')] },
+        fx: [log('펠은 무력으로 한 번 갈라진 나라를 다시 힘으로 다잡을 수는 없다고 했다.'), next('ep_alabasta_a5')] },
     ],
   },
   {
@@ -418,7 +418,7 @@ export const EP_ALABASTA: Turning[] = [
   {
     id: 'ep_alabasta_a7', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '새물 조합의 조합장 무스타파' },
     title: '6주차 · 무스타파의 제안',
-    body: '위조 장부를 들킨 무스타파가 땀을 닦으며 {name}을(를) 사무소로 부른다. 증서는 법이고 나는 값을 치르고 샀다, 가뭄 때 아무도 사지 않던 땅을 내가 샀다고 그는 말한다. 수문만 지켜 주면 물값의 몫을 나눠 주겠다고. 그 말에는 진짜도 섞여 있지만, 판 적 없는 도장 이야기는 한마디도 없다.',
+    body: '위조 장부를 들킨 무스타파가 땀을 닦으며 {name}을(를) 사무소로 부른다. 그는 가뭄 때 아무도 사려 하지 않던 땅을 정당한 값에 샀다며 증서를 내보인다. 수문만 지켜 주면 물값을 나눠 주겠다고 한다. 그 말에는 진짜도 섞여 있지만, 판 적 없는 도장 이야기는 한마디도 없다.',
     doors: [
       { label: '내민 증서 몫을 탁자 위에 그대로 두고 나온다', hint: '무스타파가 혀를 찬다. 수문의 경비가 늘어난다', values: { loyalty: D },
         fx: [flag('ep_alabasta_a_people'), next('ep_alabasta_a8')] },

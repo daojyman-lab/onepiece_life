@@ -30,9 +30,18 @@ import { PRIME } from './prime';
 import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
 import { EPISODE_TURNINGS } from '../episodes';
+import { TRAINING } from './training';
+import { ROUTE_STORIES } from './route-stories';
+import { PORT_STORIES, RESUPPLY } from './ports';
+import { CHILDHOOD_CRISES, CHILDHOOD_MEMORIES } from './childhood-crises';
+import { RIVAL_WORK_LETTERS } from '../rival-letters';
+import { RIVAL_ERRANDS } from './rival-errand';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
+  CHILDHOOD_CRISES, CHILDHOOD_MEMORIES,
+  RIVAL_WORK_LETTERS,
+  RIVAL_ERRANDS,
   BONDS,
   FORTUNES,
   MISFORTUNES,
@@ -63,6 +72,10 @@ const GROUPS: Turning[][] = [
   DREAM_TURNINGS,
   KIN_TURNINGS,
   EPISODE_TURNINGS,
+  TRAINING,
+  ROUTE_STORIES,
+  PORT_STORIES,
+  [RESUPPLY],
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

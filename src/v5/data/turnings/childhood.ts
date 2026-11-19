@@ -31,7 +31,7 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_bully', kind: 'door', when: kid(3, 10), weight: 10, repeat: 'once', speaker: 'hero',
     title: '골목대장', body: '{town} 골목에서 덩치 큰 아이가 작은 아이의 빵을 빼앗아 들고 웃는다.',
     doors: [
-      { label: '끼어들어 막아선다', hint: '대신 얻어맞을지도 모른다', values: { justice: D }, mark: 'unyielding', fx: [{ op: 'hp', add: -10 }] },
+      { label: '빵을 쥔 손목을 붙잡고 작은 아이를 등 뒤로 보낸다', hint: '빼앗은 빵을 돌려 달라고 한다', values: { justice: D }, mark: 'unyielding', fx: [{ op: 'hp', add: -10 }] },
       { label: '골목대장 편에 붙어 빵 부스러기를 얻는다', hint: '배는 부르다. 빵을 빼앗긴 아이가 {name}을(를) 쳐다본다', values: { greed: D }, fx: [] },
       { label: '골목대장을 꺾고 골목을 차지한다', hint: '골목 아이들이 {name}을(를) 따르게 된다', special: 'dominion', values: { dominion: D },
         fx: [{ op: 'flag', id: 'kidBoss' }, { op: 'log', text: '그날부터 골목 아이들은 {name}의 눈치를 보았다.', weight: 'heavy' }] },
@@ -41,8 +41,8 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_sailor_tale', kind: 'door', when: kid(3, 9), weight: 10, repeat: 'once', speaker: { relation: '늙은 뱃사람' },
     title: '늙은 뱃사람의 이야기', body: '{island} 부두의 술집 앞, 다리를 저는 늙은 뱃사람이 위대한 항로 이야기를 들려준다.',
     doors: [
-      { label: '밤늦도록 이야기를 듣는다', hint: '바다 저편이 마음에 오래 남는다', values: { romance: D }, fx: [] },
-      { label: '지도를 그려 달라고 조른다', hint: '머릿속에 바닷길이 그려진다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
+      { label: '노인이 잔을 내려놓자 다음 섬 얘기도 해 달라고 조른다', hint: '술집 주인이 덧문을 닫을 때까지 둘이 층계에 앉아 있는다', values: { romance: D }, fx: [] },
+      { label: '흙바닥을 쓸고 바닷길을 그려 달라고 한다', hint: '노인이 지팡이로 섬을 찍으면 조약돌을 하나씩 놓는다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }] },
       { label: '뱃사람의 보물 이야기를 부잣집 아이에게 팔아넘긴다', hint: '몇 닢을 번다. 뱃사람이 다시는 이야기를 들려주지 않는다', values: { greed: D }, fx: [{ op: 'money', add: 2000 }] },
     ],
   },
@@ -59,7 +59,7 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_marine_parade', kind: 'door', when: kid(4, 12), weight: 10, repeat: 'once', speaker: 'hero',
     title: '해군의 행진', body: '{island} 항구에 군함이 들어왔다. 흰 제복의 수병들이 줄을 맞춰 광장을 지나간다.',
     doors: [
-      { label: '수병에게 경례하는 법을 배운다', hint: '언젠가 저 제복을 입고 싶어진다', values: { justice: D }, fx: [] },
+      { label: '수병에게 경례하는 법을 배운다', hint: '수병이 손끝을 눈썹까지 내려 준다. 지나가는 다음 줄에는 혼자 경례해 본다', values: { justice: D }, fx: [] },
       { label: '아버지의 옛 전우를 찾아간다', hint: '해군 집안의 연줄로 군함에 올라 본다', when: [{ c: 'lineage', is: ['marineFamily'] }], values: { loyalty: D, justice: D }, fx: [{ op: 'flag', id: 'marineContact' }] },
       { label: '행진 대열 뒤에서 수병 흉내를 내며 놀린다', hint: '어른들에게 꾸중을 듣는다', values: { freedom: D }, mark: 'rebel', fx: [] },
     ],
@@ -69,7 +69,7 @@ export const CHILDHOOD: Turning[] = [
     title: '현상수배서', body: '마을 게시판에 새 현상수배서가 붙었다. 활짝 웃는 해적의 얼굴 아래 큰돈이 적혀 있다.',
     doors: [
       { label: '수배서를 몰래 떼어 간직한다', hint: '저 사람처럼 웃으며 살고 싶어진다', values: { freedom: D, romance: D }, fx: [] },
-      { label: '언젠가 내 얼굴도 저기 걸리겠다고 다짐한다', hint: '마음속에 큰 꿈이 자리 잡는다', values: { ambition: D }, mark: 'obsession', fx: [] },
+      { label: '수배서 옆 빈 종이에 제 얼굴과 현상금을 그려 붙인다', hint: '친구가 현상금을 세는 동안 끝에 동그라미를 하나 더 그린다', values: { ambition: D }, mark: 'obsession', fx: [] },
       { label: '아버지가 남긴 바다 이야기를 떠올린다', hint: '해적의 아이만 아는 이야기가 있다', when: [{ c: 'lineage', is: ['pirateChild'] }], values: { freedom: D, loyalty: D }, fx: [{ op: 'flag', id: 'fatherTale' }] },
     ],
   },
@@ -126,9 +126,9 @@ export const CHILDHOOD: Turning[] = [
     title: '처형대', body: '{island} 광장의 처형대. 어른들은 해적왕이 저 위에서 웃으며 죽었다고 말한다.',
     doors: [
       { label: '몰래 처형대 위에 올라가 바다를 본다', hint: '들키면 경비에게 끌려 내려온다', values: { romance: D }, mark: 'obsession', fx: [] },
-      { label: '해적왕이 남긴 말을 곱씹는다', hint: '그 말의 뜻을 알고 싶어진다', values: { inquiry: D }, fx: [] },
-      { label: '언젠가 저 사람보다 높이 서겠다고 맹세한다', hint: '한 번 한 맹세는 거둘 수 없다', special: 'ambition', values: { ambition: D },
-        fx: [{ op: 'flag', id: 'kingOath' }, { op: 'timeline', text: '처형대 앞에서 맹세했다' }] },
+      { label: '그날 광장에 있던 어른에게 로저의 마지막 말을 묻는다', hint: '어디서 그 말을 들었는지 묻고 그 자리까지 걸어가 본다', values: { inquiry: D }, fx: [] },
+      { label: '처형대 앞에 서서 로저의 보물을 먼저 찾겠다고 외친다', hint: '광장 건너편 과일 장수까지 고개를 돌린다', special: 'ambition', values: { ambition: D },
+        fx: [{ op: 'flag', id: 'kingOath' }, { op: 'timeline', text: '로그타운 처형대 아래서 로저의 보물을 찾겠다고 외쳤다' }] },
     ],
   },
   {
@@ -155,8 +155,8 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_promise', kind: 'door', when: kid(8, 15), weight: 9, repeat: 'once', speaker: 'hero',
     title: '떠나는 친구', body: '가장 가까운 동무가 먼 섬으로 이사를 간다. 떠나기 전날 밤, 바닷가에서 약속을 하자고 한다.',
     doors: [
-      { label: '언젠가 같은 배를 타자고 약속한다', hint: '이 약속은 오래 남는다', values: { romance: D }, mark: 'obsession', fx: [{ op: 'flag', id: 'kidPromise' }] },
-      { label: '웃으며 보내 준다', hint: '담담하게 헤어진다', values: { peace: D }, fx: [] },
+      { label: '납작한 조개껍데기 두 개에 같은 깃발을 그려 나눠 갖는다', hint: '나중에 배가 생기면 서로 알아볼 수 있게 이 깃발을 달기로 한다', values: { romance: D }, mark: 'obsession', fx: [{ op: 'flag', id: 'kidPromise' }] },
+      { label: '동무의 짐 보따리에 좋아하던 조약돌을 슬쩍 넣어 준다', hint: '새집에 도착한 뒤 보따리를 풀어 보라고 귀띔한다', values: { peace: D }, fx: [] },
       { label: '손바닥을 그어 피로 맹세한다', hint: '평생 잊지 못할 밤이 된다', special: 'loyalty', values: { loyalty: D },
         fx: [{ op: 'flag', id: 'bloodOath' }, { op: 'timeline', text: '떠나는 동무와 피로 맹세했다' }] },
     ],
@@ -166,13 +166,13 @@ export const CHILDHOOD: Turning[] = [
   {
     id: 'kid_rival', kind: 'door', when: [...kid(3, 9), { c: 'kin', who: 'sibling', has: false }, { c: 'flag', id: 'lonely', has: false }],   // 형제가 있으면 맞수 대신 형제의 이야기가 온다 (bonds.ts)
     weight: 9, repeat: 'once', speaker: 'hero',
-    title: '눈이 마주친 또래', body: '부둣가에서 고집 센 또래 하나와 눈이 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
+    title: '눈이 마주친 또래', body: '마을 어귀의 좁은 길에서 고집 센 또래와 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
     doors: [
       { label: '먼저 주먹을 날린다', hint: '코피가 터지도록 뒹군다. 그 아이와는 오래 겨루는 사이가 된다', values: { dominion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' }] },
-      { label: '등대까지 달리기로 겨루자고 한다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
+      { label: '마을을 한 바퀴 돌아 누가 먼저 도착하는지 겨룬다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' },
-             { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }], else: [{ op: 'log', text: '등대 앞에서 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
+             { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }], else: [{ op: 'log', text: '출발선으로 돌아왔을 때 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
       { label: '눈싸움을 그만두고 손을 내민다', hint: '그 아이는 한참 망설이다 손을 잡는다. 겨룰 상대 대신 놀 동무가 생긴다', values: { loyalty: D },
         fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }] },
     ],

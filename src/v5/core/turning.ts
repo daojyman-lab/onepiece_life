@@ -1,15 +1,14 @@
 // 전환점과 문: 고를 수 있는 문을 풀고, 띄우고, 고른 답을 적용한다.
 import { buildVoyage, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../../core/josa';
-import { fill } from '../../core/util';
 import { chance, weighted, type Rng } from '../../core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
-import { applyFx } from './fx';
-import { needsOk, whyNeed } from './needs';
+import { applyFx, fillText } from './fx';
+import { livingRelation, needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep } from './values';
 import { isQuiet } from './year';
@@ -22,16 +21,11 @@ import type { Life5, ResolvedDoor, Turning } from './types';
 const OPENED_ELSEWHERE = new Map<string, Turning>();
 const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id);
 
-/** 자리표시 {name}(이름만) {town} {island}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
-function fillTurning(s: Life5, text: string): string {
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island });
-}
-
 function speakerOf(s: Life5, t: Turning): string {
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
   if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
-  return s.people.find((p) => p.alive && p.relation === sp.relation)?.name ?? sp.relation;
+  return livingRelation(s, sp.relation)?.name ?? sp.relation;
 }
 
 /** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
@@ -41,7 +35,7 @@ export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
     if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
-      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,
+      label: fillText(s, d.label), hint: fillText(s, d.hint), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
@@ -59,18 +53,22 @@ export function stillOpen(s: Life5, t: Turning): boolean {
   return !s.closed.includes(t.id) && (s.seenCount[t.id] ?? 0) < capOf(t);
 }
 
+function canAttend(s: Life5, t: Turning): boolean {
+  return s.hero.standing !== 'prisoner' || t.kind !== 'door' || t.id.startsWith('prison_');
+}
+
 /**
  * 전환점을 띄운다. 닫혔거나 상한에 닿았거나, 글이 전제하는 것(needs)이 없거나, 열린 문이 하나도 없으면
  * false를 돌려주고 아무것도 하지 않는다.
  */
 export function openTurning(s: Life5, t: Turning): boolean {
-  if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
+  if (!canAttend(s, t) || !stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
   if (TURNING_BY_ID[t.id] !== t) OPENED_ELSEWHERE.set(t.id, t);
   s.pending = {
     kind: 'door', turning: t.id, moment: t.kind === 'moment',
-    title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
+    title: fillText(s, t.title), body: fillText(s, t.body), speaker: speakerOf(s, t), doors,
   };
   s.seen[t.id] = s.age;
   s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
@@ -83,11 +81,10 @@ function stopsGoal(s: Life5): number {
   return V.stopsPerYear.find((x) => s.age <= x.to)?.n ?? 0;
 }
 
-/** 이 토막에 멈출 차례인가. 올해 목표를 한 번 넘게 넘기면 더 멈추지 않는다. */
+/** 항해·수련·고향 사건을 포함해 이미 고른 만큼 올해의 일반 사건 추첨을 줄인다. */
 export function wantsStop(s: Life5, r: Rng): boolean {
-  const n = stopsGoal(s);
-  if (s.stopsThisYear >= Math.ceil(n) + 1) return false;
-  return chance(r, n / V.partsPerYear);
+  const remaining = stopsGoal(s) - s.stopsThisYear;
+  return remaining > 0 && chance(r, remaining / V.partsPerYear);
 }
 
 /**
@@ -103,7 +100,7 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
-  return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
+  return canAttend(s, t) && checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
 }
 
 /**
@@ -141,7 +138,7 @@ export function openQueued(s: Life5): boolean {
 export function pickTurning(s: Life5, r: Rng): Turning | null {
   const queued = takeQueued(s, false);
   if (queued) return queued;
-  const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
+  const pool = TURNINGS.filter((t) => t.weight > 0 && (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
   return weighted(r, pool, (t) => t.weight);
 }
 
@@ -155,7 +152,11 @@ export function answerDoor(s: Life5, index: number): void {
   if (!chosen || chosen.locked || !t || !door) return;
 
   const before = { ...s.values };
-  const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
+  const values = { ...door.values };
+  if (values.greed && values.greed > 0 && door.fx.some(fx => fx.op === 'money' && fx.add > 0)) {
+    values.greed *= V.value.greedProfit;
+  }
+  const rose = addValues(s, values, p.moment ? V.value.moment / V.value.door : 1);
   // 이번 선택으로 깊어지는 선을 넘었을 때만 "깊어졌다". 아직 깊지 않거나 이미 깊으면 "기울었다" (인물 칸의 말과 맞춘다)
   for (const id of rose) {
     const crossed = before[id] < V.value.deep && isDeep(s, id);

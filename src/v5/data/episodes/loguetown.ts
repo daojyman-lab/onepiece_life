@@ -97,13 +97,13 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_a4', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'smoker' },
     title: '4주차 · 처형대 광장의 두 목소리',
-    body: '광장 상인회가 모였다. 지도 장수 덕에 풋내기들이 몰려와 장사가 된다는 쪽과, 우리 거리가 사람 잡는 지도를 판다는 소문이 더 무섭다는 쪽이 맞선다. 그때 하얀 연기가 회관 문틈으로 기어들어 시가 두 대를 문 사내가 된다. 스모커 대령은 누구 편도 들지 않고 {name}만 본다. 요 몇 주 이 거리에서 네가 한 짓은 다 들었다고.',
+    body: '광장 상인회가 모였다. 지도 장수 덕에 풋내기들이 몰려와 장사가 된다는 쪽과, 우리 거리가 사람 잡는 지도를 판다는 소문이 더 무섭다는 쪽이 맞선다. 그때 하얀 연기가 회관 문틈으로 기어들어 시가 두 대를 문 사내가 된다. 스모커 대령은 누구 편도 들지 않고 {name}만 본다. 대령은 지난 몇 주 동안 {name}이(가) 이 거리에서 한 일을 이미 알고 있다.',
     doors: [
       { label: '맞춰 본 장부와 창고 자리를 대령 앞에 내놓는다', hint: '대령은 대답 없이 연기만 내뿜는다. 그래도 기억은 한다', when: [has('ep_loguetown_a_depot')], values: { justice: D },
         fx: [flag('ep_loguetown_a_smoker'), { op: 'person', kind: 'ally', relation: '장부를 받아 든 연기의 대령', canon: 'smoker' },
-             log('대령은 장부를 넘기다 말했다. 증거는 받아 두지. 하지만 이건 네가 시작한 일이다. 끝도 네가 봐라.'), next('ep_loguetown_a5')] },
+             log('대령은 장부를 훑어보고 증거로 받아 두었다. 사건을 마무리하는 일은 처음 나섰던 {name}에게 맡겼다.'), next('ep_loguetown_a5')] },
       { label: '주먹으로 거리를 휘저은 일을 따지는 대령 앞에서 고개를 든다', hint: '연기가 목덜미를 감는다. 다음은 없다는 경고다', when: [has('ep_loguetown_a_force')], values: { dominion: D },
-        fx: [{ op: 'hp', add: -5 }, log('대령은 연기로 {name}의 멱살을 들어 올렸다가 내려놓았다. 해적이든 아니든 이 거리를 주먹으로 휘두르는 놈은 내가 잡는다고.'), next('ep_loguetown_a5')] },
+        fx: [{ op: 'hp', add: -5 }, log('대령은 연기로 {name}의 멱살을 들어 올렸다가 내려놓았다. 누가 됐든 주먹으로 거리를 휘두르면 직접 잡아들이겠다는 경고였다.'), next('ep_loguetown_a5')] },
       { label: '먹물회의 아이들도 이 거리 사람이라고 말한다', hint: '대령의 눈썹이 꿈틀한다. 리코가 문밖에서 듣고 있다', values: { loyalty: D },
         fx: [flag('ep_loguetown_a_riko'), log('주먹을 휘두른 놈이 할 소리냐고 대령이 말했다. 그래도 아이들을 잡아들이란 말은 끝내 하지 않았다.', 'light'), next('ep_loguetown_a5')] },
       { label: '짓테 앞에 서서 한 수 겨뤄 달라고 한다', hint: '잡으려는 싸움이 아니다. 대령의 진짜 힘을 몸으로 안다', special: 'ambition', when: [ready(3)], values: { ambition: D }, danger: true,
@@ -127,7 +127,7 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_a6', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '가짜 지도 사기단 두목' },
     title: '6주차 · 먹물손의 제안',
-    body: '손톱 밑까지 먹물이 밴 사내가 처형대 계단에 앉아 {name}을(를) 기다린다. 먹물손 도링이다. 꿈만 크고 해도 하나 읽을 줄 모르는 풋내기들이 어차피 바다에서 죽는다고, 자기는 그 꿈에 값을 매길 뿐이라고 웃는다. 그러고는 금화 자루를 내민다. 한몫 끼든지, 입을 다물든지.',
+    body: '손톱 밑까지 먹물이 밴 사내가 처형대 계단에 앉아 {name}을(를) 기다린다. 먹물손 도링이다. 꿈만 크고 해도 하나 읽을 줄 모르는 풋내기들이 어차피 바다에서 죽는다고, 자기는 그 꿈에 값을 매길 뿐이라고 웃는다. 그러고는 금화 자루를 내민다. 일에 끼워 줄 수도 있고, 그저 입을 다물어 주어도 좋다는 뜻이다.',
     doors: [
       { label: '금화 자루를 걷어차고 돌아선다', hint: '거리 사람들이 그 장면을 본다. 먹물회는 경계를 굳힌다', values: { justice: D },
         fx: [{ op: 'fame', add: 2 }, log('금화가 처형대 계단에 쏟아졌다. 도링은 줍지도 않고 웃기만 했다.', 'light'), next('ep_loguetown_a7')] },
@@ -173,7 +173,7 @@ export const EP_LOGUETOWN: Turning[] = [
     title: '8주차 · 창고의 결판',
     body: '먹물손 도링이 창고 문을 등지고 선다. 허리춤의 단발 권총 두 자루, 발밑에는 찢긴 지도 더미. 쥐새끼 한 마리가 장사를 망쳤다고, 처형대 아래서 썩은 지도만 팔아 온 게 아니라고 낮게 웃는다. 두목은 질 것 같으면 아이들을 방패로 세울 사내다.',
     doors: [
-      { label: '젖은 화약 냄새를 맡으며 곧장 파고든다', hint: '총이 헛불을 튀긴다. 이번에는 내가 빠르다', when: [has('ep_loguetown_a_sab')], values: { dominion: D }, danger: true,
+      { label: '젖은 화약 냄새를 맡으며 곧장 파고든다', hint: '총이 헛불을 튀긴다. 이번에는 {name}이(가) 먼저 움직인다', when: [has('ep_loguetown_a_sab')], values: { dominion: D }, danger: true,
         fx: [fight('b_mapcon_worn', false, { win: 'ep_loguetown_a8w', lose: 'ep_loguetown_a9', back: 'ep_loguetown_a9' })] },
       { label: '두목에게 덤벼든다', hint: '총알이 날아온다. 지면 다치고 먹물회는 달아난다', values: { justice: D }, danger: true,
         fx: [fight('b_mapcon', false, { win: 'ep_loguetown_a8w', lose: 'ep_loguetown_a9', back: 'ep_loguetown_a9' })] },
@@ -189,7 +189,7 @@ export const EP_LOGUETOWN: Turning[] = [
     body: '먹물손이 지도 더미 위에 대자로 뻗었다. 아이들이 하나둘 구석에서 기어 나오고, 리코가 바닥에 흩어진 가짜 지도를 밟으며 묻는다. 이제 우리는 어떻게 되느냐고. 골목 끝에서 시가 냄새가 풍겨 온다.',
     doors: [
       { label: '두목을 묶어 대령에게 넘기고 장부를 증거로 댄다', hint: '대령이 시가를 문 채 고개를 끄덕인다', when: [has('ep_loguetown_a_smoker')], values: { justice: D },
-        fx: [flag('ep_loguetown_a_won'), { op: 'fame', add: 5 }, log('결말 · 연기가 거둔 먹물. 스모커는 도링을 끌고 가며 말했다. 다음엔 내가 먼저 잡는다. 그게 칭찬이었다.'),
+        fx: [flag('ep_loguetown_a_won'), { op: 'fame', add: 5 }, log('결말 · 연기가 거둔 먹물. 스모커는 도링을 끌고 가며 다음에는 자신이 먼저 범인을 잡겠다고 했다. 나름의 칭찬이었다.'),
              time('로그타운의 가짜 지도 사기단을 무너뜨리고 그 두목을 스모커에게 넘겼다', 'smoker'), next('ep_loguetown_a10')] },
       { label: '두목을 묶어 둔 채 아이들에게 정하게 한다', hint: '리코가 처음으로 큰 소리를 낸다', values: { loyalty: D },
         fx: [flag('ep_loguetown_a_won'), next('ep_loguetown_a9')] },
@@ -208,7 +208,7 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '처형대 앞 게시판에 페니의 장부가 붙는 것을 본다', hint: '풋내기들이 떠나기 전에 그 앞에서 멈춘다', when: [has('ep_loguetown_a_won'), has('ep_loguetown_a_penny')], values: { inquiry: D },
         fx: [log('결말 · 처형대 장부. 페니는 돌아오지 않은 배의 이름과 가짜 지도의 생김새를 게시판에 붙였다. 그 앞에서 풋내기들이 지도를 찢었다.'),
              time('로그타운 처형대 앞에 사기 지도를 경고하는 장부를 붙였다')] },
-      { label: '처형대 그림자가 길어질 때까지 앉아 있다', hint: '이 거리는 내가 없어도 그럭저럭 굴러간다', values: { peace: D },
+      { label: '처형대 그림자가 길어질 때까지 앉아 있다', hint: '거리의 하루는 여느 때처럼 흘러간다', values: { peace: D },
         fx: [log('결말 · 지나가는 구경꾼. 몇 달 뒤 다른 장수가 처형대 아래서 같은 지도를 펼쳤다. {name}은(는) 그 소문을 먼 곳에서 들었다.'),
              time('로그타운 처형대 아래에서 바다를 꿈꾸었다')] },
     ],
@@ -220,7 +220,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '리코가 내민 가짜 지도를 받는다', hint: '뒷면에 리코가 삐뚤빼뚤 그린 진짜 항로가 있다', when: [has('ep_loguetown_a_riko')], values: { romance: D },
         fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_riko'), log('가짜 지도 뒷면의 진짜 항로. 리코는 언젠가 그 길로 가겠다고 했다.')] },
-      { label: '페니가 찢어 준 장부 한 장을 품에 넣는다', hint: '거기에 내 이름도 적혀 있다', when: [has('ep_loguetown_a_penny')], values: { inquiry: D },
+      { label: '페니가 찢어 준 장부 한 장을 품에 넣는다', hint: '거기에 {name}의 이름도 적혀 있다', when: [has('ep_loguetown_a_penny')], values: { inquiry: D },
         fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_penny'), log('장부 한 장에 {name}의 이름과 날짜가 적혀 있었다. 처형대를 지나간 사람, 이라고.')] },
       { label: '손을 흔들고 부두로 걸어간다', hint: '처형대가 등 뒤에서 작아진다', values: { freedom: D },
         fx: [flag('ep_loguetown_pre_done'), log('처형대 그림자가 길게 늘어졌다. {name}은(는) 그 끝이 바다를 가리킨다고 생각했다.', 'light')] },
@@ -247,7 +247,7 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_b2', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { relation: '신문 배달소의 페니' },
     title: '2주차 · 우산 장수의 장바구니',
-    body: '페니의 수첩에 따르면 검은 우산단은 흑우산 바넷이라는 사내가 이끈다. 기름, 갈고리, 방수포, 그리고 광장 하수도의 낡은 도면. 해군 지부 압수품 창고가 광장 바로 옆이라는 게 마음에 걸린다고 페니가 말한다. 처형대에 해적이 하나 묶이는 날이면 온 해군이 광장으로 몰릴 텐데.',
+    body: '페니의 수첩에 따르면 검은 우산단은 흑우산 바넷이라는 사내가 이끈다. 기름, 갈고리, 방수포, 그리고 광장 하수도의 낡은 도면. 해군 지부의 압수품 창고는 광장 바로 옆이다. 페니는 처형이 열리는 날 해군이 광장으로 몰리면 창고를 지킬 사람이 없을까 걱정한다.',
     doors: [
       { label: '우산단에 물건을 대는 밧줄 가게 주인을 윽박지른다', hint: '빨리 듣지만 우산단 귀에도 들어간다', values: { dominion: D },
         fx: [flag('ep_loguetown_b_tunnel'), log('밧줄 가게 주인은 하수도 도면을 판 것까지 털어놓았다. 그날 밤 가게 앞에 검은 우산 하나가 꽂혀 있었다.', 'light'), next('ep_loguetown_b3')] },
@@ -289,15 +289,15 @@ export const EP_LOGUETOWN: Turning[] = [
   {
     id: 'ep_loguetown_b5', kind: 'door', when: [], weight: 0, repeat: 'once', speaker: { canon: 'smoker' },
     title: '5주차 · 연기가 떠나는 부두',
-    body: '벼락은 처형대를 두 동강 냈고, 밀짚모자는 웃으며 살아남았다. 그 틈에 압수품 창고가 털렸다. 상인회는 부두 아이들이 훔쳤다고 몰아세우고, 리코의 친구 둘이 지부 마당에 끌려와 있다. 군함 트랩 앞에서 스모커 대령이 시가를 씹는다. 나는 밀짚모자를 쫓는다, 이 거리 일은 이 거리 놈들이 하라고. 그러고는 {name}을(를) 돌아본다. 그날 네가 어디서 뭘 했는지는 들었다고.',
+    body: '벼락은 처형대를 두 동강 냈고, 밀짚모자는 웃으며 살아남았다. 그 틈에 압수품 창고가 털렸다. 상인회는 부두 아이들이 훔쳤다고 몰아세우고, 리코의 친구 둘이 지부 마당에 끌려와 있다. 군함 트랩 앞에서 스모커 대령이 시가를 씹는다. 스모커는 밀짚모자를 쫓을 생각이다. 거리의 일은 주민들에게 맡기고 {name}을(를) 돌아본다. 처형이 있던 날 {name}이(가) 무슨 일을 했는지는 이미 들었다.',
     doors: [
       { label: '하수도에서 본 것과 우산단의 숨은 배를 털어놓는다', hint: '대령이 안경 쓴 상사에게 받아 적으라고 턱짓한다', when: [has('ep_loguetown_b_vault')], values: { justice: D },
         fx: [flag('ep_loguetown_b_smoker'), { op: 'person', kind: 'ally', relation: '부두에서 증언을 받아 간 연기의 대령', canon: 'smoker' },
-             log('스모커는 아이 둘을 풀어 주라고 한마디 하고 트랩을 올랐다. 우산단을 잡는 건 끝내 네 몫이라고 덧붙였다.'), next('ep_loguetown_b6')] },
+             log('스모커는 아이 둘을 풀어 주라고 한마디 하고 트랩을 올랐다. 우산단을 잡는 일은 {name}에게 맡겼다.'), next('ep_loguetown_b6')] },
       { label: '끌려온 아이들 앞을 막아서고 누명이라고 소리친다', hint: '대령은 대답 대신 연기를 내뿜는다. 리코가 이를 악문다', values: { loyalty: D },
         fx: [flag('ep_loguetown_b_riko'), log('그날 광장에서 뭘 했는지 보면 안다고, 대령은 그 말만 남겼다. 아이들은 해 질 녘에야 풀려났다.', 'light'), next('ep_loguetown_b6')] },
       { label: '그날 광장에서 사람들을 내보낸 일을 묻는 대령에게 고개를 끄덕인다', hint: '대령이 상인회를 돌아보며 시가를 짓씹는다', when: [has('ep_loguetown_b_plaza')], values: { peace: D },
-        fx: [flag('ep_loguetown_b_evac'), log('그 녀석이 광장 출구를 열었다, 대령은 상인회에 그 말만 했다. 상인과 짐꾼이 한 조로 밤길을 돌기로 했다.', 'light'), next('ep_loguetown_b6')] },
+        fx: [flag('ep_loguetown_b_evac'), log('대령은 {name}이(가) 광장 출구를 열었다는 사실만 상인회에 전했다. 상인과 짐꾼이 한 조로 밤길을 돌기로 했다.', 'light'), next('ep_loguetown_b6')] },
       { label: '항구의 우산단 연락책을 붙잡아 배 이름을 묻는다', hint: '광장의 혼란을 이용한 도둑들의 배를 알아낸다', special: 'dominion', when: [ready(2)], values: { dominion: D }, danger: true,
         fx: [flag('ep_loguetown_b_vault'), log('연락책의 젖은 장부에 압수품을 실을 배의 이름이 적혀 있었다.'), next('ep_loguetown_b6')] },
     ],
@@ -382,7 +382,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '대령이 남긴 쪽지대로 바넷과 압수품을 지부에 넘긴다', hint: '부두 아이들의 누명도 함께 벗겨진다', when: [has('ep_loguetown_b_smoker')], values: { justice: D },
         fx: [flag('ep_loguetown_b_won'), { op: 'fame', add: 5 },
-             log('결말 · 연기가 남긴 쪽지. 스모커의 쪽지에는 단 한 줄, 그 녀석 말을 들어라, 라고 적혀 있었다. 우산단은 붙잡혔고 아이들의 이름은 지부 장부에서 지워졌다.'),
+             log('결말 · 연기가 남긴 쪽지. 스모커가 남긴 쪽지에는 {name}의 말을 들어 보라는 지시가 한 줄 적혀 있었다. 우산단은 붙잡혔고 아이들의 이름은 지부 장부에서 지워졌다.'),
              time('스모커가 떠난 로그타운에서 처형대의 날을 틈탄 약탈단을 붙잡았다', 'smoker'), next('ep_loguetown_b11')] },
       { label: '바넷을 묶어 부두 사람들 앞에 세운다', hint: '부두가 처음으로 큰 소리로 웃는다', values: { ambition: D },
         fx: [flag('ep_loguetown_b_won'), next('ep_loguetown_b10')] },
@@ -499,7 +499,7 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [{ op: 'fame', add: 2 }, next('ep_loguetown_c7')] },
       { label: '받아들이는 척하며 빚배가 뜨는 날을 캐묻는다', hint: '조합장이 흡족해하며 서쪽 선창 이야기를 흘린다', values: { ambition: D },
         fx: [flag('ep_loguetown_c_depot'), log('카스퍼는 새 부조합장에게 창고 열쇠 하나를 건넸다. 빚배는 다음 달 초하루에 뜬다.', 'light'), next('ep_loguetown_c7')] },
-      { label: '금화 상자를 받고 부조합장 자리에 앉는다', hint: '광장의 돈이 내 손을 거친다. 리코의 술집은 문을 닫아건다', values: { greed: D },
+      { label: '금화 상자를 받고 부조합장 자리에 앉는다', hint: '광장의 돈이 {name}의 손을 거친다. 리코의 술집은 문을 닫아건다', values: { greed: D },
         fx: [flag('ep_loguetown_c_deal'), { op: 'money', add: 15000 }, next('ep_loguetown_c6d')] },
       { label: '빚배의 풋내기들을 먼저 풀어 주면 생각해 보겠다고 한다', hint: '조합장이 잔을 내려놓는다. 흥정이 시작된다', special: 'peace', values: { peace: D },
         fx: [flag('ep_loguetown_c_evac'), log('카스퍼는 빚배 셋의 쇠사슬을 풀었다. 나머지는 손을 잡은 뒤에 이야기하자고 했다.'), next('ep_loguetown_c7')] },
@@ -588,7 +588,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '리코가 벽에서 내려 준 액자 속 지도를 받는다', hint: '그 시절 창고에서 마지막으로 남은 한 장이다', when: [has('ep_loguetown_c_riko')], values: { loyalty: D },
         fx: [flag('ep_loguetown_post_done'), log('액자 속 가짜 지도는 그날 창고에서 마지막으로 남은 한 장이었다. 리코는 이제 이게 진짜 보물이라고 했다.')] },
-      { label: '페니가 장부에 내 이름을 마지막 줄로 적는 것을 본다', hint: '처형대를 지나간 사람, 이라고 쓴다', when: [has('ep_loguetown_c_penny')], values: { inquiry: D },
+      { label: '페니가 장부 마지막 줄에 이름을 적는 모습을 본다', hint: '처형대를 지나간 사람, 이라고 쓴다', when: [has('ep_loguetown_c_penny')], values: { inquiry: D },
         fx: [flag('ep_loguetown_post_done'), log('장부의 마지막 줄에 {name}의 이름이 적혔다. 첫 장의 글씨와 같은 손이었다.')] },
       { label: '갓 들어온 풋내기 배에 로그 포스 하나를 던져 주고 떠난다', hint: '저 배가 어디까지 갈지는 아무도 모른다', values: { freedom: D },
         fx: [flag('ep_loguetown_post_done'), { op: 'money', add: -2000 }, time('로그타운에서 새 세대의 풋내기에게 항로를 열어 주었다')] },

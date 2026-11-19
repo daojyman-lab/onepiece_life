@@ -2,6 +2,7 @@
 // 창을 닫는 길은 마지막 장면의 단추(명예의 전당에 남기기)뿐이다. 장면은 화면을 누르거나 단추로 넘긴다.
 import { useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
+import { josa } from '../../../core/josa';
 import { actions } from '../../app/store';
 import type { Meta5 } from '../../core/meta';
 import type { Life5 } from '../../core/types';
@@ -41,8 +42,8 @@ export function EndingModal({ s, meta }: { s: Life5; meta: Meta5 }) {
     ) },
     ...(v.canonWords.length || v.canonMoments.length ? [{ key: 'canon', body: (
       <div class="scene5">
-        {v.canonWords.length > 0 && <div class="t9 soft">원작 인물의 한마디</div>}
-        {v.canonWords.map((w, i) => <div key={i}><span class="soft">{w.who}</span> 「{w.line}」</div>)}
+        {v.canonWords.length > 0 && <div class="t9 soft">인연을 맺은 이들의 기억</div>}
+        {v.canonWords.map((w, i) => <div key={i}><span class="soft">{josa(`${w.who}은(는)`)}</span> {w.line}</div>)}
         {v.canonMoments.length > 0 && <div class="t9 soft" style={{ marginTop: 8 }}>겹친 원작 순간</div>}
         {v.canonMoments.map((m, i) => <div key={i} class="t9">{m}</div>)}
       </div>

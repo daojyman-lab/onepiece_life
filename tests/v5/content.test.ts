@@ -37,7 +37,7 @@ describe('사건 데이터의 짜임', () => {
   it('id가 겹치지 않는다', () => {
     expect(new Set(TURNINGS.map((t) => t.id)).size).toBe(TURNINGS.length);
   });
-  it('문은 2~3개이고, 특별한 문은 많아야 하나 더', () => {
+  it('문은 2~3개이고, 가치관 특별문은 하나 더 열릴 수 있다', () => {
     for (const t of doorTurnings) {
       const plain = t.doors.filter((d) => !d.special).length, special = t.doors.length - plain;
       expect(plain, t.id).toBeGreaterThanOrEqual(2); expect(plain, t.id).toBeLessThanOrEqual(3); expect(special, t.id).toBeLessThanOrEqual(1);

@@ -4,7 +4,7 @@ import { foePower, gapOf, heroFightStats } from '../../core/fight';
 import { TURNING_BY_ID } from '../../data/turnings';
 import type { EnemySpec, Life5, Pending5 } from '../../core/types';
 import { foeWho, speakerOf } from './faces';
-import { bandWord } from './words';
+import { bandWord, crewGrade } from './words';
 import { GRADES, GRADE_TOP } from '../../data/words';
 import { rating5 } from '../../core/power';
 
@@ -52,7 +52,7 @@ export function fightView(s: Life5, p: Extract<Pending5, { kind: 'fight' }>): Fi
     crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).length,
     grade: {
       me: bandWord(rating5(s), GRADES, GRADE_TOP), foe: bandWord(foePower(p.foe), GRADES, GRADE_TOP),
-      crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).map((x) => bandWord(x.crew!.power, GRADES, GRADE_TOP)),
+      crew: s.people.filter((x) => x.alive && x.crew && x.crew.injuredMonths <= 0).map(x => crewGrade(s, x)),
     },
     risk: [
       { label: '다칠 위험', word: w.injury },

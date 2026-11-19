@@ -17,7 +17,7 @@ const FREE = st('pirate', 'bountyHunter', 'revolution', 'warlord');
 /** 이미 있던 바다의 전환점 가운데 그 섬에서 일어나는 것 (index.ts가 섬 조건을 더한다) */
 export const ISLAND_OF: Record<string, string> = {
   gl_whisky_peak: '위스키 피크', gl_little_garden: '리틀 가든', gl_mock_town: '자야', gl_aqua_laguna: '워터 세븐',
-  gl_sabaody_auction: '샤본디 제도', nw_zou: '조',
+  gl_sabaody_auction: '샤본디 제도', nw_zou: '조우',
 };
 
 export const ISLANDS: Turning[] = [
@@ -41,7 +41,7 @@ export const ISLANDS: Turning[] = [
     doors: [
       { label: '칼을 받아 주고, 따라오고 싶으면 타라고 한다', hint: '둘은 그날부터 {name}을(를) 형님이라 부른다', needs: ['ship'], when: [FREE], values: { dominion: D },
         fx: [{ op: 'person', kind: 'crew', relation: '형님이라 부르며 따라온 사냥꾼', canon: 'johnny', role: 'support' },
-             heavy('조니가 갑판에 무릎을 꿇었다. 형님! 종이 한 장 차이로 졌습니다!'), line('사냥꾼 조니를 배에 태웠다', 'johnny')] },
+             heavy('조니는 갑판에 무릎을 꿇고 간발의 차로 졌다며 {name}을(를) 형님으로 모셨다.'), line('사냥꾼 조니를 배에 태웠다', 'johnny')] },
       { label: '앓는 쪽에게 귤을 짜 먹이는 법부터 일러 준다', hint: '뱃사람이 왜 이를 잃는지 아는 사람은 드물다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '귤 한 알을 빚진 사냥꾼', canon: 'johnny' }] },
       { label: '수배서 뭉치에서 값나가는 것만 골라 사들인다', hint: '쓸 만한 사냥감의 행방을 손에 넣는다', when: [{ c: 'money', min: 5000 }], values: { ambition: D },
@@ -68,7 +68,7 @@ export const ISLANDS: Turning[] = [
     doors: [
       { label: '밤새 같이 춤추고 노래하다 벗이 된다', hint: '우정에 걸린 시간은 하룻밤이다. 사내는 제 배를 버리고 따라오겠다고 한다', needs: ['ship'], when: [FREE], values: { romance: D },
         fx: [{ op: 'person', kind: 'crew', relation: '하룻밤에 벗이 된 발레 권법가', canon: 'bonclay', role: 'vanguard' },
-             heavy('봉쿠레가 뱃머리에서 외쳤다. 우정에 세월은 상관없는 거야!'), line('발레 권법가 봉쿠레와 벗이 되었다', 'bonclay')] },
+             heavy('봉쿠레는 함께 보낸 시간이 짧아도 이미 친구라며 뱃머리에서 두 팔을 벌렸다.'), line('발레 권법가 봉쿠레와 벗이 되었다', 'bonclay')] },
       { label: '그 능력으로 무엇을 하고 다니는지 묻는다', hint: '사내는 입에 손가락을 댄다. 이 나라에 무언가 숨은 조직이 있다', values: { inquiry: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, flag('baroqueHint'), { op: 'person', kind: 'ally', relation: '강에서 건져 준 발레 권법가', canon: 'bonclay' }] },
       { label: '제 얼굴을 한 사내를 믿지 않고 배에서 내리게 한다', hint: '아무 일도 일어나지 않는다. 백조 배는 노래하며 멀어진다', values: { justice: D },
@@ -94,7 +94,7 @@ export const ISLANDS: Turning[] = [
     doors: [
       { label: '두들겨 패서 얼굴 뼈를 바로잡아 준다', hint: '두목은 거울을 보고 울음을 터뜨린다. 그날부터 은인이라며 따라다닌다', needs: ['ship'], when: [FREE], values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'crew', relation: '얼굴을 고쳐 준 날치 기수', canon: 'duval', role: 'support' },
-             heavy('듀발이 윙크를 날렸다. 이 잘생긴 얼굴, 평생 은인께 바치겠습니다!'), line('날치 기수 듀발을 배에 태웠다', 'duval')] },
+             heavy('듀발은 새 얼굴로 윙크를 하며 평생 은혜를 갚겠다고 했다.'), line('날치 기수 듀발을 배에 태웠다', 'duval')] },
       { label: '날치 떼를 따돌리고 숲 안쪽으로 달아난다', hint: '싸우지 않는다. 비눗방울 사이로 숨는다', values: { freedom: D },
         fx: [{ op: 'base', key: 'spd', add: 1 }] },
       { label: '무리가 잡아 둔 사람들을 풀어 주라고 한다', hint: '말로는 듣지 않는다. 주먹이 오간다', values: { justice: D }, danger: true,
@@ -102,7 +102,7 @@ export const ISLANDS: Turning[] = [
     ],
   },
   {
-    id: 'isl_thriller_shadow', kind: 'door', when: at(age(17), SAIL, on('스릴러 바크')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'isl_thriller_shadow', kind: 'door', when: at(age(17, 18), SAIL, on('스릴러 바크')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '안개 속의 떠다니는 섬', body: '짙은 안개 속에서 섬만 한 배가 나타났다. 숲에는 그림자가 없는 사람들이 숨어 산다. 해가 뜨면 몸이 타 버린다고 한다. 성에서는 밤마다 꿰맨 자국투성이의 시체들이 걸어 나온다.',
     doors: [
       { label: '걸어 다니는 시체의 입에 소금을 밀어 넣어 본다', hint: '그림자 하나가 제 주인에게 돌아간다. 성의 주인이 알아챈다', values: { inquiry: D }, danger: true,
@@ -144,7 +144,7 @@ export const ISLANDS: Turning[] = [
     doors: [
       { label: '잔을 받고, 한 번 잔을 나눈 사이의 맹세를 한다', hint: '꽃 나라의 수군은 잔을 나눈 상대를 끝까지 따른다', needs: ['ship'], when: [FREE], values: { loyalty: D },
         fx: [{ op: 'person', kind: 'crew', relation: '잔을 나눈 꽃 나라 수군의 두령', canon: 'sai', role: 'vanguard' },
-             heavy('사이가 잔을 바닥에 내리쳤다. 오늘부터 팔보수군은 네 부름에 답한다.'), line('꽃 나라 수군의 사이와 잔을 나눴다', 'sai')] },
+             heavy('사이는 잔을 바닥에 내리치며 앞으로 {name}이(가) 부르면 팔보수군을 이끌고 오겠다고 약속했다.'), line('꽃 나라 수군의 사이와 잔을 나눴다', 'sai')] },
       { label: '투기장에 이름을 올리고 끝까지 싸운다', hint: '살아서 나오면 온 신세계가 그 이름을 안다', values: { ambition: D }, danger: true,
         fx: [{ op: 'hp', add: -30 }, { op: 'fame', add: 60 }, { op: 'mastery', branch: 'fist', add: 20 }, { op: 'chance', p: 0.35, then: [{ op: 'injury', severity: 'heavy' }] },
              line('드레스로자의 투기장에서 끝까지 싸웠다')] },
@@ -169,7 +169,7 @@ export const ISLANDS: Turning[] = [
     title: '거인의 나라', body: '세상에서 가장 큰 나무 아래에 거인들의 나라가 있다. 술통이 집채만 하다. 거인 전사들이 작은 방문객을 신기한 듯 손바닥에 올려 눈높이를 맞춘다.',
     doors: [
       { label: '집채만 한 술통을 같이 비우며 옛 이야기를 듣는다', hint: '거인은 작은 사람의 배짱에 크게 웃는다', values: { loyalty: D },
-        fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'wil', add: 1 }, heavy('술통 너머로 거인들의 웃음소리에 나뭇잎이 떨어졌다. 좋다, 작은 손님!')] },
+        fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'wil', add: 1 }, heavy('거인들이 작은 손님을 반기며 술통 너머에서 크게 웃었다. 머리 위에서 나뭇잎이 우수수 떨어졌다.')] },
       { label: '전사의 결투를 청한다', hint: '엘바프에서는 결투에서 달아나지 않는 것이 긍지다. 맞으면 날아간다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -35 }, { op: 'fame', add: 40 }, { op: 'base', key: 'wil', add: 1 }, { op: 'chance', p: 0.4, then: [{ op: 'injury', severity: 'heavy' }] },
              heavy('세 번 날아갔고 세 번 일어났다. 거인들이 방패를 두드리며 {name}의 이름을 불렀다.')] },
