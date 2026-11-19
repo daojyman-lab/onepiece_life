@@ -243,15 +243,15 @@ export const CHILDHOOD: Turning[] = [
   {
     id: 'kid_rival', kind: 'door', when: [...kid(3, 9), { c: 'kin', who: 'sibling', has: false }, { c: 'flag', id: 'lonely', has: false }],   // 형제가 있으면 맞수 대신 형제의 이야기가 온다 (bonds.ts)
     weight: 9, repeat: 'once', speaker: 'hero',
-    title: '눈이 마주친 또래', body: '부둣가에서 고집 센 또래 하나와 눈이 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
+    title: '눈이 마주친 또래', body: '마을 어귀의 좁은 길에서 고집 센 또래와 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
     doors: [
       { label: '먼저 주먹을 날린다', hint: '코피가 터지도록 뒹군다. 그 아이와는 오래 겨루는 사이가 된다', values: { dominion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' }, { op: 'log', text: '둘 다 흙투성이가 된 뒤에야 주먹을 내렸다. 다음 날 그 아이는 같은 자리에서 다시 {name}을(를) 기다리고 있었다.', weight: 'light' }] },
-      { label: '등대까지 달리기로 겨루자고 한다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
+      { label: '마을을 한 바퀴 돌아 누가 먼저 도착하는지 겨룬다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' },
-             { op: 'chance', p: 0.5, skillCheck: true, then: [{ op: 'base', key: 'spd', add: 1 }, { op: 'log', text: '등대 계단에 먼저 손을 짚었다. 뒤따라온 아이는 숨을 고르자마자 내일 다시 겨루자고 했다.', weight: 'light' }], else: [{ op: 'log', text: '등대 앞에서 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
+             { op: 'chance', p: 0.5, skillCheck: true, then: [{ op: 'base', key: 'spd', add: 1 }, { op: 'log', text: '출발선에 먼저 돌아왔다. 뒤따라온 아이는 숨을 고르자마자 내일 다시 겨루자고 했다.', weight: 'light' }], else: [{ op: 'log', text: '출발선으로 돌아왔을 때 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
       { label: '눈싸움을 그만두고 손을 내민다', hint: '그 아이는 한참 망설이다 손을 잡는다. 겨룰 상대 대신 놀 동무가 생긴다', values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }, { op: 'log', text: '내민 손을 한참 보던 아이가 마침내 맞잡았다. 둘은 부두 끝까지 나란히 걸으며 서로 이름을 물었다.', weight: 'light' }] },
+        fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }, { op: 'log', text: '내민 손을 한참 보던 아이가 마침내 맞잡았다. 둘은 마을 어귀까지 나란히 걸으며 서로 이름을 물었다.', weight: 'light' }] },
     ],
   },
   {

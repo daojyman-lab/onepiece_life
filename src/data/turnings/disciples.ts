@@ -6,7 +6,7 @@ const stage = (stage: DiscipleStage): Cond => ({ c: 'disciple', stage });
 export const DISCIPLES: Turning[] = [
   {
     id: 'disciple_meeting', disciple: 'meeting', kind: 'door',
-    when: [{ c: 'age', min: 25, max: 55 }, stage('meeting')], weight: 6, repeat: { years: 2 }, max: 12,
+    when: [{ c: 'age', min: 25, max: 55 }, stage('meeting')], weight: 6, repeat: { years: 2 },
     speaker: { relation: '수련을 지켜보던 아이' }, title: '마당 끝의 작은 발자국',
     body: '며칠째 수련을 지켜보던 열네 살 아이가 오늘도 {discipleLesson}을 흉내 낸다. 바다에 나가기 전에 {discipleStyle}을 배우고 싶다며, 내일부터도 와도 되는지 묻는다. 한 번 자세를 고쳐 주는 일과 제자로 받는 일은 다르다.',
     doors: [

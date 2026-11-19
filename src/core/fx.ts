@@ -5,7 +5,11 @@ import { loseShip, nameShip, ownedHull, partShip, repairShip, repairWords, takeS
 import { recordWatchMeal, watchMealWords } from './watch-meal';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
-import { parentFound, parentMissing } from './family';
+import { returnFromTraining } from './training-travel';
+import { childhoodWords, rememberChildhood } from './childhood-memory';
+import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
+import { resumeVoyage } from './passage';
+import { markPersonDead, parentFound, parentMissing, separateSpouse } from './family';
 import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
@@ -23,7 +27,7 @@ import { HOMES } from '../data/homes';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
-import { askFight } from './fight';
+import { askFight, rivalCombatStat, startKumaFight, startRivalDuel } from './fight';
 import { fillContacts, hasRelation, livingContact } from './needs';
 import { josa } from '../shared/core/josa';
 import { revealSurname } from './fortune';
@@ -42,6 +46,11 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (!text.includes('{')) return josa(text);
   const vars: Record<string, string> = { name: s.hero.name, town: s.hero.town, island: s.hero.island };
+  if (text.includes('{rival}')) vars.rival = rivalPerson(s)?.name ?? '맞수';
+  if (text.includes('{rivalPost}')) vars.rivalPost = rivalPosition(s);
+  if (text.includes('{crisis')) Object.assign(vars, childhoodWords(s));
+  if (text.includes('{mentor}')) vars.mentor = livingContact(s, { relation: '스승' })?.name ?? '스승';
+  if (text.includes('{destination}')) vars.destination = s.passage?.to ?? '';
   if (text.includes('{weapon}')) vars.weapon = equippedWeapon(s)?.name ?? '';
   if (text.includes('{shipName}')) vars.shipName = ownedHull(s)?.name ?? '배';
   if (text.includes('{shipRepair}')) vars.shipRepair = repairWords(ownedHull(s));
@@ -63,8 +72,9 @@ export function tierCap(s: Life5, b: Branch): number {
   // 입문 자체는 상한을 바꾸지 않는다. 실제 시련·실전을 거친 재회의 고급 수련만 극의까지 연다.
   if (isMartialBranch(b) && s.growth.styleBonds[focusedStyle(s, b)]?.refined) return V.growth.maxTier;
   const m = s.growth.master;
-  if (!m || m.branch !== b) return V.growth.noMasterCap;
-  return Math.max(V.growth.noMasterCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
+  const baseCap = s.flags.includes('focused_training') && isMartialBranch(b) ? Math.max(4, V.growth.noMasterCap) : V.growth.noMasterCap;
+  if (!m || m.branch !== b) return baseCap;
+  return Math.max(baseCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
 }
 
 /** 숙련을 더한다. tierUp에 닿으면 단계를 하나 올리고 숙련을 0으로 돌린다. 상한에 닿으면 숙련은 tierUp에서 멈춘다. */
@@ -150,6 +160,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
+    case 'kumaFight': startKumaFight(s); return;
+    case 'trainingReturn': returnFromTraining(s); return;
     case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
     case 'flag':
@@ -232,11 +244,13 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       const r = rngOf(s.rng);
       const c = e.canon ? CANON[e.canon] : undefined;
       const gender = existing?.gender ?? c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
+      const localCompanion = e.relation === '어릴 적 맞수' || e.relation === '스승';
+      const natives = HOMES[h.home].species;
       const p: Person = existing ?? {
         id: `p${s.seq++}`, name: c?.name ?? e.name ?? npcName(s, r, gender), gender, age: personAge(s, e),
         ...(e.reuseName && !e.canon && e.name ? { storyName: e.name } : {}),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
-        bond: V.person.bond, faction: c?.faction ?? e.faction ?? 'civil', species: c?.species ?? e.species ?? 'human', alive: true,
+        bond: V.person.bond, faction: c?.faction ?? e.faction ?? 'civil', species: c?.species ?? e.species ?? (localCompanion ? (natives.includes(h.species) ? h.species : natives[0]) : 'human'), alive: true,
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
@@ -253,7 +267,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
           p.kind = 'crew';
         }
         if (e.years) p.tempUntil = s.age + e.years;
-        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0,
+        const power = p.canon === 'bellamy' ? V.person.crew.bellamyPower : crewPowerFor(SEA_BY_ID[h.sea].stage, level);
+        p.crew = { role: e.role ?? role, level, power, skills: [], injuredMonths: 0,
           ...((e.role ?? role) === 'medic' ? { medicalSkill: e.medicalSkill ?? 50 } : {}) };
       }
       if (!existing) s.people.push(p);
@@ -288,10 +303,25 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
     case 'partCrew':
       for (const p of s.people) if (p.alive && p.crew && p.relation.startsWith(e.prefix)) { delete p.crew; p.kind = 'ally'; }
       return;
+    case 'rememberChildhood': rememberChildhood(s, e.storyId, e.outcome); return;
+    case 'separateSpouse': separateSpouse(s); return;
+    case 'resumeVoyage': resumeVoyage(s, e.stores); return;
+    case 'rivalDuel': startRivalDuel(s); return;
+    case 'recruitRival': {
+      const rival = rivalPerson(s);
+      if (!rival?.alive || rival.kind === 'crew' || h.standing === 'marine' || !s.flags.includes('rival:free')) return;
+      rival.kind = 'crew';
+      rival.crew = { role: rivalCrewRole(s), level: V.person.crew.level, power: rivalCombatStat(rival), skills: [], injuredMonths: 0 };
+      if (rival.crew.role === 'medic') rival.crew.medicalSkill = 50;
+      recordTraitEvent(s, 'crew', '', rival.id);
+      s.flags = s.flags.filter(id => id !== 'rival:free');
+      s.timeline.push({ age: s.age, text: fillText(s, '어릴 적 맞수 {rival}과(와) 동료가 되었다.') });
+      return;
+    }
     case 'losePerson': {
       const p = livingContact(s, e);
       if (!p) return;
-      p.alive = false;
+      markPersonDead(s, p);
       recordTraitEvent(s, 'loss', '', p.id);
       s.hardship += V.hardship.loss;
       return;

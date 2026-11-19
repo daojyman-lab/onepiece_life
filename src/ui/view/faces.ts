@@ -1,12 +1,12 @@
 // 얼굴: 주인공 · 곁의 사람 · 상대를 픽셀 그림의 Who로 바꾼다.
-import { GRADES, GRADE_TOP } from '../../data/words';
-import { bandWord } from './words';
+import { crewGrade } from './words';
 import { weaponOfSkills, weaponOfStyle, type Who } from '../pixel/pixelArt';
 import type { Item } from '../../shared/core/types';
 import { LIMBS } from '../../core/body';
 import { CANON, canonAge } from '../../data/canon';
 import { TURNING_BY_ID } from '../../data/turnings';
 import { equippedWeapon, weaponStyleFor } from '../../core/styles';
+import { rivalPosition } from '../../core/rival';
 import { livingContact } from '../../core/needs';
 import type { EnemySpec, Life5, Pending5, Person, Standing } from '../../core/types';
 
@@ -19,8 +19,18 @@ export function personWho5(p: Person): Who {
 const CREW_ROLE_NAME: Record<string, string> = { vanguard: '돌격', support: '지원', medic: '의사', navigator: '항해사', cook: '요리사', shipwright: '목수' };
 
 export function peopleView(s: Life5): { id: string; name: string; relation: string; gone: boolean; who: Who; crew: string | null }[] {
-  return s.people.map((p) => ({ id: p.id, name: p.name, relation: p.missing ? `${p.relation} · 행방불명` : p.relation, gone: !p.alive, who: personWho5(p),
-    crew: p.alive && p.crew ? `${p.tempUntil !== undefined ? `임시 동행(${Math.max(1, p.tempUntil - s.age)}해 남음) · ` : ''}${bandWord(p.crew.power, GRADES, GRADE_TOP)}급 · ${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.role === 'medic' ? ` · 의료 ${p.crew.medicalSkill ?? 50}` : ''}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
+  return s.people.map((p) => ({ id: p.id, name: p.name, relation: personRelation(s, p), gone: !p.alive, who: personWho5(p),
+    crew: p.alive && p.crew ? `${p.tempUntil !== undefined ? `임시 동행(${Math.max(1, p.tempUntil - s.age)}해 남음) · ` : ''}${crewGrade(s, p)}급 · ${CREW_ROLE_NAME[p.crew.role] ?? '동료'} · Lv.${p.crew.level}${p.crew.role === 'medic' ? ` · 의료 ${p.crew.medicalSkill ?? 50}` : ''}${p.crew.injuredMonths > 0 ? ' · 다쳐 쉬는 중' : ''}` : null }));
+}
+
+function personRelation(s: Life5, p: Person): string {
+  const labels = [p.relation];
+  const love = s.rivalLove?.personId === p.id ? s.rivalLove.status : null;
+  if (love === 'married') labels.unshift('어릴 적 맞수');
+  else if (love && love !== 'friends') labels.push('연인');
+  if (p.missing) labels.push('행방불명');
+  else if (s.rival?.personId === p.id && p.alive && !p.crew) labels.push(rivalPosition(s), `명성 ${s.rival.fame}`, s.rival.port || '행방 미상');
+  return labels.join(' · ');
 }
 
 function factionOf(st: Standing): NonNullable<Who['faction']> {

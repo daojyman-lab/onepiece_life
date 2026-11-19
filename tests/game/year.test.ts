@@ -123,7 +123,7 @@ describe('한 해의 진행', () => {
     ]);
   });
   it('항로 이동과 귀향에도 새 장소가 표시되고 같은 섬으로 이동할 때는 중복되지 않는다', () => {
-    const s = newLife5(3);
+    const s = newLife5(3, { home: 'loguetown' });
     s.age = 48;
     s.hero.island = '조';
     const before = s.log.filter((l) => l.weight === 'year').length;

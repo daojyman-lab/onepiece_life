@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
 import { reduce5 } from '../../src/core/reduce';
-import { askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/core/fight';
+import { askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight, scaleFoe } from '../../src/core/fight';
 import { openTurning } from '../../src/core/turning';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import { crewPowerFor } from '../../src/shared/core/people';
@@ -128,7 +128,7 @@ describe('싸움', () => {
 
   it('사소한 교전도 결과 확인 전에는 팝업에서 멈추고, 확인 뒤에만 전적을 남긴다', () => {
     const s = Array.from({ length: 30 }, (_, i) => {
-      const life = fighter(i, 6); addValues(life, { dominion: 90 });
+      const life = fighter(i, 40); life.hero.sea = 'east'; addValues(life, { dominion: 90 });
       minorFight(life, rngOf(life.rng));
       return life;
     }).find((life) => life.pending?.kind === 'battle');
@@ -216,6 +216,31 @@ describe('싸움', () => {
     askFight(s, weak, false, true);
     const b = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
     expect(b.battle.units.some((u) => u.personId === mate.id && u.side === 'L')).toBe(true);
+  });
+  it('성인의 길거리 상대는 해역에 따라 F급부터 C급까지 오른다', () => {
+    const s = fighter(3);
+    s.age = 25;
+    for (const [sea, low, high] of [['east', 0, 60], ['gl_entry', 60, 100], ['gl_first', 100, 240], ['sabaody', 100, 240], ['nw_first', 240, 500], ['nw_late', 240, 500]] as const) {
+      s.hero.sea = sea;
+      for (let i = 0; i < 40; i++) {
+        const power = foePower(minorFoe(s, rngOf(s.rng)));
+        expect(power).toBeGreaterThanOrEqual(low);
+        expect(power).toBeLessThan(high);
+      }
+    }
+  });
+  it('이름 있는 지역 두목은 B급이고 약화 분기는 C급이다', () => {
+    for (const id of ['b_gramon', 'b_fm_utsubo', 'b_dr_remedio']) {
+      const power = foePower(scaleFoe(FOES[id], id));
+      const worn = foePower(scaleFoe(FOES[id + '_worn'], id + '_worn'));
+      expect(power).toBeGreaterThanOrEqual(500);
+      expect(power).toBeLessThan(770);
+      expect(worn).toBeGreaterThanOrEqual(240);
+      expect(worn).toBeLessThan(500);
+    }
+    const s = fighter(3);
+    applyFx(s, [{ op: 'person', kind: 'crew', canon: 'bellamy', relation: '하이에나' }]);
+    expect(s.people.at(-1)?.crew?.power).toBe(580);
   });
   it('부상은 기록되고 시간이 지나면 낫는다', () => {
     let s = fighter(1); applyFx(s, [{ op: 'injury', severity: 'light' }]);

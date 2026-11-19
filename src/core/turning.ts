@@ -134,12 +134,16 @@ export function stillOpen(s: Life5, t: Turning): boolean {
   return !s.closed.includes(t.id) && (s.seenCount[t.id] ?? 0) < capOf(t);
 }
 
+function canAttend(s: Life5, t: Turning): boolean {
+  return s.hero.standing !== 'prisoner' || t.kind !== 'door' || t.id.startsWith('prison_');
+}
+
 /**
  * 전환점을 띄운다. 닫혔거나 상한에 닿았거나, 글이 전제하는 것(needs)이 없거나, 열린 문이 하나도 없으면
  * false를 돌려주고 아무것도 하지 않는다.
  */
 export function openTurning(s: Life5, t: Turning): boolean {
-  if (knownSpeakerIsDead(s, t)) return false;
+  if (!canAttend(s, t) || knownSpeakerIsDead(s, t)) return false;
   if (t.when.some(c => c.c === 'history' && !checkAll(s, [c]))) return false;
   const weaponScene = t.doors.some(d => d.fx.some(e =>
     ['receiveWeapon', 'buyWeapon', 'giveAwayWeapon', 'beginStyle', 'adoptStyle', 'refineStyle'].includes(e.op)));
@@ -170,11 +174,10 @@ function stopsGoal(s: Life5): number {
   return V.stopsPerYear.find((x) => s.age <= x.to)?.n ?? 0;
 }
 
-/** 이 토막에 멈출 차례인가. 올해 목표를 한 번 넘게 넘기면 더 멈추지 않는다. */
+/** 항해·수련·고향 사건을 포함해 이미 고른 만큼 올해의 일반 사건 추첨을 줄인다. */
 export function wantsStop(s: Life5, r: Rng): boolean {
-  const n = stopsGoal(s);
-  if (s.stopsThisYear >= Math.ceil(n) + 1) return false;
-  return chance(r, n / V.partsPerYear);
+  const remaining = stopsGoal(s) - s.stopsThisYear;
+  return remaining > 0 && chance(r, remaining / V.partsPerYear);
 }
 
 /**
@@ -190,7 +193,7 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
-  return checkAll(s, t.when) && !knownSpeakerIsDead(s, t) && needsOk(s, t.needs) && t.doors.some(d => !doorAccess(s, d).locked);
+  return canAttend(s, t) && checkAll(s, t.when) && !knownSpeakerIsDead(s, t) && needsOk(s, t.needs) && t.doors.some(d => !doorAccess(s, d).locked);
 }
 
 /** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
@@ -287,7 +290,9 @@ export function answerDoor(s: Life5, index: number): void {
   s.traitSource = t.id;
   s.traitScene = t.tags ?? [];
   const before = { ...s.values };
-  const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
+  const values = { ...door.values };
+  if (values.greed && door.fx.some(fx => fx.op === 'money' && fx.add > 0)) values.greed *= V.value.greedProfit;
+  const rose = addValues(s, values, p.moment ? V.value.moment / V.value.door : 1);
   applyPersonalityChoice(s, door.values ?? {});
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 

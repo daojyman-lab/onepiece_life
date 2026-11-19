@@ -21,7 +21,7 @@ export function zoneOf(sea: string): SeaZone {
 }
 
 /** 칼름벨트를 건너야 닿는 섬 */
-export const CALM_BELT_ISLANDS: readonly string[] = ['아마존 릴리'];
+export const CALM_BELT_ISLANDS: readonly string[] = ['아마존 릴리', '루스카이나'];
 
 /** 칼름벨트에서 한 토막마다 해왕류와 마주칠 확률 */
 export const SEA_KING_CHANCE = 0.4;

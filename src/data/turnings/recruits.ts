@@ -27,6 +27,7 @@ const LEVEL: Record<string, number> = {
 const MEDICAL_SKILL: Record<string, number> = { hogback: 90, aladdin: 75 };
 /** 아무나 태울 수 없는 사람: 이름값이 있어야 말을 붙일 수 있고, 쿠잔은 해군을 떠난 뒤(원작 두 해 뒤)에만 만난다 */
 const GATE: Record<string, Cond[]> = {
+  perona: [age(16, 18)], absalom: [age(16, 18)], hogback: [age(16, 18)], lola: [age(18, 18)],
   mihawk: [afterHistory('reverie'), fame(300), { c: 'tier', branch: 'any', min: 4 }],
   kuzan: [afterHistory('punkDuel'), fame(150), { c: 'canonAge', id: 'kuzan', min: 49 }],
   hatchan: [afterHistory('strawHatPoster')], kuroobi: [afterHistory('strawHatPoster')],
@@ -37,7 +38,7 @@ const GATE: Record<string, Cond[]> = {
   kawamatsu: [afterHistory('reverie')], kikunojo: [afterHistory('wanoFree')], ulti: [afterHistory('wanoFree')],
   yamato: [afterHistory('wanoFree'), fame(100)], killer: [fame(60)],
   zoro: [age(16, 17), beforeHistory('loguetownStorm')],
-  vivi: [age(17), beforeHistory('alabastaRain')], ace: [age(16), beforeHistory('alabastaRain')],
+  vivi: [age(17, 19), beforeHistory('alabastaRain')], ace: [age(16, 19), beforeHistory('alabastaRain')],
   law: [afterHistory('fishmanPact'), beforeHistory('dressrosaFree'), fame(60)],
   smoker: [afterHistory('fishmanPact'), beforeHistory('dressrosaFree')],
   marco: [afterHistory('reverie'), beforeHistory('wanoFree'), fame(100)],

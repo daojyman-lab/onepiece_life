@@ -323,6 +323,14 @@ describe('말하는 사람', () => {
 });
 
 describe('도감과 명예의 전당', () => {
+  it('인생이 끝난 뒤에도 도감의 사건 제목과 선택 문구에는 인물 자리표시가 남지 않는다', () => {
+    const meta = emptyMeta5();
+    for (const t of TURNINGS) t.doors.forEach((_door, i) => { meta.doors[t.id + '#' + i] = []; });
+    const rows = codexView(meta).doors;
+    expect(rows.some(row => row.title === '제자의 첫 실전')).toBe(true);
+    expect(rows.some(row => row.door.includes('부모와 뒤뜰 창을 열어'))).toBe(true);
+    expect(rows.filter(row => /{[^{}]+}/.test(row.title + row.door))).toEqual([]);
+  });
   it('도감은 문을 제목과 이름, 가치관 이름으로 푼다', () => {
     const s = autoplay5(11, 'random').s;
     const meta = recordLife(emptyMeta5(), s);

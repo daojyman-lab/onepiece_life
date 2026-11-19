@@ -476,7 +476,7 @@ export const EP_ALABASTA: Turning[] = [
       { label: '회의는 이 나라 사람들에게 맡기고 자리를 뜬다', hint: '펠은 외지인을 붙잡지 않는다', values: { peace: D },
         fx: [next('ep_alabasta_a5'), log('펠은 문을 열어 줬지만 회의에 남아 있었다. {name}은(는) 다시 물길로 나갔다.', 'light')] },
       { label: '조합 사무소를 부순 일을 자랑삼아 늘어놓는다', hint: '회의장이 술렁인다. 펠의 눈이 차가워진다', special: 'dominion', when: [has('ep_alabasta_a_force')],
-        fx: [log('펠이 낮게 말했다. 이 나라는 주먹으로 둘로 갈라졌던 곳이다. 같은 길로 고치지는 않는다.'), next('ep_alabasta_a5')] },
+        fx: [log('펠은 무력으로 한 번 갈라진 나라를 다시 힘으로 다잡을 수는 없다고 했다.'), next('ep_alabasta_a5')] },
     ],
   },
   {

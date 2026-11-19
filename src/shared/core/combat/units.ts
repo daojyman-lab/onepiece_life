@@ -79,13 +79,13 @@ const ROLE_BRANCH: Record<string, string[]> = {
   medic: [],
 };
 
-export function crewUnit(p: Person, stage: number): CUnit {
+export function crewUnit(p: Person, stage: number, practicedSkills?: string[]): CUnit {
   const c = p.crew!;
   const tr = traitOf(p);
   const st = statsAround(c.power * CREW_GEAR[c.gear ?? 0].mult, ROLE_BIAS[c.role] ?? {});
   for (const [k, m] of Object.entries(tr.bias)) st[k as keyof Stats] = Math.round(st[k as keyof Stats] * (m as number));
   const tierMax = c.power < 25 ? 1 : c.power < 45 ? 2 : c.power < 80 ? 3 : 4;
-  const skills = (ROLE_BRANCH[c.role] ?? []).filter((id) => (SKILLS.find((k) => k.id === id)?.tier ?? 9) <= tierMax).slice(0, 4);
+  const skills = (practicedSkills ?? ROLE_BRANCH[c.role] ?? []).filter((id) => (SKILLS.find((k) => k.id === id)?.tier ?? 9) <= tierMax).slice(0, 4);
   // 열매를 먹은 동료: 열매 패시브 (레벨이 오를수록 세진다)
   const fruit = c.fruit ? FRUIT_BY_ID[c.fruit] : null;
   const maxHp = Math.round(hpOf(st));
