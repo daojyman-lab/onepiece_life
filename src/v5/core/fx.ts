@@ -32,9 +32,16 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 
 /** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string): string {
-  const parent = s.people.find((p) => p.alive && personIs(p, 'parent'))?.relation ?? '';
+  const parentPerson = s.people.find((p) => p.alive && personIs(p, 'parent'));
+  const parent = parentPerson?.relation ?? '';
+  const parentName = parentPerson?.name ?? parent;
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend });
+  const childFriend = s.people.find((p) => p.alive && p.relation === '어릴 적 친구')?.name ?? '친구';
+  const sibling = s.people.find((p) => p.alive && personIs(p, 'sibling'))?.name ?? '형제';
+  const rival = s.people.find((p) => p.alive && p.relation === '어릴 적 맞수')?.name ?? '맞수';
+  const mentor = s.people.find((p) => p.relation === '스승')?.name ?? '스승';
+  const swordElder = s.people.find((p) => p.alive && p.relation === '목검을 가르친 형')?.name ?? '형';
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, parentName, friend, childFriend, sibling, rival, mentor, swordElder });
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */

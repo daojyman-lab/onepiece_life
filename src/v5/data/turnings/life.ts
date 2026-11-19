@@ -348,16 +348,16 @@ const BONDS: Turning[] = [
   },
   {
     // v4 bd_rival_reunion: 어릴 적 맞수(표시 'kidRival')와 다시 만난다. pp_promise와 같은 꼴
-    id: 'life_rival_reunion', kind: 'door', when: at(age(20, 50), active, has('kidRival')),
+    id: 'life_rival_reunion', kind: 'door', when: at(age(20, 50), active, has('kidRival'), { c: 'person', relation: '어릴 적 맞수', has: true }),
     weight: 5, repeat: 'once', speaker: { relation: '어릴 적 맞수' },
-    title: '다시 만난 맞수', body: '{island}의 길목에서 어릴 적 맨날 붙어 싸우던 맞수와 마주친다. 한눈에 서로를 알아본다. 맞수가 웃으며 소매를 걷어붙인다.',
+    title: '다시 만난 맞수', body: '{island}의 길목에서 {rival}와(과) 마주친다. {rivalMemory} 한눈에 서로를 알아본 {rival}이(가) 웃으며 소매를 걷어붙인다.',
     doors: [
       { label: '소매를 걷어붙이고 다시 붙는다', hint: '근처의 물건까지 망가진다. 누가 이기든 둘 다 멍투성이다', values: { dominion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -12 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'money', add: -5000 }, { op: 'log', text: '망가진 물건값을 물어 준 뒤 둘은 멍든 얼굴로 웃었다.', weight: 'light' }] },
       { label: '먼저 손을 내민다', hint: '밤새 옛이야기를 한다', values: { peace: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '밤새 웃고 떠들었다. 해가 뜨자 맞수는 손을 흔들고 떠났다.', weight: 'light' }] },
       { label: '같이 가자고 손을 내민다', hint: '어제의 맞수가 등을 맡길 사람이 된다', values: { loyalty: D }, when: [NOT_SQUAD],
-        fx: [{ op: 'person', kind: 'crew', relation: '함께하게 된 어릴 적 맞수' }, { op: 'timeline', text: '어릴 적 맞수와 같은 길을 걷게 되었다' }, { op: 'log', text: '맞수는 손을 한참 바라보다 잡았다. 다음 항구에서부터 같은 배에 올랐다.', weight: 'light' }] },
+        fx: [{ op: 'personChange', relation: '어릴 적 맞수', kind: 'crew', bond: 12 }, { op: 'timeline', text: '{rival}와(과) 같은 길을 걷게 되었다' }, { op: 'log', text: '{rival}은(는) 손을 한참 바라보다 잡았다. 다음 항구에서부터 같은 배에 올랐다.', weight: 'light' }] },
     ],
   },
   {

@@ -3,6 +3,7 @@ import type { Cond, Fx, Turning } from '../../core/types';
 import { COASTAL_WORDS, INLAND_TOWNS, ISOLATED_TOWNS, SEA_STANDINGS, WORLD_GOV_WORDS } from '../landlocked';
 export { COASTAL_WORDS, INLAND_TOWNS, ISOLATED_TOWNS, WORLD_GOV_WORDS } from '../landlocked';
 import { CHILDHOOD } from './childhood';
+import { CHILDHOOD_BONDS } from './childhood-bonds';
 import { FORTUNES } from './fortunes';
 import { MISFORTUNES } from './misfortunes';
 import { MOMENTS } from './moments';
@@ -33,6 +34,7 @@ import { EPISODE_TURNINGS } from '../episodes';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
+  CHILDHOOD_BONDS,
   BONDS,
   FORTUNES,
   MISFORTUNES,

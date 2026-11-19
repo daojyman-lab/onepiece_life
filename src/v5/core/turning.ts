@@ -14,6 +14,7 @@ import { logLine } from './state';
 import { addValues, isDeep } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
+import { personIs } from './needs';
 import { advanceVow } from './vow';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
@@ -27,8 +28,35 @@ const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPEN
 /** 자리표시 {name}(이름만) {town} {island} {parent}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string): string {
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  const parent = s.people.find((p) => p.alive && (p.relation === '아버지' || p.relation === '어머니'))?.relation ?? '';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent });
+  const childFriend = s.people.find((p) => p.alive && p.relation === '어릴 적 친구')?.name ?? '친구';
+  const parentPerson = s.people.find((p) => p.alive && personIs(p, 'parent'));
+  const parent = parentPerson?.relation ?? '';
+  const parentName = parentPerson?.name ?? parent;
+  const sibling = s.people.find((p) => p.alive && personIs(p, 'sibling'))?.name ?? '형제';
+  const rival = s.people.find((p) => p.alive && p.relation === '어릴 적 맞수')?.name ?? '맞수';
+  const mentor = s.people.find((p) => p.relation === '스승')?.name ?? '스승';
+  const swordElder = s.people.find((p) => p.alive && p.relation === '목검을 가르친 형')?.name ?? '형';
+  const rivalMemory = s.flags.includes('rivalFarewellSword') ? '어릴 때 나눠 든 목검의 손잡이에 같은 흠집이 남아 있다.'
+    : s.flags.includes('rivalFarewellDuel') ? '마지막 겨룸에서 서로 걸어온 길까지 다시 겨루자고 약속했었다.'
+    : s.flags.includes('rivalFarewellTalk') ? '헤어지던 날 서로 다른 길로 가기로 했던 말을 기억한다.'
+    : s.flags.includes('rivalChoseRescue') ? '축제 결승을 포기하고 아이를 찾던 날 이후 처음이다.'
+    : '어릴 적 길목에서 겨루던 날 이후 오랜만이다.';
+  const rivalPrepareMemory = s.flags.includes('rivalSearched') ? '잃어버린 깃발을 함께 찾던 때 서로의 달리는 버릇까지 알아챘다.'
+    : s.flags.includes('rivalMadeFlag') ? '둘이 주민과 함께 꿰맨 깃발이 경기장에 걸려 있다.'
+    : s.flags.includes('rivalMapClue') ? '깃대에서 찾은 낡은 지도의 끝이 아직 품에 있다.'
+    : '';
+  const rivalFestivalMemory = s.flags.includes('rivalChoseMatch') ? '축제 날 끝낸 승부를 다시 겨뤄 볼지 묻는다.'
+    : s.flags.includes('rivalChoseRescue') ? '축제 날 아이를 찾느라 미룬 승부를 지금 끝낼지 묻는다.'
+    : '축제 날 주민을 도우느라 미룬 승부를 지금 끝낼지 묻는다.';
+  const parentWorkMemory = s.flags.includes('parHelped') ? `${parentName}의 일을 거든 뒤 손에 잡힌 물집이 아직도 기억난다.`
+    : s.flags.includes('parDefy') ? `${parentName}처럼 살지 않겠다고 혼자 다짐했던 날을 기억한다.`
+    : s.flags.includes('parAsked') ? `${parentName}에게 도구의 쓰임을 하나씩 물었던 날을 기억한다.`
+    : `${parentName}의 굳은살 박인 손을 지켜보던 날을 기억한다.`;
+  const mentorTrainingMemory = s.flags.includes('menGuarded') ? '지난번에는 다친 아이를 등 뒤에 세우고 길을 지켰다.'
+    : s.flags.includes('menOutwitted') ? '지난번에는 어른들의 시선을 읽고 싸움 없이 아이를 데려왔다.'
+    : s.flags.includes('menTogether') ? '지난번에는 스승과 어깨를 맞대고 아이를 데려왔다.'
+    : '스승이 물었던 힘의 쓰임이 다시 떠오른다.';
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, childFriend, parent, parentName, sibling, rival, mentor, swordElder, rivalMemory, rivalPrepareMemory, rivalFestivalMemory, parentWorkMemory, mentorTrainingMemory });
 }
 
 function speakerOf(s: Life5, t: Turning): string {
