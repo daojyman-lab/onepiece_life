@@ -6,6 +6,7 @@
 import { V } from '../balance';
 import type { WorldEventId } from '../world-history';
 import { ISOLATED_TOWNS } from '../landlocked';
+import { JOIN_SHIP } from '../shipmates';
 import type { Cond, HomeId, Person, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -54,7 +55,7 @@ export const PATHS: Turning[] = [
     title: '해적에게 붙잡히다', body: '{island} 앞바다에서 해적선이 고깃배를 덮쳤다. 선장이 {name}의 멱살을 움켜쥐고, 마침 일손이 모자랐다며 웃는다.',
     doors: [
       { label: '끌려가 선원이 된다', hint: '돌아갈 길은 당분간 없다', values: { romance: D },
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'log', text: '해적선의 막내 선원이 되었다. 갑판을 닦으며 바다를 배운다.', weight: 'heavy' },
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'log', text: '해적선의 막내 선원이 되었다. 갑판을 닦으며 바다를 배운다.', weight: 'heavy' },
              { op: 'timeline', text: '해적선에 끌려가 선원이 되었다' }] },
       { label: '해군에 밀고하고 빠져나온다', hint: '해적들이 원한을 품는다', values: { justice: D },
         fx: [{ op: 'fame', add: 2 }, { op: 'flag', id: 'piratesGrudge' }, { op: 'log', text: '해군 순찰선이 해적선을 덮쳤다. {name}은(는) 그 틈에 빠져나왔다.', weight: 'heavy' }] },
@@ -73,7 +74,7 @@ export const PATHS: Turning[] = [
         fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship', newHull: true },
              { op: 'log', text: '낡은 돛대 끝에 직접 그린 해골 깃발이 펄럭였다.', weight: 'heavy' }, { op: 'timeline', text: '해적 깃발을 올렸다' }] },
       { label: '이름난 해적선에 견습으로 오른다', hint: '남의 깃발 아래서 바다를 배운다', values: { romance: D }, 
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },
       { label: '바다는 꿈으로만 둔다', hint: '뭍에서의 삶이 이어진다', values: { peace: D }, fx: [ { op: 'log', text: '부두에서 배가 떠나는 걸 지켜봤다. 이튿날에도 익숙한 골목으로 출근했다.', weight: 'light' }] },
       { label: '부두의 건달들을 모아 선단을 꾸린다', hint: '처음부터 우두머리로 바다에 나선다', special: 'dominion', values: { dominion: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' }, { op: 'fame', add: 10 },

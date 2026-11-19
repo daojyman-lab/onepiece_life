@@ -436,6 +436,8 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
 
 export interface SceneInput {
   hero: Who; crew: Who[]; foe: Who | null;
+  /** 남의 배에 탄 말단 선원일 때 모시는 선장. 있으면(싸우지 않을 때) 선장이 맨 앞에 서고 주인공은 줄 끝에 선다 */
+  captain?: Who | null;
   sailing: boolean; place: string; islandColor: string; flag: 'pirate' | 'marine' | 'rev' | 'civil';
   aura: string | null;
 }
@@ -505,6 +507,18 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t
     else bx.drawImage(sp, Math.round(cx), py);
   };
   const crew = sc.crew.slice(0, 3);
+  const lunge = fighting ? Math.round(Math.sin(t * 0.13) * 4) : 0;
+  let heroX = W * 0.36 + lunge;
+  if (sc.captain && !fighting) {
+    // 말단 선원: 선장 → 선배 선원들 → 주인공(맨 끝). 배 위에서는 선장이 돛대 앞(뱃머리 쪽)에 선다
+    const tailX = sc.sailing ? Math.floor(W * 0.2) + 2 : W * 0.10;
+    const frontX = sc.sailing ? W * 0.56 : W * 0.45;
+    const lineL = tailX + 15, lineR = sc.sailing ? W * 0.43 : W * 0.36;
+    put(sc.captain, frontX, null, false);
+    crew.forEach((c, i) => put(c, crew.length > 1 ? lineL + ((lineR - lineL) * i) / (crew.length - 1) : (lineL + lineR) / 2, null, false));
+    put(sc.hero, tailX, null, false);
+    heroX = tailX;
+  } else {
   if (sc.sailing) {
     // 배 위: 갑판(폭의 20~80%) 안에 세운다. 싸우지 않을 때는 셋째를 돛대 오른쪽에
     const deckL = Math.floor(W * 0.2) + 2, heroX = W * 0.36;
@@ -515,7 +529,6 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t
   } else {
     crew.forEach((c, i) => put(c, W * (0.10 + i * 0.085), null, false));
   }
-  const lunge = fighting ? Math.round(Math.sin(t * 0.13) * 4) : 0;
   put(sc.hero, W * 0.36 + lunge, fighting && tt % 4 < 2 ? 'attack' : null, false);
   if (sc.foe) {
     put(sc.foe, W * 0.58 - lunge, tt % 4 >= 2 ? 'attack' : null, true);
@@ -544,8 +557,9 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t
       }
     }
   }
+  }
   if (sc.aura) {
-    const ax = W * 0.36 + lunge;
+    const ax = heroX;
     [[1, 4], [17, 9], [3, 15], [16, 1]].forEach(([ox, oy], i) => { if ((tt + i) % 4 < 2) r(ax + ox, ground - 22 + oy - ((tt + i) % 4), 1, 2, sc.aura!); });
   }
   ctx.imageSmoothingEnabled = false;

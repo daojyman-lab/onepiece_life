@@ -7,6 +7,7 @@ import { V } from '../balance';
 import { known, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 import { PIRATE_2 } from './pirate-2';
+import { JOIN_SHIP, SHIP_CAPTAIN, SHIPMATE } from '../shipmates';
 
 const D = V.value.door;
 const PIR = st('pirate');
@@ -69,7 +70,7 @@ export const PIRATE: Turning[] = [
     title: '짐칸의 어둠', body: '물을 길으러 {island}에 들른 해적선이 내일 새벽 닻을 올린다고 한다. 부두에 내려 둔 짐칸 덮개가 반쯤 열려 있다.',
     doors: [
       { label: '밤을 틈타 짐칸에 숨어든다', hint: '들키면 바다 한가운데서 끌려 나온다', values: { romance: D }, danger: true,
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'chance', p: 0.5,
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'chance', p: 0.5,
                then: [{ op: 'log', text: '사흘 만에 짐칸에서 끌려 나왔다. 선장은 한참 웃더니 갑판 닦을 걸레를 던져 주었다.', weight: 'heavy' }],
                else: [{ op: 'hp', add: -15 }, { op: 'log', text: '짐칸에서 끌려 나와 실컷 두들겨 맞았다. 그래도 배에서 내쫓기지는 않았다.', weight: 'heavy' }] },
              { op: 'timeline', text: '해적선에 몰래 숨어 타 바다로 나갔다' }] },
@@ -94,9 +95,9 @@ export const PIRATE: Turning[] = [
         fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'chance', p: 0.5,
                then: [{ op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'log', text: '손을 든 선원이 더 많았다. 배는 {name}의 것이 되었다.', weight: 'heavy' },
                       { op: 'timeline', text: '선원들의 손으로 선장에 뽑혔다' }],
-               else: [{ op: 'log', text: '갑판장이 선장이 되었다. {name}은(는) 그 밑에서 다시 밧줄을 잡았다.', weight: 'heavy' }] }] },
+               else: [{ op: 'personChange', relation: `${SHIPMATE} · 갑판장`, kind: 'ally', rename: SHIP_CAPTAIN }, { op: 'log', text: '갑판장이 선장이 되었다. {name}은(는) 그 밑에서 다시 밧줄을 잡았다.', weight: 'heavy' }] }] },
       { label: '선장이 숨겨 둔 금고만 챙겨 배를 떠난다', hint: '돈은 남지만 함께 싸운 배는 남의 것이 된다', values: { greed: D },
-        fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'money', add: 75000 }, { op: 'flag', id: 'leftCrew' }, { op: 'log', text: '금고를 품에 안고 다음 항구에서 내렸다. 뒤에서 욕설이 쏟아졌다.', weight: 'heavy' }] },
+        fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'money', add: 75000 }, { op: 'flag', id: 'leftCrew' }, { op: 'partCrew', prefix: SHIPMATE }, { op: 'log', text: '금고를 품에 안고 다음 항구에서 내렸다. 뒤에서 욕설이 쏟아졌다.', weight: 'heavy' }] },
     ],
   },
   {
@@ -106,7 +107,7 @@ export const PIRATE: Turning[] = [
     doors: [
       { label: '반란을 이끌어 배를 빼앗는다', hint: '실패하면 돛대에 매달린다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.65,
-               then: [{ op: 'hp', add: -15 }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 15 },
+               then: [{ op: 'hp', add: -15 }, { op: 'personChange', relation: SHIP_CAPTAIN, kind: 'enemy', rename: '반란으로 쫓아낸 옛 선장' }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 15 },
                       { op: 'log', text: '선장을 작은 보트에 태워 바다에 띄워 보냈다. 깃발은 {name}의 손으로 다시 그렸다.', weight: 'heavy' },
                       { op: 'timeline', text: '반란을 일으켜 해적선을 빼앗았다' }],
                else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -30 },

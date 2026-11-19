@@ -11,6 +11,7 @@ import { altitudeEffect } from '../../core/environment';
 import { bountyAmount } from '../../core/first-poster';
 import { KEEPSAKES } from '../../data/keepsakes';
 import { townLabel } from '../../data/homes';
+import { SHIP_CAPTAIN, SHIPMATE } from '../../data/shipmates';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
 import { DREAMS } from '../../data/dreams';
@@ -158,9 +159,16 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const fighter = ready && p?.kind === 'battle' ? p.battle.units.find(u => u.hero) : null;
   const hero = fighter ? unitWho(s, fighter) : heroWho5(s);
   const climate = s.passage ? undefined : climateOf(h.island, s);
+  // 남의 배의 말단 선원: 모시는 선장이 앞에 서고 주인공은 선배 선원들 뒤 줄 끝에 선다
+  const shipCaptain = (h.standing === 'pirate' && !s.flags.includes('captain'))
+    ? s.people.find((x) => x.alive && x.kind === 'ally' && (x.relation === SHIP_CAPTAIN || x.aliases?.includes(SHIP_CAPTAIN))) : undefined;
+  const crewPeople = s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths);
+  // 선배 선원을 먼저 세운다 (선장 바로 뒤 자리부터)
+  if (shipCaptain) crewPeople.sort((a, b) => Number(b.relation.startsWith(SHIPMATE)) - Number(a.relation.startsWith(SHIPMATE)));
   return {
     hero,
-    crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),
+    crew: crewPeople.slice(0, SCENE_CREW).map(personWho5),
+    captain: shipCaptain ? { ...personWho5(shipCaptain), faction: 'pirate' } : null,
     foe,
     sailing: !!s.passage,
     place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : [sea.name, h.island, climate?.name].filter(Boolean).join(' · '),

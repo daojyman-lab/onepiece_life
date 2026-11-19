@@ -26,6 +26,7 @@ import { V } from '../data/balance';
 import { CANON, canonAge } from '../data/canon';
 import { FOES } from '../data/foes';
 import { HOMES } from '../data/homes';
+import { SHIP_CAPTAIN, SHIPMATE, SHIPMATE_FOLLOWED } from '../data/shipmates';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
@@ -107,6 +108,39 @@ function captainByShip(s: Life5): void {
   if ((st === 'warlord' || (st === 'pirate' && s.flags.includes('ship'))) && !s.flags.includes('captain')) s.flags.push('captain');
 }
 
+/** 선배 선원 (남의 배에서 함께 탄 선원들). 주인공을 따라온 뒤에는 이 앞말이 빠진다 */
+const isShipmate = (p: Person) => p.alive && p.kind === 'crew' && p.relation.startsWith(`${SHIPMATE} · `);
+/** '선배 선원 · 갑판장' → '갑판장' */
+const shipmateTitle = (p: Person) => p.relation.slice(SHIPMATE.length + 3);
+
+/** 선배 선원을 배에 남기고 떠난다: 동료에서 빠지고 아는 사람으로 남는다 */
+function leaveShipmates(s: Life5): void {
+  for (const p of s.people) {
+    if (!isShipmate(p)) continue;
+    p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+    p.relation = `옛 배의 ${shipmateTitle(p)}`;
+    delete p.crew; delete p.tempUntil; p.kind = 'ally';
+  }
+}
+
+/**
+ * 처지 · 선장 표시가 바뀐 뒤 선배 선원의 자리를 맞춘다.
+ * 해적을 그만두면 배에 남는다. 선장이 되었을 때 모시던 선장이 아직 그 배에 있으면(제 배를 따로 얻었으면) 배에 남고,
+ * 모시던 선장이 없으면(물려받았거나 빼앗았으면) 주인공을 새 선장으로 따른다.
+ */
+function settleShipmates(s: Life5): void {
+  if (!s.people.some(isShipmate)) return;
+  const st = s.hero.standing;
+  if (st !== 'pirate' && st !== 'warlord') { leaveShipmates(s); return; }
+  if (!s.flags.includes('captain')) return;
+  if (s.people.some(p => p.alive && p.kind === 'ally' && hasRelation(p, SHIP_CAPTAIN))) { leaveShipmates(s); return; }
+  for (const p of s.people) {
+    if (!isShipmate(p)) continue;
+    p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+    p.relation = `${SHIPMATE_FOLLOWED} ${shipmateTitle(p)}`;
+  }
+}
+
 function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
   const h = s.hero;
   switch (e.op) {
@@ -172,6 +206,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       h.standing = e.to;
       s.standingSince = s.age;
       captainByShip(s);
+      settleShipmates(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
     case 'kumaFight': startKumaFight(s); return;
@@ -182,6 +217,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       if (e.id === 'ship') takeShip(s, e.newHull);
       else if (!s.flags.includes(e.id)) s.flags.push(e.id);
       captainByShip(s);
+      settleShipmates(s);
       if (e.id === 'prime') enterPrime(s);
       return;
     case 'dream': setDream(s, e.id); return;
@@ -322,6 +358,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     }
     case 'partCrew':
+      if (e.prefix === SHIPMATE) { leaveShipmates(s); return; }
       for (const p of s.people) if (p.alive && p.crew && p.relation.startsWith(e.prefix)) { delete p.crew; p.kind = 'ally'; }
       return;
     case 'rememberChildhood': rememberChildhood(s, e.storyId, e.outcome); return;
