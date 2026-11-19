@@ -23,7 +23,7 @@ export function cloneLife(prev: Life5): Life5 {
 
 /** 명령을 받은 상태에 그대로 적용한다 (복사하지 않는다) */
 export function apply5(s: Life5, cmd: Command5): void {
-  const previousBounty = bountyAmount(s.hero);
+  const previousBounty = bountyAmount(s);
   const previousStanding = s.hero.standing;
   switch (cmd.type) {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;

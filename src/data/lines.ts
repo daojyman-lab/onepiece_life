@@ -25,6 +25,7 @@ const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 const atSea = st('pirate', 'marine', 'revolution');
 const town = (name: string): Cond[] => [{ c: 'town', is: [name] }, kid];
 const island = (...is: string[]): Cond => ({ c: 'island', is });
+const known = (relation: string): Cond => ({ c: 'person', relation, has: true, kinds: ['ally', 'crew'] });
 const fruit: Cond = { c: 'fruit', has: true };
 const ashore: Cond = { c: 'ashore' };
 const inTown = st('child', 'civil', 'settled', 'shipwright', 'pirate', 'marine', 'cp', 'revolution', 'bountyHunter', 'warlord', 'retired');
@@ -55,7 +56,7 @@ export const LINES: DailyLine5[] = [
   L(adult, { greed: 1 }, '장부의 숫자를 살짝 고쳐 차액을 제 몫으로 돌렸다.'),
   M(adult, { greed: 1 }, '급한 사람에게 물건값을 두 배로 불렀다.', 2000),
   L(old, { greed: 1 }, '모아 둔 돈을 몇 번이고 세어 보고 다시 숨겼다.'),
-  M(old, { greed: 1 }, '빌려준 돈의 이자를 하루도 미루지 않고 받아 냈다.', 3000),
+  M(old, { greed: 1 }, '급전을 구하던 사람에게 돈을 빌려주고 약속한 날 이자까지 받아 냈다.', 3000),
   // ---------------- 남을 돌보는 줄 (헌신이 빠진 뒤 정의 · 의리 · 평온으로)
   L(kid, { romance: 1 }, '앓아누운 이웃 할머니에게 물을 길어다 드렸다.'),
   L(kid, { peace: 1 }, '동생들의 밥을 먼저 덜어 주고 남은 것을 먹었다.', ['sibling']),
@@ -67,9 +68,9 @@ export const LINES: DailyLine5[] = [
   L(small, { ambition: 1 }, '골목에서 친구들과 해적 놀이를 했다. 선장을 맡은 {name}은(는) 나무 상자 위에 올라 외쳤다. “나는 언젠가 해적왕이 되겠어!!”'),
   L(teen, { ambition: 1 }, '골목에서 친구들과 해적 놀이를 했다. 선장을 맡은 {name}은(는) 나무 상자에 올라 친구들 앞에서 해적왕이 되겠다고 외쳤다.'),
   L(kid, { ambition: 1 }, '나뭇가지로 친구들을 모두 이길 때까지 집에 가지 않았다.'),
-  L([adult, path('sword')], { ambition: 1 }, '새벽마다 부두에서 목검을 휘둘렀다.'),
-  L([adult, path('fist')], { ambition: 1 }, '새벽마다 모래 자루를 매달아 놓고 주먹이 까지도록 두드렸다.'),
-  L([adult, path('gun')], { ambition: 1 }, '새벽마다 빈 병을 세워 놓고 한 발씩 맞혀 나갔다.'),
+  L([adult, path('sword')], { ambition: 1 }, '새벽마다 부두에서 목검을 휘둘렀다.', ['sword']),
+  L([adult, path('fist')], { ambition: 1 }, '새벽마다 모래밭에 선을 긋고 발을 옮기며 몸의 중심을 잡았다.', ['fist']),
+  L([adult, path('gun')], { ambition: 1 }, '새벽마다 멀고 가까운 표적의 거리를 가늠해 보았다.', ['gun']),
   L(adult, { ambition: 1 }, '{island}에서 가장 센 자의 이름을 수첩에 적어 두었다.'),
   L(old, { ambition: 1 }, '서랍에서 누렇게 바랜 할 일 목록을 꺼냈다. ‘섬 한 바퀴 걷기’ 옆에는 아직도 빈 네모가 있었다.'),
   L(old, { ambition: 1 }, '늙었다는 말을 들으면 괜히 더 무거운 짐을 졌다.'),
@@ -94,6 +95,13 @@ export const LINES: DailyLine5[] = [
   L(adult, { loyalty: 1 }, '등을 맡긴 사람의 험담을 듣고 자리를 박차고 나왔다.'),
   L(old, { loyalty: 1 }, '먼저 간 친구의 기일에 술 한 잔을 따랐다.'),
   L(old, { loyalty: 1 }, '벗이 보낸 봉투에서 납작한 병뚜껑이 떨어졌다. 어릴 적 둘이 잃어버린 보물을 마룻장 밑에서 찾았다는 편지가 들어 있었다.'),
+  L(old, { inquiry: 1 }, '날짜가 뒤섞인 서류를 차례로 정리하며 밤을 새웠다.'),
+  L(old, { inquiry: 1 }, '모르는 것이 아직 너무 많다는 사실이 즐거웠다.'),
+  L(kid, { loyalty: 1 }, '한번 한 약속은 비가 와도 지키러 나갔다.'),
+  L([adult, known('생명의 은인')], { loyalty: 1 }, '목숨을 구해 준 {person:생명의 은인}의 부탁을 받고 먼 길을 다녀왔다.'),
+  L([adult, known('거리의 동무'), { c: 'choiceAgo', turning: 'kid_bread', door: 2 }], { loyalty: 1 }, '한때 함께 빵을 나눈 {person:거리의 동무}의 험담이 들리자 자리를 박차고 나왔다.'),
+  L(old, { loyalty: 1 }, '마을 위령비 앞에 술 한 잔을 따르고 지나갔다.'),
+  L([old, known('축제를 함께한 동무'), { c: 'choiceAgo', turning: 'kid_scholarship', door: 1 }], { loyalty: 1 }, '어린 날 함께 북을 옮긴 {person:축제를 함께한 동무}의 편지를 받고 한참 웃었다.'),
   // ---------------- 자유
   L(kid, { freedom: 1 }, '서당을 빠져나와 언덕에서 하루 종일 바람을 맞았다.'),
   L(kid, { freedom: 1 }, '어른들이 정해 준 길 말고 다른 길로 집에 돌아갔다.'),
@@ -237,7 +245,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('marine')], { ambition: 1 }, '훈련이 끝난 뒤에도 연병장 모래밭을 몇 바퀴 더 달렸다.'),
   L([grown, st('marine')], { inquiry: 1 }, '항해 일지에 없는 섬의 이름을 해도에 적어 넣었다.'),
   L([grown, st('marine')], { romance: 1 }, '야간 경계를 서며 별이 쏟아지는 밤바다를 보았다.'),
-  L([grown, st('marine')], { loyalty: 1 }, '함께 입대한 동기의 당번을 말없이 대신 섰다.'),
+  L([grown, st('marine')], { loyalty: 1 }, '열이 오른 병사를 쉬게 하고 그날 당번을 대신 섰다.'),
   L([grown, st('marine')], { freedom: 1 }, '쓸데없는 명령은 못 들은 척하고 맡은 구역만 돌았다.'),
   L([grown, st('marine')], { dominion: 1 }, '대련장에서 덤벼 오는 병사들을 차례로 바닥에 눕혔다.'),
   L([grown, st('marine')], { peace: 1 }, '길목의 말다툼을 말없이 떼어 놓고 각자 갈 길로 돌려보냈다.'),
@@ -286,7 +294,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('civil')], { ambition: 1 }, '남보다 한 시간 일찍 문을 열고 한 시간 늦게 닫았다.'),
   L([grown, st('civil')], { inquiry: 1 }, '항구에 들어온 신문을 사서 먼 나라 소식을 꼼꼼히 읽었다.'),
   L([grown, st('civil')], { romance: 1 }, '일을 마치고 문간에 앉아 낡은 기타를 퉁겼다.'),
-  L([grown, st('civil')], { loyalty: 1 }, '오래 거래한 집의 물건만은 값이 올라도 계속 받아 썼다.'),
+  L([grown, st('civil')], { loyalty: 1 }, '장이 끝날 때까지 물건이 남은 이웃의 좌판에서 저녁 찬거리를 샀다.'),
   L([grown, st('civil')], { freedom: 1 }, '하루 일을 쉬고 발길 닿는 대로 섬 반대편까지 걸었다.'),
   L([grown, st('civil'), fierce], { dominion: 1 }, '좋은 좌판 자리를 두고 다투던 장사꾼을 밀어붙여 쫓아냈다.'),
   L([grown, st('civil')], { peace: 1 }, '손님끼리 다투자 차 한 잔씩 내주며 가라앉혔다.'),
@@ -298,7 +306,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('settled')], { ambition: 1 }, '돌밭을 갈아엎어 밭을 한 고랑 더 늘렸다.'),
   L([grown, st('settled')], { inquiry: 1 }, '바닷가에 밀려온 낯선 물건이 어디서 왔는지 따져 보았다.'),
   L([grown, st('settled')], { romance: 1 }, '장이 파한 빈 광장에서 혼자 콧노래를 부르며 춤을 췄다.'),
-  L([grown, st('settled')], { loyalty: 1 }, '오래전 누군가와 함께 심은 나무에 올해도 거름을 주었다.'),
+  L([grown, st('settled')], { loyalty: 1 }, '우물가 그늘에 어린 나무를 한 그루 심고 물을 주었다.'),
   L([grown, st('settled')], { freedom: 1 }, '마을 모임에 빠지고 혼자 산마루에 올라 바람을 쐬었다.'),
   L([grown, st('settled')], { dominion: 1 }, '이웃이 넘겨 박은 울타리 말뚝을 뽑아 제자리에 도로 박았다.'),
   L([grown, st('settled')], { peace: 1 }, '이웃끼리 다투는 소리에 나가 양쪽을 차분히 달랬다.'),
@@ -309,7 +317,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('retired')], { ambition: 1 }, '몸이 허락하는 한 매일 언덕길을 올랐다.'),
   L([grown, st('retired')], { inquiry: 1 }, '서랍 속 항해 책을 펴 가 보지 못한 섬을 찾아보았다.'),
   L([grown, st('retired')], { romance: 1 }, '포구에서 들려오는 뱃노래에 맞춰 잊었던 가락을 흥얼거렸다.'),
-  L([grown, st('retired')], { loyalty: 1 }, '옛 벗의 생일이면 해마다 같은 자리에 모였다.'),
+  L([grown, st('retired'), known('어릴 적 친구')], { loyalty: 1 }, '{person:어릴 적 친구}의 생일에 맞춰 잔을 들고 찾아갔다.'),
   L([grown, st('retired')], { freedom: 1 }, '정해진 끼니 시간도 없이 내키는 대로 먹고 잤다.'),
   L([grown, st('retired'), fierce], { dominion: 1 }, '광장에서 시비를 건 젊은이를 큰소리로 몰아붙였다.'),
   L([grown, st('retired'), calm], { peace: 1 }, '모임에서 다툼이 번지자 조용히 일어나 집으로 돌아왔다.'),
@@ -361,12 +369,14 @@ export const LINES: DailyLine5[] = [
   L(prime, {}, '어깨가 결려 아침 수련을 짧게 끝냈다.'),
   L(prime, {}, '묵은 바지를 꺼내다 무릎께의 기운 자리를 만졌다. 담을 넘던 날 바지는 찢어지고 주머니의 자두만 멀쩡했었다.'),
   L(prime, { peace: 1 }, '짐을 두 상자나 겹쳐 들고 가던 청년 앞에서 문을 잡았다. 전에 자신이 걸려 넘어진 문턱을 조심하라고 일러 줬다.'),
+  L(prime, {}, '담 너머로 뛰어내리는 젊은이를 보고 저도 모르게 무릎을 짚었다.'),
+  L(prime, { peace: 1 }, '겁 없이 덤비는 젊은이들을 보면 걱정이 앞섰다.'),
   L(prime, { inquiry: 1 }, '모은 돈을 세어 보며 남은 날들을 헤아렸다.'),
   L({ c: 'age', min: 40 }, { justice: 1 }, '젊은 선원에게 매듭 묶는 요령을 가르쳤다.'),
   // ---------------- 노년 (60~)
   L(elder, {}, '이가 하나 빠져 딱딱한 빵을 국에 적셔 먹었다.'),
   L(elder, { romance: 1 }, '동네 꼬마들이 옛날이야기를 해 달라고 졸랐다.'),
-  L(elder, { inquiry: 1 }, '젊어서 다닌 바다의 이름을 하나씩 잊어 가는 게 서운했다.'),
+  L(elder, { inquiry: 1 }, '바다 이름 하나가 떠오르지 않아 지도를 펴고 낯익은 글자를 찾았다.'),
   L(elder, { peace: 1 }, '볕 드는 창가에서 졸다 깨다 하루를 보냈다.'),
 
   // 섬에서 나고 자라며 보거나, 제 손으로 얻은 것을 꺼내 보는 날들.

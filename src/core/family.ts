@@ -1,10 +1,12 @@
-// 출생 때의 가족: 부모 둘과 형제 몇. 가족은 싸우지 않는다 (crew가 없다). 고아는 가족이 없다.
+// 부모와 손위 형제는 처음부터, 손아래 형제는 유년기에 태어난다. 고아에게는 따로 보호자가 있을 수 있다.
 import { homeFirstNames } from './names';
 import { chance, int, pick, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
+import { NEWBORN_SIBLING, SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
 import { RELATION_KIND } from '../data/words';
+import { clamp } from '../shared/core/util';
 import { logLine } from './log';
-import type { Life5, Person } from './types';
+import type { Life5, Lineage, Person, SiblingWelcomeAction } from './types';
 
 /** 형제의 관계 낱말. 손위는 주인공의 성별에 따라 부르는 말이 다르다 (아들에게 형 · 누나, 딸에게 오빠 · 언니) */
 function siblingWord(heroGender: 'm' | 'f', gender: 'm' | 'f', older: boolean): string {
@@ -13,43 +15,126 @@ function siblingWord(heroGender: 'm' | 'f', gender: 'm' | 'f', older: boolean): 
   return heroGender === 'm' ? '누나' : '언니';
 }
 
-/**
- * 출생 때 한 번. 부모와 형제를 s.people에 넣는다. 성은 주인공과 같고, 이름은 주인공 · 서로와 겹치지 않는다.
- * 손아래 형제는 이미 태어난 아이만 둔다 (지금 주인공 나이보다 더 어릴 수는 없다).
- */
+function addFamilyMember(s: Life5, name: string, relation: string, gender: Person['gender'], age: number): Person {
+  const person: Person = {
+    id: `p${s.seq++}`, name, gender, age, kind: 'family', relation, canon: null,
+    bond: V.person.bond, faction: 'civil', species: s.hero.species, alive: true,
+  };
+  s.people.push(person);
+  return person;
+}
+
+function familyName(s: Life5, first: string): string {
+  return s.hero.surname ? `${s.hero.surname} ${first}` : first;
+}
+
+/** 시작 가족과 미래의 동생을 한 번 뽑는다. 동생은 태어날 때 인물 목록에 들어간다. */
 export function rollFamily(s: Life5, r: Rng): void {
   const h = s.hero;
   if (h.lineage === 'orphan') { orphanFate(s); return; }
   const F = V.family;
   const used = new Set([h.name]);
-  const add = (relation: string, gender: 'm' | 'f', age: number) => {
+  const chooseName = (gender: Person['gender']): string => {
     const all = homeFirstNames(h.home, gender);
     const pool = all.filter((x) => !used.has(x));
     const first = pick(r, pool.length ? pool : all);
     used.add(first);
-    const p: Person = {
-      id: `p${s.seq++}`, name: h.surname ? `${h.surname} ${first}` : first, gender, age,
-      kind: 'family', relation, canon: null,
-      bond: V.person.bond, faction: 'civil', species: h.species, alive: true,
-    };
-    s.people.push(p);
+    return familyName(s, first);
   };
 
   const father = int(r, F.parentOlder[0], F.parentOlder[1]), mother = int(r, F.parentOlder[0], F.parentOlder[1]);
-  add('아버지', 'm', s.age + father);
-  add('어머니', 'f', s.age + mother);
+  addFamilyMember(s, chooseName('m'), '아버지', 'm', s.age + father);
+  addFamilyMember(s, chooseName('f'), '어머니', 'f', s.age + mother);
   // 손위 형제는 젊은 쪽 부모가 parentAtBirth살일 때보다 먼저 태어날 수 없다
   const eldestGap = Math.min(F.siblingGap[1], Math.min(father, mother) - F.parentAtBirth);
 
   const counts = Array.from({ length: F.maxSiblings + 1 }, (_, i) => i);
   const n = weighted(r, counts, (i) => F.siblings[h.wealth][i] ?? 0) ?? 0;
+  const firstBirthAge = Math.max(s.age + 1, F.siblingGap[0]);
+  const birthAges = Array.from({ length: Math.max(0, F.siblingGap[1] - firstBirthAge + 1) }, (_, i) => firstBirthAge + i);
   for (let i = 0; i < n; i++) {
     const gender = pick(r, ['m', 'f'] as const);
-    const youngest = Math.min(F.siblingGap[1], s.age);   // 손아래로 둘 수 있는 가장 큰 차이
-    const older = youngest < F.siblingGap[0] || chance(r, F.olderP);
-    const gap = int(r, F.siblingGap[0], older ? eldestGap : youngest);
-    add(siblingWord(h.gender, gender, older), gender, older ? s.age + gap : s.age - gap);
+    const older = birthAges.length === 0 || chance(r, F.olderP);
+    if (older) {
+      const gap = int(r, F.siblingGap[0], eldestGap);
+      addFamilyMember(s, chooseName(gender), siblingWord(h.gender, gender, true), gender, s.age + gap);
+    } else {
+      const [age] = birthAges.splice(int(r, 0, birthAges.length - 1), 1);
+      (s.siblingBirths ??= []).push({ age, name: chooseName(gender), gender });
+    }
   }
+}
+
+const FAMILY_BACKGROUND: Partial<Record<Lineage, string>> = {
+  marineFamily: ' 집안은 해군과 인연이 깊었다.',
+  pirateChild: ' 부모 중 한 사람은 해적이었다.',
+  samurai: ' 무사의 집안이었다.',
+  outcast: ' 집안은 핏줄을 이유로 차별을 받곤 했다.',
+};
+
+/** 첫 선택 전에 주인공이 알고 있는 가족을 소개한다. */
+export function introduceFamily(s: Life5): void {
+  if (s.hero.lineage === 'orphan') {
+    const guardian = s.people.find((p) => p.relation === '할머니' || p.relation === '할아버지');
+    const text = guardian
+      ? `${guardian.relation} ${guardian.name}이(가) 어린아이를 거두어 길렀다.`
+      : s.flags.includes('lonely') ? '기댈 가족 없이 마을 한구석에서 자랐다.'
+      : '부모가 누구인지 알 길은 없었다. 마을에서 어린 시절을 보냈다.';
+    logLine(s, text, 'heavy', 'world');
+    return;
+  }
+
+  const parents = s.people.filter((p) => RELATION_KIND.parent.includes(p.relation)).map((p) => `${p.relation} ${p.name}`);
+  const [father, mother] = parents;
+  logLine(s, `${father}와(과) ${mother}의 손에서 자랐다.${FAMILY_BACKGROUND[s.hero.lineage] ?? ''}`, 'heavy', 'world');
+  const older = s.people.filter((p) => RELATION_KIND.sibling.includes(p.relation)).sort((a, b) => b.age - a.age)
+    .map((p) => `${p.age}살 ${p.relation} ${p.name}`);
+  if (older.length) logLine(s, `집에는 먼저 태어난 ${older.join(', ')}이(가) 있었다.`, 'heavy', 'world');
+}
+
+export function atFamilyHome(s: Life5): boolean {
+  return s.hero.island === s.hero.town && !s.passage && s.hero.standing === 'child' && !s.flags.includes('left_home_young');
+}
+
+function siblingBirthYear(s: Life5): void {
+  const births = s.siblingBirths;
+  if (!births) return;
+  const birth = births.find((b) => b.age === s.age);
+  const future = births.filter((b) => b.age > s.age);
+  if (future.length) s.siblingBirths = future;
+  else delete s.siblingBirths;
+  if (!birth || !s.people.some((p) => p.kind === 'family' && p.relation === '어머니' && p.alive)) return;
+
+  const relation = siblingWord(s.hero.gender, birth.gender, false);
+  const baby = addFamilyMember(s, birth.name, relation, birth.gender, 0);
+  baby.aliases = [NEWBORN_SIBLING];
+  s.queue.unshift(SIBLING_BIRTH_ID);
+  const news = `${relation}이 태어났다.`;
+  const text = atFamilyHome(s) ? `방 안에서 아기 울음이 들렸다. ${news}` : `고향에서 소식이 왔다. ${news}`;
+  logLine(s, text, 'heavy', 'life');
+  s.timeline.push({ age: s.age, text: news });
+}
+
+export function welcomeSibling(s: Life5, action: SiblingWelcomeAction): void {
+  const baby = s.people.find((p) => p.alive && p.kind === 'family' && p.aliases?.includes(NEWBORN_SIBLING));
+  if (!baby) return;
+  baby.aliases = baby.aliases?.filter((alias) => alias !== NEWBORN_SIBLING);
+  baby.bond = clamp(baby.bond + (action === 'hold' ? 8 : 5), 0, V.person.bondMax);
+
+  if (action === 'name') {
+    const reserved = s.siblingBirths?.map((b) => b.name) ?? [];
+    const used = new Set([familyName(s, s.hero.name), ...s.people.map((p) => p.name), ...reserved]);
+    const candidates = homeFirstNames(s.hero.home, baby.gender).map((first) => familyName(s, first)).filter((name) => !used.has(name));
+    if (candidates.length) baby.name = pick(rngOf(s.rng), candidates);
+  }
+
+  const text = {
+    hold: `어머니가 아기의 목을 받치는 법을 가르쳐 줬다. 품에 안긴 동생이 손가락을 꼭 쥐었다. 어머니는 아기를 ${baby.name}(이)라고 불렀다.`,
+    name: atFamilyHome(s) ? `어머니와 떠오르는 이름을 하나씩 불러 봤다. 둘은 ${baby.name}(이)라는 이름을 골라 아기에게 들려줬다.`
+      : `편지에 떠오른 이름을 적었다. 고향에서 동생을 ${baby.name}(이)라고 부르기로 했다는 답장이 왔다.`,
+    letter: `이름을 듣고 편지에 ${baby.name}(이)라고 적었다. 동생이 글을 읽을 수 있을 때 건네 달라고 부탁했다.`,
+  }[action];
+  logLine(s, text, 'heavy', 'choice');
 }
 
 const FAMILY_WORDS: readonly string[] = Object.values(RELATION_KIND).flat();
@@ -74,20 +159,23 @@ export function separateSpouse(s: Life5): void {
 }
 
 /**
- * 한 해가 지날 때: 늙은 가족(가족 관계 낱말의 사람. 원작 인물 · 함께 싸우는 동료는 빼고)이 노환으로 세상을 떠날 수 있다.
+ * 한 해가 지날 때: 동생이 태어나고, 늙은 가족(원작 인물 · 함께 싸우는 동료 제외)은 노환으로 세상을 떠날 수 있다.
  * V.family.oldFrom살부터 해마다 확률이 오른다. 떠나면 무거운 기록 한 줄을 남긴다.
  */
 export function familyYear(s: Life5): void {
+  siblingBirthYear(s);
   const F = V.family, r = rngOf(s.rng);
   for (const p of s.people) {
     if (!p.alive || p.canon || p.crew || !FAMILY_WORDS.includes(p.relation) || p.age < F.oldFrom) continue;
     if (!chance(r, Math.min(F.oldP.cap, F.oldP.start + F.oldP.perYear * (p.age - F.oldFrom)))) continue;
     markPersonDead(s, p);
-    const lateReunion = s.hero.lineage === 'orphan' && s.flags.includes('parentFound') && ['아버지', '어머니'].includes(p.relation);
+    const lateReunion = s.hero.lineage === 'orphan' && p.aliases?.includes('다시 만난 부모');
     const grief = lateReunion
       ? `늦게 만난 ${p.relation}와(과) 나누지 못한 세월이 떠올라 마음이 먹먹했다.`
       : '함께한 날들이 떠올라 한동안 마음이 먹먹했다.';
-    logLine(s, `${p.relation}이(가) 세상을 떠났다. ${grief}`, 'heavy', 'life');
+    const who = p.siblingLife ? `${p.relation} ${p.name}` : p.relation;
+    const card = p.siblingLife?.vivreCard ? ' 지니고 있던 비블카드 조각도 재가 되어 흩어졌다.' : '';
+    logLine(s, `${who}이(가) 세상을 떠났다. ${grief}${card}`, 'heavy', 'life');
   }
 }
 
@@ -131,11 +219,15 @@ export function parentMissing(s: Life5): void {
 export function parentFound(s: Life5): void {
   const r = rngOf(s.rng);
   const p = s.people.find((x) => x.missing);
-  if (p) { p.alive = true; p.missing = false; p.bond = Math.max(p.bond, V.person.bond); }
+  if (p) {
+    p.alive = true; p.missing = false; p.bond = Math.max(p.bond, V.person.bond);
+    p.aliases = [...new Set([...(p.aliases ?? []), '다시 만난 부모'])];
+  }
   else {
     const gender = pick(r, ['m', 'f'] as const);
     s.people.push({
       id: `p${s.seq++}`, name: pick(r, homeFirstNames(s.hero.home, gender)), gender, age: s.age + int(r, 22, 34),
+      aliases: ['다시 만난 부모'],
       kind: 'family', relation: gender === 'm' ? '아버지' : '어머니', canon: null, bond: V.person.bond, faction: 'civil', species: s.hero.species, alive: true,
     });
   }

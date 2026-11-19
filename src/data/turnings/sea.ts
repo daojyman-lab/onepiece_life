@@ -38,7 +38,7 @@ export const SEA_LEAVE: Turning[] = [
                       { op: 'log', text: '사슬을 갈던 손이 들켰다. 샤본디의 경매장 뒤뜰에서 해적들의 소동이 벌어진 틈에야 겨우 사슬이 풀렸다.', weight: 'heavy' },
                       { op: 'timeline', text: '노예선에 실려 샤본디 제도까지 끌려갔다' }] }] },
       { label: '옆 사슬의 아이를 다독이며 함께 버틴다', hint: '샤본디까지 끌려간다. 그 아이는 {name}의 손을 놓지 않는다', values: { freedom: D },
-        fx: [{ op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'person', kind: 'ally', relation: '노예선에서 손을 잡았던 아이', age: { younger: 10 } }, { op: 'hardship', add: 4 },
+        fx: [{ op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'person', kind: 'ally', relation: '노예선에서 손을 잡았던 아이', age: 10 }, { op: 'hardship', add: 4 },
              { op: 'log', text: '샤본디의 경매장 뒤뜰에서 소동이 벌어졌다. 아이를 업고 맹그로브 숲으로 달아났다.', weight: 'heavy' },
              { op: 'timeline', text: '노예선에 실려 샤본디 제도까지 끌려갔다' }] },
       { label: '노예상에게 몸값을 부르라고 흥정한다', hint: '가진 돈을 다 내놓는다. 노예상이 약속을 지킬지 모른다', values: { ambition: D },
@@ -78,7 +78,7 @@ export const SEA_LEAVE: Turning[] = [
   {
     id: 'sea_bounty_chase', kind: 'door', when: at(age(17, 45), st('bountyHunter'), sea('east'), { c: 'standingYears', min: 1 }),
     weight: 4, repeat: 'once', speaker: 'hero',
-    title: '붉은 산 너머로 달아난 사냥감', body: '석 달을 쫓은 해적이 붉은 산 너머로 달아났다. 위대한 항로 입구에는 사냥꾼들이 모여 사는 선인장 바위의 마을이 있다고 한다. 그 너머의 사냥감은 현상금의 자릿수가 다르다.',
+    title: '붉은 산 너머로 달아난 사냥감', body: '부두에 걸린 수배서의 해적이 붉은 산 너머로 달아났다는 소식이 왔다. 위대한 항로 입구에는 사냥꾼들이 모여 사는 선인장 바위의 마을이 있다고 한다. 그 너머의 사냥감은 현상금의 자릿수가 다르다.',
     doors: [
       { label: '사냥감을 쫓아 붉은 산을 넘는다', hint: '더 큰 사냥터로 간다. 사냥꾼도 사냥감이 될 수 있는 바다다', values: { ambition: D }, danger: true,
         fx: [{ op: 'move', island: '위스키 피크', sea: 'gl_entry' }, { op: 'hp', add: -10 },
@@ -92,7 +92,7 @@ export const SEA_LEAVE: Turning[] = [
   {
     id: 'sea_new_ship', kind: 'door', when: at(age(18, 45), st('pirate', 'bountyHunter', 'civil'), sea('east'), { c: 'flag', id: 'ship', has: true }, { c: 'standingYears', min: 1 }),
     weight: 5, repeat: 'once', speaker: 'hero',
-    title: '붉은 산을 넘을 배', body: '손본 배가 이제 제법 튼튼하다. 조선소의 늙은 목수가 이 배라면 붉은 산의 물길도 버틸 거라고 한다. 이스트 블루의 섬들은 이제 눈을 감고도 다닐 수 있다.',
+    title: '붉은 산을 넘을 배', body: '손본 배가 이제 제법 튼튼하다. 조선소의 늙은 목수가 이 배라면 붉은 산의 물길도 버틸 거라고 한다. 목수가 해도에서 물길의 입구를 짚어 준다.',
     doors: [
       { label: '돛을 올려 붉은 산으로 간다', hint: '위대한 항로에 들어선다. 이 배로 어디까지 갈지 시험한다', values: { ambition: D },
         fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'log', text: '배가 붉은 산을 거슬러 올라 반대편 바다로 떨어졌다. 등 뒤로 이스트 블루가 사라졌다.', weight: 'heavy' },
@@ -126,8 +126,8 @@ export const SEA_LEAVE: Turning[] = [
         fx: [{ op: 'move', island: '워터 세븐', sea: 'gl_first' }, { op: 'base', key: 'int', add: 1 },
              { op: 'log', text: '바다 위에 떠 있는 물의 도시에 내렸다. 수로마다 배가 지나갔다.', weight: 'heavy' }, { op: 'timeline', text: '워터 세븐의 조선 회사로 갔다' }] },
       { label: '이 조선소를 지키겠다고 답장한다', hint: '익숙한 망치 소리 곁에 남는다', values: { loyalty: D }, closes: true, fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "워터 세븐의 초청장 뒤에 거절의 답장을 적었다. 다음 날도 이스트 블루 조선소에서 같은 배의 용골을 맞췄다.", weight: 'light' }] },
-      { label: '손이 좋은 제자를 대신 보낸다', hint: '제자의 앞길을 연다. 제 기회는 거기서 접는다', values: { justice: D }, closes: true,
-        fx: [{ op: 'person', kind: 'ally', relation: '물의 도시로 간 제자', age: { younger: 12 } }, { op: 'log', text: "제자의 손으로 쓴 지원서를 초청장에 넣어 보냈다. 떠나는 배에서 제자가 망치를 들어 마지막 인사를 했다.", weight: 'light' }] },
+      { label: '항구에서 지원자를 뽑아 추천한다', hint: '다른 목수에게 자리를 내준다', values: { justice: D }, closes: true,
+        fx: [{ op: 'person', kind: 'ally', relation: '워터 세븐에 추천한 목수' }, { op: 'log', text: "지원자들이 깎은 뱃머리 중 물살을 가장 곧게 가르는 것을 골랐다. 그것을 만든 {person:워터 세븐에 추천한 목수}이(가) 추천장을 받아 배에 오르며 망치를 들어 인사했다.", weight: 'light' }] },
     ],
   },
   {
@@ -137,12 +137,13 @@ export const SEA_LEAVE: Turning[] = [
     doors: [
       { label: '갑판 일꾼으로 오른다', hint: '모르는 바다로 간다. 품삯이 두둑하다', values: { romance: D }, 
         fx: [{ op: 'money', add: 15000 }, { op: 'move', island: '알라바스타 왕국', sea: 'gl_first' },
-             { op: 'log', text: '상선은 모래바람 부는 왕국의 항구에 닻을 내렸다. 품삯을 받고 배에서 내렸다.', weight: 'heavy' }, { op: 'timeline', text: '상선의 일꾼이 되어 위대한 항로로 갔다' }] },
+             { op: 'person', kind: 'ally', relation: '사막행 상선의 동무' },
+             { op: 'log', text: '상선은 모래바람 부는 왕국의 항구에 닻을 내렸다. 야간 당번을 함께 선 {person:사막행 상선의 동무}와(과) 품삯을 나란히 받았다. 동무는 고향인 시럽 마을 언덕에서 바다를 보면 이 배도 보일 거라며 웃었다.', weight: 'heavy' }, { op: 'timeline', text: '상선의 일꾼이 되어 위대한 항로로 갔다' }] },
       { label: '선장에게 장사 밑천을 대고 몫을 받기로 한다', hint: '저는 남고 돈만 보낸다. 배가 돌아올지는 모른다', values: { ambition: D },
         fx: [{ op: 'money', add: -15000 }, { op: 'chance', p: 0.5, then: [{ op: 'money', add: 40000 }, { op: 'log', text: '반년 뒤 상선이 돌아와 몫을 두 배로 쳐주었다.', weight: 'light' }],
                else: [{ op: 'log', text: '약속한 철이 지나도 상선은 돌아오지 않았다. 선장에게 맡긴 장사 밑천의 행방을 물을 사람도 없었다.', weight: 'light' }] }] },
       { label: '배에 오르려는 동네 아이를 붙잡아 말린다', hint: '아이는 원망한다. 그 상선이 돌아올지 아무도 모른다', values: { romance: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '바다로 가려던 동네 아이', age: { younger: 6 } }, { op: 'log', text: "동네 아이를 배에서 내려오게 하자 아이가 소매를 뿌리쳤다. 상선은 그날 밤 바람을 맞고 떠났다.", weight: 'light' }] },
+        fx: [{ op: 'person', kind: 'ally', relation: '바다로 가려던 동네 아이', age: 13 }, { op: 'log', text: "동네 아이를 배에서 내려오게 하자 아이가 소매를 뿌리쳤다. 상선은 그날 밤 바람을 맞고 떠났다.", weight: 'light' }] },
     ],
   },
   {
@@ -177,15 +178,16 @@ export const SEA_LEAVE: Turning[] = [
 export const SEA_RETURN: Turning[] = [
   // ---------------------------------------------------------------- 이스트 블루로 돌아오는 길
   {
-    id: 'sea_back_broke', kind: 'door', when: at(home('loguetown'), age(18, 55), st(...SEAFARING, 'civil'), sea('gl_entry', 'gl_first')),
+    id: 'sea_back_broke', kind: 'door', when: at(home('loguetown'), age(18, 55), st(...SEAFARING, 'civil'), sea('gl_entry', 'gl_first'),
+      { c: 'anyOf', conditions: [{ c: 'turningSeen', id: 'mis_shipwreck', has: true }, { c: 'turningSeen', id: 'mis_ship_lost', has: true }] }),
     weight: 3, repeat: 'once', speaker: 'hero',
-    title: '빈손의 항구', body: '위대한 항로에서 가진 것을 다 잃었다. {island}의 항구에 이스트 블루로 가는 상선이 있다. 선장은 갑판 일을 하면 뱃삯을 받지 않겠다고 한다.',
+    title: '다시 선 부두', body: '부서진 배를 두고 물러서야 했던 날이 자꾸 떠오른다. {island}의 항구에 이스트 블루로 가는 상선이 있다. 선장은 갑판 일을 하면 뱃삯을 받지 않겠다고 한다.',
     doors: [
       { label: '상선을 얻어 타고 이스트 블루로 돌아간다', hint: '바다 위의 식당에 내려 다시 시작한다', values: { peace: D },
         fx: [{ op: 'move', island: '해상 레스토랑 발라티에', sea: 'east' }, { op: 'log', text: '바다 위의 식당에 내렸다. 요리사들의 고함이 이렇게 반가울 줄 몰랐다.', weight: 'heavy' },
-             { op: 'timeline', text: '빈손으로 이스트 블루에 돌아왔다' }] },
-      { label: '이 바다에서 맨손으로 다시 일어선다', hint: '돌아가지 않는다. 몇 해는 바닥에서 버틴다', mark: 'unyielding', values: { ambition: D },
-        fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "부서진 배에서 건진 도구로 항구 일을 다시 구했다. 손은 상했지만 며칠 뒤 다시 배를 고칠 수 있었다.", weight: 'light' }] },
+             { op: 'timeline', text: '상선의 갑판 일을 거들며 이스트 블루에 돌아왔다' }] },
+      { label: '이 바다에 남아 항구 일을 찾는다', hint: '동쪽으로 떠나는 배를 보내고 일손을 구하는 부두로 간다', mark: 'unyielding', values: { ambition: D },
+        fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "부두에 남아 일감을 물었다. 며칠 동안 묵직한 짐을 옮기고 첫 품삯을 받았다.", weight: 'light' }] },
     ],
   },
   {
@@ -202,18 +204,19 @@ export const SEA_RETURN: Turning[] = [
     ],
   },
   {
-    id: 'sea_ashes_home', kind: 'door', when: at(home('loguetown'), age(19, 60), st(...SEAFARING, 'civil', 'shipwright'), sea(...GL_SEAS)),
+    id: 'sea_ashes_home', kind: 'door', when: at(home('loguetown'), age(19, 60), st(...SEAFARING, 'civil', 'shipwright'), sea(...GL_SEAS),
+      { c: 'choiceAgo', turning: 'sea_merchant_hire', door: 0, years: 2 }, { c: 'person', relation: '사막행 상선의 동무', has: true, kinds: ['ally'] }),
     weight: 2, repeat: 'once', speaker: 'hero',
-    title: '고향에 묻어 달라던 말', body: '함께 이스트 블루를 떠나온 옛 동무가 {island}에서 숨을 거두었다. 시럽 마을의 언덕에 묻어 달라는 것이 마지막 말이었다. 유골함이 가볍다.',
+    title: '고향에 묻어 달라던 말', body: '사막행 상선에서 야간 당번을 함께 섰던 {person:사막행 상선의 동무}이(가) {island}에서 숨을 거두었다. 시럽 마을의 언덕에 묻어 달라는 것이 마지막 말이었다. 유골함이 가볍다.',
     doors: [
       { label: '유골함을 안고 이스트 블루로 돌아간다', hint: '먼 뱃길을 거슬러 간다. 하던 일은 멈춘다', values: { loyalty: D },
         fx: [{ op: 'move', island: '시럽 마을', sea: 'east' }, { op: 'hardship', add: 2 },
              { op: 'log', text: '언덕 위 바다가 보이는 곳에 동무를 묻었다. 마을 아이 하나가 무덤 앞에 꽃을 놓고 갔다.', weight: 'heavy' },
-             { op: 'timeline', text: '옛 동무의 유골을 안고 이스트 블루에 돌아왔다' }] },
-      { label: '동무가 좋아하던 바다에 뿌린다', hint: '부탁을 저버린다. 그래도 이 바다가 더 어울린다고 여긴다', values: { romance: D },
-        fx: [{ op: 'hardship', add: 1 }, { op: 'log', text: "동무가 좋아하던 바다에 재를 뿌렸다. 유골함이 비었는데도 고향에 데려가 달라던 부탁은 오래 남았다.", weight: 'light' }] },
+             { op: 'timeline', text: '{person:사막행 상선의 동무}의 유골을 안고 이스트 블루에 돌아왔다' }, { op: 'losePerson', relation: '사막행 상선의 동무' }] },
+      { label: '야간 당번을 함께 섰던 바다에 뿌린다', hint: '부탁을 저버린다. 그래도 이 바다가 더 어울린다고 여긴다', values: { romance: D },
+        fx: [{ op: 'hardship', add: 1 }, { op: 'log', text: "{person:사막행 상선의 동무}와(과) 당번을 섰던 바다에 재를 뿌렸다. 유골함이 비었는데도 고향에 데려가 달라던 부탁은 오래 남았다.", weight: 'light' }, { op: 'losePerson', relation: '사막행 상선의 동무' }] },
       { label: '이스트 블루로 가는 상선에 돈을 주고 맡긴다', hint: '제 걸음은 멈추지 않는다', values: { ambition: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'log', text: "이스트 블루행 상선의 선장에게 뱃삯과 유골함을 건넸다. 배가 떠난 뒤 자신의 항해를 이어 갔다.", weight: 'light' }] },
+        fx: [{ op: 'money', add: -10000 }, { op: 'log', text: "이스트 블루행 상선의 선장에게 뱃삯과 {person:사막행 상선의 동무}의 유골함을 건넸다. 배가 떠난 뒤 자신의 항해를 이어 갔다.", weight: 'light' }, { op: 'losePerson', relation: '사막행 상선의 동무' }] },
     ],
   },
 ];

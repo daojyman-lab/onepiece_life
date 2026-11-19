@@ -22,7 +22,10 @@ import { SHIP_MARK } from './ship-memory';
 import { isCombatStyle } from '../data/combat-styles';
 import { discipleFor } from './disciples';
 import { restoreStoryDoor } from './turning';
-import { repairWeaponMentors } from '../data/episodes/contacts';
+import { restoreEscapeNotoriety } from './bounty';
+import { isSiblingCareer } from './siblings';
+import { SIBLING_REUNION_ID } from '../data/turnings/sibling-reunion';
+import { repairEpisodeContacts } from '../data/episodes/contacts';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -92,11 +95,6 @@ export function normalizeLife5(x: unknown): Life5 | null {
       (article.amount !== undefined && (!Number.isSafeInteger(article.amount) || article.amount <= 0)))) return null;
   if (new Set(life.news.map(issue => issue.id)).size !== life.news.length) return null;
   if (life.pressTick !== undefined && !validTick(life.pressTick)) return null;
-  if (x.publishedBounty === undefined) {
-    const first = life.timeline.find(entry => typeof entry?.text === 'string' && /^첫 현상금 [\d,]+ 베리$/.test(entry.text));
-    life.publishedBounty = Math.max(bountyAmount(life.hero), Number(first?.text.replace(/[^\d]/g, '') || 0), ...life.news.map(issue => issue.amount ?? 0));
-  }
-  if (!Number.isSafeInteger(life.publishedBounty) || life.publishedBounty! < 0) return null;
   if (life.ships !== undefined) {
     const ageOk = (age: number, min = 0) => Number.isInteger(age) && age >= min && age <= life.age;
     if (!Array.isArray(life.ships) || life.ships.some((h, i, hulls) =>
@@ -119,6 +117,23 @@ export function normalizeLife5(x: unknown): Life5 | null {
       !Array.isArray(meal.originalCrew) || !meal.originalCrew.includes(meal.sailorId) || !meal.originalCrew.every(id => typeof id === 'string'))))) return null;
   if (life.hero.gender === 'm' && life.hero.island === '아마존 릴리' && !life.pending && !life.passage) life.hero.island = AMAZON_ROADS;
   if (!normalizeRouteSave(life)) return null;
+  if (life.siblingBirths !== undefined && (!Array.isArray(life.siblingBirths) ||
+    life.siblingBirths.some(b => !isObj(b) || !Number.isInteger(b.age) || b.age <= V.birth.startAge || b.age > V.family.siblingGap[1] ||
+      typeof b.name !== 'string' || !b.name.trim() || (b.gender !== 'm' && b.gender !== 'f')) ||
+    new Set(life.siblingBirths.map(b => b.age)).size !== life.siblingBirths.length)) return null;
+  // 지나간 출생 예정일은 지운다. 뒤늦게 동생이나 출생 장면을 만들지 않는다.
+  if (life.siblingBirths?.some(b => b.age <= life.age)) {
+    life.siblingBirths = life.siblingBirths.filter(b => b.age > life.age);
+    if (!life.siblingBirths.length) delete life.siblingBirths;
+  }
+  if (life.people.some((p) => {
+    const story = p?.siblingLife;
+    return story !== undefined && (!isObj(story) || !isSiblingCareer(story.career) ||
+      typeof story.island !== 'string' || !story.island.trim() || typeof story.latestNews !== 'string' ||
+      !Number.isInteger(story.nextNewsAt) || story.nextNewsAt < 0 ||
+      (story.metAt !== undefined && (!Number.isInteger(story.metAt) || story.metAt < 0 || story.metAt > life.age)) ||
+      (story.vivreCard !== undefined && story.vivreCard !== true));
+  })) return null;
   try { normalizeStyles(life, legacyStyles, !isObj(x.growth) || x.growth.weapons === undefined); } catch { return null; }
   if (life.disciples !== undefined) {
     if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
@@ -159,10 +174,6 @@ export function normalizeLife5(x: unknown): Life5 | null {
     life.growth.tier.fruit = 0;
     life.growth.mastery.fruit = 0;
   }
-  if (life.pending?.kind === 'door' && life.pending.turning === 'late_old_design' &&
-      (!life.flags.includes('sharedFlightDesign') || !life.people.some((p) => p.alive && p.relation === '어릴 적 동무'))) {
-    life.pending = null;
-  }
   if (oldPersonality) {
     const top = topValues(life, 1)[0];
     if (top) life.personality = { ...personalityCell(top), pullRow: 0, pullCol: 0, choices: 3, hold: 0, established: true };
@@ -195,6 +206,12 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.age >= V.growth.pref.pathAge) g.path = mainBranch(life);
   }
   try {
+    restoreEscapeNotoriety(life);
+    if (x.publishedBounty === undefined) {
+      const first = life.timeline.find(entry => typeof entry?.text === 'string' && /^첫 현상금 [\d,]+ 베리$/.test(entry.text));
+      life.publishedBounty = Math.max(bountyAmount(life), Number(first?.text.replace(/[^\d]/g, '') || 0), ...life.news.map(issue => issue.amount ?? 0));
+    }
+    if (!Number.isSafeInteger(life.publishedBounty) || life.publishedBounty! < 0) return null;
     if (x.firstBountyIssued === undefined) life.firstBountyIssued = hadBountyBeforeUpgrade(life);
     if (typeof life.firstBountyIssued !== 'boolean') return null;
     if (x.news === undefined && !life.ended) reconcileWorld(life, false);
@@ -211,7 +228,6 @@ export function normalizeLife5(x: unknown): Life5 | null {
       }
     }
     restoreRecruitedRival(life);
-    repairWeaponMentors(life);
     for (const p of life.people) {
       if (p.canon === 'bellamy' && p.crew) p.crew.power = Math.max(p.crew.power, V.person.crew.bellamyPower);
     }
@@ -219,7 +235,9 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.pending?.kind === 'door' && obsoleteRivalChoices.includes(life.pending.turning)) life.pending = null;
     life.queue = life.queue.filter(id => !obsoleteRivalChoices.includes(id));
     if (life.pending?.kind === 'door' && life.pending.turning === 'life_rival_reunion' && !life.rival) updateRival(life);
+    repairEpisodeContacts(life);
     restoreStoryDoor(life);
+    if (life.pending?.kind !== 'door' || life.pending.turning !== SIBLING_REUNION_ID) delete life.siblingMeeting;
     return life;
   } catch {
     return null;                               // 칸의 모양이 깨져 확인조차 못 하면 읽지 않는다

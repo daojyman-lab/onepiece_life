@@ -16,6 +16,13 @@ describe('고향의 마을 (과제 1)', () => {
   it('고향마다 마을이 둘 이상 있다', () => {
     for (const id of IDS) expect(HOMETOWNS.filter((t) => t.home === id).length, id).toBeGreaterThanOrEqual(2);
   });
+  it('첫해 이야기에서 태어난 마을의 모습을 소개한다', () => {
+    const opening = IDS.flatMap((id) => born(id, 40)).flatMap((s) =>
+      s.log.filter((l) => l.age === s.age && l.weight === 'heavy').map((l) => l.text));
+    expect(opening.some((line) => line.includes('후샤 마을') && line.includes('풍차'))).toBe(true);
+    expect(opening.some((line) => line.includes('시프트 역') && line.includes('바다 열차'))).toBe(true);
+    expect(opening.some((line) => line.includes('쿠라우 도시') && line.includes('코끼리'))).toBe(true);
+  });
   it('고향을 정하면 늘 그 고향의 마을에서 태어나고, 그 마을이 첫 섬이며, 고향의 바다에 있다', () => {
     for (const id of IDS) {
       const towns = HOMETOWNS.filter((t) => t.home === id).map((t) => t.name);

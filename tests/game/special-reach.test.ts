@@ -24,9 +24,6 @@ describe('특별한 문은 모두 열릴 수 있다', () => {
     // 난수 소비가 바뀌어도 하나의 고정 시드 대신 동일한 유한 표본에서 접근 가능성을 검증한다.
     if (['ep_alabasta_p4#3', 'ep_alabasta_p6#3', 'ep_alabasta_w4#3', 'ep_alabasta_w6#3'].includes(key)) {
       it(key, () => { expect(reachViaIntroduction(d)).toBeGreaterThanOrEqual(0); }, 120_000);
-    } else if (key === 'ep_dressrosa_b6#3') {
-      // 드레스로자에 제때 닿고 명성과 충성심을 함께 쌓는 경로는 다음 시드 구간에서도 찾는다.
-      it(key, () => { expect(reach(d, 40, 50600) >= 0 || reach(d, TRIES) >= 0).toBe(true); }, 120_000);
     } else {
       it(key, () => { expect(reach(d, TRIES)).toBeGreaterThanOrEqual(0); }, 120_000);
     }

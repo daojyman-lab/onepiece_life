@@ -60,13 +60,13 @@ describe('뉴스 쿠와 원작 연혁', () => {
     s.hero.fame = 2;
     reportBountyChange(s, 0, 'pirate');
     s.hero.fame = 4;
-    reportBountyChange(s, 2000000, 'pirate');
+    reportBountyChange(s, 200000, 'pirate');
     s.hero.fame = 2;
-    reportBountyChange(s, 4000000, 'pirate');
+    reportBountyChange(s, 400000, 'pirate');
     s.hero.fame = 4;
-    reportBountyChange(s, 2000000, 'pirate');
+    reportBountyChange(s, 200000, 'pirate');
     const restored = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
-    expect(restored.news?.filter(n => n.kind === 'bounty').map(n => n.amount)).toEqual([2000000, 4000000]);
+    expect(restored.news?.filter(n => n.kind === 'bounty').map(n => n.amount)).toEqual([200000, 400000]);
     expect(restored.timeline.filter(row => row.text.startsWith('첫 현상금'))).toHaveLength(1);
   });
 
@@ -81,7 +81,7 @@ describe('뉴스 쿠와 원작 연혁', () => {
     const restored = normalizeLife5(s)!;
     expect(restored.hero.standing).toBe('pirate');
     expect(restored.people.find(p => p.canon === 'ace')).toMatchObject({ alive: false, relation: '함께 밥을 먹었다' });
-    expect(restored.publishedBounty).toBe(40000000);
+    expect(restored.publishedBounty).toBe(4000000);
     deliverEdition(restored);
     expect(restored.news?.map(i => i.id)).toEqual(['port:28']);
     expect(restored.timeline.filter(line => line.text.includes('공인장'))).toHaveLength(1);
@@ -93,6 +93,7 @@ describe('뉴스 쿠와 원작 연혁', () => {
     s.hero.standing = 'pirate';
     s.standingSince = 16;
     s.hero.fame = 300;
+    s.growth.tier.fist = 6;
     reportBountyChange(s, 0, 'pirate');
     expect(openTurning(s, TURNING_BY_ID.path_warlord)).toBe(true);
     apply5(s, { type: 'answer', index: 0 });

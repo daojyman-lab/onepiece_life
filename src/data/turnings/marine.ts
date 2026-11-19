@@ -6,7 +6,7 @@
 // (사관학교 입학과 진급의 문이 남긴다). 다른 처지로 건너가는 전환점에는 standingYears를 둔다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { age, at, sea, st } from './paths';
+import { chose, known, age, at, sea, st } from './paths';
 import type { Cond, Fx, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -28,7 +28,8 @@ const PART_SQUAD: Fx[] = [{ op: 'partCrew', prefix: SQUAD }];
 const squadMember = (role: string, crewRole: 'vanguard' | 'support' | 'medic' | 'navigator' | 'cook', extra: Partial<Extract<Fx, { op: 'person' }>> = {}): Fx =>
   ({ op: 'person', kind: 'crew', relation: `${SQUAD} · ${role}`, role: crewRole, age: { younger: 5 }, ...extra });
 /** 분대가 있는 분대장 */
-const hasSquad: Cond[] = [officer];
+const squadRoles = ['돌격병', '저격수', '군의관', '항해 수병', '요리병', '분홍 머리 신병', '턱이 긴 신병', '안경 쓴 검사'];
+const hasSquad: Cond[] = [officer, { c: 'anyOf', conditions: squadRoles.map(role => known(`${SQUAD} · ${role}`, 'crew')) }];
 
 export const MARINE: Turning[] = [
   // ---------------------------------------------------------------- 수병의 날들
@@ -132,15 +133,15 @@ export const MARINE: Turning[] = [
       { label: '다음 출동에 막내를 맨 앞에 세운다', hint: '두려움은 부딪혀야 사라진다고 믿는다', values: { ambition: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'crewTrain', add: 2 }, { op: 'log', text: '막내가 맨 먼저 해적선에 뛰어올랐다. 다리는 떨리고 있었다.', weight: 'heavy' }],
           else: [{ op: 'hp', add: -10 }, { op: 'log', text: '막내는 또 얼어붙었다. 그 대신 {name}이(가) 칼을 맞았다.', weight: 'heavy' }] }] },
-      { label: '제 첫 출동에서 떨던 이야기를 해 준다', hint: '막내가 고개를 든다', values: { loyalty: D }, mark: 'fellowship',
-        fx: [{ op: 'crewTrain', add: 2 }, { op: 'log', text: '첫 출동에서 떨던 이야기를 듣자 막내는 조금씩 눈을 들었다. 다음 훈련에서는 사다리 첫 단을 스스로 밟았다.', weight: 'light' }] },
+      { label: '어디서 발이 굳었는지 마주 앉아 듣는다', hint: '막내가 고개를 든다', values: { loyalty: D }, mark: 'fellowship',
+        fx: [{ op: 'crewTrain', add: 2 }, { op: 'log', text: '막내가 사다리 밑에서 본 것을 하나씩 이야기하며 눈을 들었다. 다음 훈련에서는 사다리 첫 단을 스스로 밟았다.', weight: 'light' }] },
       { label: '보고서에 놓친 책임을 제 이름으로 적는다', hint: '막내는 무사하고 {name}의 공적이 깎인다', values: { justice: D },
         fx: [{ op: 'fame', add: -5 }, { op: 'crewTrain', add: 1 }, { op: 'log', text: '보고서의 책임자 칸에 자기 이름을 적었다. 막내는 꾸중을 피했고, 상관은 {name}의 공적을 지우며 다시 훈련시키라고 했다.', weight: 'light' }] },
     ],
   },
   {
     // v4 namedCrew: 코비 · 헤르메포 · 타시기. 원작이 시작될 무렵 해군에 막 들어온 신병들
-    id: 'mn_named_rookies', kind: 'door', when: at(st('marine'), ...hasSquad, age(17, 26)),
+    id: 'mn_named_rookies', kind: 'door', when: at(st('marine'), officer, age(17, 26)),
     weight: 6, repeat: 'once', speaker: 'hero',
     title: '눈에 띄는 신병들', body: '본부에서 온 신병들 가운데 셋이 눈에 띈다. 큰 목소리로 인사하는 분홍 머리 소년, 툴툴대면서도 제일 먼저 갑판을 닦는 턱이 긴 청년, 칼은 잘 쓰는데 안경을 자꾸 떨어뜨리는 여자 하사.',
     doors: [
@@ -210,9 +211,9 @@ export const MARINE: Turning[] = [
     ],
   },
   {
-    id: 'mn_comrade_death', kind: 'door', when: at(st('marine'), age(17, 50), seasoned, years(2)),
+    id: 'mn_comrade_death', kind: 'door', when: at(st('marine'), age(17, 50), seasoned, years(2), chose('mn_boot_camp', 0, 2), known('훈련소 동기', 'ally')),
     weight: 4, repeat: 'once', speaker: 'hero',
-    title: '돌아오지 않은 동기', body: '토벌전에서 같은 해에 입대한 동기가 돌아오지 않았다. 갑판 위에 덮인 흰 천 아래로 낯익은 군화가 삐져나와 있다.',
+    title: '돌아오지 않은 동기', body: '토벌전에서 훈련소 갯벌에서 업어 줬던 {person:훈련소 동기}이(가) 돌아오지 않았다. 갑판 위에 덮인 흰 천 아래로 낯익은 군화가 삐져나와 있다.',
     doors: [
       { label: '유품을 들고 동기의 고향을 찾아간다', hint: '가진 돈을 털어 두고 오고, 그 집의 울음을 듣는다', values: { justice: D },
         fx: [{ op: 'losePerson', relation: '훈련소 동기' }, { op: 'money', add: -20000 }, { op: 'hardship', add: 3 },
@@ -400,7 +401,7 @@ export const MARINE: Turning[] = [
   {
     id: 'cp_nameless', kind: 'door', when: at(st('cp'), age(18), { c: 'flag', id: 'cpNew', has: true }),
     weight: 9, repeat: 'once', speaker: { relation: '첩보 기관의 교관' },
-    title: '이름을 버리는 날', body: '기관의 첫날. 교관이 {name}의 이름과 태어난 곳이 적힌 서류를 난로 앞에 내민다. 오늘부터는 번호로 불린다고, {town}에 보내던 편지도 끝이라고 한다.',
+    title: '이름을 버리는 날', body: '기관의 첫날. 교관이 {name}의 이름과 태어난 곳이 적힌 서류를 난로 앞에 내민다. 오늘부터는 번호로 불린다고, 이제 {town}에 편지도 보낼 수 없다고 한다.',
     doors: [
       { label: '제 손으로 서류를 불에 던진다', hint: '기관에 온몸을 맡긴다. {town}에 두고 온 끈이 끊어진다', values: { loyalty: D },
         fx: [{ op: 'unflag', id: 'cpNew' }, { op: 'flag', id: 'cpNameless' }, { op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 3 },
@@ -413,15 +414,15 @@ export const MARINE: Turning[] = [
     ],
   },
   {
-    id: 'cp_known_target', kind: 'door', when: at(st('cp'), age(20, 60), cpSettled),
+    id: 'cp_known_target', kind: 'door', when: at(st('cp'), age(20, 60), cpSettled, chose('pp_bookseller', 0, 6), known('글을 가르쳐 준 책방 주인', 'ally')),
     weight: 6, repeat: 'once', speaker: { relation: '기관의 명령서' },
-    title: '명령서의 이름', body: '내려온 명령서에 낯익은 이름이 있다. {town}에서 {name}에게 글을 가르쳐 준 늙은 책방 주인이다. 금지된 역사를 몰래 연구했다는 죄목이 적혀 있다.',
+    title: '명령서의 이름', body: '내려온 명령서에 낯익은 이름이 있다. 책갈피 뒤에 {name}의 이름을 써 주었던 {person:글을 가르쳐 준 책방 주인}의 이름이다. 금지된 역사를 몰래 연구했다는 죄목이 적혀 있다.',
     doors: [
       { label: '명령대로 처리한다', hint: '기관의 신임을 얻고, {town}에 다시는 발을 들이지 못한다', values: { loyalty: D },
-        fx: [{ op: 'rank', add: 1 }, { op: 'fame', add: 20 }, { op: 'hardship', add: 8 },
+        fx: [{ op: 'losePerson', relation: '글을 가르쳐 준 책방 주인' }, { op: 'rank', add: 1 }, { op: 'fame', add: 20 }, { op: 'hardship', add: 8 },
              { op: 'log', text: '명령서의 이름 위에 줄이 그어졌다. 보고서에는 한 줄만 남았다.', weight: 'heavy' }, { op: 'timeline', text: '어릴 적 스승을 명령대로 지웠다' }] },
       { label: '죽은 것으로 꾸미고 먼 섬으로 빼돌린다', hint: '들키면 {name}이(가) 지워질 차례다', values: { romance: D }, danger: true,
-        fx: [{ op: 'chance', p: 0.65, then: [{ op: 'flag', id: 'cpSparedTarget' }, { op: 'person', kind: 'ally', relation: '살려 보낸 책방 주인' }, { op: 'log', text: '책방 주인을 먼 섬행 배에 태우고 죽었다는 보고를 올렸다. 그는 떠나기 전 옛날처럼 {name}의 이름을 불렀다.', weight: 'heavy' }],
+        fx: [{ op: 'chance', p: 0.65, then: [{ op: 'flag', id: 'cpSparedTarget' }, { op: 'personChange', relation: '글을 가르쳐 준 책방 주인', kind: 'ally', rename: '살려 보낸 책방 주인', bond: 15 }, { op: 'log', text: '책방 주인을 먼 섬행 배에 태우고 죽었다는 보고를 올렸다. 그는 떠나기 전 옛날처럼 {name}의 이름을 불렀다.', weight: 'heavy' }],
                else: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '꾸민 시체가 들통났다. 기관은 {name}을(를) 바다 밑 감옥으로 보냈다.', weight: 'heavy' }] }] },
       { label: '책방 주인이 지키던 연구를 먼저 읽는다', hint: '세상이 감춘 것을 알게 되고, 같은 죄를 짓게 된다', values: { inquiry: D }, danger: true,
         fx: [{ op: 'flag', id: 'readForbidden' }, { op: 'base', key: 'int', add: 2 },
@@ -446,7 +447,7 @@ export const MARINE: Turning[] = [
   {
     id: 'cp_erase_village', kind: 'door', when: at(st('cp'), age(22, 60), years(2), cpSettled),
     weight: 5, repeat: 'once', speaker: { relation: '기관의 장관' },
-    title: '지도에서 지울 마을', body: '정부가 학자들이 숨어 사는 마을 하나를 지도에서 지우기로 했다. {name}이(가) 몇 달 동안 모은 주민 명단이 군함의 포격 순서가 된다. 명단 맨 아래에 {name}이(가) 글을 가르친 아이의 이름이 있다.',
+    title: '지도에서 지울 마을', body: '정부가 학자들이 숨어 사는 마을 하나를 지도에서 지우기로 했다. 기관에서 넘겨준 주민 명단이 군함의 포격 순서가 된다. 명단 맨 아래에 마을 글방의 가장 어린 학생 이름이 있다.',
     doors: [
       { label: '명단을 그대로 넘긴다', hint: '세상의 질서는 지켜지고, 마을은 지도에서 사라진다', values: { dominion: D },
         fx: [{ op: 'fame', add: 25 }, { op: 'rank', add: 1 }, { op: 'hardship', add: 8 }, { op: 'timeline', text: '학자들의 마을을 지운 명단을 넘겼다' }, { op: 'log', text: '군함은 {name}이(가) 넘긴 명단 순서대로 포를 겨눴다. 본부는 임무를 높이 평가했지만 맨 아래 적힌 아이의 이름이 오래 떠올랐다.', weight: 'heavy' }] },

@@ -1,21 +1,21 @@
-import { V } from '../data/balance';
+import { bountyOf } from './bounty';
 import { TURNING_BY_ID } from '../data/turnings';
 import { fmtMoney } from '../shared/core/util';
 import { fullName } from './birth';
 import { logLine } from './log';
 import { publishIssue } from './world-news';
 import { hasRelation, personIs } from './needs';
-import type { Hero5, Life5, Person, Standing } from './types';
+import type { Life5, Person, Standing } from './types';
 
 const wanted = (standing: Standing | undefined) => standing === 'pirate' || standing === 'warlord';
 
-export function bountyAmount(hero: Hero5): number {
-  return wanted(hero.standing) ? Math.max(0, Math.round(hero.fame)) * V.fame.bounty : 0;
+export function bountyAmount(s: Life5): number {
+  return wanted(s.hero.standing) ? bountyOf(s) : 0;
 }
 
 /** 옛 저장은 현상금 변동 이력이 없다. 지난 해적 생활을 마친 인생에는 '최초'를 소급하지 않는다. */
 export function hadBountyBeforeUpgrade(s: Life5): boolean {
-  if (bountyAmount(s.hero) > 0 || s.seen.pirate_first_poster !== undefined || s.flags.includes('firstPoster')) return true;
+  if (bountyAmount(s) > 0 || s.seen.pirate_first_poster !== undefined || s.flags.includes('firstPoster')) return true;
   const postings = s.timeline.map(entry => entry.standing).filter((standing): standing is Standing => !!standing);
   if (postings.at(-1) !== s.hero.standing) postings.push(s.hero.standing);
   return postings.some((standing, i) => i + 1 < postings.length && wanted(standing) && !wanted(postings[i + 1]));
@@ -76,7 +76,7 @@ export function reportBountyChange(s: Life5, previousBounty: number, previousSta
     }
     return;
   }
-  const amount = bountyAmount(s.hero);
+  const amount = bountyAmount(s);
   if (previousStanding === 'warlord' && s.hero.standing === 'pirate' && s.firstBountyIssued && amount > 0) {
     const name = fullName(s.hero);
     s.publishedBounty = Math.max(s.publishedBounty ?? 0, amount);

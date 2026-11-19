@@ -7,13 +7,14 @@ import type { Cond } from '../core/types';
 import type { DailyLine5 } from './lines';
 
 const at = (...is: string[]): Cond => ({ c: 'island', is });
-const line = (where: Cond, text: string, lean: DailyLine5['lean'] = {}): DailyLine5 => ({ when: [where], lean, text });
+const line = (where: Cond | Cond[], text: string, lean: DailyLine5['lean'] = {}): DailyLine5 => ({ when: Array.isArray(where) ? where : [where], lean, text });
 
 const LOGUE = at('로그타운');
 const SAND = at('알라바스타 왕국');
 const SKY = at('스카이피아', '엔젤섬', '샨디아 마을');
 const FISH = at('어인섬', '어인가', '류구 왕국', '바다의 숲');
 const DRESS = at('드레스로자');
+const DRESS_TOYS: Cond[] = [DRESS, { c: 'age', max: 20 }, { c: 'history', id: 'dressrosaFree', has: false }]; // 21세의 장편 중에 장난감들이 사람으로 돌아온다.
 const WANO = at('와노쿠니', '하나노미야코', '쿠리', '에비스 마을');
 
 export const STORY_LINES: DailyLine5[] = [
@@ -101,6 +102,7 @@ export const STORY_LINES: DailyLine5[] = [
   line(DRESS, '골목 카페의 주인이 정열이 부족하다며 {name}의 커피에 설탕을 한 숟갈 더 넣었다.'),
   line(DRESS, '밤늦도록 거리에서 플라멩코 음악이 끊이지 않았다. 잠은 늦게 들었다.', { freedom: 1 }),
   line(DRESS, '꽃집 앞을 지나자 발목께에서 재채기가 났다. 꽃보다 작은 톤타타족이 꽃가루투성이 얼굴로 고개를 내밀고는 입에 손가락을 댔다.'),
+  line(DRESS_TOYS, '움직이는 장난감이 꽃 한 송이를 건네고 사라졌다. 이 나라에선 흔한 일이라고 했다.'),
   line(DRESS, '투우장 앞에서 내기를 거는 사람들 사이를 지나쳤다.', { greed: 1 }),
   line(DRESS, '햇볕이 뜨거워 분수대 가장자리에 앉아 발을 식혔다.', { peace: 1 }),
   line(DRESS, '빵집에서 갓 구운 엠파나다를 샀다. 손이 데일 만큼 뜨거웠다.'),
@@ -114,6 +116,7 @@ export const STORY_LINES: DailyLine5[] = [
   line(DRESS, '밤 축제의 폭죽이 멀리서 터졌다. 창문 너머로 사람들의 함성이 들렸다.'),
   line(DRESS, '노천 식당에서 해산물 쌀요리를 시켰다. 혼자 먹기엔 양이 너무 많았다.'),
   line(DRESS, '꽃 장수의 수레가 돌 틈에 끼었다. 뒤에서 밀어 주자 장수가 수레 밑에 떨어진 카네이션 한 송이를 건넸다.', { justice: 1 }),
+  line(DRESS_TOYS, '장난감 하나가 넘어진 채 일어나지 못하고 있었다. 세워 주니 고개를 꾸벅 숙였다.', { justice: 1 }),
   line(DRESS, '골목 카드판에서 돈을 걸라는 권유를 받았다.', { greed: 1 }),
   // ---------------------------------------------------------------- 와노쿠니
   line(WANO, '찻집 처마 밑에서 비를 피했다. 주인이 말없이 따뜻한 차를 내왔다.', { peace: 1 }),

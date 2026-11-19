@@ -1,7 +1,7 @@
 // tests/game/year.test.ts
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
-import { reduce5, invariants5 } from '../../src/core/reduce';
+import { apply5, reduce5, invariants5 } from '../../src/core/reduce';
 import { lineFits, stepPart } from '../../src/core/year';
 import { checkAll, whyNot } from '../../src/core/cond';
 import { applyFx } from '../../src/core/fx';
@@ -10,7 +10,8 @@ import { sailTo } from '../../src/core/voyage';
 import { arrive } from '../../src/core/passage';
 import { V } from '../../src/data/balance';
 import { LINES } from '../../src/data/lines';
-import { autoplay5 } from '../../src/core/autoplay';
+import { rngOf } from '../../src/shared/core/rng';
+import { choose } from '../../src/core/autoplay';
 import type { Life5 } from '../../src/core/types';
 
 const step = (s: Life5) => reduce5(s, { type: 'step' });
@@ -151,14 +152,24 @@ describe('한 해의 진행', () => {
   });
   it('일상 기록과 자잘한 일의 글은 12줄 안에 다시 나오지 않는다', () => {
     expect(V.lines.noRepeat).toBe(12);
+    let inspected = 0;
     for (const seed of [9000, 9001, 9002]) {
-      const { s } = autoplay5(seed, 'random');
-      // 일상 · 자잘한 일의 줄은 type 'day'다. 해 구분선(year)과 고른 뒤의 줄(choice)은 들지 않는다
-      const day = s.log.filter((l) => l.weight === 'light' && l.type === 'day').map((l) => l.text);
-      expect(day.length, `seed ${seed}`).toBeGreaterThan(50);
-      day.forEach((t, i) => expect(day.slice(Math.max(0, i - V.lines.noRepeat), i), `seed ${seed} #${i}`).not.toContain(t));
+      const s = newLife5(seed);
+      const rng = rngOf({ seed: seed ^ 0x5eed, cursor: 0 });
+      const day: string[] = [];
+      // 신문과 가족 소식도 같은 로그를 쓰므로 오래된 줄이 잘리기 전에 읽는다.
+      for (let step = 0; step < 20000 && s.pending?.kind !== 'ending'; step++) {
+        const from = s.seq;
+        apply5(s, s.pending ? { type: 'answer', index: choose(s, 'random', rng) } : { type: 'step' });
+        for (const line of s.log.filter(l => l.id >= from && l.type === 'day' && l.weight === 'light')) {
+          expect(day.slice(-V.lines.noRepeat), `seed ${seed} #${day.length}`).not.toContain(line.text);
+          day.push(line.text);
+        }
+      }
+      inspected += day.length;
       expect(s.recentLines.length).toBeLessThanOrEqual(V.lines.noRepeat);
     }
+    expect(inspected).toBeGreaterThan(150);
   });
   it('대기 중인 일이 있으면 흐르지 않는다', () => {
     const s0: Life5 = { ...newLife5(3), pending: { kind: 'ending', cause: '시험' } };

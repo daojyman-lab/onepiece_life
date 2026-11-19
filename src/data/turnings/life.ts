@@ -5,7 +5,7 @@
 // 자식이 자라서 오는 사건은 주인공이 쉰 살 넘어서 온다 (자식의 나이를 보는 조건이 아직 없다 — 과제 13에 보고).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { ACTIVE, GROWN, HUNTED, SEAFARING, age, at, st } from './paths';
+import { chose, known, ACTIVE, GROWN, HUNTED, SEAFARING, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 /** 해군은 떠돌이를 동료로 받지 않는다 (marine.ts의 mn_squad_pick) */
@@ -25,31 +25,31 @@ const LOVE: Turning[] = [
     title: '자꾸 마주치는 눈', body: '{island} 항구의 꽃가게 앞을 지날 때마다 같은 사람과 눈이 마주친다. 오늘은 그 사람이 먼저 웃었다. {name}의 손에는 내일 떠나는 배의 표가 들려 있다.',
     doors: [
       { label: '배를 한 척 늦추고 먼저 말을 건다', hint: '떠날 날이 밀리고, 마음에 둔 사람이 생긴다', values: { romance: D },
-        fx: [{ op: 'flag', id: 'sweetheart' }, { op: 'money', add: -3000 }, { op: 'log', text: '배는 {name}을(를) 두고 떠났다. 꽃가게 앞에서 해가 질 때까지 이야기를 나눴다.', weight: 'heavy' }] },
+        fx: [{ op: 'person', kind: 'ally', relation: '꽃가게에서 만난 사람' }, { op: 'flag', id: 'sweetheart' }, { op: 'money', add: -3000 }, { op: 'log', text: '배는 {name}을(를) 두고 떠났다. 꽃가게 앞에서 해가 질 때까지 이야기를 나눴다.', weight: 'heavy' }] },
       { label: '말없이 꽃 한 송이를 사서 그 사람의 손에 쥐여 주고 배에 오른다', hint: '아무것도 묻지 않고 떠난다. 그 얼굴이 오래 남는다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 1 }, { op: 'log', text: '배가 멀어질 때까지 꽃가게 앞에 서 있는 사람이 보였다.', weight: 'light' }] },
       { label: '떠나는 날을 미루고 그 사람의 가게 일을 거든다', hint: '몇 달을 묵묵히 곁에 있는다. 하던 일은 멈춘다', values: { romance: D },
-        fx: [{ op: 'flag', id: 'sweetheart' }, { op: 'money', add: -8000 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '꽃가게 문을 닫는 동안 짐을 날랐다. 배표는 접혀 서랍 속에 들어갔다.', weight: 'light' }] },
+        fx: [{ op: 'person', kind: 'ally', relation: '꽃가게에서 만난 사람' }, { op: 'flag', id: 'sweetheart' }, { op: 'money', add: -8000 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '꽃가게 문을 닫는 동안 짐을 날랐다. 배표는 접혀 서랍 속에 들어갔다.', weight: 'light' }] },
     ],
   },
   {
-    id: 'life_family_objection', kind: 'door', when: at(age(18, 42), active, has('sweetheart'), not('married')),
+    id: 'life_family_objection', kind: 'door', when: at(age(18, 42), active, has('sweetheart'), not('married'), known('꽃가게에서 만난 사람', 'ally')),
     weight: 5, repeat: 'once', speaker: { relation: '마음에 둔 사람의 아버지' },
-    title: '문간의 아버지', body: '마음에 둔 사람의 아버지가 {name}을(를) 문간에 세워 둔 채 들이지 않는다. 근본도 벌이도 모르는 사람에게 제 집 사람을 맡길 수 없다고, 다시는 찾아오지 말라고 한다.',
+    title: '문간의 아버지', body: '{person:꽃가게에서 만난 사람}의 아버지가 {name}을(를) 문간에 세워 둔 채 들이지 않는다. 근본도 벌이도 모르는 사람에게 제 집 사람을 맡길 수 없다고, 다시는 찾아오지 말라고 한다.',
     doors: [
       { label: '보란 듯이 이름을 얻어 다시 오겠다고 한다', hint: '몇 해를 독하게 일한다. 그동안 그 사람이 기다릴지는 모른다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'flag', id: 'provingSelf' }, { op: 'money', add: 10000 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '그 집 문 앞에서 발길을 돌렸다. 몇 해 동안 모은 품삯과 소문을 안고 다시 찾아갈 생각이었다.', weight: 'light' }] },
       { label: '그 사람의 손을 잡고 밤배로 달아난다', hint: '혼인은 하지만 그 집과는 끝이다. 아는 사람 없는 곳에서 시작한다', values: { romance: D }, danger: true,
-        fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' },
+        fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'personChange', relation: '꽃가게에서 만난 사람', kind: 'family', rename: '배우자', bond: 12 }, { op: 'flag', id: 'married' },
              { op: 'hardship', add: 2 }, { op: 'timeline', text: '반대를 무릅쓰고 마음에 둔 사람과 달아나 혼인했다' }, { op: 'log', text: '밤배가 떠날 때 그 사람은 작은 보퉁이 하나만 들고 있었다. 뒷집의 등불이 멀어졌다.', weight: 'light' }] },
       { label: '그 사람이 집을 잃지 않게 스스로 물러난다', hint: '마음을 접는다. 그 사람은 집에 남는다', values: { loyalty: D },
         fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'hardship', add: 4 }, { op: 'log', text: '다시는 꽃가게 앞을 지나지 않았다.', weight: 'heavy' }] },
     ],
   },
   {
-    id: 'life_love_or_route', kind: 'door', when: at(age(20, 42), active, has('sweetheart'), not('married')),
-    weight: 5, repeat: 'once', speaker: { relation: '마음에 둔 사람' },
-    title: '두 개의 배표', body: '마음에 둔 사람이 먼 섬의 지도 공방에 자리를 얻었다. 같은 달, {name}에게도 오래 기다린 일이 다른 쪽 바다에서 들어왔다. 배표 두 장이 탁자 위에 놓여 있다.',
+    id: 'life_love_or_route', kind: 'door', when: at(age(20, 42), active, has('sweetheart'), not('married'), known('꽃가게에서 만난 사람', 'ally')),
+    weight: 5, repeat: 'once', speaker: { relation: '꽃가게에서 만난 사람' },
+    title: '두 개의 배표', body: '{person:꽃가게에서 만난 사람}이(가) 먼 섬의 지도 공방에 자리를 얻었다. 같은 달, {name}에게도 오래 기다린 일이 다른 쪽 바다에서 들어왔다. 배표 두 장이 탁자 위에 놓여 있다.',
     doors: [
       { label: '제 일을 버리고 그 사람의 섬으로 간다', hint: '쌓아 온 것을 놓는다. 낯선 섬에서 다시 시작한다', values: { romance: D },
         fx: [{ op: 'money', add: -15000 }, { op: 'flag', id: 'followedLove' }, { op: 'log', text: '그 사람의 섬에 내렸다. 바닷바람이 고향과 달랐다.', weight: 'heavy' }] },
@@ -60,12 +60,12 @@ const LOVE: Turning[] = [
     ],
   },
   {
-    id: 'life_waited', kind: 'door', when: at(age(24, 55), active, has('waitingLove'), not('married')),
-    weight: 6, repeat: 'once', speaker: { relation: '기다리던 사람' },
-    title: '아직 기다린다는 편지', body: '닳고 닳은 편지 한 통이 몇 달을 돌아 {name}의 손에 닿았다. 아직 기다리고 있다고, 그런데 이제 기다리는 일이 조금 지쳤다고 적혀 있다.',
+    id: 'life_waited', kind: 'door', when: at(age(24, 55), active, has('waitingLove'), not('married'), known('꽃가게에서 만난 사람', 'ally')),
+    weight: 6, repeat: 'once', speaker: { relation: '꽃가게에서 만난 사람' },
+    title: '아직 기다린다는 편지', body: '봉투에 {person:꽃가게에서 만난 사람}의 이름이 적혀 있다. 닳고 닳은 편지 한 통이 몇 달을 돌아 {name}의 손에 닿았다. 아직 기다리고 있다고, 그런데 이제 기다리는 일이 조금 지쳤다고 적혀 있다.',
     doors: [
       { label: '하던 일을 접고 돌아가 혼인한다', hint: '약속을 지킨다. 바다의 일은 거기서 멈춘다', values: { justice: D },
-        fx: [{ op: 'unflag', id: 'waitingLove' }, { op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' },
+        fx: [{ op: 'unflag', id: 'waitingLove' }, { op: 'personChange', relation: '꽃가게에서 만난 사람', kind: 'family', rename: '배우자', bond: 12 }, { op: 'flag', id: 'married' },
              { op: 'moveHome' }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '오래 기다려 준 사람과 혼인했다' }, { op: 'log', text: '닳은 편지를 품에 넣고 돌아가는 배에 올랐다. 마중 나온 사람의 눈가에 긴 기다림이 남아 있었다.', weight: 'light' }] },
       { label: '이제 기다리지 말라는 답장을 쓴다', hint: '그 사람을 놓아준다. 답장을 쓰는 데 사흘이 걸린다', values: { freedom: D },
         fx: [{ op: 'unflag', id: 'waitingLove' }, { op: 'hardship', add: 4 }, { op: 'log', text: '사흘 만에 답장을 봉했다. 부두 우체통에 넣은 뒤에도 한참 손을 떼지 못했다.', weight: 'light' }] },
@@ -121,9 +121,9 @@ const LOVE: Turning[] = [
 const FAMILY: Turning[] = [
   // ---------------------------------------------------------------- 자식
   {
-    id: 'life_child_sea', kind: 'door', when: at(age(50, 78), grown),
+    id: 'life_child_sea', kind: 'door', when: at(age(50, 78), grown, { c: 'person', relation: '자식', has: true, minAge: 16 }),
     weight: 5, repeat: 'once', needs: ['child'], speaker: { relation: '다 자란 자식' },
-    title: '자식의 돛', body: '다 자란 자식이 바다로 나가겠다고 한다. 해적이 들끓는 바다라는 걸 알면서도. {name}이(가) 젊을 때 보던 눈빛과 똑같다.',
+    title: '자식의 돛', body: '다 자란 자식이 바다로 나가겠다고 한다. 해적이 들끓는 바다라는 걸 알면서도. 자식이 배표를 탁자 위에 올려놓는다.',
     doors: [
       { label: '모은 돈으로 튼튼한 배를 마련해 준다', hint: '빈 둥지가 된다. 그 배가 어디까지 갈지는 모른다', values: { freedom: D },
         fx: [{ op: 'money', add: -30000 }, { op: 'flag', id: 'childSailed' }, { op: 'timeline', text: '자식에게 배를 마련해 바다로 보냈다' }, { op: 'log', text: '새 배의 돛을 함께 올렸다. 항구가 비자 집에서 자식의 발소리가 더는 들리지 않았다.', weight: 'light' }] },
@@ -134,7 +134,7 @@ const FAMILY: Turning[] = [
     ],
   },
   {
-    id: 'life_child_secret', kind: 'door', when: at(age(48, 78), grown),
+    id: 'life_child_secret', kind: 'door', when: at(age(48, 78), grown, { c: 'person', relation: '자식', has: true, minAge: 13 }),
     weight: 4, repeat: 'once', needs: ['child'], speaker: 'hero',
     title: '닫힌 방문', body: '자식이 말이 없어졌다. 방문을 걸어 잠그고, 집안의 돈이 조금씩 비고, 밤늦게 낯선 사람들과 부두를 오간다는 말이 들린다.',
     doors: [
@@ -151,7 +151,7 @@ const FAMILY: Turning[] = [
   },
   {
     // 뭍에서 일군 일(가게 · 작업장)을 물려줄 때. 바다의 처지는 아래의 깃발 · 제복 쪽이 온다
-    id: 'life_child_name', kind: 'door', when: at(age(52, 80), st('civil', 'shipwright', 'settled', 'retired')),
+    id: 'life_child_name', kind: 'door', when: at(age(52, 80), st('civil', 'shipwright', 'settled', 'retired'), { c: 'person', relation: '자식', has: true, minAge: 16 }, has('shop')),
     weight: 4, repeat: 'once', needs: ['child'], speaker: { relation: '다 자란 자식' },
     title: '물려줄 이름', body: '{name}이(가) 평생 일군 일을 물려받을 나이가 된 자식이, 제 이름으로 전혀 다른 일을 시작하고 싶다고 한다. 손님들도 거래처도 {name}의 이름을 보고 온 사람들이다.',
     doors: [
@@ -206,9 +206,9 @@ const FAMILY: Turning[] = [
     ],
   },
   {
-    id: 'life_parent_remarry', kind: 'door', when: at(age(16, 45), active),
+    id: 'life_parent_remarry', kind: 'door', when: at(age(16, 45), active, { c: 'anyOf', conditions: [{ c: 'person', relation: '어머니', has: false }, { c: 'person', relation: '아버지', has: false }] }),
     weight: 3, repeat: 'once', needs: ['parent'], speaker: { relation: '혼자 된 부모' },
-    title: '새 식구', body: '오래 혼자 살아온 부모가 머뭇거리며, 같이 살고 싶은 사람이 생겼다고 한다. 그 사람에게는 다 큰 아이들이 셋 있고, 고향 집은 그 식구들로 가득 찰 것이다.',
+    title: '새 식구', body: '부모가 머뭇거리며, 같이 살고 싶은 사람이 생겼다고 한다. 그 사람에게는 다 큰 아이들이 셋 있고, 고향 집은 그 식구들로 가득 찰 것이다.',
     doors: [
       { label: '새 식구를 반갑게 맞는다', hint: '고향 집이 낯설어진다. 집안이 다시 화목해진다', values: { peace: D },
         fx: [{ op: 'person', kind: 'ally', relation: '부모의 새 짝', age: { older: 25 } }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '새 식구들이 짐을 풀자 고향 집 식탁에 의자가 셋 늘었다.', weight: 'light' }] },
@@ -235,14 +235,14 @@ const FAMILY: Turning[] = [
     ],
   },
   {
-    id: 'life_sibling_other_side', kind: 'door', when: at(age(18, 55), st(...HUNTED)),
-    weight: 4, repeat: 'once', needs: ['sibling'], speaker: { relation: '해군이 된 형제' },
-    title: '군함 위의 얼굴', body: '{name}이(가) 탄 배를 쫓아오는 군함의 뱃머리에 낯익은 얼굴이 서 있다. 해군 장교가 된 형제다. 형제가 확성기를 들고 배를 세우라고 외친다.',
+    id: 'life_sibling_other_side', kind: 'door', when: at(age(18, 55), st(...HUNTED), chose('sib_news', 1, 2), known('임관 소식을 보낸 형제')),
+    weight: 4, repeat: 'once', needs: ['sibling'], speaker: { relation: '임관 소식을 보낸 형제' },
+    title: '군함 위의 얼굴', body: '{name}이(가) 탄 배를 쫓아오는 군함의 뱃머리에 낯익은 얼굴이 서 있다. 임관 소식을 편지로 보냈던 {person:임관 소식을 보낸 형제}의 얼굴이다. 형제가 확성기를 들고 배를 세우라고 외친다.',
     doors: [
-      { label: '형제와 칼을 맞대지 않으려 다른 바다로 달아난다', hint: '이 바다의 일을 버린다', values: { loyalty: D },
+      { label: '형제와 싸우지 않으려 다른 바다로 달아난다', hint: '이 바다의 일을 버린다', values: { loyalty: D },
         fx: [{ op: 'fame', add: -3 }, { op: 'flag', id: 'fledSibling' }, { op: 'hardship', add: 1 }, { op: 'log', text: '형제의 확성기 소리가 멀어질 때까지 돛을 내리지 않았다. 배를 돌린 뒤에도 손이 떨렸다.', weight: 'light' }] },
       { label: '배를 돌려 맞선다', hint: '형제에게 이기든 지든 그 사이는 돌아오지 않는다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -15 }, { op: 'fame', add: 8 }, { op: 'person', kind: 'rival', relation: '군함의 형제' }, { op: 'log', text: '군함과 배가 가까워지자 형제가 먼저 칼을 뽑았다. 둘의 칼이 맞닿는 소리가 갑판에 울렸다.', weight: 'light' }] },
+        fx: [{ op: 'hp', add: -15 }, { op: 'fame', add: 8 }, { op: 'personChange', relation: '임관 소식을 보낸 형제', bond: -20 }, { op: 'log', text: '군함과 배가 가까워지자 형제가 먼저 칼을 뽑았다. 갑판이 흔들리고 형제의 얼굴이 포연에 가렸다.', weight: 'light' }] },
       { label: '배를 세우고 혼자 군함에 올라 형제를 설득한다', hint: '붙잡힐 수도 있다. 형제가 귀를 기울일지도 모른다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'chance', p: 0.4, then: [{ op: 'log', text: '형제는 한참을 노려보다 군함을 돌렸다.', weight: 'heavy' }],
                else: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '형제는 울면서 {name}의 손에 수갑을 채웠다.', weight: 'heavy' }] }] },
@@ -254,7 +254,7 @@ const FAMILY: Turning[] = [
     title: '하나뿐인 집', body: '부모가 남긴 {town}의 집과 밭은 하나뿐이다. 형제는 거기서 식구들과 살아야 한다며 통째로 달라고 하고, 동네 어른들은 반씩 나누는 게 법도라고 한다.',
     doors: [
       { label: '형제에게 모두 넘긴다', hint: '다툼 없이 끝낸다. 고향에 제 몫은 남지 않는다', values: { peace: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '고향 집을 지키는 형제' }, { op: 'log', text: '형제가 집 열쇠를 받아 들었다. 고향을 떠나며 밭두렁을 마지막으로 걸었다.', weight: 'light' }] },
+        fx: [{ op: 'personChange', who: 'sibling', bond: 15 }, { op: 'log', text: '형제가 집 열쇠를 받아 들었다. 고향을 떠나며 밭두렁을 마지막으로 걸었다.', weight: 'light' }] },
       { label: '법도대로 반씩 나누자고 한다', hint: '몫은 챙긴다. 형제가 서운해한다', values: { justice: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'hardship', add: 1 }, { op: 'log', text: '동네 어른들이 경계에 말뚝을 박았다. 형제는 제 몫의 밭에서 눈을 돌렸다.', weight: 'light' }] },
       { label: '맏이의 몫이라며 제가 차지한다', hint: '집은 손에 들어오고, 형제와는 남이 된다', values: { greed: D }, 
@@ -264,16 +264,29 @@ const FAMILY: Turning[] = [
 ];
 
 const BONDS: Turning[] = [
+  {
+    id: 'life_merchant_meeting', kind: 'door', when: at(age(16, 45), active),
+    weight: 5, repeat: 'once', speaker: { relation: '부두의 장사꾼' },
+    title: '막배가 끊긴 밤', body: '폭우로 막배가 끊겼다. 처마 밑에서 비를 피하던 장사꾼이 자기 창고에 빈방이 있다고 한다. 아침에 떠날 짐은 많은데 같이 일할 사람도, 외상 거래에 이름을 써 줄 사람도 아직 구하지 못했단다.',
+    doors: [
+      { label: '창고에 묵고 따뜻한 밥 한 그릇을 얻는다', hint: '낯선 항구에 다시 찾아갈 집이 생긴다', values: { romance: D },
+        fx: [{ op: 'person', kind: 'ally', relation: '창고 방을 내준 상인' }, { op: 'log', text: '{person:창고 방을 내준 상인}은(는) 젖은 이불을 걷고 마른 자리를 내줬다. 둘이 식은 밥을 국에 말아 먹는 동안 창고 지붕에서 빗소리가 났다.', weight: 'light' }] },
+      { label: '일손을 보태는 대신 이문에서 더 큰 몫을 달라고 한다', hint: '장사꾼은 급한 짐을 팔기 위해 조건을 받아들인다', values: { greed: D },
+        fx: [{ op: 'person', kind: 'ally', relation: '첫 거래를 함께한 상인' }, { op: 'money', add: 5000 }, { op: 'log', text: '아침에 짐을 다 팔고 약속한 대로 이문을 더 챙겼다. {person:첫 거래를 함께한 상인}은(는) 그래도 일을 빨리 끝냈다며 다음 거래처를 장부에 적어 줬다.', weight: 'light' }] },
+      { label: '장부를 읽어 보고 외상 보증에 이름을 쓴다', hint: '장사꾼이 갚지 못하면 내게 빚이 돌아온다', values: { loyalty: D },
+        fx: [{ op: 'person', kind: 'ally', relation: '보증을 서 준 장사꾼' }, { op: 'log', text: '{person:보증을 서 준 장사꾼}의 이름 아래에 서명했다. 장사꾼은 젖지 않게 싸 둔 고향 주소를 건넸다.', weight: 'heavy' }] },
+    ],
+  },
   // ---------------------------------------------------------------- 벗과 빚과 배신, 누구를 구할지
   {
-    id: 'life_friend_debt', kind: 'door', when: at(age(18, 60), active),
+    id: 'life_friend_debt', kind: 'door', when: at(age(18, 60), active, chose('life_merchant_meeting', 2, 2), known('보증을 서 준 장사꾼', 'ally')),
     weight: 4, repeat: 'once', speaker: { relation: '빚쟁이' },
-    title: '벗이 남긴 빚', body: '보증을 서 준 오랜 벗이 빚을 두고 사라졌다. 빚쟁이들이 {name}을(를) 찾아와 벗 대신 갚으라고 한다. 벗이 어느 섬에 숨었는지 짐작 가는 데가 있다.',
+    title: '벗이 남긴 빚', body: '막배가 끊긴 밤에 보증을 서 주었던 {person:보증을 서 준 장사꾼}이(가) 빚을 두고 사라졌다. 빚쟁이들이 {name}을(를) 찾아와 벗 대신 갚으라고 한다. 벗이 어느 섬에 숨었는지 짐작 가는 데가 있다.',
     doors: [
       { label: '벗 대신 빚을 갚는다', hint: '모아 둔 것이 사라진다. 벗을 탓하지 않는다', values: { loyalty: D },
         fx: [{ op: 'money', add: -40000 }, { op: 'hardship', add: 2 }, { op: 'log', text: '빚쟁이에게 돈을 건넸다. 벗의 빈 자리를 보면서도 뒤쫓지 않았다.', weight: 'light' }] },
       { label: '벗을 찾아가 끌고 와서 제 빚을 갚게 한다', hint: '몇 달이 걸린다. 그 벗과는 끝이다', values: { dominion: D }, 
-        fx: [{ op: 'hp', add: -5 }, { op: 'person', kind: 'rival', relation: '끌려와 빚을 갚은 옛 벗' }, { op: 'log', text: '숨은 섬에서 벗을 찾아 데려왔다. 빚을 갚은 뒤 둘은 다른 배를 탔다.', weight: 'light' }] },
+        fx: [{ op: 'hp', add: -5 }, { op: 'personChange', relation: '보증을 서 준 장사꾼', kind: 'rival', rename: '끌려와 빚을 갚은 옛 벗', bond: -20 }, { op: 'log', text: '숨은 섬에서 벗을 찾아 데려왔다. 빚을 갚은 뒤 둘은 다른 배를 탔다.', weight: 'light' }] },
       { label: '빚쟁이들을 문밖으로 내던진다', hint: '빚은 그대로 남고, 빚쟁이들이 사람을 모아 온다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'enemy', relation: '앙심을 품은 빚쟁이' }, { op: 'flag', id: 'loanSharkGrudge' }, { op: 'log', text: '빚쟁이를 내쫓자 문 앞에 부서진 등불이 남았다. 다음 날 더 많은 발자국이 골목에 찍혔다.', weight: 'light' }] },
     ],
@@ -292,12 +305,12 @@ const BONDS: Turning[] = [
     ],
   },
   {
-    id: 'life_fallen_benefactor', kind: 'door', when: at(age(22, 70), active),
-    weight: 4, repeat: 'once', speaker: { relation: '몰락한 은인' },
-    title: '은인의 몰락', body: '어려운 시절 {name}에게 밥과 잠자리를 내주던 상인이 쫄딱 망해 {island}에 왔다. 빚쟁이를 피해 다닌다며, 며칠만 재워 달라고 한다.',
+    id: 'life_fallen_benefactor', kind: 'door', when: at(age(22, 70), active, chose('life_merchant_meeting', 0, 4), known('창고 방을 내준 상인', 'ally')),
+    weight: 4, repeat: 'once', speaker: { relation: '창고 방을 내준 상인' },
+    title: '은인의 몰락', body: '막배가 끊겼던 밤에 밥과 잠자리를 내준 {person:창고 방을 내준 상인}이(가) 쫄딱 망해 {island}에 왔다. 빚쟁이를 피해 다닌다며, 며칠만 재워 달라고 한다.',
     doors: [
       { label: '집에 들여 몇 해라도 먹여 살린다', hint: '살림이 빠듯해진다. 빚쟁이가 문을 두드릴 수도 있다', values: { loyalty: D },
-        fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '몰락한 옛 은인', age: { older: 20 } }, { op: 'log', text: '은인은 빚쟁이가 지나갈 때까지 다락에서 지냈다. 오래전 내주던 밥그릇을 이번에는 {name}이(가) 채웠다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -20000 }, { op: 'personChange', relation: '창고 방을 내준 상인', kind: 'ally', rename: '몰락한 옛 은인', bond: 15 }, { op: 'log', text: '은인은 빚쟁이가 지나갈 때까지 다락에서 지냈다. 오래전 내주던 밥그릇을 이번에는 {name}이(가) 채웠다.', weight: 'light' }] },
       { label: '은인의 빚을 대신 갚아 다시 일어서게 한다', hint: '모아 둔 돈이 크게 나간다', values: { justice: D },
         fx: [{ op: 'money', add: -50000 }, { op: 'chance', p: 0.5, then: [{ op: 'money', add: 30000 }, { op: 'log', text: '다시 일어선 은인이 몇 해 뒤 갚은 돈을 두 배로 돌려주었다.', weight: 'heavy' }] , else: [{ op: 'log', text: '빚은 갚았지만 은인은 한동안 빈 가게 앞을 떠나지 못했다. 다시 물건을 들이기까지 시간이 걸렸다.', weight: 'light' }]}] },
       { label: '은인의 남은 물건을 헐값에 사서 되판다', hint: '팔리면 돈이 남고, 안 팔리면 산 값만 날린다. 은인은 고맙다며 떠난다', values: { greed: D },
@@ -307,43 +320,43 @@ const BONDS: Turning[] = [
     ],
   },
   {
-    id: 'life_friend_betrayal', kind: 'door', when: at(age(20, 65), active),
+    id: 'life_friend_betrayal', kind: 'door', when: at(age(20, 65), active, chose('life_merchant_meeting', 1, 2), known('첫 거래를 함께한 상인', 'ally')),
     weight: 4, repeat: 'once', speaker: 'hero',
-    title: '판 쪽에 선 벗', body: '오랜 벗이 {name}의 큰 거래를 남에게 몰래 넘겼다. 거래는 깨졌고, 벗은 그 대가로 받은 돈으로 새 배를 샀다. 벗이 {island}에 있다는 말이 들린다.',
+    title: '판 쪽에 선 벗', body: '첫 품삯을 반으로 나눴던 {person:첫 거래를 함께한 상인}이(가) 약속한 거래를 남에게 몰래 넘겼다. 거래는 깨졌고, 벗은 그 대가로 받은 돈으로 새 배를 샀다. 벗이 {island}에 있다는 말이 들린다.',
     doors: [
       { label: '벗이 챙긴 몫을 이자까지 쳐서 빼앗아 온다', hint: '돈은 돌아온다. 서로 원수가 된다', values: { greed: D },
-        fx: [{ op: 'money', add: 15000 }, { op: 'person', kind: 'rival', relation: '원수가 된 옛 벗' }, { op: 'log', text: '옛 벗이 산 새 배를 찾아갔다. 금고에서 받아 낸 돈을 세고 서로 등을 돌렸다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: 15000 }, { op: 'personChange', relation: '첫 거래를 함께한 상인', kind: 'enemy', rename: '거래를 가로챈 상인', bond: -20 }, { op: 'log', text: '옛 벗이 산 새 배를 찾아갔다. 금고에서 받아 낸 돈을 세고 서로 등을 돌렸다.', weight: 'light' }] },
       { label: '벗을 찾아가 까닭을 묻고 용서한다', hint: '손해는 그대로다. 벗은 눈을 들지 못한다', values: { loyalty: D },
-        fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '용서받은 옛 벗' }, { op: 'log', text: '벗은 고개를 숙이고 빼앗은 몫을 돌려주겠다고 했다. 오래 걸리더라도 기다리기로 했다.', weight: 'light' }] , else: [{ op: 'log', text: '벗은 손끝만 만지작거렸다. 왜 그랬는지 끝내 대답하지 못했다.', weight: 'light' }]}] },
+        fx: [{ op: 'money', add: -10000 }, { op: 'chance', p: 0.5, then: [{ op: 'personChange', relation: '첫 거래를 함께한 상인', kind: 'ally', rename: '용서받은 옛 벗', bond: 8 }, { op: 'log', text: '벗은 고개를 숙이고 빼앗은 몫을 돌려주겠다고 했다. 오래 걸리더라도 기다리기로 했다.', weight: 'light' }] , else: [{ op: 'log', text: '벗은 손끝만 만지작거렸다. 왜 그랬는지 끝내 대답하지 못했다.', weight: 'light' }]}] },
       { label: '아무 말 없이 연을 끊는다', hint: '얽히지 않는다. 다시는 그 이름을 입에 올리지 않는다', values: { freedom: D },
         fx: [{ op: 'hardship', add: 2 }, { op: 'log', text: '벗이 머문다는 곳의 길목까지 갔다가 돌아섰다. 그 뒤로 그 배의 이름을 들어도 묻지 않았다.', weight: 'light' }] },
     ],
   },
   {
-    id: 'life_enemy_plea', kind: 'door', when: at(age(22, 70), active),
-    weight: 3, repeat: 'once', speaker: { relation: '옛 원수' },
-    title: '원수의 부탁', body: '오래전 {name}에게 큰 해를 입힌 자가 피투성이가 되어 문 앞에 쓰러졌다. 의원에게 갈 돈을 빌려 달라고, 그때 일은 잘못했다고 한다.',
+    id: 'life_enemy_plea', kind: 'door', when: at(age(22, 70), active, chose('life_friend_betrayal', 0, 3), known('거래를 가로챈 상인', 'enemy')),
+    weight: 3, repeat: 'once', speaker: { relation: '거래를 가로챈 상인' },
+    title: '원수의 부탁', body: '거래를 빼돌리고 새 배를 샀던 {person:거래를 가로챈 상인}이(가) 피투성이가 되어 문 앞에 쓰러졌다. 의원에게 갈 돈을 빌려 달라고, 그때 일은 잘못했다고 한다.',
     doors: [
       { label: '의원에게 업고 가서 치료비를 낸다', hint: '원한을 내려놓는다. 돈이 나가고, 그 뒤로 밤잠이 편하다', values: { peace: D },
-        fx: [{ op: 'money', add: -15000 }, { op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '목숨을 빚진 옛 원수' }, { op: 'log', text: '의원의 불이 꺼질 무렵 원수가 살아 나왔다. 그는 갚을 빚이 생겼다며 고개를 숙였다.', weight: 'light' }] , else: [{ op: 'log', text: '의원은 새벽에 고개를 저었다. {name}은(는) 치료비 영수증을 접어 넣었다.', weight: 'light' }]}] },
+        fx: [{ op: 'money', add: -15000 }, { op: 'chance', p: 0.5, then: [{ op: 'personChange', relation: '거래를 가로챈 상인', kind: 'ally', rename: '목숨을 빚진 옛 원수', bond: 25 }, { op: 'log', text: '의원의 불이 꺼질 무렵 원수가 살아 나왔다. 그는 갚을 빚이 생겼다며 고개를 숙였다.', weight: 'light' }] , else: [{ op: 'losePerson', relation: '거래를 가로챈 상인' }, { op: 'log', text: '의원은 새벽에 고개를 저었다. {name}은(는) 치료비 영수증을 접어 넣었다.', weight: 'light' }]}] },
       { label: '문을 닫는다', hint: '그자가 어떻게 되든 상관하지 않는다', values: { dominion: D },
-        fx: [{ op: 'hardship', add: 1 }, { op: 'log', text: '문밖의 숨소리가 새벽녘에 멎었다.', weight: 'light' }] },
+        fx: [{ op: 'losePerson', relation: '거래를 가로챈 상인' }, { op: 'hardship', add: 1 }, { op: 'log', text: '문밖의 숨소리가 새벽녘에 멎었다.', weight: 'light' }] },
       { label: '그때 일을 눈감아 주는 값으로 남은 재산을 받아 낸다', hint: '돈은 생긴다. 원수는 살아도 빈털터리가 된다', values: { greed: D }, fx: [{ op: 'money', add: 45000 }, { op: 'log', text: '원수는 남은 재산의 문서를 내밀었다. 의원이 그를 데려가는 동안 손에서 종이가 바스락거렸다.', weight: 'light' }] },
     ],
   },
   {
-    id: 'life_two_castaways', kind: 'door', when: at(age(18, 65), active),
+    id: 'life_two_castaways', kind: 'door', when: at(age(18, 65), active, known('어릴 적 동무', 'ally'), known('거래를 가로챈 상인', 'enemy')),
     weight: 3, repeat: 'once', speaker: 'hero',
-    title: '바위섬의 두 사람', body: '작은 배를 몰고 가다 난파선의 생존자 둘을 바위섬에서 찾았다. 하나는 오랜 벗이고, 하나는 {name}에게 큰 손해를 입힌 사람이다. 물이 차오르고, 배에는 한 사람 자리만 남았다.',
+    title: '바위섬의 두 사람', body: '작은 배를 몰고 가다 난파선의 생존자 둘을 바위섬에서 찾았다. 한 사람은 부두에서 작은 배를 띄우던 {friend}, 다른 사람은 거래를 빼돌렸던 {person:거래를 가로챈 상인}이다. 물이 차오르고, 배에는 한 사람 자리만 남았다.',
     doors: [
       { label: '벗을 태운다', hint: '다른 하나는 물결 속에 남는다', values: { loyalty: D },
         fx: [{ op: 'hardship', add: 3 }, { op: 'log', text: '벗을 태우고 노를 저었다. 뒤를 돌아보지 않았다.', weight: 'heavy' }] },
       { label: '더 많이 다친 쪽을 먼저 태운다', hint: '그게 원수라도. 벗에게는 돌아오겠다고 한다', values: { justice: D },
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'log', text: '다시 돌아갔을 때 벗은 바위 꼭대기에 매달려 있었다. 둘 다 살았다.', weight: 'heavy' }],
-               else: [{ op: 'hardship', add: 4 }, { op: 'log', text: '다시 돌아갔을 때 바위섬은 물에 잠겨 있었다.', weight: 'heavy' }] }] },
+               else: [{ op: 'hardship', add: 4 }, { op: 'losePerson', relation: '어릴 적 동무' }, { op: 'log', text: '다시 돌아갔을 때 바위섬은 물에 잠겨 있었다.', weight: 'heavy' }] }] },
       { label: '배의 짐을 모두 버리고 둘 다 태운다', hint: '실은 것을 다 잃는다. 배가 견딜지는 모른다', values: { romance: D }, danger: true,
         fx: [{ op: 'money', add: -30000 }, { op: 'chance', p: 0.7, then: [{ op: 'fame', add: 2 }, { op: 'log', text: '가라앉을 듯 기우뚱거리던 배가 끝내 항구에 닿았다.', weight: 'heavy' }],
-               else: [{ op: 'hp', add: -20 }, { op: 'hardship', add: 3 }, { op: 'log', text: '배가 뒤집혔다. {name}만 겨우 해안에 닿았다.', weight: 'heavy' }] }] },
+               else: [{ op: 'losePerson', relation: '어릴 적 동무' }, { op: 'losePerson', relation: '거래를 가로챈 상인' }, { op: 'hp', add: -20 }, { op: 'hardship', add: 3 }, { op: 'log', text: '배가 뒤집혔다. {name}만 겨우 해안에 닿았다.', weight: 'heavy' }] }] },
     ],
   },
   {

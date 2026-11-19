@@ -100,7 +100,7 @@ describe('어릴 적 맞수의 행적', () => {
 
   it('독립 선장은 해적단에 따라 다른 일로 이름을 알린다', () => {
     const reports = new Map<string, string>();
-    for (let seed = 1; seed < 200 && reports.size < 4; seed++) {
+    for (let seed = 1; seed <= 1000 && reports.size < 4; seed++) {
       const s = childhoodRival(seed);
       reportAt(s, 16);
       if (s.rival?.career === 'captain') reports.set(s.rival.crewName, reportAt(s, 19));

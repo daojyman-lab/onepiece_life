@@ -105,7 +105,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     high: '자기 이름을 알고도 눈치 한번 보지 않던 {name}을(를) 별난 녀석으로 기억했다.',
   },
   alvida: {
-    low: '자기 배를 거쳐 간 수많은 사람 가운데 하나로 여겼다.',
+    low: '얼굴은 알아봤지만 특별히 기억나는 일은 없었다.',
     high: '겉모습만 보고 사람을 판단하지 않던 {name}의 눈을 오래 기억했다.',
   },
   kuro: {
@@ -189,19 +189,19 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     high: '몇 번을 쓰러져도 다시 일어서던 {name}의 끈질김을 기억했다.',
   },
   marco: {
-    low: '한 번 함께 날았던 인연으로 기억했다.',
+    low: '이름을 듣자 얼굴을 떠올렸다.',
     high: '흰수염이라면 {name}도 아들로 맞았으리라 여겼다.',
   },
   kid: {
     low: '적어도 등 뒤를 치지는 않았던 사람으로 기억했다.',
-    high: '동맹을 질색하면서도 {name}과(와) 나란히 싸운 날만은 기꺼이 떠올렸다.',
+    high: '제 앞에서도 할 말을 다 하던 {name}을(를) 기억했다.',
   },
   gin: {
-    low: '{name}에게 밥 한 끼를 얻어먹은 일을 기억했다.',
-    high: '굶어 죽어 가던 자신에게 {name}이(가) 내민 밥의 맛을 평생 잊지 않았다.',
+    low: '이름을 듣자 얼굴을 떠올렸다.',
+    high: '{name}에게만큼은 거짓말을 하고 싶지 않았다고 했다.',
   },
   johnny: {
-    low: '잠깐 같은 배를 탔던 인연으로 기억했다.',
+    low: '형님이라 부르던 {name}의 이름을 알아봤다.',
     high: '우연히 만나 형님으로 따르게 된 {name}의 넓은 등을 오래 기억했다.',
   },
   bonclay: {
@@ -210,11 +210,11 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   duval: {
     low: '한때 다녀간 손님으로 기억했다.',
-    high: '제가 따랐던 선장 가운데 {name}을(를) 으뜸으로 꼽았다.',
+    high: '{name}만큼 기억에 남은 사람은 드물다고 했다.',
   },
   sai: {
     low: '이름을 들어 본 정도로만 기억했다.',
-    high: '잔을 나눈 {name}의 부름이라면 언제라도 팔보수군의 닻을 올릴 마음이었다.',
+    high: '{name}의 부름이라면 언제라도 팔보수군의 닻을 올릴 마음이었다.',
   },
   bartolomeo: {
     low: '그 무렵엔 선배들 생각에 빠져 다른 얼굴은 잘 기억하지 못했다.',
@@ -226,7 +226,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   ideo: {
     low: '주먹을 맞댄 기억이 없어 얼굴도 낯설어했다.',
-    high: '{name}과(와) 주먹을 맞댄 순간을 손에 남은 감각으로 기억했다.',
+    high: '경기장 밖에서도 눈에 띄던 {name}의 눈빛을 기억했다.',
   },
   koala: {
     low: '식당에서 스쳤을 뿐 이야기를 나눌 기회는 없었다.',
@@ -234,7 +234,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   hack: {
     low: '기지에서 인사한 사람 가운데 하나로 기억했다.',
-    high: '바닥에 내던져져도 다시 일어났던 {name}을(를) 좋은 제자로 기억했다.',
+    high: '한번 마음먹으면 좀처럼 물러서지 않던 {name}을(를) 기억했다.',
   },
   chopper: {
     low: '언젠가 진찰했던 환자인가 싶어 기억을 더듬었다.',

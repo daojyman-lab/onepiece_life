@@ -19,6 +19,11 @@ const kidIn = (town: string, min: number, max: number, ...more: Cond[]): Cond[] 
 /** 워터 세븐에 사는 어른 */
 const adult = (min: number, max: number | undefined, ...more: Cond[]): Cond[] => [...here, age(min, max), ...more];
 const LANDED = st('civil', 'shipwright', 'settled', 'retired');
+const dockExperience: Cond = { c: 'anyOf', conditions: [
+  st('shipwright'), { c: 'flag', id: 'w7_apprentice', has: true },
+  { c: 'choiceAgo', turning: 'w7_galley_hire', door: 0 }, { c: 'choiceAgo', turning: 'w7_galley_hire', door: 2 },
+  { c: 'choiceAgo', turning: 'w7a_strike', door: 1 },
+] };
 const crossing: Cond = { c: 'standingYears', min: 1 };
 
 export const WATER7: Turning[] = [
@@ -294,11 +299,11 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7a_strike', kind: 'door', when: adult(20, 50, st('shipwright')), weight: 5, repeat: 'once', speaker: { relation: '조선소의 동기' },
+    id: 'w7a_strike', kind: 'door', when: adult(20, 50, st('shipwright')), weight: 5, repeat: 'once', speaker: { relation: '파업을 제안한 직공' },
     title: '직공들의 파업', body: '조선소가 품삯을 깎았다. 직공들이 도크에 모여 망치를 내려놓자고 한다. 주문받은 배의 진수식은 사흘 뒤다.',
     doors: [
       { label: '망치를 내려놓고 동기들 편에 선다', hint: '품삯을 되찾을지 모른다. 회사의 눈 밖에 난다', values: { loyalty: D }, fx: [{ op: 'chance', p: 0.6, then: [{ op: "log", text: "회사에서 밀린 품삯을 내놓자 직공들이 망치를 다시 들었다. 함께 서 있던 동기들이 작업대로 돌아갔다.", weight: "light" }, { op: 'money', add: 10000 }], else: [{ op: "log", text: "회사는 물러서지 않았고 작업장은 오래 비었다. 직공들은 서로의 끼니를 챙기며 다음 집회를 준비했다.", weight: "light" }, { op: 'hardship', add: 1 }] }] },
-      { label: '혼자라도 배를 마무리한다', hint: '진수식은 지켜진다. 동기들이 등을 돌린다', values: { justice: D }, fx: [{ op: "log", text: "혼자 배의 마지막 이음새를 맞춰 진수식 날짜를 지켰다. 동기들은 완성된 배 옆을 지나며 인사하지 않았다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'person', kind: 'rival', relation: '등을 돌린 동기' }] },
+      { label: '혼자라도 배를 마무리한다', hint: '진수식은 지켜진다. 동기들이 등을 돌린다', values: { justice: D }, fx: [{ op: "log", text: "혼자 배의 마지막 이음새를 맞춰 진수식 날짜를 지켰다. 동기들은 완성된 배 옆을 지나며 인사하지 않았다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'person', kind: 'rival', relation: '파업 때 갈라선 직공' }] },
       { label: '사장과 직공 사이를 오가며 타협을 붙인다', hint: '양쪽 모두에게 조금씩 욕을 먹는다', values: { dominion: D }, fx: [{ op: "log", text: "사장과 직공들이 한 탁자에 앉았다. 모두가 불만을 남겼지만 밀린 품삯과 진수식 일정을 종이에 함께 적었다.", weight: "light" }, { op: 'fame', add: 2 }] },
     ],
   },
@@ -329,11 +334,11 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7a_apprentice', kind: 'door', when: adult(36, 75, st('shipwright', 'settled', 'retired', 'civil')), weight: 5, repeat: 'once', speaker: { relation: '도크를 기웃거리는 아이' },
+    id: 'w7a_apprentice', kind: 'door', when: adult(36, 75, LANDED, dockExperience), weight: 5, repeat: 'once', speaker: { relation: '도크를 기웃거리는 아이' },
     title: '도크의 아이', body: '날마다 도크 울타리 너머로 망치질을 지켜보는 아이가 있다. 손톱 밑이 까맣다. 뒷골목 아이다.',
     doors: [
-      { label: '아이를 견습으로 들인다', hint: '가르치는 데 몇 해가 든다', values: { freedom: D }, fx: [{ op: "log", text: "아이에게 망치와 작은 못부터 건넸다. 서툰 첫 자국이 작업대에 남고, 다음 날도 아이가 찾아왔다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '뒷골목에서 들인 견습', age: { younger: 30 } }] },
-      { label: '아이에게 들보 깎는 시험을 낸다', hint: '실력이 없으면 돌려보낸다', values: { justice: D }, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '시험을 통과한 견습', age: { younger: 30 } }, { op: 'log', text: '아이가 끝까지 들보를 깎았다. 거친 면은 남았지만 손을 놓지 않아 견습으로 받아들였다.', weight: 'light' }], else: [{ op: 'log', text: '아이는 들보를 끝내지 못했다. 도구를 돌려주고 더 연습한 뒤 다시 오라고 했다.', weight: 'light' }] }] },
+      { label: '아이를 견습으로 들인다', hint: '가르치는 데 몇 해가 든다', values: { freedom: D }, fx: [{ op: "log", text: "아이에게 망치와 작은 못부터 건넸다. 서툰 첫 자국이 작업대에 남고, 다음 날도 아이가 찾아왔다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '뒷골목에서 들인 견습', age: 13 }] },
+      { label: '아이에게 들보 깎는 시험을 낸다', hint: '실력이 없으면 돌려보낸다', values: { justice: D }, fx: [{ op: 'chance', p: 0.5, then: [{ op: 'person', kind: 'ally', relation: '시험을 통과한 견습', age: 13 }, { op: 'log', text: '아이가 끝까지 들보를 깎았다. 거친 면은 남았지만 손을 놓지 않아 견습으로 받아들였다.', weight: 'light' }], else: [{ op: 'log', text: '아이는 들보를 끝내지 못했다. 도구를 돌려주고 더 연습한 뒤 다시 오라고 했다.', weight: 'light' }] }] },
       { label: '못 본 척 망치질을 계속한다', hint: '아이는 언젠가 오지 않는다', closes: true, fx: [{ op: "log", text: "망치질만 이어 가자 아이는 한참 문턱에 서 있다가 돌아갔다. 다음 날 그 자리에는 아무 발소리도 없었다.", weight: "light" }] },
     ],
   },
@@ -346,8 +351,8 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7a_old_dock', kind: 'door', when: adult(45, 85, LANDED), weight: 4, repeat: 'once', speaker: 'hero',
-    title: '헐리는 옛 도크', body: '{name}이(가) 젊어서 처음 망치를 잡았던 옛 도크가 헐린다. 그 자리에 바다 열차의 새 역이 선다. 도크 기둥에 새긴 이름들이 아직 남아 있다.',
+    id: 'w7a_old_dock', kind: 'door', when: adult(45, 85, LANDED, { c: 'flag', id: 'w7_apprentice', has: true }), weight: 4, repeat: 'once', speaker: 'hero',
+    title: '헐리는 옛 도크', body: '{name}이(가) 견습 시절 일하던 도크가 헐린다. 그 자리에 바다 열차의 새 역이 선다. 도크 기둥에 새긴 이름들이 아직 남아 있다.',
     doors: [
       { label: '기둥 하나를 얻어 집에 들인다', hint: '옛 이름들을 곁에 둔다', values: { romance: D }, fx: [{ op: "log", text: "옛 도크의 기둥을 집 벽에 세웠다. 물에 닳은 나무에서 함께 일했던 직공들의 새긴 이름이 드러났다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }] },
       { label: '새 역을 짓는 일에 손을 보탠다', hint: '도시는 바뀌어도 목수는 짓는다', values: { inquiry: D }, fx: [{ op: "log", text: "새 역의 들보를 올릴 때 옛 도크에서 배운 손놀림을 썼다. 첫 열차가 들어오자 사람들은 완성된 지붕 아래로 모였다.", weight: "light" }, { op: 'money', add: 15000 }] },
@@ -355,12 +360,22 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7a_last_ship', kind: 'door', when: adult(55, 90, st('shipwright', 'settled', 'retired', 'civil')), weight: 4, repeat: 'once', speaker: 'hero',
+    id: 'w7a_last_ship', kind: 'door', when: adult(55, 90, LANDED, dockExperience), weight: 4, repeat: 'once', speaker: 'hero',
     title: '마지막 배', body: '손이 예전 같지 않다. 한 척만 더 짓는다면 그것이 마지막 배가 될 것이다. 누구를 위한 배를 지을지 정해야 한다.',
     doors: [
-      { label: '아무도 타지 않을 꿈의 배를 짓는다', hint: '평생 그려 온 설계를 끝낸다', values: { romance: D }, fx: [{ op: "log", text: "평생 모아 둔 설계도를 펼쳐 꿈의 배를 완성했다. 진수할 손님은 없어도 배의 선이 물길 위에 곧게 섰다.", weight: "light" }, { op: 'money', add: -20000 }, { op: 'fame', add: 5 }, { op: 'timeline', text: '평생 그려 온 마지막 배를 지었다' }] },
+      { label: '아무도 타지 않을 꿈의 배를 짓는다', hint: '손님이 주문하지 않은 배를 제 뜻대로 그린다', values: { romance: D }, fx: [{ op: "log", text: "설계도 맨 위에 제 이름을 쓰고, 그리고 싶던 뱃머리를 달았다. 진수할 손님은 없어도 배의 선이 물길 위에 곧게 섰다.", weight: "light" }, { op: 'money', add: -20000 }, { op: 'fame', add: 5 }, { op: 'timeline', text: '제 뜻대로 마지막 배를 지었다' }] },
       { label: '가난한 어부에게 줄 고깃배를 짓는다', hint: '이름은 남지 않는다', values: { loyalty: D }, fx: [{ op: "log", text: "어부는 새 고깃배의 난간을 쓸어 보고 바다로 밀었다. 배 이름은 작은 글씨로 선미에 남았다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '마지막 배를 받은 어부' }, { op: 'timeline', text: '마지막 배를 가난한 어부에게 주었다' }] },
-      { label: '견습들에게 망치를 넘기고 짓는 것을 지켜본다', hint: '내 손 대신 그들의 손이 짓는다', values: { loyalty: D }, fx: [{ op: "log", text: "견습들의 손이 마지막 판자를 맞췄다. {name}은(는) 망치를 건네고 옆에서 배가 모양을 갖추는 것을 지켜보았다.", weight: "light" }, { op: 'timeline', text: '마지막 배는 견습들의 손으로 지어졌다' }] },
+      { label: '견습에게 망치를 넘긴다', hint: '직접 가르친 견습에게 마지막 판자를 맡긴다', values: { loyalty: D },
+        when: [{ c: 'anyOf', conditions: [
+          { c: 'person', relation: '뒷골목에서 들인 견습', has: true, kinds: ['ally'] },
+          { c: 'person', relation: '시험을 통과한 견습', has: true, kinds: ['ally'] },
+        ] }, { c: 'anyOf', conditions: [
+          { c: 'choiceAgo', turning: 'w7a_apprentice', door: 0, years: 3 }, { c: 'choiceAgo', turning: 'w7a_apprentice', door: 1, years: 3 },
+        ] }],
+        fx: [{ op: 'personChange', relation: '뒷골목에서 들인 견습', rename: '마지막 배를 지은 견습', bond: 10 },
+             { op: 'personChange', relation: '시험을 통과한 견습', rename: '마지막 배를 지은 견습', bond: 10 },
+             { op: 'log', text: '{person:마지막 배를 지은 견습}이(가) 망치를 받아 마지막 판자를 맞췄다. {name}은(는) 배가 물에 뜨는 순간까지 곁에 섰다.', weight: 'light' },
+             { op: 'timeline', text: '{person:마지막 배를 지은 견습}에게 마지막 배를 맡겼다' }] },
     ],
   },
   {

@@ -69,7 +69,7 @@ describe('길과 바다의 데이터', () => {
   it('본문의 자리표시는 인물 이름과 장소만 사용한다', () => {
     for (const t of [...paths, ...people])
       for (const text of [t.title, t.body, ...t.doors.flatMap((d) => [d.label, d.hint])])
-        for (const m of text.match(/\{\w+\}/g) ?? []) expect(['{name}', '{town}', '{island}', '{friend}'], t.id).toContain(m);
+        for (const m of text.match(/\{\w+\}/g) ?? []) expect(['{name}', '{town}', '{island}', '{friend}', '{crew}', '{sibling}', '{defeatedFoe}', '{dojoPartner}'], t.id).toContain(m);
   });
   it('문의 가치관 점수는 V.value.door만큼이다', () => {
     for (const t of [...paths, ...people]) for (const d of t.doors)
@@ -210,7 +210,7 @@ describe('규칙', () => {
     expect(s.queue.filter((q) => q === 'after_fight')).toHaveLength(1);
     const t = TURNINGS.find((x) => x.id === 'after_fight')!;
     expect(t.doors).toHaveLength(3);
-    expect(t.doors.some((d) => d.fx.some((f) => f.op === 'person' && f.kind === 'crew'))).toBe(true);
+    expect(t.doors.some((d) => d.fx.some((f) => f.op === 'recruitDefeated'))).toBe(true);
   });
   it('지면 쓰러진 적의 전환점이 줄을 서지 않는다', () => {
     const s = newLife5(7); s.pending = null; s.age = 25;

@@ -21,7 +21,7 @@ import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { recoverHealthPart } from './health';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
-import { openQueued, openTurning, pickTurning, repeatAllows, STORY_PREFIX, storyRng, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, refreshEntryDoor, repeatAllows, STORY_PREFIX, storyRng, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
@@ -32,6 +32,9 @@ import { MORO, MORO_LANDING } from '../data/turnings/log-island';
 import { buildVoyage, ENTRY_PREFIX, openLogIslandDay, openRouteArrival, regularDestinations, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
 import { advanceRestingRival, openChildhoodAndRival } from './childhood-and-rival';
 import { TRAINING } from '../data/turnings/training';
+import { SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
+import { SIBLING_REUNION } from '../data/turnings/sibling-reunion';
+import { findSiblingReunion, siblingYear } from './siblings';
 import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
 import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
@@ -64,6 +67,8 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (!s.hero.alive) { endIfDead(s); return; }
   deliverEdition(s);
   if (openLogIslandDay(s)) return;
+  partCompanions(s, true);
+  if (s.queue[0] === SIBLING_BIRTH_ID && openQueued(s)) return;
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
   const sighting = kumaSighting(s);
@@ -71,6 +76,12 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
+  const sibling = findSiblingReunion(s);
+  if (sibling) {
+    s.siblingMeeting = sibling.id;
+    if (openTurning(s, SIBLING_REUNION)) return;
+    delete s.siblingMeeting;
+  }
   const vowTurning = chosenActivity ? null : nextLifeVowTurning(s);
   if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
@@ -108,8 +119,11 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   notePath(s);
   if (s.hero.alive) { advanceLifeTime(s); nextPart(s, r); }
   endIfDead(s);
+  if (s.hero.alive && s.queue[0] === SIBLING_BIRTH_ID) openQueued(s);
   if (minorFightDue && s.hero.alive && !s.pending && gateOf(s.hero.island) === gateOf(island)) minorFight(s, r);
   if (s.hero.island === island) delete s.hero.skyAcclimating;
+  // 항해 끝에 열린 입항 창도 그 철의 품삯·불행을 반영한 잠금으로 보여 준다.
+  refreshEntryDoor(s);
 }
 
 /** 줄 선 것 가운데 섬 장편의 장면이 있는가 */
@@ -325,6 +339,7 @@ function nextPart(s: Life5, r: Rng): void {
   comeOfAge(s);
   masterYear(s);
   livingIncome(s);
+  siblingYear(s);
   partCompanions(s);
   voyage(s);
   primeYear(s);
@@ -333,9 +348,18 @@ function nextPart(s: Life5, r: Rng): void {
 }
 
 /** 임시 동행은 약속한 햇수가 차면 제 길로 떠난다: 동료에서 빠지고 아는 사람으로 남는다 */
-function partCompanions(s: Life5): void {
+function partCompanions(s: Life5, siblingsOnly = false): void {
   for (const p of s.people) {
     if (!p.alive || !p.crew || p.tempUntil === undefined || s.age < p.tempUntil) continue;
+    if (p.siblingLife) {
+      if (s.passage || p.crew.separatedMonths) continue;
+      delete p.crew; delete p.tempUntil; p.kind = 'family';
+      p.siblingLife.island = s.hero.island;
+      s.timeline.push({ age: s.age, text: josa(`${p.name}와(과) 동행을 마쳤다`) });
+      logLine(s, `${p.name}와(과) 동행을 마쳤다. 헤어지기 전, 다시 길이 겹치면 찾아오기로 했다.`, 'heavy', 'life');
+      continue;
+    }
+    if (siblingsOnly) continue;
     delete p.crew; delete p.tempUntil; p.kind = 'ally';
     logLine(s, josa(`${p.name}이(가) 제 길로 떠났다. 다시 만나자는 말은 짧았다.`), 'heavy');
   }

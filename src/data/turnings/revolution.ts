@@ -5,7 +5,7 @@
 // 다른 처지에서 건너오는 전환점에는 standingYears를 둔다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { age, at, st } from './paths';
+import { chose, known, age, at, st } from './paths';
 import type { Cond, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -79,7 +79,7 @@ export const REVOLUTION: Turning[] = [
   {
     id: 'rev_palace_servant', kind: 'door', when: at(rev, age(18, 50)),
     weight: 5, repeat: 'once', speaker: 'hero',
-    title: '궁정의 하인', body: '왕의 곡간에 곡식이 썩어 가는지 확인하려 궁정 하인으로 들어간 지 반년. 어린 공주는 {name}을(를) 하나뿐인 친구로 여긴다. 오늘 밤 봉기의 신호가 오면 성문을 열어야 한다.',
+    title: '궁정의 하인', body: '왕의 곡간을 살피려고 하인 차림으로 궁정에 들어섰다. 길을 잃은 어린 공주가 {name}의 소매를 붙들고 방까지 데려다 달라고 한다. 오늘 밤 봉기의 신호가 오면 성문을 열어야 한다.',
     doors: [
       { label: '예정대로 성문을 연다', hint: '봉기는 성공하고, 공주는 {name}을(를) 다시 보지 않는다', values: { justice: D },
         fx: [{ op: 'fame', add: 25 }, { op: 'hardship', add: 4 }, { op: 'log', text: '성문이 열렸다. 횃불 사이로 공주의 얼굴이 보였다. {name}은(는) 고개를 돌렸다.', weight: 'heavy' }] },
@@ -158,15 +158,15 @@ export const REVOLUTION: Turning[] = [
     ],
   },
   {
-    id: 'rev_old_friend', kind: 'door', when: at(rev, age(20, 55), years(2)),
-    weight: 4, repeat: 'once', speaker: { relation: '해군이 된 어릴 적 동무' },
-    title: '쫓아온 얼굴', body: '{name}을(를) 막아선 해군 장교는 {town}에서 함께 자란 동무다. 동무는 칼을 뽑지 않은 채, 지금 항복하면 목숨만은 지켜 주겠다고 한다.',
+    id: 'rev_old_friend', kind: 'door', when: at(rev, age(20, 55), years(2), chose('pp_promise', 2, 3), known('어릴 적 동무', 'rival')),
+    weight: 4, repeat: 'once', speaker: { relation: '어릴 적 동무' },
+    title: '쫓아온 얼굴', body: '{name}을(를) 막아선 해군 장교는 부두에서 해군 모자를 꺼내 보였던 {friend}이다. 동무는 칼을 뽑지 않은 채, 지금 항복하면 목숨만은 지켜 주겠다고 한다.',
     doors: [
       { label: '어릴 적 바닷가의 약속을 꺼내 함께 가자고 한다', hint: '동무가 흔들릴 수도, 부하들을 부를 수도 있다', values: { romance: D }, danger: true,
-        fx: [{ op: 'chance', p: 0.35, then: [{ op: 'person', kind: 'ally', relation: '제복을 버린 옛 동무' }, { op: 'log', text: '동무는 한참 말이 없다가, 제복의 단추를 하나씩 풀었다.', weight: 'heavy' }],
-               else: [{ op: 'hp', add: -20 }, { op: 'flag', id: 'wanted' }, { op: 'person', kind: 'rival', relation: '해군이 된 옛 동무' }, { op: 'log', text: '옛 약속을 꺼내자 동무는 부하들을 불렀다. 칼을 피하며 달아난 {name}의 이름이 수배 명단에 올랐고, 둘의 승부는 끝나지 않았다.', weight: 'heavy' }] }] },
+        fx: [{ op: 'chance', p: 0.35, then: [{ op: 'personChange', relation: '어릴 적 동무', kind: 'ally', rename: '제복을 버린 옛 동무', bond: 10 }, { op: 'log', text: '동무는 한참 말이 없다가, 제복의 단추를 하나씩 풀었다.', weight: 'heavy' }],
+               else: [{ op: 'hp', add: -20 }, { op: 'flag', id: 'wanted' }, { op: 'personChange', relation: '어릴 적 동무', kind: 'rival', rename: '해군이 된 옛 동무', bond: -10 }, { op: 'log', text: '옛 약속을 꺼내자 동무는 부하들을 불렀다. 칼을 피하며 달아난 {name}의 이름이 수배 명단에 올랐고, 둘의 승부는 끝나지 않았다.', weight: 'heavy' }] }] },
       { label: '동무를 쓰러뜨리고 달아난다', hint: '빠져나가지만, 다시는 {town}의 동무로 돌아가지 못한다', values: { freedom: D },
-        fx: [{ op: 'hp', add: -12 }, { op: 'person', kind: 'enemy', relation: '등을 맞은 옛 동무' }, { op: 'log', text: '동무를 쓰러뜨리고 추격을 피해 달아났다. {name}도 상처를 입었고, 돌아본 동무의 눈에는 어릴 적의 정이 남지 않았다.', weight: 'heavy' }] },
+        fx: [{ op: 'hp', add: -12 }, { op: 'personChange', relation: '어릴 적 동무', kind: 'enemy', rename: '등을 맞은 옛 동무', bond: -10 }, { op: 'log', text: '동무를 쓰러뜨리고 추격을 피해 달아났다. {name}도 상처를 입었고, 돌아본 동무의 눈에는 어릴 적의 정이 남지 않았다.', weight: 'heavy' }] },
       { label: '동무의 공이 되도록 손을 내민다', hint: '동무는 진급하고 {name}은(는) 갇힌다', values: { loyalty: D },
         fx: [{ op: 'standing', to: 'prisoner' }, { op: 'log', text: '두 손을 내밀었다. 수갑을 채우는 동무의 손이 떨렸다.', weight: 'heavy' }] },
     ],
@@ -217,7 +217,7 @@ export const REVOLUTION: Turning[] = [
   {
     id: 'rev_leave', kind: 'door', when: at(rev, age(25, 65), years(5)),
     weight: 3, repeat: 'once', speaker: 'hero',
-    title: '끝나지 않는 싸움', body: '혁명군이 된 지 여러 해. 왕국 하나를 무너뜨리면 다른 왕국이 굶긴다. 거울 속의 얼굴에 흉터가 늘었고, 기지의 아이들은 어느새 총을 든다.',
+    title: '끝나지 않는 싸움', body: '혁명군이 된 지 여러 해. 왕국 하나를 무너뜨리면 다른 왕국이 굶긴다. 거울 속의 얼굴에 피곤한 기색이 가득하고, 기지의 아이들은 어느새 총을 든다.',
     doors: [
       { label: '총을 내려놓고 뭍의 조용한 마을로 간다', hint: '싸움에서 물러나지만, 정부의 명단에서는 지워지지 않는다', values: { peace: D },
         fx: [{ op: 'standing', to: 'settled' }, { op: 'flag', id: 'wanted' }, { op: 'timeline', text: '혁명군을 떠나 뭍에 자리 잡았다' }, { op: 'log', text: '총을 기지에 두고 뭍의 마을로 옮겼다. 조용히 집을 구했지만 정부의 수배 명단에는 여전히 {name}의 이름이 남았다.', weight: 'heavy' }] },

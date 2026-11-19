@@ -34,6 +34,8 @@ import { RECRUIT_TURNINGS } from './recruits';
 import { PRIME } from './prime';
 import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
+import { SIBLING_BIRTH_TURNINGS } from './sibling-birth';
+import { SIBLING_REUNION } from './sibling-reunion';
 import { TRAIT_AWAKENINGS } from './trait-awakening';
 import { LIFE_VOW_TURNINGS } from './vow-life';
 import { EPISODE_TURNINGS } from '../episodes';
@@ -86,6 +88,8 @@ const GROUPS: Turning[][] = [
   PRIME,
   DREAM_TURNINGS,
   KIN_TURNINGS,
+  SIBLING_BIRTH_TURNINGS,
+  [SIBLING_REUNION],
   LIFE_VOW_TURNINGS,
   EPISODE_TURNINGS,
   PORT_MARKETS,

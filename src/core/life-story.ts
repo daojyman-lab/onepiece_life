@@ -1,5 +1,6 @@
 // 첫 약속부터 말년까지 이어지는 사실 기록. 짧은 후속 큐와 실제 시간이 필요한 재회를 구분한다.
 import { canUse } from './body';
+import { livingContact } from './needs';
 import type { Life5 } from './types';
 
 export const LIFE_CONTACT = '부두의 기록꾼 페니';
@@ -13,7 +14,7 @@ export function recordLifeEvent(s: Life5, id: string, actor?: string): void {
   const story = storyState(s);
   if (hasLifeEvent(s, id)) return;
   const helper = id === 'escort' && !(hasLifeEvent(s, 'trained_guard') && swordReady(s) && s.growth.tier.sword >= 1) ? support(s) : undefined;
-  const person = helper || (actor && s.people.find((p) => p.relation === actor));
+  const person = helper || (actor && livingContact(s, { relation: actor }));
   story.events.push({ id, age: s.age, part: s.part, island: s.hero.island, elapsed: story.elapsed,
     ...(person ? { actorId: person.id } : {}), ...(id === 'escort' ? { method: helper ? 'support' : 'guard' } as const : {}) });
   if (!s.flags.includes(`life:${id}`)) s.flags.push(`life:${id}`);

@@ -297,13 +297,15 @@ export const WANO: Turning[] = [
     id: 'wanoa_terakoya', kind: 'door', when: adult(36, 75, LANDED), weight: 5, repeat: 'once', speaker: 'hero',
     title: '마을 서당', body: '마을 아이들이 글을 모른다. 할아버지들도 오로치 때는 옛 책을 숨겨 두었다고 한다. 빈 헛간 하나면 서당을 열 수 있다.',
     doors: [
-      { label: '서당을 열어 글과 옛이야기를 가르친다', hint: '아이들과 마을의 역사를 읽는다', values: { inquiry: D }, fx: [{ op: "log", text: "서당 문을 열자 아이들이 글자를 따라 썼다. 아이들이 옛 영주의 이름을 읽자 창밖의 할머니도 따라 읽었다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '서당의 아이들', age: { younger: 30 } }, { op: 'fame', add: 2 }] },
+      { label: '서당을 열어 글과 옛이야기를 가르친다', hint: '아이들과 마을의 역사를 읽는다', values: { inquiry: D }, fx: [{ op: "log", text: "서당 문을 열자 아이들이 글자를 따라 썼다. 아이들이 옛 영주의 이름을 읽자 창밖의 할머니도 따라 읽었다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '서당에서 글을 배운 아이', age: 10 }, { op: 'fame', add: 2 }] },
       { label: '셈과 장사만 가르친다', hint: '먹고사는 법만 가르친다. 탈은 없다', values: { peace: D }, fx: [{ op: "log", text: "아이들은 셈판을 두드리며 장사 값을 맞췄다. 수업이 끝난 뒤에도 시장에서 쓸 숫자를 서로 물었다.", weight: "light" }] },
-      { label: '아이들에게 칼을 가르친다', hint: '언젠가 칼을 들 날을 위해', values: { loyalty: D }, fx: [{ op: "log", text: "아이들에게 나무칼을 나눠 주었다. 작은 손들이 같은 자세를 반복하는 소리가 서당 마당에 났다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 5 }] },
+      { label: '아이들에게 칼을 가르친다', hint: '언젠가 칼을 들 날을 위해', when: [{ c: 'tier', branch: 'sword', min: 2 }], values: { loyalty: D }, fx: [{ op: "log", text: "아이들에게 나무칼을 나눠 주었다. 작은 손들이 같은 자세를 반복하는 소리가 서당 마당에 났다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 5 }] },
     ],
   },
   {
-    id: 'wanoa_old_song', kind: 'door', when: adult(40, 85, LANDED), weight: 4, repeat: 'once', speaker: 'hero',
+    id: 'wanoa_old_song', kind: 'door', when: adult(40, 85, LANDED, { c: 'anyOf', conditions: [
+      { c: 'choiceAgo', turning: 'wanok_forbidden_name', door: 0 }, { c: 'choiceAgo', turning: 'wanok_forbidden_name', door: 2 },
+    ] }), weight: 4, repeat: 'once', speaker: 'hero',
     title: '부르면 안 되던 노래', body: '어릴 적 술 취한 노인에게서 들었던, 부르면 안 되는 노래가 입가에 맴돈다. 손주뻘 아이들이 무슨 노래냐고 묻는다.',
     doors: [
       { label: '노래를 가르쳐 준다', hint: '이야기는 이어진다', values: { romance: D }, fx: [{ op: "log", text: "잊힌 노래의 첫 구절을 부르자 아이가 곧바로 따라 했다. 다음 날 골목에서 다른 아이들의 목소리로도 들렸다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }] },

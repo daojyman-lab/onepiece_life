@@ -39,7 +39,7 @@ export const ISLANDS: Turning[] = [
     id: 'isl_conomi_johnny', kind: 'door', when: at(age(16, 40), SAIL, on('코노미 제도')), weight: 10, repeat: 'once', speaker: { canon: 'johnny' },
     title: '종이 한 장 차이', body: '귤밭이 보이는 선착장에서 선글라스를 낀 사냥꾼 콤비가 수배서 뭉치를 넘기고 있다. 둘 중 하나는 괴혈병으로 이가 흔들린다. {name}의 얼굴을 본 선글라스 쪽이 벌떡 일어선다. 한 수 가르쳐 달라는 것이다.',
     doors: [
-      { label: '칼을 받아 주고, 따라오고 싶으면 타라고 한다', hint: '둘은 그날부터 {name}을(를) 형님이라 부른다', needs: ['ship'], when: [FREE], values: { dominion: D },
+      { label: '칼을 받아 주고, 따라오고 싶으면 타라고 한다', hint: '둘은 그날부터 {name}을(를) 형님이라 부른다', needs: ['ship', 'sword'], when: [FREE], values: { dominion: D },
         fx: [{ op: 'person', kind: 'crew', relation: '형님이라 부르며 따라온 사냥꾼', canon: 'johnny', role: 'support' },
              heavy('조니가 갑판에 무릎을 꿇었다. 형님! 종이 한 장 차이로 졌습니다!'), line('사냥꾼 조니를 배에 태웠다', 'johnny')] },
       { label: '앓는 쪽에게 귤을 짜 먹이는 법부터 일러 준다', hint: '뱃사람이 왜 이를 잃는지 아는 사람은 드물다', values: { inquiry: D },
@@ -50,7 +50,7 @@ export const ISLANDS: Turning[] = [
   },
   // ---------------------------------------------------------------- 위대한 항로 입구
   {
-    id: 'isl_reverse_keeper', kind: 'door', when: at(age(16), SAIL, on('리버스 마운틴')), weight: 10, repeat: 'once', speaker: { relation: '등대지기 노인' },
+    id: 'isl_reverse_keeper', kind: 'door', when: at(age(16), SAIL, on('리버스 마운틴')), weight: 10, repeat: 'once', speaker: { relation: '쌍둥이 곶의 등대지기' },
     title: '쌍둥이 곶의 등대지기', body: '붉은 산을 넘어 떨어진 곳에 등대가 서 있다. 꽃 같은 머리의 늙은 등대지기가 신문을 접으며 {name}을(를) 올려다본다. 이 바다에서는 나침반이 듣지 않는다고, 섬의 자기를 기억하는 지침이 있어야 한다고 한다.',
     doors: [
       { label: '젊은 날 어느 배를 탔느냐고 캐묻는다', hint: '노인은 한참 웃다가, 세상 끝까지 갔다 온 배의 이야기를 조금 들려준다', values: { inquiry: D },
@@ -130,9 +130,9 @@ export const ISLANDS: Turning[] = [
     title: '어인 가라테의 사범', body: '바닷속 도장에서 어인 사범이 물방울 하나로 기왓장 백 장을 깬다. 사람과 어인이 같은 도장에서 땀을 흘리는 날을 보고 싶다고, 그래서 혁명군의 깃발 아래 있다고 한다. 사범이 {name}에게 자세를 잡아 보라고 한다.',
     doors: [
       { label: '같은 배에서 싸우자고 청한다', hint: '사범은 제자 하나를 더 들인 셈 치겠다며 웃는다', needs: ['ship'], values: { loyalty: D },
-        fx: [{ op: "log", text: "핵은 갑판에 올라 물방울 하나로 나무판을 깨 보였다. 새 동료들은 그의 정권을 구경하려고 둘러섰다.", weight: "light" }, { op: 'person', kind: 'crew', relation: '한배에 오른 어인 가라테 사범', canon: 'hack', role: 'vanguard' }, line('어인 가라테 사범 핵과 한배를 탔다', 'hack')] },
+        fx: [{ op: "log", text: "핵은 갑판에 올라 물방울 하나로 나무판을 깨 보였다. 조각 하나가 물에 떨어지자 그가 뱃전 너머를 보며 웃었다.", weight: "light" }, { op: 'person', kind: 'crew', relation: '한배에 오른 어인 가라테 사범', canon: 'hack', role: 'vanguard' }, line('어인 가라테 사범 핵과 한배를 탔다', 'hack')] },
       { label: '물을 다루는 주먹을 한 철 배운다', hint: '손바닥이 부르튼다. 물 한 방울의 무게를 알게 된다', values: { ambition: D },
-        fx: [{ op: "log", text: "핵은 손바닥에 물 한 방울을 올려두고 파문이 번질 때까지 기다리게 했다. 한 철 뒤에는 기왓장이 움직였다.", weight: "light" }, { op: 'mastery', branch: 'fist', add: 25 }, { op: 'hp', add: -8 }] },
+        fx: [{ op: "log", text: "핵은 손바닥에 물 한 방울을 올려두고 파문이 번질 때까지 기다리게 했다. 한 철 뒤에는 기왓장이 움직였다.", weight: "light" }, { op: 'person', kind: 'master', relation: '한 철 동안 가르쳐 준 어인 가라테 사범', canon: 'hack' }, { op: 'mastery', branch: 'fist', add: 25 }, { op: 'hp', add: -8 }] },
       { label: '이 섬의 사람들이 지상을 어떻게 보는지 듣는다', hint: '쉽게 풀릴 이야기가 아니라는 것을 알게 된다', values: { justice: D },
         fx: [{ op: "log", text: "핵은 지상의 빛을 두려워하는 이들과 그곳에 가고 싶어 하는 이들의 말을 함께 전했다. 도장 밖에서는 아이들이 그 이야기를 듣고 있었다.", weight: "light" }, { op: 'base', key: 'int', add: 1 }, flag('fishmanHistory')] },
     ],

@@ -385,6 +385,8 @@ function PeoplePanel({ s }: { s: Life5 }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div><b>{p.name}</b></div>
               <div class="t9 soft">{p.relation}{p.gone ? ' · 떠났다' : ''}{p.crew ? ` · ${p.crew}` : ''}</div>
+              {p.news && <div class="t9 soft">{p.news}</div>}
+              {p.card && <div class="t9">{p.card}</div>}
             </div>
           </div>
         ))}

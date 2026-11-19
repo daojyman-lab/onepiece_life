@@ -4,7 +4,7 @@
 // 다른 처지로 건너가게 하는 전환점에는 처지가 된 지 두 해 이상(standingYears)을 건다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { age, at, st } from './paths';
+import { chose, known, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -101,35 +101,35 @@ export const HUNTER: Turning[] = [
     ],
   },
   {
-    id: 'hunter_partner_split', kind: 'door', when: at(age(18), HUNTER_ONLY), needs: ['crew'],
-    weight: 4, repeat: 'once', speaker: { relation: '함께 사냥하던 동료' },
-    title: '사라진 몫', body: '함께 잡은 거물의 현상금을 가장 오래 함께한 동료가 혼자 받아 갔다는 소문이 들린다. 그 동료는 아무 일 없다는 얼굴로 다음 수배서를 내민다.',
+    id: 'hunter_partner_split', kind: 'door', when: at(age(18), HUNTER_ONLY, chose('hunter_partner', 0, 2), known('외눈의 동업자', 'crew'), { c: 'person', relation: '배신한 옛 동료', has: false }), needs: ['crew'],
+    weight: 4, repeat: 'once', speaker: { relation: '외눈의 동업자' },
+    title: '사라진 몫', body: '함께 잡은 거물의 현상금을 반씩 나누자던 {person:외눈의 동업자}이(가) 혼자 받아 갔다는 소문이 들린다. 그 동료는 아무 일 없다는 얼굴로 다음 수배서를 내민다.',
     doors: [
       { label: '아무것도 묻지 않고 다음 사냥에 나선다', hint: '믿음을 지키거나 또 속는다', values: { loyalty: D },
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'money', add: 40000 }, { op: 'log', text: '동료가 말없이 돈주머니를 건넸다. 앓는 가족에게 먼저 보냈다고 했다.', weight: 'heavy' }],
-               else: [{ op: 'losePerson', who: 'crew' }, { op: 'flag', id: 'betrayed' }, { op: 'money', add: -20000 },
+               else: [{ op: 'personChange', relation: '외눈의 동업자', kind: 'rival', rename: '배신한 옛 동료' }, { op: 'flag', id: 'betrayed' }, { op: 'money', add: -20000 },
                       { op: 'log', text: '다음 날 아침, 동료는 둘의 돈 상자와 함께 사라졌다.', weight: 'heavy' }] }] },
       { label: '대놓고 따지고 몫을 받아 낸다', hint: '돈은 돌아와도 사이는 끝난다', values: { justice: D },
-        fx: [{ op: 'money', add: 40000 }, { op: 'losePerson', who: 'crew' }, { op: 'log', text: '동료는 숨겨 둔 돈주머니를 내놓았다. 각자의 몫을 센 뒤에도 다음 수배서를 함께 펼칠 사람은 남지 않았다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: 40000 }, { op: 'personChange', relation: '외눈의 동업자', kind: 'rival', bond: -20 }, { op: 'log', text: '동료는 숨겨 둔 돈주머니를 내놓았다. 각자의 몫을 센 뒤에도 다음 수배서를 함께 펼칠 사람은 남지 않았다.', weight: 'light' }] },
       { label: '먼저 동료의 몫까지 챙겨 떠난다', hint: '속기 전에 속인다', values: { greed: D },
-        fx: [{ op: 'money', add: 105000 }, { op: 'losePerson', who: 'crew' }, { op: 'flag', id: 'hunterGrudge' }, { op: 'log', text: '동료가 돌아오기 전에 돈 상자를 들고 떠났다. 뒤늦게 비어 있는 자리를 본 동료가 {name}의 행선지를 묻고 다녔다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: 105000 }, { op: 'personChange', relation: '외눈의 동업자', kind: 'rival', bond: -20 }, { op: 'flag', id: 'hunterGrudge' }, { op: 'log', text: '동료가 돌아오기 전에 돈 상자를 들고 떠났다. 뒤늦게 비어 있는 자리를 본 동료가 {name}의 행선지를 묻고 다녔다.', weight: 'light' }] },
     ],
   },
 
   // ---------------------------------------------------------------- 사냥감이 아는 사람일 때
   {
-    id: 'hunter_known_face', kind: 'door', when: at(age(18), HUNTER_ONLY, settledIn(2)),
+    id: 'hunter_known_face', kind: 'door', when: at(age(18), HUNTER_ONLY, settledIn(2), chose('kid_promise', 1, 4), known('어릴 적 동무', 'ally')),
     weight: 5, repeat: 'once', speaker: 'hero',
-    title: '수배서 속의 동무', body: '새로 붙은 수배서의 얼굴이 낯익다. {town}의 바닷가에서 함께 게를 잡던 어릴 적 동무다. 제법 큰 현상금이 붙었고, 지금 {island} 근처에 숨어 있다고 한다.',
+    title: '수배서 속의 동무', body: '새로 붙은 수배서의 얼굴이 낯익다. 부두에서 작은 배를 함께 띄우고, 먼 섬으로 떠나는 날 손을 흔들어 보냈던 {friend}이다. 제법 큰 현상금이 붙었고, 지금 {island} 근처에 숨어 있다고 한다.',
     doors: [
       { label: '찾아가 붙잡아 넘긴다', hint: '현상금은 크고, 동무의 마지막 눈빛이 오래 따라다닌다', values: { justice: D },
-        fx: [{ op: 'money', add: 50000 }, { op: 'fame', add: 5 }, { op: 'hardship', add: 4 },
+        fx: [{ op: 'personChange', relation: '어릴 적 동무', kind: 'rival', bond: -20 }, { op: 'money', add: 50000 }, { op: 'fame', add: 5 }, { op: 'hardship', add: 4 },
              { op: 'log', text: '동무는 끝까지 {name}의 눈을 보았다. 지부의 문이 닫혔다.', weight: 'heavy' }] },
       { label: '먼저 찾아가 달아나라고 귀띔한다', hint: '사냥꾼 조합에 알려지면 일이 끊긴다', values: { loyalty: D },
         fx: [{ op: 'flag', id: 'warnedPirate' }, { op: 'chance', p: 0.3, then: [{ op: 'fame', add: -10 }, { op: 'money', add: -10000 }, { op: 'log', text: '동무를 달아나게 한 일이 조합에 알려졌다. 맡던 사냥이 끊기고 벌금까지 냈다.', weight: 'light' }], else: [{ op: 'log', text: '동무에게 숨은 길을 일러 주었다. 조합에는 아무도 그 만남을 알리지 않았다.', weight: 'light' }] }] },
       { label: '동무의 배에 올라 함께 바다로 나간다', hint: '사냥하던 쪽에서 쫓기는 쪽이 된다', values: { romance: D },
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'crew', relation: '어릴 적 동무' },
+        fx: [{ op: 'standing', to: 'pirate' }, { op: 'personChange', relation: '어릴 적 동무', kind: 'crew', bond: 12 },
              { op: 'timeline', text: '수배된 동무를 따라 해적이 되었다' }, { op: 'log', text: '동무가 갑판에서 자리를 비켜 주었다. 새 배가 출항하자 뒤에 남은 지부의 깃발이 점점 작아졌다.', weight: 'heavy' }] },
     ],
   },
@@ -251,7 +251,7 @@ export const HUNTER: Turning[] = [
   {
     id: 'hunter_lay_down', kind: 'door', when: at(age(25), HUNTER_ONLY, settledIn(2)),
     weight: 3, repeat: 'once', speaker: { relation: '마을의 원로' },
-    title: '눌러앉을 자리', body: '몇 해 동안 {name}이(가) 해적을 쫓아 준 {island}의 원로들이 찾아왔다. 마을의 경비대장 자리가 비었다고, 이제 떠돌지 말고 눌러앉으라고 한다.',
+    title: '눌러앉을 자리', body: '{island}의 원로들이 조합에서 {name}의 이름을 듣고 찾아왔다. 마을의 경비대장 자리가 비었다고, 이제 떠돌지 말고 눌러앉으라고 한다.',
     doors: [
       { label: '경비대장이 되어 눌러앉는다', hint: '사냥은 끝나고 그 거리를 제 손으로 다스린다', values: { dominion: D },
         fx: [{ op: 'standing', to: 'settled' }, { op: 'log', text: '손때 묻은 수배서 뭉치를 태우고 마을 경비대의 문패를 달았다.', weight: 'heavy' }, { op: 'timeline', text: '사냥을 그만두고 마을의 경비대장이 되었다' }] },

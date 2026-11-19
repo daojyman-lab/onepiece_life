@@ -34,9 +34,9 @@ describe('첫 현상수배서', () => {
     s.hero.fame = 2;
     expect(profileView(s).fame).toBe('이름값 2');
     choose(s, 'path_pirate_sail', 1);
-    expect(profileView(s).fame).toBe('현상금 2,000,000 베리');
+    expect(profileView(s).fame).toBe('현상금 200,000 베리');
     expect(scene(s)).toContain('모라 린');
-    expect(posters(s).map(p => p.text)).toEqual(['첫 현상금 2,000,000 베리']);
+    expect(posters(s).map(p => p.text)).toEqual(['첫 현상금 200,000 베리']);
     expect(scene(s)).not.toMatch(/아버지|어머니|스승|맞수/);
   });
 

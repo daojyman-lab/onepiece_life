@@ -8,6 +8,8 @@ import { publishIssue } from './world-news';
 import { CANON } from '../data/canon';
 import { ITEM_BY_ID } from '../shared/data/items';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
+import { SIBLING_BIRTH_AWAY_ID, SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
+import { SIBLING_REUNION_ID } from '../data/turnings/sibling-reunion';
 import { STORY_PACE } from '../data/episodes/pacing';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
@@ -23,6 +25,8 @@ import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
 import { recordTraitEvent, tradeCost } from './traits';
 import { discipleFor, discipleReady } from './disciples';
+import { atFamilyHome } from './family';
+import { meetingSibling } from './siblings';
 import type { Door, Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -39,6 +43,7 @@ function fillTurning(s: Life5, text: string, t?: Turning): string {
 }
 
 function speakerOf(s: Life5, t: Turning): string {
+  if (t.id === SIBLING_REUNION_ID) return meetingSibling(s)?.name ?? s.hero.name;
   if (t.disciple && t.disciple !== 'meeting') {
     const pupil = discipleFor(s, t.disciple);
     return s.people.find(p => p.id === pupil?.personId)?.name ?? '제자';
@@ -147,7 +152,8 @@ export function openTurning(s: Life5, t: Turning): boolean {
   if (t.when.some(c => c.c === 'history' && !checkAll(s, [c]))) return false;
   const weaponScene = t.doors.some(d => d.fx.some(e =>
     ['receiveWeapon', 'buyWeapon', 'giveAwayWeapon', 'beginStyle', 'adoptStyle', 'refineStyle'].includes(e.op)));
-  if (weaponScene && !checkAll(s, t.when)) return false;
+  const prerequisites = weaponScene ? t.when : t.when.filter(c => ['choiceAgo', 'person', 'canonPerson', 'opponent', 'anyOf', 'siblingReunion'].includes(c.c));
+  if (!checkAll(s, prerequisites)) return false;
   if (t.disciple && !discipleReady(s, t.disciple)) return false;
   if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
@@ -243,7 +249,8 @@ export function takeQueued(s: Life5, count = true): Turning | null {
   for (let i = 0; i < s.queue.length;) {
     const id = s.queue[i];
     const entry = buildEntryGate(id);
-    const t = entry ?? TURNING_BY_ID[id];
+    const scene = id === SIBLING_BIRTH_ID && !atFamilyHome(s) ? SIBLING_BIRTH_AWAY_ID : id;
+    const t = entry ?? TURNING_BY_ID[scene];
     if (entry && !checkAll(s, entry.when)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
     const expired = t?.when.some(c => c.c === 'history' && !c.has && !checkAll(s, [c]));
     if (t && (expired || !stillOpen(s, t))) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
@@ -278,6 +285,9 @@ export function pickTurning(s: Life5, r: Rng): Turning | null {
 
 /** 떠 있는 문 가운데 index번째를 고른다. 잠긴 문이나 없는 문이면 아무것도 하지 않는다. */
 export function answerDoor(s: Life5, index: number): void {
+  // 입항한 철에 생긴 불행으로 돈 등이 바뀌면, 열었을 때의 잠금도 갱신한다.
+  // 더는 고를 수 없는 유료 길을 계속 고르며 멈추지 않게 한다.
+  refreshEntryDoor(s);
   const p = s.pending;
   if (p?.kind !== 'door') return;
   const t = turningOf(p.turning);
@@ -286,6 +296,7 @@ export function answerDoor(s: Life5, index: number): void {
   const chosen = p.doors[index];
   if (!chosen || chosen.locked || !t || !door) return;
   if (t.id.startsWith(ENTRY_PREFIX) && !checkAll(s, door.when)) return;
+  if (t.id === SIBLING_REUNION_ID && (!meetingSibling(s) || !checkAll(s, door.when))) return;
 
   s.traitSource = t.id;
   s.traitScene = t.tags ?? [];
@@ -304,9 +315,10 @@ export function answerDoor(s: Life5, index: number): void {
   if (!s.tried.includes(key)) s.tried.push(key);
   if (door.closes && !s.closed.includes(t.id)) s.closed.push(t.id);
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
-  s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
-  // 서약의 제안·결산·각성은 강제로 끼어드는 장면이므로 보통 사건의 멈춤 예산에서 뺀다.
-  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening') {
+  s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, choice: key, ...(canon ? { canon } : {}) });
+  // 서약·각성·동생 탄생처럼 때가 되면 반드시 열리는 장면은 보통 사건의 멈춤 예산에서 뺀다.
+  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening' &&
+      t.id !== SIBLING_BIRTH_ID && t.id !== SIBLING_BIRTH_AWAY_ID && t.id !== SIBLING_REUNION_ID) {
     s.stats.stops += 1;
     s.stats.stopsAt.push(s.age);
     s.stopsThisYear += 1;
@@ -315,6 +327,7 @@ export function answerDoor(s: Life5, index: number): void {
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx, p.discipleId);
   if (door.news) publishIssue(s, { id: `local:${key}`, kind: 'local', ...door.news });
+  if (t.id === 'after_fight') delete s.defeatedFoe;
   afterLifeStoryChoice(s, t.id);
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);

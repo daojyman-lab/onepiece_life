@@ -5,11 +5,12 @@
 //     결전 날 밀짚모자는 시계탑의 폭탄과 크로커다일을 맡고, 주인공은 서쪽 저수고를 지킨다.
 //   비가 돌아온 뒤 「물길의 주인」: 재건의 물 증서를 사들이는 새물 조합(무스타파). 안내 하리스 · 기록 마이사 · 판단 펠.
 //     원작 뒤의 크로커다일·미스터 1 재방문을 가정하지 않는다. 위조 증서와 물길의 소유권만 다룬다.
-import type { Turning } from '../../core/types';
+import type { Fx, Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
 import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const ISL = '알라바스타 왕국';
+const nadir: Fx = { op: 'person', kind: 'ally', relation: '낙타몰이 나디르', name: '나디르', gender: 'm', reuseName: true };
 
 export const FOES_ALABASTA: FoeDef[] = [
   // 원작 간부 (알라바스타용)
@@ -100,11 +101,11 @@ export const EP_ALABASTA: Turning[] = [
     body: '나디르가 잠긴 우물에서 나오는 수레를 가리킨다. “낮엔 물이 없다더니, 저녁엔 통마다 가득 채워요.” 바람에 바퀴 자국이 지워지기 전에 따라붙을 수 있다.',
     doors: [
       { label: '나디르와 바퀴 자국을 따라 밤새 모래 언덕을 넘는다', hint: '수레가 사라지는 붉은 협곡 하나를 찾아낸다', values: { loyalty: D },
-        fx: [flag('ep_alabasta_p_cistern'), flag('ep_alabasta_nadir_trust'), next('ep_alabasta_p4'), log('나디르가 바퀴 자국이 끊긴 협곡 바위틈을 찾아냈다. 안쪽에서 물통 부딪는 소리가 났다.', 'light')] },
+        fx: [nadir, flag('ep_alabasta_p_cistern'), flag('ep_alabasta_nadir_trust'), next('ep_alabasta_p4'), log('나디르가 바퀴 자국이 끊긴 협곡 바위틈을 찾아냈다. 안쪽에서 물통 부딪는 소리가 났다.', 'light')] },
       { label: '빈 물통 사이에 숨어 수레에 실려 간다', hint: '숨이 막힌다. 상단의 사람 수와 무기를 하나하나 헤아린다', values: { freedom: D },
-        fx: [flag('ep_alabasta_p_cistern'), { op: 'base', key: 'int', add: 1 }, next('ep_alabasta_p4'), log('수레 밑에서 호위병의 얼굴과 창을 셌다. 협곡에 닿을 때쯤 숨길 자리를 알게 됐다.', 'light')] },
+        fx: [nadir, flag('ep_alabasta_p_cistern'), { op: 'base', key: 'int', add: 1 }, next('ep_alabasta_p4'), log('수레 밑에서 호위병의 얼굴과 창을 셌다. 협곡에 닿을 때쯤 숨길 자리를 알게 됐다.', 'light')] },
       { label: '수레를 세우고 빼앗은 물을 유바로 나른다', hint: '목마른 마을 하나가 하룻밤 숨을 돌린다. 상단이 칼을 간다', values: { justice: D },
-        fx: [flag('ep_alabasta_p_people'), { op: 'hp', add: -10 }, next('ep_alabasta_p4'), log('빼앗은 물통이 유바 천막마다 돌아갔다. 뒤쫓던 상단의 횃불은 마을 어귀에서 멈췄다.', 'light')] },
+        fx: [nadir, flag('ep_alabasta_p_people'), { op: 'hp', add: -10 }, next('ep_alabasta_p4'), log('빼앗은 물통이 유바 천막마다 돌아갔다. 뒤쫓던 상단의 횃불은 마을 어귀에서 멈췄다.', 'light')] },
     ],
   },
   {
@@ -215,8 +216,8 @@ export const EP_ALABASTA: Turning[] = [
       { label: '하잠이 남긴 열쇠 꾸러미로 물을 판다', hint: '돈은 쌓인다. 우물가의 눈길이 등에 꽂힌다', when: [has('ep_alabasta_p_deal')], values: { greed: D },
         news: { title: '나노하나 우물 다시 열려, 식수는 유료', body: '잠겨 있던 우물 앞에 물통을 든 줄이 섰다. 주민들은 차례가 오기 전에 오늘 물값부터 묻고 있다.' },
         fx: [{ op: 'money', add: 50000 }, time('가뭄의 알라바스타에서 잠긴 우물의 물을 팔아 돈을 벌었다'), next('ep_alabasta_p11'), log('열쇠를 돌리자 물을 기다리던 이웃이 값을 묻고 주머니를 열었다. 나디르는 눈을 마주치지 않았다.', 'light')] },
-      { label: '우물 일은 이 나라 사람들에게 남기고 짐을 꾸린다', hint: '물값은 아직 비싸다. 이 땅에 남긴 자국은 많지 않다', values: { freedom: D },
-        fx: [time('가뭄의 알라바스타를 지나왔다. 잠긴 우물은 잠긴 채였다'), next('ep_alabasta_p11'), log('짐을 싣는 동안 우물 앞에서는 여전히 값을 두고 다퉜다. 사피야가 그 소리를 장부에 적었다.', 'light')] },
+      { label: '우물 일은 이 나라 사람들에게 남기고 짐을 꾸린다', hint: '우물의 다음 결정은 주민들에게 맡긴다', values: { freedom: D },
+        fx: [time('우물의 관리는 주민들에게 맡기고 가뭄의 알라바스타를 떠났다'), next('ep_alabasta_p11'), log('짐을 싣는 동안 우물 앞에 모인 주민들이 내일 쓸 물을 의논했다. 사피야가 그 곁에서 장부를 폈다.', 'light')] },
     ],
   },
   {
@@ -227,8 +228,8 @@ export const EP_ALABASTA: Turning[] = [
       { label: '나디르가 내미는 낙타 방울을 받아 든다', hint: '모래바람 속에서도 길을 찾는 소리라고 한다', when: [has('ep_alabasta_nadir_trust'), not('ep_alabasta_p_deal')], values: { romance: D },
         fx: [flag('ep_alabasta_p_bell'), flag('ep_alabasta_pre_done'), log('나디르의 낙타 방울을 받았다. 흔들면 마른 사막의 바람 소리가 났다.')] },
       { label: '바다를 보고 싶다는 나디르를 배에 태운다', hint: '한동안 같은 길을 간다. 사피야가 부두에서 손을 흔든다', when: [has('ep_alabasta_nadir_trust'), has('ep_alabasta_safiya_trust'), not('ep_alabasta_p_deal')], values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'crew', relation: '알라바스타에서 따라나선 낙타몰이 나디르', years: 1 }, flag('ep_alabasta_p_bell'), flag('ep_alabasta_pre_done'),
-             log('나디르가 낙타를 사피야에게 맡기고 배에 올랐다. 처음 보는 바다 앞에서 그는 한참 말이 없었다.')] },
+        fx: [{ op: 'person', kind: 'crew', relation: '알라바스타에서 따라나선 낙타몰이 나디르', name: '나디르', gender: 'm', reuseName: true, years: 1 }, flag('ep_alabasta_p_bell'), flag('ep_alabasta_pre_done'),
+             log('나디르가 낙타를 사피야에게 맡기고 방울을 풀어 내게 건넸다. 둘이 배에 올랐다. 처음 보는 바다 앞에서 그는 한참 말이 없었다.')] },
       { label: '아무에게도 인사하지 않고 배에 오른다', hint: '모래 냄새가 옷에 오래 남는다', values: { freedom: D },
         fx: [flag('ep_alabasta_pre_done'), log('알라바스타를 떠났다. 수도에 비가 오는 날을 보지 못한 채였다.')] },
     ],
@@ -406,8 +407,8 @@ export const EP_ALABASTA: Turning[] = [
       { label: '레일라가 건네는 약초 주머니를 받는다', hint: '모래바람에 갈라진 상처에 바르는 것이라고 한다', when: [has('ep_alabasta_leila_trust'), not('ep_alabasta_w_deal')], values: { romance: D },
         fx: [flag('ep_alabasta_w_herb'), flag('ep_alabasta_war_done'), log('레일라의 약초 주머니를 받았다. 쓴 풀 냄새 속에 빗물 냄새가 섞여 있었다.')] },
       { label: '바다를 보겠다는 카심을 배에 태운다', hint: '한동안 같은 길을 간다. 레일라가 웃으며 등을 떠민다', when: [has('ep_alabasta_kasim_trust'), has('ep_alabasta_leila_trust'), not('ep_alabasta_w_deal')], values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'crew', relation: '비 내린 알라바스타에서 따라나선 짐꾼 카심', years: 1 }, flag('ep_alabasta_w_herb'), flag('ep_alabasta_war_done'),
-             log('카심이 짐꾼의 멜빵을 벗어 레일라에게 맡기고 배에 올랐다.')] },
+        fx: [{ op: 'person', kind: 'crew', relation: '비 내린 알라바스타에서 따라나선 짐꾼 카심', name: '카심', gender: 'm', reuseName: true, years: 1 }, flag('ep_alabasta_w_herb'), flag('ep_alabasta_war_done'),
+             log('카심이 짐꾼의 멜빵을 벗어 맡기자 레일라가 여행길에 쓰라며 우리에게 약초 주머니를 건넸다.')] },
       { label: '빗물 고인 길을 밟으며 혼자 떠난다', hint: '발자국이 물에 번진다', values: { freedom: D },
         fx: [flag('ep_alabasta_war_done'), log('비 내린 알라바스타를 떠났다. 발밑에서 젖은 모래가 소리를 냈다.')] },
     ],
@@ -429,8 +430,8 @@ export const EP_ALABASTA: Turning[] = [
              log('전투 · 유바의 새 물길 / 새물 조합 경비'), fight('b_nw_scout', false, { win: 'ep_alabasta_a2', lose: 'ep_alabasta_a2', back: 'ep_alabasta_a2' }, true)] },
       { label: '왕궁 서기 마이사와 말뚝에 찍힌 도장을 적는다', hint: '같은 도장이 너무 많은 말뚝에 찍혀 있다', values: { inquiry: D },
         fx: [flag('ep_alabasta_maisa_trust'), next('ep_alabasta_a2'), log('마이사가 말뚝의 도장을 종이에 떴다. 멀리 떨어진 밭의 증서와도 정확히 같았다.', 'light')] },
-      { label: '예전에 받은 우물 지도와 새 물길을 겹쳐 본다', hint: '말뚝은 옛 상단이 잠갔던 우물 자리에만 박혀 있다', when: [has('ep_alabasta_p_map')], values: { romance: D },
-        fx: [flag('ep_alabasta_a_ledger'), flag('ep_alabasta_maisa_trust'), log('사피야의 지도 위에 새 물길을 겹쳤다. 모래시계 상단의 자물쇠 자리마다 푸른 말뚝이 박혀 있었다.'), next('ep_alabasta_a2')] },
+      { label: '우물 기록과 새 물길을 겹쳐 본다', hint: '말뚝은 옛 상단이 잠갔던 우물 자리에만 박혀 있다', when: [has('ep_alabasta_p_map')], values: { romance: D },
+        fx: [flag('ep_alabasta_a_ledger'), flag('ep_alabasta_maisa_trust'), log('사피야의 기록에 나온 우물 자리를 새 물길에 표시했다. 모래시계 상단의 자물쇠 자리마다 푸른 말뚝이 박혀 있었다.'), next('ep_alabasta_a2')] },
     ],
   },
   {
@@ -575,8 +576,8 @@ export const EP_ALABASTA: Turning[] = [
       { label: '하리스가 건네는 우물 바닥의 돌 하나를 받는다', hint: '스승이 가뭄 내내 파던 우물에서 나온 돌이라고 한다', when: [has('ep_alabasta_haris_trust'), not('ep_alabasta_a_deal')], values: { romance: D },
         fx: [flag('ep_alabasta_a_stone'), flag('ep_alabasta_post_done'), log('하리스에게서 유바 우물 바닥의 돌을 받았다. 손에 쥐면 서늘했다.')] },
       { label: '새 물길이 바다에 닿는 걸 보겠다는 하리스와 함께 떠난다', hint: '한동안 같은 길을 간다. 마이사가 우물가에서 손을 흔든다', when: [has('ep_alabasta_haris_trust'), has('ep_alabasta_maisa_trust'), not('ep_alabasta_a_deal')], values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'crew', relation: '알라바스타에서 따라나선 우물 일꾼 하리스', years: 2 }, flag('ep_alabasta_a_stone'), flag('ep_alabasta_post_done'),
-             log('하리스가 스승에게 삽을 맡기고 따라나섰다. 토토 노인은 물 한 바가지를 길에 뿌려 주었다.')] },
+        fx: [{ op: 'person', kind: 'crew', relation: '알라바스타에서 따라나선 우물 일꾼 하리스', name: '하리스', gender: 'm', reuseName: true, years: 2 }, flag('ep_alabasta_a_stone'), flag('ep_alabasta_post_done'),
+             log('하리스가 우물 바닥에서 나온 돌을 내 손에 쥐여 주고 스승에게 삽을 맡겼다. 토토 노인은 물 한 바가지를 길에 뿌려 주었다.')] },
       { label: '모래 언덕을 넘어 다음 섬으로 간다', hint: '발자국은 바람이 지운다', values: { freedom: D },
         fx: [flag('ep_alabasta_post_done'), log('알라바스타를 떠났다. 등 뒤에서 오아시스의 물소리가 오래 들렸다.')] },
     ],

@@ -66,7 +66,7 @@ function fameWord(s: Life5): string {
     ? `수배 정지 · 종전 현상금 ${fmtMoney(s.publishedBounty)} 베리` : '수배 정지 · 정부 공인';
   const fame = Math.round(s.hero.fame);
   if (fame <= 0) return '';
-  const amount = bountyAmount(s.hero);
+  const amount = bountyAmount(s);
   return amount > 0 ? `현상금 ${fmtMoney(amount)} 베리` : `이름값 ${fmtMoney(fame)}`;
 }
 

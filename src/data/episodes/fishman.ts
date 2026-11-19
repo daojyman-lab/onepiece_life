@@ -268,7 +268,7 @@ export const EP_FISHMAN: Turning[] = [
     body: '페론과 시엘라가 배 앞에서 출항을 기다린다.',
     doors: [
       { label: '페론에게 위쪽 바다의 해를 같이 보자고 한다', hint: '짐꾼은 여덟 팔을 모두 들어 대답한다', when: [has('ep_fishman_peron_trust'), has('ep_fishman_siella_trust'), not('ep_fishman_b_deal')], values: { freedom: D },
-        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_b_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 문어 어인 짐꾼', years: 2 },
+        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_b_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 문어 어인 짐꾼', name: '페론', gender: 'm', species: 'fishman', reuseName: true, years: 2 },
              log('페론은 짐 대신 작은 보따리 하나만 지고 배에 올랐다. 시엘라가 항구에서 명부를 흔들었다.')] },
       { label: '시엘라가 건네는 조개 등불을 받는다', hint: '명부를 비추던 등불이다. 어두운 곳에서 길을 밝힌다', when: [has('ep_fishman_siella_trust')], values: { romance: D },
         fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_b_done'), flag('ep_fishman_shell'), log('조개 등불은 손바닥 안에서 푸르게 빛났다. 이걸 켜면 명부의 이름들이 생각날 거라고 시엘라가 말했다.')] },
@@ -537,7 +537,7 @@ export const EP_FISHMAN: Turning[] = [
     body: '토르가 코팅 항구까지 편지 가방을 메고 온다. 「오늘은 이게 마지막 배달이야.」 뒤따라온 미오가 숨을 고르며 두 손을 앞으로 내민다.',
     doors: [
       { label: '토르에게 위쪽 바다에도 편지 갈 곳이 많다고 한다', hint: '거북은 아주 천천히, 그러나 분명히 고개를 끄덕인다', when: [has('ep_fishman_tor_trust'), has('ep_fishman_mio_trust'), not('ep_fishman_c_deal')], values: { freedom: D },
-        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_c_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 거북 어인 우편배달부', years: 2 },
+        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_c_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 거북 어인 우편배달부', name: '토르', gender: 'm', species: 'fishman', reuseName: true, years: 2 },
              log('토르는 편지 가방을 미오에게 맡기고 빈 가방 하나를 새로 멨다. 배달할 곳은 이제부터 정한다며.')] },
       { label: '미오가 건네는 산호 부적을 받는다', hint: '병원 아이들이 함께 깎은 것이다', when: [has('ep_fishman_mio_trust')], values: { loyalty: D },
         fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_c_done'), flag('ep_fishman_coral'), log('산호 부적에는 서툰 글씨로 늙지 말라고 새겨져 있었다. 미오가 웃으며 자기 소원이라고 했다.')] },
@@ -758,7 +758,7 @@ export const EP_FISHMAN: Turning[] = [
     body: '바스도 부두에 있다. 함께 길을 떠날지, 인사를 하고 배에 오를지 정한다.',
     doors: [
       { label: '바스에게 위쪽 바다의 뱃길도 같이 그리자고 한다', hint: '도선사는 지느러미를 크게 펄럭인다', when: [has('ep_fishman_bass_trust'), has('ep_fishman_rune_trust'), not('ep_fishman_a_deal')], values: { freedom: D },
-        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_a_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 가오리 어인 도선사', years: 2 },
+        fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_a_done'), { op: 'person', kind: 'crew', relation: '어인섬에서 함께 떠난 가오리 어인 도선사', name: '바스', gender: 'm', species: 'fishman', reuseName: true, years: 2 },
              log('바스는 뱃머리에 올라 앞길을 읽기 시작했다. 루네가 지도 한 장을 던져 주며 다 그리면 돌아오라고 했다.')] },
       { label: '루네가 건네는 그리다 만 지상 지도를 받는다', hint: '어인을 받아 줄 섬을 찾으면 표시해 달라고 한다', when: [has('ep_fishman_rune_trust')], values: { inquiry: D },
         fx: [{ op: 'entryPass', gate: 'fishman' }, flag('ep_fishman_a_done'), { op: 'base', key: 'int', add: 1 }, log('지도의 빈칸에는 루네의 글씨로 여기를 채워 줘, 라고 적혀 있었다.')] },

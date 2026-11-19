@@ -14,6 +14,7 @@ import { ITEM_BY_ID } from '../../src/shared/data/items';
 function adult() {
   const s = newLife5(71, { home: 'loguetown' });
   s.pending = null;
+  s.siblingBirths = [];
   s.age = 20;
   s.hero.standing = 'civil';
   s.hero.island = '로그타운';
@@ -102,7 +103,8 @@ describe('주무기와 실물 보관', () => {
   });
 
   it('가보를 신사에 바치면 장비·보관 목록·다시 읽은 저장에서 모두 떠난다', () => {
-    const s = newLife5(15, { home: 'wano', lineage: 'samurai' }); s.age = 10; s.pending = null;
+    const s = newLife5(15, { home: 'wano', lineage: 'samurai' });
+    s.siblingBirths = []; s.age = 10; s.pending = null;
     expect(openTurning(s, TURNING_BY_ID.wanok_samurai_blade)).toBe(true);
     answerDoor(s, 0);
     expect(s.growth.weapons).toContain('wano_heirloom');

@@ -12,6 +12,7 @@ import { STRENGTHS } from '../data/strengths';
 import { TURNING_BY_ID } from '../data/turnings';
 import { VALUE_PERSONA } from '../data/values';
 import { fullName } from './birth';
+import { bountyOf } from './bounty';
 import { fillText } from './fx';
 import type { Meta5 } from './meta';
 import { topValues } from './values';
@@ -74,7 +75,8 @@ function rememberedOf(s: Life5): string {
   const h = s.hero;
   if (h.fame < E.knownFame) return fill(RUMOR, { town: h.town });
   return fill(HEADLINE[h.standing] ?? HEADLINE.default, {
-    name: fullName(h), town: h.town, age: ageWord(endOf(s).age), bounty: fmtMoney(h.fame * V.fame.bounty),
+    name: fullName(h), town: h.town, age: ageWord(endOf(s).age),
+    bounty: fmtMoney(h.standing === 'marine' ? h.fame * V.fame.bounty : bountyOf(s)),
   });
 }
 
@@ -83,10 +85,16 @@ function canonWordsOf(s: Life5): Ending5['canonWords'] {
   const seen = new Set<string>();
   const out: Ending5['canonWords'] = [];
   for (const p of s.people) {
-    if (!p.canon || seen.has(p.canon) || out.length >= E.canonWords) continue;
+    if (!p.alive || !p.canon || seen.has(p.canon) || out.length >= E.canonWords) continue;
     seen.add(p.canon);
     const w = CANON_WORDS[p.canon] ?? CANON_WORDS_DEFAULT;
-    out.push({ who: p.name, line: fill(p.bond >= E.bondHigh ? w.high : w.low, { name: s.hero.name }) });
+    const highBond = p.bond >= E.bondHigh;
+    let line = highBond ? w.high : w.low;
+    if (p.canon === 'gin' && (s.tried.includes('isl_baratie_gin#0') || s.tried.includes('isl_baratie_gin#1'))) {
+      line = highBond ? '발라티에에서 내 앞에 놓아 준 그 밥 한 그릇을 잊을 수가 없다. 고마웠다, {name}.' : '{name}… 밥 한 끼 얻어먹은 사이지.';
+    }
+    if (p.canon === 'hack' && highBond && s.tried.includes('isl_fishman_hack#1')) line = '{name}은(는) 내 도장에서 끈기 있게 배웠다. 좋은 제자였다.';
+    out.push({ who: p.name, line: fill(line, { name: s.hero.name }) });
   }
   return out;
 }
@@ -110,6 +118,8 @@ function unchosenOf(s: Life5): string[] {
 
 /** 골라 본 문 "id#번호"를 읽을 수 있는 말로. 데이터에 없는 전환점이면 키 그대로 */
 function doorName(s: Life5, key: string): string {
+  const recorded = s.timeline.find(line => line.choice === key);
+  if (recorded) return recorded.text;
   const [id, i] = key.split('#');
   const t = TURNING_BY_ID[id];
   const d = t?.doors[Number(i)];

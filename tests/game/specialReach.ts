@@ -248,13 +248,15 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
  */
 export function reach(target: SpecialDoor, tries: number, seed0?: number): number {
   let k = 0;
-  // 명성 150을 쌓고 21세에 도착한 실제 항로들. 규칙이 바뀌면 남은 시도로 새 인생을 찾는다.
-  if (seed0 === undefined && target.turning === 'ep_dressrosa_b6' && target.index === 3) {
-    for (const [seed, home] of [[4, 'wano'], [146, 'zou']] as const) {
-      if (k >= tries) return -1;
-      if (tryReach(target, seed, home)) return k;
-      k++;
-    }
+  // 시간 제한이 있는 초대는 이전에 끝까지 플레이한 출생을 먼저 재현한다.
+  const routes: Record<string, [number, HomeId][]> = {
+    'path_warlord#2': [[60, 'zou']],
+    'ep_dressrosa_b6#3': [[605, 'wano']],
+  };
+  for (const [seed, home] of seed0 === undefined ? routes[`${target.turning}#${target.index}`] ?? [] : []) {
+    if (k >= tries) return -1;
+    if (tryReach(target, seed, home)) return k;
+    k++;
   }
   const first = seed0 ?? 50000;
   // 알라바스타로 가는 소개장은 로그타운에서 태어나 페니와 약속한 뒤 열여섯 살에 받을 수 있다.

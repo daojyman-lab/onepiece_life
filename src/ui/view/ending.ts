@@ -14,7 +14,7 @@ import { ageWord, endWord } from './words';
 /** 도감에는 지금 인생이 없으므로 문 이름의 자리표시를 이 말로 채운다 */
 const CODEX_FILL = {
   name: '나', town: '고향', island: '그 섬', rival: '어릴 적 맞수', rivalPost: '고향에서 온 길잡이', mentor: '스승', parent: '부모',
-  discipleName: '제자',
+  discipleName: '제자', dojoPartner: '함께 겨룰 상대', siblingMeetingName: '형제자매',
   crisisTitle: '고향 사람들이 함께한 날', crisisTown: '고향', crisisPerson: '그날 곁에 있던 사람', crisisLandmark: '마을 풍경',
 };
 

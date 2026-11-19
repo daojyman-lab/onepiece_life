@@ -129,14 +129,15 @@ export const CANON_SEA: Turning[] = [
   },
   {
     // 코비는 두 해 뒤 해군 대령이 되어 있다
-    id: 'cn_coby_colonel', kind: 'door', when: at(age(20, 30), st('marine', 'pirate', 'bountyHunter', 'revolution'), sea('sabaody', 'nw_first', 'nw_late', 'gl_first')),
+    id: 'cn_coby_colonel', kind: 'door', when: at(age(20, 30), st('marine', 'pirate', 'bountyHunter', 'revolution'), sea('sabaody', 'nw_first', 'nw_late', 'gl_first'),
+      { c: 'turningSeen', id: 'cn_coby_alvida', has: true }, { c: 'canonPerson', id: 'coby', has: true }),
     weight: 4, repeat: 'once', speaker: { canon: 'coby' },
     title: '분홍 머리의 대령', body: '{island} 항구에 해군의 군함이 닿았다. 갑판에서 내려오는 분홍 머리의 젊은 대령은, 몇 해 전 겁에 질려 있던 얼굴과 같은 사람이다. 대령이 {name}을(를) 알아보고 걸음을 멈춘다.',
     doors: [
       { label: '반갑게 손을 흔든다', hint: '대령은 웃는다. 처지가 달라도 인사는 할 수 있다', values: { loyalty: D },
         fx: [{ op: "log", text: "코비가 갑판에서 내려와 손을 맞잡았다. 군복은 달라졌지만 예전의 얼굴로 안부를 물었다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '분홍 머리의 대령', canon: 'coby' }] },
-      { label: '해군이라면 등을 보일 수 없다며 칼을 뽑는다', hint: '대령도 칼을 뽑는다. 겁쟁이 소년은 이제 없다', values: { dominion: D }, danger: true, when: [{ c: 'standing', is: ['pirate', 'revolution'] }],
-        fx: [{ op: "log", text: "항구에서 칼이 맞부딪쳤다. 코비는 한 발도 물러서지 않았고, 서로 피 묻은 칼을 거둘 때쯤 구경꾼들이 이름을 외쳤다.", weight: "light" }, { op: 'hp', add: -25 }, { op: 'fame', add: 10 }, { op: 'person', kind: 'rival', relation: '칼을 맞댄 분홍 머리 대령', canon: 'coby' }] },
+      { label: '해군이라면 물러설 수 없다며 맞선다', hint: '대령도 물러서지 않는다. 겁에 질려 있던 소년은 이제 없다', values: { dominion: D }, danger: true, when: [{ c: 'standing', is: ['pirate', 'revolution'] }],
+        fx: [{ op: "log", text: "부두에서 맞붙자 코비는 한 발도 물러서지 않았다. 둘이 상처를 입고 물러날 무렵 구경꾼들이 대령의 이름을 외쳤다.", weight: "light" }, { op: 'hp', add: -25 }, { op: 'fame', add: 10 }, { op: 'person', kind: 'rival', relation: '항구에서 맞붙은 분홍 머리 대령', canon: 'coby' }] },
       { label: '세상에서 본 부당한 일들을 털어놓는다', hint: '대령은 끝까지 듣고 수첩에 적는다. 해군 안에도 바꾸려는 사람이 있다', values: { justice: D },
         fx: [{ op: "log", text: "코비는 말을 끊지 않고 수첩을 채웠다. 헤어질 때 그 사건들을 직접 살피겠다고 약속했다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }, { op: 'person', kind: 'ally', relation: '이야기를 들어 준 대령', canon: 'coby' }] },
     ],
