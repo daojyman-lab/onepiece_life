@@ -4,7 +4,6 @@ import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
 import { answerDoor } from './turning';
-import { takeTrainingLine } from './training-travel';
 import { stepPart } from './year';
 import { equipWeapon, selectStyle } from './styles';
 import type { Command5, Life5 } from './types';
@@ -26,7 +25,6 @@ export function apply5(s: Life5, cmd: Command5): void {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;
     case 'equipWeapon': if (s.hero.alive && !s.pending) equipWeapon(s, cmd.id); break;
     case 'traits': selectTraits(s, cmd.ids); break;
-    case 'trainingTrip': takeTrainingLine(s, cmd.line); break;
     case 'step': if (s.pending === null) stepPart(s); break;
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
     case 'answer': answer(s, cmd.index); break;

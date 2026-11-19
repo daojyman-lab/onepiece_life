@@ -3,7 +3,7 @@ import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, t
 import { setDream } from './dreams';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
-import { returnFromTraining, takeTrainingLine } from './training-travel';
+import { returnFromTraining } from './training-travel';
 import { childhoodWords, rememberChildhood } from './childhood-memory';
 import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
 import { resumeVoyage } from './passage';
@@ -25,7 +25,7 @@ import { HOMES } from '../data/homes';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
-import { askFight, rivalCombatStat, startRivalDuel } from './fight';
+import { askFight, rivalCombatStat, startKumaFight, startRivalDuel } from './fight';
 import { fillContacts, hasRelation, livingContact } from './needs';
 import { josa } from '../shared/core/josa';
 import { revealSurname } from './fortune';
@@ -151,7 +151,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'trainingTrip': takeTrainingLine(s, e.line); return;
+    case 'kumaFight': startKumaFight(s); return;
     case 'trainingReturn': returnFromTraining(s); return;
     case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;

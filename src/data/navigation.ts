@@ -1,8 +1,8 @@
 // 원작 여정의 연결을 바탕으로 구성한 게임 항로. 실제 거리·방위를 뜻하지 않는다.
 import { SEAS } from '../shared/data/seas';
-import type { Life5, SeaId } from '../core/types';
+import type { SeaId } from '../core/types';
 
-import { AMAZON_ROADS, trainingDepartures, trainingReturn, trainingSite, trainingDays } from './training-routes';
+import { AMAZON_ROADS, trainingSite, trainingDays } from './training-routes';
 
 export const ISLAND_ALIASES: Record<string, string> = {
   [AMAZON_ROADS]: '아마존 릴리', '시케아르 왕국 폐허': '쿠라이가나', '모모이로섬': '카마바카 왕국', '기계장치 섬': '벌지모아',
@@ -14,13 +14,6 @@ export const ISLAND_ALIASES: Record<string, string> = {
   '엔젤섬': '스카이피아', '샨디아 마을': '스카이피아',
 };
 export const portOf = (place: string): string => ISLAND_ALIASES[place] ?? place;
-
-export function availableTrainingLines(s: Life5) {
-  if (!s.hero.alive || s.ended || s.pending || s.passage || s.hero.standing === 'prisoner' || s.age < 16) return [];
-  if (s.queue.some(id => id.startsWith('field_') || id.startsWith('ep_'))) return [];
-  const back = trainingReturn(s.hero.island, s.flags);
-  return back ? [back] : trainingDepartures(portOf(s.hero.island));
-}
 
 export const CONTENT_CLASS = {
   major: ['로그타운', '알라바스타 왕국', '스카이피아', '어인섬', '드레스로자', '와노쿠니'],

@@ -26,6 +26,7 @@ import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
+import { KUMA_MET, kumaSighting } from '../data/kuma';
 import { TURNING_BY_ID } from '../data/turnings';
 import { buildVoyage, ENTRY_PREFIX, openRouteArrival, regularDestinations, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
 import { advanceRestingRival, openChildhoodAndRival } from './childhood-and-rival';
@@ -61,6 +62,8 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (!s.hero.alive) { endIfDead(s); return; }
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  const sighting = kumaSighting(s);
+  if (sighting && !s.flags.includes(KUMA_MET) && !s.queue.some(id => id.startsWith('ep_')) && openTurning(s, TURNING_BY_ID[sighting.id])) return;
   if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;

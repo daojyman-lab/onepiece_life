@@ -1,5 +1,4 @@
 // v5 본 화면: 데스크톱은 세 칸(인물 · 장면과 이야기 · 인연과 연표), 휴대폰(760px 이하)은 탭 넷. (v4 src/ui/screens/Main.tsx와 같은 마크업 · 클래스)
-import { availableTrainingLines } from '../../data/navigation';
 import { stageName } from '../../core/stages';
 import { lifeProgress } from '../../core/life-story';
 import { Styles } from './Styles';
@@ -266,10 +265,6 @@ function Scene({ s, ready }: { s: Life5; ready: boolean }) {
   return (
     <div class="frame" style={{ padding: 0 }}>
       <canvas ref={ref} class="scene" aria-label="현재 장면" />
-      {ready && availableTrainingLines(s).map(line => <button key={line.id} class="btn block"
-        onClick={() => dispatch({ type: 'trainingTrip', line: line.id })}>
-        {line.island === s.hero.island ? '귀항 · ' + line.from : '수련 항로 · ' + line.island} · {line.vessel}
-      </button>)}
     </div>
   );
 }

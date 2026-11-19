@@ -1,29 +1,29 @@
 import type { SeaId } from '../core/types';
 
-// 항해자가 동승할 수 있는 게임용 운항편. 출항지는 원작에서 공인한 이웃 섬이나 방위를 뜻하지 않는다.
+// 수련 뒤의 귀항편. 구판에서 출항한 저장도 같은 목적지로 돌아간다.
 export interface TrainingLine {
   id: string; course: string; from: string; island: string; sea: SeaId;
-  vessel: string; outward: string; homeward: string; days?: number;
+  vessel: string; homeward: string; days?: number;
 }
 
 export const AMAZON_ROADS = '아마존 릴리 외해 정박지';
 export const TRAINING_LINES: TrainingLine[] = [
   { id: 'kuja', course: 'rusukaina', from: '아마존 릴리', island: '루스카이나', sea: 'sabaody', vessel: '쿠자 경비선',
-    outward: '여인섬 앞바다에서 경비대에 귀환 시각을 알렸다. 허락을 받은 뒤 바다뱀이 끄는 배에 올랐다.', homeward: '경비선이 약속한 바위턱에 배를 대고 여인섬 앞바다까지 태워 주었다.' },
+    homeward: '경비선이 약속한 바위턱에 배를 대고 여인섬 앞바다까지 태워 주었다.' },
   { id: 'chart', course: 'kuraigana', from: '롱 링 롱 랜드', island: '쿠라이가나', sea: 'gl_first', vessel: '폐허 측량선',
-    outward: '길잡이가 시케아르 폐허의 해안선을 손으로 그린 해도와 대조했다. 바위에 남은 측량 표식이 일치하자 닻을 올렸다.', homeward: '측량 기사가 귀항 해도를 폈다. 안개가 트인 자리로 배가 빠져나갔다.' },
+    homeward: '측량 기사가 귀항 해도를 폈다. 안개가 트인 자리로 배가 빠져나갔다.' },
   { id: 'botany', course: 'boin', from: '알라바스타 왕국', island: '보인 열도', sea: 'gl_first', vessel: '식물 탐사선', days: 8,
-    outward: '나노하나에서 표본 상자를 실었다. 열도의 바깥 잎을 본 적 있는 탐사선장이 키를 잡았다.', homeward: '표본 상자를 묶은 탐사선이 접히는 잎 끝을 벗어나 나노하나로 향했다.' },
+    homeward: '표본 상자를 묶은 탐사선이 접히는 잎 끝을 벗어나 나노하나로 향했다.' },
   { id: 'balloon', course: 'weatheria', from: '자야', island: '웨더리아', sea: 'gl_first', vessel: '기상 관측 기구',
-    outward: '자야에서 관측반의 신호를 기다렸다. 구름 사이로 나타난 기구에 올라 기상학자들과 함께 움직이는 하늘섬에 닿았다.', homeward: '관측반이 자야의 지붕을 알아보고 기구의 고도를 낮췄다. 구름 사이로 지면이 가까워졌다.' },
+    homeward: '관측반이 자야의 지붕을 알아보고 기구의 고도를 낮췄다. 구름 사이로 지면이 가까워졌다.' },
   { id: 'pantry', course: 'kamabakka', from: '샤본디 제도', island: '카마바카 왕국', sea: 'gl_first', vessel: '식재료 보급선', days: 9,
-    outward: '샤본디의 수지 부두에서 식재료를 인수하는 배에 빈 솥을 날랐다. 모모이로섬 주방에 납품하는 보급선이 자리를 내주었다.', homeward: '보급선이 다음 기항지로 떠나기 전에 돌아갈 배편을 물었다. 모모이로섬의 요리사가 귀항선을 소개했다.' },
+    homeward: '보급선이 다음 기항지로 떠나기 전에 돌아갈 배편을 물었다. 모모이로섬의 요리사가 귀항선을 소개했다.' },
   { id: 'birds', course: 'torino', from: '남쪽 산호초 항구', island: '토리노 왕국', sea: 'south', vessel: '약재 교역선',
-    outward: '사우스 블루의 약재상이 물때를 살펴 짐을 실었다. 섬 위로 거대한 새가 선회하는 모습이 갑판에서 보였다.', homeward: '약재상이 빈 광주리를 갑판에 포개고 산호초 항구로 돌아갈 물때를 짚었다.' },
+    homeward: '약재상이 빈 광주리를 갑판에 포개고 산호초 항구로 돌아갈 물때를 짚었다.' },
   { id: 'relief', course: 'torino', from: '드럼 왕국', island: '토리노 왕국', sea: 'south', vessel: '사우스 블루 구호선', days: 12,
-    outward: '드럼의 의료진이 구호 선단에 자리를 냈다. 해루석을 댄 호위함이 무풍지대를 건널 동안 약재 상자를 지켰다.', homeward: '회항하는 구호 선단이 약재 목록을 인수했다. 호위함 뒤에 붙어 드럼으로 돌아가는 배에 올랐다.' },
+    homeward: '회항하는 구호 선단이 약재 목록을 인수했다. 호위함 뒤에 붙어 드럼으로 돌아가는 배에 올랐다.' },
   { id: 'workshop', course: 'baldimore', from: '워터 세븐', island: '벌지모아', sea: 'gl_first', vessel: '기계 부품 운반선', days: 7,
-    outward: '워터 세븐의 도크에서 눈썰매 부품을 실었다. 납품선의 다음 목적지는 겨울섬 벌지모아였다.', homeward: '부품을 내린 배가 빈 나무틀을 실었다. 도크로 돌아가는 배 안에서 젖은 장갑을 말렸다.' },
+    homeward: '부품을 내린 배가 빈 나무틀을 실었다. 도크로 돌아가는 배 안에서 젖은 장갑을 말렸다.' },
 ];
 
 export const trainingDays = (from: string, to: string) => TRAINING_LINES.find(line =>
@@ -38,7 +38,4 @@ export function trainingLanding(place: string, flags: string[]): string | undefi
 
 export function trainingReturn(place: string, flags: string[]) {
   return TRAINING_LINES.find(line => line.island === place && flags.includes('training:line:' + line.id)) ?? trainingSite(place);
-}
-export function trainingDepartures(place: string) {
-  return TRAINING_LINES.filter(line => line.from === (place === AMAZON_ROADS ? '아마존 릴리' : place));
 }
