@@ -80,7 +80,9 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'shipMemory'; stage: 'unnamed' | 'named' | 'farewell' }
   | { c: 'anyOf'; conditions: Cond[] }
+  | { c: 'watchMeal'; stage: 'first' | 'shelf' | 'nextWatch' | 'custom' }
   | { c: 'ashore' }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
@@ -121,6 +123,10 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'nameShip'; name: string }
+  | { op: 'repairShip'; mark: ShipRepair }
+  | { op: 'partShip'; how: 'helm' | 'playground' | 'house' }
+  | { op: 'watchMeal'; action: 'share' | 'close' | 'reserve' | 'passOn' }
   | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
   | { op: 'beginStyle'; style: CombatStyle; teacherRelation?: string }
   | { op: 'adoptStyle' | 'refineStyle'; style: CombatStyle }
@@ -140,7 +146,7 @@ export type Fx =
   | { op: 'tier'; branch: Branch; to: number }
   | { op: 'traitAwaken'; branch: Branch }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
-  | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
+  | { op: 'flag'; id: string; newHull?: true } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
@@ -252,6 +258,10 @@ export interface DiscipleRecord {
   outcome?: 'duel' | 'reconciled' | 'reported';
 }
 export interface Life5 {
+  watchMeal?: {
+    hullId: number; sailorId: string; sharedAt: number; stage: 'shared' | 'reserved' | 'passed' | 'closed';
+    shelfSince?: number; originalCrew?: string[];
+  };
   /** 실제로 받아들인 제자들. 기술과 시기는 가르치기 시작한 때의 사실로 남긴다. */
   disciples?: DiscipleRecord[];
   /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */
@@ -285,6 +295,7 @@ export interface Life5 {
   recentLines: string[];                       // 최근에 낸 일상 · 자잘한 일의 글 (V.lines.noRepeat개까지). 이 안의 글은 다시 뽑지 않는다
   pending: Pending5;
   stats: Stats5;
+  firstBountyIssued: boolean;
   seq: number;
   ended: { cause: string; age: number } | null;
   /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
@@ -297,6 +308,14 @@ export interface Life5 {
   sail?: boolean;
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
   passage?: import('./passage').Passage | null;
+  ships?: ShipHull[];
+}
+export type ShipRepair = 'plank' | 'helm' | 'seam' | 'plating' | 'keel' | 'medicine';
+export interface ShipHull {
+  id: number; name?: string; acquiredAt?: number;
+  repairs: { kind: ShipRepair; age: number; island: string }[];
+  helmFrom?: number; spiritAt?: number;
+  end?: { kind: 'helm' | 'playground' | 'house' | 'lost' | 'switched'; age: number; island: string };
 }
 export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
   | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] };

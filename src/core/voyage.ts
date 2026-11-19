@@ -2,11 +2,14 @@
 // 해적 · 혁명군 · 현상금 사냥꾼 · 칠무해는 섬을 옮길 때가 되면(year.ts voyage) 다음 멈춤에 세 갈래 항로 중 하나를 고른다.
 // 고르는 장면은 그때그때 만들어지는 전환점이다: id에 후보 섬이 담겨 있어 저장 · 불러오기 뒤에도 다시 지을 수 있다.
 import { josa } from '../shared/core/josa';
+import { loseShip } from './ship-memory';
 import { chance, pick, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { SEA_BY_ID } from '../shared/data/seas';
 import { V } from '../data/balance';
 import { DREAMS } from '../data/dreams';
 import { climateOf } from '../data/climates';
+import { LOG_ISLAND_TURNINGS, MORO, MORO_LANDING, moroReturnLine } from '../data/turnings/log-island';
+import { checkAll } from './cond';
 import { COATING_CONTACT, DREAM_ISLANDS, ENTRY_COST, ENTRY_GATES, ROUTE, ZOU_CARD, dangerOf, entryPass, gateOf, type EntryGate } from '../data/voyage';
 import { islandImmunity, isNative } from './environment';
 import { locationDivider, logLine } from './log';
@@ -61,6 +64,7 @@ export function buildVoyage(id: string): Turning | undefined {
   for (const door of doors) {
     const destination = door.fx?.[0];
     if (destination?.op === 'sail' && gateOf(destination.island)) door.hint += '. 이 섬에는 별도의 진입 관문이 있다';
+    if (destination?.op === 'sail' && destination.island === MORO) door.hint += '. 해 질 무렵이면 동전도 옆으로 떨어진다는 섬이다';
   }
   return {
     id, kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: 'hero',
@@ -100,6 +104,26 @@ export function requestArrival(s: Life5, island: string, sea: SeaId, route: Arri
     return;
   }
   arrive(s, island, sea, route);
+  if (island === MORO && sea === 'gl_entry' && route !== 'story' && route !== 'home') {
+    const memory = moroReturnLine(s.tried);
+    if (memory) logLine(s, memory, 'heavy');
+    else if (!s.seenCount[MORO_LANDING] && !s.queue.includes(MORO_LANDING)) s.queue.push(MORO_LANDING);
+  }
+}
+
+/** 입항 전에 밀린 일은 먼저 열되, 일단 시작한 사흘 사이에는 다른 일이나 계절이 끼지 않는다. */
+export function openLogIslandDay(s: Life5): boolean {
+  if (s.pending || s.passage || s.hero.island !== MORO) return false;
+  for (const scene of LOG_ISLAND_TURNINGS) {
+    const index = s.queue.indexOf(scene.id);
+    if (index < 0 || !checkAll(s, scene.when)) continue;
+    if (scene.id === MORO_LANDING && (index > 0 || s.storyRest > 0)) return false;
+    if (!openTurning(s, scene)) return false;
+    s.queue.splice(index, 1);
+    delete s.queueTries[scene.id];
+    return true;
+  }
+  return false;
 }
 
 export function hasEntryContact(s: Life5, gate: 'fishman' | 'zou'): boolean {
@@ -181,7 +205,8 @@ export function resolveEntry(s: Life5, e: Extract<Fx, { op: 'entry' }>): void {
       if (chance(r, h.hp < 55 && seamanship < 18 ? 0.03 : 0.005)) {
         hurt(40, true);
         for (const sailor of crew) sailor.injuredMonths = Math.max(3, sailor.injuredMonths);
-        s.flags = s.flags.filter((flag) => flag !== 'ship' && flag !== 'captain');
+        loseShip(s);
+        s.flags = s.flags.filter(flag => flag !== 'captain');
         say('물기둥에서 배가 부서졌다. 표류 끝에 구조되어 출발지로 돌아왔다.');
         return;
       }

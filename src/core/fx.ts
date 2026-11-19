@@ -1,6 +1,8 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, traitMastery } from './traits';
 import { setDream } from './dreams';
+import { loseShip, nameShip, ownedHull, partShip, repairShip, repairWords, takeShip } from './ship-memory';
+import { recordWatchMeal, watchMealWords } from './watch-meal';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
 import { parentFound, parentMissing } from './family';
@@ -41,9 +43,12 @@ export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (!text.includes('{')) return josa(text);
   const vars: Record<string, string> = { name: s.hero.name, town: s.hero.town, island: s.hero.island };
   if (text.includes('{weapon}')) vars.weapon = equippedWeapon(s)?.name ?? '';
+  if (text.includes('{shipName}')) vars.shipName = ownedHull(s)?.name ?? '배';
+  if (text.includes('{shipRepair}')) vars.shipRepair = repairWords(ownedHull(s));
   if (text.includes('{parent}')) vars.parent = livingContact(s, { who: 'parent' })?.relation ?? '';
   if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
   if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
+  if (text.includes('{firstWatch}') || text.includes('{nextWatch}')) Object.assign(vars, watchMealWords(s));
   if (text.includes('{sibling}')) vars.sibling = livingContact(s, { who: 'sibling' })?.name ?? '형제';
   if (text.includes('{child}')) vars.child = livingContact(s, { who: 'child' })?.name ?? '자식';
   if (text.includes('{spouse}')) vars.spouse = livingContact(s, { who: 'spouse' })?.name ?? '짝';
@@ -88,6 +93,10 @@ function captainByShip(s: Life5): void {
 function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
   const h = s.hero;
   switch (e.op) {
+    case 'nameShip': nameShip(s, e.name); return;
+    case 'repairShip': repairShip(s, e.mark); return;
+    case 'partShip': partShip(s, e.how); return;
+    case 'watchMeal': recordWatchMeal(s, e.action); return;
     case 'disciple': {
       if (e.action === 'accept') { context.discipleId = acceptDisciple(s); return; }
       const d = s.disciples?.find(x => x.personId === context.discipleId);
@@ -143,7 +152,12 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
-    case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
+    case 'flag':
+      if (e.id === 'ship') takeShip(s, e.newHull);
+      else if (!s.flags.includes(e.id)) s.flags.push(e.id);
+      captainByShip(s);
+      if (e.id === 'prime') enterPrime(s);
+      return;
     case 'dream': setDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;
     case 'vowDecline': declineVow(s); return;
@@ -181,7 +195,10 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       logLine(s, branch ? '장인이 무기를 손질하고 손잡이를 손에 맞춰 줬다.' : '공방 뒤뜰에서 장인들의 이야기를 들으며 한숨 돌렸다.', 'light');
       return;
     }
-    case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
+    case 'unflag':
+      if (e.id === 'ship') loseShip(s);
+      else s.flags = s.flags.filter(f => f !== e.id);
+      return;
     case 'mark': {
       const got = addMark(s, e.id);
       const st = got ? STRENGTHS.find((x) => x.id === got) : undefined;

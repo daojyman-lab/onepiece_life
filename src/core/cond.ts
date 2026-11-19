@@ -1,8 +1,10 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
 import { hasTrait } from './traits';
+import { watchMealReady } from './watch-meal';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
 import { discipleReady } from './disciples';
+import { shipReady } from './ship-memory';
 import { fmtMoney } from '../shared/core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
@@ -26,7 +28,9 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'shipMemory': return shipReady(s, c.stage);
     case 'anyOf': return c.conditions.some(option => check(s, option));
+    case 'watchMeal': return watchMealReady(s, c.stage);
     case 'ashore': return !s.passage;
     case 'disciple': return discipleReady(s, c.stage);
     case 'styleBond': return c.phase === 'new' ? !s.passage && !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
@@ -92,7 +96,9 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'shipMemory': return '이 배와 함께 겪은 일이 아직 맞지 않는다';
     case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
+    case 'watchMeal': return '이 배에서 함께 당직을 선 이력이 맞지 않는다';
     case 'ashore': return '항해를 마치고 뭍에 닿아야 한다';
     case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';

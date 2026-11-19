@@ -47,7 +47,7 @@ export const HOMES_LEAVE: Turning[] = [
              { op: 'log', text: '첫 항해는 무사했다. 비눗방울이 떠다니는 섬에서 배를 넘겨주었다.', weight: 'heavy' },
              { op: 'timeline', text: '조선소의 새 배를 타고 샤본디 제도에 갔다' }] },
       { label: '그 배를 통째로 사서 깃발을 올린다', hint: '가진 돈을 다 쓴다. 오늘부터 쫓기는 몸이 된다', values: { freedom: D }, when: [{ c: 'money', min: 100000 }, settledIn],
-        fx: [{ op: 'money', add: -100000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
+        fx: [{ op: 'money', add: -100000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship', newHull: true },
              { op: 'move', island: '알라바스타 왕국', sea: 'gl_first' }, { op: 'log', text: '갓 지은 배에 해골 깃발을 올렸다. 직공장이 혀를 찼다.', weight: 'heavy' },
              { op: 'timeline', text: '물의 도시에서 산 배로 해적이 되었다' }] },
       { label: '도크에 남아 다음 배를 짓는다', hint: '배는 떠나도 목수는 남는다', closes: true, fx: [{ op: 'money', add: 8000 }, { op: 'log', text: "새 상선이 도크를 빠져나가자 다음 배의 용골이 작업대에 올라왔다. 직공장은 남은 일의 품삯을 건넸다.", weight: 'light' }] },

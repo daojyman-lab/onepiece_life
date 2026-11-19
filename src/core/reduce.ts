@@ -3,6 +3,7 @@ import { selectTraits } from './traits';
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
+import { bountyAmount, recordFirstPoster } from './first-poster';
 import { answerDoor } from './turning';
 import { stepPart } from './year';
 import { equipWeapon, selectStyle } from './styles';
@@ -21,6 +22,7 @@ export function cloneLife(prev: Life5): Life5 {
 
 /** 명령을 받은 상태에 그대로 적용한다 (복사하지 않는다) */
 export function apply5(s: Life5, cmd: Command5): void {
+  const previousBounty = bountyAmount(s.hero);
   switch (cmd.type) {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;
     case 'equipWeapon': if (s.hero.alive && !s.pending) equipWeapon(s, cmd.id); break;
@@ -29,6 +31,7 @@ export function apply5(s: Life5, cmd: Command5): void {
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
     case 'answer': answer(s, cmd.index); break;
   }
+  recordFirstPoster(s, previousBounty);
 }
 
 export function reduce5(prev: Life5, cmd: Command5): Life5 {

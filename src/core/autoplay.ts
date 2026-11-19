@@ -70,7 +70,7 @@ const count = <K extends string>(keys: K[]) => {
 const topTier = (s: Life5) => Math.max(...Object.values(s.growth.tier));
 /** 병 · 사고(난파) · 굶주림으로 젊어서 죽었다고 세는 나이 (tests/game/risk.test.ts와 같은 잣대) */
 const YOUNG_AGE = 40;
-const RISK_CAUSES: readonly string[] = ['병', '난파', '굶주림'];
+export const RISK_CAUSES: readonly string[] = ['병', '난파', '굶주림'];
 
 export interface Report {
   n: number;

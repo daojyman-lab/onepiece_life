@@ -60,6 +60,7 @@ export function emptyLife(seed: number): Life5 {
     log: [], timeline: [], recentLines: [],
     pending: null,
     stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {}, stopsAt: [], stopTries: 0, emptyStops: 0, namedMet: 0 },
+    firstBountyIssued: false,
     seq: 0,
     ended: null,
     vows: { active: null, history: [] },

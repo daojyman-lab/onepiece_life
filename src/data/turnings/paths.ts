@@ -67,7 +67,7 @@ export const PATHS: Turning[] = [
     title: '깃발을 올리다', body: '{island} 부두에 낡은 배 한 척이 헐값에 나왔다. 해골 깃발 하나만 그려 넣으면 내일이라도 바다로 나갈 수 있다.',
     doors: [
       { label: '배를 사서 해골 깃발을 올린다', hint: '오늘부터 쫓기는 몸이 된다', values: { freedom: D },
-        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
+        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship', newHull: true },
              { op: 'log', text: '낡은 돛대 끝에 직접 그린 해골 깃발이 펄럭였다.', weight: 'heavy' }, { op: 'timeline', text: '해적 깃발을 올렸다' }] },
       { label: '이름난 해적선에 견습으로 오른다', hint: '남의 깃발 아래서 바다를 배운다', values: { romance: D }, 
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },
@@ -83,7 +83,7 @@ export const PATHS: Turning[] = [
     title: '수평선의 상선', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이 호위도 없이 {island} 쪽으로 느릿느릿 움직이고 있다.',
     doors: [
       { label: '상선을 덮친다', hint: '현상금이 오른다', values: { dominion: D },
-        fx: [{ op: 'money', add: 60000 }, { op: 'fame', add: 30 }, { op: 'log', text: '상선의 짐칸을 털었다. 수배서의 숫자가 또 올랐다.', weight: 'heavy' }] },
+        fx: [{ op: 'money', add: 60000 }, { op: 'fame', add: 30 }, { op: 'log', text: '상선의 짐칸을 털었다. 피해를 본 선장이 항구에 닿자마자 해군 지부를 찾아갔다.', weight: 'heavy' }] },
       { label: '상선을 노리는 다른 해적을 쫓아낸다', hint: '상인들에게 이름이 알려진다', values: { dominion: D }, 
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 15 }, { op: 'money', add: 20000 }, { op: 'log', text: '상선 앞을 가로막던 해적선이 물러났다. 상인은 항구에 닿아 {name}의 깃발을 이야기했다.', weight: 'light' }] },
       { label: '사황의 깃발을 단 배를 건드린다', hint: '신세계 전체가 그 이름을 알게 된다', when: [sea('nw_first', 'nw_late')], values: { ambition: D }, danger: true,
@@ -404,7 +404,7 @@ export const PATHS: Turning[] = [
     title: '주인 잃은 배', body: '{island} 항구에 주인을 잃은 범선 한 척이 묶여 있다. 위대한 항로를 건널 만한 배다.',
     doors: [
       { label: '배를 얻어 붉은 산을 넘는다', hint: '세상에서 가장 험한 바다로 들어선다', values: { romance: D },
-        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 5 },
+        fx: [{ op: 'flag', id: 'ship', newHull: true }, { op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 5 },
              { op: 'log', text: '배는 붉은 산의 물길을 거슬러 올라 위대한 항로에 들어섰다.', weight: 'heavy' }, { op: 'timeline', text: '위대한 항로에 들어섰다' }] },
       { label: '배를 팔아 돈을 챙긴다', hint: '당분간은 이 바다로 족하다', values: { ambition: D }, fx: [{ op: 'money', add: 80000 }, { op: 'log', text: '배를 사겠다는 사람에게 열쇠를 넘겼다. 빈 부두를 지나 새 주머니를 쥐었다.', weight: 'light' }] },
       { label: '원래 주인을 찾아 돌려준다', hint: '고맙다는 말만 듣는다', values: { justice: D }, fx: [{ op: 'fame', add: 3 }, { op: 'log', text: '낡은 선실에 남은 이름표로 주인을 찾았다. 그는 돛을 만지며 몇 번이나 고맙다고 했다.', weight: 'light' }] },

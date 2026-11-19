@@ -98,7 +98,7 @@ export const SEA_LEAVE: Turning[] = [
         fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'log', text: '배가 붉은 산을 거슬러 올라 반대편 바다로 떨어졌다. 등 뒤로 이스트 블루가 사라졌다.', weight: 'heavy' },
              { op: 'timeline', text: '제 배로 붉은 산을 넘어 위대한 항로에 들어섰다' }] },
       { label: '한 해 더 이 바다에서 배와 사람을 다진다', hint: '서두르지 않는다. 더 단단해져서 간다', mark: 'composure', values: { loyalty: D },
-        fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "늙은 목수와 선체의 약한 이음새를 다시 박았다. 선원들과 이스트 블루의 해류를 한 해 더 익히기로 했다.", weight: 'light' }] },
+        fx: [{ op: 'repairShip', mark: 'seam' }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "늙은 목수와 선체의 약한 이음새를 다시 박았다. 선원들과 이스트 블루의 해류를 한 해 더 익히기로 했다.", weight: 'light' }] },
       { label: '배를 고깃배로 고쳐 이 바다에서 산다', hint: '모험은 접는다. 바다는 계속 곁에 있다', values: { peace: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 10000 }, { op: 'timeline', text: '배를 고깃배로 고쳐 이스트 블루에 남았다' }, { op: 'log', text: "배의 화물칸을 고기 저장고로 고치자 첫 어획물을 실을 수 있었다. 항구 상인이 값을 치르고 돌아갔다.", weight: 'light' }] },
     ],

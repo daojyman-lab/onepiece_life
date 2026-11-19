@@ -145,8 +145,8 @@ export const PIRATE: Turning[] = [
     title: '떠돌이 의사', body: '{island}의 천막 진료소에서 해진 외투의 의사가 돈 없는 뱃사람들을 공짜로 꿰매 준다. 약값이 떨어져 이 섬을 떠나야 한다며, 바다로 나가는 배를 찾고 있다.',
     doors: [
       { label: '배에 태워 선의로 삼는다', hint: '약값은 이제 배의 몫이 된다', values: { peace: D },
-        fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'person', kind: 'crew', relation: '떠돌이 의사', role: 'medic', medicalSkill: 65 },
-             { op: 'log', text: '의사가 약 상자를 메고 배에 올랐다. 선실 한 칸이 진료실이 되었다.', weight: 'heavy' }] },
+        fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'person', kind: 'crew', relation: '떠돌이 의사', role: 'medic', medicalSkill: 65 }, { op: 'repairShip', mark: 'medicine' },
+             { op: 'log', text: '의사가 약 상자를 메고 배에 올랐다. 새 진료실의 약장 맨 위 칸에 붕대를 넣으려니 발뒤꿈치가 들렸다. {name}은(는) 나사를 풀어 약장을 한 뼘 낮췄다. 이번에는 선의의 손이 꼭 닿았다.', weight: 'heavy' }] },
       { label: '치료만 받고 약값을 넉넉히 치른다', hint: '몸은 가벼워지고 의사는 다른 배를 찾는다',
         fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'hp', add: 25 }, { op: 'log', text: '의사는 상처를 꿰맨 뒤 약값을 받아 천막의 빈 약장을 채웠다. {name}은(는) 몸을 추슬러 배로 돌아갔고 의사는 다른 배의 환자를 기다렸다.', weight: 'light' }] },
       { label: '진료소째로 배에 실어 간다', hint: '의사의 뜻은 묻지 않는다', values: { dominion: D },
@@ -278,14 +278,14 @@ export const PIRATE: Turning[] = [
   {
     id: 'pirate_first_poster', kind: 'door', when: at(age(16), PIR, fame(5)),
     weight: 6, repeat: 'once', speaker: 'hero',
-    title: '첫 수배서', body: '{island} 게시판에 {name}의 얼굴이 실린 수배서가 붙었다. 그림은 영 딴판이지만 이름은 틀림없다. 이제 바다의 모든 사냥꾼이 그 얼굴을 찾는다.',
+    title: '게시판에 걸린 내 얼굴', body: '{island} 게시판에 {name}의 수배서가 걸려 있다. 눈매도 턱도 영 딴판인데 이름만큼은 틀림없다. 지나가던 사냥꾼이 종이와 행인들의 얼굴을 번갈아 살핀다.',
     doors: [
       { label: '수배서를 떼어 품에 넣고 다닌다', hint: '숫자가 오를 때마다 새것으로 바꿔 넣을 생각이다', values: { romance: D },
-        fx: [{ op: 'fame', add: 3 }, { op: 'flag', id: 'firstPoster' }, { op: 'log', text: '게시판에서 수배서를 떼어 접었다. 배에 돌아와 선실 벽에 붙이자 선원들이 그림이 닮지 않았다며 웃었다.', weight: 'light' }] },
+        fx: [{ op: 'fame', add: 3 }, { op: 'flag', id: 'firstPoster' }, { op: 'log', text: '사냥꾼이 돌아선 사이 수배서를 떼어 접었다. 주머니에 넣고 두어 걸음 가다가, 대체 얼마나 안 닮았나 싶어 다시 꺼내 봤다.', weight: 'light' }] },
       { label: '가면을 쓰고 이름을 바꿔 다닌다', hint: '쫓기는 일은 줄고 이름은 묻힌다', values: { freedom: D },
         fx: [{ op: 'fame', add: -3 }, { op: 'flag', id: 'masked' }, { op: 'log', text: '가면을 쓰고 다른 이름을 댔다. 수배서를 든 사냥꾼이 바로 옆을 지나갔지만 얼굴을 알아보지 못했다.', weight: 'light' }] },
       { label: '더 큰 일을 벌여 숫자를 끌어올린다', hint: '쫓는 눈도 그만큼 늘어난다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'fame', add: 25 }, { op: 'hp', add: -15 }, { op: 'log', text: '한 달 사이에 상선 셋을 털었다. 새 수배서의 숫자가 두 배가 되었다.', weight: 'heavy' }] },
+        fx: [{ op: 'fame', add: 25 }, { op: 'hp', add: -15 }, { op: 'log', text: '한 달 사이에 상선 셋을 털었다. 다음 항구에 붙은 수배서에는 더 큰 액수가 찍혀 있었다.', weight: 'heavy' }] },
     ],
   },
   {

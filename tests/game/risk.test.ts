@@ -1,6 +1,7 @@
 // tests/game/risk.test.ts
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
+import { RISK_CAUSES } from '../../src/core/autoplay';
 import { reduce5 } from '../../src/core/reduce';
 import { oldAgeP, partRisks, yearRisks } from '../../src/core/risk';
 import { applyFx } from '../../src/core/fx';
@@ -105,15 +106,15 @@ describe('병, 사고, 노환', () => {
     expect(lives.every((s) => s.pending?.kind === 'ending' && s.ended)).toBe(true);
   });
   it('싸움을 모두 피해도 병이나 사고로 죽는 인생이 있다', () => {
-    expect(lives.some((s) => /병|사고|난파|굶주림/.test(s.ended!.cause))).toBe(true);
+    expect(lives.some((s) => RISK_CAUSES.includes(s.ended!.cause))).toBe(true);
   });
   it('병이나 사고로 40세 전에 죽는 인생은 20명 중 1명 이하다', () => {
-    const young = lives.filter((s) => s.ended!.age < 40 && /병|사고|난파|굶주림/.test(s.ended!.cause)).length;
+    const young = lives.filter((s) => s.ended!.age < 40 && RISK_CAUSES.includes(s.ended!.cause)).length;
     expect(young / lives.length).toBeLessThanOrEqual(0.05);
   });
   it('병이나 사고로 죽기 전에 조짐이 기록에 떠오른다', () => {
     // 싸움에서 쓰러진 죽음('해군 졸병에게 쓰러졌다' 등)은 이름에 '병'이 들어가도 병이 아니다
-    for (const s of lives.filter((x) => /병|사고|난파|굶주림/.test(x.ended!.cause) && !/쓰러졌다$/.test(x.ended!.cause)))
+    for (const s of lives.filter((x) => RISK_CAUSES.includes(x.ended!.cause)))
       expect(s.log.some((l) => /깊어|기침|폭풍|먹구름|야위/.test(l.text)), s.ended!.cause).toBe(true);
   });
 });

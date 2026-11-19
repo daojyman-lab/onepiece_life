@@ -28,7 +28,7 @@ describe('특별한 문은 모두 열릴 수 있다', () => {
     if (DEFERRED.has(key)) { it.todo(`${key} (보류: 무술 단계)`); continue; }
     // 어린 나이의 알라바스타 진입은 로그타운의 약속·수련·소개장을 실제로 거친다.
     // 난수 소비가 바뀌어도 하나의 고정 시드 대신 동일한 유한 표본에서 접근 가능성을 검증한다.
-    if (key === 'ep_alabasta_p4#3' || key === 'ep_alabasta_p6#3' || key === 'ep_alabasta_w4#3') {
+    if (['ep_alabasta_p4#3', 'ep_alabasta_p6#3', 'ep_alabasta_w4#3', 'ep_alabasta_w6#3'].includes(key)) {
       it(key, () => { expect(reachViaIntroduction(d)).toBeGreaterThanOrEqual(0); }, 120_000);
     } else if (key === 'ep_dressrosa_b6#3') {
       // 드레스로자에 제때 닿고 명성과 충성심을 함께 쌓는 경로는 다음 시드 구간에서도 찾는다.

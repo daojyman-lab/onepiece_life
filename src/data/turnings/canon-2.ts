@@ -83,7 +83,7 @@ export const CANON_SEA: Turning[] = [
     title: '뒷골목의 해체업자', body: '워터 세븐의 해체장에서 팬티 바람의 사내가 제 배를 열었다. 배꼽 안쪽 냉장고에 콜라병이 딱 세 개 들어갔다. 병마개가 튀자 쇠팔에서 바람이 터져 나와 선체를 덮은 톱밥을 싹 걷어냈다. 프랑키가 두 팔을 붙여 별을 만들었다. 뒤에 서 있던 인부들 눈썹에도 톱밥이 수북했다.',
     doors: [
       { label: '배를 맡기고 고쳐 달라고 한다', hint: '수리비 대신 콜라 상자를 요구한다. 배가 이상하게 튼튼해진다', values: { romance: D }, needs: ['ship'],
-        fx: [{ op: "log", text: "프랑키가 콜라 상자를 받아 들고 선체에 철판을 덧댔다. 수리한 배를 두드려 보더니 이제 파도 좀 맞아도 버티겠다고 웃었다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '배를 고쳐 준 해체업자', canon: 'franky' }, { op: 'flag', id: 'frankyShip' }] },
+        fx: [{ op: 'repairShip', mark: 'plating' }, { op: "log", text: "프랑키가 콜라 상자를 받아 들고 선체에 철판을 덧댔다. 수리한 배를 두드려 보더니 이제 파도 좀 맞아도 버티겠다고 웃었다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '배를 고쳐 준 해체업자', canon: 'franky' }, { op: 'flag', id: 'frankyShip' }] },
       { label: '해체업자 일가의 일을 거들며 배 짓는 법을 배운다', hint: '고철 더미 속에서 몇 달을 산다. 손이 거칠어진다', values: { inquiry: D },
         fx: [{ op: 'log', text: '고철 더미에서 부품을 골라 프랑키와 배수 펌프를 고쳤다. 마지막으로 건넨 콜라를 프랑키가 기계에 부었다. 꾸르륵, 딸꾹, 콸콸! 물벼락을 맞은 두목은 머리를 쓸어 올리며 “수퍼!” 하고 외쳤다.', weight: 'light' }, { op: 'flag', id: 'learnedColaPump' }, { op: 'base', key: 'int', add: 1 }, { op: 'base', key: 'str', add: 1 }, { op: 'person', kind: 'ally', relation: '뒷골목의 두목', canon: 'franky' }] },
       { label: '배를 노리는 해체업자 졸개들을 쫓아낸다', hint: '두목이 웃으며 나선다. 거칠게 한 판 붙는다', values: { dominion: D }, danger: true,

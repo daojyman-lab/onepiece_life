@@ -72,7 +72,7 @@ const CIVIL: Turning[] = [
              { op: 'chance', p: 0.5, then: [{ op: 'log', text: '길 건너의 큰 가게가 두 해 만에 문을 닫았다. 단골들은 끝내 떠나지 않았다.', weight: 'heavy' }],
                else: [{ op: 'unflag', id: 'shop' }, { op: 'standing', to: 'civil' }, { op: 'log', text: '버티다 버티다 끝내 간판을 내렸다.', weight: 'heavy' }] }] },
       { label: '판 돈으로 낡은 배 한 척을 사서 바다 장사를 시작한다', hint: '가게 대신 배가 생긴다. 바다는 가게보다 거칠다', values: { romance: D }, danger: true,
-        fx: [{ op: 'money', add: 60000 }, { op: 'unflag', id: 'shop' }, { op: 'flag', id: 'ship' }, { op: 'standing', to: 'civil' },
+        fx: [{ op: 'money', add: 60000 }, { op: 'unflag', id: 'shop' }, { op: 'flag', id: 'ship', newHull: true }, { op: 'standing', to: 'civil' },
              { op: 'timeline', text: '가게를 팔아 배를 사고 바다 장사를 시작했다' }, { op: 'log', text: '가게 문을 닫고 낡은 배에 짐을 실었다. 첫 거래처에 닿기 전부터 갑판이 흔들렸다.', weight: 'light' }] },
     ],
   },

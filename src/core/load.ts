@@ -10,8 +10,10 @@ import { topValues } from './values';
 import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
+import { hadBountyBeforeUpgrade } from './first-poster';
 import { emptyLife } from './state';
 import { normalizeStyles } from './styles';
+import { SHIP_MARK } from './ship-memory';
 import { isCombatStyle } from '../data/combat-styles';
 import { discipleFor } from './disciples';
 import { restoreStoryDoor } from './turning';
@@ -74,6 +76,26 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (life.ships !== undefined) {
+    const ageOk = (age: number, min = 0) => Number.isInteger(age) && age >= min && age <= life.age;
+    if (!Array.isArray(life.ships) || life.ships.some((h, i, hulls) =>
+      !isObj(h) || h.id !== i + 1 || (h.name !== undefined && typeof h.name !== 'string') ||
+      (h.acquiredAt !== undefined && !ageOk(h.acquiredAt, hulls[i - 1]?.end?.age)) ||
+      !Array.isArray(h.repairs) || h.repairs.some(r => !isObj(r) || !Object.hasOwn(SHIP_MARK, r.kind) ||
+        !ageOk(r.age, h.acquiredAt) || typeof r.island !== 'string' || (h.end && r.age > h.end.age)) ||
+      (h.helmFrom !== undefined && (!i || h.helmFrom !== i || hulls[i - 1].end?.kind !== 'helm')) ||
+      (h.spiritAt !== undefined && h.spiritAt !== h.end?.age) ||
+      (h.end === undefined ? i !== hulls.length - 1 || !life.flags.includes('ship') :
+        !isObj(h.end) || !['helm', 'playground', 'house', 'lost', 'switched'].includes(h.end.kind) ||
+        !ageOk(h.end.age, h.acquiredAt) || typeof h.end.island !== 'string'))) return null;
+  }
+  const meal = life.watchMeal;
+  if (meal !== undefined && (!isObj(meal) || !Number.isSafeInteger(meal.hullId) || meal.hullId < 1 ||
+    typeof meal.sailorId !== 'string' || !Number.isInteger(meal.sharedAt) || meal.sharedAt < 0 || meal.sharedAt > life.age ||
+    !['shared', 'reserved', 'passed', 'closed'].includes(meal.stage) ||
+    ((meal.stage === 'reserved' || meal.stage === 'passed') && (meal.shelfSince === undefined ||
+      !Number.isInteger(meal.shelfSince) || meal.shelfSince <= meal.sharedAt || meal.shelfSince > life.age ||
+      !Array.isArray(meal.originalCrew) || !meal.originalCrew.includes(meal.sailorId) || !meal.originalCrew.every(id => typeof id === 'string'))))) return null;
   try { normalizeStyles(life, legacyStyles, !isObj(x.growth) || x.growth.weapons === undefined); } catch { return null; }
   if (life.disciples !== undefined) {
     if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
@@ -150,6 +172,8 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.age >= V.growth.pref.pathAge) g.path = mainBranch(life);
   }
   try {
+    if (x.firstBountyIssued === undefined) life.firstBountyIssued = hadBountyBeforeUpgrade(life);
+    if (typeof life.firstBountyIssued !== 'boolean') return null;
     if (invariants5(life, true).length) return null;
     if (life.firstChoiceAge !== undefined && (!isObj(life.firstChoiceAge) ||
         !Object.values(life.firstChoiceAge).every(age => Number.isInteger(age) && age >= 0 && age <= life.age))) return null;

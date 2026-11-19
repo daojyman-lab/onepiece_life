@@ -203,11 +203,17 @@ function Profile({ s }: { s: Life5 }) {
           <dt>주무기</dt><dd><b>{p.weapon}</b></dd>
           <dt>{s.growth.primaryStyle || !p.path ? '주력 유파' : '주력 갈래'}</dt><dd>{p.path ?? '아직 정하지 않음'}</dd>
           {p.keepsakes.length > 0 && <><dt>소지품</dt><dd>{p.keepsakes.join(' · ')}</dd></>}
+          {p.shipName && <><dt>내 배</dt><dd>{p.shipName}</dd></>}
         </dl>
       </div>
       <div class="stack" style={{ marginTop: 8 }}>
         <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         <div class="t9">{p.born}</div>
+        {p.shipHistory.length > 0 && <details class="paper t9">
+          <summary>배의 기록</summary>
+          {p.shipHistory.map(hull => <div key={hull.id}><b>{hull.id}번째 배 · {hull.name}</b>
+            {hull.lines.map((line, i) => <div class="soft" key={i}>{line}</div>)}</div>)}
+        </details>}
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
         {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}

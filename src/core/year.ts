@@ -28,7 +28,8 @@ import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
 import { TURNING_BY_ID } from '../data/turnings';
-import { buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { buildVoyage, ENTRY_PREFIX, openLogIslandDay, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { MORO, MORO_LANDING } from '../data/turnings/log-island';
 import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
 import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
@@ -58,6 +59,7 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.pending) return;
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
+  if (openLogIslandDay(s)) return;
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
   const storyScene = lifeStoryScene(s);
@@ -70,8 +72,15 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   s.traitScene = [];
   delete s.traitSource;
   const r = rngOf(s.rng);
-  if (s.passage) passagePart(s, r);            // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
-  else climatePart(s);                         // 섬 위: 그 섬의 기후가 끼어든다 (펑크 해저드 · 하늘섬 · 조우 …). 따로 된 주사위를 쓴다
+  if (s.passage) {
+    passagePart(s, r);                         // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
+    if (!s.passage && s.hero.island === MORO && s.queue[0] === MORO_LANDING) {
+      advanceLifeTime(s);                      // 방금 마친 항해의 마지막 토막은 달력에 센다
+      nextPart(s, r);
+      openLogIslandDay(s);
+      return;
+    }
+  } else climatePart(s);                       // 섬 위: 그 섬의 기후가 끼어든다 (펑크 해저드 · 하늘섬 · 조우 …). 따로 된 주사위를 쓴다
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = chosenActivity ?? activityOf(s, r);
