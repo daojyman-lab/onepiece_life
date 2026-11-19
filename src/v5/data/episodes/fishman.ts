@@ -87,7 +87,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [{ op: 'fame', add: 2 }, log('명부에 적힌 이름 가운데 사라진 인어들의 이름도 있었다. 몇 사람이 횃불을 내렸다. 시엘라는 새 종이를 꺼냈다.'), next('ep_fishman_b_5')] },
       { label: '성난 무리 앞에 서서 인간 상인들을 항구에서 몰아낸다', hint: '골목의 박수와 시엘라의 굳은 얼굴을 함께 받는다', values: { dominion: D },
         fx: [flag('ep_fishman_b_mob'), { op: 'hardship', add: 1 }, log('죄 없는 인간 상인들까지 짐을 버리고 달아났다. 시엘라가 낮게 말했다. 미움으로 그물을 찢으면 다음 그물은 더 촘촘해진다고.'), next('ep_fishman_b_5')] },
-      { label: '붉은 눈의 패거리가 남긴 순찰표를 가져온다', hint: '피해자들이 증거를 쥐게 된다', special: 'dominion', when: [ready(4), has('ep_fishman_b_hodyleak')], danger: true, values: { dominion: D },
+      { label: '붉은 눈의 패거리가 남긴 순찰표를 가져온다', hint: '피해자들이 증거를 쥐게 된다', special: 'dominion', when: [has('ep_fishman_b_hodyleak')], danger: true, values: { dominion: D },
         fx: [flag('ep_fishman_b_jinbe'), next('ep_fishman_b_hody')] },
     ],
   },

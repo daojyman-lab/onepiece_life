@@ -229,7 +229,7 @@ export const EP_WANO: Turning[] = [
              time('숯장이 타케조와 함께 보급선에 숨어 닫힌 나라 와노를 빠져나갔다'), { op: 'move', island: '드레스로자', sea: 'nw_first' }] },
       { label: '쿠리의 강가에 남아 다음 철을 맞는다', hint: '닫힌 나라에서 하루하루를 산다', values: { loyalty: D },
         fx: [flag('ep_wano_pre_done'), log('쿠리 사람들은 처형대 앞에서 전해진 예언을 믿으며 스무 해 뒤의 약속을 기다린다.', 'light')] },
-      { label: '검은 강 상류의 남은 노동자를 찾는다', hint: '강의 근원을 살피면 아직 돌아오지 못한 사람들을 구할 수 있다', special: 'dominion', when: [ready(6)], values: { dominion: D }, danger: true,
+      { label: '검은 강 상류의 남은 노동자를 찾는다', hint: '강의 근원을 살피면 아직 돌아오지 못한 사람들을 구할 수 있다', special: 'dominion', when: [has('ep_wano_pre_ledger')], values: { dominion: D }, danger: true,
         fx: [flag('ep_wano_pre_done'), next('ep_wano_pre_kaido')] },
     ],
   },
@@ -238,7 +238,7 @@ export const EP_WANO: Turning[] = [
     title: '검은 강의 근원',
     body: '상류의 버려진 숯가마 안에 흑연조가 남긴 노동자들이 숨어 있다. 오염된 물이 가마 아래로 흐르고, 길목에는 겐바의 하수인들이 서 있다. 사람을 먼저 빼낼 수도, 오염의 원인을 적어 둘 수도 있다. 둘 다 하려면 밤이 짧다.',
     doors: [
-      { label: '노동자들을 이끌고 가마 뒤편으로 빠진다', hint: '사람을 구한다. 오염의 원인을 남에게 맡겨야 한다', when: [ready(6)], values: { loyalty: D }, danger: true,
+      { label: '노동자들을 이끌고 가마 뒤편으로 빠진다', hint: '사람을 구한다. 오염의 원인을 남에게 맡겨야 한다', when: [has('ep_wano_pre_evac')], values: { loyalty: D }, danger: true,
         fx: [flag('ep_wano_pre_freed'), next('ep_wano_pre_kaido_win')] },
       { label: '물길과 배수관을 그려 오유키에게 건넨다', hint: '지금은 사람을 모두 빼내지 못해도 기록이 남는다', values: { inquiry: D },
         fx: [flag('ep_wano_pre_record'), next('ep_wano_pre_kaido_lose')] },
