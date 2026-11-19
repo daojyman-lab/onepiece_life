@@ -1,14 +1,15 @@
 // 무기 · 장비 · 소모품. 강화는 없다.
 import type { Item } from '../core/types';
+import { COMBAT_STYLES, STYLE_BRANCH_ID } from '../../data/combat-styles';
 
 export const ITEMS: Item[] = [
   // 검
   { id: 'sw1', name: '무명 검', kind: 'weapon', grade: 1, branch: 'martial.sword', mult: 1.05, price: 3000, text: '대장간에서 흔히 파는 검.' },
   { id: 'sw2', name: '양업물 검', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.15, price: 25000, text: '이름 있는 대장장이의 검.' },
   { id: 'sw3', name: '대업물 검', kind: 'weapon', grade: 3, branch: 'martial.sword', mult: 1.25, price: 150000, text: '세상에 21자루뿐인 명검 중 하나.' },
-  { id: 'sp2', name: '이름난 강철창', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.15, price: 28000, text: '도검과 같은 무기술 갈래로 다루는 장창.' },
+  { id: 'sp2', name: '이름난 강철창', kind: 'weapon', grade: 2, branch: 'weapon.polearm', mult: 1.15, price: 28000, text: '장병기술로 다루는 장창.' },
   { id: 'sw4', name: '최상대업물 검', kind: 'weapon', grade: 4, branch: 'martial.sword', mult: 1.4, price: 900000, text: '바다에 12자루뿐인 최상의 검.' },
-  { id: 'sw_ss', name: '해루석 십수', kind: 'weapon', grade: 2, branch: 'martial.sword', mult: 1.05, seastone: true, price: 18000, text: '끝에 해루석을 박은 쇠몽둥이. 검술 기술이 자연계에 닿는다.' },
+  { id: 'sw_ss', name: '해루석 십수', kind: 'weapon', grade: 2, branch: 'weapon.blunt', mult: 1.05, seastone: true, price: 18000, text: '끝에 해루석을 박은 쇠몽둥이. 둔기술로 자연계의 실체를 짚는다.' },
   { id: 'sw5', name: '흑도', kind: 'weapon', grade: 5, branch: 'martial.sword', mult: 1.5, price: 0, text: '패기에 길든 검은 칼날. 사고팔 수 없다.' },
   // 체술
   { id: 'fi1', name: '가죽 장갑', kind: 'weapon', grade: 1, branch: 'martial.fist', mult: 1.05, price: 2500, text: '주먹을 보호한다.' },
@@ -40,4 +41,8 @@ export const ITEMS: Item[] = [
   { id: 'smoke', name: '연막 구슬', kind: 'consumable', grade: 1, use: 'smoke', price: 3000, text: '물러날 때 반드시 성공한다.' },
 ];
 
+for (const s of COMBAT_STYLES) if (s.weapon) ITEMS.push({
+  id: `style_${s.id}`, name: s.weapon, kind: 'weapon', grade: 1, branch: STYLE_BRANCH_ID[s.branch],
+  mult: 1.1, price: 0, text: `${s.name}의 인연에서 손에 맞추어 완성한 무기. 사고팔지 않는다.`,
+});
 export const ITEM_BY_ID = Object.fromEntries(ITEMS.map((i) => [i.id, i])) as Record<string, Item>;

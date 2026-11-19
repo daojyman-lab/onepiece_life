@@ -5,6 +5,8 @@ import { weaponOfSkills, type Weapon, type Who } from '../pixel/pixelArt';
 import { LIMBS } from '../../core/body';
 import { CANON, canonAge } from '../../data/canon';
 import { TURNING_BY_ID } from '../../data/turnings';
+import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
+import { primaryStyle } from '../../core/styles';
 import type { EnemySpec, Life5, Pending5, Person, Standing } from '../../core/types';
 
 export function personWho5(p: Person): Who {
@@ -31,6 +33,15 @@ function factionOf(st: Standing): NonNullable<Who['faction']> {
 
 /** 단계가 가장 높은 무술 갈래의 무기 (모두 0이면 맨주먹) */
 function heroWeapon(s: Life5): Weapon {
+  const style = primaryStyle(s);
+  if (style) {
+    const b = COMBAT_STYLE_BY_ID[style].branch;
+    if (b === 'polearm' || b === 'blunt') return style as Weapon;
+    if (b === 'gun' && style !== 'pistol') return style as Weapon;
+    return b === 'fist' ? 'fist' : b === 'sword' ? 'sword' : 'gun';
+  }
+  if (s.hero.weapon === 'sp2') return 'spear';
+  if (s.hero.weapon === 'sw_ss') return 'club';
   const t = s.growth.tier;
   if (t.sword > 0 && t.sword >= t.gun && t.sword >= t.fist) return 'sword';
   if (t.gun > 0 && t.gun >= t.fist) return 'gun';

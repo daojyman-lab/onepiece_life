@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
 import { apply5, reduce5 } from '../../src/core/reduce';
 import { addValues } from '../../src/core/values';
-import { activityOf, mainBranch, notePath, power5 } from '../../src/core/year';
+import { activityOf, growPart, mainBranch, notePath, power5 } from '../../src/core/year';
 import { LINES } from '../../src/data/lines';
 import { MINORS } from '../../src/data/minors';
 import { applyFx } from '../../src/core/fx';
@@ -48,6 +48,18 @@ describe('가치관이 정하는 한 해', () => {
 });
 
 describe('숙련과 단계의 상한', () => {
+  it('주력 유파가 있어도 받아들인 패기 스승의 가르침을 실제로 수련한다', () => {
+    const s = newLife5(2); s.age = 20; s.pending = null;
+    applyFx(s, [{ op: 'tier', branch: 'sword', to: 2 }]);
+    apply5(s, { type: 'style', style: 'oneSword' });
+    applyFx(s, [{ op: 'master', name: '견문색 스승', branch: 'observation', cap: 6, years: 10, paid: false }]);
+    expect(mainBranch(s)).toBe('observation');
+    growPart(s, 'train', () => 0.9);
+    expect(s.growth.mastery.observation).toBeGreaterThan(0);
+    expect(s.growth.primaryStyle).toBe('oneSword');
+    s.growth.master = null;
+    expect(mainBranch(s)).toBe('sword');
+  });
   /** 숙련을 크게 여러 번 더해 상한까지 밀어 올린다 */
   function pushSword(master?: { cap: number; paid: boolean }) {
     const s = newLife5(1);

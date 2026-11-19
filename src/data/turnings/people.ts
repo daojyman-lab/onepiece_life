@@ -188,7 +188,7 @@ export const PEOPLE: Turning[] = [
              { op: 'log', text: '아이들을 안고 빠져나왔다. 돌아보니 동료가 있던 자리는 이미 불길 속이었다.', weight: 'heavy' }] },
       { label: '불길 속으로 다시 뛰어든다', hint: '둘 다 구할지도 모른다. 몸이 버틸지는 모른다', special: 'justice', values: { ambition: D }, danger: true,
         fx: [{ op: 'injury', severity: 'heavy' }, { op: 'fame', add: 20 }, { op: 'chance', p: 0.35,
-          then: [{ op: 'loseLimb', limb: 'random' }, { op: 'log', text: '아이들을 내보낸 뒤 다시 불길로 뛰어들어 동료까지 구했다. 온몸에 큰 상처를 입었고 팔다리 하나를 잃었지만 모두 살아 나왔다.', weight: 'heavy' }],
+          then: [{ op: 'loseLimb', limb: 'random' }, { op: 'log', text: '아이들을 내보낸 뒤 다시 불길로 뛰어들어 동료까지 구했다. 무너지는 들보를 피해 기어 나온 뒤에야 다친 몸을 살폈다. 모두 살아 나왔다.', weight: 'heavy' }],
           else: [{ op: 'log', text: '아이들을 내보낸 뒤 다시 불길로 뛰어들어 동료까지 구했다. 온몸에 큰 상처를 입었지만 모두 살아 나왔다.', weight: 'heavy' }] }] },
     ],
   },

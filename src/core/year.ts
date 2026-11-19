@@ -25,10 +25,14 @@ import { openQueued, openTurning, pickTurning, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow } from './vow';
+import { advanceLifeTime, lifeStoryScene } from './life-story';
+import { TURNING_BY_ID } from '../data/turnings';
 import { buildVoyage, ENTRY_PREFIX, requestArrival, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
 import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
 import { gateOf } from '../data/voyage';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
+import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
+import { hasLocalStyleLesson, isMartialBranch, practiceStyles, primaryStyle, styleName, styleUsable } from './styles';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
 
 const ACTIVITIES: readonly Activity[] = ['train', 'work', 'study', 'roam', 'family', 'rest'];
@@ -52,6 +56,8 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  const storyScene = lifeStoryScene(s);
+  if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
 
   const r = rngOf(s.rng);
   partRisks(s, r);
@@ -68,7 +74,7 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.part === V.partsPerYear - 1 && !firstLap(s)) yearTurn(s, r);   // 병 · 기연은 실제 한 해에 한 번
   turningPoint(s, r);
   notePath(s);
-  if (s.hero.alive) nextPart(s, r);
+  if (s.hero.alive) { advanceLifeTime(s); nextPart(s, r); }
   endIfDead(s);
   if (minorFightDue && s.hero.alive && !s.pending && gateOf(s.hero.island) === gateOf(island)) minorFight(s, r);
   if (s.hero.island === island) delete s.hero.skyAcclimating;
@@ -113,8 +119,12 @@ export function activityOf(s: Life5, r: Rng): Activity {
  * 아무것도 익히지 않았으면 null
  */
 export function mainBranch(s: Life5): Branch | null {
+  const specialMaster = s.growth.master;
+  if (specialMaster && !isMartialBranch(specialMaster.branch) && canUse(s, specialMaster.branch)) return specialMaster.branch;
   const m = s.growth.master;
   if (m && canUse(s, m.branch)) return m.branch;
+  const style = primaryStyle(s);
+  if (style && styleUsable(s, style)) return COMBAT_STYLE_BY_ID[style].branch;
   // 선호도가 가장 높은 갈래 (같으면 더 멀리 간 갈래). 선호도가 하나도 없으면 가장 멀리 간 갈래
   const pref = (b: Branch) => s.growth.pref[b] ?? 0;
   const progress = (b: Branch) => s.growth.tier[b] * V.growth.tierUp + s.growth.mastery[b];
@@ -138,7 +148,7 @@ export function notePath(s: Life5): void {
   const was = s.growth.path;
   if (now === was || now === null) return;
   s.growth.path = now;
-  const name = (b: Branch) => BRANCH_NAMES[BRANCH_ID[b]];
+  const name = (b: Branch) => styleName(s, b) ? `${b === 'fist' ? '체술' : '무기술'} · ${styleName(s, b)}` : BRANCH_NAMES[BRANCH_ID[b]];
   const m = s.growth.master;
   const by = m && m.branch === now ? `${m.name}을(를) 만나 ` : '';
   if (was === null) {
@@ -152,6 +162,7 @@ export function notePath(s: Life5): void {
 
 /** 한 토막의 활동만큼 자란다: 숙련과 능력치, 단계, 정체와 돌파 */
 export function growPart(s: Life5, act: Activity, r: Rng): void {
+  practiceStyles(s, act);
   const h = s.hero;
   const G = V.growth;
   const age = ageMult(s.age) * potentialMult(s, null);
@@ -275,9 +286,10 @@ function partCompanions(s: Life5): void {
 
 /** 바다를 다니는 사람은 해마다 같은 바다의 다른 섬에 닿는다 (V.voyage). 섬마다의 이야기는 그 섬에 닿아야 열린다 (turnings/islands.ts) */
 export function voyage(s: Life5): void {
+  if (hasLocalStyleLesson(s)) { s.sail = false; return; }
   const h = s.hero;
   const scene = s.pending?.kind === 'door' ? s.pending.turning : '';
-  if (s.queue.length || scene.startsWith('ep_') || scene.startsWith(VOYAGE_PREFIX) || scene.startsWith(ENTRY_PREFIX)) return;
+  if (s.queue.length || s.lifeStory?.wait || scene.startsWith('life_course_') || scene.startsWith('ep_') || scene.startsWith(VOYAGE_PREFIX) || scene.startsWith(ENTRY_PREFIX)) return;
   if (s.ended || s.age < V.voyage.minAge || !SEA_STANDINGS.includes(h.standing)) return;
   const r = rngOf(s.rng);
   const military = h.standing === 'marine' || h.standing === 'cp';
@@ -293,6 +305,7 @@ export function voyage(s: Life5): void {
 /** 항로 고르기를 띄운다. 띄웠으면 true */
 function openVoyage(s: Life5, r: Rng): boolean {
   s.sail = false;
+  if (hasLocalStyleLesson(s)) return false;
   if (!SEA_STANDINGS.includes(s.hero.standing) || s.hero.standing === 'marine' || s.hero.standing === 'cp') return false;
   const c = voyageChoices(s, r);
   const t = c && buildVoyage(voyageId(s, c));

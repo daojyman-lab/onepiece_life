@@ -243,7 +243,7 @@ describe('특수 섬 항해', () => {
     expect(openTurning(s, TURNING_BY_ID.port_weapon_water7)).toBe(true);
     answerDoor(s, 0);
     expect(s.hero.money).toBe(52000);
-    expect(heroUnit5(s).weapon).toMatchObject({ branch: 'martial.sword', mult: 1.15 });
+    expect(heroUnit5(s).weapon).toMatchObject({ branch: 'weapon.polearm', mult: 1.15 });
   });
 });
 

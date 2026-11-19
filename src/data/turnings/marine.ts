@@ -119,8 +119,8 @@ export const MARINE: Turning[] = [
         fx: [{ op: 'crewTrain', add: 3 }, { op: 'log', text: '분대원들이 연병장에 쓰러져 잠들었다. 다음 날 아무도 늦지 않았다.', weight: 'light' }] },
       { label: '하나하나 곁에 붙어 약점을 고쳐 준다', hint: '제 수련 시간이 줄어든다. 분대원들이 {name}을(를) 따른다', values: { inquiry: D },
         fx: [{ op: 'crewTrain', add: 2 }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '밤마다 분대원 하나씩 붙잡고 자세를 고쳐 주었다.', weight: 'light' }] },
-      { label: '해적 소탕에 실전으로 데려간다', hint: '빨리 큰다. 다치는 녀석이 나올지 모른다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'crewTrain', add: 4 }, { op: 'fame', add: 5 }, { op: 'chance', p: 0.35, then: [{ op: 'hp', add: -15 }, { op: 'log', text: '분대원 하나가 칼을 맞았다. 들것에 실려 가며 다음엔 안 맞는다고 웃었다.', weight: 'heavy' }], else: [{ op: 'log', text: '분대원들은 첫 실전에서 서로의 움직임을 익혔다. 해적을 몰아낸 뒤 연병장으로 돌아오니 훈련 때보다 발걸음이 맞았다.', weight: 'light' }] }] },
+      { label: '해적 소탕에 실전으로 데려간다', hint: '빨리 큰다. 직접 앞장서다 다칠 수 있다', values: { ambition: D }, danger: true,
+        fx: [{ op: 'crewTrain', add: 4 }, { op: 'fame', add: 5 }, { op: 'chance', p: 0.35, then: [{ op: 'hp', add: -15 }, { op: 'log', text: '얼어붙은 분대원 앞을 막아서다 {name}이(가) 칼에 베였다. 분대원들이 다친 분대장을 부축해 돌아오며 다음에는 함께 막겠다고 했다.', weight: 'heavy' }], else: [{ op: 'log', text: '분대원들은 첫 실전에서 서로의 움직임을 익혔다. 해적을 몰아낸 뒤 연병장으로 돌아오니 훈련 때보다 발걸음이 맞았다.', weight: 'light' }] }] },
     ],
   },
   {

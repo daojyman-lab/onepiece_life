@@ -3,9 +3,10 @@ import { B } from '../../data/balance';
 import { FRUIT_BY_ID, FRUIT_TEMPLATES } from '../../data/fruits';
 import { ITEM_BY_ID } from '../../data/items';
 import { HAKI_LEVEL_GATES, SKILLS } from '../../data/skills';
+import { STYLE_SKILLS } from '../../data/style-skills';
 import type { BranchId, LifeState, Skill, Stats, StatKey } from '../types';
 
-const SKILL_BY_ID: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
+const SKILL_BY_ID: Record<string, Skill> = Object.fromEntries([...SKILLS, ...STYLE_SKILLS].map((s) => [s.id, s]));
 const fruitSkillCache = new Map<string, Skill>();
 
 /** 열매 기술 id: `fruit:<열매id>:<순번>` */
@@ -43,6 +44,8 @@ export function getSkill(id: string): Skill | undefined {
 
 /** 한 갈래의 기술 목록. 열매는 주인공이 먹은 열매의 것 */
 export function branchSkills(branch: BranchId, fruitId: string | null): Skill[] {
+  if (branch === 'weapon.polearm') return STYLE_SKILLS.filter((s) => s.id.startsWith('style:spear:'));
+  if (branch === 'weapon.blunt') return STYLE_SKILLS.filter((s) => s.id.startsWith('style:club:'));
   if (branch !== 'fruit') return SKILLS.filter((s) => s.branch === branch);
   void fruitId;
   return [];   // 열매는 기술이 아니라 패시브다 (data/passives.ts)

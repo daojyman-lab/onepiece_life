@@ -15,6 +15,7 @@ import { addValues, isDeep } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
 import { advanceVow } from './vow';
+import { afterLifeStoryChoice, lifeOutcome } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
 import type { Life5, ResolvedDoor, Turning } from './types';
@@ -30,14 +31,14 @@ export const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] 
 function fillTurning(s: Life5, text: string): string {
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
   const parent = s.people.find((p) => p.alive && (p.relation === '아버지' || p.relation === '어머니'))?.relation ?? '';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent });
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent, lifeOutcome: lifeOutcome(s) });
 }
 
 function speakerOf(s: Life5, t: Turning): string {
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
   if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
-  return s.people.find((p) => p.alive && p.relation === sp.relation)?.name ?? sp.relation;
+  return s.people.find((p) => p.alive && (p.relation === sp.relation || p.aliases?.includes(sp.relation)))?.name ?? sp.relation;
 }
 
 /** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
@@ -191,6 +192,7 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
+  afterLifeStoryChoice(s, t.id);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
   // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.

@@ -50,7 +50,7 @@ export function applyEnvironmentPart(s: Life5, activity: Activity, branch: Branc
   if (!env?.pressure) return;
   if (s.hero.fruit) {
     if (activity === 'roam') deepWater(s);
-  } else if (activity === 'train' && (branch === 'fist' || branch === 'sword' || branch === 'gun')) {
+  } else if (activity === 'train' && (branch === 'fist' || branch === 'sword' || branch === 'polearm' || branch === 'blunt' || branch === 'gun')) {
     s.hero.base.str += env.pressure.strength;
   }
 }

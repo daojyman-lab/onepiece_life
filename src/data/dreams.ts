@@ -5,6 +5,9 @@ import type { DreamId } from '../core/types';
 export const DREAMS: Record<DreamId, { name: string; done: string; missed: string }> = {
   pirateKing: { name: '해적왕', done: '바다의 정점에 섰다', missed: '해적왕의 자리에는 끝내 닿지 못했다' },
   bestSword:  { name: '세계 최강의 검객', done: '검의 끝에 닿았다', missed: '검의 끝은 끝내 보이지 않았다' },
+  bestFist: { name: '세계 최강의 무투가', done: '자신의 몸으로 무도의 끝에 닿았다', missed: '무도의 끝에는 닿지 못했다' },
+  bestWeapon: { name: '세계 최강의 병기가', done: '손에 익힌 무기로 정점에 섰다', missed: '무기의 정점에는 닿지 못했다' },
+  bestShot: { name: '세계 최고의 저격수', done: '자신의 사격으로 가장 먼 표적에 닿았다', missed: '사격의 정점에는 닿지 못했다' },
   marineTop:  { name: '해군의 정점', done: '정의의 가장 높은 자리에 섰다', missed: '정의의 정점에는 닿지 못했다' },
   changeWorld:{ name: '세상을 바꾸는 것', done: '세상이 조금은 달라졌다', missed: '세상은 생각보다 단단했다' },
   worldEnd:   { name: '세상의 끝을 보는 것', done: '마지막 바다를 보았다', missed: '세상의 끝은 수평선 너머에 남았다' },

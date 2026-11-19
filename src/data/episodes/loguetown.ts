@@ -49,7 +49,7 @@ export const FOES_LOGUETOWN: FoeDef[] = [
 const FREE: Standing[] = ['child', ...GROWN];
 const LT: Cond = on('로그타운');
 const RIKO = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '리코', gender: 'm' as const, age: { younger: 3 } });
-const PENNY = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '페니', gender: 'f' as const });
+const PENNY = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '페니', gender: 'f' as const, reuseName: true });
 
 export const EP_LOGUETOWN: Turning[] = [
   // ================================================================ 원작 전 (주인공 13~15) · 처형대 아래의 가짜 지도

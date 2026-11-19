@@ -2,6 +2,9 @@
 import { CHANGE_FAME, DREAMS, PEACE_AGE, TREASURE_MONEY } from '../data/dreams';
 import { josa } from '../shared/core/josa';
 import { logLine } from './log';
+import { hasLifeEvent, lifeStoryAnswer } from './life-story';
+import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
+import { primaryStyle, styleTier } from './styles';
 import type { DreamId, Life5 } from './types';
 
 /** 꿈을 품는다 (처음이든, 바뀌든). 이미 이룬 꿈을 다시 고르면 아무 일도 없다 */
@@ -24,7 +27,15 @@ export function dreamMet(s: Life5, id: DreamId): boolean {
   const h = s.hero, f = (x: string) => s.flags.includes(x);
   switch (id) {
     case 'pirateKing': return f('pirateKing');
-    case 'bestSword': return s.growth.tier.sword >= 6;
+    case 'bestSword': return s.growth.tier.sword >= 6 &&
+      (!primaryStyle(s) || (COMBAT_STYLE_BY_ID[primaryStyle(s)!].branch === 'sword' && styleTier(s, primaryStyle(s)!) >= 6)) &&
+      (!(hasLifeEvent(s, 'trained_guard') || hasLifeEvent(s, 'trained_duel')) || hasLifeEvent(s, 'recognized') || hasLifeEvent(s, 'recognition_declined'));
+    case 'bestFist': case 'bestWeapon': case 'bestShot': {
+      const style = primaryStyle(s);
+      if (!style || styleTier(s, style) < 6) return false;
+      const branch = COMBAT_STYLE_BY_ID[style].branch;
+      return id === 'bestFist' ? branch === 'fist' : id === 'bestShot' ? branch === 'gun' : branch === 'polearm' || branch === 'blunt';
+    }
     case 'marineTop': return f('apex') && (h.standing === 'marine' || h.standing === 'cp');
     case 'changeWorld': return h.standing === 'revolution' && h.fame >= CHANGE_FAME;
     case 'worldEnd': return f('sawLastSea') || f('lastSeaChart');
@@ -69,6 +80,8 @@ const VALUE_ANSWER: Record<string, string> = {
 
 /** 마지막 질문 "너에게 원피스는 무엇이었나?"의 대답 (통합 기획 10.4). 어떤 대답도 다른 대답보다 옳지 않다 */
 export function onePieceAnswer(s: Life5, top: string | undefined): string {
+  const storyAnswer = lifeStoryAnswer(s);
+  if (storyAnswer) return storyAnswer;
   const d = s.dream;
   const changed = s.timeline.some((t) => t.text.startsWith('꿈을 ') && t.text.includes('바꾸었다'));
   const close = s.people.filter((p) => p.alive !== undefined && p.bond >= 80 && p.kind !== 'family').length;

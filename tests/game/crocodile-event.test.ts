@@ -20,7 +20,7 @@ function eligibleLife(rating = 500) {
   life.hero.standing = 'pirate';
   life.hero.fame = 100;
   life.hero.base = { str: rating, spd: 0, vit: 0, int: 0, wil: 0, luk: 0 };
-  life.growth.tier = { fist: 0, sword: 0, gun: 0, observation: 0, armament: 0, conqueror: 0, fruit: 0 };
+  life.growth.tier = { fist: 0, sword: 0, polearm: 0, blunt: 0, gun: 0, observation: 0, armament: 0, conqueror: 0, fruit: 0 };
   life.hero.fruit = null;
   life.flags.push('ship');
   expect(rating5(life)).toBe(rating);

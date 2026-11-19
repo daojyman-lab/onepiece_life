@@ -158,7 +158,7 @@ export const HUNTER: Turning[] = [
                then: [{ op: 'hp', add: -30 }, { op: 'fame', add: 40 }, { op: 'money', add: 120000 },
                       { op: 'log', text: '선장을 갑판에 눕혔다. 사냥꾼들 사이에 그날 밤 {name}의 이름이 퍼졌다.', weight: 'heavy' }, { op: 'timeline', text: '거물 해적을 홀로 잡았다' }],
                else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -40 }, { op: 'chance', p: 0.3,
-                 then: [{ op: 'loseLimb', limb: 'random' }, { op: 'log', text: '포위망을 뚫는 사이 팔다리 하나를 잃었다. 배에서 벗어난 뒤에야 남은 동료가 상처를 묶어 주었다.', weight: 'heavy' }],
+                 then: [{ op: 'loseLimb', limb: 'random' }, { op: 'log', text: '포위망을 뚫고 갑판 밖으로 몸을 던졌다. 뭍에 기어오른 뒤에야 찢어진 옷으로 상처를 눌렀다.', weight: 'heavy' }],
                  else: [{ op: 'log', text: '칼과 총에 크게 다쳤지만 몸을 끌고 배 밖으로 빠져나왔다. 다른 사냥꾼을 찾아갈 힘도 남지 않았다.', weight: 'heavy' }] }] }] },
       { label: '다른 사냥꾼들을 모아 함께 친다', hint: '몫은 열로 나뉜다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'money', add: 25000 }, { op: 'fame', add: 10 }, { op: 'person', kind: 'ally', relation: '함께 싸운 사냥꾼' }, { op: 'log', text: '열 명이 갑판에 올라 선장을 붙잡았다. 지부에서 현상금을 나눌 때 함께 싸운 사냥꾼 하나가 다음 사냥도 함께하자며 손을 내밀었다.', weight: 'heavy' }] },
@@ -178,7 +178,7 @@ export const HUNTER: Turning[] = [
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'fame', add: 50 }, { op: 'money', add: 100000 }, { op: 'hp', add: -25 },
                       { op: 'log', text: '가짜 보물 소문에 몰려든 해적들을 섬 하나에 가두었다. 그 바다의 수배서가 절반으로 줄었다.', weight: 'heavy' }],
-               else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -40 }, { op: 'loseLimb', limb: 'random' }, { op: 'log', text: '미끼를 알아챈 해적들이 오히려 {name}을(를) 포위했다. 큰 상처와 잃은 팔 또는 다리를 안고 가까스로 섬을 빠져나왔다.', weight: 'heavy' }] }] },
+               else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -40 }, { op: 'loseLimb', limb: 'random' }, { op: 'log', text: '미끼를 알아챈 해적들이 오히려 {name}을(를) 포위했다. 큰 상처를 입고 가까스로 섬을 빠져나왔다.', weight: 'heavy' }] }] },
     ],
   },
   {

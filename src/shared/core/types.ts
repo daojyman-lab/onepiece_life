@@ -10,6 +10,7 @@ export type StatKey = 'str' | 'spd' | 'vit' | 'int' | 'wil' | 'luk';
 export type Stats = Record<StatKey, number>;
 export type BranchId =
   | 'martial.fist' | 'martial.sword' | 'martial.gun'
+  | 'weapon.polearm' | 'weapon.blunt'
   | 'haki.observation' | 'haki.armament' | 'haki.conqueror'
   | 'fruit';
 export type Tactic = 'offense' | 'defense' | 'counter' | 'endurance';
@@ -74,6 +75,7 @@ export interface CrewInfo {
 }
 
 export interface Person {
+  aliases?: string[];         // 같은 인물을 다른 장면의 관계 이름으로 다시 부를 때
   id: string; name: string; gender: 'm' | 'f'; age: number;
   kind: 'family' | 'master' | 'crew' | 'rival' | 'enemy' | 'ally';
   relation: string;           // 아버지, 라이벌, 스승 … 화면용

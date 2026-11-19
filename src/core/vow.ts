@@ -39,7 +39,7 @@ export function resolveVow(s: Life5, id: string, forcedFail = false): { reward: 
   }
   s.timeline.push({ age: s.age, text: `${d.target}에게 건 서약을 지켰다` });
   logLine(s, `${d.target}에게 건 약속을 지켰다. 그날의 결심이 몸에 남았다.`, 'heavy', 'growth');
-  const branches: Branch[] = ['fist', 'sword', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
+  const branches: Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
   const reward = s.growth.path ?? branches.reduce((best, b) => s.growth.pref[b] > s.growth.pref[best] ? b : best, 'fist');
   return { reward, amount: d.rewardMastery };
 }

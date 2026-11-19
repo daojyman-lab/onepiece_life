@@ -27,7 +27,7 @@ export const V = {
             studyObs: 0.5,                     // study가 견문색 숙련에 주는 몫 (perPart의 배수)
             // 활동마다 능력치가 1 오를 확률 (나이 배율을 곱한다)
             statP: { train: 0.9, study: 0.6, roam: 0.6 },
-            branchStats: { fist: ['str', 'vit'], sword: ['str', 'spd'], gun: ['spd', 'luk'], observation: ['int', 'wil'],
+            branchStats: { fist: ['str', 'vit'], sword: ['str', 'spd'], polearm: ['str', 'spd'], blunt: ['str', 'vit'], gun: ['spd', 'luk'], observation: ['int', 'wil'],
                            armament: ['vit', 'wil'], conqueror: ['wil'], fruit: ['wil', 'vit'] },
             bareStats: ['str', 'spd', 'vit'],  // 갈래가 아직 없을 때 수련이 올리는 몸
             workMoney: 3000, familyBond: 2, restHp: 10,

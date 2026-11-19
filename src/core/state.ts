@@ -10,11 +10,12 @@ import { LIMBS } from './body';
 import { logLine, yearDivider } from './log';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
+import { COMBAT_STYLES, DEFAULT_STYLE } from '../data/combat-styles';
 import type { Branch, Life5, Limb, LimbState, Stats, Values, Wealth } from './types';
 
 export { fullName } from './birth';
 export { logLine } from './log';
-const BRANCHES: readonly Branch[] = ['fist', 'sword', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
+const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
 function fill<K extends string, T>(keys: readonly K[], v: T): Record<K, T> {
   const out = {} as Record<K, T>;
@@ -48,7 +49,8 @@ export function emptyLife(seed: number): Life5 {
       alive: true,
       bornWealth: 'common',
     },
-    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null },
+    growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null,
+      styleMastery: Object.fromEntries(COMBAT_STYLES.map((x) => [x.id, 0])), styleFocus: { ...DEFAULT_STYLE }, styleWeapons: {}, primaryStyle: null, styleBonds: {} },
     values, personality: { row: 1, col: 1, pullRow: 0, pullCol: 0, choices: 0, hold: 0, established: false }, strengths: [], marks: {},
     hardship: 0,
     people: [],

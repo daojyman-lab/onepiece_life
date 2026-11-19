@@ -1,5 +1,6 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
 import { josa } from '../shared/core/josa';
+import { lifePreparation } from './life-story';
 import { fmtMoney } from '../shared/core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
@@ -9,6 +10,7 @@ import { rating5 } from './power';
 import { personIs } from './needs';
 import { isDeep } from './values';
 import { hasEntryContact } from './voyage';
+import { styleBondReady, styleUsable } from './styles';
 import type { Cond, Life5, Wealth } from './types';
 
 const WEALTH_ORDER: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
@@ -21,6 +23,8 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'styleBond': return c.phase === 'new' ? !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
+    case 'lifePreparation': return lifePreparation(s, c.mode) === null;
     case 'age': return inRange(s.age, c.min, c.max);
     case 'standing': return c.is.includes(h.standing);
     case 'home': return c.is.includes(h.home);
@@ -51,7 +55,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'island': return c.is.includes(h.island) !== (c.not ?? false);
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
-    case 'person': return s.people.some((p) => p.alive && p.relation === c.relation && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'person': return s.people.some((p) => p.alive && (p.relation === c.relation || p.aliases?.includes(c.relation)) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -70,6 +74,8 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';
+    case 'lifePreparation': return lifePreparation(s, c.mode) ?? '';
     case 'age': return c.min !== undefined && s.age < c.min ? `아직 ${c.min}살이 되지 않았다` : `${c.max}살을 넘겼다`;
     case 'standing': return '지금 처지로는 할 수 없다';
     case 'home': return '고향이 다르다';

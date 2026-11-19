@@ -16,7 +16,7 @@ const GRAY: Pair = ['#dcdfe6', '#a8acb8'];
 const CIVIL: Pair[] = [['#4a8ac8', '#2f6498'], ['#58a070', '#3a7850'], ['#c89040', '#98682a'], ['#a868b0', '#7a4884']];
 
 /** 들고 있는 무기. 평소 모습(칼집 · 권총집 · 붕대 감은 주먹)과 공격 자세 · 공격 효과가 달라진다 */
-export type Weapon = 'sword' | 'fist' | 'gun';
+export type Weapon = 'sword' | 'fist' | 'gun' | 'spear' | 'naginata' | 'staff' | 'hammer' | 'club' | 'pipe' | 'rifle' | 'sniper' | 'slingshot' | 'dial';
 /** 멀쩡하지 않은 부위. L/R은 인물 자신의 왼쪽/오른쪽 (앞을 보는 그림에서 L은 보는 이의 오른쪽) */
 export type BodyMark = Partial<Record<'eyeL' | 'eyeR' | 'armL' | 'armR' | 'legL' | 'legR', 'lost' | 'basic' | 'superior'>>;
 export interface Who {
@@ -30,6 +30,8 @@ export interface Who {
 
 /** 기술 목록에서 무기를 정한다: 검술 기술이 있으면 칼, 사격이면 총, 아니면 맨주먹 */
 export function weaponOfSkills(skills: readonly string[]): Weapon {
+  const style = skills.find((k) => k.startsWith('style:'))?.split(':')[1];
+  if (style && ['spear', 'naginata', 'staff', 'hammer', 'club', 'pipe', 'rifle', 'sniper', 'slingshot', 'dial'].includes(style)) return style as Weapon;
   const sword = skills.filter((k) => k.startsWith('sword_')).length;
   const gun = skills.filter((k) => k.startsWith('gun_')).length;
   const fist = skills.filter((k) => k.startsWith('fist_')).length;
@@ -299,6 +301,18 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
   if (holstered(pose, body) && !child) {
     if (wp === 'sword') { r(1, torsoTop - 2, 1, 2, '#c8a040'); r(1, torsoTop, 1, torsoH + 3, '#3a2a40'); r(0, torsoTop + 1, 1, torsoH + 1, '#5a4466'); }
     if (wp === 'gun') { r(11, legsTop, 2, 3, '#4a3020'); r(11, legsTop - 1, 1, 1, '#7a7a88'); }
+    if (wp === 'spear' || wp === 'naginata' || wp === 'staff') {
+      r(1, headTop - 1, 1, 23, '#88603c');
+      if (wp !== 'staff') { r(1, headTop - 4, 1, 4, '#d8e4ec'); r(wp === 'naginata' ? 2 : 0, headTop - 2, 1, 2, '#a8b8c8'); }
+    }
+    if (wp === 'hammer' || wp === 'club' || wp === 'pipe') {
+      r(0, torsoTop + 1, 1, 10, wp === 'pipe' ? '#9aa4b0' : '#88603c');
+      if (wp === 'hammer') r(0, torsoTop - 1, 4, 3, '#8995a2');
+      if (wp === 'club') r(0, torsoTop - 2, 2, 6, '#65505a');
+    }
+    if (wp === 'rifle' || wp === 'sniper') { r(0, torsoTop - 1, 1, 12, '#75818d'); r(0, legsTop - 2, 2, 5, '#785232'); }
+    if (wp === 'slingshot') { r(12, torsoTop + 4, 1, 4, '#986a3f'); r(11, torsoTop + 3, 3, 1, '#b88745'); }
+    if (wp === 'dial') r(12, torsoTop + 5, 3, 2, '#d9c2a2');
   }
   // 잃은 왼팔은 자세와 상관없이 빈 소매 끝만 (두 팔을 다 잃으면 공격 효과는 장면이 그린다)
   if (armL === 'lost') arm(12, clS, armL);
@@ -310,6 +324,17 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
     // 팔을 뻗어 권총을 겨눈다
     r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);
     r(15, ay + 2, 1, 2, '#5a3a22'); r(15, ay, 4, 2, '#4a4a56'); r(16, ay, 3, 1, '#8a8a96');
+  } else if (atk && wp !== null && ['spear', 'naginata', 'staff', 'hammer', 'club', 'pipe'].includes(wp ?? '')) {
+    r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);
+    r(16, ay - 5, 1, 11, wp === 'pipe' ? '#a4b0bc' : '#91643e');
+    if (wp === 'spear' || wp === 'naginata') { r(16, ay - 8, 1, 4, '#e0e8f0'); r(17, ay - 6, 1, 2, '#a8bdcc'); }
+    if (wp === 'hammer') r(14, ay - 6, 5, 3, '#9ba8b6');
+    if (wp === 'club') { r(15, ay - 6, 3, 5, '#65505a'); r(15, ay - 4, 3, 1, '#a0a5b0'); }
+  } else if (atk && wp !== null && ['rifle', 'sniper', 'slingshot', 'dial'].includes(wp ?? '')) {
+    r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);
+    if (wp === 'dial') { r(16, ay, 3, 3, '#e5cfb0'); r(17, ay + 1, 1, 1, '#b29a77'); }
+    else if (wp === 'slingshot') { r(17, ay - 2, 1, 6, '#a67740'); r(16, ay - 3, 3, 1, '#b88745'); }
+    else { r(14, ay + 1, 4, 2, '#715033'); r(16, ay, 4, 1, '#acb8c4'); if (wp === 'sniper') r(16, ay - 1, 3, 1, '#455264'); }
   } else if (atk) {
     // 칼을 치켜든다 (무기가 정해지지 않았으면 칼)
     r(sx, ay + 1, 15 - sx, 2, sleeve); wristL(14); r(15, ay + 1, 1, 2, handL);

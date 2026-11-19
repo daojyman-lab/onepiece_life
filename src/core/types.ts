@@ -1,6 +1,7 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
 import type { EntryGate } from '../data/voyage';
 import type { ArrivalRoute } from './voyage';
+import type { CombatStyle, MartialBranch } from '../data/combat-styles';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
 
 export type ValueId = 'justice' | 'greed' | 'ambition' | 'romance' | 'inquiry' | 'loyalty' | 'freedom' | 'dominion' | 'peace';
@@ -23,7 +24,7 @@ export type WoundKind = 'bruise' | 'cut' | 'burn' | 'fracture';
 export type Wound5 = Injury & { part?: WoundPart; kind?: WoundKind };
 export type LimbState = 'ok' | 'lost' | 'basic' | 'superior';    // basic 돈으로 단 것, superior 기연으로 얻은 것
 export type Activity = 'train' | 'work' | 'study' | 'roam' | 'family' | 'rest';
-export type Branch = 'fist' | 'sword' | 'gun' | 'observation' | 'armament' | 'conqueror' | 'fruit';
+export type Branch = MartialBranch | 'observation' | 'armament' | 'conqueror' | 'fruit';
 /** 사건의 글이 전제하는 것. 맞지 않으면 그 전환점은 오지 않고, 그 문은 잠긴다 (needs.ts) */
 export type Need = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent' | 'swim' | 'sword' | 'gun' | 'fist' | 'arms' | 'ship';
 
@@ -46,12 +47,17 @@ export interface Hero5 {
   weapon?: string;                             // 전투에 가져가는 무기의 상품 ID
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
-export type DreamId = 'pirateKing' | 'bestSword' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+export type DreamId = 'pirateKing' | 'bestSword' | 'bestFist' | 'bestWeapon' | 'bestShot' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
 export interface VowState {
   active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
   history: { id: string; result: 'kept' | 'failed' }[];
 }
 export interface Growth5 {
+  styleMastery: Partial<Record<CombatStyle, number>>;
+  styleFocus: Partial<Record<MartialBranch, CombatStyle>>;
+  styleWeapons: Partial<Record<CombatStyle, string>>;
+  primaryStyle: CombatStyle | null;
+  styleBonds: Partial<Record<CombatStyle, { teacherId: string; island: string; since: number; practice: number; adopted: boolean; refined: boolean }>>;
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
   mastery: Record<Branch, number>;             // 0~100, 다음 단계로 가는 숙련
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
@@ -70,6 +76,8 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
+  | { c: 'lifePreparation'; mode: 'guard' | 'duel' }
   | { c: 'age'; min?: number; max?: number }
   | { c: 'standing'; is: Standing[] }
   | { c: 'home'; is: HomeId[] }
@@ -101,6 +109,10 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'beginStyle' | 'adoptStyle' | 'refineStyle'; style: CombatStyle }
+  | { op: 'lifeMilitary' }
+  | { op: 'lifeEvent'; id: string; actor?: string }
+  | { op: 'lifeWait'; ready: string; otherwise: string }
   | { op: 'base'; key: StatKey | 'all'; add: number }
   | { op: 'hp'; add: number }
   | { op: 'money'; add: number }
@@ -128,7 +140,7 @@ export type Fx =
   | { op: 'serviceWeapon' }
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
-  | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string;
+  | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string; reuseName?: boolean;
       age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
       role?: CrewRole;
       level?: number;                          // 동료의 처음 레벨 (이름난 사람은 처음부터 높다). 없으면 V.person.crew.level
@@ -203,6 +215,12 @@ export interface Stats5 {
   namedMet: number;                            // 이름 있는 상대와 마주친 횟수 (싸웠든 물러났든)
 }
 export interface Life5 {
+  /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */
+  lifeStory?: {
+    elapsed: number;
+    events: { id: string; age: number; part: number; island: string; elapsed: number; actorId?: string; method?: 'guard' | 'support' }[];
+    wait: { readyAt: number; expiresAt: number; island: string; then: string; otherwise: string } | null;
+  };
   schema: 5;
   rng: { seed: number; cursor: number };
   age: number; part: 0 | 1 | 2 | 3;            // 한 해의 네 토막
@@ -233,4 +251,4 @@ export interface Life5 {
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
 }
-export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number };
+export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle };

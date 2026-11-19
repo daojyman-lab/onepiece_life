@@ -31,6 +31,8 @@ import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
 import { EPISODE_TURNINGS } from '../episodes';
 import { PORT_MARKETS } from './port-market';
+import { STYLE_TURNINGS } from './style-origins';
+import { LIFE_COURSE } from './life-course';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -65,6 +67,8 @@ const GROUPS: Turning[][] = [
   KIN_TURNINGS,
   EPISODE_TURNINGS,
   PORT_MARKETS,
+  STYLE_TURNINGS,
+  LIFE_COURSE,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

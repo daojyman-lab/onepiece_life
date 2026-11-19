@@ -1,5 +1,6 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { setDream } from './dreams';
+import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
 import { parentFound, parentMissing } from './family';
 import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
@@ -22,6 +23,7 @@ import { askFight } from './fight';
 import { personIs } from './needs';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
+import { addStyleMastery, adoptStyle, beginStyle, focusedStyle, isMartialBranch, refineStyle, rememberWeapon } from './styles';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
@@ -35,11 +37,14 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 export function fillText(s: Life5, text: string): string {
   const parent = s.people.find((p) => p.alive && personIs(p, 'parent'))?.relation ?? '';
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend });
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend,
+    lifeGuardMethod: lifeGuardMethod(s), lifeOutcome: lifeOutcome(s) });
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
 export function tierCap(s: Life5, b: Branch): number {
+  // 입문 자체는 상한을 바꾸지 않는다. 실제 시련·실전을 거친 재회의 고급 수련만 극의까지 연다.
+  if (isMartialBranch(b) && s.growth.styleBonds[focusedStyle(s, b)]?.refined) return V.growth.maxTier;
   const m = s.growth.master;
   if (!m || m.branch !== b) return V.growth.noMasterCap;
   return Math.max(V.growth.noMasterCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
@@ -48,6 +53,7 @@ export function tierCap(s: Life5, b: Branch): number {
 /** 숙련을 더한다. tierUp에 닿으면 단계를 하나 올리고 숙련을 0으로 돌린다. 상한에 닿으면 숙련은 tierUp에서 멈춘다. */
 export function addMastery(s: Life5, b: Branch, add: number): void {
   const g = s.growth;
+  addStyleMastery(s, b, add, tierCap(s, b));
   g.mastery[b] = Math.max(0, g.mastery[b] + add);
   if (g.mastery[b] < V.growth.tierUp) return;
   if (g.tier[b] >= tierCap(s, b)) { g.mastery[b] = V.growth.tierUp; return; }
@@ -69,6 +75,14 @@ function captainByShip(s: Life5): void {
 function applyOne(s: Life5, e: Fx): void {
   const h = s.hero;
   switch (e.op) {
+    case 'beginStyle': beginStyle(s, e.style); return;
+    case 'adoptStyle': adoptStyle(s, e.style); return;
+    case 'refineStyle': refineStyle(s, e.style); return;
+    case 'lifeMilitary':
+      if (h.standing !== 'marine' && h.standing !== 'cp') applyOne(s, { op: 'standing', to: 'marine' });
+      return;
+    case 'lifeEvent': recordLifeEvent(s, e.id, e.actor); return;
+    case 'lifeWait': waitForLifeEvidence(s, e.ready, e.otherwise); return;
     case 'base':
       for (const k of e.key === 'all' ? STAT_KEYS : [e.key]) h.base[k] = Math.max(0, h.base[k] + e.add);
       return;
@@ -110,14 +124,16 @@ function applyOne(s: Life5, e: Fx): void {
     case 'buyWeapon': {
       const item = ITEM_BY_ID[e.id];
       if (item?.kind !== 'weapon' || !item.price || h.money < item.price || h.weapon === item.id) return;
+      rememberWeapon(s);
       h.money -= item.price;
       h.weapon = item.id;
+      rememberWeapon(s);
       logLine(s, `${item.name}을(를) 장만해 전투에 쓰기로 했다.`, 'heavy', 'growth');
       return;
     }
     case 'serviceWeapon': {
       const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
-      const branch = item && (['sword', 'gun', 'fist'] as const).find((b) => BRANCH_ID[b] === item.branch);
+      const branch = item && (['sword', 'polearm', 'blunt', 'gun', 'fist'] as const).find((b) => BRANCH_ID[b] === item.branch);
       if (branch) addMastery(s, branch, 4);
       logLine(s, branch ? '장인이 무기를 손질하고 손잡이를 손에 맞춰 줬다.' : '공방 뒤뜰에서 장인들의 이야기를 들으며 한숨 돌렸다.', 'light');
       return;
@@ -131,6 +147,11 @@ function applyOne(s: Life5, e: Fx): void {
     }
     case 'hardship': s.hardship = Math.max(0, s.hardship + e.add); return;
     case 'person': {
+      const existing = e.reuseName && e.name ? s.people.find((p) => p.name === e.name && !p.canon) : undefined;
+      if (existing) {
+        existing.aliases = [...new Set([...(existing.aliases ?? []), e.relation])];
+        return;                              // 사망한 인물도 새 인물로 만들어 되살리지 않는다
+      }
       const r = rngOf(s.rng);
       const c = e.canon ? CANON[e.canon] : undefined;
       const gender = c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
@@ -205,7 +226,14 @@ function applyOne(s: Life5, e: Fx): void {
       return;
     case 'pref': s.growth.pref[e.branch] = Math.max(0, s.growth.pref[e.branch] + e.add); return;
     // 단계를 그 자리까지 끌어올린다. 이미 더 높으면 그대로 둔다
-    case 'tier': s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier)); return;
+    case 'tier': {
+      s.growth.tier[e.branch] = Math.max(s.growth.tier[e.branch], clamp(e.to, 0, V.growth.maxTier));
+      if (isMartialBranch(e.branch)) {
+        const id = focusedStyle(s, e.branch);
+        s.growth.styleMastery[id] = Math.max(s.growth.styleMastery[id] ?? 0, clamp(e.to, 0, V.growth.maxTier) * V.growth.tierUp);
+      }
+      return;
+    }
     case 'master':
       s.growth.master = { name: e.name, branch: e.branch, cap: e.cap, yearsLeft: e.years, paid: e.paid };
       // 스승을 들이면 그 갈래가 앞선다. 길이 바뀌면 year.ts의 notePath가 큰 일로 남긴다

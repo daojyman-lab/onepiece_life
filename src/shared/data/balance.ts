@@ -27,6 +27,8 @@ export const B = {
     split: {
       'martial.fist': { str: 0.5, vit: 0.3, spd: 0.2 },
       'martial.sword': { str: 0.4, spd: 0.4, wil: 0.2 },
+      'weapon.polearm': { str: 0.4, spd: 0.4, vit: 0.2 },
+      'weapon.blunt': { str: 0.5, vit: 0.3, wil: 0.2 },
       'martial.gun': { spd: 0.5, int: 0.3, luk: 0.2 },
       'haki.observation': { wil: 0.4, spd: 0.3, int: 0.3 },
       'haki.armament': { wil: 0.5, vit: 0.3, str: 0.2 },

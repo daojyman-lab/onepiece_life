@@ -20,6 +20,8 @@ import {
 } from '../../data/words';
 import { activeValue } from '../../core/personality';
 import { rating5 } from '../../core/power';
+import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
+import { primaryStyle } from '../../core/styles';
 import { bandWord } from './words';
 import { GRADES, GRADE_TOP } from '../../data/words';
 import type { Branch, Life5, LogLine, Standing } from '../../core/types';
@@ -51,7 +53,7 @@ export interface ProfileView {
 }
 
 const BOUNTY_STANDINGS: readonly Standing[] = ['pirate', 'warlord'];
-const BRANCHES: readonly Branch[] = ['fist', 'sword', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
+const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
 function fameWord(s: Life5): string {
   const fame = Math.round(s.hero.fame);
@@ -104,7 +106,7 @@ export function profileView(s: Life5): ProfileView {
       return st === 'ok' ? [] : [{ limb: LIMB_NAME[l], word: LIMB_STATE_WORD[st] }];
     }),
     skills: BRANCHES.filter((b) => g.tier[b] >= 1).map((b) => ({ name: BRANCH_NAME[b], tier: TIER_WORD[g.tier[b]] ?? '' })),
-    path: g.path ? BRANCH_NAME[g.path] : null,
+    path: primaryStyle(s) ? `${COMBAT_STYLE_BY_ID[primaryStyle(s)!].group === 'weapon' ? '무기술' : '체술'} · ${COMBAT_STYLE_BY_ID[primaryStyle(s)!].name}` : g.path ? `${['sword', 'polearm', 'blunt', 'gun'].includes(g.path) ? '무기술 · ' : ''}${BRANCH_NAME[g.path]}` : null,
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,

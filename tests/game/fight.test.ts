@@ -129,6 +129,30 @@ describe('싸움', () => {
       expect.objectContaining({ severity: 'heavy', part: expect.any(String), kind: expect.any(String) }),
     ]));
   });
+  it('마그마 기술을 쓰는 상대에게 쓰러지면 화상으로 기록한다', () => {
+    const s = fighter(16, 5);
+    s.strengths = ['rebel'];
+    askFight(s, 'b_akainu', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');
+    expect(s.pending.battle.units.find((u) => u.hero)?.hp).toBe(0);
+    const after = reduce5(s, { type: 'answer', index: 0 });
+    expect(after.hero.injuries).toEqual(expect.arrayContaining([
+      expect.objectContaining({ severity: 'heavy', kind: 'burn' }),
+    ]));
+  });
+  it('이미 잃은 부위에는 새 전투 상처가 생기지 않는다', () => {
+    for (let seed = 0; seed < 16; seed++) {
+      const s = fighter(seed, 5);
+      s.strengths = ['rebel'];
+      for (const limb of Object.keys(s.hero.limbs) as (keyof typeof s.hero.limbs)[]) s.hero.limbs[limb] = 'lost';
+      askFight(s, 'b_alvida', false, true);
+      if (s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');
+      expect(s.pending.battle.units.find((u) => u.hero)?.hp).toBe(0);
+      const after = reduce5(s, { type: 'answer', index: 0 });
+      expect(after.hero.injuries).toHaveLength(1);
+      expect(['head', 'torso']).toContain(after.hero.injuries[0].part);
+    }
+  });
   it('강한 상대에게 지면 몸을 잃을 수 있고, 잃으면 큰 계기가 줄을 선다', () => {
     let lost: Life5 | null = null;
     for (let i = 0; i < 200 && !lost; i++) {

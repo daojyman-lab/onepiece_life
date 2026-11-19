@@ -1,5 +1,7 @@
 // v5 본 화면: 데스크톱은 세 칸(인물 · 장면과 이야기 · 인연과 연표), 휴대폰(760px 이하)은 탭 넷. (v4 src/ui/screens/Main.tsx와 같은 마크업 · 클래스)
 import { stageName } from '../../core/stages';
+import { lifeProgress } from '../../core/life-story';
+import { Styles } from './Styles';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { drawScene, type SceneInput } from '../pixel/pixelArt';
 import { caughtUp, shouldRead } from '../../app/flow';
@@ -184,9 +186,11 @@ function Profile({ s }: { s: Life5 }) {
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
         {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
+        <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
+        {lifeProgress(s).length > 0 && <div class="paper t9"><b>약속에서 이어진 수련</b>{lifeProgress(s).map((line) => <div key={line}>{line}</div>)}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
         {p.weapon && <div class="t9"><b>무기</b> {p.weapon}</div>}
         <div class="t9"><b>전투력</b> {p.power}</div>

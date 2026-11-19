@@ -10,6 +10,9 @@ import { runBattle, startBattle } from '../shared/core/combat/engine';
 import { fruitMods, mergeMods } from '../shared/core/combat/mods';
 import { crewUnit, enemyUnit } from '../shared/core/combat/units';
 import { branchSkills, getSkill } from '../shared/core/growth/skillbook';
+import { STYLE_SKILLS } from '../shared/data/style-skills';
+import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
+import { isMartialBranch, primaryStyle, styleTier, styleUsable } from './styles';
 import { chance, hashString, int, pick, rngOf, type Rng } from '../shared/core/rng';
 import { fill } from '../shared/core/util';
 import { V } from '../data/balance';
@@ -112,13 +115,21 @@ function hakiLevel(tier: number): number {
 /** 연 갈래(몸이 허락하는 것만)의 기술 가운데 그 갈래의 단계까지 닿은 것. 높은 단계부터 최대 maxSkills개 */
 function heroSkills(s: Life5): CUnit['skills'] {
   const got: { sk: Skill; b: Branch }[] = [];
+  const active = primaryStyle(s);
   for (const b of Object.keys(BRANCH_ID) as Branch[]) {
+    if (active && isMartialBranch(b)) {
+      if (COMBAT_STYLE_BY_ID[active].branch === b && styleUsable(s, active)) {
+        const tier = Math.min(s.growth.tier[b], styleTier(s, active));
+        for (const sk of STYLE_SKILLS) if (sk.id.startsWith(`style:${active}:`) && sk.tier <= tier) got.push({ sk, b });
+      }
+      continue;
+    }
     const tier = s.growth.tier[b];
     if (tier <= 0 || !canUse(s, b)) continue;
     for (const sk of branchSkills(BRANCH_ID[b], s.hero.fruit?.id ?? null)) if (sk.tier <= tier) got.push({ sk, b });
   }
   return got.sort((x, y) => y.sk.tier - x.sk.tier).slice(0, F.maxSkills)
-    .map(({ sk, b }) => ({ id: sk.id, mastery: skillMastery(s.growth.tier[b]), cd: 0 }));
+    .map(({ sk, b }) => ({ id: sk.id, mastery: skillMastery(active && sk.id.startsWith('style:') ? styleTier(s, active) : s.growth.tier[b]), cd: 0 }));
 }
 
 /** 패시브 기술과 특성 · 열매 패시브를 유닛에 반영한다 (v4 units.ts와 같은 규칙) */
@@ -258,6 +269,16 @@ export function ackBattle(s: Life5): void {
   s.pending = null;
   const foe = p.foe;
   const won = p.result === 'win';
+  const style = primaryStyle(s);
+  if (style) {
+    const key = `styleCombat:${style}:${foe.id}`;
+    const used = p.battle.events.some((e) => e.k === 'act' && p.battle.units[e.who]?.hero && e.skill.startsWith(`style:${style}:`));
+    const amount = won ? 6 : p.lethal ? 0 : p.result === 'retreat' ? 1 : 2;
+    if (used && amount > 0 && s.seen[key] === undefined) {
+      s.seen[key] = s.age;
+      applyFx(s, [{ op: 'mastery', branch: COMBAT_STYLE_BY_ID[style].branch, add: amount }]);
+    }
+  }
   if (foe.spar) {
     logLine(s, won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`, 'heavy', 'battle');
     const next = won ? p.next?.win : p.next?.lose;
@@ -272,8 +293,9 @@ export function ackBattle(s: Life5): void {
   const woundRisk = riskOf(s, foe, p.lethal, p.atSea).injury * (won ? F.wonMult : 1);
   if (knockedOut || (damage > 0 && chance(r, woundRisk))) {
     const severity = knockedOut ? 'heavy' : 'light';
-    const part = pick(r, ['torso', 'armL', 'armR', 'legL', 'legR', 'head', 'eyeL', 'eyeR'] as WoundPart[]);
-    const kind: WoundKind = foe.skills.some((id) => /fire|flame|magma|heat/.test(id)) ? 'burn'
+    const parts: WoundPart[] = ['torso', 'armL', 'armR', 'legL', 'legR', 'head', 'eyeL', 'eyeR'];
+    const part = pick(r, parts.filter((part) => part === 'head' || part === 'torso' || s.hero.limbs[part] !== 'lost'));
+    const kind: WoundKind = foe.skills.some((id) => /fire|flame|magma|heat|^fruit:(mera|magu|netsu):/.test(id)) ? 'burn'
       : foe.skills.some((id) => /sword|gun|blade/.test(id)) ? 'cut'
       : knockedOut ? 'fracture' : 'bruise';
     applyFx(s, [{ op: 'injury', severity, part, kind }]);

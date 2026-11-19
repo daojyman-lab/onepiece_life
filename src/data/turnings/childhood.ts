@@ -169,8 +169,8 @@ export const CHILDHOOD: Turning[] = [
     id: 'kid_dice', kind: 'door', when: kid(9, 15), weight: 9, repeat: 'once', speaker: 'hero',
     title: '부두의 노름판', body: '부두 뒷골목에서 뱃사람들이 주사위 노름을 한다. 한 사람이 끼워 주겠다며 손짓한다.',
     doors: [
-      { label: '가진 돈을 몽땅 건다', hint: '크게 따거나 몽땅 잃는다', values: { greed: D }, mark: 'daring', danger: true,
-        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 4000 }, { op: 'log', text: '마지막 주사위가 멈추자 뱃사람들의 웃음이 끊겼다. {name}은(는) 쌓인 동전을 움켜쥐고 노름판을 빠져나왔다.', weight: 'light' }], else: [{ op: 'money', add: -3000 }, { op: 'log', text: '마지막 주사위가 빗나갔다. 빈 주머니를 뒤집어 보이는 동안 뱃사람들은 벌써 다음 판을 벌였다.', weight: 'light' }] }] },
+      { label: '노름판에 끼어든다', hint: '돈을 얻거나 빈손으로 끝난다', values: { greed: D }, mark: 'daring', danger: true,
+        fx: [{ op: 'chance', p: 0.5, then: [{ op: 'money', add: 4000 }, { op: 'log', text: '마지막 주사위가 멈추자 뱃사람들의 웃음이 끊겼다. {name}은(는) 쌓인 동전을 움켜쥐고 노름판을 빠져나왔다.', weight: 'light' }], else: [{ op: 'money', add: -3000 }, { op: 'log', text: '마지막 주사위가 빗나갔다. 이번 판에서 돌아오는 몫은 없었다. 뱃사람들은 벌써 다음 판을 벌였다.', weight: 'light' }] }] },
       { label: '노름판의 속임수를 지켜본다', hint: '손놀림의 비밀을 알아챈다', values: { inquiry: D }, mark: 'composure', fx: [{ op: 'log', text: '한 뱃사람이 주사위를 던지기 직전 손가락으로 모서리를 바꿔 쥐었다. {name}은(는) 그 손을 보고도 모른 척 판을 떠났다.', weight: 'light' }] },
       { label: '경비대에 알린다', hint: '뱃사람들의 미움을 산다', values: { justice: D }, fx: [{ op: 'person', kind: 'rival', relation: '노름판의 뱃사람' }, { op: 'log', text: '경비대가 골목에 들이닥치자 판이 뒤집혔다. 붙잡힌 뱃사람 하나가 {name}의 얼굴을 똑똑히 기억해 두겠다고 소리쳤다.', weight: 'light' }] },
     ],

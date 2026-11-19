@@ -122,6 +122,9 @@ export const ISLAND_DANGER: Record<string, 1 | 2 | 3> = {
 export const DREAM_ISLANDS: Record<DreamId, readonly string[]> = {
   pirateKing: ['로그타운', '샤본디 제도', '라프텔 근해', '리버스 마운틴'],
   bestSword: ['로그타운', '스릴러 바크', '드레스로자', '와노쿠니', '리틀 가든'],
+  bestFist: ['로그타운', '어인섬', '에니에스 로비', '와노쿠니'],
+  bestShot: ['시럽 마을', '드레스로자', '샤본디 제도'],
+  bestWeapon: ['로그타운', '워터 세븐', '와노쿠니', '드레스로자'],
   marineTop: ['로그타운', '에니에스 로비', '샤본디 제도', '시럽 마을'],
   changeWorld: ['알라바스타 왕국', '드레스로자', '소르베 왕국', '마피아 항구', '루브니르 왕국'],
   worldEnd: ['리버스 마운틴', '스카이피아', '엘바프', '라프텔 근해', '서쪽 등대섬'],

@@ -8,6 +8,8 @@ export const BRANCH_NAMES: Record<BranchId, string> = {
   'martial.fist': '체술',
   'martial.sword': '검술',
   'martial.gun': '사격',
+  'weapon.polearm': '장병기술',
+  'weapon.blunt': '둔기술',
   'haki.observation': '견문색',
   'haki.armament': '무장색',
   'haki.conqueror': '패왕색',

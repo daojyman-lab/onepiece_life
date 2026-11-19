@@ -74,7 +74,8 @@ const WOUND_STATS: Record<WoundPart, readonly StatKey[]> = {
 export function canUse(s: Life5, branch: Branch): boolean {
   const arms = ARMS.map((l) => factorOf(s, l) > 0);
   switch (branch) {
-    case 'gun': return arms.every(Boolean);
+    case 'gun': case 'polearm': return arms.every(Boolean);
+    case 'blunt': return arms.some(Boolean);
     case 'sword': case 'fist': return arms.some(Boolean);
     default: return true;
   }

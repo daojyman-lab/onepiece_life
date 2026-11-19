@@ -10,6 +10,7 @@ import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
 import { emptyLife } from './state';
+import { normalizeStyles } from './styles';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -55,6 +56,7 @@ function withDefaults(got: Obj, def: object): Obj {
 export function normalizeLife5(x: unknown): Life5 | null {
   if (!isObj(x) || x.schema !== 5) return null;
   const oldPersonality = x.personality === undefined;
+  const legacyStyles = !isObj(x.growth) || x.growth.styleMastery === undefined;
   const seed = isObj(x.rng) && typeof x.rng.seed === 'number' ? x.rng.seed : 0;
   const def = emptyLife(seed);
   // 처지가 된 나이를 모르는 옛 저장은 지금부터 센다
@@ -67,6 +69,19 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  try { normalizeStyles(life, legacyStyles); } catch { return null; }
+  if (life.lifeStory !== undefined) {
+    const story = life.lifeStory;
+    if (!isObj(story) || !Number.isInteger(story.elapsed) || story.elapsed < 0 || !Array.isArray(story.events) ||
+      story.events.some((e) => !isObj(e) || typeof e.id !== 'string' || !Number.isFinite(e.age) ||
+        !Number.isInteger(e.part) || e.part < 0 || e.part > 3 || typeof e.island !== 'string' ||
+        !Number.isInteger(e.elapsed) || e.elapsed < 0 || e.elapsed > story.elapsed || (e.actorId !== undefined && typeof e.actorId !== 'string') ||
+        (e.method !== undefined && e.method !== 'guard' && e.method !== 'support')) ||
+      new Set(story.events.map((e) => e.id)).size !== story.events.length ||
+      (story.wait !== null && (!isObj(story.wait) || !Number.isInteger(story.wait.readyAt) || !Number.isInteger(story.wait.expiresAt) ||
+        story.wait.readyAt > story.wait.expiresAt || typeof story.wait.island !== 'string' ||
+        typeof story.wait.then !== 'string' || typeof story.wait.otherwise !== 'string'))) return null;
+  }
   // 증표 기능이 생기기 전에 보상 문을 고른 인생도 그 선택을 인정한다.
   for (const { choice, flag, home } of ENTRY_PASS_CHOICES) {
     if (life.hero.home !== home && life.tried.includes(choice) && !life.flags.includes(flag)) life.flags = [...life.flags, flag];

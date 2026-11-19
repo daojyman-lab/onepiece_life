@@ -1,12 +1,14 @@
 // 갈래 id와 대략의 힘. fx · fight · year가 모두 쓰므로, 그 셋을 가져오지 않는 잎 모듈로 둔다.
 import { V } from '../data/balance';
 import { effectiveStats5 } from './body';
+import { primaryStyle, styleTier } from './styles';
 import type { BranchId } from '../shared/core/types';
 import type { Branch, Life5 } from './types';
 
 /** v5 갈래 → v4 갈래 id (재능의 숙련 배율과 갈래 이름이 v4 id로 적혀 있다) */
 export const BRANCH_ID: Record<Branch, BranchId> = {
   fist: 'martial.fist', sword: 'martial.sword', gun: 'martial.gun',
+  polearm: 'weapon.polearm', blunt: 'weapon.blunt',
   observation: 'haki.observation', armament: 'haki.armament', conqueror: 'haki.conqueror', fruit: 'fruit',
 };
 
@@ -20,6 +22,8 @@ export function tierMult(tier: number): number {
 
 /** 가장 높은 단계 */
 export function topTier(s: Life5): number {
+  const style = primaryStyle(s);
+  if (style) return Math.max(styleTier(s, style), s.growth.tier.observation, s.growth.tier.armament, s.growth.tier.conqueror, s.growth.tier.fruit);
   return Math.max(...Object.values(s.growth.tier));
 }
 
@@ -27,7 +31,8 @@ export function topTier(s: Life5): number {
 export function rating5(s: Life5): number {
   const sum = Object.values(effectiveStats5(s)).reduce((a, b) => a + b, 0);
   const t = s.growth.tier;
-  const martial = tierMult(Math.max(t.fist, t.sword, t.gun));
+  const style = primaryStyle(s);
+  const martial = tierMult(style ? styleTier(s, style) : Math.max(t.fist, t.sword, t.polearm, t.blunt, t.gun));
   const fruit = s.hero.fruit ? tierMult(t.fruit) - 1 : 0;
   const haki = (tierMult(t.observation) - 1) + (tierMult(t.armament) - 1) + (tierMult(t.conqueror) - 1);
   return sum * (martial + V.grade.fruit * fruit + V.grade.haki * haki);

@@ -9,7 +9,7 @@ export type HomeKey = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou
 export interface Hometown {
   name: string; home: HomeKey; sea: SeaId; text: string;
   households: { text: string; father?: 'marine' | 'pirate' }[];
-  teachers: { label: string; hint: string; branch: 'martial.fist' | 'martial.sword' | 'martial.gun' }[];   // 10세에 배울 수 있는 곳
+  teachers: { label: string; hint: string; branch: 'martial.fist' | 'martial.sword' | 'martial.gun' | 'weapon.polearm' | 'weapon.blunt' }[];   // 10세에 배울 수 있는 곳
 }
 
 export const HOMETOWNS: Hometown[] = [
@@ -23,7 +23,7 @@ export const HOMETOWNS: Hometown[] = [
   { name: '고아 왕국 그레이 터미널', home: 'loguetown', sea: 'east', text: '왕국 성벽 밖의 쓰레기 산',
     households: [{ text: '쓰레기 산 판잣집' }, { text: '산적 일가의 이웃', father: 'pirate' }],
     teachers: [
-      { label: '쓰레기 산 형들과 쇠파이프로 싸운다', hint: '검술 · 막대기도 칼이다', branch: 'martial.sword' },
+      { label: '쓰레기 산 형들과 쇠파이프로 싸운다', hint: '무기술 · 둔기로 거리를 지킨다', branch: 'weapon.blunt' },
       { label: '산적 일가에게 맨주먹을 배운다', hint: '체술 · 살아남는 싸움', branch: 'martial.fist' },
       { label: '고철로 만든 새총으로 새를 잡는다', hint: '사격 · 굶지 않으려면 맞혀야 한다', branch: 'martial.gun' },
     ] },
@@ -70,7 +70,7 @@ export const HOMETOWNS: Hometown[] = [
   { name: '워터 세븐', home: 'water7', sea: 'gl_first', text: '물길이 거리를 가르는 조선의 도시',
     households: [{ text: '갈레라 컴퍼니 직공의 집' }, { text: '물길가 여관' }, { text: '시장 상인의 집' }],
     teachers: [
-      { label: '조선소 직공들 틈에서 망치를 든다', hint: '체술 · 쇠못을 박으며 팔이 굵어진다', branch: 'martial.fist' },
+      { label: '조선소 직공들 틈에서 망치를 든다', hint: '무기술 · 작업 해머를 다룬다', branch: 'weapon.blunt' },
       { label: '시장 경비대에게 칼을 배운다', hint: '검술 · 도시를 지키는 칼', branch: 'martial.sword' },
     ] },
   { name: '워터 세븐 뒷골목', home: 'water7', sea: 'gl_first', text: '스크랩 섬의 해체장과 판잣집',
@@ -109,12 +109,12 @@ export const HOMETOWNS: Hometown[] = [
     households: [{ text: '뒷골목 판잣집' }, { text: '고기잡이 집' }],
     teachers: [
       { label: '뒷골목 형들에게 어인 가라테를 흉내 낸다', hint: '체술 · 물을 치는 주먹', branch: 'martial.fist' },
-      { label: '버려진 작살을 주워 휘두른다', hint: '검술 · 작살도 칼이다', branch: 'martial.sword' },
+      { label: '버려진 작살을 주워 휘두른다', hint: '무기술 · 긴 자루의 찌르기', branch: 'weapon.polearm' },
     ] },
   { name: '류구 왕국', home: 'fishman', sea: 'sabaody', text: '거품 속 왕궁이 빛나는 바닷속 나라',
     households: [{ text: '근위병의 집' }, { text: '산호 세공 공방' }, { text: '인어 카페' }],
     teachers: [
-      { label: '근위병에게 창 쓰는 법을 배운다', hint: '검술 · 왕궁의 창', branch: 'martial.sword' },
+      { label: '근위병에게 창 쓰는 법을 배운다', hint: '무기술 · 장병기 · 왕궁의 창', branch: 'weapon.polearm' },
       { label: '어인 가라테 도장에 들어간다', hint: '체술 · 바다의 무술', branch: 'martial.fist' },
     ] },
   { name: '바다의 숲', home: 'fishman', sea: 'sabaody', text: '가라앉은 배들이 잠든 어인섬 끝자락',
@@ -127,7 +127,7 @@ export const HOMETOWNS: Hometown[] = [
   { name: '엔젤섬', home: 'sky', sea: 'gl_first', text: '흰 구름 바다에 뜬 하늘 사람들의 섬',
     households: [{ text: '다이얼 공방' }, { text: '구름 과일 농가' }, { text: '화이트베레 대원의 집' }],
     teachers: [
-      { label: '화이트베레에게 봉술을 배운다', hint: '검술 · 하늘의 질서', branch: 'martial.sword' },
+      { label: '화이트베레에게 봉술을 배운다', hint: '무기술 · 장병기 · 하늘의 질서', branch: 'weapon.polearm' },
       { label: '충격 다이얼을 손에 쥐고 다룬다', hint: '체술 · 쳐 낸 힘을 되돌린다', branch: 'martial.fist' },
     ] },
   { name: '샨디아 마을', home: 'sky', sea: 'gl_first', text: '고향 땅을 되찾으려는 전사들의 숲',
@@ -140,7 +140,7 @@ export const HOMETOWNS: Hometown[] = [
   { name: '쿠라우 도시', home: 'zou', sea: 'nw_first', text: '거대한 코끼리 등 위 밍크족의 도시',
     households: [{ text: '전사의 집' }, { text: '약초 가게' }, { text: '공작의 성 근처 집' }],
     teachers: [
-      { label: '낮의 전사들에게 창을 배운다', hint: '검술 · 낮 왕의 창', branch: 'martial.sword' },
+      { label: '낮의 전사들에게 창을 배운다', hint: '무기술 · 장병기 · 낮 왕의 창', branch: 'weapon.polearm' },
       { label: '전기를 두른 주먹을 배운다', hint: '체술 · 밍크족의 일렉트로', branch: 'martial.fist' },
     ] },
   { name: '고래숲', home: 'zou', sea: 'nw_first', text: '밤의 왕이 다스리는 깊은 숲',
