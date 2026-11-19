@@ -98,7 +98,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   rollFamily(s, r);
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
   const town = HOMETOWNS.find((t) => t.home === h.home && t.name === h.town);
-  if (town) logLine(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}(이)다.`, 'heavy', 'world');
+  if (town) logLine(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
   introduceFamily(s);
   birthEdition(s);
   s.hero.standing = 'child';
