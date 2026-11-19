@@ -23,6 +23,7 @@ function traveler() {
   s.age = 24;
   s.siblingBirths = [];
   Object.assign(s.hero, { island: '자야', sea: 'gl_first', standing: 'pirate', money: 80000, hp: 60 });
+  s.debut = { age: 17, lap: false };   // 이미 오래전에 처음 바다에 나섰다
   return s;
 }
 

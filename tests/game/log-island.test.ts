@@ -19,6 +19,7 @@ function sailor() {
   s.vows!.declined = true;
   Object.assign(s.hero, { standing: 'pirate', island: '위스키 피크', sea: 'gl_entry' });
   s.dream = { id: 'worldEnd', since: 23, done: null };
+  s.debut = { age: 17, lap: false };   // 이미 오래전에 처음 바다에 나섰다
   return s;
 }
 function reload(s: Life5) {
