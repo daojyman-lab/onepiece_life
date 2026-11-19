@@ -55,8 +55,9 @@ function knownSpeakerIsDead(s: Life5, t: Turning): boolean {
 
 function renderDoor(s: Life5, t: Turning, doors: ResolvedDoor[]): Extract<Life5['pending'], { kind: 'door' }> {
   const disciple = t.disciple && discipleFor(s, t.disciple);
+  const body = [t.body, ...(t.recall ?? []).filter(line => checkAll(s, line.when)).map(line => line.text)].join('\n\n');
   return { kind: 'door', turning: t.id, moment: t.kind === 'moment',
-    title: fillTurning(s, t.title, t), body: fillTurning(s, t.body, t), speaker: speakerOf(s, t), doors,
+    title: fillTurning(s, t.title, t), body: fillTurning(s, body, t), speaker: speakerOf(s, t), doors,
     ...(disciple ? { discipleId: disciple.personId } : {}) };
 }
 

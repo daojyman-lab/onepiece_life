@@ -122,7 +122,7 @@ export function rollPassage(p: Passage, sea: string, navigator: number, r: Rng, 
   if (zone === 'calmBelt' && r() < SEA_KING_CHANCE) {
     out.seaKing = true;
     out.hp += SEA_KING_HP;
-    out.lines.push('바람 없는 바다 밑에서 거대한 해왕류가 떠올라 배를 뒤흔들었다.');
+    out.lines.push('수면에 뜬 노란 달이 눈을 깜박였다. 해왕류의 눈동자였다. 비늘 한 장이 돛보다 컸다. 놈이 고개를 돌리자 물이 비탈처럼 기울어 배 안의 물건들이 한쪽으로 쏟아졌다.');
   }
 
   const spent = p.partsSpent + 1;
@@ -145,6 +145,10 @@ export function passagePart(s: Life5, r: Rng): void {
   if (!SEA_STANDINGS.includes(h.standing)) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다
   const step = rollPassage(p, h.sea, Math.max(0, Math.min(3, navigatorLevel(s) + (hasTrait(s, 'orientation') ? 1 : hasTrait(s, 'lostWay') ? -1 : 0))), r, canonYear(s.age));
   for (const line of step.lines) logLine(s, line, 'light');
+  if (step.seaKing && !s.flags.includes('sawCalmBeltKing')) {
+    s.flags.push('sawCalmBeltKing');
+    s.timeline.push({ age: s.age, text: '칼름벨트에서 돛보다 비늘이 큰 해왕류와 눈이 마주쳤다' });
+  }
   if (step.hp) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + (step.hp < 0 ? Math.round(step.hp * traitFactor(s, 'danger')) : Math.round(step.hp * traitFactor(s, 'healing')))));   // 날씨로는 죽지 않는다
   if (step.fame) h.fame += step.fame;
   if (step.next) { s.passage = step.next; return; }

@@ -202,6 +202,7 @@ function Profile({ s }: { s: Life5 }) {
         <dl class="profile-gear">
           <dt>주무기</dt><dd><b>{p.weapon}</b></dd>
           <dt>{s.growth.primaryStyle || !p.path ? '주력 유파' : '주력 갈래'}</dt><dd>{p.path ?? '아직 정하지 않음'}</dd>
+          {p.keepsakes.length > 0 && <><dt>소지품</dt><dd>{p.keepsakes.join(' · ')}</dd></>}
         </dl>
       </div>
       <div class="stack" style={{ marginTop: 8 }}>

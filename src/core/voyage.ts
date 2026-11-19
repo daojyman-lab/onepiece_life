@@ -231,7 +231,7 @@ export function resolveEntry(s: Life5, e: Extract<Fx, { op: 'entry' }>): void {
           return;
         }
       }
-      say(e.option === 0 ? '비브르 카드가 당기는 방향에서 거대한 다리가 모습을 드러냈다.' : '안개 사이로 즈니샤의 다리를 발견해 밧줄을 걸었다.');
+      say(e.option === 0 ? '비블카드가 당기는 방향에서 거대한 다리가 모습을 드러냈다.' : '안개 사이로 즈니샤의 다리를 발견해 밧줄을 걸었다.');
       say('거대한 다리를 올라 모코모 공국의 숲에 닿았다.');
       break;
   }

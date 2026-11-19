@@ -4,6 +4,7 @@
 // 물러서는 줄에는 맞서는 가치관이, 맞서는 줄에는 평온이 깊으면 나오지 않는 조건을 붙인다 (방금 싸움에 끼어든 사람에게 "자리를 피했다"가 나오지 않게).
 // 처지가 배를 타는 처지(해적 · 해군 · 혁명군)면 그 처지가 배를 전제하므로 'ship'을 따로 적지 않는다. 'ship'은 제 배를 가졌을 때다.
 import type { Branch, Cond, Need, Standing, ValueId, Values } from '../core/types';
+import { PILOT_CARD, POST_SNAIL } from './keepsakes';
 
 /** money: 글이 말하는 돈의 오감 (보냈다 · 써 버렸다면 음수, 주웠다 · 받아 냈다면 양수). 쓰는 줄은 그만한 돈이 있어야 나온다 */
 export interface DailyLine5 { when: Cond[]; lean: Partial<Values>; text: string; needs?: Need[]; money?: number; onceKey?: string }
@@ -24,6 +25,9 @@ const atSea = st('pirate', 'marine', 'revolution');
 const town = (name: string): Cond[] => [{ c: 'town', is: [name] }, kid];
 const island = (...is: string[]): Cond => ({ c: 'island', is });
 const fruit: Cond = { c: 'fruit', has: true };
+const ashore: Cond = { c: 'ashore' };
+const inTown = st('child', 'civil', 'settled', 'shipwright', 'pirate', 'marine', 'cp', 'revolution', 'bountyHunter', 'warlord', 'retired');
+const kept = (id: string): Cond => ({ c: 'flag', id, has: true });
 /** 지금 걷는 길 (무기를 쥐는 줄은 그 길을 걷는 사람에게만) */
 const path = (...is: (Branch | 'none')[]): Cond => ({ c: 'path', is });
 /** 이 가치관이 깊으면 나오지 않는다 */
@@ -362,4 +366,24 @@ export const LINES: DailyLine5[] = [
   L(elder, { romance: 1 }, '동네 꼬마들이 옛날이야기를 해 달라고 졸랐다.'),
   L(elder, { inquiry: 1 }, '젊어서 다닌 바다의 이름을 하나씩 잊어 가는 게 서운했다.'),
   L(elder, { peace: 1 }, '볕 드는 창가에서 졸다 깨다 하루를 보냈다.'),
+
+  // 섬에서 나고 자라며 보거나, 제 손으로 얻은 것을 꺼내 보는 날들.
+  L([kid, inTown, ashore, island('로그타운', '시럽 마을', '셸스 타운', '후샤 마을')], {}, '뉴스 쿠가 신문 가방을 열었다. 동전 대신 과자를 내밀자 날개 끝으로 가격표를 세 번 두드렸다. 흥정은 실패였다.'),
+  L([inTown, ashore, island('워터 세븐', '워터 세븐 뒷골목', '시프트 역')], {}, '장 보러 나온 야가라 불이 물길에서 재채기를 했다. 장바구니의 양배추가 둥둥 떠내려가자 주인은 안장 위에서 뜰채부터 폈다.'),
+  L([inTown, ashore, island('엔젤섬', '스카이피아', '샨디아 마을')], {}, '꼬마가 음성 다이얼에 대고 큰소리로 숙제를 다 했다고 했다. 뒤에서 “공책은 비었잖니” 하는 소리까지 함께 녹음됐다.'),
+  L([inTown, ashore, island('쿠리', '하나노미야코', '와노쿠니')], {}, '코마이누가 다리 한복판에 턱을 괴고 낮잠을 잤다. 짐꾼이 곱슬갈기를 간질이자 다리만 한 앞발이 귀를 긁으러 올라갔다. 수레 세 대가 잽싸게 지나갔다.'),
+  L([inTown, ashore, island('쿠라우 도시', '고래숲', '조', '조우')], {}, '즈니샤가 코로 물을 뿜었다. 빗방울인 줄 알고 손을 폈는데 손바닥에 작은 생선이 떨어졌다. 이웃은 벌써 냄비를 받쳐 들고 있었다.'),
+  L([inTown, ashore, island('어인섬', '류구 왕국', '어인가', '바다의 숲')], {}, '인어 카페의 배달원이 거품을 타고 이층 창으로 쟁반을 밀어 넣었다. 아래층 손님이 제 거라고 하자 거품째 쏙 내려왔다. 차는 한 방울도 안 쏟았다.'),
+  L([inTown, ashore, island('리틀 가든')], {}, '목 긴 공룡의 등을 언덕으로 잘못 알고 그늘에 앉았다. 그늘이 통째로 일어나 잎을 따 먹으러 가는 바람에 햇볕 아래 덩그러니 남았다.'),
+  L([inTown, ashore, island('알라바스타 왕국')], { romance: 1 }, '물가에서 쿵푸 듀공이 앞발을 모으고 정중히 인사했다. 따라 인사했더니 결투 신청이었는지 뒤로 듀공 열 마리가 줄을 섰다.'),
+  L([inTown, ashore, island('홀케이크 아일랜드'), { c: 'age', min: 17, max: 21 }], {}, '빅 맘 해적단의 다과회 행렬이 지나갔다. 찻잔들이 줄을 맞춰 노래를 불렀고, 각설탕 하나가 제 차례가 되자 코를 막고 홍차에 뛰어들었다.'),
+  L([inTown, ashore, island('자야'), { c: 'age', min: 17, max: 18 }], {}, '술집 문틈에서 “제하하하!” 웃음이 새어 나왔다. 빠진 이 사이로 체리 파이가 보였다. 검은수염이 한 판을 더 시키자 주방장은 오늘 몫 밀가루를 몽땅 꺼냈다.'),
+  L([inTown, ashore, island('와노쿠니', '쿠리'), { c: 'age', min: 16, max: 20 }], {}, '백수 해적단의 연회가 열린 밤, 산 위에서 “워로로로!” 하는 웃음이 내려왔다. 포장마차 주인은 말없이 찻잔들을 붙잡았다. 탁자가 뒤늦게 떨렸다.'),
+  L([inTown, ashore, island('드럼 왕국'), { c: 'choiceAgo', turning: 'cn_chopper_drum', door: 0 }], { inquiry: 1 }, '약초를 고르다 문득 웃었다. 그날 순록 의사가 나무 뒤에 숨기엔 바구니도 뿔도 너무 컸다. 모른 척 앉아 있느라 얼마나 힘들었는지.'),
+  L([inTown, kept(POST_SNAIL)], {}, '달팽이콩이 배고픈 소리를 냈다. 수화기를 들어 보니 상대편에서도 꼬르륵. 서로 상추 한 장 먹이고 다시 걸기로 했다.'),
+  L([inTown, kept(PILOT_CARD), { c: 'person', relation: '비블카드를 나눈 도선사', has: true }], {}, '마레의 비블카드가 잠든 사이 모자 안감을 타고 기어 나왔다. 종이 반쪽이 저렇게 부지런한데 주인은 얼마나 바쁠까.'),
+  L([elder, inTown, kept('sawCalmBeltKing')], {}, '아이들이 해왕류 비늘 크기를 물었다. 두 팔을 벌려도 모자라서 지붕을 가리켰더니 다들 맞은편의 더 큰 지붕을 쳐다봤다. 고개를 끄덕여 줬다.'),
+  L([old, inTown, kept('reefKingWatched')], {}, '어인섬의 어린 해왕류 이야기를 했다. 얼마나 컸냐기에 눈에 등대가 통째로 비쳤다고 했다. 듣고 있던 아이가 숟가락에 제 얼굴을 비춰 보았다.'),
+  L([old, inTown, kept('ateWithAce')], {}, '식은 수프 앞에 앉자 에이스가 손끝으로 그릇을 데우던 날이 생각났다. 맞은편에 앉은 여행자에게 고기를 반 덜어 주었다.'),
+  L([elder, inTown, kept('postCallAnswered')], {}, '수배서에 고등어를 싸던 날 이야기를 하자 달팽이콩이 수화기 위에서 눈을 가늘게 떴다. 포포의 그 표정을 아직도 기억하고 있었다.'),
 ];

@@ -62,7 +62,7 @@ function recruit(row: RecruitRow, i: number): Turning {
     for (const door of [join, friendly]) {
       if (door.fx?.some((e) => e.op === 'person' && (e.kind === 'ally' || e.kind === 'crew'))) {
         door.fx.push({ op: 'flag', id: ZOU_CARD },
-          { op: 'log', text: '밍크 전사가 고향으로 갈 때 쓰라며 비브르 카드 조각을 건넸다.', weight: 'light' });
+          { op: 'log', text: '밍크 전사가 고향을 찾을 때 쓰라며 비블카드 조각을 건넸다. 손바닥 위에 놓자 한쪽 귀퉁이가 조우를 향해 움직였다.', weight: 'light' });
       }
     }
   }

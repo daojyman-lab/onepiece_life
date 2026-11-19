@@ -18,9 +18,9 @@ export const REVOLUTION: Turning[] = [
   // ---------------------------------------------------------------- 들어서는 계기
   {
     // v4 cr_rev_seed: 해적만이 아니라 어느 처지에서나. 지켜보던 눈이 코알라의 방문(rev_koala)으로 잇는다
-    id: 'rev_noble_parade', kind: 'door', when: at(age(16, 50), st(...OUTSIDE, 'settled')),
+    id: 'rev_noble_parade', kind: 'door', when: at(age(16, 50), st(...OUTSIDE, 'settled'), { c: 'ashore' }),
     weight: 5, repeat: 'once', speaker: { relation: '천룡인' },
-    title: '천룡인의 행차', body: '{island}에 천룡인의 배가 들렀다. 거리의 사람들이 모두 이마를 땅에 댄다. 천룡인이 길가의 젊은 어부를 가리키더니, 목줄을 채워 끌고 가라고 한다.',
+    title: '천룡인의 행차', body: '{island}에 천룡인의 배가 들자 거리의 사람들이 일제히 엎드렸다. “저건 내 어부로 한다이. 생선은 사면 된다지만 낚싯대를 들고 서 있는 건 귀엽다이.” 투구에 손가락을 대고 어부를 콕 찍었다. 호위병이 목줄을 꺼냈다. 어부의 맨발 옆에서 갓 낚은 물고기가 펄떡였다.',
     doors: [
       { label: '목줄을 끊고 어부를 군중 속으로 숨긴다', hint: '해군이 거리를 뒤지고, 어딘가에서 누가 지켜본다', values: { justice: D }, danger: true,
         fx: [{ op: 'injury', severity: 'light' }, { op: 'hp', add: -12 }, { op: 'fame', add: 10 }, { op: 'flag', id: 'revSeed' },

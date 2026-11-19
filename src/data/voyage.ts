@@ -104,7 +104,7 @@ export const ENTRY_GATES: Record<EntryGate, { title: string; body: string; optio
     title: '안개 속의 즈니샤',
     body: '로그 포스는 아무것도 가리키지 않는다. 움직이는 섬을 발견해야 그 거대한 다리 위로 오를 수 있다.',
     options: [
-      { label: '비브르 카드가 움직이는 쪽을 따른다', hint: '밍크족 인연에게 받은 조각으로 즈니샤를 찾는다', when: [{ c: 'entryContact', gate: 'zou' }], values: { loyalty: D, inquiry: D } },
+      { label: '비블카드가 움직이는 쪽을 따른다', hint: '밍크족 인연에게 받은 조우행 조각으로 즈니샤를 찾는다', when: [{ c: 'entryContact', gate: 'zou' }], values: { loyalty: D, inquiry: D } },
       { label: '안개 속에서 발자국을 찾는다', hint: '해무에 막혀 돌아올 가능성이 크다', danger: true, values: { romance: D, freedom: D } },
     ],
   },

@@ -27,6 +27,7 @@ export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
     case 'anyOf': return c.conditions.some(option => check(s, option));
+    case 'ashore': return !s.passage;
     case 'disciple': return discipleReady(s, c.stage);
     case 'styleBond': return c.phase === 'new' ? !s.passage && !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
     case 'lifePreparation': return lifePreparation(s, c.mode) === null;
@@ -92,6 +93,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
     case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
+    case 'ashore': return '항해를 마치고 뭍에 닿아야 한다';
     case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';
     case 'lifePreparation': return lifePreparation(s, c.mode) ?? '';
@@ -104,7 +106,7 @@ function reason(s: Life5, c: Cond): string {
     case 'trait': return '필요한 특성이 적용되어 있지 않다';
     case 'strength': return c.has ? `「${strengthName(c.id)}」이(가) 아직 없다` : `이미 「${strengthName(c.id)}」이(가) 있다`;
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
-    case 'entryContact': return c.gate === 'zou' ? '비브르 카드가 없다' : '코팅을 도와줄 장인 인연이 없다';
+    case 'entryContact': return c.gate === 'zou' ? '조우행 비블카드가 없다' : '코팅을 도와줄 장인 인연이 없다';
     case 'weapon': return c.has ? '이 무기를 가지고 있지 않다' : '이미 이 무기를 가지고 있다';
     case 'equippedWeapon': return '지금 손에 든 무기가 없다';
     case 'prime': return '전성기에만 찾아오는 기회다';

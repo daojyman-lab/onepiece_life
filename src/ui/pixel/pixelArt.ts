@@ -155,7 +155,61 @@ function seakingBody(w: Who, frame: number): HTMLCanvasElement {
 }
 
 const faceCache = new Map<string, string>();
+
+// 브룩의 빈 눈구멍과 쵸파의 뿔은 사람 얼굴에 모자를 씌워서는 표현되지 않는다.
+function musicianOrDoctor(key: 'brook' | 'chopper'): string {
+  const [canvas, ctx] = makeCanvas(24, 24);
+  const paint = (color: string, x: number, y: number, width: number, height: number) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
+  };
+  if (key === 'brook') {
+    const hair = '#3a3044', bone = '#f6e7c3', socket = '#342939';
+    paint(hair, 2, 7, 20, 10);
+    paint(hair, 4, 5, 16, 15);
+    paint('#252036', 7, 1, 10, 6);
+    paint('#ac643f', 7, 5, 10, 2);
+    paint('#252036', 4, 7, 16, 2);
+    paint(bone, 6, 10, 12, 8);
+    paint(bone, 8, 17, 8, 4);
+    paint(socket, 7, 12, 4, 3);
+    paint(socket, 13, 12, 4, 3);
+    paint(socket, 11, 15, 2, 2);
+    paint(socket, 8, 18, 8, 1);
+    for (let tooth = 9; tooth <= 15; tooth += 2) paint(socket, tooth, 19, 1, 1);
+    paint('#e9a342', 7, 21, 4, 2);
+    paint('#e9a342', 13, 21, 4, 2);
+  } else {
+    const antler = '#835432', fur = '#c98955', hat = '#e16b95';
+    for (const x of [1, 19]) {
+      paint(antler, x, 3, 3, 5);
+      paint(antler, x + 2, 1, 2, 4);
+      paint(antler, x + 1, 7, 3, 2);
+    }
+    paint(fur, 2, 12, 20, 3);
+    paint(fur, 5, 13, 14, 7);
+    paint('#efbc86', 8, 17, 8, 5);
+    paint('#362538', 7, 15, 2, 2);
+    paint('#362538', 15, 15, 2, 2);
+    paint('#329cdd', 10, 17, 4, 2);
+    paint('#634033', 11, 20, 3, 1);
+    paint(hat, 5, 4, 14, 8);
+    paint('#c44877', 3, 11, 18, 2);
+    for (let i = 0; i < 5; i++) {
+      paint('#fff0dc', 9 + i, 5 + i, 2, 1);
+      paint('#fff0dc', 13 - i, 5 + i, 2, 1);
+    }
+  }
+  outline(ctx, 24, 24);
+  return canvas.toDataURL('image/png');
+}
+
 export function faceURL(w: Who): string {
+  if (w.key === 'brook' || w.key === 'chopper') {
+    const face = faceCache.get(w.key) ?? musicianOrDoctor(w.key);
+    faceCache.set(w.key, face);
+    return face;
+  }
   if (w.form === 'seaking') {
     const k = 'seaking|' + w.key;
     const hit = faceCache.get(k);

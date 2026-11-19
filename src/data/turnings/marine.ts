@@ -282,9 +282,9 @@ export const MARINE: Turning[] = [
   },
   {
     // v4 sm_tenryu: 명령을 따르는 것이 늘 정의는 아닌 판
-    id: 'mn_tenryu', kind: 'door', when: at(st('marine', 'cp'), age(18, 60), sea('sabaody'), seasoned, cpSettled),
+    id: 'mn_tenryu', kind: 'door', when: at(st('marine', 'cp'), age(18, 60), sea('sabaody'), { c: 'ashore' }, { c: 'island', is: ['샤본디 제도'] }, seasoned, cpSettled),
     weight: 6, repeat: 'once', speaker: { relation: '천룡인' },
-    title: '천룡인의 행차', body: '샤본디 제도를 지나는 천룡인의 호위를 맡았다. 길가에서 미처 무릎을 꿇지 못한 노인에게 천룡인이 총을 겨눈다. 호위대장은 앞만 보라고 이른다.',
+    title: '천룡인의 행차', body: '샤본디 제도에서 천룡인의 가마를 호위했다. 길가의 노인이 지팡이를 놓쳐 무릎 꿇는 게 한 박자 늦었다. “내가 지나갔는데 아직도 서 있다이. 그럼 내가 다시 지나가야 한다이?” 거품 투구 안에서 콧김이 뿌옇게 서렸다. 호위대장이 앞만 보라고 할 때, 천룡인은 이미 노인에게 총을 겨누고 있었다.',
     doors: [
       { label: '호위 대열을 지킨다', hint: '총성이 울리고, 호위 수당과 함께 그 소리를 가지고 산다', values: { loyalty: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'hardship', add: 6 },

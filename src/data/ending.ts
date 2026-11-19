@@ -27,6 +27,10 @@ export const SECRET_LINE = '당신의 진짜 성은 {surname}(이)었다.';
 /** 원작 인물이 주인공을 어떻게 기억하는지. 유대가 낮으면 low, 높으면 high. {name}은 주인공의 이름 */
 export interface CanonWords { low: string; high: string }
 export const CANON_WORDS: Record<string, CanonWords> = {
+  brook: {
+    low: '안갯속에서 제 연주를 들어 준 분이지요. 박수 소리는 똑똑히 기억한답니다.',
+    high: '오래 혼자 연주하다 보면 다음 소절을 기다려 주는 귀가 얼마나 귀한지 압니다. {name}께 한 곡 올리지요.',
+  },
   smoker: {
     low: '{name}? 이름은 기억난다. 그 이상은 모르겠군.',
     high: '연기 너머로 봐도 곧은 녀석이었다. {name}은(는) 제 길을 끝까지 걸었지.',

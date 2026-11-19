@@ -81,6 +81,7 @@ export interface TimelineEntry {
 
 export type Cond =
   | { c: 'anyOf'; conditions: Cond[] }
+  | { c: 'ashore' }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
   | { c: 'lifePreparation'; mode: 'guard' | 'duel' }
@@ -206,6 +207,7 @@ export interface Turning {
   fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
   speaker: 'hero' | { canon: string } | { relation: string } | { who: ContactRole };
   title: string; body: string;
+  recall?: { when: Cond[]; text: string }[];    // 실제로 겪은 과거에만 보이는 장면 속 한마디
   intro?: readonly string[];                   // 선택창이 열리기 전에 이야기 창에 한 줄씩 보여 준다
   automatic?: { unless: Cond[]; fx: Fx[] };     // 조건을 채우지 못하면 선택 대신 즉시 일어나는 일
   doors: Door[];                               // misfortune은 빈 배열

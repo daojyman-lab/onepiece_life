@@ -9,6 +9,7 @@ import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { altitudeEffect } from '../../core/environment';
 import { V } from '../../data/balance';
+import { KEEPSAKES } from '../../data/keepsakes';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
@@ -47,6 +48,7 @@ export interface ProfileView {
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
   weapon: string;
+  keepsakes: string[];
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
@@ -117,6 +119,7 @@ export function profileView(s: Life5): ProfileView {
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     weapon: equippedWeapon(s)?.name ?? (weaponPath ? '장착한 무기 없음' : '맨손'),
+    keepsakes: KEEPSAKES.filter(item => s.flags.includes(item.flag)).map(item => item.name),
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
