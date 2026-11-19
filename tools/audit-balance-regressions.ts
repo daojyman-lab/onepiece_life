@@ -14,7 +14,7 @@ function cohort(name: string, seed: number, policy: Policy, birth: { wealth?: We
   console.log(JSON.stringify({ name, n, stopped: runs.filter((r) => r.stuck || r.violations.length).length,
     tier: average(lives, top), t4: average(lives, (s) => +(top(s) >= 4)), t6: average(lives, (s) => +(top(s) >= 6)),
     age: average(lives, (s) => s.ended!.age), stops: report.perLife.stops, bands: report.stopsByBand,
-    topShare: report.topShare }));
+    topShare: report.topShare, named: report.named }));
 }
 cohort('random', 9000, 'random');
 cohort('lean', 9000, 'lean');

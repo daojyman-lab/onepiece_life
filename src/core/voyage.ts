@@ -6,11 +6,13 @@ import { chance, pick, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { SEA_BY_ID } from '../shared/data/seas';
 import { V } from '../data/balance';
 import { DREAMS } from '../data/dreams';
+import { climateOf } from '../data/climates';
 import { COATING_CONTACT, DREAM_ISLANDS, ENTRY_COST, ENTRY_GATES, ROUTE, ZOU_CARD, dangerOf, entryPass, gateOf, type EntryGate } from '../data/voyage';
 import { islandImmunity, isNative } from './environment';
 import { locationDivider, logLine } from './log';
 import { openTurning } from './turning';
 import type { Cond, DreamId, Door, Fx, Life5, SeaId, Turning } from './types';
+import { depart } from './passage';
 
 export type Route = 'calm' | 'dream' | 'wild';
 export type ArrivalRoute = Route | 'story' | 'home' | 'drift' | 'orders';
@@ -67,9 +69,9 @@ export function buildVoyage(id: string): Turning | undefined {
   };
 }
 
-/** 고른 섬으로 간다 */
+/** 고른 섬으로 출항한다. 섬은 바다를 건너 닿을 때 바뀐다 (core/passage.ts) */
 export function sailTo(s: Life5, island: string, route: Route): void {
-  requestArrival(s, island, s.hero.sea, route);
+  depart(s, island, route);
 }
 
 export function buildEntryGate(id: string): Turning | undefined {
@@ -85,6 +87,7 @@ export function buildEntryGate(id: string): Turning | undefined {
 }
 
 export function requestArrival(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void {
+  s.passage = null;
   const gate = gateOf(island);
   if (gate && gate !== gateOf(s.hero.island) && !islandImmunity(s, island)) {
     const id = `${ENTRY_PREFIX}${gate}:${sea}:${route}:${island}:${s.hero.sea}:${s.hero.island}`;
@@ -123,12 +126,14 @@ function arrive(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void
   if (gate && priorGate !== gate && immune) {
     logLine(s, isNative(s, island) ? '고향 사람만 아는 길을 따라 조용히 돌아왔다.' : '지난 항해에서 받은 증표를 내밀자 익숙한 길이 열렸다.', 'light');
   }
+  const approach = climateOf(island)?.approach;
+  if (gate && priorGate !== gate && !immune && approach?.arrive) logLine(s, approach.arrive, 'light');
   if (gate === 'sky' && priorGate !== 'sky' && h.skyAcclimating) {
     logLine(s, '희박한 공기에 숨이 찼다. 몸이 적응할 때까지 힘과 회복이 떨어진다.', 'light', 'life');
   }
   if (route === 'story' || route === 'home') return;
   if (route === 'orders') {
-    logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${island}에 처음 배속되었다.` : `전근 명령을 받아 다시 ${island}(으)로 배속되었다.`), 'light');
+    logLine(s, josa(first ? `본부의 전근 명령이 내려왔다. ${island} 지부에 처음 배속되었다.` : `전근 명령을 받아 다시 ${island} 지부로 배속되었다.`), 'light');
     return;
   }
   logLine(s, josa(first ? `${island}에 처음 닻을 내렸다.` : `다시 ${island}(으)로 뱃머리를 돌렸다.`), 'light');

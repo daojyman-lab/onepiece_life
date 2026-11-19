@@ -78,7 +78,7 @@ export const EP_ALABASTA: Turning[] = [
       { label: '왕궁 서기 사피야와 물값이 오른 날을 확인한다', hint: '이상하다. 값은 비가 끊기기 전부터 오르고 있었다', values: { inquiry: D },
         fx: [flag('ep_alabasta_safiya_trust'), next('ep_alabasta_p2'), log('사피야가 비가 오던 때의 숫자에도 붉은 줄을 그었다. 두 사람은 장부 첫 장을 다시 폈다.', 'light')] },
       { label: '물을 한 바가지 사서 마시고 가던 길을 간다', hint: '돈을 내고 물을 마신다. 경비가 나디르를 끌고 간다', values: { peace: D },
-        fx: [{ op: 'money', add: -2000 }, next('ep_alabasta_p2'), log('돈을 낸 뒤 물 한 바가지를 마셨다. 나디르가 끌려가는 소리는 시장 끝까지 들렸다.', 'light')] },
+        fx: [{ op: 'money', add: -2000, trade: true }, next('ep_alabasta_p2'), log('돈을 낸 뒤 물 한 바가지를 마셨다. 나디르가 끌려가는 소리는 시장 끝까지 들렸다.', 'light')] },
     ],
   },
   {

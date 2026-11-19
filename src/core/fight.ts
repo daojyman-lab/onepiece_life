@@ -1,12 +1,13 @@
 // 싸움: 붙을지 물러날지를 묻고, 붙으면 v4의 자동 전투로 끝까지 돌린 뒤 결과를 몸과 마음에 남긴다.
+import { storyPause } from './turning';
 import { B } from '../shared/data/balance';
 import { makeEnemy } from '../shared/data/bosses';
 import { FRUIT_BY_ID } from '../shared/data/fruits';
 import { ITEM_BY_ID } from '../shared/data/items';
-import { HERO_TRAIT_BY_ID, SPECIES_PASSIVES } from '../shared/data/passives';
+import { SPECIES_PASSIVES } from '../shared/data/passives';
 import { SEA_BY_ID, SEAS } from '../shared/data/seas';
-import { TALENT_BY_ID } from '../shared/data/talents';
-import { runBattle, startBattle } from '../shared/core/combat/engine';
+import { hasTrait, traitModifiers, traitFactor, recordTraitEvent } from './traits';
+import { retreatChance, rollDice, runBattle, startBattle } from '../shared/core/combat/engine';
 import { fruitMods, mergeMods } from '../shared/core/combat/mods';
 import { crewUnit, enemyUnit } from '../shared/core/combat/units';
 import { branchSkills, getSkill } from '../shared/core/growth/skillbook';
@@ -22,7 +23,7 @@ import { fullName } from './birth';
 import { canUse, effectiveStats5, limbFactor, loseLimb, WOUND_PART_NAME } from './body';
 import { applyFx } from './fx';
 import { environmentOf, islandImmunity } from './environment';
-import { BRANCH_ID, power5, tierMult, topTier } from './power';
+import { BRANCH_ID, power5, tierMult } from './power';
 import { logLine } from './state';
 import { leanPick, topValues } from './values';
 import type { BattleState, Branch, EnemySpec, Life5, Person, Standing, Stats, FightNext, WoundPart, WoundKind } from './types';
@@ -38,11 +39,6 @@ export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const AFTER_FIGHT = 'after_fight';
 const WOUND_KIND_NAME: Record<WoundKind, string> = { bruise: '타박', cut: '베인', burn: '화상', fracture: '골절' };
-
-/** 정신적 강점 → 싸움에 걸리는 v4의 특성 */
-const STRENGTH_TRAIT: Record<string, string> = {
-  unyielding: 'tenacity', obsession: 'vampire', composure: 'coolhead', fellowship: 'comrade', daring: 'gambler', rebel: 'fighting',
-};
 
 const FACTION: Partial<Record<Standing, Person['faction']>> = {
   pirate: 'pirate', warlord: 'pirate', marine: 'marine', cp: 'marine', revolution: 'rev',
@@ -92,10 +88,11 @@ export function gapOf(s: Life5, e: EnemySpec, atSea?: true): number {
 export function riskOf(s: Life5, e: EnemySpec, lethal: boolean, atSea?: true): { injury: number; limb: number; death: number } {
   if (e.spar) return { injury: 0, limb: 0, death: 0 };
   const gap = gapOf(s, e, atSea);
+  const danger = traitFactor(s, 'danger');
   return {
-    injury: clamp(F.injuryBase + F.injuryPerGap * (gap - F.injuryGapFrom), F.injuryFloor, F.injuryCap),
-    limb: clamp(F.limbPerGap * (gap - F.limbGapFrom), 0, F.limbCap),
-    death: lethal ? clamp(F.deathPerGap * (gap - F.deathGapFrom), 0, F.deathCap) : 0,
+    injury: Math.min(1, danger * clamp(F.injuryBase + F.injuryPerGap * (gap - F.injuryGapFrom), F.injuryFloor, F.injuryCap)),
+    limb: Math.min(1, danger * clamp(F.limbPerGap * (gap - F.limbGapFrom), 0, F.limbCap)),
+    death: lethal ? Math.min(1, danger * clamp(F.deathPerGap * (gap - F.deathGapFrom), 0, F.deathCap)) : 0,
   };
 }
 
@@ -166,10 +163,11 @@ function aimMult(s: Life5): number {
  * v5 상태에서 주인공의 전투 유닛을 만든다. 편성 화면이 없으므로 기술 · 전술 · 물러날 때는 저절로 정해진다.
  * 능력치는 (상처와 몸을 반영한 뒤) 가장 높은 단계의 배율을 곱한다: 경지가 곧 싸우는 힘이다
  */
-/** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 뒤 가장 높은 단계의 배율을 곱한다 (heroUnit5와 같다) */
+/** 싸움에 나서는 주인공의 능력치: 상처와 몸을 반영한 능력치의 비율을 유지해 경지와 서약 하한을 적용한다 */
 export function heroFightStats(s: Life5, atSea?: true): Stats {
   const st: Stats = effectiveStats5(s);
-  const m = tierMult(topTier(s)) * pressureMultiplier(s, atSea);
+  const total = sum(st);
+  const m = (total > 0 ? power5(s, st) / total : 1) * pressureMultiplier(s, atSea);
   for (const k of Object.keys(st) as (keyof Stats)[]) st[k] *= m;
   return st;
 }
@@ -187,7 +185,7 @@ export function heroUnit5(s: Life5, atSea?: true): CUnit {
   const top = topValues(s, 1)[0];
   const aim = aimMult(s);
   const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
-  const traits = s.strengths.filter((id) => STRENGTH_TRAIT[id]).map((id) => HERO_TRAIT_BY_ID[STRENGTH_TRAIT[id]]?.mods);
+  const traits = traitModifiers(s);
   const u: CUnit = {
     key: 'hero', name: fullName(h), side: 'L', hero: true, leader: true, role: 'hero',
     maxHp, hp: maxHp, maxSp, sp: maxSp,
@@ -196,13 +194,13 @@ export function heroUnit5(s: Life5, atSea?: true): CUnit {
     fruitClass: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.cls ?? null : null,
     skills: heroSkills(s),
     tactic: top ? VALUE_TACTIC[top] : 'endurance',
-    retreatAt: s.strengths.includes('rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
+    retreatAt: hasTrait(s, 'rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
     weapon: item?.branch && item.mult ? { branch: item.branch, mult: item.mult, seastone: item.seastone ?? false } : null, consumables: [],
     guard: 0, guardTurns: 0, evade: 0, evadeTurns: 0, buff: 0, buffTurns: 0, bound: 0, sealed: 0,
     pGuard: 0, pDodge: 0, pBuff: 0, lastBig: false,
     faction: FACTION[h.standing] ?? 'civil', species: h.species, gender: h.gender, age: s.age,
     faceKey: `hero:${s.rng.seed}`,
-    mods: mergeMods(SPECIES_PASSIVES[h.species]?.mods, ...h.talents.map((t) => TALENT_BY_ID[t]?.mods), ...traits,
+    mods: mergeMods(SPECIES_PASSIVES[h.species]?.mods, traits,
       fruitMods(h.fruit?.id, skillMastery(s.growth.tier.fruit), false), aim < 1 ? { dmg: aim } : undefined),
   };
   applyPassives(u);
@@ -233,12 +231,18 @@ function fightBattle(s: Life5, foe: EnemySpec, atSea?: true): BattleState {
     assign[i + 1] = enemyStart + (fights && next <= foe.officers.length ? next++ : 0);
   });
   const seed = hashString(String(rngOf(s.rng)()));
-  return runBattle(startBattle(units, assign, seed, false), true);
+  return runBattle(startBattle(units, assign, seed, !!atSea || !!s.passage || !!s.traitScene?.includes('sea')), true);
 }
 
-function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, atSea?: true): void {
+function startFight(s: Life5, foe: EnemySpec, lethal: boolean, next?: FightNext, atSea?: true, escape?: { roll: number; need: number }): void {
   const battle = fightBattle(s, foe, atSea);
-  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}), ...(atSea ? { atSea } : {}) };
+  s.pending = { kind: 'battle', foe, lethal, battle, result: battle.result ?? 'lose', ...(next ? { next } : {}), ...(atSea ? { atSea } : {}), ...(escape ? { escape } : {}) };
+}
+
+/** 싸움 앞에서 물러날 확률 (0~1): 속도의 몫으로 정하고, 목숨을 건 상대 앞이면 backOffLethal만큼 낮다 */
+export function backOffChance(s: Life5, foe: EnemySpec, lethal: boolean, atSea?: true): number {
+  const p = retreatChance(heroFightStats(s, atSea).spd, foe.base.spd);
+  return Math.max(C.retreat.min, p - (lethal ? F.backOffLethal : 0));
 }
 
 /** 이름 있는 상대와 마주친다. 물러날 수 없는 싸움이면 바로 싸우고, 아니면 위험을 보여 주며 묻는다 */
@@ -257,9 +261,16 @@ export function answerFight(s: Life5, index: number): void {
   if (p?.kind !== 'fight') return;
   if (index === ENGAGE) { startFight(s, p.foe, p.lethal, p.next, p.atSea); return; }
   if (index !== BACK_OFF) return;
+  // 물러나기도 주사위로 판정한다. 실패하면 붙잡혀 그대로 싸운다
+  const { roll, need, ok } = rollDice(rngOf(s.rng), backOffChance(s, p.foe, p.lethal, p.atSea));
+  if (!ok) {
+    logLine(s, `${p.foe.name}에게서 물러나려 했지만 붙잡혔다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
+    startFight(s, p.foe, p.lethal, p.next, p.atSea, { roll, need });
+    return;
+  }
   s.pending = null;
-  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다.`, 'heavy', 'battle');
-  if (p.next?.back) applyFx(s, [{ op: 'queue', turning: p.next.back }]);
+  logLine(s, `${p.foe.name}과(와) 맞서지 않고 물러났다. [주사위 ${roll} / ${need} 이하 성공]`, 'heavy', 'battle');
+  if (p.next?.back) { applyFx(s, [{ op: 'queue', turning: p.next.back }]); storyPause(s); }
 }
 
 /** 끝난 전투의 결과를 적용한다: 전적과 명성, 부상, 신체 손실, 죽음, 패배의 앙금 */
@@ -282,15 +293,18 @@ export function ackBattle(s: Life5): void {
   if (foe.spar) {
     logLine(s, won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`, 'heavy', 'battle');
     const next = won ? p.next?.win : p.next?.lose;
-    if (next) applyFx(s, [{ op: 'queue', turning: next }]);
+    if (next) { applyFx(s, [{ op: 'queue', turning: next }]); storyPause(s); }
     return;
   }
   const r = rngOf(s.rng);
+  const switched = !p.lethal && !!p.battle.deathmatch;
+  const risk = riskOf(s, foe, p.lethal || switched, p.atSea);
   const hero = p.battle.units?.find((u) => u.hero);
   const damage = hero ? clamp(1 - hero.hp / Math.max(1, hero.maxHp), 0, 1) : 0;
   if (damage > 0) s.hero.hp = Math.max(1, s.hero.hp - Math.max(1, Math.round(damage * F.healthDamage)));
   const knockedOut = !!hero && hero.hp <= 0;
-  const woundRisk = riskOf(s, foe, p.lethal, p.atSea).injury * (won ? F.wonMult : 1);
+  const woundRisk = risk.injury * (won ? F.wonMult : 1);
+  let battleWound: Life5['hero']['injuries'][number] | undefined;
   if (knockedOut || (damage > 0 && chance(r, woundRisk))) {
     const severity = knockedOut ? 'heavy' : 'light';
     const parts: WoundPart[] = ['torso', 'armL', 'armR', 'legL', 'legR', 'head', 'eyeL', 'eyeR'];
@@ -298,16 +312,23 @@ export function ackBattle(s: Life5): void {
     const kind: WoundKind = foe.skills.some((id) => /fire|flame|magma|heat|^fruit:(mera|magu|netsu):/.test(id)) ? 'burn'
       : foe.skills.some((id) => /sword|gun|blade/.test(id)) ? 'cut'
       : knockedOut ? 'fracture' : 'bruise';
+    const before = s.hero.injuries.length;
     applyFx(s, [{ op: 'injury', severity, part, kind }]);
+    battleWound = s.hero.injuries.length > before ? s.hero.injuries[s.hero.injuries.length - 1] : undefined;
+    // 쓰러진 몸에는 회복 특성이 있어도 적어도 한 토막 동안 남는 큰 상처가 있다.
+    if (knockedOut && !battleWound) {
+      battleWound = { severity: 'heavy', part, kind, monthsLeft: V.injury.monthsPerPart };
+      s.hero.injuries.push(battleWound);
+    }
     logLine(s, `싸움에서 ${WOUND_PART_NAME[part]}에 ${WOUND_KIND_NAME[kind]} 상처를 입었다.`, 'heavy', 'danger');
   }
   if (p.minor) {
     s.stats.fights += 1;
     if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
     logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    if (!won && p.battle.deathmatch && chance(r, riskOf(s, foe, true, p.atSea).death * F.minorDeathMult)) dieOrSurvive(s, r, foe, battleWound);
     return;
   }
-  const risk = riskOf(s, foe, p.lethal, p.atSea);
   const mult = won ? F.wonMult : 1;
   const grudge = `lostTo:${foe.id}`;
 
@@ -318,8 +339,11 @@ export function ackBattle(s: Life5): void {
     n.fights += 1;
     if (won) n.wins += 1;
   }
+  s.traitSource = 'battle:' + foe.id;
+  if (!won) recordTraitEvent(s, 'loss', '', s.traitSource);
   if (won) {
     s.stats.wins += 1;
+    recordTraitEvent(s, 'win', s.hero.sea, foe.id);
     s.hero.fame += Math.round(foePower(foe) * F.famePerPower);
     logLine(s, `${foe.name}을(를) 쓰러뜨렸다.`, 'heavy', 'battle');
     if (s.flags.includes(grudge)) {           // 한 번 졌던 상대를 다시 붙어 이겼다
@@ -331,18 +355,36 @@ export function ackBattle(s: Life5): void {
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
-    if (p.next?.win) applyFx(s, [{ op: 'queue', turning: p.next.win }]);   // 이야기가 이어지는 싸움
+    if (p.next?.win) { applyFx(s, [{ op: 'queue', turning: p.next.win }]); storyPause(s); }   // 이야기가 이어지는 싸움
     else if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
     return;
   }
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다
   if (chance(r, risk.death * (p.result === 'lose' ? 1 : F.retreatDeath))) {
-    applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]);
-    return;
+    // 빈사로 바뀐 싸움이면 주사위를 한 번 더 굴려, 붙으면 큰 부상을 입고 살아남는다
+    if (!switched) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return; }
+    if (!dieOrSurvive(s, r, foe, battleWound)) return;
   }
   s.hardship += V.hardship.defeat;
   if (!s.flags.includes(grudge)) s.flags.push(grudge);
-  if (p.next?.lose) applyFx(s, [{ op: 'queue', turning: p.next.lose }]);
+  if (p.next?.lose) { applyFx(s, [{ op: 'queue', turning: p.next.lose }]); storyPause(s); }
+}
+
+/** 빈사로 바뀐 싸움에서 죽을 판정이 났을 때: 생존 주사위에 붙으면 큰 부상을 입고 살아남는다. 살아남았으면 true */
+function dieOrSurvive(s: Life5, r: Rng, foe: EnemySpec, wound?: Life5['hero']['injuries'][number]): boolean {
+  const live = rollDice(r, F.deathmatchSurvive);
+  if (!live.ok) { applyFx(s, [{ op: 'die', cause: `${foe.name}에게 쓰러졌다` }]); return false; }
+  if (wound) {
+    wound.severity = 'heavy';
+    wound.monthsLeft = Math.max(wound.monthsLeft, V.injury.monthsPerPart,
+      Math.round(V.injury.months.heavy * traitFactor(s, 'injury') / V.injury.monthsPerPart) * V.injury.monthsPerPart);
+  } else {
+    const before = s.hero.injuries.length;
+    applyFx(s, [{ op: 'injury', severity: 'heavy', part: 'torso', kind: 'fracture' }]);
+    if (s.hero.injuries.length === before) s.hero.injuries.push({ severity: 'heavy', part: 'torso', kind: 'fracture', monthsLeft: V.injury.monthsPerPart });
+  }
+  logLine(s, `죽음의 문턱까지 갔지만 숨이 붙어 있었다. 큰 부상을 입고 간신히 살아남았다. [주사위 ${live.roll} / ${live.need} 이하 생존]`, 'heavy', 'danger');
+  return true;
 }
 
 // ---------------------------------------------------------------- 사소한 싸움
@@ -356,7 +398,7 @@ export function minorFoe(s: Life5, r: Rng, name: string = pick(r, MINOR_FOE_NAME
 
 /**
  * 이름 없는 상대와의 사소한 싸움. 붙을지는 가치관이 정하고, 붙으면 전투 창에서 보여 준다.
- * 죽지 않고 신체도 잃지 않는다. 지면 가볍게 다칠 수 있다.
+ * 신체는 잃지 않는다. 지면 가볍게 다칠 수 있고, 빈사로 바뀐 싸움에서 지면 낮은 확률로 죽을 수 있다.
  */
 export function minorFight(s: Life5, r: Rng): void {
   const env = environmentOf(s);

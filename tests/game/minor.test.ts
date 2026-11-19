@@ -19,13 +19,18 @@ describe('자잘한 일', () => {
     }).find((life) => life.people.some((p) => p.alive && p.relation === '아버지'))!;
     s.age = 47; s.hero.standing = 'civil'; s.hero.money = 99999;
     s.seen = Object.fromEntries(MINORS.filter((m) => m.id !== 'm_home_letter').map((m) => [m.id, s.age]));
+    const letter = MINORS.find((m) => m.id === 'm_home_letter')!;
+    for (const key of Object.keys(s.values) as (keyof typeof s.values)[]) s.values[key] = 0;
     let namedFather = false;
-    for (let i = 0; i < 4; i++) {
+    // 각 결과의 모든 문구를 독립적으로 검사한다. 최근 문구 소진은 이 검증과 무관하다.
+    letter.outcomes.forEach((outcome, outcomeIndex) => outcome.text.forEach((_, textIndex) => {
       s.seen.m_home_letter = -100;
-      expect(runMinor(s, rngOf(s.rng))).toBe(true);
+      s.recentLines = [];
+      const rolls = [0, (outcomeIndex + 0.5) / letter.outcomes.length, (textIndex + 0.5) / outcome.text.length];
+      expect(runMinor(s, () => rolls.shift() ?? 0)).toBe(true);
       namedFather ||= s.log.at(-1)!.text.includes('아버지');
       expect(s.log.at(-1)!.text).not.toMatch(/어머니|부모님/);
-    }
+    }));
     expect(namedFather).toBe(true);
   });
   it('아버지만 살아 있을 때 부모 관련 일상 기록에 어머니가 등장하지 않는다', () => {

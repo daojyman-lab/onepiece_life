@@ -3,7 +3,9 @@ import { potentialOf } from './stages';
 import { homeFirstNames } from './names';
 import { HOMETOWNS, SPECIES_BONUS, SPECIES_REROLL, SURNAMES, SURNAME_WEIGHT } from '../shared/data/births';
 import { TALENTS, type Talent } from '../shared/data/talents';
-import { chance, int, pick, rngOf, weighted } from '../shared/core/rng';
+import { NEW_TRAITS, TRAIT_BY_ID } from '../data/traits';
+import { initializeTraits } from './traits';
+import { chance, pick, rngOf, weighted } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { HOMES } from '../data/homes';
 import { BRANCH_ID } from './power';
@@ -56,10 +58,13 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   const wealth: Wealth = opt.wealth ?? (orphan ? 'poor' : weighted(r, WEALTHS, (w) => home.wealth[w])!);
   const lineage = opt.lineage ?? (orphan ? 'orphan' : weighted(r, home.lineages, (x) => x[1])![0]);
 
+  const candidates: Talent[] = [...TALENTS, ...NEW_TRAITS.filter(t => t.born).map(t => ({ id: t.id, name: t.name, desc: t.desc, good: t.good, weight: t.weight, excludes: t.excludes }))];
   const talents: Talent[] = [];
-  const nTalents = int(r, V.birth.talents.min, V.birth.talents.max);
+  const roll = r();
+  const nTalents = roll < .15 ? 2 : roll < .55 ? 3 : roll < .9 ? 4 : 5;
   for (let i = 0; i < nTalents; i++) {
-    const pool = TALENTS.filter((t) => !NOT_BORN_TALENTS.includes(t.id)
+    const pool = candidates.filter((t) => !NOT_BORN_TALENTS.includes(t.id)
+      && !talents.some(b => TRAIT_BY_ID[t.id]?.family && TRAIT_BY_ID[t.id]?.family === TRAIT_BY_ID[b.id]?.family)
       && !talents.some((b) => b.id === t.id || b.excludes?.includes(t.id) || t.excludes?.includes(b.id)));
     const t = weighted(r, pool, (x) => x.weight);
     if (!t) break;
@@ -82,6 +87,7 @@ export function rollBirth(s: Life5, opt: BirthOpt = {}): void {
   h.wealth = wealth;
   h.lineage = lineage;
   h.talents = talents.map((t) => t.id);
+  initializeTraits(s);
   // 무술 재능은 그 갈래의 선호도로 시작한다 (검술 재능이면 검술 쪽으로 기운 아이). 패기 · 열매는 계기가 있어야 길이 된다
   for (const t of talents) for (const [id, m] of Object.entries(t.mastery ?? {}))
     if ((m ?? 1) > 1 && id.startsWith('martial.')) { const b = BRANCH_OF[id]; if (b) s.growth.pref[b] += V.growth.pref.talent; }

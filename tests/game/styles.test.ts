@@ -12,7 +12,7 @@ import { COMBAT_STYLES } from '../../src/data/combat-styles';
 import { STYLE_TURNINGS } from '../../src/data/turnings/style-origins';
 import { checkAll } from '../../src/core/cond';
 import { openTurning, answerDoor, repeatAllows } from '../../src/core/turning';
-import { aggregateStyleMastery, styleTier } from '../../src/core/styles';
+import { aggregateStyleMastery, hasLocalStyleLesson, styleTier } from '../../src/core/styles';
 import { heroWho5 } from '../../src/ui/view/faces';
 import { dreamMet, setDream, dreamLine } from '../../src/core/dreams';
 import { shouldSave } from '../../src/app/flow';
@@ -143,7 +143,8 @@ describe('인연에서 시작하는 무기술', () => {
       openTurning(s, adopt); answerDoor(s, 0);
       expect(s.growth.primaryStyle, def.id).toBe(def.id);
       expect(heroUnit5(s).skills.some((k) => k.id === `style:${def.id}:1`), def.id).toBe(true);
-      applyFx(s, [{ op: 'mastery', branch: def.branch, add: 100 }, { op: 'mastery', branch: def.branch, add: 100 }]);
+      // 타고난 특성의 숙련 배율을 유지한 채 실제로 3단계에 이를 때까지 수련한다.
+      for (let i = 0; i < 10 && styleTier(s, def.id) < 3; i++) applyFx(s, [{ op: 'mastery', branch: def.branch, add: 100 }]);
       s.hardship = 50;
       const refine = STYLE_TURNINGS.find((t) => t.id === `style_refine_${def.id}`)!;
       expect(checkAll(s, refine.when), def.id).toBe(true);
@@ -315,6 +316,14 @@ describe('인연에서 시작하는 무기술', () => {
     voyage(s);
     expect(s.hero.island).toBe(place);
     expect(s.pending).toBeNull();
+  });
+
+  it('몸이 더는 창을 다룰 수 없으면 미완성 수련이 자동 출항을 계속 붙잡지 않는다', () => {
+    const s = newLife5(3); s.age = 20; s.pending = null;
+    effects(s, [{ op: 'beginStyle', style: 'spear' }]);
+    expect(hasLocalStyleLesson(s)).toBe(true);
+    s.hero.limbs.armL = 'lost';
+    expect(hasLocalStyleLesson(s)).toBe(false);
   });
 
 });

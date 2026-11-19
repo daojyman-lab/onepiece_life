@@ -46,6 +46,28 @@ export function startBattle(units: CUnit[], assign: Record<number, number>, seed
 const alive = (u: CUnit) => u.hp > 0;
 const ratio = (u: CUnit) => u.hp / u.maxHp;
 
+/** 물러나기 성공 확률 (0~1). 속도의 몫으로 정하고, 연막이 있으면 더한다 */
+export function retreatChance(mySpd: number, foeSpd: number, smoke = false): number {
+  const R = C.retreat;
+  const share = Math.max(0, mySpd) / Math.max(1, Math.max(0, mySpd) + Math.max(0, foeSpd));
+  return Math.max(R.min, Math.min(R.max, R.base + R.perShare * (share - 0.5) + (smoke ? R.smoke : 0)));
+}
+
+/** 주사위 판정: 1~100을 굴려 need(= 확률 × 100) 이하면 성공 */
+export function rollDice(r: Rng, p: number): { roll: number; need: number; ok: boolean } {
+  const roll = 1 + Math.floor(r() * 100);
+  const need = Math.round(p * 100);
+  return { roll, need, ok: roll <= need };
+}
+
+/** 누군가 빈사(체력이 deathmatchBelow 아래)가 되면 목숨을 건 싸움으로 바꾼다. 한 번만 */
+function checkDeathmatch(b: BattleState, who: number) {
+  if (b.deathmatch) return;
+  if (ratio(b.units[who]) >= C.deathmatchBelow) return;
+  b.deathmatch = true;
+  b.events.push({ k: 'deathmatch', who });
+}
+
 function heroIndex(b: BattleState) { return b.units.findIndex((u) => u.hero); }
 function heroDuel(b: BattleState) { const h = heroIndex(b); return b.duels.find((d) => !d.over && d.l === h) ?? null; }
 function leaderIdx(b: BattleState) { return b.units.findIndex((u) => u.side === 'R' && u.leader); }
@@ -122,6 +144,7 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   if (dmg >= t.hp && tm.lastStand && !t.stood && t.hp > 1) { t.stood = true; dmg = t.hp - 1; stood = true; }
   t.hp = Math.max(0, t.hp - dmg);
   if (t.guardTurns > 0) t.guardTurns -= 1;
+  checkDeathmatch(b, ti);
   const note = stood ? '쓰러지지 않고 버텼다!' : resist === 0 ? '전혀 통하지 않는다' : resist < 1 ? '잘 안 먹힌다' : lg.why ?? undefined;
   b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note, proc: extra.proc });
   // 패시브: 흡수 · 묶기 · 봉인 · 추가 공격
@@ -143,6 +166,7 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
     if (r() < (b.navigator ? C.drown.navigatorP : C.drown.p)) {
       b.events.push({ k: 'drown', who: ti });
       t.hp = 0;
+      checkDeathmatch(b, ti);
     }
   }
   if (extra.seastone && t.fruitClass) t.sealed = C.seastoneSeal;
@@ -186,16 +210,12 @@ function act(b: BattleState, r: Rng, d: Duel, ai: number, ti: number) {
     b.events.push({ k: 'act', d: d.id, who: ai, target: ti, skill: 'bound', name: '묶여서 움직이지 못한다', dmg: 0, crit: false, dodge: false });
     return;
   }
-  // 1. 물러나기
-  if (a.hero && a.retreatAt > 0 && ratio(a) < a.retreatAt) {
+  // 1. 물러나기: 누군가 빈사가 된 뒤(목숨을 건 싸움)에는 물러날 수 없다. 연막이 있어도 주사위를 굴린다
+  if (a.hero && a.retreatAt > 0 && !b.deathmatch && ratio(a) < a.retreatAt) {
     const smoke = a.consumables.indexOf('smoke');
-    let ok: boolean;
-    if (smoke >= 0) { a.consumables.splice(smoke, 1); ok = true; }
-    else {
-      const p = Math.max(C.retreat.min, Math.min(C.retreat.max, C.retreat.base + (a.st.spd - t.st.spd) * C.retreat.perSpd));
-      ok = r() < p;
-    }
-    b.events.push({ k: 'retreat', who: ai, ok });
+    if (smoke >= 0) a.consumables.splice(smoke, 1);
+    const { roll, need, ok } = rollDice(r, retreatChance(a.st.spd, t.st.spd, smoke >= 0));
+    b.events.push({ k: 'retreat', who: ai, ok, roll, need });
     if (ok) { b.result = 'retreat'; return; }
   }
   // 2. 소모품

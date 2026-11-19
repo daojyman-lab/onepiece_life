@@ -2,22 +2,24 @@
 import { buildEntryGate, buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../shared/core/josa';
 import { fill } from '../shared/core/util';
-import { chance, weighted, type Rng } from '../shared/core/rng';
+import { chance, int, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
+import { STORY_PACE } from '../data/episodes/pacing';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
 import { applyFx } from './fx';
 import { needsOk, whyNeed } from './needs';
 import { logLine } from './state';
-import { addValues, isDeep } from './values';
+import { addValues, isDeep, opensSpecial } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
-import { advanceVow } from './vow';
+import { advanceVow, canBeginVow, recordVowChoice } from './vow';
 import { afterLifeStoryChoice, lifeOutcome } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
+import { recordTraitEvent, tradeCost } from './traits';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -44,11 +46,17 @@ function speakerOf(s: Life5, t: Turning): string {
 /** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
-    let locked = whyNot(s, d.when) ?? whyNeed(s, d.needs);
-    if (!locked && d.special && !isDeep(s, d.special)) locked = josa(`${VALUE_NAME[d.special]}이(가) 깊은 사람만 이 문을 떠올린다`);
+    const price = d.fx.filter(e => e.op === 'money' && e.trade && e.add < 0).reduce((n, e) => n - (e as { add: number }).add, 0);
+    const conditions = d.when?.map(c => c.c === 'money' && price > 0 && c.min === price ? { ...c, min: tradeCost(s, price) } : c);
+    let locked = whyNot(s, conditions) ?? whyNeed(s, d.needs);
+    if (!locked && price > 0 && s.hero.money < tradeCost(s, price)) locked = '거래 비용이 부족하다';
+    const start = d.fx.find((e) => e.op === 'vowStart');
+    if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
+    const earned = (d.when ?? []).some((c) => c.c === 'flag' && c.has);   // 앞선 선택의 표시로 잠긴 문
+    if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
-      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint), locked,
+      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint) + (price > 0 ? ` · 거래 ${tradeCost(s, price).toLocaleString('ko-KR')} 베리` : ''), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
@@ -75,6 +83,7 @@ export function openTurning(s: Life5, t: Turning): boolean {
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
   if (TURNING_BY_ID[t.id] !== t && !t.id.startsWith(ENTRY_PREFIX)) OPENED_ELSEWHERE.set(t.id, t);
+  storyOpening(s, t);
   for (const line of t.intro ?? []) logLine(s, fillTurning(s, line), 'light');
   const automatic = t.automatic && !checkAll(s, t.automatic.unless) ? t.automatic.fx : undefined;
   if (!automatic) s.pending = {
@@ -119,6 +128,43 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
   return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
+}
+
+/** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
+export const STORY_PREFIX = 'ep_';
+
+/**
+ * 장편의 쉼에만 쓰는 곁 난수. 인생의 난수 줄(s.rng)을 밀지 않아서, 쉼을 넣어도 나머지 인생의 주사위가 그대로다.
+ * 기록 번호(s.seq)가 줄마다 오르므로 토막마다 다른 값이 나온다
+ */
+export function storyRng(s: Life5): Rng {
+  return rngOf({ seed: (s.rng.seed ^ 0x5eed5) >>> 0, cursor: s.seq * 4 });
+}
+
+/**
+ * 섬 장편의 다음 장면이 줄 섰을 때 그 사이에 흐를 시간을 정한다 (data/episodes/pacing.ts의 막 구성).
+ *  - 실시간으로 이어지는 장면: 쉬지 않는다
+ *  - 같은 막 안: V.story.beat 토막 / 막이 바뀜: V.story.act 토막, 쉼이 시작될 때 막 제목을 기록에 띄운다
+ * 쉬는 토막은 year.ts의 storyInterlude가 섬의 하루로 보낸다.
+ * 문을 고른 뒤(answerDoor)와 이야기가 이어지는 싸움이 끝난 뒤(fight.ts) 부른다.
+ */
+export function storyPause(s: Life5): void {
+  s.storyRest = 0; s.storyNote = '';
+  const next = s.queue.find((id) => id.startsWith(STORY_PREFIX));
+  if (!next) return;
+  const last = [...s.tried].reverse().find((k) => k.startsWith(STORY_PREFIX))?.split('#')[0];
+  const to = STORY_PACE[next];
+  if (!last || to?.cont) return;
+  const newAct = !to || STORY_PACE[last]?.act !== to.act;
+  const [lo, hi] = newAct ? V.story.act : V.story.beat;
+  s.storyRest = int(storyRng(s), lo, hi);
+  if (newAct && to) s.storyNote = to.act;
+}
+
+/** 장편의 첫 장면을 띄울 때 첫 막의 제목을 기록에 남긴다 */
+function storyOpening(s: Life5, t: Turning): void {
+  const p = STORY_PACE[t.id];
+  if (t.id.startsWith(STORY_PREFIX) && t.weight > 0 && p) logLine(s, `── ${p.act} ──`, 'heavy', 'info');
 }
 
 /**
@@ -173,6 +219,8 @@ export function answerDoor(s: Life5, index: number): void {
   if (!chosen || chosen.locked || !t || !door) return;
   if (t.id.startsWith(ENTRY_PREFIX) && !checkAll(s, door.when)) return;
 
+  s.traitSource = t.id;
+  s.traitScene = t.tags ?? [];
   const before = { ...s.values };
   const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
   applyPersonalityChoice(s, door.values ?? {});
@@ -186,13 +234,20 @@ export function answerDoor(s: Life5, index: number): void {
   if (door.closes && !s.closed.includes(t.id)) s.closed.push(t.id);
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, ...(canon ? { canon } : {}) });
-  s.stats.stops += 1;
-  s.stats.stopsAt.push(s.age);
-  s.stopsThisYear += 1;
+  // 서약의 제안·결산·각성은 강제로 끼어드는 장면이므로 보통 사건의 멈춤 예산에서 뺀다.
+  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening') {
+    s.stats.stops += 1;
+    s.stats.stopsAt.push(s.age);
+    s.stopsThisYear += 1;
+  }
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx);
   afterLifeStoryChoice(s, t.id);
+  if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
+  for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
+  if (t.id.startsWith(STORY_PREFIX) || t.id.startsWith('life_course_')) storyPause(s);   // 생애 코스에서 장편으로 돌아올 때도 막 사이의 쉼을 잇는다
+  if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
   // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.

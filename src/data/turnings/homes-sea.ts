@@ -47,7 +47,7 @@ export const HOMES_LEAVE: Turning[] = [
              { op: 'log', text: '첫 항해는 무사했다. 비눗방울이 떠다니는 섬에서 배를 넘겨주었다.', weight: 'heavy' },
              { op: 'timeline', text: '조선소의 새 배를 타고 샤본디 제도에 갔다' }] },
       { label: '그 배를 통째로 사서 깃발을 올린다', hint: '가진 돈을 다 쓴다. 오늘부터 쫓기는 몸이 된다', values: { freedom: D }, when: [{ c: 'money', min: 100000 }, settledIn],
-        fx: [{ op: 'money', add: -100000 }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
+        fx: [{ op: 'money', add: -100000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
              { op: 'move', island: '알라바스타 왕국', sea: 'gl_first' }, { op: 'log', text: '갓 지은 배에 해골 깃발을 올렸다. 직공장이 혀를 찼다.', weight: 'heavy' },
              { op: 'timeline', text: '물의 도시에서 산 배로 해적이 되었다' }] },
       { label: '도크에 남아 다음 배를 짓는다', hint: '배는 떠나도 목수는 남는다', closes: true, fx: [{ op: 'money', add: 8000 }, { op: 'log', text: "새 상선이 도크를 빠져나가자 다음 배의 용골이 작업대에 올라왔다. 직공장은 남은 일의 품삯을 건넸다.", weight: 'light' }] },
@@ -112,7 +112,7 @@ export const HOMES_LEAVE: Turning[] = [
     title: '거품 옷을 입힌 배', body: '지상으로 오르는 배에 거품 옷을 입히는 장인이 값을 부른다. 지상 사람들이 어인을 어떻게 보는지는 섬의 누구나 안다.',
     doors: [
       { label: '값을 치르고 지상으로 오른다', hint: '샤본디에 닿는다. 그곳의 눈길을 견뎌야 한다', values: { romance: D }, when: [{ c: 'money', min: 20000 }],
-        fx: [{ op: 'money', add: -20000 }, { op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'hardship', add: 3 },
+        fx: [{ op: 'money', add: -20000, trade: true }, { op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'hardship', add: 3 },
              { op: 'log', text: '해수면을 뚫고 올라가 처음으로 하늘을 봤다. 항구의 사람들이 손가락질했다.', weight: 'heavy' },
              { op: 'timeline', text: '거품 옷을 입힌 배로 지상에 올랐다' }] },
       { label: '장인의 일을 거들며 코팅을 배운다', hint: '섬에 남는다. 언젠가 제 배를 띄울 수 있다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: "장인의 손을 따라 배 밑창에 거품 막을 입혔다. 물속에서도 찢어지지 않는 이음새를 찾느라 몇 척을 다시 손봤다.", weight: 'light' }] },

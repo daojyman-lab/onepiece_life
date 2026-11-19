@@ -251,7 +251,7 @@ export const WANO: Turning[] = [
     id: 'wanoa_smile_trade', kind: 'door', when: adult(18, 50, LANDED), weight: 5, repeat: 'once', speaker: { relation: '뒷골목의 거간꾼' },
     title: '웃는 열매의 거간꾼', body: '뒷골목 거간꾼이 이상한 열매를 판다. 먹으면 짐승의 힘을 얻거나, 아니면 평생 웃기만 한다. 값은 비싸고 사려는 사람은 많다.',
     doors: [
-      { label: '열매를 사서 되판다', hint: '팔리면 큰돈이 된다. 누군가는 웃기만 하게 된다', values: { greed: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'money', add: -10000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 52000 }, { op: 'log', text: '열매는 웃돈을 받고 팔려 나갔다.', weight: 'light' }], else: [{ op: 'log', text: '관리의 단속에 열매를 빼앗겼다. 산 값만 날렸다.', weight: 'light' }] }] },
+      { label: '열매를 사서 되판다', hint: '팔리면 큰돈이 된다. 누군가는 웃기만 하게 된다', values: { greed: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'money', add: -10000, trade: true }, { op: 'chance', p: 0.7, skillCheck: true, then: [{ op: 'money', add: 52000 }, { op: 'log', text: '열매는 웃돈을 받고 팔려 나갔다.', weight: 'light' }], else: [{ op: 'log', text: '관리의 단속에 열매를 빼앗겼다. 산 값만 날렸다.', weight: 'light' }] }] },
       { label: '거간꾼의 창고를 불태운다', hint: '들키면 끌려간다', values: { justice: D }, danger: true, fx: [{ op: 'chance', p: 0.6, then: [{ op: "log", text: "거간꾼의 창고에 불이 붙자 열매 상자가 타들어 갔다. 뒷골목 사람들은 멀리서 연기를 보고 모였다.", weight: "light" }, { op: 'fame', add: 3 }], else: [{ op: "log", text: "감시꾼에게 들켜 불길 앞에서 붙잡혔다. 매를 맞고 달아났지만 창고에는 아직 열매가 남아 있었다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'hardship', add: 2 }] }] },
       { label: '눈을 돌린다', hint: '뒷골목의 일이다', closes: true, fx: [{ op: "log", text: "열매를 사러 온 사람들의 줄을 지나쳤다. 다음 날 뒷골목에서 웃음이 멎지 않는 새 사람이 보였다.", weight: "light" }] },
     ],
@@ -288,8 +288,8 @@ export const WANO: Turning[] = [
     title: '양조장', body: '강가의 낡은 양조장이 팔린다. 맑은 물이 나오는 우물도 함께 넘긴다고 한다. 쌀은 귀하고 술은 비싸다.',
     doors: [
       { label: '양조장을 사서 술을 빚는다', hint: '뿌리를 내린다. 쌀을 구하는 게 일이다', values: { peace: D }, fx: [{ op: "log", text: "양조장 솥에 첫 쌀을 붓고 불을 지폈다. 술 냄새가 마을에 퍼지자 쌀을 팔겠다는 농부들이 찾아왔다.", weight: "light" }, { op: 'money', add: -25000 }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '강가의 양조장에서 술을 빚기 시작했다' }] },
-      { label: '우물만 사서 마을에 맑은 물을 나눈다', hint: '돈은 안 된다', values: { romance: D }, fx: [{ op: "log", text: "우물에서 맑은 물을 퍼 이웃들에게 나눴다. 돈은 들어오지 않아도 빈 동이를 든 사람들이 날마다 왔다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '맑은 물을 얻은 마을' }] },
-      { label: '양조장을 사서 쇼군의 관리들에게 술을 댄다', hint: '돈과 연줄이 생긴다', values: { greed: D }, fx: [{ op: 'money', add: -25000 }, { op: 'chance', p: 0.7, then: [{ op: 'money', add: 90000 }, { op: 'log', text: '관리들의 술자리가 끊이지 않았다. 술값을 치르는 손도 커져 양조장에 돈이 쌓였다.', weight: 'light' }], else: [{ op: 'log', text: '관리들은 술을 가져가면서도 값을 미뤘다. 빈 술독과 외상 장부만 늘었다.', weight: 'light' }] }] },
+      { label: '우물만 사서 마을에 맑은 물을 나눈다', hint: '돈은 안 된다', values: { romance: D }, fx: [{ op: "log", text: "우물에서 맑은 물을 퍼 이웃들에게 나눴다. 돈은 들어오지 않아도 빈 동이를 든 사람들이 날마다 왔다.", weight: "light" }, { op: 'money', add: -10000, trade: true }, { op: 'person', kind: 'ally', relation: '맑은 물을 얻은 마을' }] },
+      { label: '양조장을 사서 쇼군의 관리들에게 술을 댄다', hint: '돈과 연줄이 생긴다', values: { greed: D }, fx: [{ op: 'money', add: -25000, trade: true }, { op: 'chance', p: 0.7, skillCheck: true, then: [{ op: 'money', add: 90000 }, { op: 'log', text: '관리들의 술자리가 끊이지 않았다. 술값을 치르는 손도 커져 양조장에 돈이 쌓였다.', weight: 'light' }], else: [{ op: 'log', text: '관리들은 술을 가져가면서도 값을 미뤘다. 빈 술독과 외상 장부만 늘었다.', weight: 'light' }] }] },
     ],
   },
   {

@@ -1,6 +1,7 @@
 // 한 철의 몸 회복. 선의의 의료 솜씨는 전투 레벨과 별개다.
 import { V } from '../data/balance';
 import { logLine } from './state';
+import { recordTraitEvent, traitFactor } from './traits';
 import { recoveryMultiplier } from './environment';
 import type { Life5 } from './types';
 
@@ -10,10 +11,12 @@ export function medicSkill(s: Life5): number {
 }
 
 export function recoverHealthPart(s: Life5, mode: 'usual' | 'rest' | 'chosenRest'): void {
+  const before = s.hero.hp;
   const skill = medicSkill(s);
   const rest = mode !== 'usual';
-  const hp = Math.round((V.hp.recovery + (mode === 'chosenRest' ? V.hp.chosenRest : rest ? V.growth.restHp : 0) + Math.round(skill / V.hp.medicPer)) * recoveryMultiplier(s));
+  const hp = Math.round((V.hp.recovery + (mode === 'chosenRest' ? V.hp.chosenRest : rest ? V.growth.restHp : 0) + Math.round(skill / V.hp.medicPer)) * recoveryMultiplier(s) * traitFactor(s, 'healing'));
   s.hero.hp = Math.min(V.hp.max, s.hero.hp + hp);
+  if (s.hero.hp > before && before < 70) recordTraitEvent(s, 'recover', '', String(s.age));
   const months = V.injury.monthsPerPart + (rest ? V.injury.restMonths : 0) + Math.floor(skill / 50) * V.injury.medicMonths;
   for (const wound of s.hero.injuries) {
     if (wound.severity === 'scar') continue;

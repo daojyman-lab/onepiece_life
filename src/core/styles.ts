@@ -92,7 +92,7 @@ export function styleBondReady(s: Life5, id: CombatStyle, phase: 'ready' | 'refi
     : bond.adopted && !bond.refined && styleTier(s, id) >= 3 && (s.hardship >= 40 || s.stats.wins >= 5);
 }
 export function hasLocalStyleLesson(s: Life5): boolean {
-  return Object.values(s.growth.styleBonds).some((b) => !b.adopted && b.practice < 3 && b.island === s.hero.island &&
+  return Object.entries(s.growth.styleBonds).some(([id, b]) => isCombatStyle(id) && styleUsable(s, id) && !b.adopted && b.practice < 3 && b.island === s.hero.island &&
     s.people.some((p) => p.id === b.teacherId && p.alive));
 }
 export function adoptStyle(s: Life5, id: CombatStyle): void {

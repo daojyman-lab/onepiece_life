@@ -10,7 +10,9 @@ import { advanceLifeTime, lifePreparation, lifeStoryScene, recordLifeEvent } fro
 import type { Life5 } from '../../src/core/types';
 import { playLifeCourse } from '../../tools/life-course-policy';
 import { growPart } from '../../src/core/year';
-import { heroUnit5 } from '../../src/core/fight';
+import { backOffChance, heroUnit5 } from '../../src/core/fight';
+import { rollDice } from '../../src/shared/core/combat/engine';
+import { rngOf } from '../../src/shared/core/rng';
 
 const fresh = () => newLife5(23, { home: 'loguetown' });
 function trained(mode: 'guard' | 'duel' = 'guard'): Life5 {
@@ -80,6 +82,18 @@ describe('한 생애의 사건과 실제 시간', () => {
     const hp = s.hero.hp;
     apply5(s, { type: 'step' });
     expect(s.hero.hp).toBe(hp); expect(s.lifeStory!.elapsed).toBe(before + 1);
+  });
+  it('호위 코스에서 장편 에필로그로 돌아갈 때 막 사이의 쉼과 제목을 보존한다', () => {
+    const s = trained();
+    s.tried.push('ep_alabasta_p7#0');
+    choose(s, 'life_course_prepare', 0);
+    expect(s.storyRest).toBeGreaterThanOrEqual(3);
+    expect(s.storyRest).toBeLessThanOrEqual(4);
+    const age = s.age;
+    apply5(s, { type: 'step' });
+    expect(s.pending).toBeNull();
+    expect(s.age).toBe(age);
+    expect(s.log.some((line) => line.type === 'info' && line.text.includes('에필로그'))).toBe(true);
   });
   it('깨진 사건 기록과 미래의 시점은 저장에서 거부한다', () => {
     const s = trained();
@@ -182,7 +196,12 @@ describe('준비와 결과가 다른 생애를 만든다', () => {
   });
   it('전투를 시작하지 않고 물러난 결과도 다른 사건으로 저장된다', () => {
     const s = trained('duel'); choose(s, 'life_course_prepare', 2);
+    expect(s.pending?.kind).toBe('fight');
+    const p = s.pending as Extract<Life5['pending'], { kind: 'fight' }>;
+    // 물러난 후속 사건을 검증하므로 성공하는 주사위 차례를 고른다.
+    while (!rollDice(rngOf({ ...s.rng }), backOffChance(s, p.foe, p.lethal, p.atSea)).ok) s.rng.cursor++;
     apply5(s, { type: 'answer', index: 1 });
+    expect(s.pending).toBeNull();
     apply5(s, { type: 'step' });
     expect(s.pending?.kind === 'door' && s.pending.turning).toBe('life_course_back');
     apply5(s, { type: 'answer', index: 0 });

@@ -153,6 +153,7 @@ describe('감옥', () => {
 describe('규칙', () => {
   it('아이로 남은 사람은 열여섯 살이 되는 해에 뭍의 어른이 된다', () => {
     let s = newLife5(2); s.pending = null; s.age = V.adultAge - 1; s.part = 3; s.hero.standing = 'child';
+    s.vows!.declined = true;
     s.stopsThisYear = 99;                                    // 전환점이 끼어들지 않게
     s = reduce5(s, { type: 'step' });
     expect(s.age).toBe(V.adultAge);
@@ -161,6 +162,7 @@ describe('규칙', () => {
   });
   it('가난한 어른은 아이 처지로 굶어 죽지 않는다', () => {
     let s = newLife5(3); s.pending = null; s.age = V.adultAge - 1; s.part = 3; s.hero.standing = 'child'; s.stopsThisYear = 99;
+    s.vows!.declined = true;
     s = reduce5(s, { type: 'step' });
     expect(V.risk.idleStandings as readonly string[]).not.toContain(s.hero.standing);
   });

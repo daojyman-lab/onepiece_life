@@ -1,4 +1,5 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
+import { normalizeTraits } from './traits';
 import { V } from '../data/balance';
 import { RETIRED_FRUIT_IDS } from '../shared/data/fruits';
 import { EPISODE_TURNINGS } from '../data/episodes';
@@ -107,10 +108,17 @@ export function normalizeLife5(x: unknown): Life5 | null {
       established: p.established === undefined ? (Number(p.choices) >= 3) : p.established,
     } as Life5['personality'];
   }
+  if (life.traits !== undefined && !isObj(life.traits)) return null;
+  if (!Array.isArray(life.hero.talents) || !Array.isArray(life.strengths)) return null;
+  normalizeTraits(life);
   // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다.
   if (life.vows?.active) {
     life.vows.active.island ??= life.hero.island;
     life.vows.active.progress ??= [];
+    if (life.vows.active.level) {
+      life.vows.active.activities ??= [];
+      life.vows.active.choices ??= [];
+    }
   }
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;

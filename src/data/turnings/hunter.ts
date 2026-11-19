@@ -57,7 +57,7 @@ export const HUNTER: Turning[] = [
     title: '닮은 얼굴', body: '현상금이 꽤 큰 해적을 잡았다고 생각했다. 지부로 가는 길에 사내의 손바닥을 보니 그물 자국투성이다. 수배서와 꼭 닮았을 뿐인 어부일지도 모른다.',
     doors: [
       { label: '풀어 주고 다친 값을 치른다', hint: '헛걸음에 돈까지 쓴다', values: { justice: D },
-        fx: [{ op: 'money', add: -8000 }, { op: 'person', kind: 'ally', relation: '닮은 얼굴의 어부' }, { op: 'log', text: '밧줄을 풀고 다친 값을 내밀자 어부는 그물 자국이 남은 손으로 받았다. 나중에 그가 다시 부두에 나왔을 때 먼저 {name}을(를) 불렀다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -8000, trade: true }, { op: 'person', kind: 'ally', relation: '닮은 얼굴의 어부' }, { op: 'log', text: '밧줄을 풀고 다친 값을 내밀자 어부는 그물 자국이 남은 손으로 받았다. 나중에 그가 다시 부두에 나왔을 때 먼저 {name}을(를) 불렀다.', weight: 'light' }] },
       { label: '그대로 넘긴다', hint: '지부가 가려낼 일이다. 현상금은 크다', values: { greed: D }, 
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'money', add: 90000 }, { op: 'hardship', add: 3 }, { op: 'log', text: '지부는 서류만 보고 돈을 내주었다. 어부의 얼굴을 다시 보지 못했다.', weight: 'heavy' }],

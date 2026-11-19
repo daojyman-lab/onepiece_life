@@ -112,7 +112,8 @@ describe('병, 사고, 노환', () => {
     expect(young / lives.length).toBeLessThanOrEqual(0.05);
   });
   it('병이나 사고로 죽기 전에 조짐이 기록에 떠오른다', () => {
-    for (const s of lives.filter((x) => /병|사고|난파|굶주림/.test(x.ended!.cause)))
+    // 싸움에서 쓰러진 죽음('해군 졸병에게 쓰러졌다' 등)은 이름에 '병'이 들어가도 병이 아니다
+    for (const s of lives.filter((x) => /병|사고|난파|굶주림/.test(x.ended!.cause) && !/쓰러졌다$/.test(x.ended!.cause)))
       expect(s.log.some((l) => /깊어|기침|폭풍|먹구름|야위/.test(l.text)), s.ended!.cause).toBe(true);
   });
 });

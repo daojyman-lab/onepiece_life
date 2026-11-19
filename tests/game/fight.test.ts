@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
 import { reduce5 } from '../../src/core/reduce';
-import { askFight, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/core/fight';
+import { askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/core/fight';
 import { openTurning } from '../../src/core/turning';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import { crewPowerFor } from '../../src/shared/core/people';
@@ -11,12 +11,14 @@ import { addValues } from '../../src/core/values';
 import { FOES } from '../../src/data/foes';
 import { V } from '../../src/data/balance';
 import { applyFx } from '../../src/core/fx';
+import { selectTraits } from '../../src/core/traits';
 import { tierMult } from '../../src/core/power';
 import type { Life5 } from '../../src/core/types';
 
 const weak = Object.keys(FOES)[0];
 function fighter(seed: number, stat = 40): Life5 {
   const s = newLife5(seed); s.pending = null; s.age = 22; s.hero.standing = 'pirate';
+  s.vows!.declined = true; // 부상·전투 진행 검증 중 생애 서약 제안이 끼어들지 않게
   for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = stat;
   return s;
 }
@@ -28,11 +30,29 @@ describe('싸움', () => {
     const p = s.pending as Extract<Life5['pending'], { kind: 'fight' }>;
     for (const v of Object.values(p.risk)) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThanOrEqual(1); }
   });
-  it('물러나면 싸우지 않는다', () => {
-    let s = fighter(1); askFight(s, weak, true, false);
-    s = reduce5(s, { type: 'answer', index: 1 });
-    expect(s.pending).toBeNull();
-    expect(s.stats.fights).toBe(0);
+  it('물러나기는 주사위로 판정한다: 성공하면 싸우지 않고, 실패하면 붙잡혀 싸운다', () => {
+    let ok = 0, caught = 0;
+    for (let seed = 1; seed <= 60; seed++) {
+      let s = fighter(seed); askFight(s, weak, true, false);
+      s = reduce5(s, { type: 'answer', index: 1 });
+      if (s.pending === null) { ok++; expect(s.stats.fights).toBe(0); }
+      else {
+        caught++;
+        expect(s.pending.kind).toBe('battle');
+        const p = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
+        expect(p.escape!.roll).toBeGreaterThan(p.escape!.need);
+      }
+    }
+    expect(ok).toBeGreaterThan(0);
+    expect(caught).toBeGreaterThan(0);
+  });
+  it('물러날 확률은 속도가 빠를수록 높고, 목숨을 건 상대 앞에서는 낮다. 100%는 없다', () => {
+    const slow = fighter(1, 10), fast = fighter(1, 10);
+    fast.hero.base.spd = 400;
+    const foe = FOES[weak];
+    expect(backOffChance(fast, foe, false)).toBeGreaterThan(backOffChance(slow, foe, false));
+    expect(backOffChance(fast, foe, true)).toBeLessThan(backOffChance(fast, foe, false));
+    expect(backOffChance(fast, foe, false)).toBeLessThan(1);
   });
   it('물러날 수 없는 싸움은 묻지 않고 싸운다', () => {
     const s = fighter(1); askFight(s, weak, false, true);
@@ -69,13 +89,21 @@ describe('싸움', () => {
     expect(superior).toBeCloseTo(whole);
     expect(aim((s) => { s.hero.limbs.eyeL = 'lost'; s.hero.limbs.eyeR = 'lost'; })).toBeLessThan(one);
   });
-  it('목숨을 걸지 않은 싸움에서는 죽지 않는다', () => {
+  it('목숨을 걸지 않은 싸움은 빈사를 거치지 않으면 죽지 않고, 빈사로 바뀌면 죽거나 큰 부상을 입고 살아남는다', () => {
     expect(riskOf(fighter(1, 5), FOES[weak], false).death).toBe(0);
-    for (let i = 0; i < 60; i++) {
+    let died = 0, survived = 0;
+    for (let i = 0; i < 120; i++) {
       let s = fighter(i, 5); askFight(s, weak, false, false);
-      s = reduce5(s, { type: 'answer', index: 0 }); s = reduce5(s, { type: 'answer', index: 0 });
-      expect(s.hero.alive).toBe(true);
+      s = reduce5(s, { type: 'answer', index: 0 });
+      const p = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
+      const switched = !!p.battle.deathmatch;
+      s = reduce5(s, { type: 'answer', index: 0 });
+      if (!switched) expect(s.hero.alive).toBe(true);
+      if (!s.hero.alive) died++;
+      if (s.log.some((l) => l.text.includes('간신히 살아남았다'))) { survived++; expect(s.hero.injuries.some((x) => x.severity === 'heavy')).toBe(true); }
     }
+    expect(died).toBeGreaterThan(0);
+    expect(survived).toBeGreaterThan(0);
   });
   it('어떻게 싸우는지는 가치관이 정한다', () => {
     const a = fighter(1); addValues(a, { dominion: 90 });
@@ -90,7 +118,7 @@ describe('싸움', () => {
     expect(heroUnit5(s).tactic).toBe('offense');
   });
   it('반골은 물러나지 않는다', () => {
-    const s = fighter(1); s.strengths.push('rebel');
+    const s = fighter(1); s.strengths.push('rebel'); s.traits!.active = ['rebel'];
     expect(heroUnit5(s).retreatAt).toBe(0);
   });
   it('싸움 물음이 떠 있는 상태를 JSON으로 되살려도 같은 결과가 나온다', () => {
@@ -132,6 +160,7 @@ describe('싸움', () => {
   it('마그마 기술을 쓰는 상대에게 쓰러지면 화상으로 기록한다', () => {
     const s = fighter(16, 5);
     s.strengths = ['rebel'];
+    expect(selectTraits(s, ['rebel'])).toBe(true);
     askFight(s, 'b_akainu', false, true);
     if (s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');
     expect(s.pending.battle.units.find((u) => u.hero)?.hp).toBe(0);
@@ -144,6 +173,7 @@ describe('싸움', () => {
     for (let seed = 0; seed < 16; seed++) {
       const s = fighter(seed, 5);
       s.strengths = ['rebel'];
+      expect(selectTraits(s, ['rebel'])).toBe(true);
       for (const limb of Object.keys(s.hero.limbs) as (keyof typeof s.hero.limbs)[]) s.hero.limbs[limb] = 'lost';
       askFight(s, 'b_alvida', false, true);
       if (s.pending?.kind !== 'battle') throw new Error('전투가 열리지 않았다');

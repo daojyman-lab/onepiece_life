@@ -3,12 +3,24 @@ export const V = {
   // 항해: 바다를 다니는 처지(해적 · 해군 · 혁명군 · 사냥꾼 · 칠무해 · CP)는 해마다 p의 확률로 같은 바다의 다른 섬으로 옮겨 간다.
   // 아직 들르지 않은 섬은 fresh배 더 잘 뽑힌다. 들른 섬은 표시 'at:섬'으로 남는다
   // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
-  // 싸움의 계산(power5)은 바꾸지 않는다. 등급의 경계는 data/words.ts의 GRADES
+  // 화면과 싸움의 기본 계산식은 다르지만 서약으로 보장하는 하한은 같다. 등급 경계는 data/words.ts의 GRADES
   grade: { fruit: 0.5, haki: 0.25 },
+  vow: { powerFloors: [0, 500, 770, 1500] }, // B, A, S
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
+  // 항해 중(core/passage.ts): 지식(int)이 이만큼이면 항해 실력이 1 오른다 (항해사 동료는 2)
+  passage: { navInt: 8 },
+  // 원작의 때: 모든 주인공은 루피와 같은 세대다. 열일곱 살이 원작이 시작하는 해원력 1522년이다 (연혁 보정 YEAR_WEATHER의 열쇠)
+  canon: { startYear: 1522, heroAge: 17 },
+  // 섬의 기후(core/climate.ts): 그 섬에서 나고 자란 사람에게는 기후가 이만큼 드물게 눈에 띈다
+  climate: { localMult: 0.25 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
-           soften: 0.85 },                     // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
+           soften: 0.85,                       // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
+           // 특별한 문의 문턱: 그 나이(to살까지)에 이만큼 쌓였으면 연다. 그 가치관을 꾸준히 고른 사람의 나이별 중앙값 둘레다
+           // (깊음 deep은 30살 무렵에야 닿아서, 유년기 · 섬 장편의 특별한 문이 열리지 않았다). 30살부터는 deep과 같다
+           special: [ { to: 7, need: 6 }, { to: 9, need: 12 }, { to: 11, need: 17 }, { to: 13, need: 22 }, { to: 15, need: 27 },
+                      { to: 17, need: 32 }, { to: 19, need: 36 }, { to: 21, need: 40 }, { to: 24, need: 45 }, { to: 29, need: 50 },
+                      { to: Infinity, need: 55 } ] },
   // 유파 연습 완료·생애 후속처럼 별도로 열리는 선택을 고려한 일반 사건의 빈도.
   stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 1.9 }, { to: 200, n: 0.77 } ],
   stopsQuiet: 0.4,
@@ -17,6 +29,10 @@ export const V = {
   // 노화: from살부터 한 해에 rolls번, 확률 start + perYear×(나이−from) + wear×(잃은 부위 + 부상)로 근력 · 속도 · 체력 하나가 1 줄어든다 (cap까지)
   aging: { from: 50, start: 0.25, perYear: 0.03, wear: 0.1, cap: 0.9, rolls: 2, lineP: 0.35 },                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
+  // 섬 장편의 장면 사이에 흐르는 시간 (data/episodes/pacing.ts의 막 구성): 실시간 장면은 곧장, 같은 막 안은 beat, 막이 바뀌면 act 토막(클릭).
+  // 쉬는 토막마다 그 섬의 일상 한 줄이 나오고, 나이 · 성장 · 위험 · 항해는 흐르지 않는다 (장편 전체가 두 달 남짓이므로)
+  story: { beat: [1, 2] as [number, number], act: [3, 4] as [number, number],
+           memory: 150 },                      // 일상 줄은 최근 기록 이만큼 안에 나온 것을 다시 내지 않는다 (장편 하나를 덮는 길이)
   turning: { maxRepeat: 3 },                   // 되풀이되는 전환점도 한 인생에 많아야 이만큼 (Turning.max가 없을 때)
   lines: { dailyP: 0.8, minorP: 0.35, quietDailyP: 0.3,
            noRepeat: 12 },                    // 일상 · 자잘한 일의 글은 최근 이만큼 낸 것을 다시 뽑지 않는다
@@ -60,10 +76,13 @@ export const V = {
            passiveScale: { base: 0.7, span: 0.6 },   // 패시브 기술의 효과 = 값 × (base + span × 숙련/100), v4와 같다
            hakiLevelPer: 2, hakiLevelMax: 3,  // 전투의 패기 레벨 = min(3, ⌊단계 / 2⌋)
            retreat: { calm: 0.5, usual: 0.3, never: 0 },
-           retreatDeath: 0.5,                 // 목숨을 건 싸움에서 몸을 빼낸 사람이 죽을 확률 = 죽을 확률 × 이것
+           retreatDeath: 0.5,
+           backOffLethal: 0.15,
+           deathmatchSurvive: 0.4,
+           minorDeathMult: 0.2,               // 시정잡배와의 싸움이 빈사로 바뀌어 지면 목숨을 건 싸움의 죽을 확률에 이것을 곱한다 (낮지만 죽을 수 있다)            // 빈사로 바뀐 싸움에서 죽을 판정이 나와도 주사위로 이 확률이면 큰 부상을 입고 살아남는다               // 목숨을 건 상대 앞에서 물러날 때 주사위 확률에서 빼는 몫                 // 목숨을 건 싸움에서 몸을 빼낸 사람이 죽을 확률 = 죽을 확률 × 이것
            famePerPower: 0.1, minorFame: 1,
            // 이름 있는 상대의 능력치(간부 포함)에 곱하는 배율, 상대가 나오는 바다별 (v4 보스는 v4의 레벨 성장에 맞춰져 있다)
-           foeScale: { east: 0.4, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.2, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },
+           foeScale: { east: 0.46, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.3, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },
            dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
            minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
@@ -94,7 +113,7 @@ export const V = {
           idleStandings: ['child', 'retired'],
           kidAge: 15, kidHp: 30 },             // 이 나이 이하는 병 · 사고 · 굶주림으로 죽지 않고 체력만 잃는다
   wealthMoney: { poor: 0, common: 20000, comfortable: 150000, noble: 800000 },
-  birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 3 }, startAge: 3 },
+  birth: { stat: 5, statFloor: 1, talents: { min: 2, max: 5 }, startAge: 3 },
   // 출생 때의 가족 (고아는 없다): 부모 둘은 주인공보다 parentOlder 사이로 많고, 형제는 0~maxSiblings명, 주인공과 siblingGap 차이.
   // siblings[형편][n]: 형제가 n명일 가중치. 가난한 집일수록 많다
   family: { parentOlder: [20, 38], maxSiblings: 3, siblingGap: [1, 8], olderP: 0.5,   // olderP: 형제가 손위일 확률

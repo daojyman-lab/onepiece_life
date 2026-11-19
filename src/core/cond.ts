@@ -1,4 +1,5 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
+import { hasTrait } from './traits';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
 import { fmtMoney } from '../shared/core/util';
@@ -32,7 +33,8 @@ export function check(s: Life5, c: Cond): boolean {
       c.min === undefined ? undefined : wealthRank(c.min), c.max === undefined ? undefined : wealthRank(c.max));
     case 'lineage': return c.is.includes(h.lineage);
     case 'value': return isDeep(s, c.id) === c.deep;
-    case 'strength': return s.strengths.includes(c.id) === c.has;
+    case 'trait': return hasTrait(s, c.id) === c.has;
+    case 'strength': return hasTrait(s, c.id) === c.has;
     case 'money': return h.money >= c.min;
     case 'entryContact': return hasEntryContact(s, c.gate);
     case 'weapon': return (h.weapon === c.id) === c.has;
@@ -52,7 +54,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
     case 'town': return c.is.includes(h.town);
     case 'standingYears': return s.age - s.standingSince >= c.min;
-    case 'island': return c.is.includes(h.island) !== (c.not ?? false);
+    case 'island': return c.is.includes(s.passage ? '' : h.island) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
     case 'person': return s.people.some((p) => p.alive && (p.relation === c.relation || p.aliases?.includes(c.relation)) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
@@ -82,6 +84,7 @@ function reason(s: Life5, c: Cond): string {
     case 'wealth': return c.min !== undefined && wealthRank(s.hero.wealth) < wealthRank(c.min) ? '집안 형편이 따라 주지 않는다' : '집안이 너무 넉넉하다';
     case 'lineage': return '핏줄이 다르다';
     case 'value': return c.deep ? `${VALUE_NAME[c.id]}이(가) 아직 깊지 않다` : `${VALUE_NAME[c.id]}이(가) 너무 깊다`;
+    case 'trait': return '필요한 특성이 적용되어 있지 않다';
     case 'strength': return c.has ? `「${strengthName(c.id)}」이(가) 아직 없다` : `이미 「${strengthName(c.id)}」이(가) 있다`;
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
     case 'entryContact': return c.gate === 'zou' ? '비브르 카드가 없다' : '코팅을 도와줄 장인 인연이 없다';

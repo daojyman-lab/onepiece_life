@@ -45,7 +45,7 @@ export const ISLANDS: Turning[] = [
       { label: '앓는 쪽에게 귤을 짜 먹이는 법부터 일러 준다', hint: '뱃사람이 왜 이를 잃는지 아는 사람은 드물다', values: { inquiry: D },
         fx: [{ op: "log", text: "귤즙을 마신 사냥꾼이 며칠 만에 잇몸의 피가 멎었다고 했다. 콤비는 수배서를 접고 고맙다며 귤 한 망을 건넸다.", weight: "light" }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '귤 한 알을 빚진 사냥꾼', canon: 'johnny' }] },
       { label: '수배서 뭉치에서 값나가는 것만 골라 사들인다', hint: '쓸 만한 사냥감의 행방을 손에 넣는다', when: [{ c: 'money', min: 5000 }], values: { ambition: D },
-        fx: [{ op: "log", text: "수배서 속 표적들의 마지막 목격지를 표시해 두었다. 사냥꾼들은 돈을 받고 다음 항구의 소문까지 얹어 주었다.", weight: "light" }, { op: 'money', add: -5000 }, { op: 'fame', add: 8 }, flag('boughtPosters')] },
+        fx: [{ op: "log", text: "수배서 속 표적들의 마지막 목격지를 표시해 두었다. 사냥꾼들은 돈을 받고 다음 항구의 소문까지 얹어 주었다.", weight: "light" }, { op: 'money', add: -5000, trade: true }, { op: 'fame', add: 8 }, flag('boughtPosters')] },
     ],
   },
   // ---------------------------------------------------------------- 위대한 항로 입구

@@ -49,8 +49,11 @@ export interface Hero5 {
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'bestFist' | 'bestWeapon' | 'bestShot' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
 export interface VowState {
-  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[] } | null;
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[];
+    level?: 1 | 2 | 3; activities?: Activity[]; choices?: string[]; branch?: Branch; targetPersonId?: string } | null;
   history: { id: string; result: 'kept' | 'failed' }[];
+  declined?: boolean;
+  branch?: Branch;
 }
 export interface Growth5 {
   styleMastery: Partial<Record<CombatStyle, number>>;
@@ -84,6 +87,7 @@ export type Cond =
   | { c: 'wealth'; min?: Wealth; max?: Wealth }
   | { c: 'lineage'; is: Lineage[] }
   | { c: 'value'; id: ValueId; deep: boolean }
+  | { c: 'trait'; id: string; has: boolean }
   | { c: 'strength'; id: string; has: boolean }
   | { c: 'money'; min: number }
   | { c: 'entryContact'; gate: 'fishman' | 'zou' }
@@ -115,7 +119,7 @@ export type Fx =
   | { op: 'lifeWait'; ready: string; otherwise: string }
   | { op: 'base'; key: StatKey | 'all'; add: number }
   | { op: 'hp'; add: number }
-  | { op: 'money'; add: number }
+  | { op: 'money'; add: number; trade?: boolean }
   | { op: 'fame'; add: number }
   | { op: 'rank'; add: number }
   | { op: 'standing'; to: Standing }
@@ -124,12 +128,15 @@ export type Fx =
   | { op: 'moveHome' }                                  // 태어난 마을과 고향의 바다로 돌아간다
   | { op: 'mastery'; branch: Branch; add: number }
   | { op: 'tier'; branch: Branch; to: number }
+  | { op: 'traitAwaken'; branch: Branch }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
   | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
   | { op: 'vowResolve'; id: string }
+  | { op: 'vowFail'; id: string }
+  | { op: 'vowDecline' }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
@@ -164,7 +171,7 @@ export type Fx =
   | { op: 'log'; text: string; weight: LogWeight }
   | { op: 'timeline'; text: string; canon?: string }   // canon: 원작 인물과 겹친 순간이면 그 인물 id (엔딩의 「겹친 원작 순간」)
   | { op: 'die'; cause: string }
-  | { op: 'chance'; p: number; then: Fx[]; else?: Fx[] };
+  | { op: 'chance'; p: number; skillCheck?: boolean; then: Fx[]; else?: Fx[] };
 
 export interface FightNext { win?: string; lose?: string; back?: string }
 
@@ -173,6 +180,7 @@ export interface Door {
   when?: Cond[];                               // 출생 · 처지의 벽. 안 맞으면 잠긴다
   special?: ValueId;                           // 이 가치관이 깊어야 열리는 특별한 문
   values?: Partial<Values>;                    // 고르면 오르는 점수
+  meal?: boolean;
   mark?: string;                               // 정신적 강점으로 가는 표시
   fx: Fx[];
   danger?: boolean;
@@ -190,6 +198,7 @@ export interface Turning {
   automatic?: { unless: Cond[]; fx: Fx[] };     // 조건을 채우지 못하면 선택 대신 즉시 일어나는 일
   doors: Door[];                               // misfortune은 빈 배열
   fx?: Fx[];                                   // misfortune이 일으키는 일
+  tags?: ('sea' | 'night' | 'underground')[];
   needs?: Need[];                              // 안 맞으면 뽑히지 않는다
   max?: number;                                // 한 인생에 많아야 이만큼. 없으면 once는 1, 되풀이는 V.turning.maxRepeat
 }
@@ -203,7 +212,7 @@ export interface ResolvedDoor { label: string; hint: string; locked: string | nu
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
-  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string } }
+  | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string }; escape?: { roll: number; need: number } }
   | { kind: 'ending'; cause: string }
   | null;
 export interface Stats5 {
@@ -214,6 +223,13 @@ export interface Stats5 {
   emptyStops: number;                          // 그 가운데 띄울 전환점이 없던 횟수
   namedMet: number;                            // 이름 있는 상대와 마주친 횟수 (싸웠든 물러났든)
 }
+export interface TraitState {
+  earned: string[];
+  active: string[];
+  evidence: Record<string, string[]>;
+  changedAt: number | null;
+  crewSeen: string[];
+}
 export interface Life5 {
   /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */
   lifeStory?: {
@@ -221,6 +237,9 @@ export interface Life5 {
     events: { id: string; age: number; part: number; island: string; elapsed: number; actorId?: string; method?: 'guard' | 'support' }[];
     wait: { readyAt: number; expiresAt: number; island: string; then: string; otherwise: string } | null;
   };
+  traits?: TraitState;
+  traitScene?: ('sea' | 'night' | 'underground')[];
+  traitSource?: string;
   schema: 5;
   rng: { seed: number; cursor: number };
   age: number; part: 0 | 1 | 2 | 3;            // 한 해의 네 토막
@@ -233,6 +252,8 @@ export interface Life5 {
   closed: string[];                            // closes 문으로 닫힌 전환점 id
   standingSince: number;                       // 지금의 처지가 된 나이
   queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
+  storyRest: number;                           // 섬 장편의 다음 장면까지 남은 일상 토막 (V.story.beat · act)
+  storyNote: string;                           // 쉼이 시작될 때 띄울 막 제목 (막이 바뀔 때만)
   stopsThisYear: number;
   unchosen: Unchosen[]; tried: string[];       // tried: 이번 인생에 고른 "전환점id#문번호" (도감으로 옮겨진다)
   known: string[];                             // 지난 인생들에서 골라 본 "전환점id#문번호" (새 인생을 만들 때 도감에서 받는다)
@@ -250,5 +271,7 @@ export interface Life5 {
   vows?: VowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
+  /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
+  passage?: import('./passage').Passage | null;
 }
-export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle };
+export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle } | { type: 'traits'; ids: string[] };

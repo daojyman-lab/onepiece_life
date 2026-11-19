@@ -403,3 +403,7 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .personality-group { color: var(--ink-soft); background: var(--paper-d); }
 .personality-cell { background: var(--paper); }
 .personality-cell.active { border-color: var(--gold-d); background: var(--gold); color: var(--wood-dd); font-weight: bold; }
+
+/* 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었을 때의 경고 */
+.deathmatch-alert { border-color: var(--red, #c0392b); animation: deathmatch-blink 0.5s steps(2) 3; }
+@keyframes deathmatch-blink { 50% { opacity: 0.35; } }

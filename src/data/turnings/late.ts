@@ -276,7 +276,7 @@ const LAND_LATE: Turning[] = [
       { label: '젊은이들이 새 섬에 자리 잡게 돕는다', hint: '떠나는 사람들의 길을 연다. 저는 남는다', values: { loyalty: D },
         fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '새 섬으로 간 젊은이', age: { younger: 30 } }, { op: 'log', text: '젊은이들의 짐을 배에 실었다. 떠나는 배에서 아이가 끝까지 손을 흔들었다.', weight: 'light' }] },
       { label: '물에 잠긴 창고들을 헐값에 사들인다', hint: '물이 빠지면 값이 오른다. 다시 잠기면 산 값만 날린다', values: { greed: D },
-        fx: [{ op: 'money', add: -20000 }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 75000 }, { op: 'log', text: '물이 빠지자 창고 값이 두 배로 뛰었다.', weight: 'light' }], else: [{ op: 'log', text: '이듬해 폭풍에 창고들이 다시 잠겼다. 사들인 값만 날렸다.', weight: 'light' }] }, { op: 'hardship', add: 1 }] },
+        fx: [{ op: 'money', add: -20000, trade: true }, { op: 'chance', p: 0.6, then: [{ op: 'money', add: 75000 }, { op: 'log', text: '물이 빠지자 창고 값이 두 배로 뛰었다.', weight: 'light' }], else: [{ op: 'log', text: '이듬해 폭풍에 창고들이 다시 잠겼다. 사들인 값만 날렸다.', weight: 'light' }] }, { op: 'hardship', add: 1 }] },
     ],
   },
   {

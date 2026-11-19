@@ -1,5 +1,5 @@
 import { ORPHAN_STORIES, SPECIES_NAMES } from '../shared/data/births';
-import { TALENT_BY_ID } from '../shared/data/talents';
+import { traitName } from './traits';
 import { pick, rngOf, weighted } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
@@ -54,7 +54,7 @@ export function emptyLife(seed: number): Life5 {
     values, personality: { row: 1, col: 1, pullRow: 0, pullCol: 0, choices: 0, hold: 0, established: false }, strengths: [], marks: {},
     hardship: 0,
     people: [],
-    flags: [], seen: {}, seenCount: {}, closed: [], standingSince: 0, queue: [], queueTries: {},
+    flags: [], seen: {}, seenCount: {}, closed: [], standingSince: 0, queue: [], queueTries: {}, storyRest: 0, storyNote: '',
     stopsThisYear: 0,
     unchosen: [], tried: [], known: [],
     log: [], timeline: [], recentLines: [],
@@ -82,7 +82,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   const born = h.lineage === 'orphan'
     ? `${pick(r, ORPHAN_STORIES).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
     : `${h.town}의 ${WEALTH_HOUSE[h.wealth]}에서 ${fullName(h)}이(가) 태어났다.`;
-  const gifts = h.talents.map((id) => TALENT_BY_ID[id]).map((t) => `${t.name}${t.good ? '' : '(-)'}`).join(', ');
+  const gifts = h.talents.map(traitName).join(', ');
   for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
   rollFamily(s, r);                            // 가족은 시작하는 나이에 맞춰 둔다 (손아래 형제는 이미 태어난 아이만)

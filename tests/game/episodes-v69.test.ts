@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { EPISODE_TURNINGS } from '../../src/data/episodes';
 import type { Fx } from '../../src/core/types';
+import { newLife5 } from '../../src/core/state';
+import { openTurning, answerDoor, resolveDoors } from '../../src/core/turning';
 
 function effects(fx: Fx[] = []): Fx[] {
   return fx.flatMap((e) => e.op === 'chance' ? [e, ...effects(e.then), ...effects(e.else)] : [e]);
@@ -40,4 +42,18 @@ describe('v6.9 주요 섬 시나리오', () => {
       }), id).toBe(true);
     }
   });
+});
+
+
+it('하늘섬의 이전 피난길 성과가 번개를 피하는 특별한 문을 연다', () => {
+  const s = newLife5(1, { home: 'sky' }); s.pending = null; s.age = 17;
+  s.values.justice = 100;
+  const before = EPISODE_TURNINGS.find((t) => t.id === 'ep_skypiea_b8')!;
+  const forest = EPISODE_TURNINGS.find((t) => t.id === 'ep_skypiea_c3')!;
+  expect(resolveDoors(s, forest)[3].locked).not.toBeNull();
+  s.flags.push('ep_skypiea_tika_trust', 'ep_skypiea_b_evac');
+  expect(openTurning(s, before)).toBe(true);
+  answerDoor(s, 1);
+  expect(s.flags).toContain('ep_skypiea_b_vow_refuge');
+  expect(resolveDoors(s, forest)[3].locked).toBeNull();
 });

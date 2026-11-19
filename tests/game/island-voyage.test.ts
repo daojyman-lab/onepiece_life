@@ -9,6 +9,7 @@ import { newLife5 } from '../../src/core/state';
 import { answerDoor, openQueued, openTurning } from '../../src/core/turning';
 import { buildVoyage, sailTo, voyageId } from '../../src/core/voyage';
 import { growPart, stepPart, voyage } from '../../src/core/year';
+import { arrive } from '../../src/core/passage';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import { checkAll } from '../../src/core/cond';
 import { COATING_CONTACT, ZOU_CARD, entryPass } from '../../src/data/voyage';
@@ -24,6 +25,12 @@ function traveler() {
   return s;
 }
 
+// 해상 날씨는 passage.test에서 검증하고, 여기서는 도착 뒤의 관문을 검증한다.
+function finishPassage(s: ReturnType<typeof traveler>) {
+  expect(s.passage).toBeTruthy();
+  arrive(s, s.passage!);
+}
+
 describe('특수 섬 항해', () => {
   it('하이 웨스트를 고르기 전까지 도착과 항로 보상을 보류하고 저장 후에도 한 번만 처리한다', () => {
     const s = traveler();
@@ -32,6 +39,7 @@ describe('특수 섬 항해', () => {
     if (s.pending?.kind !== 'door') throw new Error('항로 창이 열리지 않았다');
     expect(doorView(s, s.pending).doors[1].hint).toContain('진입 관문');
     answerDoor(s, 1);
+    finishPassage(s);
     expect(s.hero.island).toBe('자야');
     expect(s.flags).not.toContain('at:스카이피아');
     const loaded = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
@@ -50,6 +58,7 @@ describe('특수 섬 항해', () => {
     const s = traveler();
     s.hero.base.str = 20;
     sailTo(s, '스카이피아', 'calm');
+    finishPassage(s);
     answerDoor(s, 1);
     const base = s.hero.base.str;
     expect(effectiveStats5(s).str).toBeCloseTo(base * 0.95);
@@ -61,6 +70,7 @@ describe('특수 섬 항해', () => {
     const s = traveler();
     s.hero.home = 'sky';
     sailTo(s, '스카이피아', 'wild');
+    finishPassage(s);
     expect(s.pending).toBeNull();
     expect(s.hero.island).toBe('스카이피아');
     expect(s.hero.hp).toBe(60);
@@ -80,6 +90,7 @@ describe('특수 섬 항해', () => {
   it('와노의 도검 수련과 스카이피아의 견문색 공부에 지역 보너스가 붙는다', () => {
     const inland = traveler();
     const regional = traveler();
+    for (const s of [inland, regional]) for (const branch of Object.keys(s.growth.pref) as (keyof typeof s.growth.pref)[]) s.growth.pref[branch] = 0;
     inland.growth.pref.sword = regional.growth.pref.sword = 10;
     regional.hero.island = '와노쿠니';
     growPart(inland, 'train', () => 0.9);
@@ -107,6 +118,7 @@ describe('특수 섬 항해', () => {
     s.sail = true;
     s.rng = rngFor(0.4);
     voyage(s);
+    finishPassage(s);
     expect(s.hero.island).toBe('샤본디 제도');
     expect(s.pending).toMatchObject({ kind: 'door', title: '샤본디에서 심해로' });
   });
@@ -118,6 +130,7 @@ describe('특수 섬 항해', () => {
     s.sail = true;
     s.rng = rngFor(0.4);
     voyage(s);
+    finishPassage(s);
     expect(s.pending).toMatchObject({ turning: 'path_sea_newworld' });
     const loaded = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
     answerDoor(loaded, 1);
@@ -194,6 +207,7 @@ describe('특수 섬 항해', () => {
     expect(s.flags).toContain(entryPass('wano'));
     applyFx(s, [{ op: 'move', island: '엘바프', sea: 'nw_late' }]);
     sailTo(s, '와노쿠니', 'wild');
+    finishPassage(s);
     expect(s.pending).toBeNull();
     expect(s.hero.island).toBe('와노쿠니');
     expect(localFightChance(s)).toBe(V.fight.minorP);

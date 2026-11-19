@@ -7,6 +7,7 @@ import { checkAll, whyNot } from '../../src/core/cond';
 import { applyFx } from '../../src/core/fx';
 import { yearDivider } from '../../src/core/log';
 import { sailTo } from '../../src/core/voyage';
+import { arrive } from '../../src/core/passage';
 import { V } from '../../src/data/balance';
 import { LINES } from '../../src/data/lines';
 import { autoplay5 } from '../../src/core/autoplay';
@@ -126,6 +127,8 @@ describe('한 해의 진행', () => {
     s.hero.island = '조';
     const before = s.log.filter((l) => l.weight === 'year').length;
     sailTo(s, '드레스로자', 'calm');
+    expect(s.hero.island).toBe('조');
+    arrive(s, s.passage!);
     expect(s.log.filter((l) => l.weight === 'year')).toHaveLength(before + 1);
     expect(s.log.at(-2)).toMatchObject({ weight: 'year', island: '드레스로자', moved: true });
     applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }]);
@@ -171,6 +174,7 @@ describe('한 해의 진행', () => {
   });
   it('조건이 맞는 사건이 하나도 없어도 해는 넘어간다', () => {
     const s0 = { ...newLife5(3), pending: null, age: 30, hero: { ...newLife5(3).hero, standing: 'settled' as const, home: 'zou' as const } };
+    s0.vows!.declined = true; // 생애 서약 제안도 없는 조건에서 시간 진행만 본다
     expect(flow(s0, 4).age).toBe(31);
   });
   it('불변 조건을 지킨다', () => {

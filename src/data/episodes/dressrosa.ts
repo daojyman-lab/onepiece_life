@@ -384,7 +384,7 @@ const B: Turning[] = [
              log('사람이 사라진 날마다 흰 닻이 그려진 수레가 열매 상자를 옮겼다.', 'light'),
              log('수레는 장난감의 집 뒷문을 쓰고, 다음 출입 시간은 이튿날 아침이다.', 'light')] },
       { label: '투기장 노름꾼에게 술을 사며 소문을 산다', hint: '돈이 든다. 노름꾼은 상자가 대회 날 옮겨진다고 흘린다', values: { greed: D },
-        fx: [{ op: 'money', add: -10000 }, flag('ep_dressrosa_b_info'), next('ep_dressrosa_b_supper'), log('노름꾼이 술값을 받자 장난감의 집 뒷문이 화물 통로라고 알려 준다. 아침에 짐꾼들이 들어가고, 대회가 시작하는 날에 큰 배가 뜬다고 한다.', 'light')] },
+        fx: [{ op: 'money', add: -10000, trade: true }, flag('ep_dressrosa_b_info'), next('ep_dressrosa_b_supper'), log('노름꾼이 술값을 받자 장난감의 집 뒷문이 화물 통로라고 알려 준다. 아침에 짐꾼들이 들어가고, 대회가 시작하는 날에 큰 배가 뜬다고 한다.', 'light')] },
     ],
   },
   {

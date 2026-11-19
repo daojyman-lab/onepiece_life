@@ -1,5 +1,6 @@
 // 몸: 잃은 부위와 의수 · 의족, 상처가 깎는 능력치, 몸이 막는 갈래.
 // effectiveStats5는 힘(power.ts)과 전투 유닛이 쓰므로 fx · fight · year를 가져오지 않는다.
+import { traitStats } from './traits';
 import { josa } from '../shared/core/josa';
 import { pick, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
@@ -45,7 +46,8 @@ function limbMult(s: Life5, l: Limb, penalty: number): number {
 /** 상처와 잃은 부위를 반영한 능력치. 어떤 능력치도 base × floor 아래로 내려가지 않는다 */
 export function effectiveStats5(s: Life5): Stats {
   const h = s.hero;
-  const st: Stats = { ...h.base };
+  const st: Stats = traitStats(s);
+  const floor = { ...st };
   for (const inj of h.injuries) {
     if (inj.severity === 'scar') {
       if (inj.stat) st[inj.stat] = Math.max(0, st[inj.stat] - V.injury.scarAmount);
@@ -59,7 +61,7 @@ export function effectiveStats5(s: Life5): Stats {
   for (const l of LEGS) st.spd *= limbMult(s, l, V.limb.leg.spd);
   const blind = EYES.every((l) => factorOf(s, l) === 0);
   if (blind && s.growth.tier.observation < V.limb.blindSight) for (const k of STAT_KEYS) st[k] *= V.limb.bothEyes;
-  for (const k of STAT_KEYS) st[k] = Math.max(st[k], h.base[k] * V.limb.floor);
+  for (const k of STAT_KEYS) st[k] = Math.max(st[k], floor[k] * V.limb.floor);
   const altitude = altitudeEffect(s);
   if (altitude) for (const k of ['str', 'spd', 'vit'] as const) st[k] *= altitude.physical;
   return st;

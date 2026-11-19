@@ -1,4 +1,5 @@
 // 명령 처리와 불변 조건. reduce5는 입력 상태를 바꾸지 않고, apply5는 받은 상태를 그 자리에서 바꾼다.
+import { selectTraits } from './traits';
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
@@ -22,6 +23,7 @@ export function cloneLife(prev: Life5): Life5 {
 export function apply5(s: Life5, cmd: Command5): void {
   switch (cmd.type) {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;
+    case 'traits': selectTraits(s, cmd.ids); break;
     case 'step': if (s.pending === null) stepPart(s); break;
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
     case 'answer': answer(s, cmd.index); break;
