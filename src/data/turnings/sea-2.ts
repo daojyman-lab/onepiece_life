@@ -29,7 +29,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     ],
   },
   {
-    id: 'gl_little_garden', kind: 'door', when: at(age(16), HERE, sea('gl_entry')),
+    id: 'gl_little_garden', kind: 'door', when: at(age(16, 18), HERE, sea('gl_entry')),
     weight: 4, repeat: 'once', speaker: 'hero',
     title: '백 년의 결투', body: '공룡이 사는 원시의 섬 한가운데서 두 거인이 도끼와 칼을 맞대고 있다. 백 년째 끝나지 않는 결투라고 한다. 화산이 연기를 뿜을 때마다 둘은 다시 맞붙는다.',
     doors: [

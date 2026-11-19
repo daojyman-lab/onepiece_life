@@ -3,10 +3,13 @@ import { recordTraitEvent, traitFactor, hasTrait, traitStats } from './traits';
 // 토막마다 그 바다의 날씨를 굴린다(data/weather.ts). 폭풍은 고른 뱃길대로 피항 · 우회 · 돌파한다.
 // 바다 위에 있는 동안에는 섬에 묶인 전환점이 열리지 않는다(cond.ts island). 닿으면 그 섬의 이야기가 열린다.
 import { josa } from '../shared/core/josa';
-import { pick, type Rng } from '../shared/core/rng';
+import { pick, rngOf, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { SEA_STANDINGS } from '../data/landlocked';
 import { dangerOf } from '../data/voyage';
+import { destinationAt, offshoreDays, portOf, seaOfPort } from '../data/navigation';
+import { RESUPPLY_STORIES } from '../data/turnings/ports';
+import { openTurning } from './turning';
 import {
   ANOMALY_KINDS, CALM_BELT_ISLANDS, DRIFT_CHANCE, SEA_KING_CHANCE, WEATHER_EFFECT, WEATHER_LINES,
   WEATHER_TABLE, YEAR_WEATHER, zoneOf, type SeaZone, type Weather,
@@ -30,7 +33,13 @@ export interface Passage {
   partsSpent: number;      // 바다에서 보낸 토막
   maxParts: number;        // 이만큼 바다에 있었으면 무조건 닿는다
   last?: Weather;          // 지난 토막의 날씨
+  stopover?: 'planned' | 'islet_resupply' | 'islet_rainwater';
+  from?: string;           // 보급섬에서 보이는 동안에도 원래 출발 항구를 보존한다
 }
+
+export const UNNAMED_ISLET = '이름 없는 섬';
+export const MAX_PROVISIONS = 6;
+const RECENT_STOPOVER = 'voyage:recentStopover';
 
 /** 무풍 · 피항이 이어져도 기본 길이에서 이만큼 넘으면 닿는다 */
 export const MAX_EXTRA_PARTS = 3;
@@ -45,9 +54,21 @@ export function passageParts(sea: string, to: string, route: PassageRoute): numb
 
 /** 출항한다. 섬은 닿을 때 바뀐다 */
 export function depart(s: Life5, to: string, route: PassageRoute, order = false): void {
+  if (s.passage) return;
+  to = destinationAt(to, s.age);
   const parts = passageParts(s.hero.sea, to, route);
   s.passage = { to, route, ...(order ? { order } : {}), partsLeft: parts, partsSpent: 0, maxParts: parts + MAX_EXTRA_PARTS };
   logLine(s, josa(order ? `전근 명령을 받고 ${to}(으)로 가는 군함에 올랐다.` : `${s.hero.island}의 항구를 떠나 ${to}(으)로 돛을 올렸다.`), 'light');
+  if (!offshoreDays(portOf(s.hero.island), to)) return;
+  const stores = s.hero.provisions ?? 0;
+  if (stores > 0) {
+    s.hero.provisions = stores - 1;
+    s.hero.hp = Math.min(V.hp.max, s.hero.hp + 3);
+    logLine(s, '외해로 나서며 비축한 식량 한 몫을 나눠 먹었다.', 'light');
+  }
+  if (s.flags.includes(RECENT_STOPOVER)) {
+    s.flags = s.flags.filter(flag => flag !== RECENT_STOPOVER);
+  } else if (stores < MAX_PROVISIONS && rngOf(s.rng)() < 0.35) s.passage.stopover = 'planned';
 }
 
 /** 고른 뱃길은 날씨 확률도 바꾼다 */
@@ -143,25 +164,54 @@ export function passagePart(s: Life5, r: Rng): void {
   if (!p) return;
   const h = s.hero;
   if (!SEA_STANDINGS.includes(h.standing)) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다
+  if (p.stopover && p.stopover !== 'planned') {
+    const t = RESUPPLY_STORIES.find(t => t.id === p.stopover);
+    if (t && !s.pending) openTurning(s, t);
+    return;
+  }
   const step = rollPassage(p, h.sea, Math.max(0, Math.min(3, navigatorLevel(s) + (hasTrait(s, 'orientation') ? 1 : hasTrait(s, 'lostWay') ? -1 : 0))), r, canonYear(s.age));
   for (const line of step.lines) logLine(s, line, 'light');
   if (step.hp) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + (step.hp < 0 ? Math.round(step.hp * traitFactor(s, 'danger')) : Math.round(step.hp * traitFactor(s, 'healing')))));   // 날씨로는 죽지 않는다
   if (step.fame) h.fame += step.fame;
+  if (p.stopover === 'planned') {
+    const [spring, rain] = RESUPPLY_STORIES;
+    const t = (s.seenCount[spring.id] ?? 0) > (s.seenCount[rain.id] ?? 0) ? rain : spring;
+    const voyage = step.next ?? { ...p, partsSpent: p.partsSpent + 1, partsLeft: 0, last: step.weather };
+    s.passage = { ...voyage, from: h.island, stopover: t === spring ? 'islet_resupply' : 'islet_rainwater' };
+    h.island = UNNAMED_ISLET;
+    s.flags.push(RECENT_STOPOVER);
+    logLine(s, '항로 곁에 해도에 이름이 없는 섬이 보였다. 작은 배를 내려 보낼 만한 물때였다.', 'light');
+    openTurning(s, t);
+    return;
+  }
   if (step.next) { s.passage = step.next; return; }
   arrive(s, p);
 }
 
+/** 정박 중에만 보급품을 한 번 싣고, 원래 뱃길과 남은 날씨 판정을 이어 간다. */
+export function resumeVoyage(s: Life5, stores: number): void {
+  const p = s.passage;
+  if (!p?.from || !p.stopover || p.stopover === 'planned') return;
+  s.hero.island = p.from;
+  delete p.from;
+  delete p.stopover;
+  s.hero.provisions = Math.min(MAX_PROVISIONS, (s.hero.provisions ?? 0) + stores);
+  if (p.partsLeft <= 0) arrive(s, p);
+}
+
 /** 닿는다: 섬을 바꾸고, 고른 뱃길의 효과를 받는다 */
 export function arrive(s: Life5, p: Passage): void {
-  recordTraitEvent(s, 'voyage', '', p.to);
+  if (p.from) s.hero.island = p.from;
+  const to = destinationAt(p.to, s.age);
+  recordTraitEvent(s, 'voyage', '', to);
   s.passage = null;
   // Special islands resolve their entry gate before moving the hero or granting route rewards.
-  const way = climateOf(p.to)?.approach;
-  if (!gateOf(p.to) && way?.arrive) {
+  const way = climateOf(to)?.approach;
+  if (!gateOf(to) && way?.arrive) {
     logLine(s, way.arrive, 'light');
-    if (way.hp && s.hero.town !== p.to) s.hero.hp = Math.max(1, Math.min(V.hp.max, s.hero.hp + way.hp));
+    if (way.hp && s.hero.town !== to) s.hero.hp = Math.max(1, Math.min(V.hp.max, s.hero.hp + way.hp));
   }
-  requestArrival(s, p.to, s.hero.sea, p.order ? 'orders' : p.route);
+  requestArrival(s, to, seaOfPort(to) ?? s.hero.sea, p.order ? 'orders' : p.route);
 }
 
 /** 주인공의 나이를 해원력으로: 열일곱 살이 원작이 시작하는 해(V.canon) */

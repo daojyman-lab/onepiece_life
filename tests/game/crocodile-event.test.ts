@@ -17,6 +17,7 @@ function eligibleLife(rating = 500) {
   life.pending = null;
   life.age = 21;
   life.hero.sea = 'nw_first';
+  life.hero.island = '드레스로자';
   life.hero.standing = 'pirate';
   life.hero.fame = 100;
   life.hero.base = { str: rating, spd: 0, vit: 0, int: 0, wil: 0, luk: 0 };

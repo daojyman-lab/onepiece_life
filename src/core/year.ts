@@ -3,7 +3,6 @@ import { BRANCH_NAMES } from '../shared/data/skills';
 import { traitMastery, traitEffects, traitFactor, recordTraitEvent, nextTraitAwakening } from './traits';
 import { chance, pick, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { josa } from '../shared/core/josa';
-import { SEA_BY_ID } from '../shared/data/seas';
 import { V } from '../data/balance';
 import { SEA_STANDINGS } from '../data/landlocked';
 import { LINES, type DailyLine5 } from '../data/lines';
@@ -22,13 +21,15 @@ import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { recoverHealthPart } from './health';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
-import { openQueued, openTurning, pickTurning, STORY_PREFIX, storyRng, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, repeatAllows, STORY_PREFIX, storyRng, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
 import { TURNING_BY_ID } from '../data/turnings';
-import { buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { buildVoyage, ENTRY_PREFIX, openRouteArrival, regularDestinations, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { advanceRestingRival, openChildhoodAndRival } from './childhood-and-rival';
+import { TRAINING } from '../data/turnings/training';
 import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
 import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
@@ -60,6 +61,7 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (!s.hero.alive) { endIfDead(s); return; }
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
   const vowTurning = chosenActivity ? null : nextLifeVowTurning(s);
@@ -67,6 +69,8 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
 
   const awakening = chosenActivity ? null : nextTraitAwakening(s);
   if (awakening && openTurning(s, TURNING_BY_ID[awakening])) return;
+  if (chosenActivity) advanceRestingRival(s);
+  if (!chosenActivity && (openChildhoodAndRival(s) || openRouteArrival(s))) return;
   s.traitScene = [];
   delete s.traitSource;
   const r = rngOf(s.rng);
@@ -131,7 +135,12 @@ function yearTurn(s: Life5, r: Rng): void {
 
 /** 멈출 차례면 전환점 하나를 띄운다 */
 function turningPoint(s: Life5, r: Rng): void {
-  if (s.pending || !wantsStop(s, r)) return;
+  if (s.pending) return;
+  if (!s.passage) {
+    const lesson = TRAINING.find(t => repeatAllows(s, t) && checkAll(s, t.when));
+    if (lesson && openTurning(s, lesson)) return;
+  }
+  if (!wantsStop(s, r)) return;
   s.stats.stopTries += 1;
   if (s.sail && openVoyage(s, r)) return;          // 섬을 옮길 때면 이번 멈춤은 항로 고르기
   const t = pickTurning(s, r);
@@ -330,7 +339,7 @@ export function voyage(s: Life5): void {
   if (!s.sail && !chance(r, V.voyage.p)) return;
   if (!military && !s.sail) { s.sail = true; return; }   // 다음 멈춤에 항로를 고른다
   s.sail = false;                              // 해군은 명령으로, 고를 틈이 없던 사람은 바람 닿는 대로
-  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island && (!military || gateOf(p) !== 'wano'));
+  const ports = regularDestinations(s, military);
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
   depart(s, next, 'drift', military);         // 바다를 건너 닿는다 (core/passage.ts)
@@ -341,7 +350,8 @@ function openVoyage(s: Life5, r: Rng): boolean {
   s.sail = false;
   if (hasLocalStyleLesson(s)) return false;
   if (!SEA_STANDINGS.includes(s.hero.standing) || s.hero.standing === 'marine' || s.hero.standing === 'cp') return false;
-  const c = voyageChoices(s, r);
+  const arrivalAge = s.part === V.partsPerYear - 1 && !firstLap(s) ? s.age + 1 : s.age;
+  const c = voyageChoices(s, r, arrivalAge);
   const t = c && buildVoyage(voyageId(s, c));
   return !!t && openTurning(s, t);
 }

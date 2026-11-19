@@ -4,6 +4,7 @@
 // 원작 인물은 주인공의 나이에 맞춰 나온다 (주인공 열일곱 살 무렵이 원작의 시작).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
+import { ISOLATED_TOWNS } from '../landlocked';
 import type { Cond, HomeId, Person, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -321,14 +322,14 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'prison_release', kind: 'door', when: at(st('prisoner')),
-    weight: 4, repeat: { years: 1 }, speaker: { relation: '간수' },
+    weight: 4, repeat: { years: 1 }, max: Infinity, speaker: { relation: '간수' },
     title: '형기를 마치다', body: '녹슨 문이 열린다. 간수가 {name}의 짐 꾸러미를 바닥에 던지며, 다시는 보지 말자고 한다.',
     doors: [
       { label: '고개를 숙이고 뭍의 삶으로 돌아간다', hint: '조용히 다시 시작한다', values: { peace: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'log', text: '감옥 문을 나섰다. 바깥 공기가 낯설었다.', weight: 'heavy' }, { op: 'timeline', text: '형기를 마치고 풀려났다' }] },
-      { label: '감옥에서 만난 자들과 바다로 나간다', hint: '쫓기는 삶으로 돌아간다', values: { freedom: D },
+      { label: '감옥에서 만난 자들과 바다로 나간다', hint: '쫓기는 삶으로 돌아간다', when: [{ c: 'island', is: ISOLATED_TOWNS, not: true }], values: { freedom: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'crew', relation: '감옥 동기' }, { op: 'timeline', text: '감옥 동기들과 바다로 나갔다' }, { op: 'log', text: '감옥에서 만난 자들이 부두에 기다렸다. 낡은 배에 오르자 다시 수배장에 이름이 올랐다.', weight: 'light' }] },
-      { label: '해군의 끄나풀이 되기로 하고 나온다', hint: '옛 동료들을 팔아 남은 형기를 지운다', needs: ['crew'], values: { greed: D }, 
+      { label: '해군의 끄나풀이 되기로 하고 나온다', hint: '옛 동료들을 팔아 남은 형기를 지운다', when: [{ c: 'island', is: ISOLATED_TOWNS, not: true }], needs: ['crew'], values: { greed: D },
         fx: [{ op: 'standing', to: 'bountyHunter' }, { op: 'flag', id: 'informant' }, { op: 'log', text: '간수는 비밀 보고서 첫 장을 내밀었다. 옛 동료의 이름을 적어야 문이 열렸다.', weight: 'light' }] },
     ],
   },
@@ -455,9 +456,9 @@ export const PATHS: Turning[] = [
       { label: '비눗방울 섬으로 배를 몬다', hint: '이름난 자들이 모이는 곳으로 간다', values: { ambition: D },
         fx: [{ op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'log', text: '비눗방울이 떠오르는 섬, 샤본디 제도에 닻을 내렸다.', weight: 'heavy' }] },
       { label: '이 바다에 머문다', hint: '아직은 이 바다가 맞다', values: { peace: D }, fx: [ { op: 'log', text: '붉은 벽 아래에서 배를 돌렸다. 아직 익숙한 항로를 더 항해하기로 했다.', weight: 'light' }] },
-      { label: '안개 속의 거대한 유령선에 다가간다', hint: '살아서 나올 수 있을지 모른다', values: { romance: D }, danger: true,
+      { label: '유령선이 목격된 안개 속으로 들어간다', hint: '짙은 안개 속에서 들리는 소리를 따라간다', values: { romance: D }, danger: true,
         fx: [{ op: 'hp', add: -25 }, { op: 'move', island: '스릴러 바크', sea: 'sabaody' },
-             { op: 'log', text: '안개 속의 유령섬 스릴러 바크에 발을 들였다. 그림자가 멋대로 움직였다.', weight: 'heavy' }] },
+             { op: 'log', text: '선체를 때리는 큰 파도를 겨우 넘었다. 뱃전의 그림자가 일렁이고 안개 속 사슬이 울렸다.', weight: 'heavy' }] },
     ],
   },
   {

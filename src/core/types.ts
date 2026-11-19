@@ -1,4 +1,5 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
+import type { ExtraCareerId } from '../data/rival-careers';
 import type { EntryGate } from '../data/voyage';
 import type { ArrivalRoute } from './voyage';
 import type { CombatStyle, MartialBranch } from '../data/combat-styles';
@@ -14,6 +15,9 @@ export interface Personality5 {
   hold: number; established: boolean;
 }
 export type HomeId = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou';
+export type RivalCareer = 'captain' | 'fifth' | 'marine' | 'warden' | ExtraCareerId;
+export type RivalLoveStatus = 'dating' | 'steady' | 'partners' | 'friends' | 'married';
+export type ChildhoodOutcome = 'loss' | 'parentSafe' | 'mentor' | 'rival';
 export type Wealth = 'poor' | 'common' | 'comfortable' | 'noble';
 export type Lineage = 'orphan' | 'commoner' | 'marineFamily' | 'pirateChild' | 'samurai' | 'outcast';
 export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 'bountyHunter' | 'warlord'
@@ -42,6 +46,7 @@ export interface Hero5 {
   standing: Standing; island: string; sea: SeaId;
   alive: boolean;
   bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
+  provisions?: number;
   potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
   skyAcclimating?: true;                       // 하늘섬에 닿은 뒤 첫 토막
   weapon?: string;                             // 전투에 가져가는 무기의 상품 ID
@@ -80,6 +85,8 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'single' }
+  | { c: 'rivalAtWork'; career: ExtraCareerId }
   | { c: 'anyOf'; conditions: Cond[] }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
@@ -120,6 +127,10 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'resumeVoyage'; stores: number }
+  | { op: 'rememberChildhood'; storyId: string; outcome: ChildhoodOutcome }
+  | { op: 'separateSpouse' }
+  | { op: 'rivalDuel' } | { op: 'recruitRival' }
   | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
   | { op: 'beginStyle'; style: CombatStyle; teacherRelation?: string }
   | { op: 'adoptStyle' | 'refineStyle'; style: CombatStyle }
@@ -250,6 +261,10 @@ export interface DiscipleRecord {
   outcome?: 'duel' | 'reconciled' | 'reported';
 }
 export interface Life5 {
+  childhoodMemory?: { storyId: string; outcome: ChildhoodOutcome; town: string; personId: string; personName: string; relation: string };
+  rivalLove?: { personId: string; status: RivalLoveStatus; since: number };
+  rivalAffinity?: { personId: string; timePoints: number; lastSharedAge: number };
+  rival?: { personId: string; career: RivalCareer; crewName: string; stage: number; port: string; fame: number };
   /** 실제로 받아들인 제자들. 기술과 시기는 가르치기 시작한 때의 사실로 남긴다. */
   disciples?: DiscipleRecord[];
   /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */

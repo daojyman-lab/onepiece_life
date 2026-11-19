@@ -1,4 +1,5 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
+import { single } from './rival-romance';
 import { hasTrait } from './traits';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
@@ -9,7 +10,7 @@ import { STRENGTHS } from '../data/strengths';
 import { GRADES, GRADE_TOP } from '../data/words';
 import { VALUE_NAME } from '../data/values';
 import { rating5 } from './power';
-import { hasRelation, personIs } from './needs';
+import { hasRelation, livingRelation, personIs } from './needs';
 import { isDeep } from './values';
 import { hasEntryContact } from './voyage';
 import { equippedWeapon, hasWeapon, styleBondReady, styleUsable } from './styles';
@@ -26,6 +27,8 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'rivalAtWork': return s.rival?.career === c.career && s.people.some(p => p.id === s.rival!.personId && p.alive && !p.crew);
+    case 'single': return single(s);
     case 'anyOf': return c.conditions.some(option => check(s, option));
     case 'disciple': return discipleReady(s, c.stage);
     case 'styleBond': return c.phase === 'new' ? !s.passage && !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
@@ -69,10 +72,11 @@ export function check(s: Life5, c: Cond): boolean {
     case 'secret': return c.known ? s.flags.includes('surnameKnown') : h.secretSurname !== null;
     case 'town': return c.is.includes(h.town);
     case 'standingYears': return s.age - s.standingSince >= c.min;
-    case 'island': return c.is.includes(s.passage ? '' : h.island) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
+    case 'island': return (!s.passage && c.is.some(island => island === h.island ||
+      (island === '조' || island === '조우') && (h.island === '조' || h.island === '조우'))) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
-    case 'person': return s.people.some((p) => p.alive && hasRelation(p, c.relation) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'person': return !c.kinds ? !!livingRelation(s, c.relation) === c.has : s.people.some((p) => p.alive && hasRelation(p, c.relation) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -91,6 +95,8 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'rivalAtWork': return '그 일을 하는 맞수에게서 온 편지가 없다';
+    case 'single': return '이미 마음을 약속한 사람이 있다';
     case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
     case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';

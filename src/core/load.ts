@@ -1,4 +1,6 @@
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
+import { normalizeRouteSave } from './route-save';
+import { restoreRecruitedRival, updateRival } from './rival';
 import { normalizeTraits } from './traits';
 import { V } from '../data/balance';
 import { RETIRED_FRUIT_IDS } from '../shared/data/fruits';
@@ -74,6 +76,7 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (!normalizeRouteSave(life)) return null;
   try { normalizeStyles(life, legacyStyles, !isObj(x.growth) || x.growth.weapons === undefined); } catch { return null; }
   if (life.disciples !== undefined) {
     if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
@@ -162,7 +165,15 @@ export function normalizeLife5(x: unknown): Life5 | null {
         (life.firstChoiceAge ??= {})[key] = lastVisit;
       }
     }
+    restoreRecruitedRival(life);
     repairWeaponMentors(life);
+    for (const p of life.people) {
+      if (p.canon === 'bellamy' && p.crew) p.crew.power = Math.max(p.crew.power, V.person.crew.bellamyPower);
+    }
+    const obsoleteRivalChoices = ['life_rival_invitation', 'life_rival_date', 'life_rival_promise'];
+    if (life.pending?.kind === 'door' && obsoleteRivalChoices.includes(life.pending.turning)) life.pending = null;
+    life.queue = life.queue.filter(id => !obsoleteRivalChoices.includes(id));
+    if (life.pending?.kind === 'door' && life.pending.turning === 'life_rival_reunion' && !life.rival) updateRival(life);
     restoreStoryDoor(life);
     return life;
   } catch {

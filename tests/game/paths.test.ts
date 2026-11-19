@@ -221,7 +221,7 @@ describe('규칙', () => {
   it('로그타운의 어른 앞에 길이 열린다', () => {
     let opened = 0;
     for (let seed = 0; seed < 50; seed++) {
-      const s = newLife5(seed); s.pending = null; s.age = 17; s.hero.standing = 'civil';
+      const s = newLife5(seed, { home: 'loguetown' }); s.pending = null; s.age = 17; s.hero.standing = 'civil';
       if (TURNINGS.some((t) => t.id.startsWith('path_') && checkAll(s, t.when))) opened++;
     }
     expect(opened).toBe(50);

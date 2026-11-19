@@ -27,6 +27,7 @@ const LEVEL: Record<string, number> = {
 const MEDICAL_SKILL: Record<string, number> = { hogback: 90, aladdin: 75 };
 /** 아무나 태울 수 없는 사람: 이름값이 있어야 말을 붙일 수 있고, 쿠잔은 해군을 떠난 뒤(원작 두 해 뒤)에만 만난다 */
 const GATE: Record<string, Cond[]> = {
+  perona: [age(16, 18)], absalom: [age(16, 18)], hogback: [age(16, 18)], lola: [age(18, 18)],
   mihawk: [fame(300), { c: 'tier', branch: 'any', min: 4 }], kuzan: [fame(150), { c: 'canonAge', id: 'kuzan', min: 49 }],
   yamato: [fame(100)], killer: [fame(60)],
   zoro: [{ c: 'age', min: 16, max: 17 }], vivi: [{ c: 'age', min: 17, max: 19 }], ace: [{ c: 'age', min: 16, max: 19 }],

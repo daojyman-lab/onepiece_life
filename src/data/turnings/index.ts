@@ -38,8 +38,18 @@ import { WEAPON_STORIES } from './weapon-stories';
 import { LIFE_COURSE } from './life-course';
 import { DISCIPLES } from './disciples';
 
+import { CHILDHOOD_CRISES, CHILDHOOD_MEMORIES } from './childhood-crises';
+import { RIVAL_WORK_LETTERS } from '../rival-letters';
+import { RIVAL_ERRANDS } from './rival-errand';
+import { TRAINING } from './training';
+import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
+import { ROUTE_STORIES } from './route-stories';
+
 const GROUPS: Turning[][] = [
   CHILDHOOD,
+  CHILDHOOD_CRISES, CHILDHOOD_MEMORIES,
+  RIVAL_WORK_LETTERS, RIVAL_ERRANDS,
+  TRAINING, PORT_STORIES, RESUPPLY_STORIES, ROUTE_STORIES,
   BONDS,
   FORTUNES,
   MISFORTUNES,
@@ -88,6 +98,8 @@ const textOf = (t: Turning) => [t.title, t.body, ...t.doors.flatMap((d) => [d.la
  * 섬을 떠나 바다에 나가면(hero.island가 바뀌면) 다시 열린다.
  */
 export function landlocked(t: Turning): Turning {
+  // 어느 섬의 감옥에서도 형기는 끝난다. 바다로 나가는 선택만 개별적으로 제한한다.
+  if (t.id === 'prison_release') return t;
   if (t.when.some((c) => c.c === 'home' || c.c === 'town' || c.c === 'island')) return t;
   const x = textOf(t);
   const add: Cond[] = [];

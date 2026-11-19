@@ -14,7 +14,7 @@ const young = at(age(13, 17), NO_DREAM);
 const BORN: Turning[] = [
   {
     id: 'dream_horizon', kind: 'door', when: young, weight: 25, repeat: 'once', speaker: 'hero',
-    title: '수평선 너머', body: '어릴 적 들은 이야기가 아직도 귓가에 맴돈다. 세상 어딘가에 모든 것을 손에 넣은 왕이 남긴 보물이 있다고 했다. 지도에 없는 섬이 아직 수없이 많다고도 했다. {name}은(는) 밤마다 멀리 수평선을 바라본다. 가슴속에서 무언가가 이름을 갖기 시작한다.',
+    title: '골목 끝 해적단', body: '골목 아이들이 빈 상자 셋을 이어 놓고 해적 놀이를 한다. 앞 상자에는 손수건 깃발, 가운데에는 반쯤 그린 지도, 뒤에는 반짝이는 병뚜껑이 놓였다. 아이들이 {name}에게 어떤 역할을 맡을지 묻는다.',
     doors: [
       { label: '누구에게도 매이지 않는 왕이 되겠다고 다짐한다', hint: '가장 높은 곳에서 바람처럼 살고 싶다', values: { freedom: D },
         fx: [dream('pirateKing'), { op: 'log', text: "{name}은(는) 수평선에 걸린 마지막 빛을 보며 왕의 이름을 입에 올렸다. 누구의 명령도 받지 않는 항해가 그날의 꿈이 되었다.", weight: 'heavy' }] },
@@ -26,7 +26,7 @@ const BORN: Turning[] = [
   },
   {
     id: 'dream_order', kind: 'door', when: young, weight: 25, repeat: 'once', speaker: 'hero',
-    title: '무엇이 되고 싶은가', body: '어른들이 묻는다. 커서 무엇이 될 거냐고. 예전에는 웃으며 아무렇게나 대답했지만, 이제는 그 물음이 조금 무겁다. {name}은(는) 지금까지 본 것들을 하나씩 떠올린다. 억울한 얼굴, 오래된 책, 저녁 밥상에 둘러앉은 사람들.',
+    title: '십 년 뒤에 받을 편지', body: '글방에서 십 년 뒤의 자기 앞으로 편지를 쓴다. 옆자리 아이는 과자 가게 주인이 된 자신에게 편지를 썼다. {name}은(는) 봉투를 앞에 놓고 십 년 뒤 무엇을 하고 있을지 생각한다.',
     doors: [
       { label: '옳은 것을 지키는 가장 높은 자리에 서겠다고 다짐한다', hint: '억울한 사람이 없는 세상의 꼭대기에 서고 싶다', values: { justice: D },
         fx: [dream('marineTop'), { op: 'log', text: "억울한 얼굴들이 떠올라 {name}은(는) 어른들 앞에서 해군의 가장 높은 자리에 서겠다고 말했다. 웃는 사람도 있었지만 다짐은 거두지 않았다.", weight: 'heavy' }] },
@@ -38,7 +38,7 @@ const BORN: Turning[] = [
   },
   {
     id: 'dream_blade', kind: 'door', when: [...young, { c: 'path', is: ['sword'] }], weight: 35, repeat: 'once', speaker: 'hero',
-    title: '검 끝의 약속', body: '손바닥의 굳은살이 단단해졌다. 매일 휘두르는 검이 이제는 몸의 일부 같다. 언젠가 들은 이름, 세상에서 가장 강하다는 검객의 이야기가 떠오른다. {name}은(는) 검을 내려다본다. 이 검으로 어디까지 갈 수 있을까.',
+    title: '검 끝의 약속', body: '연습이 끝나자 맞은편 아이가 팔뚝의 멍을 문지른다. 그 아이가 누구와 겨루려고 매일 연습하는지 묻는다. {name}은(는) 풀어진 칼자루의 천을 다시 감는다.',
     doors: [
       { label: '세상에서 가장 강한 검객이 되겠다고 다짐한다', hint: '정점에 선 검객을 넘어서고 싶다', values: { dominion: D },
         fx: [dream('bestSword'), { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "{name}은(는) 굳은살 박인 손으로 검을 다시 쥐고, 세상에서 가장 강한 검객의 이름을 소리 내어 말했다. 다음 훈련부터는 한 번도 대충 휘두르지 않았다.", weight: 'heavy' }] },
@@ -50,7 +50,7 @@ const BORN: Turning[] = [
   },
   {
     id: 'dream_rebel', kind: 'door', when: young, weight: 20, repeat: 'once', speaker: 'hero',
-    title: '불공평한 세상', body: '높은 사람들이 지나가면 모두가 고개를 숙인다. 이유를 물으면 원래 그런 거라고 한다. {name}은(는) 그 대답이 마음에 들지 않는다. 주먹을 쥐었다 편다. 원래 그런 것을 바꾸는 사람도 있지 않을까.',
+    title: '빵 바구니에 붙은 딱지', body: '징수원이 장터의 빵 바구니에 붉은 압류 딱지를 붙인다. 빵집 주인이 방금 받은 세금 영수증을 펴 보이지만 징수원은 허리의 칼을 툭 치고 다음 좌판으로 간다. 딱지의 풀이 마르기 전에 {name}이(가) 빵집 앞에 멈춰 선다.',
     doors: [
       { label: '이 세상을 뿌리부터 바꾸겠다고 다짐한다', hint: '누구도 무릎 꿇지 않는 세상을 꿈꾼다', values: { freedom: D },
         fx: [dream('changeWorld'), { op: 'log', text: "{name}은(는) 고개를 숙인 사람 곁으로 가서 일어나라고 손을 내밀었다. 오래된 질서를 바꾸겠다는 꿈이 그날부터 말이 아닌 행동이 되었다.", weight: 'heavy' }] },
@@ -65,7 +65,7 @@ const BORN: Turning[] = [
 const LATER: Turning[] = [
   {
     id: 'dream_waver', kind: 'door', when: at(age(28, 42), st(...ACTIVE), { c: 'dream', has: true, done: false, years: 12 }), weight: 3, repeat: 'once', speaker: 'hero',
-    title: '흔들리는 꿈', body: '어린 날 품은 꿈을 오래 좇았다. 그런데 요즘 {name}은(는) 문득 멈춰 선다. 그 꿈은 아직 너무 멀고, 그사이 곁에는 지켜야 할 것들이 생겼다. 꿈은 아직 같은 꿈일까.',
+    title: '흔들리는 꿈', body: '묵은 수첩의 실밥이 터져 첫 장이 떨어졌다. 거기엔 어린 날의 글씨로 꿈 한 줄이 적혀 있다. {name}은(는) 새 수첩을 펴고 그 종이를 옆에 놓는다.',
     doors: [
       { label: '처음 품었던 꿈을 끝까지 붙든다', hint: '멀어도 내 꿈이다. 놓으면 내가 아니다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('{name}은(는) 어린 날의 다짐을 다시 한 번 입 밖에 냈다. 꿈은 그대로였다.')] },
@@ -77,15 +77,15 @@ const LATER: Turning[] = [
   },
   {
     id: 'dream_last', kind: 'door', when: at(age(55, 75), st(...GROWN), { c: 'dream', has: true, done: false }), weight: 14, repeat: 'once', speaker: 'hero',
-    title: '닿지 못한 꿈', body: '머리가 하얗게 셌다. 어린 날 품은 꿈은 끝내 손에 잡히지 않았다. {name}은(는) 오래된 다짐을 떠올린다. 남은 시간은 많지 않다. 이 꿈을 어떻게 할까.',
+    title: '닿지 못한 꿈', body: '짐을 정리하던 {name}은(는) 오래된 꾸러미를 무릎에 올린다. 젊을 때부터 모은 메모가 한 움큼 나온다. 짐을 거들던 젊은이가 메모도 함께 묶어 둘지 묻는다.',
     doors: [
-      { label: '마지막으로 한 번 더 그 꿈을 향해 나선다', hint: '몸은 늙었어도 마음은 그날 그대로다', values: { romance: D },
+      { label: '메모를 챙겨 다시 길을 나선다', hint: '다음 날 들고 갈 짐에 메모 꾸러미를 따로 넣어 둔다', values: { romance: D },
         fx: [{ op: 'hp', add: -15 }, { op: 'fame', add: 20 }, { op: 'flag', id: 'dreamLastTry' },
-             heavy('{name}은(는) 낡은 짐을 꾸려 다시 길을 나섰다. 사람들은 말렸지만, 그 눈빛은 어린 날과 똑같았다.')] },
-      { label: '그 꿈을 다음 사람에게 넘겨준다', hint: '내가 못 간 곳에 누군가는 닿을 것이다', values: { loyalty: D },
-        fx: [{ op: 'flag', id: 'dreamPassed' }, heavy('{name}은(는) 젊은 사람에게 오래 품은 꿈 이야기를 들려주었다. 그 눈이 반짝였다.')] },
-      { label: '닿지 못한 꿈도 내 인생이었다고 받아들인다', hint: '좇은 시간만큼은 후회하지 않는다', values: { peace: D },
-        fx: [{ op: 'flag', id: 'dreamAccepted' }, heavy('{name}은(는) 꿈을 내려놓았다. 이상하게 마음이 가벼웠다.')] },
+             heavy('다음 날 새벽, {name}은(는) 문 앞에서 무릎을 한 번 주무르고 다시 짐을 졌다. 메모 꾸러미는 꺼내기 쉽게 맨 위에 두었다.')] },
+      { label: '메모를 날짜순으로 펴서 젊은이에게 읽어 준다', hint: '어디까지 해냈는지 짚어 주고 나머지를 이어 볼 생각이 있는지 묻는다', values: { loyalty: D },
+        fx: [{ op: 'flag', id: 'dreamPassed' }, heavy('젊은이는 맨 위 메모를 소리 내어 읽고 나머지를 품에 넣었다. {name}은(는) 빈 꾸러미의 끈까지 풀어 건넸다.')] },
+      { label: '메모에 마지막 날짜를 쓰고 꾸러미를 묶는다', hint: '남은 이야기는 저녁을 먹으며 들려주기로 한다', values: { peace: D },
+        fx: [{ op: 'flag', id: 'dreamAccepted' }, heavy('{name}은(는) 꾸러미를 선반에 올리고 저녁상에 숟가락을 하나 더 놓았다.')] },
     ],
   },
 ];

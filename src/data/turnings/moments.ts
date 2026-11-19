@@ -20,7 +20,7 @@ export const MOMENTS: Turning[] = [
     ],
   }),
   moment('moment_loss', {
-    title: '남겨진 사람', body: '아끼던 사람이 더는 곁에 없다. 텅 빈 자리를 바라보며 {name}은(는) 한참을 움직이지 못한다.',
+    title: '그날 저녁의 식탁', body: '그날 일을 겪은 사람들이 한 상에 둘러앉았다. 국은 식었고 누구도 먼저 숟가락을 들지 않는다. 맞은편에 앉은 이가 {name}에게 오늘 밤 묵을 만한 곳을 아는지 묻는다.',
     doors: [
       { label: '남은 사람들을 끝까지 지킨다', hint: '다시는 누구도 잃지 않겠다고 다짐한다', values: { loyalty: D }, mark: 'fellowship', fx: [{ op: 'log', text: '빈자리를 덮어 두고 남은 사람들 곁으로 갔다. 그들이 잠든 뒤에도 한동안 불을 끄지 못했다.', weight: 'heavy' }] },
       { label: '그 사람이 꿈꾸던 곳으로 떠난다', hint: '못다 한 길을 대신 걷는다', values: { romance: D }, fx: [{ op: 'log', text: '그 사람이 남긴 물건 하나를 챙겨 길을 나섰다. 그토록 가고 싶어 하던 곳의 이름을 몇 번이나 되뇌었다.', weight: 'heavy' }] },

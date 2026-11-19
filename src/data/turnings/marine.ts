@@ -340,7 +340,7 @@ export const MARINE: Turning[] = [
     // 그 이듬해(주인공 열여덟 무렵)부터는 본부에서 가프에게 따로 훈련받으므로 열일곱 한 해만 연다
     id: 'mn_coby', kind: 'door', when: at(st('marine'), age(17, 17), sea('east')),
     weight: 6, repeat: 'once', speaker: { canon: 'coby' },
-    title: '잡일하는 두 신병', body: '보급차 들른 군함에서 분홍 머리 신병과 턱이 뾰족한 신병이 갑판을 닦고 있다. 분홍 머리는 언젠가 해군 대장이 되겠다고 말하고, 턱이 뾰족한 쪽은 한때 대령 집안의 도련님이었다고 수군거린다.',
+    title: '잡일하는 두 신병', body: '보급을 받으러 들른 군함에서 신병 둘이 갑판을 닦는다. 코비가 걸레를 짜며 해군 대장이 되는 게 꿈이라고 털어놓는다. 헤르메포는 벌써 대장을 대하듯 경례하고는 닦을 계단 쪽으로 양동이를 밀어 준다.',
     doors: [
       { label: '밤마다 분홍 머리의 대련 상대가 되어 준다', hint: '겁 많던 신병이 조금씩 단단해진다. {name}의 쉴 틈이 사라진다', values: { freedom: D },
         fx: [{ op: 'person', kind: 'ally', relation: '대련을 청하던 신병', canon: 'coby' }, { op: 'mastery', branch: 'fist', add: 5 }, { op: 'hp', add: -5 }, { op: 'log', text: '밤 대련에서 코비는 넘어져도 먼저 일어났다. {name}은(는) 쉴 시간 대신 주먹을 맞대는 시간이 늘었고 코비는 다음 밤에도 찾아왔다.', weight: 'light' }] },

@@ -10,7 +10,11 @@ import { climateOf } from '../data/climates';
 import { COATING_CONTACT, DREAM_ISLANDS, ENTRY_COST, ENTRY_GATES, ROUTE, ZOU_CARD, dangerOf, entryPass, gateOf, type EntryGate } from '../data/voyage';
 import { islandImmunity, isNative } from './environment';
 import { locationDivider, logLine } from './log';
-import { openTurning } from './turning';
+import { openTurning, repeatAllows } from './turning';
+import { checkAll } from './cond';
+import { TURNING_BY_ID } from '../data/turnings';
+import { DEFERRED_ROUTE, ROUTE_ARRIVALS } from '../data/turnings/route-stories';
+import { connectedPorts, contentClass, destinationAt, offshoreDays, portOf } from '../data/navigation';
 import type { Cond, DreamId, Door, Fx, Life5, SeaId, Turning } from './types';
 import { depart } from './passage';
 
@@ -20,10 +24,36 @@ export const VOYAGE_PREFIX = 'voyage:';
 export const ENTRY_PREFIX = 'entry:';
 const ARRIVAL_ROUTES: readonly string[] = ['calm', 'dream', 'wild', 'story', 'home', 'drift', 'orders'];
 
-/** 지금 바다에서 갈 수 있는 섬 가운데 세 갈래의 후보. 고를 섬이 둘도 안 되면 null */
-export function voyageChoices(s: Life5, r: Rng): { calm?: string; dream?: string; wild?: string } | null {
-  const ports = SEA_BY_ID[s.hero.sea].ports.filter((p) => p !== s.hero.island);
-  if (ports.length < 2) return null;
+export function regularDestinations(s: Life5, military = false, age = s.age): string[] {
+  return connectedPorts(s.hero.island, s.hero.sea, s.flags, age)
+    .filter(port => !military || gateOf(port) !== 'wano');
+}
+
+export function openRouteArrival(s: Life5): boolean {
+  if (s.pending || s.passage || s.hero.standing === 'prisoner' || s.age < V.voyage.minAge) return false;
+  if (s.hero.island === '스릴러 바크' && s.age > 18) {
+    s.hero.island = '플로리안 트라이앵글';
+    logLine(s, '마지막 목격 지점으로 돌아갔을 때 거대한 선체는 안개 밖으로 사라져 있었다.', 'light');
+  }
+  const port = portOf(s.hero.island);
+  if (s.hero.island === s.hero.town && !s.flags.includes(`at:${port}`)) return false;
+  const scene = port === '리틀 가든' && s.age <= 18 && !s.seenCount.garden_giants && !s.seenCount.garden_1
+    ? 'garden_giants' : ROUTE_ARRIVALS[port];
+  if (!scene) return false;
+  if ((scene === 'route_coating' && (hasEntryContact(s, 'fishman') || islandImmunity(s, '어인섬'))) ||
+      (scene === 'route_zou' && (hasEntryContact(s, 'zou') || islandImmunity(s, '조우'))) ||
+      (scene === 'route_sky' && islandImmunity(s, '스카이피아'))) return false;
+  const t = TURNING_BY_ID[scene];
+  return !!t && checkAll(s, t.when) && repeatAllows(s, t) && openTurning(s, t);
+}
+
+type Choices = { calm?: string; dream?: string; wild?: string; coastal?: string };
+
+/** 지금 바다에서 갈 수 있는 섬 가운데 세 갈래의 후보. 갈 수 있는 섬이 없으면 null */
+export function voyageChoices(s: Life5, r: Rng, departureAge = s.age): Choices | null {
+  if (s.passage) return null;
+  const ports = regularDestinations(s, false, departureAge);
+  if (!ports.length) return null;
   const fresh = (p: string) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh);
   const top = Math.max(...ports.map(dangerOf));
   const wild = top >= 3 ? weighted(r, ports.filter((p) => dangerOf(p) === top), fresh) ?? undefined : undefined;
@@ -33,13 +63,14 @@ export function voyageChoices(s: Life5, r: Rng): { calm?: string; dream?: string
   rest = rest.filter((p) => p !== calm);
   const tagged = s.dream ? rest.filter((p) => DREAM_ISLANDS[s.dream!.id].includes(p)) : [];
   const dream = rest.length ? pick(r, tagged.length ? tagged : rest) : undefined;
-  return [calm, dream, wild].filter(Boolean).length >= 2 ? { calm, dream, wild } : null;
+  const coastal = wild ? undefined : rest.find(port => port !== dream);
+  return { calm, dream, wild, coastal };
 }
 
 /** 후보를 담은 전환점 id: voyage:<나이>:<꿈 id 또는 ->:<잔잔>|<꿈>|<험함> (빈칸이면 그 갈래 없음). 나이가 들어 있어 해마다 다른 장면이다 */
-export function voyageId(s: Life5, c: { calm?: string; dream?: string; wild?: string }): string {
+export function voyageId(s: Life5, c: Choices): string {
   const d = s.dream && c.dream && DREAM_ISLANDS[s.dream.id].includes(c.dream) ? s.dream.id : '-';
-  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}`;
+  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}|${c.coastal ?? ''}:${portOf(s.hero.island)}`;
 }
 
 const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route });
@@ -47,21 +78,28 @@ const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route 
 /** id로 항로 고르기 전환점을 짓는다. 문은 잔잔 · 꿈(또는 소문) · 험함 순서 */
 export function buildVoyage(id: string): Turning | undefined {
   if (!id.startsWith(VOYAGE_PREFIX)) return undefined;
-  const [, dreamId, rest = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
-  const [calm, dream, wild] = rest.split('|');
+  const [, dreamId, rest = '', from = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
+  const [calm, dream, wild, coastal] = rest.split('|');
   const doors: Door[] = [];
   if (calm) doors.push({ label: josa(`잔잔한 뱃길로 ${calm}에 간다`), hint: '쉬어 가며 숨을 고른다', fx: [sail(calm, 'calm')] });
   if (dream) {
     const d = dreamId !== '-' ? DREAMS[dreamId as DreamId] : null;
     doors.push(d
-      ? { label: josa(`${dream}(으)로 뱃머리를 돌린다`), hint: josa(`${d.name}에 한 걸음 가까워질 것 같은 소문이 있다`), fx: [sail(dream, 'dream')] }
-      : { label: josa(`소문을 따라 ${dream}(으)로 간다`), hint: '떠도는 소문이 자꾸 마음에 걸린다', fx: [sail(dream, 'dream')] });
+      ? { label: josa(`${dream}(으)로 뱃머리를 돌린다`), hint: josa(`${d.name}에 한 걸음 가까워질 것 같은 소문이 있다`), values: { romance: V.value.door }, fx: [sail(dream, 'dream')] }
+      : { label: josa(`소문을 따라 ${dream}(으)로 간다`), hint: '술집에서 들은 이야기가 자꾸 마음에 걸린다', values: { romance: V.value.door / 2 }, fx: [sail(dream, 'dream')] });
   }
   if (wild) doors.push({ label: josa(`험한 바다를 건너 ${wild}(으)로 간다`), hint: '위험하지만 이름을 떨칠 기회가 있다', danger: true, fx: [sail(wild, 'wild')] });
+  if (coastal) doors.push({ label: josa(`뱃길을 따라 ${coastal}(으)로 간다`), hint: '갑판에서 숨을 고른다', fx: [sail(coastal, 'calm')] });
+  const contentLabel = { major: '주요 이야기', regular: '지역 이야기', encounter: '인연·탐험', exploration: '탐험 거점' };
   for (const door of doors) {
-    const destination = door.fx?.[0];
-    if (destination?.op === 'sail' && gateOf(destination.island)) door.hint += '. 이 섬에는 별도의 진입 관문이 있다';
+    const destination = door.fx.find((fx) => fx.op === 'sail');
+    if (destination?.op !== 'sail') continue;
+    if (gateOf(destination.island)) door.hint += ' · 별도의 진입 관문이 있다';
+    door.hint += ` · ${contentLabel[contentClass(destination.island)]}`;
+    const days = offshoreDays(from, destination.island);
+    if (days) door.hint += ` · 예상 ${days}일, 도중 보급 가능`;
   }
+  doors.push({ label: '이곳에 더 머문다', hint: '준비와 탐색을 이어 간다', fx: [{ op: 'log', text: '해도를 접고 계류 밧줄을 다시 묶었다.', weight: 'light' }] });
   return {
     id, kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: 'hero',
     title: '다음 항로', body: '{island}에서의 날들이 끝나 간다. 해도를 펼치자 갈 만한 섬이 몇 보인다. 어디로 뱃머리를 돌릴까.',
@@ -87,7 +125,9 @@ export function buildEntryGate(id: string): Turning | undefined {
 }
 
 export function requestArrival(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void {
+  if (s.passage?.from) s.hero.island = s.passage.from;
   s.passage = null;
+  if (island === '스릴러 바크') island = destinationAt(island, s.age);
   const gate = gateOf(island);
   if (gate && gate !== gateOf(s.hero.island) && !islandImmunity(s, island)) {
     const id = `${ENTRY_PREFIX}${gate}:${sea}:${route}:${island}:${s.hero.sea}:${s.hero.island}`;
@@ -103,8 +143,8 @@ export function requestArrival(s: Life5, island: string, sea: SeaId, route: Arri
 }
 
 export function hasEntryContact(s: Life5, gate: 'fishman' | 'zou'): boolean {
-  if (gate === 'zou') return s.flags.includes(ZOU_CARD);
-  return s.flags.includes(COATING_CONTACT) || s.people.some((p) => p.alive && p.canon === 'hatchan'
+  if (gate === 'zou') return s.flags.includes(ZOU_CARD) || s.flags.includes('route:zou');
+  return s.flags.includes('route:coating') || s.flags.includes(COATING_CONTACT) || s.people.some((p) => p.alive && p.canon === 'hatchan'
     && (p.kind === 'ally' || p.kind === 'crew'));
 }
 
@@ -114,6 +154,7 @@ function arrive(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void
   const priorGate = gateOf(h.island);
   const gate = gateOf(island);
   const immune = islandImmunity(s, island);
+  if (portOf(h.island) !== portOf(island)) s.flags = s.flags.filter(f => f !== DEFERRED_ROUTE);
   h.island = island;
   h.sea = sea;
   if (gate !== 'sky') delete h.skyAcclimating;
@@ -161,7 +202,8 @@ export function resolveEntry(s: Life5, e: Extract<Fx, { op: 'entry' }>): void {
   const r = rngOf(s.rng);
   const crew = s.people.flatMap((p) => p.alive && p.kind === 'crew' && p.crew ? [p.crew] : []);
   const navigator = crew.some((p) => p.role === 'navigator' && p.injuredMonths <= 0 && !p.separatedMonths);
-  const seamanship = h.base.int + (navigator ? 10 : 0);
+  const reinforced = e.gate === 'sky' && s.flags.includes('route:sky');
+  const seamanship = h.base.int + (navigator ? 10 : 0) + (reinforced ? 10 : 0);
   const hurt = (hp: number, heavy = false) => {
     h.hp = Math.max(1, h.hp - hp);
     const severity = heavy ? 'heavy' : 'light';

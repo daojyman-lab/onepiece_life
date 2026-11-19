@@ -81,6 +81,11 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
     lines: ['짙은 안개가 걷히지 않았다. 해가 뜨는지 지는지도 알 수 없었다.', '안개 속에서 누군가 웃는 소리가 들렸다. 돌아보면 아무도 없었다.'],
     approach: { tilt: { fog: +30, clear: -20 }, arrive: '안개 속에서 섬만 한 배가 소리 없이 다가왔다. 마의 삼각지대였다.' },
   },
+  '플로리안 트라이앵글': {
+    name: '마의 삼각지대', p: 0.35, hp: -2,
+    lines: ['안개에 젖은 뱃전에서 물시계만 내려다보았다.', '낡은 부표에서 녹슨 종이 울렸다. 그 너머에 무엇이 있는지는 보이지 않았다.'],
+    approach: { tilt: { fog: +30, clear: -20 }, arrive: '견시대 아래까지 안개가 차올랐다. 낡은 부표만 남은 마의 삼각지대에 닿았다.' },
+  },
   '어인섬': FISHMAN, '어인가': FISHMAN, '류구 왕국': FISHMAN, '바다의 숲': FISHMAN,
   '아마존 릴리': {
     name: '바람 없는 바다의 섬', p: 0.2,
@@ -98,7 +103,7 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
     name: '정열의 나라', p: 0.15,
     lines: ['한낮의 볕이 뜨겁고 바람은 꽃향기로 가득했다.', '광장마다 탱고 가락이 흘렀다. 장난감들이 사람처럼 거리를 걸어 다녔다.'],
   },
-  '조': {
+  '조우': {
     name: '코끼리 등 위의 섬', p: 0.35, hp: -2, natives: ['mink'],
     lines: ['줌보가 크게 걸음을 내딛자 온 땅이 한쪽으로 기울었다.', '거대한 코끼리가 몸을 씻는지 하늘에서 소나기 같은 물이 쏟아졌다.',
       '천 년을 걸었다는 코끼리 등 위에도 숲과 강이 있었다.'],
@@ -125,6 +130,4 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
     approach: { tilt: { anomaly: +10, storm: +10, clear: -20 } },
   },
 };
-ISLAND_CLIMATE['조우'] = ISLAND_CLIMATE['조'];   // 조우 고향의 섬 이름
-
-export const climateOf = (island: string): IslandClimate | undefined => ISLAND_CLIMATE[island];
+export const climateOf = (island: string): IslandClimate | undefined => ISLAND_CLIMATE[island === '조' ? '조우' : island];

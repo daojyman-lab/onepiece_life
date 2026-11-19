@@ -81,7 +81,7 @@ describe('인연에서 시작하는 무기술', () => {
   });
 
   it('같은 무기술의 새 유파도 숙련을 빌리지 않고 실제 수련만 해당 유파에 더한다', () => {
-    const s = newLife5(5); s.age = 22;
+    const s = newLife5(5, { home: 'loguetown' }); s.age = 22;
     learn(s, 'spear');
     applyFx(s, [{ op: 'mastery', branch: 'polearm', add: 180 }]);
     const spear = s.growth.styleMastery.spear;
@@ -129,7 +129,7 @@ describe('인연에서 시작하는 무기술', () => {
 
   it('21개 유파 모두 만남→실제 연습→주력 선택→숙련 후 재회를 플레이할 수 있다', () => {
     for (const def of COMBAT_STYLES) {
-      const s = newLife5(2); s.age = 20; s.pending = null;
+      const s = newLife5(2, { home: 'loguetown' }); s.age = 20; s.pending = null;
       const meet = STYLE_TURNINGS.find((t) => t.id === `style_meet_${def.id}`)!;
       for (const c of meet.when) {
         if (c.c === 'age') s.age = Math.min(c.max ?? Infinity, Math.max(c.min ?? 0, s.age));
