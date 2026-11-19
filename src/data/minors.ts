@@ -19,6 +19,7 @@ const FREE: Standing[] = ['civil', 'pirate', 'marine', 'revolution', 'bountyHunt
 const free: Cond = { c: 'standing', is: FREE };
 const ashore: Cond = { c: 'standing', is: ['civil', 'shipwright', 'settled', 'bountyHunter', 'retired'] };
 const crew: Cond = { c: 'standing', is: ['pirate', 'marine', 'revolution'] };
+const equippedWeapon: Cond = { c: 'equippedWeapon' };
 const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 const money = (min: number): Cond => ({ c: 'money', min });
 /** 이 가치관이 깊으면 이 결과는 고르지 않는다 */
@@ -338,8 +339,8 @@ export const MINORS: Minor[] = ([
   {
     id: 'm_gear', when: [adult, free, money(10000)], weight: 5, cooldownYears: 2,
     outcomes: [
-      { lean: { greed: 1 }, text: ['모은 돈을 털어 손에 꼭 맞는 무기를 새로 장만했다.', '대장간에 몇 번이고 드나들며 새 무기를 손에 맞게 고쳤다.'], fx: [{ op: 'money', add: -8000 }] },
-      { lean: { romance: 0.7, loyalty: 0.3 }, text: ['낡은 무기를 버리지 못하고 대장간에 맡겨 고쳐 썼다.', '손때 묻은 무기의 손잡이만 새로 감아 계속 썼다.'], fx: [{ op: 'money', add: -2000 }] },
+      { lean: { greed: 1 }, text: ['새 여행 가방을 샀다. 돈주머니를 넣을 안주머니부터 확인했다.', '장터에서 비를 맞아도 안쪽까지 젖지 않는 가방을 골랐다.'], fx: [{ op: 'money', add: -8000 }] },
+      { lean: { romance: 0.7, loyalty: 0.3 }, when: [equippedWeapon], text: ['{weapon}을(를) 공방에 맡겼다. 장인은 낡은 부분만 손보고 오래된 흠집은 남겨 두었다.', '장인이 손질을 마친 {weapon}을(를) 내밀었다. 손때 묻은 자리가 그대로였다.'], fx: [{ op: 'money', add: -2000 }] },
       { lean: {}, text: ['닳은 장화를 새것으로 바꿨다.', '해진 외투를 새로 맞췄다.'], fx: [{ op: 'money', add: -1500 }] },
     ],
   },
@@ -536,7 +537,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { loyalty: 1 }, text: ['지친 선원의 몫까지 밤새 망루를 지켰다.', '몸이 성치 않은 선원을 해먹으로 돌려보내고 대신 보초를 섰다.'], fx: [{ op: 'hp', add: -2 }] },
       { lean: { romance: 1 }, text: ['망루에 앉아 별빛 쏟아지는 밤바다를 보며 콧노래를 불렀다.', '밤바다 너머 아직 가 보지 못한 항로를 손가락으로 그려 보았다.'], fx: [] },
-      { lean: { ambition: 1 }, text: ['모두 잠든 갑판에서 혼자 무기를 휘두르며 감을 다듬었다.', '보초를 서는 내내 수배서 뭉치를 넘기며 이름난 해적들의 얼굴을 외웠다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['모두 잠든 갑판에서 혼자 당직을 서며 수평선을 살폈다.', '보초를 서는 내내 수배서 뭉치를 넘기며 이름난 해적들의 얼굴을 외웠다.'], fx: [] },
       { lean: {}, text: ['찬 밤바람을 맞으며 교대 때까지 망루를 지켰다.', '졸음을 참으며 밤새 파도 소리를 들었다.'], fx: [] },
     ],
   },
@@ -629,7 +630,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { ambition: 1 }, text: ['일과가 끝난 뒤에도 연병장에 남아 모래주머니를 차고 달렸다.', '진급 심사를 앞두고 교관에게 대련을 청했다.'], fx: [] },
       { lean: { loyalty: 1 }, text: ['구보 중 발목을 삔 신병을 부축해 끝까지 같이 뛰었다.', '사격 자세가 서툰 후임 곁에 남아 해 질 때까지 봐 주었다.'], fx: [] },
-      { lean: { freedom: 1 }, text: ['제식 훈련 도중 대열을 빠져나와 지붕 위에서 낮잠을 잤다.', '교관의 잔소리를 흘려듣고 제 방식대로 무기를 다뤘다.'], fx: [] },
+      { lean: { freedom: 1 }, text: ['제식 훈련 도중 대열을 빠져나와 지붕 위에서 낮잠을 잤다.', '교관이 구령을 붙이기도 전에 제 박자대로 먼저 걸어 나갔다.'], fx: [] },
       { lean: {}, text: ['구령에 맞춰 연병장을 돌며 그날 훈련을 마쳤다.', '땀에 젖은 군복을 털고 식당으로 향했다.'], fx: [] },
     ],
   },
@@ -765,7 +766,7 @@ export const MINORS: Minor[] = ([
     id: 'm_hunter_stakeout', when: [adult, st('bountyHunter')], weight: 7, cooldownYears: 2,
     outcomes: [
       { lean: { ambition: 1 }, text: ['비 오는 지붕 위에서 밤새 꼼짝 않고 수배범을 기다렸다.', '배고픔을 참으며 은신처 길목을 해가 뜰 때까지 지켰다.'], fx: [{ op: 'hp', add: -2 }] },
-      { lean: { romance: 1 }, text: ['달빛 아래 무기를 닦으며 사냥이 끝나면 갈 낯선 섬을 떠올렸다.', '지루한 잠복 중에 옛 전설 속 사냥꾼 이야기를 혼자 중얼거렸다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['달빛 아래 지도를 펴고 사냥이 끝나면 갈 섬을 골랐다.', '지루한 잠복 중에 옛 전설 속 사냥꾼 이야기를 혼자 중얼거렸다.'], fx: [] },
       { lean: { freedom: 1 }, text: ['잠복이 길어지자 미련 없이 털고 일어나 다른 길을 찾았다.', '숨어 기다리는 대신 소굴 문을 직접 두드렸다.'], fx: [] },
       { lean: {}, text: ['창고 그늘에 몸을 숨기고 수배범의 배가 들어오기를 기다렸다.', '외투 깃을 세우고 수배범이 자주 가는 거리를 지켜보았다.'], fx: [] },
     ],
@@ -946,12 +947,12 @@ export const MINORS: Minor[] = ([
   },
   // ---------------- 은퇴한 사람
   {
-    id: 'm_retired_old_weapon', when: [st('retired')], weight: 8, cooldownYears: 1,
+    id: 'm_retired_old_weapon', when: [st('retired'), equippedWeapon], needs: ['arms'], weight: 8, cooldownYears: 1,
     outcomes: [
-      { lean: { ambition: 1 }, text: ['녹슬지 않게 옛 무기를 갈고 마당에서 백 번 휘둘렀다.', '무거운 옛 무기를 들어 보며 아직 할 만하다고 웃었다.'], fx: [] },
-      { lean: { romance: 1 }, text: ['무기에 난 흠집을 하나씩 쓰다듬으며 옛 싸움을 떠올렸다.', '벽에 걸린 옛 무기를 보며 그 시절 뱃노래를 흥얼거렸다.'], fx: [] },
-      { lean: { peace: 1 }, text: ['기름칠을 마친 옛 무기를 궤짝 깊이 넣고 자물쇠를 채웠다.', '옛 무기를 헛간 구석에 치우고 다시 꺼내지 않기로 했다.'], fx: [] },
-      { lean: {}, text: ['궤짝에서 옛 장비를 꺼내 마른 천으로 먼지를 닦았다.', '볕 좋은 마당에 옛 장비를 늘어놓고 말렸다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['마당에서 {weapon}을(를) 들어 보았다. 팔을 내린 뒤에도 손에는 묵직한 감각이 남았다.', '{weapon}을(를) 든 채 천천히 돌아선 뒤 아직 할 만하다고 웃었다.'], fx: [] },
+      { lean: { romance: 1 }, text: ['{weapon}에 난 자국을 따라 손가락을 움직였다.', '{weapon}을(를) 닦고 천에 싸면서 콧노래를 흥얼거렸다.'], fx: [] },
+      { lean: { peace: 1 }, text: ['손질을 마친 {weapon}을(를) 마른 천에 싸 두었다.', '{weapon}을(를) 한쪽에 내려놓고 달아오른 손을 찻잔에 감쌌다.'], fx: [] },
+      { lean: {}, text: ['마른 천으로 {weapon}에 앉은 먼지를 닦았다.', '볕 좋은 마당에 앉아 {weapon}에 맺힌 이슬을 닦았다.'], fx: [] },
     ],
   },
   {

@@ -1,11 +1,14 @@
 // 자동 전투 창 (v4 src/ui/modals/BattleModal.tsx의 hpAt · line을 옮긴다).
 import { battleEventProse, battleOpening, type BattleProseLine } from '../../shared/core/combat/narrative';
 import { B } from '../../shared/data/balance';
+import { ITEM_BY_ID } from '../../shared/data/items';
+import { DEFAULT_STYLE, MARTIAL_BRANCHES, STYLE_BRANCH_ID } from '../../data/combat-styles';
+import { equippedWeapon } from '../../core/styles';
 export { battleNarrative, battleOpening } from '../../shared/core/combat/narrative';
-import { weaponOfSkills, type Who } from '../pixel/pixelArt';
+import { weaponOfSkills, weaponOfStyle, type Weapon, type Who } from '../pixel/pixelArt';
 import type { Life5 } from '../../core/types';
 import type { BattleEvent, BattleState, CUnit } from '../../shared/core/types';
-import { heroWho5 } from './faces';
+import { heroWho5, itemSprite } from './faces';
 
 /** 물약(item 'potion')이 되돌리는 체력의 몫 (v4와 같다) */
 const POTION_HEAL = 0.3;
@@ -47,9 +50,21 @@ export function battleLine(b: BattleState, e: BattleEvent): string {
   return battleEventProse(b, e).text;
 }
 
-/** 전투 인물의 겉모습: 주인공이면 heroWho5 (몸의 표시까지) */
+/** 옛 전투는 물건 ID 대신 갈래와 성능만 기록했다. 현재 장비와 제원이 다르면 갈래 그림만 쓴다. */
+function battleWeapon(s: Life5, weapon: CUnit['weapon']): Weapon {
+  if (!weapon) return 'fist';
+  const item = weapon.id ? ITEM_BY_ID[weapon.id] : equippedWeapon(s);
+  if (item?.kind === 'weapon' && (item.id === weapon.id ||
+    (item.branch === weapon.branch && item.mult === weapon.mult && !!item.seastone === weapon.seastone))) {
+    return itemSprite(item);
+  }
+  const branch = MARTIAL_BRANCHES.find(b => STYLE_BRANCH_ID[b] === weapon.branch);
+  return branch ? weaponOfStyle(DEFAULT_STYLE[branch]) : 'fist';
+}
+
+/** 전투 시점의 무기와 주인공의 몸 표시를 함께 그린다. */
 export function unitWho(s: Life5, u: CUnit): Who {
-  if (u.hero) return heroWho5(s);
+  if (u.hero) return heroWho5(s, battleWeapon(s, u.weapon));
   return { key: u.faceKey || u.key + u.name, gender: u.gender, age: u.age, species: u.species, faction: u.faction, form: u.form, weapon: weaponOfSkills(u.skills.map((k) => k.id)) };
 }
 

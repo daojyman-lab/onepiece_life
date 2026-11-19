@@ -260,7 +260,7 @@ export const LINES: DailyLine5[] = [
   L([grown, st('bountyHunter')], { freedom: 1 }, '마음에 들지 않는 의뢰는 값이 커도 받지 않았다.'),
   L([grown, st('bountyHunter'), fierce], { dominion: 1 }, '구역을 넘본 사냥꾼을 때려눕히고 {island}에서 쫓아냈다.'),
   L([grown, st('bountyHunter'), calm], { peace: 1 }, '시비를 거는 술꾼을 비켜 빈자리에서 조용히 밥을 먹었다.'),
-  L([grown, st('bountyHunter')], {}, '무기를 손질하고 시장에 도는 소문을 들으러 나갔다.'),
+  L([grown, st('bountyHunter'), { c: 'equippedWeapon' }], {}, '{weapon}을(를) 손질하고 시장에 도는 소문을 들으러 나갔다.'),
   // ---------------- 조선공
   L([grown, st('shipwright')], { romance: 1 }, '수리비가 모자란 어부의 배를 저녁 늦게까지 남아 고쳐 주었다.'),
   M([grown, st('shipwright')], { greed: 1 }, '새 목재 값을 받고 헌 목재를 끼워 넣었다.', 3000),

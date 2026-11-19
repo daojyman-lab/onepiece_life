@@ -5,7 +5,7 @@ import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
 import { answerDoor } from './turning';
 import { stepPart } from './year';
-import { selectStyle } from './styles';
+import { equipWeapon, selectStyle } from './styles';
 import type { Command5, Life5 } from './types';
 
 /**
@@ -23,6 +23,7 @@ export function cloneLife(prev: Life5): Life5 {
 export function apply5(s: Life5, cmd: Command5): void {
   switch (cmd.type) {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;
+    case 'equipWeapon': if (s.hero.alive && !s.pending) equipWeapon(s, cmd.id); break;
     case 'traits': selectTraits(s, cmd.ids); break;
     case 'step': if (s.pending === null) stepPart(s); break;
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;

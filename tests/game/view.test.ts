@@ -3,6 +3,9 @@ import { ageWord, battleFormation, battleLine, codexView, doorView, endingView, 
 import type { BattleEvent } from '../../src/shared/core/types';
 import { TURNINGS } from '../../src/data/turnings';
 import { askFight } from '../../src/core/fight';
+import { apply5 } from '../../src/core/reduce';
+import { normalizeLife5 } from '../../src/core/load';
+import { receiveWeapon } from '../../src/core/styles';
 import { VALUE_NAME } from '../../src/data/values';
 import type { Pending5 } from '../../src/core/types';
 import { newLife5 } from '../../src/core/state';
@@ -48,6 +51,62 @@ describe('가치관은 말로만', () => {
 });
 
 describe('프로필', () => {
+  it('새 인생과 무기 없는 유파의 주무기는 가진 장비에 맞춰 표시한다', () => {
+    const s = newLife5(1);
+    expect(profileView(s).weapon).toBe('맨손');
+    s.growth.primaryStyle = 'spear';
+    s.growth.tier.polearm = 3;
+    expect(profileView(s)).toMatchObject({ weapon: '장착한 무기 없음', path: '무기술 · 창술' });
+    expect(heroWho5(s).weapon).toBe('fist');
+  });
+  it('강철창을 보관하고 권법으로 전향하면 인물과 장면이 함께 바뀐다', () => {
+    const s = newLife5(1);
+    s.pending = null;
+    s.growth.primaryStyle = 'spear';
+    s.growth.tier.polearm = s.growth.tier.fist = 1;
+    s.growth.styleMastery = { spear: 100, boxing: 100 };
+    receiveWeapon(s, 'sp2');
+    const equipped = () => [profileView(s).weapon, sceneOf(s, false).hero.weapon];
+    expect(equipped()).toEqual(['이름난 강철창', 'spear']);
+    apply5(s, { type: 'style', style: 'boxing' });
+    expect(equipped()).toEqual(['맨손', 'fist']);
+    expect(profileView(s).path).toBe('체술 · 권법');
+    apply5(s, { type: 'style', style: 'spear' });
+    expect(equipped()).toEqual(['이름난 강철창', 'spear']);
+  });
+  it('유파가 없던 저장에서도 실제 장비로 인물 이름표와 전투 그림을 고른다', () => {
+    const old = newLife5(1);
+    old.hero.weapon = 'gu3';
+    old.growth.tier.sword = 4;
+    delete (old.growth as Partial<typeof old.growth>).styleMastery;
+    const s = normalizeLife5(JSON.parse(JSON.stringify(old)))!;
+    s.pending = null as Pending5;
+    s.age = 20;
+    askFight(s, 'b_alvida', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    expect(profileView(s).weapon).toBe('장거리 저격총');
+    expect(unitWho(s, s.pending.battle.units.find(u => u.hero)!).weapon).toBe('sniper');
+  });
+  it('전투 재생은 전투가 시작될 때 기록한 장비를 그린다', () => {
+    const s = newLife5(9);
+    s.age = 20;
+    s.pending = null as Pending5;
+    receiveWeapon(s, 'gu3');
+    askFight(s, 'b_alvida', false, true);
+    if (s.pending?.kind !== 'battle') throw new Error();
+    const unit = s.pending.battle.units.find(u => u.hero)!;
+    s.hero.weapon = 'sw2';
+    expect(heroWho5(s).weapon).toBe('sword');
+    expect(unitWho(s, unit).weapon).toBe('sniper');
+    expect(sceneOf(s, true).hero.weapon).toBe('sniper');
+    if (!unit.weapon) throw new Error();
+    delete unit.weapon.id;
+    expect(unitWho(s, unit).weapon).toBe('gun');
+    s.hero.weapon = 'gu3';
+    expect(unitWho(s, unit).weapon).toBe('sniper');
+    unit.weapon = null;
+    expect(sceneOf(s, true).hero.weapon).toBe('fist');
+  });
   it('확정된 부성향이 과거의 최고 점수와 달라도 현재 칸으로 호칭을 붙인다', () => {
     const s = newLife5(9);
     s.hero.standing = 'pirate'; s.hero.fame = 60;

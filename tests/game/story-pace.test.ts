@@ -31,21 +31,34 @@ function hops(seed: number): Hop[] {
   const s = newLife5(seed, {});
   const r = rngOf({ seed: seed * 7, cursor: 0 });
   const out: Hop[] = [];
-  let prev: string | null = null; let gap = 0; let ageAt = 0; let header = false;
+  let prev: string | null = null; let gap = 0; let ageAt = 0; let header = false; let calendarAdvanced = false;
   for (let i = 0; i < 20000 && !s.ended; i++) {
     const was = s.pending;
     const queued = s.queue.slice();
+    const seenBefore = queued.map(id => s.seenCount[id] ?? 0);
+    const ageBefore = s.age, partBefore = s.part;
+    const waitingForEvidence = !!s.lifeStory?.wait;
+    const interlude = s.storyRest > 0 && queued.some((id) => id.startsWith('ep_'));
     const lastLog = s.log.at(-1)?.id ?? -1;
     apply5(s, s.pending ? { type: 'answer', index: choose(s, 'random', r) } : { type: 'step' });
     if (s.log.some((l) => l.id > lastLog && l.type === 'info' && l.text.startsWith('── ') && /막|에필로그/.test(l.text))) header = true;
     if (was) continue;
+    // 증인 조사처럼 실제 한 철이 필요한 생애 사건은 장편 사이의 연출 쉼이 아니다.
+    // 달력이 진행됐다면 그 앞뒤 장면을 연속된 장편 장면으로 비교하지 않는다.
+    if (s.age !== ageBefore || s.part !== partBefore) {
+      if (!interlude && waitingForEvidence) { prev = null; gap = 0; header = false; calendarAdvanced = false; }
+      else if (prev && queued.some((id) => id.startsWith('ep_'))) calendarAdvanced = true;
+    }
     const p = s.pending;
-    if (p?.kind === 'door' && p.turning.startsWith('ep_')) {
-      if (prev && queued.includes(p.turning)) out.push({ prev, id: p.turning, gap, aged: s.age !== ageAt, header });
-      prev = p.turning; gap = 0; ageAt = s.age; header = false;
+    // 그리지오의 사무실은 힘이 모자라면 선택창 없이 바로 전투를 연다. 이때도 막의 한 장면이 열렸다.
+    const opened = p?.kind === 'door' && p.turning.startsWith('ep_') ? p.turning
+      : queued.find((id, j) => id.startsWith('ep_') && s.seenCount[id] > seenBefore[j]);
+    if (opened) {
+      if (prev && queued.includes(opened)) out.push({ prev, id: opened, gap, aged: s.age !== ageAt || calendarAdvanced, header });
+      prev = opened; gap = 0; ageAt = s.age; header = false; calendarAdvanced = false;
     } else if (prev && !s.pending) {             // 다른 일(부상의 계기 등)이 끼어든 토막은 세지 않는다
-      gap++;
-      if (!s.queue.some((q) => q.startsWith('ep_')) && gap > V.story.act[1]) prev = null;   // 장편이 끝났다
+      if (interlude) gap++;
+      if (!s.queue.some((q) => q.startsWith('ep_')) && !s.lifeStory?.wait) prev = null;
     }
   }
   return out;
@@ -54,6 +67,10 @@ function hops(seed: number): Hop[] {
 describe('장면 사이의 시간', () => {
   const all = Array.from({ length: 150 }, (_, i) => hops(100 + i)).flat();
   const kind = (h: Hop) => (STORY_PACE[h.id].cont ? 'cont' : STORY_PACE[h.prev].act === STORY_PACE[h.id].act ? 'beat' : 'act');
+
+  it('일반 추첨으로 열린 첫 장면부터 다음 장면의 쉼을 센다', () => {
+    expect(all.some((h) => h.prev === 'ep_loguetown_c1' && h.id === 'ep_loguetown_c2')).toBe(true);
+  });
 
   it('시뮬레이션에서 세 경우가 모두 충분히 나온다', () => {
     for (const k of ['cont', 'beat', 'act']) expect(all.filter((h) => kind(h) === k).length, k).toBeGreaterThan(20);
@@ -75,7 +92,7 @@ describe('장면 사이의 시간', () => {
       expect(h.header, `${h.prev} → ${h.id}`).toBe(true);
     }
   });
-  it('장면 사이의 시간에는 나이를 먹지 않는다', () => {
+  it('장면 사이의 연출 쉼에는 달력이 진행되지 않는다', () => {
     expect(all.filter((h) => h.aged).map((h) => `${h.prev} → ${h.id}`)).toEqual([]);
   });
 });

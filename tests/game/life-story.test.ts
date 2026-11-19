@@ -113,7 +113,21 @@ describe('준비와 결과가 다른 생애를 만든다', () => {
     expect(heroUnit5(s).skills.some((skill) => skill.id.startsWith('style:oneSword:'))).toBe(true);
   });
   it('동일 출생의 일반 새 게임에서 세 해결법과 재회·전수까지 상태 조작 없이 도달한다', () => {
-    const lives = (['guard', 'duel', 'evidence'] as const).map((mode) => playLifeCourse(16, mode));
+    const modes = ['guard', 'duel', 'evidence'] as const;
+    let lives: Life5[] | undefined;
+    // 체포·사망 주사위가 달라져도 세 갈래를 모두 끝까지 살 수 있는 동일 출생을 찾는다.
+    // 상태를 주입하지 않으며, 어느 출생에서도 전수가 불가능하면 유한 탐색이 실패한다.
+    for (let seed = 1, tried = 0; seed <= 3200 && tried < 80; seed++) {
+      if (newLife5(seed, { home: 'loguetown' }).hero.town !== '로그타운') continue;
+      tried++;
+      const candidates = modes.map((mode) => playLifeCourse(seed, mode));
+      if (candidates.every((s, i) => {
+        const ids = s.lifeStory?.events.map((e) => e.id) ?? [];
+        const resolved = i === 0 ? ids.includes('escort') : i === 1 ? ids.includes('duel_won') || ids.includes('duel_lost') : ids.includes('evidence');
+        return resolved && ids.includes('legacy');
+      })) { lives = candidates; break; }
+    }
+    if (!lives) throw new Error('동일 출생에서 세 해결법과 전수까지 이어지는 생애를 찾지 못했다');
     expect(lives.map((s) => s.hero.town)).toEqual(['로그타운', '로그타운', '로그타운']);
     const duelResult = lives[1].lifeStory!.events.some((e) => e.id === 'duel_won') ? 'duel_won' : 'duel_lost';
     const expected = ['escort', duelResult, 'evidence'];

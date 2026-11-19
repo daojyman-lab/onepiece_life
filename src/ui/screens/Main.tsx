@@ -199,8 +199,13 @@ function Profile({ s }: { s: Life5 }) {
         <div class="t9 soft">{yearLabel(at)} · {stageName(s, age)}</div>
         <div class="row" style={{ justifyContent: 'center', marginTop: 4 }}><span class="tag">{p.who}</span><span class="tag">{p.standing}</span>{p.role && <span class="tag">{p.role}</span>}</div>
         {p.fame && <div style={{ marginTop: 4 }}><b>{p.fame}</b></div>}
+        <dl class="profile-gear">
+          <dt>주무기</dt><dd><b>{p.weapon}</b></dd>
+          <dt>{s.growth.primaryStyle || !p.path ? '주력 유파' : '주력 갈래'}</dt><dd>{p.path ?? '아직 정하지 않음'}</dd>
+        </dl>
       </div>
       <div class="stack" style={{ marginTop: 8 }}>
+        <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         <div class="t9">{p.born}</div>
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
@@ -211,14 +216,11 @@ function Profile({ s }: { s: Life5 }) {
         <PersonalityMap s={s} />
         {p.strengths.map((x) => <div key={x.name} class="t9"><b>{x.name}</b> <span class="soft">· {x.text}</span></div>)}
         {p.body.length > 0 && <div class="t9"><b>몸</b> {p.body.map((b) => `${b.limb} ${b.word}`).join(' · ')}</div>}
-        {p.path && <div class="t9"><b>주력</b> {p.path}</div>}
-        <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
         {lifeProgress(s).length > 0 && <div class="paper t9"><b>약속에서 이어진 수련</b>{lifeProgress(s).map((line) => <div key={line}>{line}</div>)}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
-        {p.weapon && <div class="t9"><b>무기</b> {p.weapon}</div>}
         <div class="t9"><b>전투력</b> {p.power}</div>
         <div class="row between"><span>돈</span><b class={s.hero.money < 0 ? 'red' : ''}>{p.money}</b></div>
         <div>

@@ -117,6 +117,7 @@ describe('인연에서 시작하는 무기술', () => {
   it('조선공만 해머의 직업 인연을 시작하고 거절하면 무기나 스승을 얻지 않는다', () => {
     const s = newLife5(8); s.age = 20; s.pending = null;
     const t = STYLE_TURNINGS.find((t) => t.id === 'style_meet_hammer')!;
+    s.hero.island = '워터 세븐';
     s.hero.standing = 'civil'; expect(checkAll(s, t.when)).toBe(false);
     s.hero.standing = 'shipwright'; expect(checkAll(s, t.when)).toBe(true);
     const people = s.people.length;
@@ -131,6 +132,7 @@ describe('인연에서 시작하는 무기술', () => {
       const s = newLife5(2); s.age = 20; s.pending = null;
       const meet = STYLE_TURNINGS.find((t) => t.id === `style_meet_${def.id}`)!;
       for (const c of meet.when) {
+        if (c.c === 'age') s.age = Math.min(c.max ?? Infinity, Math.max(c.min ?? 0, s.age));
         if (c.c === 'island' && !c.not) s.hero.island = c.is[0];
         if (c.c === 'standing') s.hero.standing = c.is[0];
         if (c.c === 'sea') s.hero.sea = c.is[0];
@@ -230,6 +232,8 @@ describe('인연에서 시작하는 무기술', () => {
 
   it('기초 연습과 주력 채택만으로 특정 신념을 강요하지 않는다', () => {
     const s = newLife5(2); s.age = 20; s.pending = null;
+    s.hero.island = '시모츠키 마을';
+    s.stats.wins = 5;
     const values = { ...s.values };
     const meet = STYLE_TURNINGS.find((t) => t.id === 'style_meet_oneSword')!;
     expect(openTurning(s, meet)).toBe(true); answerDoor(s, 0);

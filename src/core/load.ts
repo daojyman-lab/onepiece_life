@@ -14,6 +14,8 @@ import { emptyLife } from './state';
 import { normalizeStyles } from './styles';
 import { isCombatStyle } from '../data/combat-styles';
 import { discipleFor } from './disciples';
+import { restoreStoryDoor } from './turning';
+import { repairWeaponMentors } from '../data/episodes/contacts';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -72,7 +74,7 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
-  try { normalizeStyles(life, legacyStyles); } catch { return null; }
+  try { normalizeStyles(life, legacyStyles, !isObj(x.growth) || x.growth.weapons === undefined); } catch { return null; }
   if (life.disciples !== undefined) {
     if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
       typeof d.personId !== 'string' || !life.people.some(p => p.id === d.personId) || !isCombatStyle(d.style) ||
@@ -148,7 +150,21 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.age >= V.growth.pref.pathAge) g.path = mainBranch(life);
   }
   try {
-    return invariants5(life, true).length === 0 ? life : null;
+    if (invariants5(life, true).length) return null;
+    if (life.firstChoiceAge !== undefined && (!isObj(life.firstChoiceAge) ||
+        !Object.values(life.firstChoiceAge).every(age => Number.isInteger(age) && age >= 0 && age <= life.age))) return null;
+    // 첫 선택 나이가 없던 저장도 재개한 뒤 같은 창을 다시 열기 전에 과거 기록을 보존한다.
+    // 당시 마지막 개봉 때까지는, 이번 생에서 고른 것으로 남은 문을 적어도 한 번 골랐다.
+    for (const key of life.tried) {
+      if (life.firstChoiceAge?.[key] !== undefined) continue;
+      const lastVisit = life.seen[key.slice(0, key.lastIndexOf('#'))];
+      if (Number.isInteger(lastVisit) && lastVisit >= 0 && lastVisit <= life.age) {
+        (life.firstChoiceAge ??= {})[key] = lastVisit;
+      }
+    }
+    repairWeaponMentors(life);
+    restoreStoryDoor(life);
+    return life;
   } catch {
     return null;                               // 칸의 모양이 깨져 확인조차 못 하면 읽지 않는다
   }

@@ -1,27 +1,27 @@
 // 전환점과 문: 고를 수 있는 문을 풀고, 띄우고, 고른 답을 적용한다.
 import { buildEntryGate, buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX } from './voyage';
 import { josa } from '../shared/core/josa';
-import { fill } from '../shared/core/util';
 import { chance, int, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { CANON } from '../data/canon';
+import { ITEM_BY_ID } from '../shared/data/items';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
 import { STORY_PACE } from '../data/episodes/pacing';
 import { VALUE_DEEPEN, VALUE_LEAN, VALUE_NAME } from '../data/values';
 import { checkAll, whyNot } from './cond';
-import { applyFx } from './fx';
-import { needsOk, whyNeed } from './needs';
+import { applyFx, fillText } from './fx';
+import { livingContact, needsOk, whyNeed } from './needs';
 import { logLine } from './state';
 import { addValues, isDeep, opensSpecial } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
 import { advanceVow, canBeginVow, recordVowChoice } from './vow';
-import { afterLifeStoryChoice, lifeOutcome } from './life-story';
+import { afterLifeStoryChoice } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
 import { recordTraitEvent, tradeCost } from './traits';
-import { discipleFor, discipleReady, discipleWords } from './disciples';
-import type { Life5, ResolvedDoor, Turning } from './types';
+import { discipleFor, discipleReady } from './disciples';
+import type { Door, Life5, ResolvedDoor, Turning } from './types';
 
 /**
  * 데이터에 없는 전환점(시험에서 바로 만든 것 등)을 띄웠을 때 답을 찾아갈 곳.
@@ -32,34 +32,84 @@ export const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] 
 
 /** 자리표시 {name}(이름만) {town} {island} {parent}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
 function fillTurning(s: Life5, text: string, t?: Turning): string {
-  const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  const parent = s.people.find((p) => p.alive && (p.relation === '아버지' || p.relation === '어머니'))?.relation ?? '';
   const discipleId = t?.disciple ? discipleFor(s, t.disciple)?.personId : undefined;
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent, lifeOutcome: lifeOutcome(s), ...discipleWords(s, discipleId) });
+  return fillText(s, text, discipleId);
 }
 
 function speakerOf(s: Life5, t: Turning): string {
-  if (t.disciple && t.disciple !== 'meeting') return s.people.find(p => p.id === discipleFor(s, t.disciple!)?.personId)?.name ?? '제자';
+  if (t.disciple && t.disciple !== 'meeting') {
+    const pupil = discipleFor(s, t.disciple);
+    return s.people.find(p => p.id === pupil?.personId)?.name ?? '제자';
+  }
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
   if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
-  return s.people.find((p) => p.alive && (p.relation === sp.relation || p.aliases?.includes(sp.relation)))?.name ?? sp.relation;
+  return livingContact(s, sp)?.name ?? ('relation' in sp ? sp.relation : s.hero.name);
 }
 
-/** 지금 이 사람에게 문이 어떻게 보이는지: 잠겼는지, 왜 잠겼는지, 지난 인생들에서 골라 본 적이 있는지 */
+function knownSpeakerIsDead(s: Life5, t: Turning): boolean {
+  const sp = t.speaker;
+  if (typeof sp !== 'object' || !('canon' in sp)) return false;
+  return s.people.some(p => p.canon === sp.canon && !p.alive) && !s.people.some(p => p.canon === sp.canon && p.alive);
+}
+
+function renderDoor(s: Life5, t: Turning, doors: ResolvedDoor[]): Extract<Life5['pending'], { kind: 'door' }> {
+  const disciple = t.disciple && discipleFor(s, t.disciple);
+  return { kind: 'door', turning: t.id, moment: t.kind === 'moment',
+    title: fillTurning(s, t.title, t), body: fillTurning(s, t.body, t), speaker: speakerOf(s, t), doors,
+    ...(disciple ? { discipleId: disciple.personId } : {}) };
+}
+
+/** 저장된 창의 지난 문구·잠금을 현재 사건 정의로 복원한다. 개봉 횟수나 도입 효과는 재실행하지 않는다. */
+export function restoreStoryDoor(s: Life5): void {
+  const pending = s.pending;
+  if (pending?.kind !== 'door') return;
+  // 추첨에서 퇴역한 옛 질문의 age(999)는 새로 열리지 않게 하는 조건이다.
+  // 저장 당시 이미 열린 질문은 보존해 남겨 둔 옛 선택 효과로 마무리한다.
+  if (pending.turning === 'tmp_crocodile') return;
+  const t = turningOf(pending.turning);
+  if (!t) return;
+  const doors = resolveDoors(s, t);
+  const prereqs = t.when.filter(c => !(c.c === 'turningSeen' && c.id === t.id));
+  if (!checkAll(s, prereqs) || !needsOk(s, t.needs) || knownSpeakerIsDead(s, t) || !doors.some(d => !d.locked)) {
+    s.pending = null;
+    // 고르기 전에 무효화된 한 번뿐인 만남은, 실제로 조건이 갖춰지면 다시 열 수 있다.
+    if (s.seenCount[t.id] === 1 && !s.tried.some(k => k.startsWith(t.id + '#'))) {
+      delete s.seenCount[t.id];
+      delete s.seen[t.id];
+    }
+    return;
+  }
+  s.pending = renderDoor(s, t, doors);
+}
+
+export function refreshEntryDoor(s: Life5): void {
+  if (s.pending?.kind === 'door' && s.pending.turning.startsWith(ENTRY_PREFIX)) restoreStoryDoor(s);
+}
+
+function doorAccess(s: Life5, d: Door) {
+  const price = d.fx.reduce((sum, e) => {
+    if (e.op === 'buyWeapon') return sum + (ITEM_BY_ID[e.id]?.price ?? 0);
+    return e.op === 'money' && e.trade && e.add < 0 ? sum - e.add : sum;
+  }, 0);
+  const cost = price > 0 ? tradeCost(s, price) : 0;
+  const conditions = price > 0 ? d.when?.map(c => c.c === 'money' && c.min === price ? { ...c, min: cost } : c) : d.when;
+  let locked = whyNot(s, conditions) ?? whyNeed(s, d.needs);
+  if (!locked && price > 0 && cost > s.hero.money) locked = '거래 비용이 부족하다';
+  const start = d.fx.find(e => e.op === 'vowStart');
+  if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
+  const earned = d.when?.some(c => c.c === 'flag' && c.has);
+  if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
+  return { locked, cost };
+}
+
+/** 선택지를 띄울 때에만 실제 사람의 이름을 넣어 문장을 완성한다. */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
   return t.doors.map((d, i) => {
-    const price = d.fx.filter(e => e.op === 'money' && e.trade && e.add < 0).reduce((n, e) => n - (e as { add: number }).add, 0);
-    const conditions = d.when?.map(c => c.c === 'money' && price > 0 && c.min === price ? { ...c, min: tradeCost(s, price) } : c);
-    let locked = whyNot(s, conditions) ?? whyNeed(s, d.needs);
-    if (!locked && price > 0 && s.hero.money < tradeCost(s, price)) locked = '거래 비용이 부족하다';
-    const start = d.fx.find((e) => e.op === 'vowStart');
-    if (!locked && start?.op === 'vowStart' && !canBeginVow(s, start.id)) locked = '지금은 이 서약을 걸 수 없다';
-    const earned = (d.when ?? []).some((c) => c.c === 'flag' && c.has);   // 앞선 선택의 표시로 잠긴 문
-    if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
+    const { locked, cost } = doorAccess(s, d);
     const key = `${t.id}#${i}`;
     return {
-      label: fillTurning(s, d.label, t), hint: fillTurning(s, d.hint, t) + (price > 0 ? ` · 거래 ${tradeCost(s, price).toLocaleString('ko-KR')} 베리` : ''), locked,
+      label: fillTurning(s, d.label, t), hint: fillTurning(s, d.hint, t) + (cost > 0 ? ` · 거래 ${cost.toLocaleString('ko-KR')} 베리` : ''), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
@@ -82,6 +132,10 @@ export function stillOpen(s: Life5, t: Turning): boolean {
  * false를 돌려주고 아무것도 하지 않는다.
  */
 export function openTurning(s: Life5, t: Turning): boolean {
+  if (knownSpeakerIsDead(s, t)) return false;
+  const weaponScene = t.doors.some(d => d.fx.some(e =>
+    ['receiveWeapon', 'buyWeapon', 'giveAwayWeapon', 'beginStyle', 'adoptStyle', 'refineStyle'].includes(e.op)));
+  if (weaponScene && !checkAll(s, t.when)) return false;
   if (t.disciple && !discipleReady(s, t.disciple)) return false;
   if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
@@ -90,11 +144,7 @@ export function openTurning(s: Life5, t: Turning): boolean {
   storyOpening(s, t);
   for (const line of t.intro ?? []) logLine(s, fillTurning(s, line), 'light');
   const automatic = t.automatic && !checkAll(s, t.automatic.unless) ? t.automatic.fx : undefined;
-  if (!automatic) s.pending = {
-    kind: 'door', turning: t.id, moment: t.kind === 'moment',
-    title: fillTurning(s, t.title, t), body: fillTurning(s, t.body, t), speaker: speakerOf(s, t), doors,
-    ...(t.disciple ? { discipleId: discipleFor(s, t.disciple)?.personId } : {}),
-  };
+  if (!automatic) s.pending = renderDoor(s, t, doors);
   s.seen[t.id] = s.age;
   s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
   const trust = EPISODE_NATIVE_TRUST[t.id];
@@ -132,7 +182,7 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
-  return checkAll(s, t.when) && needsOk(s, t.needs) && resolveDoors(s, t).some((d) => !d.locked);
+  return checkAll(s, t.when) && !knownSpeakerIsDead(s, t) && needsOk(s, t.needs) && t.doors.some(d => !doorAccess(s, d).locked);
 }
 
 /** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
@@ -209,7 +259,7 @@ export function openQueued(s: Life5): boolean {
 export function pickTurning(s: Life5, r: Rng): Turning | null {
   const queued = takeQueued(s, false);
   if (queued) return queued;
-  const pool = TURNINGS.filter((t) => (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
+  const pool = TURNINGS.filter((t) => t.weight > 0 && (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
   const commerce = environmentOf(s)?.commerce?.events;
   return weighted(r, pool, (t) => commerce && t.doors.some((d) => tradeEffects(d.fx)) ? t.weight * commerce : t.weight);
 }
@@ -218,9 +268,10 @@ export function pickTurning(s: Life5, r: Rng): Turning | null {
 export function answerDoor(s: Life5, index: number): void {
   const p = s.pending;
   if (p?.kind !== 'door') return;
-  const chosen = p.doors[index];
   const t = turningOf(p.turning);
   const door = t?.doors[index];
+  if (t && door?.fx.some(e => e.op === 'buyWeapon')) p.doors = resolveDoors(s, t);
+  const chosen = p.doors[index];
   if (!chosen || chosen.locked || !t || !door) return;
   if (t.id.startsWith(ENTRY_PREFIX) && !checkAll(s, door.when)) return;
 
@@ -235,6 +286,7 @@ export function answerDoor(s: Life5, index: number): void {
     if (i !== index && !d.locked) s.unchosen.push({ age: s.age, turning: t.id, title: p.title, door: d.label });
   });
   const key = `${t.id}#${index}`;
+  (s.firstChoiceAge ??= {})[key] ??= s.age;
   if (!s.tried.includes(key)) s.tried.push(key);
   if (door.closes && !s.closed.includes(t.id)) s.closed.push(t.id);
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;

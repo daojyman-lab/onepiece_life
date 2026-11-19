@@ -149,13 +149,13 @@ export const TOWNS_2: Turning[] = [
 
   // ---------------------------------------------------------------- 시모츠키 마을: 코우시로의 도장, 쿠이나와 조로
   {
-    id: 'town_shimo_dojo', kind: 'door', when: kidIn(SHIMO, 6, 12), weight: 12, repeat: 'once', speaker: { canon: 'koshiro' },
+    id: 'town_shimo_dojo', kind: 'door', when: kidIn(SHIMO, 6, 12, { c: 'flag', id: 'leftDojo', has: false }), weight: 12, repeat: 'once', speaker: { canon: 'koshiro' },
     title: '시모츠키 도장', body: '마을의 도장에서 코우시로 사범이 아이들에게 칼을 가르친다. 문틈으로 목검 부딪히는 소리가 새어 나온다. 수업료를 못 내는 아이들은 대숲에서 동작을 훔쳐 배운다.',
     doors: [
       { label: '수업료를 내고 입문한다', hint: '사범의 가르침을 정식으로 받는다. 집안의 돈이 적잖이 든다', when: [RICH], values: { ambition: D },
-        fx: [{ op: 'money', add: -20000, trade: true }, { op: 'master', name: '코우시로 사범', branch: 'sword', cap: V.growth.paidCap, years: 6, paid: true }, { op: 'log', text: '수업료를 내고 도장 마루에 올랐다. 코우시로는 목검을 쥐는 손부터 고쳐 주고, 다음 날도 같은 자리에 서라고 했다.', weight: 'light' }] },
-      { label: '수업료 대신 도장 마당을 쓸고 물을 긷는다', hint: '해 뜨기 전부터 물동이를 진다. 사범은 일을 마친 아이에게만 목검을 쥐여 준다', values: { romance: D }, mark: 'unyielding',
-        fx: [{ op: 'hp', add: -10 }, { op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '해 뜨기 전 물을 긷고 마당을 쓴 뒤에야 목검을 받았다. 지친 팔로 휘두른 자세를 사범이 말없이 바로잡아 주었다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -20000, trade: true }, { op: 'master', name: '코우시로 사범', branch: 'sword', cap: V.growth.paidCap, years: 6, paid: true }, { op: 'log', text: '수업료를 내고 도장 마루에 올랐다. 수업을 마치고 빌린 목검을 걸어 두자 코우시로가 내일도 같은 자리에 서라고 했다.', weight: 'light' }] },
+      { label: '수업료 대신 도장 마당을 쓸고 물을 긷는다', hint: '새벽 일을 마치면 사범이 수업 동안 도장 목검을 빌려 준다', values: { romance: D }, mark: 'unyielding',
+        fx: [{ op: 'hp', add: -10 }, { op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '물을 긷고 마당을 쓴 뒤 목검을 빌려 수업에 들어갔다. 수업이 끝나자 사범이 도장 벽에 빈 자리를 내 주었다. 목검을 돌려 걸고 우물가로 갔다.', weight: 'light' }] },
       { label: '대숲에서 혼자 흉내 낸다', hint: '돈도 품도 들지 않는다. 잘못 익힌 자세에 손목을 삔다', values: { freedom: D },
         fx: [{ op: 'mastery', branch: 'sword', add: 6 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '대숲에서 본 동작을 따라 하다 손목을 삐었다. 붕대를 감고도 다음 수업 때 다시 문틈에서 발의 위치를 살폈다.', weight: 'light' }] },
     ],

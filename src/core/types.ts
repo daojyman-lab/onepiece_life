@@ -59,6 +59,7 @@ export interface Growth5 {
   styleMastery: Partial<Record<CombatStyle, number>>;
   styleFocus: Partial<Record<MartialBranch, CombatStyle>>;
   styleWeapons: Partial<Record<CombatStyle, string>>;
+  weapons: string[];                          // 보관 중이거나 장착한 실물 무기
   primaryStyle: CombatStyle | null;
   styleBonds: Partial<Record<CombatStyle, { teacherId: string; island: string; since: number; practice: number; adopted: boolean; refined: boolean }>>;
   tier: Record<Branch, number>;                // 연 오의 단계 0~6
@@ -79,6 +80,7 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'anyOf'; conditions: Cond[] }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
   | { c: 'lifePreparation'; mode: 'guard' | 'duel' }
@@ -93,9 +95,13 @@ export type Cond =
   | { c: 'money'; min: number }
   | { c: 'entryContact'; gate: 'fishman' | 'zou' }
   | { c: 'weapon'; id: string; has: boolean }
+  | { c: 'equippedWeapon' }
+  | { c: 'prime' }
   | { c: 'fame'; min: number }
   | { c: 'grade'; is: string[] }                 // 화면에 표시하는 종합 전투 등급
   | { c: 'turningSeen'; id: string; has: boolean } // 이 인생에서 해당 전환점을 이미 보았는가
+  | { c: 'choiceAgo'; turning: string; door: number; years?: number }
+  | { c: 'canonPerson'; id: string; has: boolean; kinds?: Person['kind'][] }
   | { c: 'tier'; branch: Branch | 'any'; min: number }
   | { c: 'flag'; id: string; has: boolean }
   | { c: 'fruit'; has: boolean }
@@ -115,7 +121,8 @@ export type Cond =
 
 export type Fx =
   | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
-  | { op: 'beginStyle' | 'adoptStyle' | 'refineStyle'; style: CombatStyle }
+  | { op: 'beginStyle'; style: CombatStyle; teacherRelation?: string }
+  | { op: 'adoptStyle' | 'refineStyle'; style: CombatStyle }
   | { op: 'lifeMilitary' }
   | { op: 'lifeEvent'; id: string; actor?: string }
   | { op: 'lifeWait'; ready: string; otherwise: string }
@@ -146,11 +153,13 @@ export type Fx =
   | { op: 'entryPass'; gate: EntryGate }
   | { op: 'deepWater' }
   | { op: 'buyWeapon'; id: string }
+  | { op: 'receiveWeapon'; id: string; stow?: boolean }
+  | { op: 'giveAwayWeapon'; id: string }
   | { op: 'serviceWeapon' }
   | { op: 'hardship'; add: number }
   // canon이 있으면 이름 · 성별 · 나이를 원작에서 (data/canon.ts). age: 그 나이 · 주인공보다 n살 위/아래. 없으면 주인공과 같은 나이
   | { op: 'person'; kind: Person['kind']; relation: string; name?: string; canon?: string; reuseName?: boolean;
-      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f';
+      age?: number | { older: number } | { younger: number }; gender?: 'm' | 'f'; species?: Species; faction?: Person['faction'];
       role?: CrewRole;
       level?: number;                          // 동료의 처음 레벨 (이름난 사람은 처음부터 높다). 없으면 V.person.crew.level
       medicalSkill?: number;                   // 선의의 치료 솜씨. 전투 레벨과 별개
@@ -195,7 +204,7 @@ export interface Turning {
   kind: 'door' | 'moment' | 'fortune' | 'misfortune';    // moment 큰 계기, misfortune 고를 수 없는 불행 (문 없음)
   when: Cond[]; weight: number; repeat: 'once' | { years: number };
   fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
-  speaker: 'hero' | { canon: string } | { relation: string };
+  speaker: 'hero' | { canon: string } | { relation: string } | { who: ContactRole };
   title: string; body: string;
   intro?: readonly string[];                   // 선택창이 열리기 전에 이야기 창에 한 줄씩 보여 준다
   automatic?: { unless: Cond[]; fx: Fx[] };     // 조건을 채우지 못하면 선택 대신 즉시 일어나는 일
@@ -234,6 +243,7 @@ export interface TraitState {
   crewSeen: string[];
 }
 export type DiscipleStage = 'meeting' | 'training' | 'sailing' | 'reunion';
+export type ContactRole = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent';
 export interface DiscipleRecord {
   personId: string; style: CombatStyle; since: number; island: string;
   trainedAt?: number; sailedAt?: number; readyAt?: number;
@@ -260,6 +270,7 @@ export interface Life5 {
   people: Person[];
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
   seenCount: Record<string, number>;           // 전환점 id → 이번 인생에 열린 횟수
+  firstChoiceAge?: Record<string, number>;    // 이번 생에서 이 선택을 처음 한 나이
   closed: string[];                            // closes 문으로 닫힌 전환점 id
   standingSince: number;                       // 지금의 처지가 된 나이
   queueTries: Record<string, number>;          // 줄 선 전환점 id → 열지 못한 횟수 (V.queue.maxTries번이면 버린다)
@@ -285,4 +296,5 @@ export interface Life5 {
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
   passage?: import('./passage').Passage | null;
 }
-export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle } | { type: 'traits'; ids: string[] };
+export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
+  | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] };

@@ -9,10 +9,11 @@ import { STRENGTHS } from '../data/strengths';
 import { GRADES, GRADE_TOP } from '../data/words';
 import { VALUE_NAME } from '../data/values';
 import { rating5 } from './power';
-import { personIs } from './needs';
+import { hasRelation, personIs } from './needs';
 import { isDeep } from './values';
 import { hasEntryContact } from './voyage';
-import { styleBondReady, styleUsable } from './styles';
+import { equippedWeapon, hasWeapon, styleBondReady, styleUsable } from './styles';
+import { inPrime } from './stages';
 import type { Cond, Life5, Wealth } from './types';
 
 const WEALTH_ORDER: readonly Wealth[] = ['poor', 'common', 'comfortable', 'noble'];
@@ -25,8 +26,9 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'anyOf': return c.conditions.some(option => check(s, option));
     case 'disciple': return discipleReady(s, c.stage);
-    case 'styleBond': return c.phase === 'new' ? !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
+    case 'styleBond': return c.phase === 'new' ? !s.passage && !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
     case 'lifePreparation': return lifePreparation(s, c.mode) === null;
     case 'age': return inRange(s.age, c.min, c.max);
     case 'standing': return c.is.includes(h.standing);
@@ -39,10 +41,21 @@ export function check(s: Life5, c: Cond): boolean {
     case 'strength': return hasTrait(s, c.id) === c.has;
     case 'money': return h.money >= c.min;
     case 'entryContact': return hasEntryContact(s, c.gate);
-    case 'weapon': return (h.weapon === c.id) === c.has;
+    case 'weapon': return hasWeapon(s, c.id) === c.has;
+    case 'equippedWeapon': return !!equippedWeapon(s);
+    case 'prime': return inPrime(s);
     case 'fame': return h.fame >= c.min;
     case 'grade': return c.is.includes(GRADES.find(([limit]) => rating5(s) < limit)?.[1] ?? GRADE_TOP);
     case 'turningSeen': return ((s.seenCount[c.id] ?? 0) > 0) === c.has;
+    case 'canonPerson': return s.people.some(p => p.alive && p.canon === c.id && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'choiceAgo': {
+      const key = `${c.turning}#${c.door}`;
+      if (!s.tried.includes(key)) return false;
+      if (!c.years) return true;
+      // 옛 저장의 마지막 개봉도 충분히 오래전이면, 이미 고른 문은 그때 혹은 그보다 앞서 골랐다.
+      const age = s.firstChoiceAge?.[key] ?? s.seen[c.turning];
+      return age !== undefined && s.age - age >= c.years;
+    }
     case 'tier': {
       const t = c.branch === 'any' ? Math.max(...Object.values(s.growth.tier)) : s.growth.tier[c.branch];
       return t >= c.min;
@@ -59,7 +72,7 @@ export function check(s: Life5, c: Cond): boolean {
     case 'island': return c.is.includes(s.passage ? '' : h.island) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
     case 'species': return c.is.includes(h.species);
     case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
-    case 'person': return s.people.some((p) => p.alive && (p.relation === c.relation || p.aliases?.includes(c.relation)) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'person': return s.people.some((p) => p.alive && hasRelation(p, c.relation) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -78,6 +91,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
     case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';
     case 'lifePreparation': return lifePreparation(s, c.mode) ?? '';
@@ -92,9 +106,13 @@ function reason(s: Life5, c: Cond): string {
     case 'money': return `돈이 모자란다 (${fmtMoney(c.min)} 베리)`;
     case 'entryContact': return c.gate === 'zou' ? '비브르 카드가 없다' : '코팅을 도와줄 장인 인연이 없다';
     case 'weapon': return c.has ? '이 무기를 가지고 있지 않다' : '이미 이 무기를 가지고 있다';
+    case 'equippedWeapon': return '지금 손에 든 무기가 없다';
+    case 'prime': return '전성기에만 찾아오는 기회다';
     case 'fame': return '아직 이름이 알려지지 않았다';
     case 'grade': return '아직 상대가 인정할 전투력이 아니다';
     case 'turningSeen': return '이미 지나간 만남이다';
+    case 'canonPerson': return '이 인물과의 인연이 맞지 않는다';
+    case 'choiceAgo': return c.years ? '그 일을 겪고 시간이 흘러야 한다' : '앞선 선택이 필요하다';
     case 'tier': return '아직 그 경지에 이르지 못했다';
     case 'flag': return '때가 맞지 않는다';
     case 'fruit': return c.has ? '열매 능력자만 할 수 있다' : '능력자는 할 수 없다';

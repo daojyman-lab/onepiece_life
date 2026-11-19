@@ -22,10 +22,11 @@ import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
 import { askFight } from './fight';
-import { personIs } from './needs';
+import { fillContacts, hasRelation, livingContact } from './needs';
+import { josa } from '../shared/core/josa';
 import { revealSurname } from './fortune';
 import { BRANCH_ID } from './power';
-import { addStyleMastery, adoptStyle, beginStyle, focusedStyle, isMartialBranch, refineStyle, rememberWeapon } from './styles';
+import { addStyleMastery, adoptStyle, beginStyle, equippedWeapon, focusedStyle, giveAwayWeapon, hasWeapon, isMartialBranch, receiveWeapon, refineStyle } from './styles';
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
@@ -37,10 +38,19 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
 
 /** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string, discipleId?: string): string {
-  const parent = s.people.find((p) => p.alive && personIs(p, 'parent'))?.relation ?? '';
-  const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend,
-    lifeGuardMethod: lifeGuardMethod(s), lifeOutcome: lifeOutcome(s), ...discipleWords(s, discipleId) });
+  if (!text.includes('{')) return josa(text);
+  const vars: Record<string, string> = { name: s.hero.name, town: s.hero.town, island: s.hero.island };
+  if (text.includes('{weapon}')) vars.weapon = equippedWeapon(s)?.name ?? '';
+  if (text.includes('{parent}')) vars.parent = livingContact(s, { who: 'parent' })?.relation ?? '';
+  if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
+  if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
+  if (text.includes('{sibling}')) vars.sibling = livingContact(s, { who: 'sibling' })?.name ?? '형제';
+  if (text.includes('{child}')) vars.child = livingContact(s, { who: 'child' })?.name ?? '자식';
+  if (text.includes('{spouse}')) vars.spouse = livingContact(s, { who: 'spouse' })?.name ?? '짝';
+  if (text.includes('{lifeGuardMethod}')) vars.lifeGuardMethod = lifeGuardMethod(s);
+  if (text.includes('{lifeOutcome}')) vars.lifeOutcome = lifeOutcome(s);
+  if (text.includes('{disciple')) Object.assign(vars, discipleWords(s, discipleId));
+  return fill(fillContacts(s, text), vars);
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
@@ -92,7 +102,11 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       }
       return;
     }
-    case 'beginStyle': beginStyle(s, e.style); return;
+    case 'beginStyle': {
+      const contact = e.teacherRelation ? livingContact(s, { relation: e.teacherRelation }) : undefined;
+      if (!e.teacherRelation || contact) beginStyle(s, e.style, contact);
+      return;
+    }
     case 'adoptStyle': adoptStyle(s, e.style); return;
     case 'refineStyle': refineStyle(s, e.style); return;
     case 'lifeMilitary':
@@ -150,18 +164,20 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
     case 'deepWater': deepWater(s); return;
     case 'buyWeapon': {
       const item = ITEM_BY_ID[e.id];
-      if (item?.kind !== 'weapon' || !item.price || h.money < item.price || h.weapon === item.id) return;
-      rememberWeapon(s);
-      h.money -= item.price;
-      h.weapon = item.id;
-      rememberWeapon(s);
-      logLine(s, `${item.name}을(를) 장만해 전투에 쓰기로 했다.`, 'heavy', 'growth');
+      if (item?.kind !== 'weapon' || !item.price || hasWeapon(s, item.id)) return;
+      const cost = tradeCost(s, item.price);
+      if (h.money < cost) return;
+      h.money -= cost;
+      receiveWeapon(s, item.id, 'purchase');
+      recordTraitEvent(s, 'trade', '', s.traitSource ?? String(s.age));
       return;
     }
+    case 'receiveWeapon': receiveWeapon(s, e.id, e.stow ? 'stow' : 'gift'); return;
+    case 'giveAwayWeapon': giveAwayWeapon(s, e.id); return;
     case 'serviceWeapon': {
-      const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
+      const item = equippedWeapon(s);
       const branch = item && (['sword', 'polearm', 'blunt', 'gun', 'fist'] as const).find((b) => BRANCH_ID[b] === item.branch);
-      if (branch) addMastery(s, branch, 4);
+      if (branch && item?.weaponStyles?.includes(focusedStyle(s, branch))) addMastery(s, branch, 4);
       logLine(s, branch ? '장인이 무기를 손질하고 손잡이를 손에 맞춰 줬다.' : '공방 뒤뜰에서 장인들의 이야기를 들으며 한숨 돌렸다.', 'light');
       return;
     }
@@ -174,18 +190,36 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
     }
     case 'hardship': s.hardship = Math.max(0, s.hardship + e.add); return;
     case 'person': {
-      const existing = e.reuseName && e.name ? s.people.find((p) => p.name === e.name && !p.canon) : undefined;
-      if (existing) {
+      const matches = e.canon ? s.people.filter(p => p.canon === e.canon)
+        : e.reuseName && e.name ? s.people.filter(p => !p.canon &&
+          (p.storyName === e.name || p.name === e.name && hasRelation(p, e.relation))) : [];
+      // 예전 저장에 중복 인물이 남아 있다면 이미 동행 중인 그 사람을 우선한다.
+      const existing = matches.find(p => p.alive && p.crew) ?? matches.find(p => p.alive) ?? matches[0];
+      if (existing && !existing.alive) return;
+      if (existing && e.reuseName && e.name) existing.storyName = e.name;
+      if (existing && e.kind !== 'crew') {
+        if (!existing.crew && (e.kind === 'enemy' || e.kind === 'rival')) {
+          existing.aliases = [...new Set([...(existing.aliases ?? []), existing.relation])];
+          existing.relation = e.relation;
+          existing.kind = e.kind;
+        } else {
+          existing.aliases = [...new Set([...(existing.aliases ?? []), e.relation])];
+        }
+        return;
+      }
+      if (existing?.crew) {
         existing.aliases = [...new Set([...(existing.aliases ?? []), e.relation])];
-        return;                              // 사망한 인물도 새 인물로 만들어 되살리지 않는다
+        if (!e.years) delete existing.tempUntil;
+        return;
       }
       const r = rngOf(s.rng);
       const c = e.canon ? CANON[e.canon] : undefined;
-      const gender = c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
-      const p: Person = {
+      const gender = existing?.gender ?? c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
+      const p: Person = existing ?? {
         id: `p${s.seq++}`, name: c?.name ?? e.name ?? npcName(s, r, gender), gender, age: personAge(s, e),
+        ...(e.reuseName && !e.canon && e.name ? { storyName: e.name } : {}),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
-        bond: V.person.bond, faction: c?.faction ?? 'civil', species: c?.species ?? 'human', alive: true,
+        bond: V.person.bond, faction: c?.faction ?? e.faction ?? 'civil', species: c?.species ?? e.species ?? 'human', alive: true,
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
@@ -196,12 +230,16 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
         if (!known) traits.crewSeen.push(identity);
         const bonus = !known && !e.years && hasTrait(s, 'charisma') ? 2 : 0;
         const level = Math.min(maxLevel, (e.level ?? V.person.crew.level) + bonus);
-        if (e.canon) s.people = s.people.filter((x) => !(x.alive && x.canon === e.canon));   // 이미 아는 사이였으면 그 사람이 배에 오른다 (둘이 되지 않는다)
+        if (existing) {
+          p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+          p.relation = e.relation;
+          p.kind = 'crew';
+        }
         if (e.years) p.tempUntil = s.age + e.years;
         p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0,
           ...((e.role ?? role) === 'medic' ? { medicalSkill: e.medicalSkill ?? 50 } : {}) };
       }
-      s.people.push(p);
+      if (!existing) s.people.push(p);
       if (p.crew && !e.years) recordTraitEvent(s, 'crew', '', e.canon ?? e.name ?? e.relation);
       return;
     }
@@ -234,7 +272,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       for (const p of s.people) if (p.alive && p.crew && p.relation.startsWith(e.prefix)) { delete p.crew; p.kind = 'ally'; }
       return;
     case 'losePerson': {
-      const p = s.people.find((x) => x.alive && ('who' in e ? personIs(x, e.who) : x.relation === e.relation));
+      const p = livingContact(s, e);
       if (!p) return;
       p.alive = false;
       recordTraitEvent(s, 'loss', '', p.id);

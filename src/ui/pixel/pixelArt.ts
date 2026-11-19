@@ -1,6 +1,7 @@
 // 코드로 그리는 도트 캐릭터(얼굴 24×24, 전신 20×24)와 도트 장면. v3.4.0 pixel-art.js 를 옮겼다.
 // 같은 인물은 언제나 같은 모습이다 (docs/01_기획/04_UI_그래픽_방향.md 3장).
 import type { Species } from '../../shared/core/types';
+import { isCombatStyle, type CombatStyle } from '../../data/combat-styles';
 
 type Pair = [string, string];
 const SKIN: Record<'human' | 'fish' | 'mink' | 'sky' | 'luna', Pair[]> = {
@@ -28,10 +29,19 @@ export interface Who {
   body?: BodyMark;            // 안대 · 빈 소매 · 의족 (v5)
 }
 
-/** 기술 목록에서 무기를 정한다: 검술 기술이 있으면 칼, 사격이면 총, 아니면 맨주먹 */
+export function weaponOfStyle(style: CombatStyle): Weapon {
+  switch (style) {
+    case 'boxing': case 'kicking': case 'karate': case 'fishmanKarate': case 'rokushiki': case 'grappling': return 'fist';
+    case 'oneSword': case 'twoSword': case 'threeSword': case 'iai': return 'sword';
+    case 'pistol': return 'gun';
+    default: return style;
+  }
+}
+
+/** 장비 정보가 없는 상대는 기술 목록에서 무기를 정한다. */
 export function weaponOfSkills(skills: readonly string[]): Weapon {
   const style = skills.find((k) => k.startsWith('style:'))?.split(':')[1];
-  if (style && ['spear', 'naginata', 'staff', 'hammer', 'club', 'pipe', 'rifle', 'sniper', 'slingshot', 'dial'].includes(style)) return style as Weapon;
+  if (isCombatStyle(style)) return weaponOfStyle(style);
   const sword = skills.filter((k) => k.startsWith('sword_')).length;
   const gun = skills.filter((k) => k.startsWith('gun_')).length;
   const fist = skills.filter((k) => k.startsWith('fist_')).length;

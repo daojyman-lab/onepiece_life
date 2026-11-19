@@ -3,11 +3,24 @@
 import { RELATION_KIND } from '../data/words';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
 import { primaryStyle } from './styles';
-import type { Life5, Need, Person } from './types';
+import type { ContactRole, Life5, Need, Person } from './types';
 
 /** 이 사람이 그 갈래(함께 싸우는 동료, 배우자 · 자식 · 형제 · 부모)인가 */
 export function personIs(p: Person, who: 'crew' | keyof typeof RELATION_KIND): boolean {
   return who === 'crew' ? p.crew !== undefined : RELATION_KIND[who].includes(p.relation);
+}
+
+export function hasRelation(p: Person, relation: string): boolean {
+  return p.relation === relation || p.aliases?.includes(relation) === true;
+}
+
+export function livingContact(s: Life5, by: { relation: string } | { who: ContactRole }): Person | undefined {
+  return s.people.find(p => p.alive && ('relation' in by ? hasRelation(p, by.relation)
+    : personIs(p, by.who) && (by.who !== 'crew' || !p.crew?.separatedMonths)));
+}
+
+export function fillContacts(s: Life5, text: string): string {
+  return text.replace(/\{person:([^{}]+)\}/g, (_, relation: string) => livingContact(s, { relation })?.name ?? relation);
 }
 
 const usable = (x: string) => x !== 'lost';

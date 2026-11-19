@@ -1,12 +1,13 @@
 // 얼굴: 주인공 · 곁의 사람 · 상대를 픽셀 그림의 Who로 바꾼다.
 import { GRADES, GRADE_TOP } from '../../data/words';
 import { bandWord } from './words';
-import { weaponOfSkills, type Weapon, type Who } from '../pixel/pixelArt';
+import { weaponOfSkills, weaponOfStyle, type Who } from '../pixel/pixelArt';
+import type { Item } from '../../shared/core/types';
 import { LIMBS } from '../../core/body';
 import { CANON, canonAge } from '../../data/canon';
 import { TURNING_BY_ID } from '../../data/turnings';
-import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
-import { primaryStyle } from '../../core/styles';
+import { equippedWeapon, weaponStyleFor } from '../../core/styles';
+import { livingContact } from '../../core/needs';
 import type { EnemySpec, Life5, Pending5, Person, Standing } from '../../core/types';
 
 export function personWho5(p: Person): Who {
@@ -31,25 +32,12 @@ function factionOf(st: Standing): NonNullable<Who['faction']> {
   }
 }
 
-/** 단계가 가장 높은 무술 갈래의 무기 (모두 0이면 맨주먹) */
-function heroWeapon(s: Life5): Weapon {
-  const style = primaryStyle(s);
-  if (style) {
-    const b = COMBAT_STYLE_BY_ID[style].branch;
-    if (b === 'polearm' || b === 'blunt') return style as Weapon;
-    if (b === 'gun' && style !== 'pistol') return style as Weapon;
-    return b === 'fist' ? 'fist' : b === 'sword' ? 'sword' : 'gun';
-  }
-  if (s.hero.weapon === 'sp2') return 'spear';
-  if (s.hero.weapon === 'sw_ss') return 'club';
-  const t = s.growth.tier;
-  if (t.sword > 0 && t.sword >= t.gun && t.sword >= t.fist) return 'sword';
-  if (t.gun > 0 && t.gun >= t.fist) return 'gun';
-  return 'fist';
+export function itemSprite(item: Item | undefined) {
+  return item ? weaponOfStyle(weaponStyleFor(item)) : 'fist';
 }
 
-export function heroWho5(s: Life5): Who {
-  const who: Who = { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.age, species: s.hero.species, faction: factionOf(s.hero.standing), weapon: heroWeapon(s) };
+export function heroWho5(s: Life5, weapon = itemSprite(equippedWeapon(s))): Who {
+  const who: Who = { key: `hero:${s.rng.seed}`, gender: s.hero.gender, age: s.age, species: s.hero.species, faction: factionOf(s.hero.standing), weapon };
   const body: NonNullable<Who['body']> = {};
   for (const k of LIMBS) { const st = s.hero.limbs[k]; if (st !== 'ok') body[k] = st; }
   if (Object.keys(body).length) who.body = body;
@@ -66,7 +54,7 @@ export function speakerOf(s: Life5, p: Extract<Pending5, { kind: 'door' }>): { n
     if (!c) return { name: p.speaker, who: { key: sp.canon } };
     return { name: p.speaker, who: { key: sp.canon, gender: c.gender, age: canonAge(sp.canon, s.age), species: c.species ?? 'human', faction: c.faction } };
   }
-  const person = s.people.find((x) => x.alive && x.relation === sp.relation);
+  const person = p.discipleId ? s.people.find(x => x.id === p.discipleId) : livingContact(s, sp);
   return person ? { name: person.name, who: personWho5(person) } : { name: p.speaker, who: { key: p.speaker } };
 }
 

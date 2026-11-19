@@ -282,7 +282,7 @@ export const EP_SKYPIEA: Turning[] = [
       { label: '티카에게서 웨이버 깃 장식을 받는다', hint: '구름길을 달리던 바람이 묻어 있다', when: [has(F('tika_trust'))], values: { freedom: D },
         fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'ally', relation: '구름 해안의 배달꾼 티카' }, { op: 'base', key: 'spd', add: 1 }, log('하얀 깃 장식이 바람에 떨렸다. 다음에 오면 구름 끝까지 경주하자고 티카가 말했다.')] },
       { label: '벨라에게서 공방의 다이얼 노트를 받는다', hint: '다이얼 고치는 법과 빼앗긴 이름들이 적혀 있다', when: [has(F('bella_trust'))], values: { inquiry: D },
-        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'ally', relation: '다이얼 공방의 기록꾼 벨라' }, { op: 'base', key: 'int', add: 1 }, log('벨라는 낡은 노트의 첫 장에 돌려받은 집들의 이름을 적었다. 도란의 장부와 필체가 달랐다.', 'light')] },
+        fx: [{ op: 'entryPass', gate: 'sky' }, flag(F('before_done')), { op: 'person', kind: 'ally', relation: '다이얼 공방의 기록꾼 벨라', name: '벨라', gender: 'f', species: 'skypiean', reuseName: true }, { op: 'base', key: 'int', add: 1 }, log('벨라는 낡은 노트의 첫 장에 돌려받은 집들의 이름을 적었다. 도란의 장부와 필체가 달랐다.', 'light')] },
       { label: '아무 말 없이 구름길을 내려간다', hint: '돌아보는 사람은 없다', values: { ambition: D },
         fx: [flag(F('before_done')), log('구름길 끝에서 한 번 돌아보았다. 엔젤섬은 여전히 조용했다.', 'light')] },
       { label: '티카에게 함께 가자고 청한다', hint: '웨이버 하나가 길을 따라나선다', when: [has(F('tika_trust')), has(F('bella_trust'))], special: 'romance', values: { romance: D },

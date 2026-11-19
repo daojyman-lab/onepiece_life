@@ -124,7 +124,8 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   const statKey = sk ? sk.stat : 'str';
   const stat = Math.max(a.st[statKey], statKey === 'int' ? 0 : a.st.str * 0.5);
   const mastery = sk ? C.mastery.min + C.mastery.span * (a.skills.find((k) => k.id === sk.id)?.mastery ?? 50) / 100 : 1;
-  const weapon = a.weapon && sk && a.weapon.branch === sk.branch ? a.weapon.mult : 1;
+  const weaponHit = sk ? a.weapon?.branch === sk.branch : !extra.proc && !extra.seastone;
+  const weapon = weaponHit ? a.weapon?.mult ?? 1 : 1;
   const rand = C.rand[0] + (C.rand[1] - C.rand[0]) * r();
   const am = a.mods, tm = t.mods;
   const crit = r() < C.crit.base + a.st.luk * C.crit.perLuk + (am.crit ?? 0);

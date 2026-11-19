@@ -9,8 +9,10 @@ const once = (id: string, title: string, body: string, doors: Turning['doors']):
     ? [{ c: 'sea', is: ['gl_first'] }, { c: 'island', is: ['알라바스타 왕국'] }] : [],
   weight: 0, repeat: 'once', speaker: 'hero', doors,
 });
-const trained: Fx[] = [{ op: 'dream', id: 'bestSword' }, { op: 'tier', branch: 'sword', to: 1 },
-  { op: 'pref', branch: 'sword', add: 60 }, { op: 'beginStyle', style: 'oneSword' }];
+const ELMO = '부두 사범 엘모';
+const trained: Fx[] = [{ op: 'person', kind: 'master', relation: ELMO, name: '엘모', gender: 'm', age: { older: 25 }, reuseName: true },
+  { op: 'dream', id: 'bestSword' }, { op: 'tier', branch: 'sword', to: 1 },
+  { op: 'pref', branch: 'sword', add: 60 }, { op: 'beginStyle', style: 'oneSword', teacherRelation: ELMO }];
 const finish = (id: string, line: string, nextId = 'ep_alabasta_p10'): Fx[] => [event(id), log(line), time(line), next(nextId)];
 const guard: Cond = { c: 'lifePreparation', mode: 'guard' };
 const duel: Cond = { c: 'lifePreparation', mode: 'duel' };
@@ -19,9 +21,9 @@ export const LIFE_COURSE: Turning[] = [
   once('promise', '돌아오지 않은 배의 지도',
     '부두에서 장부를 쓰는 페니가 젖은 지도를 펼친다. 이 지도대로 떠난 작은 배는 돌아오지 않았다. 팔던 사람은 다음 배에도 같은 지도를 내민다. 페니가 묻는다. “어른이 되면 넌 어떤 사람이 될 거야?”', [
       { label: '다음에는 떠나는 사람을 지킬 수 있게 되겠다고 약속한다', hint: '페니가 장부 한 귀퉁이에 오늘 말을 적는다', values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '부두의 기록꾼 페니', name: '페니', gender: 'f' }, event('promise_guard'), log('돌아오지 않은 배 이름 아래에 사람을 지키겠다는 약속을 남겼다. 페니가 내 손에 지도 조각을 쥐여 주었다.')] },
+        fx: [{ op: 'person', kind: 'ally', relation: '부두의 기록꾼 페니', name: '페니', gender: 'f', reuseName: true }, event('promise_guard'), log('돌아오지 않은 배 이름 아래에 사람을 지키겠다는 약속을 남겼다. 페니가 내 손에 지도 조각을 쥐여 주었다.')] },
       { label: '누가 그린 지도든 직접 확인할 실력을 기르겠다고 한다', hint: '페니가 빈 해도 한 장을 내민다', values: { inquiry: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '부두의 기록꾼 페니', name: '페니', gender: 'f' }, event('promise_duel'), log('남이 그린 길만 따라가지 않겠다고 말했다. 페니가 내 이름을 쓰지 않은 빈 해도를 건넸다.')] },
+        fx: [{ op: 'person', kind: 'ally', relation: '부두의 기록꾼 페니', name: '페니', gender: 'f', reuseName: true }, event('promise_duel'), log('남이 그린 길만 따라가지 않겠다고 말했다. 페니가 내 이름을 쓰지 않은 빈 해도를 건넸다.')] },
       { label: '아직 바다에 나갈 생각은 없다고 말한다', hint: '오늘 본 일을 기억하며 집으로 돌아간다', values: { peace: D },
         fx: [event('declined'), log('젖은 지도는 페니에게 돌려주었다. 부두의 일을 아직 내 약속으로 삼지는 않았다.')] },
     ]),

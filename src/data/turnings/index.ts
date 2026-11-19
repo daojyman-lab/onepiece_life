@@ -34,6 +34,7 @@ import { LIFE_VOW_TURNINGS } from './vow-life';
 import { EPISODE_TURNINGS } from '../episodes';
 import { PORT_MARKETS } from './port-market';
 import { STYLE_TURNINGS } from './style-origins';
+import { WEAPON_STORIES } from './weapon-stories';
 import { LIFE_COURSE } from './life-course';
 import { DISCIPLES } from './disciples';
 
@@ -72,6 +73,7 @@ const GROUPS: Turning[][] = [
   EPISODE_TURNINGS,
   PORT_MARKETS,
   STYLE_TURNINGS,
+  WEAPON_STORIES,
   LIFE_COURSE,
   DISCIPLES,
 ];

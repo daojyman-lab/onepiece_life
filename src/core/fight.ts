@@ -4,7 +4,6 @@ import { B } from '../shared/data/balance';
 import { battleRecap } from '../shared/core/combat/narrative';
 import { makeEnemy } from '../shared/data/bosses';
 import { FRUIT_BY_ID } from '../shared/data/fruits';
-import { ITEM_BY_ID } from '../shared/data/items';
 import { SPECIES_PASSIVES } from '../shared/data/passives';
 import { SEA_BY_ID, SEAS } from '../shared/data/seas';
 import { hasTrait, traitModifiers, traitFactor, recordTraitEvent } from './traits';
@@ -14,7 +13,7 @@ import { crewUnit, enemyUnit } from '../shared/core/combat/units';
 import { branchSkills, getSkill } from '../shared/core/growth/skillbook';
 import { STYLE_SKILLS } from '../shared/data/style-skills';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
-import { isMartialBranch, primaryStyle, styleTier, styleUsable } from './styles';
+import { equippedWeapon, focusedStyle, isMartialBranch, primaryStyle, styleTier, styleUsable, weaponStyleFor } from './styles';
 import { chance, hashString, int, pick, rngOf, type Rng } from '../shared/core/rng';
 import { fill } from '../shared/core/util';
 import { V } from '../data/balance';
@@ -111,16 +110,20 @@ function hakiLevel(tier: number): number {
 }
 
 /** 연 갈래(몸이 허락하는 것만)의 기술 가운데 그 갈래의 단계까지 닿은 것. 높은 단계부터 최대 maxSkills개 */
-function heroSkills(s: Life5): CUnit['skills'] {
+function heroSkills(s: Life5, item: ReturnType<typeof equippedWeapon>): CUnit['skills'] {
   const got: { sk: Skill; b: Branch }[] = [];
-  const active = primaryStyle(s);
+  const first = item && weaponStyleFor(item);
+  const focus = first && focusedStyle(s, COMBAT_STYLE_BY_ID[first].branch);
+  const active = primaryStyle(s) ?? (focus && item?.weaponStyles?.includes(focus) ? focus : first);
   for (const b of Object.keys(BRANCH_ID) as Branch[]) {
-    if (active && isMartialBranch(b)) {
-      if (COMBAT_STYLE_BY_ID[active].branch === b && styleUsable(s, active)) {
-        const tier = Math.min(s.growth.tier[b], styleTier(s, active));
+    if (isMartialBranch(b)) {
+      if (b !== 'fist' && item?.branch !== BRANCH_ID[b]) continue;
+      if (active) {
+        if (COMBAT_STYLE_BY_ID[active].branch !== b || !styleUsable(s, active)) continue;
+        const tier = styleTier(s, active);
         for (const sk of STYLE_SKILLS) if (sk.id.startsWith(`style:${active}:`) && sk.tier <= tier) got.push({ sk, b });
+        continue;
       }
-      continue;
     }
     const tier = s.growth.tier[b];
     if (tier <= 0 || !canUse(s, b)) continue;
@@ -185,7 +188,7 @@ export function heroUnit5(s: Life5, atSea?: true): CUnit {
   const maxSp = Math.round(C.sp.base + st.wil * C.sp.perWil);
   const top = topValues(s, 1)[0];
   const aim = aimMult(s);
-  const item = h.weapon ? ITEM_BY_ID[h.weapon] : undefined;
+  const item = equippedWeapon(s);
   const traits = traitModifiers(s);
   const u: CUnit = {
     key: 'hero', name: fullName(h), side: 'L', hero: true, leader: true, role: 'hero',
@@ -193,10 +196,10 @@ export function heroUnit5(s: Life5, atSea?: true): CUnit {
     st, def: st.vit * C.defPerVit,
     armament: hakiLevel(s.growth.tier.armament), observation: hakiLevel(s.growth.tier.observation),
     fruitClass: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.cls ?? null : null,
-    skills: heroSkills(s),
+    skills: heroSkills(s, item),
     tactic: top ? VALUE_TACTIC[top] : 'endurance',
     retreatAt: hasTrait(s, 'rebel') ? F.retreat.never : top === 'peace' ? F.retreat.calm : F.retreat.usual,
-    weapon: item?.branch && item.mult ? { branch: item.branch, mult: item.mult, seastone: item.seastone ?? false } : null, consumables: [],
+    weapon: item?.branch && item.mult ? { id: item.id, branch: item.branch, mult: item.mult, seastone: item.seastone ?? false } : null, consumables: [],
     guard: 0, guardTurns: 0, evade: 0, evadeTurns: 0, buff: 0, buffTurns: 0, bound: 0, sealed: 0,
     pGuard: 0, pDodge: 0, pBuff: 0, lastBig: false,
     faction: FACTION[h.standing] ?? 'civil', species: h.species, gender: h.gender, age: s.age,

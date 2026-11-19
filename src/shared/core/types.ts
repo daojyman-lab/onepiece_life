@@ -1,5 +1,6 @@
 // 상태와 정적 데이터의 형태. docs/02_설계/02_상태와_데이터.md 를 따른다.
 // 상태에는 값만 둔다. 함수를 넣지 않는다.
+import type { CombatStyle } from '../../data/combat-styles';
 
 export type SeaId =
   | 'east' | 'west' | 'north' | 'south'
@@ -75,6 +76,7 @@ export interface CrewInfo {
 }
 
 export interface Person {
+  storyName?: string;          // 여러 장면이 같은 사람으로 지정한 이름. 무작위 동명이인과 구별한다.
   aliases?: string[];         // 같은 인물을 다른 장면의 관계 이름으로 다시 부를 때
   id: string; name: string; gender: 'm' | 'f'; age: number;
   kind: 'family' | 'master' | 'crew' | 'rival' | 'enemy' | 'ally';
@@ -181,7 +183,7 @@ export interface CUnit {
   fruitClass: FruitClass | null;
   skills: { id: string; mastery: number; cd: number }[];
   tactic: Tactic; retreatAt: number;
-  weapon: { branch: BranchId; mult: number; seastone: boolean } | null;
+  weapon: { id?: string; branch: BranchId; mult: number; seastone: boolean } | null;
   consumables: string[];
   guard: number; guardTurns: number; evade: number; evadeTurns: number; buff: number; buffTurns: number;
   bound: number; sealed: number;
@@ -363,6 +365,7 @@ export interface Item {
   kind: 'weapon' | 'armor' | 'charm' | 'consumable';
   grade: 1 | 2 | 3 | 4 | 5;
   branch?: BranchId;          // 무기가 맞는 갈래
+  weaponStyles?: readonly CombatStyle[]; // 이 물건으로 쓸 수 있는 유파. 첫 항목은 대표 유파.
   mult?: number;              // 무기 배율
   armor?: number;             // 방어구 방어
   bonus?: Partial<Stats>;     // 장신구

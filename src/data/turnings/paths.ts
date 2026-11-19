@@ -4,7 +4,7 @@
 // 원작 인물은 주인공의 나이에 맞춰 나온다 (주인공 열일곱 살 무렵이 원작의 시작).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import type { Cond, HomeId, SeaId, Standing, Turning } from '../../core/types';
+import type { Cond, HomeId, Person, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
 /** 정점: 현상금 30억 (해군은 같은 크기의 공적) */
@@ -35,6 +35,8 @@ const BLUES: SeaId[] = ['east', 'west', 'north', 'south'];
 export const at = (...c: Cond[]): Cond[] => [...c];
 export const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
 export const age = (min?: number, max?: number): Cond => ({ c: 'age', min, max });
+export const known = (relation: string, ...kinds: Person['kind'][]): Cond => ({ c: 'person', relation, has: true, ...(kinds.length ? { kinds } : {}) });
+export const chose = (turning: string, door: number, years: number): Cond => ({ c: 'choiceAgo', turning, door, years });
 export const sea = (...is: SeaId[]): Cond => ({ c: 'sea', is });
 /** 이 고향에서 태어난 사람만 */
 export const home = (...is: HomeId[]): Cond => ({ c: 'home', is });

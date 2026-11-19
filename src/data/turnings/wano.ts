@@ -72,7 +72,7 @@ export const WANO: Turning[] = [
     id: 'wanok_samurai_blade', kind: 'door', when: kidW(8, 15, SAMURAI), weight: 9, repeat: 'once', speaker: { relation: '무사 집안의 어른' },
     title: '집안의 칼', body: '무사 집안의 어른이 대대로 내려온 칼을 꺼내 보인다. 옛 영주를 섬기던 칼이라 지금은 꺼내 들기만 해도 벌을 받는다. 어른은 언젠가 이 칼을 쓸 날이 올 거라고 한다.',
     doors: [
-      { label: '그날을 위해 칼을 배운다', hint: '몰래 수련한다. 들키면 집안이 위험하다', values: { loyalty: D }, fx: [{ op: "log", text: "집안의 칼을 천으로 감싸 숨겼다. 밤마다 빈 마당에서 칼을 뽑고 다시 넣는 연습을 했다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 12 }, { op: 'flag', id: 'wano_family_blade' }] },
+      { label: '그날을 위해 칼을 배운다', hint: '몰래 수련한다. 들키면 집안이 위험하다', values: { loyalty: D }, fx: [{ op: "log", text: "집안의 칼을 천으로 감싸 숨겼다. 밤마다 빈 마당에서 칼을 뽑고 다시 넣는 연습을 했다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 12 }, { op: 'flag', id: 'wano_family_blade' }, { op: 'receiveWeapon', id: 'wano_heirloom', stow: true }] },
       { label: '칼을 땅에 묻자고 한다', hint: '집안을 지키려면 잊어야 한다고 여긴다', values: { peace: D }, fx: [{ op: "log", text: "칼을 흙에 묻자 어른들이 삽자루를 오래 붙들었다. 집안은 조용해졌지만 묻은 자리만은 잊지 않았다.", weight: "light" }] },
       { label: '그 칼로 쇼군의 관리를 베겠다고 한다', hint: '어른이 놀라 입을 막는다', values: { justice: D }, fx: [{ op: "log", text: "쇼군의 관리를 베겠다는 말을 듣고 어른이 입을 막았다. 칼집을 치우면서도 그날 이후 {name}의 눈을 경계했다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }] },
     ],
@@ -205,11 +205,11 @@ export const WANO: Turning[] = [
   },
   // ---------------------------------------------------------------- 와노만의 문 (처지 · 핏줄)
   {
-    id: 'wano_beasts', kind: 'door', when: adult(16, 30, st('child', 'civil'), crossing), weight: 5, repeat: 'once', speaker: { relation: '백수 해적단의 간부' },
+    id: 'wano_beasts', kind: 'door', when: adult(16, OPENED - 1, st('child', 'civil'), crossing), weight: 5, repeat: 'once', speaker: { relation: '백수 해적단의 간부' },
     title: '백수 해적단의 징집', body: '카이도의 해적단이 마을에서 젊은이를 뽑는다. 이상한 열매를 먹으면 짐승의 힘을 얻는다고 한다. 거절한 집은 쌀 배급에서 빠진다.',
     doors: [
-      { label: '해적단에 들어가 힘을 얻는다', hint: '해적이 된다. 마을 사람들이 눈을 피한다', values: { dominion: D },
-        fx: [{ op: "log", text: "카이도의 해적들이 옷과 무기를 건넸다. 마을로 돌아오자 이웃들이 길을 비켜 주고 눈을 피했다.", weight: "light" }, { op: 'standing', to: 'pirate' }, { op: 'base', key: 'str', add: 2 }, { op: 'person', kind: 'ally', relation: '백수 해적단의 간부' }, { op: 'timeline', text: '카이도의 해적단에 들어갔다' }] },
+      { label: '해적단에 들어가 힘을 얻는다', hint: '무명 검을 지급받고 해적이 된다. 마을 사람들이 눈을 피한다', values: { dominion: D },
+        fx: [{ op: 'log', text: '카이도의 해적들이 제복과 무명 검 한 자루를 건넸다. 마을로 돌아오자 이웃들이 길을 비켜 주고 눈을 피했다.', weight: 'light' }, { op: 'receiveWeapon', id: 'sw1' }, { op: 'standing', to: 'pirate' }, { op: 'base', key: 'str', add: 2 }, { op: 'person', kind: 'ally', relation: '백수 해적단의 간부' }, { op: 'timeline', text: '카이도의 해적단에 들어갔다' }] },
       { label: '집안의 쌀을 위해 들어가되 마음은 주지 않는다', hint: '해적이 된다. 언젠가 등을 돌릴지 모른다', values: { romance: D },
         fx: [{ op: "log", text: "해적의 표식을 달고 배급 쌀을 집으로 보냈다. 가족은 먹었지만 {name}은(는) 명령이 내려올 때마다 얼굴을 굳혔다.", weight: "light" }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'wano_beast_spy' }, { op: 'timeline', text: '쌀 배급을 위해 카이도의 해적단에 들어갔다' }] },
       { label: '징집을 거절한다', hint: '배급에서 빠진다', closes: true, values: { justice: D }, fx: [{ op: "log", text: "징집 관리가 이름에 줄을 그었다. 다음 배급 날 집안의 그릇은 빈 채로 돌아왔다.", weight: "light" }, { op: 'hardship', add: 2 }] },
@@ -230,7 +230,7 @@ export const WANO: Turning[] = [
     id: 'wano_samurai_oath', kind: 'door', when: adult(18, 40, SAMURAI, LANDED), weight: 6, repeat: 'once', speaker: { relation: '옛 영주를 섬기던 무사' },
     title: '무사의 맹세', body: '옛 영주를 섬기던 무사가 집에 찾아왔다. 스무 해 전의 맹세를 기억하는 집안을 찾아다닌다고 한다. 언젠가 칼을 들 날이 오면 함께하겠느냐고 묻는다.',
     doors: [
-      { label: '집안의 칼을 꺼내 맹세한다', hint: '그날이 오면 목숨을 건다', values: { loyalty: D }, mark: 'obsession', fx: [{ op: "log", text: "집안의 칼을 꺼내 무사 앞에서 맹세했다. 칼날을 닦아 감춰 두고 불의 축제가 올 날을 기다렸다.", weight: "light" }, { op: 'flag', id: 'wano_sworn' }, { op: 'person', kind: 'ally', relation: '옛 영주의 무사' }] },
+      { label: '집안의 칼을 꺼내 맹세한다', when: [{ c: 'weapon', id: 'wano_heirloom', has: true }], hint: '그날이 오면 목숨을 건다', values: { loyalty: D }, mark: 'obsession', fx: [{ op: "log", text: "집안의 칼을 꺼내 무사 앞에서 맹세했다. 칼날을 닦아 감춰 두고 불의 축제가 올 날을 기다렸다.", weight: "light" }, { op: 'flag', id: 'wano_sworn' }, { op: 'person', kind: 'ally', relation: '옛 영주의 무사' }] },
       { label: '집안을 지키려 맹세를 거절한다', hint: '무사가 고개를 끄덕이고 떠난다', closes: true, values: { peace: D }, fx: [{ op: "log", text: "무사는 칼집에 손을 얹은 채 고개를 끄덕였다. 그가 떠난 뒤 집안의 문은 오래 닫혀 있었다.", weight: "light" }] },
       { label: '무사를 쇼군에게 넘긴다', hint: '집안은 무사하다. 무사의 이름이 저주처럼 남는다', values: { greed: D }, fx: [{ op: "log", text: "관리들이 무사를 묶어 데려갔다. 가족은 화를 피했지만 대문 앞에서 들은 그의 이름을 지울 수 없었다.", weight: "light" }, { op: 'money', add: 30000 }, { op: 'hardship', add: 2 }] },
     ],
@@ -266,12 +266,15 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wanoa_swordsmith', kind: 'door', when: adult(20, 65, LANDED), weight: 5, repeat: 'once', speaker: { relation: '늙은 대장장이' },
+    id: 'wanoa_swordsmith', kind: 'door', when: adult(16, OPENED - 1, LANDED), weight: 5, repeat: 'once', speaker: { relation: '늙은 대장장이' },
     title: '명검의 주문', body: '늙은 대장장이가 평생의 마지막 칼을 벼린다. 주문한 사람은 카이도의 간부다. 대장장이는 칼에 혼이 담긴다고, 누구에게 가는지가 중요하다고 한다.',
     doors: [
-      { label: '칼을 빼돌려 옛 영주의 무사에게 전한다', hint: '대장장이와 함께 목숨을 건다', values: { loyalty: D }, danger: true, fx: [{ op: 'chance', p: 0.6, then: [{ op: "log", text: "대장장이가 칼을 포에 싸서 건넸다. 옛 영주의 무사가 받아 갔고 간부의 심부름꾼은 빈 칼집만 보고 돌아갔다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'person', kind: 'ally', relation: '늙은 대장장이' }], else: [{ op: "log", text: "간부의 부하가 칼을 옮기던 길을 막았다. 대장장이와 함께 맞서다 다친 채 칼을 빼앗겼다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'hardship', add: 2 }] }] },
+      { label: '칼을 빼돌려 옛 영주의 무사에게 전한다', hint: '대장장이와 함께 목숨을 건다', values: { loyalty: D }, danger: true, fx: [{ op: 'chance', p: 0.6, then: [{ op: "log", text: "대장장이가 칼을 포에 싸서 건넸다. 옛 영주의 무사가 받아 갔고 간부의 심부름꾼은 빈 칼집만 보고 돌아갔다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'person', kind: 'ally', relation: '늙은 대장장이', age: 62 }], else: [{ op: "log", text: "간부의 부하가 칼을 옮기던 길을 막았다. 대장장이와 함께 맞서다 다친 채 칼을 빼앗겼다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'hardship', add: 2 }] }] },
       { label: '대장장이 곁에서 칼 벼리는 법을 배운다', hint: '칼은 간부에게 간다. 기술은 남는다', values: { inquiry: D }, fx: [{ op: "log", text: "대장장이가 불의 색을 보며 망치질할 때를 가르쳤다. 완성된 칼은 간부의 손에 갔지만 벼린 자국은 눈에 남았다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 8 }, { op: 'base', key: 'int', add: 1 }] },
-      { label: '그 칼을 사겠다고 웃돈을 부른다', hint: '가진 돈을 다 쓴다', values: { ambition: D }, when: [{ c: 'money', min: 50000 }], fx: [{ op: "log", text: "웃돈을 내자 대장장이가 마지막 칼을 손에 쥐여 주었다. 무게를 재는 동안 밖에서는 간부의 심부름꾼이 기다렸다.", weight: "light" }, { op: 'money', add: -50000 }, { op: 'mastery', branch: 'sword', add: 15 }] },
+      { label: '그 칼을 사겠다고 웃돈을 부른다', hint: '대장장이가 마지막으로 벼린 검을 산다', values: { ambition: D },
+        when: [{ c: 'money', min: 50000 }, { c: 'weapon', id: 'wano_last_order', has: false }],
+        fx: [{ op: 'buyWeapon', id: 'wano_last_order' }, { op: 'mastery', branch: 'sword', add: 15 },
+          { op: 'log', text: '대장장이는 칼집에 마지막 검을 넣어 내 손에 맡겼다. 문밖에서 기다리던 간부의 심부름꾼은 빈손으로 돌아갔다.', weight: 'light' }] },
     ],
   },
   {
@@ -319,12 +322,12 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wanoa_last_blade', kind: 'door', when: adult(55, 90, LANDED), weight: 4, repeat: 'once', speaker: 'hero',
-    title: '칼을 물려준다', body: '평생 곁에 둔 칼을 이제 누군가에게 물려줄 때다. 칼은 주인을 고른다고들 한다.',
+    id: 'wanoa_last_blade', kind: 'door', when: adult(55, 90, LANDED, { c: 'flag', id: 'wano_family_blade', has: true }, { c: 'weapon', id: 'wano_heirloom', has: true }), weight: 4, repeat: 'once', speaker: 'hero',
+    title: '칼을 물려준다', body: '어릴 적 밤마다 마당에서 뽑아 보던 집안의 칼이다. 낡은 천을 풀자 칼집에 난 흠집까지 그대로다. 이 칼을 어디에 맡길지 정하려 한다.',
     doors: [
-      { label: '가장 오래 곁을 지킨 젊은이에게 준다', hint: '곁을 지켜 준 마음에 답한다', values: { loyalty: D }, fx: [{ op: "log", text: "젊은이가 두 손으로 칼집을 받았다. 오래 곁을 지킨 손에 칼이 넘어가자 대장간이 조용해졌다.", weight: "light" }, { op: 'timeline', text: '평생의 칼을 곁을 지킨 젊은이에게 물려주었다' }] },
-      { label: '신사에 바친다', hint: '칼은 아무에게도 가지 않는다', values: { peace: D }, fx: [{ op: "log", text: "신사에 칼을 올려놓자 관리가 천으로 덮었다. 누구도 뽑지 못한 채 그 자리에 남았다.", weight: "light" }, { op: 'timeline', text: '평생의 칼을 신사에 바쳤다' }] },
-      { label: '시합을 열어 이긴 사람에게 준다', hint: '칼은 강한 손에 간다', values: { dominion: D }, fx: [{ op: "log", text: "시합의 마지막 승자가 칼을 받았다. 패한 이들도 날을 한 번씩 보고 물러났다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'timeline', text: '시합을 열어 평생의 칼을 물려주었다' }] },
+      { label: '함께 수련한 무사에게 준다', hint: '한때 문하에 들었던 도장에 맡긴다', when: [{ c: 'person', relation: '결투를 청했던 무사', has: true, kinds: ['ally'] }], values: { loyalty: D }, fx: [{ op: 'giveAwayWeapon', id: 'wano_heirloom' }, { op: "log", text: "{person:결투를 청했던 무사}은(는) 두 손으로 칼집을 받았다. 도장에서 가장 볕이 잘 드는 자리에 놓고 곁에 집안의 이름을 적었다.", weight: "light" }, { op: 'timeline', text: '집안의 칼을 {person:결투를 청했던 무사}에게 맡겼다' }] },
+      { label: '신사에 바친다', hint: '칼은 아무에게도 가지 않는다', values: { peace: D }, fx: [{ op: 'giveAwayWeapon', id: 'wano_heirloom' }, { op: "log", text: "신사에 칼을 올려놓자 관리가 천으로 덮었다. 누구도 뽑지 못한 채 그 자리에 남았다.", weight: "light" }, { op: 'timeline', text: '평생의 칼을 신사에 바쳤다' }] },
+      { label: '시합을 열어 이긴 사람에게 준다', hint: '칼은 강한 손에 간다', values: { dominion: D }, fx: [{ op: 'giveAwayWeapon', id: 'wano_heirloom' }, { op: "log", text: "시합의 마지막 승자가 칼을 받았다. 패한 이들도 날을 한 번씩 보고 물러났다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'timeline', text: '시합을 열어 평생의 칼을 물려주었다' }] },
     ],
   },
   {

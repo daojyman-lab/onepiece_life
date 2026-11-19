@@ -2,7 +2,6 @@
 import { josa } from '../../shared/core/josa';
 import { fmtMoney } from '../../shared/core/util';
 import { FRUIT_BY_ID } from '../../shared/data/fruits';
-import { ITEM_BY_ID } from '../../shared/data/items';
 import { SEA_BY_ID } from '../../shared/data/seas';
 import type { SceneInput } from '../pixel/pixelArt';
 import { SPECIES_NAMES } from '../../shared/data/births';
@@ -23,11 +22,12 @@ import {
 import { activeValue } from '../../core/personality';
 import { rating5 } from '../../core/power';
 import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
-import { primaryStyle } from '../../core/styles';
+import { equippedWeapon, isMartialBranch, primaryStyle } from '../../core/styles';
 import { bandWord } from './words';
 import { GRADES, GRADE_TOP } from '../../data/words';
 import type { Branch, Life5, LogLine, Standing } from '../../core/types';
 import { foeWho, heroWho5, personWho5 } from './faces';
+import { unitWho } from './battle';
 import { ageWord, valueWords } from './words';
 
 /** 기록 칸에 남기는 줄 수 */
@@ -46,7 +46,7 @@ export interface ProfileView {
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
-  weapon: string | null;
+  weapon: string;
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
@@ -86,6 +86,10 @@ export function standingTitle(s: Life5): string {
 
 export function profileView(s: Life5): ProfileView {
   const h = s.hero, g = s.growth;
+  const styleId = primaryStyle(s);
+  const style = styleId ? COMBAT_STYLE_BY_ID[styleId] : null;
+  const branch = style?.branch ?? g.path;
+  const weaponPath = !!branch && isMartialBranch(branch) && branch !== 'fist';
   const hurts = h.injuries.map((i) => i.part && i.kind
     ? `${WOUND_PART_NAME[i.part]} ${WOUND_KIND_NAME[i.kind]} · ${INJURY_NAME[i.severity]}`
     : INJURY_NAME[i.severity]);
@@ -108,11 +112,11 @@ export function profileView(s: Life5): ProfileView {
       return st === 'ok' ? [] : [{ limb: LIMB_NAME[l], word: LIMB_STATE_WORD[st] }];
     }),
     skills: BRANCHES.filter((b) => g.tier[b] >= 1).map((b) => ({ name: BRANCH_NAME[b], tier: TIER_WORD[g.tier[b]] ?? '' })),
-    path: primaryStyle(s) ? `${COMBAT_STYLE_BY_ID[primaryStyle(s)!].group === 'weapon' ? '무기술' : '체술'} · ${COMBAT_STYLE_BY_ID[primaryStyle(s)!].name}` : g.path ? `${['sword', 'polearm', 'blunt', 'gun'].includes(g.path) ? '무기술 · ' : ''}${BRANCH_NAME[g.path]}` : null,
+    path: style ? `${weaponPath ? '무기술' : '체술'} · ${style.name}` : g.path ? `${weaponPath ? '무기술 · ' : ''}${BRANCH_NAME[g.path]}` : null,
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
-    weapon: h.weapon ? ITEM_BY_ID[h.weapon]?.name ?? null : null,
+    weapon: equippedWeapon(s)?.name ?? (weaponPath ? '장착한 무기 없음' : '맨손'),
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
@@ -131,7 +135,8 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const h = s.hero, p = s.pending;
   const sea = SEA_BY_ID[h.sea];
   const foe = ready && p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
-  const hero = heroWho5(s);
+  const fighter = ready && p?.kind === 'battle' ? p.battle.units.find(u => u.hero) : null;
+  const hero = fighter ? unitWho(s, fighter) : heroWho5(s);
   return {
     hero,
     crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),

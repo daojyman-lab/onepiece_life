@@ -4,7 +4,7 @@
 // 다른 처지로 건너가는 전환점에는 standingYears를 둔다. 문의 말에는 가치관 이름도 숫자도 쓰지 않는다.
 // 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { age, at, st } from './paths';
+import { chose, known, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -194,12 +194,12 @@ const CIVIL: Turning[] = [
 const SHIPWRIGHT: Turning[] = [
   // ---------------------------------------------------------------- 조선소
   {
-    id: 'sw_apprentice_wage', kind: 'door', when: at(age(15, 30), st('shipwright')),
+    id: 'sw_apprentice_wage', kind: 'door', when: at(age(15, 30), st('shipwright'), years(1)),
     weight: 7, repeat: 'once', speaker: { relation: '조선소의 목수장' },
     title: '도제의 셈', body: '조선소에 들어온 지 한 해. 목수장은 도제는 다섯 해 동안 품삯이 없다고, 대신 밥과 잠자리와 기술을 준다고 한다. 이웃 조선소는 첫해부터 품삯을 준다는 소문이 들린다.',
     doors: [
       { label: '다섯 해를 채우겠다고 손을 내민다', hint: '빈 주머니로 대패질만 한다. 손이 기술을 기억한다', values: { loyalty: D },
-        fx: [{ op: 'base', key: 'vit', add: 1 }, { op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'yardBound' }, { op: 'log', text: '목수장이 새 대패를 내밀었다. 다섯 해 동안 손바닥에 굳은살이 쌓였다.', weight: 'light' }] },
+        fx: [{ op: 'base', key: 'vit', add: 1 }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '도제 시절의 목수장' }, { op: 'flag', id: 'yardBound' }, { op: 'log', text: '목수장이 새 대패를 내밀었다. 다섯 해 동안 손바닥에 굳은살이 쌓였다.', weight: 'light' }] },
       { label: '품삯을 주는 이웃 조선소로 옮긴다', hint: '당장 돈이 들어오고, 목수장은 다시는 {name}을(를) 받지 않는다', values: { ambition: D },
         fx: [{ op: 'money', add: 12000 }, { op: 'person', kind: 'rival', relation: '등 돌린 옛 목수장', age: { older: 30 } }, { op: 'log', text: '이웃 조선소에서 첫 품삯을 받았다. 옛 목수장은 작업장 문을 닫았다.', weight: 'light' }] },
       { label: '밤마다 버려진 목재로 제 손으로 작은 배를 짓는다', hint: '잠을 줄인다. 들키면 목재 도둑이 된다', values: { inquiry: D },
@@ -307,12 +307,12 @@ const SHIPWRIGHT: Turning[] = [
     ],
   },
   {
-    id: 'sw_inherit_yard', kind: 'door', when: at(age(32, 65), st('shipwright'), years(6)),
-    weight: 4, repeat: 'once', speaker: { relation: '늙은 목수장' },
-    title: '남겨진 조선소', body: '늙은 목수장이 망치를 내려놓으며 조선소를 {name}에게 물려주겠다고 한다. 낡은 선대와 밀린 외상값도 함께다. 큰 조선 회사가 그 땅을 사겠다고 기다리고 있다.',
+    id: 'sw_inherit_yard', kind: 'door', when: at(age(32, 65), st('shipwright'), years(6), chose('sw_apprentice_wage', 0, 5), known('도제 시절의 목수장', 'ally')),
+    weight: 4, repeat: 'once', speaker: { relation: '도제 시절의 목수장' },
+    title: '남겨진 조선소', body: '도제 시절 대패를 내주었던 {person:도제 시절의 목수장}이(가) 망치를 내려놓으며 조선소를 {name}에게 물려주겠다고 한다. 낡은 선대와 밀린 외상값도 함께다. 큰 조선 회사가 그 땅을 사겠다고 기다리고 있다.',
     doors: [
       { label: '빚까지 함께 물려받는다', hint: '몇 해는 빚을 갚느라 허덕인다. 망치 소리는 이어진다', values: { loyalty: D },
-        fx: [{ op: 'money', add: -50000 }, { op: 'flag', id: 'ownYard' }, { op: 'hardship', add: 2 }, { op: 'timeline', text: '늙은 목수장의 조선소를 물려받았다' }, { op: 'log', text: '목수장의 낡은 망치를 받았다. 첫 달에는 선대보다 빚 장부를 오래 들여다봤다.', weight: 'light' }] },
+        fx: [{ op: 'money', add: -50000 }, { op: 'flag', id: 'ownYard' }, { op: 'hardship', add: 2 }, { op: 'receiveWeapon', id: 'yard_hammer', stow: true }, { op: 'timeline', text: '늙은 목수장의 조선소를 물려받았다' }, { op: 'log', text: '목수장의 낡은 망치를 받았다. 첫 달에는 선대보다 빚 장부를 오래 들여다봤다.', weight: 'light' }] },
       { label: '조선 회사에 땅을 넘기고 그 회사의 목수로 남는다', hint: '빚 걱정 없이 망치만 든다. 옛 간판은 내려간다', values: { peace: D },
         fx: [{ op: 'money', add: 40000 }, { op: 'fame', add: 1 }, { op: 'log', text: '옛 간판이 내려간 자리에 회사 일감이 쌓였다. 망치를 들 시간은 오히려 늘었다.', weight: 'light' }] },
       { label: '젊은 목수에게 물려주라고 사양한다', hint: '조선소는 다음 세대의 손으로 간다', values: { romance: D },
