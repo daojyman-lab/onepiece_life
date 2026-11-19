@@ -2,6 +2,7 @@
 import { hasTrait } from './traits';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
+import { discipleReady } from './disciples';
 import { fmtMoney } from '../shared/core/util';
 import { canonAge } from '../data/canon';
 import { STRENGTHS } from '../data/strengths';
@@ -24,6 +25,7 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'disciple': return discipleReady(s, c.stage);
     case 'styleBond': return c.phase === 'new' ? !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
     case 'lifePreparation': return lifePreparation(s, c.mode) === null;
     case 'age': return inRange(s.age, c.min, c.max);
@@ -76,6 +78,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';
     case 'lifePreparation': return lifePreparation(s, c.mode) ?? '';
     case 'age': return c.min !== undefined && s.age < c.min ? `아직 ${c.min}살이 되지 않았다` : `${c.max}살을 넘겼다`;

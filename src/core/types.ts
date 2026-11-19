@@ -79,6 +79,7 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
   | { c: 'lifePreparation'; mode: 'guard' | 'duel' }
   | { c: 'age'; min?: number; max?: number }
@@ -113,6 +114,7 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
   | { op: 'beginStyle' | 'adoptStyle' | 'refineStyle'; style: CombatStyle }
   | { op: 'lifeMilitary' }
   | { op: 'lifeEvent'; id: string; actor?: string }
@@ -189,6 +191,7 @@ export interface Door {
 }
 export interface Turning {
   id: string;
+  disciple?: DiscipleStage;
   kind: 'door' | 'moment' | 'fortune' | 'misfortune';    // moment 큰 계기, misfortune 고를 수 없는 불행 (문 없음)
   when: Cond[]; weight: number; repeat: 'once' | { years: number };
   fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
@@ -210,7 +213,7 @@ export interface Minor {
 }
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =
-  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[] }
+  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
   | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string }; escape?: { roll: number; need: number } }
   | { kind: 'ending'; cause: string }
@@ -230,7 +233,15 @@ export interface TraitState {
   changedAt: number | null;
   crewSeen: string[];
 }
+export type DiscipleStage = 'meeting' | 'training' | 'sailing' | 'reunion';
+export interface DiscipleRecord {
+  personId: string; style: CombatStyle; since: number; island: string;
+  trainedAt?: number; sailedAt?: number; readyAt?: number;
+  outcome?: 'duel' | 'reconciled' | 'reported';
+}
 export interface Life5 {
+  /** 실제로 받아들인 제자들. 기술과 시기는 가르치기 시작한 때의 사실로 남긴다. */
+  disciples?: DiscipleRecord[];
   /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */
   lifeStory?: {
     elapsed: number;

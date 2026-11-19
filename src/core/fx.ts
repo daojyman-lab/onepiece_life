@@ -1,6 +1,7 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, traitMastery } from './traits';
 import { setDream } from './dreams';
+import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
 import { parentFound, parentMissing } from './family';
 import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
@@ -35,11 +36,11 @@ const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk']
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
-export function fillText(s: Life5, text: string): string {
+export function fillText(s: Life5, text: string, discipleId?: string): string {
   const parent = s.people.find((p) => p.alive && personIs(p, 'parent'))?.relation ?? '';
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
   return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, parent, friend,
-    lifeGuardMethod: lifeGuardMethod(s), lifeOutcome: lifeOutcome(s) });
+    lifeGuardMethod: lifeGuardMethod(s), lifeOutcome: lifeOutcome(s), ...discipleWords(s, discipleId) });
 }
 
 /** 이 갈래에서 오를 수 있는 가장 높은 단계. 스승이 없으면 noMasterCap, 스승의 갈래는 스승이 정한다 (돈으로 들인 스승은 paidCap까지) */
@@ -63,8 +64,9 @@ export function addMastery(s: Life5, b: Branch, add: number): void {
   logLine(s, `${BRANCH_NAMES[BRANCH_ID[b]]}이(가) ${g.tier[b]}단계에 올랐다.`, 'heavy', 'growth');
 }
 
-export function applyFx(s: Life5, fx: Fx[]): void {
-  for (const e of fx) applyOne(s, e);
+export function applyFx(s: Life5, fx: Fx[], discipleId?: string): void {
+  const context = { discipleId };
+  for (const e of fx) applyOne(s, e, context);
 }
 
 /** 제 배를 가진 해적과 칠무해는 선장이다 (선장 · 선원에 따라 다른 글이 온다: 표시 'captain') */
@@ -73,14 +75,28 @@ function captainByShip(s: Life5): void {
   if ((st === 'warlord' || (st === 'pirate' && s.flags.includes('ship'))) && !s.flags.includes('captain')) s.flags.push('captain');
 }
 
-function applyOne(s: Life5, e: Fx): void {
+function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
   const h = s.hero;
   switch (e.op) {
+    case 'disciple': {
+      if (e.action === 'accept') { context.discipleId = acceptDisciple(s); return; }
+      const d = s.disciples?.find(x => x.personId === context.discipleId);
+      if (!d) return;
+      if (e.action === 'train') d.trainedAt = s.age;
+      if (e.action === 'sail') d.sailedAt = s.age;
+      if (e.action === 'delay') d.readyAt = s.age + 1;
+      if (e.action === 'resolve') {
+        d.outcome = e.outcome;
+        const p = s.people.find(x => x.id === d.personId);
+        if (p) { p.faction = 'pirate'; p.kind = e.outcome === 'reported' ? 'enemy' : e.outcome === 'duel' ? 'rival' : 'ally'; }
+      }
+      return;
+    }
     case 'beginStyle': beginStyle(s, e.style); return;
     case 'adoptStyle': adoptStyle(s, e.style); return;
     case 'refineStyle': refineStyle(s, e.style); return;
     case 'lifeMilitary':
-      if (h.standing !== 'marine' && h.standing !== 'cp') applyOne(s, { op: 'standing', to: 'marine' });
+      if (h.standing !== 'marine' && h.standing !== 'cp') applyOne(s, { op: 'standing', to: 'marine' }, context);
       return;
     case 'lifeEvent': recordLifeEvent(s, e.id, e.actor); return;
     case 'lifeWait': waitForLifeEvidence(s, e.ready, e.otherwise); return;
@@ -226,8 +242,8 @@ function applyOne(s: Life5, e: Fx): void {
       return;
     }
     case 'queue': if (!s.queue.includes(e.turning)) s.queue.push(e.turning); return;
-    case 'log': logLine(s, fillText(s, e.text), e.weight); return;
-    case 'timeline': s.timeline.push({ age: s.age, text: fillText(s, e.text), ...(e.canon ? { canon: e.canon } : {}) }); return;
+    case 'log': logLine(s, fillText(s, e.text, context.discipleId), e.weight); return;
+    case 'timeline': s.timeline.push({ age: s.age, text: fillText(s, e.text, context.discipleId), ...(e.canon ? { canon: e.canon } : {}) }); return;
     case 'die':
       if (!h.alive) return;
       h.alive = false;
@@ -236,7 +252,7 @@ function applyOne(s: Life5, e: Fx): void {
       s.pending = { kind: 'ending', cause: e.cause };
       return;
     case 'chance':
-      applyFx(s, chance(rngOf(s.rng), e.skillCheck && e.p > 0 && e.p < 1 ? clamp(e.p + traitFactor(s, 'chance'), 0, 1) : e.p) ? e.then : (e.else ?? []));
+      applyFx(s, chance(rngOf(s.rng), e.skillCheck && e.p > 0 && e.p < 1 ? clamp(e.p + traitFactor(s, 'chance'), 0, 1) : e.p) ? e.then : (e.else ?? []), context.discipleId);
       return;
     case 'mastery': {
       const gain = e.add > 0 ? e.add * traitMastery(s, e.branch) * growthMultiplier(s, e.branch) : e.add;

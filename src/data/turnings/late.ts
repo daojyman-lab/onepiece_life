@@ -335,21 +335,6 @@ const RETIRED_LATE: Turning[] = [
     ],
   },
   {
-    id: 'late_r_student_pirate', kind: 'door', when: at(age(55), RET),
-    weight: 4, repeat: 'once', speaker: { relation: '이름난 해적이 된 옛 제자' },
-    title: '제자의 칼끝', body: '젊은 날 칼을 가르친 아이가 악명 높은 해적이 되어 찾아왔다. 스승의 칼을 넘어서야 제 길이 끝난다며, 늙은 스승에게 한 판을 청한다.',
-    doors: [
-      { label: '마지막으로 칼을 든다', hint: '늙은 손으로 제자의 칼을 받는다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -30 }, { op: 'chance', p: 0.3,
-          then: [{ op: 'injury', severity: 'heavy' }, { op: 'log', text: '제자의 칼을 받아내다 깊은 상처를 입었다. 끝내 제자가 먼저 무릎을 꿇자 {name}은(는) 피 묻은 검을 내렸다.', weight: 'heavy' }],
-          else: [{ op: 'log', text: '오랜 공방 끝에 제자가 먼저 무릎을 꿇었다. {name}은(는) 지친 손으로 검을 내리고 제자를 일으켜 세웠다.', weight: 'heavy' }] }] },
-      { label: '칼은 들지 않고 제자에게 무엇을 위해 싸우는지 묻는다', hint: '제자는 오래 대답하지 못한다', values: { romance: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '칼을 거둔 옛 제자', age: { younger: 25 } }, { op: 'log', text: '제자가 칼끝을 내렸다. 스승의 물음에 답하지 못한 채 바닷가로 걸어갔다.', weight: 'light' }] },
-      { label: '해군에 제자의 행방을 알린다', hint: '제가 키운 칼이 세상을 베는 것을 막는다', values: { justice: D },
-        fx: [{ op: 'hardship', add: 4 }, { op: 'person', kind: 'enemy', relation: '스승을 원망하는 옛 제자', age: { younger: 25 } }, { op: 'log', text: '해군은 제자의 배를 찾아 나섰다. 가르치던 아이의 수배서가 탁자에 남았다.', weight: 'light' }] },
-    ],
-  },
-  {
     id: 'late_r_old_sin', kind: 'door', when: at(age(55), RET),
     weight: 4, repeat: 'once', speaker: { relation: '찾아온 늙은 상인' },
     title: '남은 사과', body: '젊은 날 돈을 받고 흘린 말 한마디 때문에 식구를 잃었다는 늙은 상인이 찾아왔다. {name}은(는) 그 일을 잊고 살았다. 상인은 화도 내지 않고, 이유만 알고 싶다고 한다.',
@@ -457,19 +442,7 @@ const ANY_LATE: Turning[] = [
         fx: [{ op: 'hardship', add: 2 }, { op: 'log', text: '잠들기 전 그 사람의 이름이 떠올랐다. 이불을 끌어올리고 아침을 기다렸다.', weight: 'light' }] },
     ],
   },
-  {
-    id: 'late_disciple_sails', kind: 'door', when: at(age(50), st(...GROWN)),
-    weight: 4, repeat: 'once', speaker: { relation: '떠나는 제자' },
-    title: '제자의 출항', body: '오래 곁에 두고 가르친 젊은이가 제 배를 띄우겠다고 한다. 아직 모자란 데가 보인다. 그 나이의 {name}도 그랬다.',
-    doors: [
-      { label: '아끼던 칼 한 자루를 쥐여 보낸다', hint: '제자의 길을 축복한다. 곁이 빈다', values: { freedom: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '칼을 받아 떠난 제자', age: { younger: 30 } }, { op: 'log', text: '칼집을 쥐여 주자 제자가 두 손으로 받았다. 배가 떠난 뒤 작업대가 조용해졌다.', weight: 'light' }] },
-      { label: '한 해만 더 배우고 가라고 붙잡는다', hint: '제자는 남는다. 그 눈빛이 조급하다', values: { dominion: D }, 
-        fx: [{ op: 'person', kind: 'ally', relation: '한 해를 더 배운 제자', age: { younger: 30 } }, { op: 'hardship', add: 1 }, { op: 'log', text: '제자가 한 해 더 남았다. 매일 항구의 새 배를 보고 수련장으로 돌아왔다.', weight: 'light' }] },
-      { label: '그 배의 항해사로 함께 오른다', hint: '늙은 몸으로 젊은이의 바다를 따라간다', values: { romance: D }, danger: true,
-        fx: [{ op: 'hp', add: -15 }, { op: 'mastery', branch: 'observation', add: 6 }, { op: 'log', text: '젊은 배의 해도를 펴고 항로를 짚었다. 제자는 키를 잡고 {name}에게 바람을 물었다.', weight: 'light' }] },
-    ],
-  },
+
 ];
 
 export const LATE: Turning[] = [...SEA_LATE, ...FLAG_LATE, ...LAND_LATE, ...RETIRED_LATE, ...ANY_LATE];

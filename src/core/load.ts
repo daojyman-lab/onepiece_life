@@ -12,6 +12,8 @@ import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
 import { emptyLife } from './state';
 import { normalizeStyles } from './styles';
+import { isCombatStyle } from '../data/combat-styles';
+import { discipleFor } from './disciples';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -71,6 +73,23 @@ export function normalizeLife5(x: unknown): Life5 | null {
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
   try { normalizeStyles(life, legacyStyles); } catch { return null; }
+  if (life.disciples !== undefined) {
+    if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
+      typeof d.personId !== 'string' || !life.people.some(p => p.id === d.personId) || !isCombatStyle(d.style) ||
+      typeof d.island !== 'string' || !Number.isFinite(d.since) || d.since < 0 || d.since > life.age ||
+      (d.trainedAt !== undefined && (!Number.isFinite(d.trainedAt) || d.trainedAt < d.since + 3 || d.trainedAt > life.age)) ||
+      (d.sailedAt !== undefined && (d.trainedAt === undefined || !Number.isFinite(d.sailedAt) || d.sailedAt < d.trainedAt + 2 || d.sailedAt > life.age)) ||
+      (d.readyAt !== undefined && !Number.isFinite(d.readyAt)) ||
+      (d.outcome !== undefined && (d.sailedAt === undefined || !['duel', 'reconciled', 'reported'].includes(d.outcome)))) ||
+      new Set(life.disciples.map(d => d.personId)).size !== life.disciples.length) return null;
+  }
+  // 옛 사건에는 앞선 사제 관계가 없다. 과거를 만들어 넣지 않고 근거 없는 대기 창만 닫는다.
+  if (life.pending?.kind === 'door') {
+    const stage = life.pending.turning === 'late_r_student_pirate' ? 'reunion'
+      : life.pending.turning === 'late_disciple_sails' ? 'sailing'
+      : life.pending.turning === 'disciple_training' ? 'training' : null;
+    if (stage && (!life.pending.discipleId || discipleFor(life, stage)?.personId !== life.pending.discipleId)) life.pending = null;
+  }
   if (life.lifeStory !== undefined) {
     const story = life.lifeStory;
     if (!isObj(story) || !Number.isInteger(story.elapsed) || story.elapsed < 0 || !Array.isArray(story.events) ||

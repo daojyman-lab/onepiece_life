@@ -20,6 +20,7 @@ import { afterLifeStoryChoice, lifeOutcome } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
 import { recordTraitEvent, tradeCost } from './traits';
+import { discipleFor, discipleReady, discipleWords } from './disciples';
 import type { Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -30,13 +31,15 @@ const OPENED_ELSEWHERE = new Map<string, Turning>();
 export const turningOf = (id: string): Turning | undefined => TURNING_BY_ID[id] ?? OPENED_ELSEWHERE.get(id) ?? buildVoyage(id) ?? buildEntryGate(id);
 
 /** 자리표시 {name}(이름만) {town} {island} {parent}를 채우고 조사를 고른다. 성씨는 쓰지 않는다. */
-function fillTurning(s: Life5, text: string): string {
+function fillTurning(s: Life5, text: string, t?: Turning): string {
   const friend = s.people.find((p) => p.alive && p.relation === '어릴 적 동무')?.name ?? '동무';
   const parent = s.people.find((p) => p.alive && (p.relation === '아버지' || p.relation === '어머니'))?.relation ?? '';
-  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent, lifeOutcome: lifeOutcome(s) });
+  const discipleId = t?.disciple ? discipleFor(s, t.disciple)?.personId : undefined;
+  return fill(text, { name: s.hero.name, town: s.hero.town, island: s.hero.island, friend, parent, lifeOutcome: lifeOutcome(s), ...discipleWords(s, discipleId) });
 }
 
 function speakerOf(s: Life5, t: Turning): string {
+  if (t.disciple && t.disciple !== 'meeting') return s.people.find(p => p.id === discipleFor(s, t.disciple!)?.personId)?.name ?? '제자';
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
   if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
@@ -56,7 +59,7 @@ export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
     if (!locked && d.special && !opensSpecial(s, d.special, earned)) locked = josa(`${VALUE_NAME[d.special]}이(가) 더 자라야 이 문을 떠올린다`);
     const key = `${t.id}#${i}`;
     return {
-      label: fillTurning(s, d.label), hint: fillTurning(s, d.hint) + (price > 0 ? ` · 거래 ${tradeCost(s, price).toLocaleString('ko-KR')} 베리` : ''), locked,
+      label: fillTurning(s, d.label, t), hint: fillTurning(s, d.hint, t) + (price > 0 ? ` · 거래 ${tradeCost(s, price).toLocaleString('ko-KR')} 베리` : ''), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
     };
   });
@@ -79,6 +82,7 @@ export function stillOpen(s: Life5, t: Turning): boolean {
  * false를 돌려주고 아무것도 하지 않는다.
  */
 export function openTurning(s: Life5, t: Turning): boolean {
+  if (t.disciple && !discipleReady(s, t.disciple)) return false;
   if (!stillOpen(s, t) || !needsOk(s, t.needs)) return false;
   const doors = resolveDoors(s, t);
   if (!doors.some((d) => !d.locked)) return false;
@@ -88,7 +92,8 @@ export function openTurning(s: Life5, t: Turning): boolean {
   const automatic = t.automatic && !checkAll(s, t.automatic.unless) ? t.automatic.fx : undefined;
   if (!automatic) s.pending = {
     kind: 'door', turning: t.id, moment: t.kind === 'moment',
-    title: fillTurning(s, t.title), body: fillTurning(s, t.body), speaker: speakerOf(s, t), doors,
+    title: fillTurning(s, t.title, t), body: fillTurning(s, t.body, t), speaker: speakerOf(s, t), doors,
+    ...(t.disciple ? { discipleId: discipleFor(s, t.disciple)?.personId } : {}),
   };
   s.seen[t.id] = s.age;
   s.seenCount[t.id] = (s.seenCount[t.id] ?? 0) + 1;
@@ -242,7 +247,7 @@ export function answerDoor(s: Life5, index: number): void {
   }
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
-  applyFx(s, door.fx);
+  applyFx(s, door.fx, p.discipleId);
   afterLifeStoryChoice(s, t.id);
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
