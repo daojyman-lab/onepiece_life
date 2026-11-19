@@ -22,18 +22,18 @@ export const PRIME: Turning[] = [
     doors: [
       { label: '세상의 강자들을 찾아 하나씩 겨룬다', hint: '가장 빛나는 때에 가장 높은 벽을 두드린다', values: { dominion: D },
         fx: [prime, { op: 'fame', add: 30 }, heavy('{name}은(는) 이름난 강자들의 소문을 모아 지도에 하나씩 표시했다.')] },
-      { label: '곁의 사람들이 품은 꿈을 함께 이루는 데 쓴다', hint: '나 혼자 높이 오르기보다 함께 멀리 간다', values: { loyalty: D },
-        fx: [prime, heavy('{name}은(는) 곁의 사람들에게 저마다의 꿈을 물었다. 이번에는 그 꿈들을 위해 돛을 올린다.')] },
+      { label: '누군가의 꿈을 함께 이루는 데 쓴다', hint: '내가 먼저 손을 내밀어 본다', values: { loyalty: D },
+        fx: [prime, heavy('광장에서 제 그림을 처음 팔아 보려는 아이를 만났다. {name}은(는) 바람에 펄럭이는 종이 한쪽을 잡고 첫 손님이 올 때까지 함께 기다렸다.')] },
       { label: '아무도 가 본 적 없는 곳으로 나선다', hint: '지도의 빈칸을 채우러 간다', values: { freedom: D },
         fx: [prime, heavy('{name}은(는) 지도의 가장 큰 빈칸을 손가락으로 짚었다.')] },
     ],
   },
   {
     id: 'prime_trial', kind: 'door', when: [...ready, { c: 'hardship', min: PRIME_HARDSHIP }], weight: 30, repeat: 'once', speaker: 'hero',
-    title: '견뎌 낸 끝에서', body: '굶주림도, 패배도, 잃은 것도 많았다. 그런데 오늘, 쓰러질 것 같던 자리에서 {name}은(는) 처음으로 흔들리지 않았다. 지난 시간이 모두 이 순간을 위해 쌓였던 것처럼 몸과 마음이 맞물린다. 이 힘을 무엇에 쓸까.',
+    title: '견뎌 낸 끝에서', body: '힘겨운 날들이 이어졌다. 그런데 오늘, 쓰러질 것 같던 자리에서 {name}은(는) 처음으로 흔들리지 않았다. 지난 시간이 모두 이 순간을 위해 쌓였던 것처럼 몸과 마음이 맞물린다. 이 힘을 무엇에 쓸까.',
     doors: [
-      { label: '나를 꺾었던 것들에게 차례로 되갚는다', hint: '다시는 지지 않는다는 것을 보여 준다', values: { dominion: D },
-        fx: [prime, { op: 'base', key: 'wil', add: 1 }, heavy('{name}은(는) 한때 자신을 쓰러뜨린 이름들을 하나씩 떠올렸다.')] },
+      { label: '눈앞을 가로막는 강자에게 먼저 도전한다', hint: '다시는 지지 않는다는 것을 보여 준다', values: { dominion: D },
+        fx: [prime, { op: 'base', key: 'wil', add: 1 }, heavy('{name}은(는) 동네에서 가장 큰 대련장에 찾아가 상대를 청했다.')] },
       { label: '나 같은 처지의 사람들을 끌어올린다', hint: '견뎌 본 사람만 아는 것이 있다', values: { justice: D },
         fx: [prime, heavy('{name}은(는) 지난날의 자신과 꼭 닮은 얼굴들에게 손을 내밀었다.')] },
       { label: '살아 있음을 실컷 누리며 노래한다', hint: '살아남았으니 이제 즐길 차례다', values: { romance: D },

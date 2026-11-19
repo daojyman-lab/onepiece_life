@@ -7,6 +7,7 @@ import { BRANCH_NAME } from '../data/words';
 import { rating5 } from './power';
 import { focusedStyle, isMartialBranch } from './styles';
 import { logLine } from './state';
+import { livingContact } from './needs';
 import type { Activity, Branch, Life5, ValueId, VowState } from './types';
 
 const state = (s: Life5): VowState => s.vows ?? (s.vows = { active: null, history: [] });
@@ -24,16 +25,20 @@ const nextLevel = (s: Life5): 1 | 2 | 3 | null => {
 };
 const targetOf = (s: Life5, value: ValueId, level: 1 | 2 | 3): { name: string; id?: string } => {
   if (value === 'loyalty' && level === 1 || value === 'ambition' && level === 1) {
-    const sibling = s.people.find((person) => person.alive && /^(형|오빠|누나|언니|남동생|여동생)$/.test(person.relation));
-    if (sibling) return { name: sibling.name, id: sibling.id };
-    return { name: '친구' };
+    const contact = livingContact(s, { who: 'sibling' }) ?? livingContact(s, { relation: '어릴 적 동무' });
+    return contact ? { name: contact.name, id: contact.id } : { name: '자신' };
   }
   if (value === 'loyalty' && level === 3) {
     const child = s.people.find((person) => person.alive && ['자식', '아들', '딸'].includes(person.relation));
     if (child) return { name: child.name, id: child.id };
-    return { name: '후배' };
+    const pupil = s.people.find(p => p.alive && s.disciples?.some(d => d.personId === p.id));
+    return pupil ? { name: pupil.name, id: pupil.id } : { name: '자신' };
   }
-  if (value === 'inquiry' && level === 1) return { name: s.growth.master?.name ?? '스스로 찾은 가르침' };
+  if (value === 'inquiry' && level === 1) {
+    const name = s.growth.master?.name;
+    const teacher = name && s.people.find(p => p.alive && p.kind === 'master' && p.name === name);
+    return teacher ? { name: teacher.name, id: teacher.id } : { name: name ?? '자신' };
+  }
   return { name: value === 'freedom' ? '자신' : '곁의 사람들' };
 };
 
@@ -75,7 +80,8 @@ export function canBeginVow(s: Life5, id: string): boolean {
 export function beginVow(s: Life5, id: string): boolean {
   if (!canBeginVow(s, id)) return false;
   const d = VOWS[id];
-  const target = d.level ? targetOf(s, d.value, d.level) : { name: d.target };
+  const guide = id === 'sky_tika_guard' ? livingContact(s, { relation: '구름 해안의 배달꾼 티카' }) : undefined;
+  const target = d.level ? targetOf(s, d.value, d.level) : { name: guide?.name ?? d.target, id: guide?.id };
   const level = d.level ?? 1;
   const vows = state(s);
   const branch = vows.branch ?? branchOf(s);

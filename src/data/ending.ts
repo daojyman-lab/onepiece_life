@@ -101,7 +101,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     high: '{name}은(는) 이 몸의 이름을 알면서도 끝까지 제멋대로였지. 그런 녀석은 드물어!',
   },
   alvida: {
-    low: '내 배를 스쳐 간 사람 중 하나였지. 특별할 건 없었어.',
+    low: '얼굴은 알아. 내게 깊은 인상을 남기지는 못했지.',
     high: '{name}은(는) 겉모습에 속지 않았어. 그런 눈을 가진 자는 오래 기억하지.',
   },
   kuro: {
@@ -185,19 +185,19 @@ export const CANON_WORDS: Record<string, CanonWords> = {
     high: '{name}은(는) 꺾일 때도 다시 일어났지. 그런 놈이 마지막까지 버티는 법이다.',
   },
   marco: {
-    low: '{name}? 한 번 같이 난 적이 있지요이.',
+    low: '{name}? 이름을 들으니 얼굴이 떠오르네요이.',
     high: '영감님이 살아 있었으면 {name}을(를) 아들이라 불렀을 거요이.',
   },
   kid: {
     low: '{name}? 등 뒤를 안 친 놈 하나 있었지.',
-    high: '동맹 따위는 질색이지만, {name}과(와) 싸운 그날은 나쁘지 않았다.',
+    high: '{name}? 그 녀석이라면 내 앞에서도 제 할 말을 다 했을 거다.',
   },
   gin: {
-    low: '{name}… 밥 한 끼 얻어먹은 사이지.',
-    high: '굶어 죽어 가던 나한테 밥을 내민 사람이다. {name}의 배에서 먹은 밥맛은 죽어도 못 잊는다.',
+    low: '{name}… 얼굴은 기억한다.',
+    high: '{name}한테는 거짓말을 하고 싶지 않았다. 그런 사람은 많지 않아.',
   },
   johnny: {
-    low: '{name} 형님? 잠깐 같은 배를 탔었지.',
+    low: '{name} 형님? 그 이름이라면 알지.',
     high: '종이 한 장 차이로 형님을 만났지. {name} 형님의 등은 끝까지 넓었다고!',
   },
   bonclay: {
@@ -206,11 +206,11 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   duval: {
     low: '{name}? 그런 손님도 있었지.',
-    high: '이 잘생긴 얼굴로 맹세하는데, {name}만 한 선장은 없었어.',
+    high: '이 잘생긴 얼굴로 맹세하는데, {name}만큼 기억에 남은 사람은 드물어.',
   },
   sai: {
     low: '{name}? 이름은 들었다.',
-    high: '한 번 잔을 나눈 사이는 끝까지 간다. {name}의 부름이라면 팔보수군은 언제든 닻을 올렸을 거다.',
+    high: '내가 기억한 이름은 쉽게 잊지 않는다. {name}의 부름이라면 팔보수군은 언제든 닻을 올렸을 거다.',
   },
   bartolomeo: {
     low: '어? 누구였더라! 미안, 그 무렵엔 선배님 생각뿐이었다고!',
@@ -222,7 +222,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   ideo: {
     low: '주먹을 맞대 봤던가? 기억이 안 나는 걸 보니 아닌가 보군.',
-    high: '{name}의 주먹은 진짜였다. 그 한 방은 지금도 손에 남아 있어.',
+    high: '{name}의 눈빛은 아직도 기억한다. 경기장 밖에서도 그런 사람은 눈에 띄지.',
   },
   koala: {
     low: '식당에서 스친 얼굴 같네. 이야기는 못 나눴어.',
@@ -230,7 +230,7 @@ export const CANON_WORDS: Record<string, CanonWords> = {
   },
   hack: {
     low: '기지에서 인사는 했을 것이다. 그 이상은 모른다.',
-    high: '{name}은(는) 바닥에 내던져져도 다시 일어났다. 좋은 제자였다.',
+    high: '{name}은(는) 한번 마음먹은 일 앞에서 좀처럼 물러나지 않았다. 그 점이 기억에 남는다.',
   },
   chopper: {
     low: '어? 진찰해 줬던 사람이었나? 잘 기억이 안 나!',

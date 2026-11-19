@@ -327,7 +327,7 @@ const A: Turning[] = [
     doors: [
       { label: '파코에게 다음 섬까지 함께 가자고 한다', hint: '꽃장수 소년이 짐을 꾸린다. 이 나라는 잠시 뒤에 둔다', values: { romance: D },
         when: [has('ep_dressrosa_a_paco_trust'), has('ep_dressrosa_a_isabel_trust'), not('ep_dressrosa_a_deal')],
-        fx: [flag('ep_dressrosa_a_done'), flag('ep_dressrosa_a_keepsake'), { op: 'person', kind: 'crew', relation: '드레스로자에서 따라온 꽃장수 소년', years: 2 },
+        fx: [flag('ep_dressrosa_a_done'), flag('ep_dressrosa_a_keepsake'), { op: 'person', kind: 'crew', relation: '드레스로자에서 따라온 꽃장수 소년', name: '파코', gender: 'm', reuseName: true, years: 2 },
              log('파코는 해바라기 씨 한 줌과 이사벨의 등록부 사본을 품에 넣고 배에 올랐다.')] },
       { label: '이사벨이 베껴 준 등록부 한 장을 받아 든다', hint: '잊힌 이름 몇이 짐 속에서 함께 떠난다', values: { inquiry: D },
         when: [has('ep_dressrosa_a_isabel_trust')],
@@ -663,7 +663,7 @@ const B: Turning[] = [
              time('드레스로자를 떠나며 마렐과 항해를 시작했다'),
              log('마렐이 밧줄을 풀고 배에 오른다. 부두에서 저녁을 먹던 때처럼 빵을 반으로 갈라 내민다.', 'light'),
              log('이번에는 마렐이 받아 한입 먹는다. “첫 항구에선 내가 사겠소.”', 'light'),
-             log('마렐이 키를 잡는다. 배가 수로를 빠져나가는 동안 나는 부두 쪽 사람들에게 손을 흔든다.'),
+             log('피피가 실종자 명단 사본을 건넨다. 마렐이 키를 잡고 배를 수로 밖으로 몰자 나는 부두 쪽 사람들에게 손을 흔든다.'),
              log('마렐은 한동안 내 배에서 항해하고, 드레스로자에 돌아가면 예전 상선에 다시 탈 생각이라고 한다.', 'light')] },
       { label: '이번 배를 보내고 피피와 며칠 더 남는다', hint: '피피와 명단을 정리한 뒤 다음 배를 알아본다', values: { inquiry: D },
         when: [has('ep_dressrosa_b_pipi_trust')],
@@ -905,7 +905,7 @@ const C: Turning[] = [
     doors: [
       { label: '루시아에게 다른 나라의 장부도 보러 가자고 한다', hint: '이름을 되찾아 주던 서기가 잠시 펜을 내려놓고 바다를 본다', values: { romance: D },
         when: [has('ep_dressrosa_c_lucia_trust'), has('ep_dressrosa_c_enrico_trust'), not('ep_dressrosa_c_deal')],
-        fx: [flag('ep_dressrosa_c_done'), { op: 'person', kind: 'crew', relation: '드레스로자의 이름 되찾기 서기', years: 1 },
+        fx: [flag('ep_dressrosa_c_done'), { op: 'person', kind: 'crew', relation: '드레스로자의 이름 되찾기 서기', name: '루시아', gender: 'f', reuseName: true, years: 1 },
              log('루시아는 빈 장부 한 권을 들고 배에 올랐다. 엔리코의 빵은 다음 섬에 닿을 때까지 따뜻했다.')] },
       { label: '엔리코의 빵과 루시아의 종이를 받아 든다', hint: '이 나라의 장부에 이름 하나가 남는다', values: { loyalty: D },
         when: [has('ep_dressrosa_c_enrico_trust')],

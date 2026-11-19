@@ -3,12 +3,15 @@ import { hasTrait } from './traits';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
 import { discipleReady } from './disciples';
+import { siblingReunionAllowed } from './siblings';
 import { fmtMoney } from '../shared/core/util';
 import { canonAge } from '../data/canon';
+import { FOES } from '../data/foes';
 import { STRENGTHS } from '../data/strengths';
 import { GRADES, GRADE_TOP } from '../data/words';
 import { VALUE_NAME } from '../data/values';
 import { rating5 } from './power';
+import { bountyOf } from './bounty';
 import { hasRelation, personIs } from './needs';
 import { isDeep } from './values';
 import { hasEntryContact } from './voyage';
@@ -26,6 +29,10 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'defeatedFoe': {
+      const foe = FOES[s.defeatedFoe ?? ''];
+      return !!foe && !s.people.some(p => !p.alive && (foe.canon ? p.canon === foe.canon : p.storyName === foe.name));
+    }
     case 'anyOf': return c.conditions.some(option => check(s, option));
     case 'disciple': return discipleReady(s, c.stage);
     case 'styleBond': return c.phase === 'new' ? !s.passage && !s.growth.styleBonds[c.style] && styleUsable(s, c.style) : styleBondReady(s, c.style, c.phase);
@@ -45,9 +52,14 @@ export function check(s: Life5, c: Cond): boolean {
     case 'equippedWeapon': return !!equippedWeapon(s);
     case 'prime': return inPrime(s);
     case 'fame': return h.fame >= c.min;
+    case 'bounty': return bountyOf(s) >= c.min;
     case 'grade': return c.is.includes(GRADES.find(([limit]) => rating5(s) < limit)?.[1] ?? GRADE_TOP);
     case 'turningSeen': return ((s.seenCount[c.id] ?? 0) > 0) === c.has;
     case 'canonPerson': return s.people.some(p => p.alive && p.canon === c.id && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'opponent': {
+      const people = s.people.filter(p => p.canon === c.canon);
+      return !people.length || (people.some(p => p.alive) && !people.some(p => p.alive && p.crew));
+    }
     case 'choiceAgo': {
       const key = `${c.turning}#${c.door}`;
       if (!s.tried.includes(key)) return false;
@@ -71,8 +83,9 @@ export function check(s: Life5, c: Cond): boolean {
     case 'standingYears': return s.age - s.standingSince >= c.min;
     case 'island': return c.is.includes(s.passage ? '' : h.island) !== (c.not ?? false);   // 바다 위에서는 어느 섬에도 있지 않다
     case 'species': return c.is.includes(h.species);
-    case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who)) === c.has;
-    case 'person': return s.people.some((p) => p.alive && hasRelation(p, c.relation) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
+    case 'kin': return s.people.some((p) => p.alive && personIs(p, c.who) && p.age >= (c.minAge ?? 0)) === c.has;
+    case 'siblingReunion': return siblingReunionAllowed(s, c.action);
+    case 'person': return s.people.some((p) => p.alive && hasRelation(p, c.relation) && p.age >= (c.minAge ?? 0) && (!c.kinds || c.kinds.includes(p.kind))) === c.has;
     case 'path': return c.is.includes(s.growth.path ?? 'none');
     case 'canonAge': return inRange(canonAge(c.id, s.age), c.min, c.max);
     case 'dream': {
@@ -91,6 +104,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'defeatedFoe': return '함께할 상대의 이름을 확인할 수 없다';
     case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
     case 'disciple': return '그 제자와 쌓은 수련과 시간이 아직 이어지지 않았다';
     case 'styleBond': return '인연과 연습, 몸의 준비가 아직 맞지 않는다';
@@ -109,9 +123,11 @@ function reason(s: Life5, c: Cond): string {
     case 'equippedWeapon': return '지금 손에 든 무기가 없다';
     case 'prime': return '전성기에만 찾아오는 기회다';
     case 'fame': return '아직 이름이 알려지지 않았다';
+    case 'bounty': return '현상금에 걸맞은 실력이나 정부가 경계할 행적이 부족하다';
     case 'grade': return '아직 상대가 인정할 전투력이 아니다';
     case 'turningSeen': return '이미 지나간 만남이다';
     case 'canonPerson': return '이 인물과의 인연이 맞지 않는다';
+    case 'opponent': return '이 상대와 적으로 마주칠 수 없다';
     case 'choiceAgo': return c.years ? '그 일을 겪고 시간이 흘러야 한다' : '앞선 선택이 필요하다';
     case 'tier': return '아직 그 경지에 이르지 못했다';
     case 'flag': return '때가 맞지 않는다';
@@ -125,6 +141,7 @@ function reason(s: Life5, c: Cond): string {
     case 'island': return '여기서는 일어나지 않는다';
     case 'species': return '종족이 다르다';
     case 'kin': return '때가 맞지 않는다';
+    case 'siblingReunion': return c.action === 'share' ? '이미 서로 비블카드를 나눴다' : '지금은 함께 갈 수 없다';
     case 'person': return c.has ? '그 사람과의 인연이 없다' : '이미 그 사람을 알고 있다';
     case 'path': return '걷는 길이 다르다';
     case 'canonAge': return '그 사람과 때가 맞지 않는다';

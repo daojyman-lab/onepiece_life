@@ -12,7 +12,7 @@ import type { Life5 } from '../../core/types';
 import { ageWord, endWord } from './words';
 
 /** 도감에는 지금 인생이 없으므로 문 이름의 자리표시를 이 말로 채운다 */
-const CODEX_FILL = { name: '나', town: '고향', island: '그 섬' };
+const CODEX_FILL = { name: '나', town: '고향', island: '그 섬', dojoPartner: '함께 겨룰 상대' };
 
 export interface CodexView { doors: { title: string; door: string; values: string[] }[]; fruits: string[]; people: string[]; lives: number }
 

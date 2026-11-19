@@ -2,7 +2,7 @@
 // pirate.ts가 500줄을 넘어 나누었다. pirate.ts의 PIRATE가 이 묶음을 함께 내보낸다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { age, at, sea, st } from './paths';
+import { chose, known, age, at, sea, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -15,12 +15,12 @@ const LATE = sea('nw_first', 'nw_late');
 export const PIRATE_2: Turning[] = [
   // ---------------------------------------------------------------- 칠무해
   {
-    id: 'pirate_warlord_summons', kind: 'door', when: at(WAR, settledIn(2)),
-    weight: 6, repeat: { years: 4 }, speaker: { relation: '정부의 전령' },
-    title: '정부의 소집령', body: '정부의 전령이 소집령을 내민다. 이름 없는 해적단 하나를 쳐부수라는 명령이다. 그 선장은 {name}이(가) 깃발을 처음 올리던 시절 함께 술을 마시던 사람이다.',
+    id: 'pirate_warlord_summons', kind: 'door', when: at(WAR, settledIn(2), chose('hunter_pirate_invite', 0, 4), known('사냥감이었던 선장', 'ally')),
+    weight: 6, repeat: 'once', speaker: { relation: '정부의 전령' },
+    title: '정부의 소집령', body: '정부의 전령이 소집령을 내민다. 이름 없는 해적단 하나를 쳐부수라는 명령이다. 명령서에는 수배서 대신 술병을 내밀며 {name}을(를) 배에 태웠던 {person:사냥감이었던 선장}의 이름이 있다.',
     doors: [
       { label: '소집에 응해 그 해적단을 친다', hint: '정부의 신임을 얻고 옛 얼굴 하나를 잃는다', values: { ambition: D },
-        fx: [{ op: 'fame', add: 30 }, { op: 'hardship', add: 3 }, { op: 'log', text: '옛 술친구의 배가 가라앉는 것을 끝까지 지켜보았다.', weight: 'heavy' }] },
+        fx: [{ op: 'fame', add: 30 }, { op: 'hardship', add: 3 }, { op: 'personChange', relation: '사냥감이었던 선장', kind: 'enemy', bond: -25 }, { op: 'log', text: '{person:사냥감이었던 선장}의 배가 가라앉는 것을 끝까지 지켜보았다.', weight: 'heavy' }] },
       { label: '소집령을 찢어 버린다', hint: '칠무해의 자리를 잃을 수 있다', values: { freedom: D },
         fx: [{ op: 'chance', p: 0.5,
                then: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'govEnemy' },
@@ -69,7 +69,7 @@ export const PIRATE_2: Turning[] = [
     title: '백마의 귀공자', body: '흰 말을 탄 금발의 해적이 {island}의 광장에서 {name}을(를) 노려본다. 신문 첫 장의 자리를 빼앗아 간 자를 용서할 수 없다며 칼자루에 손을 얹는다.',
     doors: [
       { label: '신문의 자리를 걸고 겨룬다', hint: '이겨도 져도 평생 그 이름이 따라붙는다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -25 }, { op: 'fame', add: 30 }, { op: 'person', kind: 'rival', relation: '백마의 귀공자', canon: 'cavendish' }, { op: 'log', text: '광장 한복판에서 캐번디시와 검을 맞댔다. 피가 흐른 자리까지 신문 기자들이 몰려왔고, 그는 다음 승부를 약속하며 말을 돌렸다.', weight: 'heavy' }] },
+        fx: [{ op: 'hp', add: -25 }, { op: 'fame', add: 30 }, { op: 'person', kind: 'rival', relation: '백마의 귀공자', canon: 'cavendish' }, { op: 'log', text: '광장 한복판에서 캐번디시가 겨눈 칼을 피해 맞섰다. 피가 흐른 자리까지 신문 기자들이 몰려왔고, 그는 다음 승부를 약속하며 말을 돌렸다.', weight: 'heavy' }] },
       { label: '그의 체면을 세워 주고 함께 싸울 날을 기약한다', hint: '신문의 주인공 자리는 그에게 넘긴다', values: { romance: D },
         fx: [{ op: 'fame', add: -10 }, { op: 'person', kind: 'ally', relation: '백마의 귀공자', canon: 'cavendish' }, { op: 'log', text: '캐번디시에게 기자들의 질문을 넘겼다. 그는 곧장 웃는 얼굴로 돌아섰고, 떠나기 전 다음 싸움에는 서로 돕자고 손을 내밀었다.', weight: 'light' }] },
       { label: '말 엉덩이를 걷어차고 달아난다', hint: '광장이 웃음바다가 되고 칼끝이 쫓아온다', values: { freedom: D },

@@ -8,7 +8,6 @@ import { SPECIES_NAMES } from '../../shared/data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { altitudeEffect } from '../../core/environment';
-import { V } from '../../data/balance';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
@@ -21,6 +20,7 @@ import {
 } from '../../data/words';
 import { activeValue } from '../../core/personality';
 import { rating5 } from '../../core/power';
+import { bountyOf } from '../../core/bounty';
 import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
 import { equippedWeapon, isMartialBranch, primaryStyle } from '../../core/styles';
 import { bandWord } from './words';
@@ -60,7 +60,7 @@ const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun',
 function fameWord(s: Life5): string {
   const fame = Math.round(s.hero.fame);
   if (fame <= 0) return '';
-  return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(fame * V.fame.bounty)} 베리` : `이름값 ${fmtMoney(fame)}`;
+  return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(bountyOf(s))} 베리` : `이름값 ${fmtMoney(fame)}`;
 }
 
 /**

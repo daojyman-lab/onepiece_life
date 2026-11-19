@@ -161,7 +161,7 @@ export const TOWNS_2: Turning[] = [
     ],
   },
   {
-    id: 'town_shimo_kuina', kind: 'door', when: kidIn(SHIMO, 7, 9), weight: 14, repeat: 'once', speaker: 'hero',
+    id: 'town_shimo_kuina', kind: 'door', when: kidIn(SHIMO, 7, 9, { c: 'turningSeen', id: 'town_shimo_stairs', has: false }), weight: 14, repeat: 'once', speaker: 'hero',
     title: '도장의 소녀 검사', body: '도장에서 가장 센 아이는 사범의 맏이 쿠이나다. 두 살 위의 초록 머리 소년 조로는 날마다 덤볐다가 날마다 진다. 오늘은 쿠이나가 목검 끝으로 {name}을(를) 가리켰다.',
     doors: [
       { label: '목검을 들고 덤빈다', hint: '세 번 덤벼 세 번 바닥에 눕는다. 지는 법을 몸으로 배운다', values: { ambition: D }, mark: 'unyielding',
@@ -178,9 +178,9 @@ export const TOWNS_2: Turning[] = [
     doors: [
       { label: '대숲에서 조로 곁에 서서 같이 칼을 휘두른다', hint: '말 한마디 없이 밤을 샌다. 손바닥이 터지고, 끝까지 가겠다는 마음이 생긴다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'hp', add: -5 }, { op: 'mastery', branch: 'sword', add: 8 }, { op: 'flag', id: 'kuinaNight' }, { op: 'log', text: '조로와 나란히 목검을 휘두르다 날이 밝았다. 서로 말을 건네지 않았지만 터진 손바닥을 감싸며 둘 다 대숲을 떠나지 않았다.', weight: 'heavy' }] },
-      { label: '사범의 집 일을 거들며 장례를 돕는다', hint: '도장의 수련은 한 철 멈춘다. 사범이 처음으로 {name}의 이름을 부른다', values: { peace: D }, mark: 'fellowship',
+      { label: '사범의 집 일을 거들며 장례를 돕는다', hint: '도장의 수련은 한 철 멈춘다. 사범이 {name}의 이름을 부른다', values: { peace: D }, mark: 'fellowship',
         fx: [{ op: 'person', kind: 'ally', relation: '도장의 사범', canon: 'koshiro' }, { op: 'log', text: '수련 대신 장례에 쓸 물과 자리를 마련했다. 코우시로는 일을 마친 {name}의 이름을 부르고 잠시 곁에 앉아 달라고 했다.', weight: 'heavy' }] },
-      { label: '목검을 돌려주고 도장을 떠난다', hint: '사람이 죽는 칼은 싫다. 다시는 도장 문을 넘지 않는다', values: { peace: D },
+      { label: '목검을 돌려주고 도장을 떠난다', hint: '사람이 죽는 칼은 싫다. 다시는 도장 문을 넘지 않는다', when: [{ c: 'anyOf', conditions: [{ c: 'choiceAgo', turning: 'town_shimo_dojo', door: 0 }, { c: 'choiceAgo', turning: 'town_shimo_dojo', door: 1 }] }], values: { peace: D },
         fx: [{ op: 'flag', id: 'leftDojo' }, { op: 'log', text: '목검을 도장 벽에 기대어 놓았다. 안쪽에서 칼 부딪히는 소리가 다시 들리기 전에 {name}은(는) 문턱을 넘어 나왔다.', weight: 'heavy' }, { op: 'timeline', text: '쿠이나가 죽은 뒤 칼을 내려놓았다' }] },
     ],
   },
@@ -200,7 +200,7 @@ export const TOWNS_2: Turning[] = [
     id: 'go_shimo', kind: 'door', when: kidIn(SHIMO, 14, 15), weight: 16, repeat: 'once', speaker: 'hero',
     title: '칼을 멘 열다섯', body: '초록 머리 조로는 칼을 메고 마을을 떠났다. 도장에는 사범 곁을 지킬 사람이 필요하고, 마을 대장간은 칼을 벼릴 견습을 구한다. 부두의 상선은 로그타운까지 간다.',
     doors: [
-      { label: '도장에 남아 사범 곁에서 어린 문하생을 가르친다', hint: '열다섯에 사범대가 된다. 바다는 남의 이야기가 된다', values: { loyalty: D },
+      { label: '도장에 남아 사범 곁에서 어린 문하생을 가르친다', hint: '사범을 도와 후배들의 연습을 지켜본다', when: [{ c: 'flag', id: 'leftDojo', has: false }, { c: 'anyOf', conditions: [{ c: 'choiceAgo', turning: 'town_shimo_dojo', door: 0 }, { c: 'choiceAgo', turning: 'town_shimo_dojo', door: 1 }] }], values: { loyalty: D },
         fx: [{ op: 'mastery', branch: 'sword', add: 8 }, { op: 'flag', id: 'dojoHeir' }, { op: 'log', text: '코우시로 곁에 서서 어린 문하생들의 자세를 고쳤다. 조로가 떠난 자리는 비었지만 도장의 아침 수련은 계속되었다.', weight: 'light' }] },
       { label: '칼 한 자루를 메고 로그타운으로 간다', hint: '마을을 떠나 큰 항구에서 칼로 먹고살 길을 찾는다', values: { ambition: D },
         fx: leaveTo(LOGUE, '칼 한 자루와 주먹밥 세 개를 들고 상선에 올랐다.', '열다섯에 시모츠키 마을을 떠나 로그타운으로 갔다') },
@@ -253,15 +253,15 @@ export const TOWNS_2: Turning[] = [
   },
   {
     id: 'town_logue_trading', kind: 'door', when: kidIn(LOGUE, 10, 14, RICH), needs: ['parent'], weight: 10, repeat: 'once', speaker: 'hero',
-    title: '상회의 빚 문서', body: '{name}의 집은 로그타운 항구의 상회다. 가장 친한 동무네가 상회에 진 빚을 갚지 못해 집을 내놓고 먼 섬의 친척에게 얹혀살러 떠나게 되었다. 빚 문서는 상회 금고 안에 있다.',
+    title: '상회의 빚 문서', body: '{name}의 집은 로그타운 항구의 상회다. 계산대 앞에 또래 아이가 서 있다. 자기네 빚을 조금만 덜어 주면 집을 팔고 떠나지 않아도 된다며 동전 몇 닢을 내민다. 빚 문서는 상회 금고 안에 있다.',
     doors: [
-      { label: '부모에게 동무네 빚을 덜어 달라고 조른다', hint: '동무는 떠나지 않는다. 그 대가로 몇 해 동안 상회 장부 일에 매인다', values: { loyalty: D }, mark: 'fellowship',
-        fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '빚에서 건진 동무' }, { op: 'flag', id: 'tradeBound' }, { op: 'log', text: '부모는 빚을 덜어 주는 대신 상회 장부를 맡겼다. 동무의 가족은 집에 남았고, {name}은(는) 저녁마다 계산대에 앉아야 했다.', weight: 'heavy' }] },
+      { label: '부모에게 아이네 빚을 덜어 달라고 조른다', hint: '아이는 떠나지 않는다. 그 대가로 몇 해 동안 상회 장부 일에 매인다', values: { loyalty: D }, mark: 'fellowship',
+        fx: [{ op: 'money', add: -20000 }, { op: 'person', kind: 'ally', relation: '빚에서 건진 동무' }, { op: 'flag', id: 'tradeBound' }, { op: 'log', text: '부모는 빚을 덜어 주는 대신 상회 장부를 맡겼다. 집에 남게 된 {person:빚에서 건진 동무}이(가) 자기 이름을 알려 주었다. 저녁이면 계산대의 {name}에게 손을 흔들고 지나갔다.', weight: 'heavy' }] },
       { label: '빚 문서의 허점을 찾아 셈을 다시 따진다', hint: '이자가 잘못 붙은 것을 찾으면 빚이 준다. 부모는 상회의 손해를 {name}의 탓으로 돌린다', values: { inquiry: D }, mark: 'composure',
-        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'chance', p: 0.6, then: [{ op: 'log', text: '잘못 붙은 이자를 짚어 냈다. 동무네 빚이 절반으로 줄어 떠나지 않아도 되었다.', weight: 'heavy' }],
-               else: [{ op: 'log', text: '셈은 맞았다. 동무는 떠났고, 부모는 한동안 {name}을(를) 상회에 들이지 않았다.', weight: 'light' }] }] },
-      { label: '상회 일을 배우며 빚 문서 다루는 법부터 익힌다', hint: '동무는 떠난다. 상회의 후계로 인정받는다', values: { ambition: D },
-        fx: [{ op: 'money', add: 5000 }, { op: 'flag', id: 'merchantHeir' }, { op: 'log', text: '동무가 떠나는 배를 배웅한 뒤 상회로 돌아왔다. 부모는 금고 열쇠를 맡기며 이제 장부 일을 배울 때라고 했다.', weight: 'heavy' }] },
+        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'chance', p: 0.6, then: [{ op: 'log', text: '잘못 붙은 이자를 짚어 냈다. 아이네 빚이 절반으로 줄어 떠나지 않아도 되었다.', weight: 'heavy' }],
+               else: [{ op: 'log', text: '셈은 맞았다. 아이는 떠났고, 부모는 한동안 {name}을(를) 상회에 들이지 않았다.', weight: 'light' }] }] },
+      { label: '상회 일을 배우며 빚 문서 다루는 법부터 익힌다', hint: '아이는 떠난다. 상회의 후계로 인정받는다', values: { ambition: D },
+        fx: [{ op: 'money', add: 5000 }, { op: 'flag', id: 'merchantHeir' }, { op: 'log', text: '아이가 떠나는 배를 배웅한 뒤 상회로 돌아왔다. 부모는 금고 열쇠를 맡기며 이제 장부 일을 배울 때라고 했다.', weight: 'heavy' }] },
     ],
   },
   {

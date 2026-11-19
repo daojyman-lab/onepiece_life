@@ -25,7 +25,7 @@ export const FORTUNES: Turning[] = [
   }),
   fortune('fortune_black_broker', 'greed', {
     speaker: { relation: '암시장의 큰손' },
-    title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name}의 수완을 오래 지켜봤다고 한다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
+    title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name} 앞으로 빈 장부를 펼친다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
     doors: [
       { label: '장부에 이름을 올리고 총잡이를 받는다', hint: '어둠의 거래에 발을 들인다. 그 총잡이는 끝까지 가르친다', values: { greed: D },
         fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 75000 }, { op: 'log', text: '장부에 이름이 올라가자 계약금이 손에 들어왔다. 큰손이 붙인 총잡이는 그날 밤부터 사격 자세를 고쳐 주었다.', weight: 'heavy' }] },
@@ -122,7 +122,7 @@ export const FORTUNES: Turning[] = [
   // ---------------------------------------------------------------- 과제 11: 가치관마다 둘 (서른여섯 이후에도 온다)
   fortune('fortune_wronged_officer', 'justice', {
     speaker: { relation: '누명 쓴 장교의 후손' },
-    title: '가라앉은 증거', body: '오래전 누명을 쓰고 처형된 해군 장교의 후손이 {name}을(를) 찾아왔다. 바다에 가라앉은 전함에 그 일을 뒤집을 장부가 있다고, 옳은 일에서 물러선 적 없는 사람에게만 부탁한다고 한다.',
+    title: '가라앉은 증거', body: '오래전 누명을 쓰고 처형된 해군 장교의 후손이 {name}을(를) 찾아왔다. 바다에 가라앉은 전함에 그 일을 뒤집을 장부가 있다고, 증거가 나오면 사람들 앞에서 장부를 펼쳐 줄 수 있겠느냐고 묻는다.',
     doors: [
       { label: '장부를 건져 달라는 부탁을 받는다', hint: '세상이 묻어 둔 일을 바로잡는다. 그 장교가 남긴 검술 비망록도 함께 나온다', values: { justice: D },
         fx: [{ op: 'fame', add: 40 }, { op: 'tier', branch: 'sword', to: LEAP }, { op: 'timeline', text: '누명 쓴 장교의 장부를 건져 세상에 알렸다' }, { op: 'log', text: '가라앉은 전함에서 장부와 검술 비망록을 함께 건졌다. 장부가 공개되자 누명이 벗겨졌고, {name}은(는) 비망록의 검을 익혔다.', weight: 'heavy' }] },
@@ -130,8 +130,9 @@ export const FORTUNES: Turning[] = [
     ],
   }),
   fortune('fortune_legend_duel', 'ambition', {
+    needs: ['sword'],
     speaker: { relation: '전설의 검객' },
-    title: '정점의 초대', body: '세상에 이름이 자자한 늙은 검객이 {name}의 승부 기록을 품에 넣고 찾아왔다. 제 검을 완성할 마지막 상대를 찾고 있다고, 이기든 지든 가진 것을 모두 보여 주겠다고 한다.',
+    title: '정점의 초대', body: '이름난 늙은 검객이 마당 한가운데서 {name}에게 검을 마주 들어 보라 한다. 제 검을 완성할 마지막 상대를 찾고 있다고, 이기든 지든 가진 것을 모두 보여 주겠다고 한다.',
     doors: [
       { label: '검객의 초대를 받는다', hint: '사흘 밤낮을 겨루며 정점의 검을 몸으로 익힌다. 돈으로는 들일 수 없는 스승이다', values: { ambition: D },
         fx: [{ op: 'master', name: '전설의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'hp', add: -20 }, { op: 'log', text: '사흘 밤낮의 승부 끝에 {name}은(는) 상처투성이로 검을 내렸다. 늙은 검객은 그제야 자신의 마지막 제자로 인정했다.', weight: 'heavy' }] },
@@ -148,12 +149,13 @@ export const FORTUNES: Turning[] = [
     ],
   }),
   fortune('fortune_oath_witness', 'loyalty', {
-    speaker: { relation: '옛 전우의 후손' },
-    title: '맹세의 증인', body: '오래전 함께 싸운 전우의 후손들이 {name}을(를) 섬 하나로 안내했다. 전우가 남긴 수련장이 있다고, 약속을 끝까지 지킨 사람에게만 열어 주라는 유언이 있었다고 한다.',
+    when: [{ c: 'flag', id: 'hidPirate', has: true }, { c: 'person', relation: '숨겨 준 해적 소년', has: true, kinds: ['ally', 'crew'] }],
+    speaker: { relation: '숨겨 준 해적 소년' },
+    title: '창고 뒷문에서 한 약속', body: '어릴 적 창고에 숨겨 주었던 {person:숨겨 준 해적 소년}이(가) 열쇠를 하나 내민다. 그날 밤 진 빚을 기억한다며, 제 수련장을 함께 쓰자고 한다.',
     doors: [
-      { label: '수련장의 열쇠를 받는다', hint: '전우가 평생 다듬은 기운을 물려받는다', values: { loyalty: D },
-        fx: [{ op: 'tier', branch: 'armament', to: LEAP }, { op: 'base', key: 'vit', add: 2 }, { op: 'log', text: '후손이 열쇠로 수련장을 열어 주었다. 전우가 남긴 수련법을 따라 기운을 두르는 법을 익히자, 버티는 힘까지 달라졌다.', weight: 'heavy' }] },
-      decline('열쇠를 받지 않는다', '그 수련장은 후손들의 것으로 둔다', '수련장의 열쇠를 돌려주었다. 그곳은 주인의 후손들이 지키게 됐다.'),
+      { label: '수련장의 열쇠를 받는다', hint: '다시 만난 벗과 나란히 수련한다', values: { loyalty: D },
+        fx: [{ op: 'tier', branch: 'armament', to: LEAP }, { op: 'base', key: 'vit', add: 2 }, { op: 'log', text: '{person:숨겨 준 해적 소년}이(가) 수련장 문을 열었다. 함께 수련하며 기운을 두르는 법을 익혔다. 떠나는 날에는 둘이서 문을 잠갔다.', weight: 'heavy' }] },
+      decline('열쇠를 받지 않는다', '창고에서 나눈 밥 한 끼면 됐다고 말한다', '열쇠를 돌려주며 창고에서 나누던 저녁 이야기를 꺼냈다. {person:숨겨 준 해적 소년}이(가) 그때처럼 웃었다.'),
     ],
   }),
   fortune('fortune_unnamed_route', 'freedom', {
@@ -168,10 +170,10 @@ export const FORTUNES: Turning[] = [
   fortune('fortune_kings_heir', 'dominion', {
     when: [{ c: 'secret', known: false }],
     speaker: { relation: '옛 왕가의 가신' },
-    title: '왕의 유산', body: '늙은 가신이 {name} 앞에 무릎을 꿇었다. 바다를 다스렸던 옛 왕가의 피가 흐른다고, 그 증표를 오래 찾아왔다고 한다. 가신이 낡은 문장을 내민다.',
+    title: '왕가의 옛 명부', body: '옛 왕가의 가신이 낡은 명부를 꺼낸다. 그 안에는 {name}이(가) 태어나던 해의 기록이 남아 있다. 마지막 장에는 집안의 이름까지 적혀 있다고 한다.',
     doors: [
-      { label: '옛 왕가의 증표를 받는다', hint: '잃어버린 성을 알게 된다. 그 피를 따르는 자들이 생긴다', values: { dominion: D },
-        fx: [{ op: 'reveal' }, { op: 'fame', add: 50 }, { op: 'person', kind: 'ally', relation: '옛 왕가의 가신', age: { older: 30 } }, { op: 'timeline', text: '옛 왕가의 피를 이었음을 알았다' }, { op: 'log', text: '가신이 낡은 문장을 {name}의 손에 쥐여 주었다. 감춰진 성을 듣자 가신은 새 주인을 모시겠다며 곁에 남았다.', weight: 'heavy' }] },
+      { label: '가신이 펼친 명부를 받는다', hint: '잃어버린 성을 알게 된다. 기록을 지켜 온 가신이 곁에 남는다', values: { dominion: D },
+        fx: [{ op: 'reveal' }, { op: 'fame', add: 50 }, { op: 'person', kind: 'ally', relation: '옛 왕가의 가신', age: { older: 30 } }, { op: 'timeline', text: '왕가의 명부에서 잃었던 성을 찾았다' }, { op: 'log', text: '가신이 명부 끝에 적힌 성을 읽어 주었다. 누가 이 기록을 지켰는지 알고 싶다는 말에 가신은 곁에 남았다.', weight: 'heavy' }] },
       decline('내력을 받지 않는다', '피보다 제가 걸어온 길이 제 이름이다', '집안의 내력을 듣지 않겠다고 말했다. 지금까지 걸어온 길만 마음에 남겼다.'),
     ],
   }),

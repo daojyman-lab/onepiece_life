@@ -151,6 +151,19 @@ describe('엔딩 자료의 세부', () => {
     applyFx(unknown, [{ op: 'person', kind: 'ally', relation: '아는 사이', name: '누군가', canon: 'nobody' }]);
     expect(buildEnding(unknown, emptyMeta5()).canonWords[0].line.length).toBeGreaterThan(0);
   });
+  it('긴은 실제로 밥을 얻어먹었을 때만 그릇을 기억하고, 먼저 떠난 인물은 추도사를 남기지 않는다', () => {
+    const s = bare(17);
+    applyFx(s, [{ op: 'person', kind: 'ally', relation: '항구에서 만난 사내', canon: 'gin' }]);
+    const gin = s.people.find(p => p.canon === 'gin')!;
+    gin.bond = V.person.bondMax;
+    const words = () => buildEnding(s, emptyMeta5()).canonWords;
+    expect(words()[0].line).not.toMatch(/밥|그릇/);
+    s.tried.push('isl_baratie_gin#1');
+    expect(words()[0].line).toContain('밥 한 그릇');
+    gin.alive = false;
+    expect(words()).toEqual([]);
+  });
+
   it('원작 인물이 말한 전환점에서 고른 일은 겹친 원작 순간으로 남는다', () => {
     let s = newLife5(7); s.pending = null; s.age = 15; s.hero.standing = 'civil';
     expect(openTurning(s, TURNING_BY_ID.path_smoker)).toBe(true);

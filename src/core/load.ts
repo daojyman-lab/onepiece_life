@@ -15,7 +15,10 @@ import { normalizeStyles } from './styles';
 import { isCombatStyle } from '../data/combat-styles';
 import { discipleFor } from './disciples';
 import { restoreStoryDoor } from './turning';
-import { repairWeaponMentors } from '../data/episodes/contacts';
+import { restoreEscapeNotoriety } from './bounty';
+import { isSiblingCareer } from './siblings';
+import { SIBLING_REUNION_ID } from '../data/turnings/sibling-reunion';
+import { repairEpisodeContacts } from '../data/episodes/contacts';
 import type { Life5 } from './types';
 
 type Obj = Record<string, unknown>;
@@ -74,6 +77,18 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (life.siblingBirths !== undefined && (!Array.isArray(life.siblingBirths) ||
+    life.siblingBirths.some(b => !isObj(b) || !Number.isInteger(b.age) || b.age <= life.age || b.age > V.family.siblingGap[1] ||
+      typeof b.name !== 'string' || !b.name.trim() || (b.gender !== 'm' && b.gender !== 'f')) ||
+    new Set(life.siblingBirths.map(b => b.age)).size !== life.siblingBirths.length)) return null;
+  if (life.people.some((p) => {
+    const story = p?.siblingLife;
+    return story !== undefined && (!isObj(story) || !isSiblingCareer(story.career) ||
+      typeof story.island !== 'string' || !story.island.trim() || typeof story.latestNews !== 'string' ||
+      !Number.isInteger(story.nextNewsAt) || story.nextNewsAt < 0 ||
+      (story.metAt !== undefined && (!Number.isInteger(story.metAt) || story.metAt < 0 || story.metAt > life.age)) ||
+      (story.vivreCard !== undefined && story.vivreCard !== true));
+  })) return null;
   try { normalizeStyles(life, legacyStyles, !isObj(x.growth) || x.growth.weapons === undefined); } catch { return null; }
   if (life.disciples !== undefined) {
     if (!Array.isArray(life.disciples) || life.disciples.some(d => !isObj(d) ||
@@ -113,10 +128,6 @@ export function normalizeLife5(x: unknown): Life5 | null {
     life.hero.fruit = null;
     life.growth.tier.fruit = 0;
     life.growth.mastery.fruit = 0;
-  }
-  if (life.pending?.kind === 'door' && life.pending.turning === 'late_old_design' &&
-      (!life.flags.includes('sharedFlightDesign') || !life.people.some((p) => p.alive && p.relation === '어릴 적 동무'))) {
-    life.pending = null;
   }
   if (oldPersonality) {
     const top = topValues(life, 1)[0];
@@ -162,8 +173,10 @@ export function normalizeLife5(x: unknown): Life5 | null {
         (life.firstChoiceAge ??= {})[key] = lastVisit;
       }
     }
-    repairWeaponMentors(life);
+    repairEpisodeContacts(life);
     restoreStoryDoor(life);
+    restoreEscapeNotoriety(life);
+    if (life.pending?.kind !== 'door' || life.pending.turning !== SIBLING_REUNION_ID) delete life.siblingMeeting;
     return life;
   } catch {
     return null;                               // 칸의 모양이 깨져 확인조차 못 하면 읽지 않는다

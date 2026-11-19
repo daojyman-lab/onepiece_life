@@ -5,7 +5,7 @@
 // 어느 고향에서나 열리도록 바닷가 · 해군의 낱말을 쓰지 않는다. 문의 말에는 가치관 이름도 숫자도 쓰지 않는다.
 import { V } from '../balance';
 import { kid } from './childhood';
-import { ACTIVE, GROWN, age, at, st } from './paths';
+import { known, ACTIVE, GROWN, age, at, st } from './paths';
 import type { Cond, Fx, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -15,17 +15,18 @@ const flag = (id: string): Fx => ({ op: 'flag', id });
 const heavy = (text: string): Fx => ({ op: 'log', text, weight: 'heavy' });
 const line = (text: string): Fx => ({ op: 'timeline', text });
 const NO_PARENT: Cond = { c: 'kin', who: 'parent', has: false };
+const siblingAge = (minAge: number): Cond => ({ c: 'kin', who: 'sibling', has: true, minAge });
 const active = st(...ACTIVE), grown = st(...GROWN);
 const MENTOR = '스승';
 
 // ================================================================ 형제
 const SIBLING: Turning[] = [
   {
-    id: 'sib_bread', kind: 'door', when: kid(4, 9), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
+    id: 'sib_bread', kind: 'door', when: [...kid(4, 9), siblingAge(3)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
     title: '하나 남은 빵', body: '저녁상에 빵이 하나뿐이다. 형제와 {name}의 손이 동시에 나갔다가 멈춘다. 둘 다 배에서 소리가 난다.',
     doors: [
       { label: '반으로 갈라 큰 쪽을 내민다', hint: '배는 덜 찬다. 형제는 그 저녁을 오래 기억한다', values: { loyalty: D }, mark: 'fellowship',
-        fx: [flag('sibBread'), heavy('형제는 큰 쪽을 받아 들고 한참 {name}을(를) 보다가, 아무 말 없이 먹었다.')] },
+        fx: [{ op: 'personChange', who: 'sibling', alias: '빵을 나눈 형제' }, flag('sibBread'), heavy('형제는 큰 쪽을 받아 들고 한참 {name}을(를) 보다가, 아무 말 없이 먹었다.')] },
       { label: '자로 잰 듯 똑같이 가르자고 한다', hint: '부스러기 하나까지 센다. 둘 다 불만은 없다', values: { justice: D },
         fx: [{ op: 'base', key: 'int', add: 1 }, heavy('빵을 몇 번이나 다시 재어 보자 형제가 마침내 웃었다. 둘은 남은 부스러기까지 반씩 집어 먹었다.')] },
       { label: '형제가 한눈파는 사이 통째로 입에 넣는다', hint: '배는 부르다. 형제는 며칠 동안 말을 걸지 않는다', values: { greed: D },
@@ -33,19 +34,19 @@ const SIBLING: Turning[] = [
     ],
   },
   {
-    id: 'sib_hill', kind: 'door', when: kid(7, 13), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
+    id: 'sib_hill', kind: 'door', when: [...kid(7, 13), siblingAge(4)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
     title: '언덕 위의 나무', body: '마을 뒤 언덕 꼭대기의 늙은 나무까지, 형제와 {name}은(는) 해마다 누가 먼저 닿는지 겨룬다. 올해는 중턱에서 형제가 돌부리에 걸려 넘어졌다.',
     doors: [
       { label: '뒤돌아보지 않고 나무를 먼저 짚는다', hint: '올해의 승자가 된다. 형제는 무릎을 털며 내년을 벼른다', values: { ambition: D }, mark: 'obsession',
-        fx: [flag('sibHill'), flag('sibWon'), { op: 'base', key: 'spd', add: 1 }, heavy('나무에 먼저 손을 댄 뒤 돌아보니 형제가 무릎을 털며 올라오고 있었다. 형제는 내년에는 절대 지지 않겠다고 했다.')] },
+        fx: [{ op: 'personChange', who: 'sibling', alias: '언덕을 달린 형제' }, flag('sibHill'), flag('sibWon'), { op: 'base', key: 'spd', add: 1 }, heavy('나무에 먼저 손을 댄 뒤 돌아보니 형제가 무릎을 털며 올라오고 있었다. 형제는 내년에는 절대 지지 않겠다고 했다.')] },
       { label: '돌아가 형제를 업고 꼭대기까지 오른다', hint: '시합은 없던 일이 된다. 등이 며칠 뻐근하다', values: { loyalty: D }, mark: 'fellowship',
-        fx: [flag('sibHill'), flag('sibCarried'), { op: 'base', key: 'vit', add: 1 }, heavy('형제를 업고 나무 아래까지 올랐다. 등 뒤에서 형제가 작게 말했다. 다음에는 내가 업을게.')] },
+        fx: [{ op: 'personChange', who: 'sibling', alias: '언덕을 달린 형제' }, flag('sibHill'), flag('sibCarried'), { op: 'base', key: 'vit', add: 1 }, heavy('형제를 업고 나무 아래까지 올랐다. 등 뒤에서 형제가 작게 말했다. 다음에는 내가 업을게.')] },
       { label: '일으켜 세우고 그 자리에서 다시 겨룬다', hint: '봐주지 않는 시합이 된다. 누가 이기든 둘 다 숨이 턱에 닿는다', values: { justice: D },
-        fx: [flag('sibHill'), { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }, heavy('둘이 동시에 다시 뛰었다. {name}이(가) 먼저 나무를 짚자 형제는 무릎을 짚고 숨을 고르며 손을 들어 주었다.')], else: [{ op: 'log', text: '한 걸음 차이로 졌다. 형제가 나무를 짚고 돌아보며 웃었다.', weight: 'light' }] }] },
+        fx: [{ op: 'personChange', who: 'sibling', alias: '언덕을 달린 형제' }, flag('sibHill'), { op: 'chance', p: 0.5, then: [{ op: 'base', key: 'spd', add: 1 }, heavy('둘이 동시에 다시 뛰었다. {name}이(가) 먼저 나무를 짚자 형제는 무릎을 짚고 숨을 고르며 손을 들어 주었다.')], else: [{ op: 'log', text: '한 걸음 차이로 졌다. 형제가 나무를 짚고 돌아보며 웃었다.', weight: 'light' }] }] },
     ],
   },
   {
-    id: 'sib_jar', kind: 'door', when: kid(8, 14), needs: ['sibling'], weight: 8, repeat: 'once', speaker: 'hero',
+    id: 'sib_jar', kind: 'door', when: [...kid(8, 14), siblingAge(4)], needs: ['sibling'], weight: 8, repeat: 'once', speaker: 'hero',
     title: '깨진 항아리', body: '둘이 장난을 치다 집안 어른이 아끼던 항아리가 깨졌다. 발소리가 다가온다. 형제의 얼굴이 하얗게 질린다.',
     doors: [
       { label: '내가 깼다고 먼저 나선다', hint: '종아리가 붓도록 혼난다. 형제는 그 빚을 잊지 않는다', values: { loyalty: D }, mark: 'unyielding',
@@ -57,7 +58,7 @@ const SIBLING: Turning[] = [
     ],
   },
   {
-    id: 'sib_roof', kind: 'door', when: kid(12, 15), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
+    id: 'sib_roof', kind: 'door', when: [...kid(12, 15), siblingAge(6)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
     title: '지붕 위의 약속', body: '잠이 오지 않는 밤, 형제와 지붕에 나란히 누웠다. 형제가 묻는다. 어른이 되면 무엇이 될 거냐고. 그리고 그때에도 우리는 지금 같을 거냐고.',
     doors: [
       { label: '누가 먼저 이름을 떨치는지 겨루자고 한다', hint: '평생 가는 내기가 된다', values: { ambition: D },
@@ -69,19 +70,19 @@ const SIBLING: Turning[] = [
     ],
   },
   {
-    id: 'sib_news', kind: 'door', when: at(age(20, 45), active), needs: ['sibling'], weight: 6, repeat: 'once', speaker: 'hero',
+    id: 'sib_news', kind: 'door', when: at(age(20, 45), active), needs: ['sibling'], weight: 0, repeat: 'once', speaker: 'hero',
     title: '형제의 소식', body: '{island}에 닿은 소식지 귀퉁이에 낯익은 이름이 있다. 형제가 제 자리에서 이름을 얻었다고 한다. {name}은(는) 그 줄을 몇 번이고 다시 읽는다.',
     doors: [
       { label: '질 수 없다며 소식지를 접어 품에 넣는다', hint: '그날부터 잠을 줄인다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 1 }, heavy('형제의 이름이 적힌 소식지를 품 안에 접어 넣었다. 그날 밤 맡은 일을 마치고도 등을 끄지 않고 다음 일을 시작했다.')] },
-      { label: '잘했다고 짧은 편지를 부친다', hint: '답장은 계절이 바뀐 뒤에야 온다', values: { peace: D },
-        fx: [{ op: 'money', add: -1000 }, heavy('계절이 바뀌고 답장이 왔다. 한 줄뿐이었다. 「너도 잘하고 있다고 들었다.」')] },
+      { label: '잘했다고 짧은 편지를 부친다', hint: '계절이 바뀌면 해군에서 답장이 온다', values: { peace: D },
+        fx: [{ op: 'personChange', who: 'sibling', alias: '임관 소식을 보낸 형제' }, { op: 'money', add: -1000 }, heavy('계절이 바뀌고 편지가 왔다. 「나 이번에 해군 장교가 됐어. 군함 위에서도 네 편지를 읽었어.」')] },
       { label: '형제의 이름을 대고 외상을 긋는다', hint: '술값과 밥값이 굳는다. 형제의 귀에 들어갈지도 모른다', values: { greed: D },
         fx: [{ op: 'money', add: 12000 }, { op: 'chance', p: 0.4, then: [flag('sibGrudge'), { op: 'log', text: '외상 장부가 형제에게까지 갔다는 소문이 들렸다.', weight: 'light' }], else: [heavy('주인은 형제의 이름을 듣고 외상 장부를 펼쳤다. 당장 값을 치르지 않고 배를 채웠고, 그날은 형제에게서 아무 소식도 오지 않았다.')] }] },
     ],
   },
   {
-    id: 'sib_back', kind: 'door', when: at(age(22, 50), active), needs: ['sibling'], weight: 6, repeat: 'once', speaker: 'hero',
+    id: 'sib_back', kind: 'door', when: at(age(22, 50), active), needs: ['sibling'], weight: 0, repeat: 'once', speaker: 'hero',
     title: '등 뒤의 목소리', body: '{island}의 뒷골목에서 건달 여럿에게 둘러싸였다. 그때 낯익은 목소리가 들린다. 볼일이 있어 이 섬에 와 있던 형제다. 형제가 말없이 {name}의 등 뒤에 선다.',
     doors: [
       { label: '어릴 적처럼 등을 맞대고 싸운다', hint: '둘 다 멍투성이가 된다. 골목에는 둘만 서 있게 된다', values: { dominion: D }, danger: true,
@@ -95,8 +96,8 @@ const SIBLING: Turning[] = [
   },
   // ---- 수미상관
   {
-    id: 'sib_echo_bread', kind: 'door', when: at(age(38, 75), grown, has('sibBread')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '하나 남은 빵, 다시', body: '오랜만에 형제와 마주 앉았다. 상에 빵이 하나 남았다. 형제가 그것을 반으로 가르더니, 큰 쪽을 {name} 앞으로 민다. 어릴 적 저녁상에서 {name}이(가) 그랬던 것처럼.',
+    id: 'sib_echo_bread', kind: 'door', when: at(age(38, 75), grown, has('sibBread'), known('빵을 나눈 형제')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '하나 남은 빵, 다시', body: '오랜만에 {person:빵을 나눈 형제}와(과) 마주 앉았다. 상에 빵이 하나 남았다. 형제가 그것을 반으로 가르더니, 큰 쪽을 {name} 앞으로 민다. 어릴 적 저녁상에서 {name}이(가) 그랬던 것처럼.',
     doors: [
       { label: '웃으며 큰 쪽을 받는다', hint: '돌려받는 데 오래 걸린 저녁이다', values: { peace: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('형제가 말했다. 그날 그 빵이, 평생 먹은 것 가운데 가장 맛있었다고.'), line('형제와 빵 하나를 나눠 먹었다')] },
@@ -107,8 +108,8 @@ const SIBLING: Turning[] = [
     ],
   },
   {
-    id: 'sib_echo_hill', kind: 'door', when: at(age(42, 75), grown, has('sibHill')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '언덕 위의 나무, 다시', body: '형제에게서 편지가 왔다. 고향 언덕의 늙은 나무가 올겨울을 넘기기 어렵겠다고 한다. 그러니 마지막으로 한 번만 더 겨루자고.',
+    id: 'sib_echo_hill', kind: 'door', when: at(age(42, 75), grown, has('sibHill'), known('언덕을 달린 형제')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '언덕 위의 나무, 다시', body: '{person:언덕을 달린 형제}에게서 편지가 왔다. 고향 언덕의 늙은 나무가 올겨울을 넘기기 어렵겠다고 한다. 그러니 마지막으로 한 번만 더 겨루자고.',
     doors: [
       { label: '돌아가서 숨이 턱에 닿도록 달린다', hint: '무릎이 예전 같지 않다. 형제의 무릎도 그렇다', values: { ambition: D },
         fx: [{ op: 'moveHome' }, { op: 'hp', add: -5 }, heavy('둘 다 중턱에서 주저앉아 웃었다. 나무는 끝내 아무도 먼저 짚지 못했다.'), line('형제와 고향 언덕을 마지막으로 달렸다')] },
@@ -127,11 +128,11 @@ const PARENT: Turning[] = [
     title: '목말', body: '마을 잔칫날, 어른들 어깨 너머로는 아무것도 보이지 않는다. 부모가 말없이 {name}을(를) 번쩍 들어 목말을 태운다. 세상이 갑자기 넓어진다.',
     doors: [
       { label: '저 멀리 끝에는 무엇이 있느냐고 묻는다', hint: '부모는 저도 가 보지 못했다고 한다', values: { inquiry: D },
-        fx: [flag('parShoulders'), heavy('부모는 아직 못 가 본 곳이라며 어깨 위의 {name}을(를) 꼭 붙잡았다. 둘은 잔치가 끝날 때까지 멀리 뻗은 길을 바라보았다.')] },
+        fx: [{ op: 'personChange', who: 'parent', alias: '목말을 태워 준 부모' }, flag('parShoulders'), heavy('부모는 아직 못 가 본 곳이라며 어깨 위의 {name}을(를) 꼭 붙잡았다. 둘은 잔치가 끝날 때까지 멀리 뻗은 길을 바라보았다.')] },
       { label: '크면 내가 이렇게 태워 주겠다고 한다', hint: '부모가 크게 웃는다. 아이의 말이라고 여긴다', values: { loyalty: D },
-        fx: [flag('parShoulders'), flag('parVow'), heavy('부모는 웃으며 말했다. 그래, 그날을 기다리마.')] },
+        fx: [{ op: 'personChange', who: 'parent', alias: '목말을 태워 준 부모' }, flag('parShoulders'), flag('parVow'), heavy('부모는 웃으며 말했다. 그래, 그날을 기다리마.')] },
       { label: '더 높이, 더 높이 올려 달라고 조른다', hint: '부모의 팔이 떨릴 때까지 내려오지 않는다', values: { ambition: D },
-        fx: [flag('parShoulders'), heavy('부모는 웃으며 팔을 조금 더 들어 올렸다. 팔이 떨리자 {name}은(는) 그제야 내려와 이번에는 손을 잡고 잔치를 보았다.')] },
+        fx: [{ op: 'personChange', who: 'parent', alias: '목말을 태워 준 부모' }, flag('parShoulders'), heavy('부모는 웃으며 팔을 조금 더 들어 올렸다. 팔이 떨리자 {name}은(는) 그제야 내려와 이번에는 손을 잡고 잔치를 보았다.')] },
     ],
   },
   {
@@ -172,10 +173,10 @@ const PARENT: Turning[] = [
   },
   // ---- 수미상관
   {
-    id: 'par_echo_carry', kind: 'door', when: at(age(28, 60), grown, has('parShoulders')), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '목말, 다시', body: '오랜만에 {town}에 들렀다. 부모는 한 뼘은 작아져 있다. 마을 잔칫날, 부모가 사람들 어깨 너머를 보려고 까치발을 든다. 어릴 적 {name}이(가) 그랬던 것처럼.',
+    id: 'par_echo_carry', kind: 'door', when: at(age(28, 60), grown, has('parShoulders'), known('목말을 태워 준 부모')), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
+    title: '목말, 다시', body: '오랜만에 {town}에 들렀다. 어릴 적 목말을 태워 주던 {person:목말을 태워 준 부모}의 키가 기억보다 한 뼘은 작다. 마을 잔칫날, 부모가 사람들 어깨 너머를 보려고 까치발을 든다. 어릴 적 {name}이(가) 그랬던 것처럼.',
     doors: [
-      { label: '말없이 부모를 등에 업는다', hint: '오래전에 한 말을 지킨다', values: { loyalty: D },
+      { label: '말없이 부모를 등에 업는다', hint: '이번에는 내가 어깨 너머를 보여 준다', values: { loyalty: D },
         fx: [{ op: 'moveHome' }, { op: 'base', key: 'wil', add: 1 }, heavy('등에 업힌 부모는 놀랄 만큼 가벼웠다. 부모가 말했다. 세상이 참 넓구나.'), line('늙은 부모를 업고 잔치를 구경했다')] },
       { label: '사람들을 헤치고 맨 앞에 자리를 낸다', hint: '아무도 {name}의 앞을 막지 않는다', values: { dominion: D },
         fx: [{ op: 'moveHome' }, heavy('부모는 맨 앞자리에 앉아서도 잔치보다 {name}의 얼굴을 더 오래 보았다.'), line('늙은 부모와 잔치를 구경했다')] },
@@ -196,7 +197,7 @@ const PARENT: Turning[] = [
     ],
   },
   {
-    id: 'par_echo_keepsake', kind: 'door', when: at(age(36, 72), grown, has('parKeepsake')), needs: ['child'], weight: 9, repeat: 'once', speaker: 'hero',
+    id: 'par_echo_keepsake', kind: 'door', when: at(age(36, 72), grown, has('parKeepsake'), { c: 'person', relation: '자식', has: true, minAge: 16 }), needs: ['child'], weight: 9, repeat: 'once', speaker: 'hero',
     title: '물려주는 것', body: '{name}은(는) 품에서 낡은 물건을 꺼낸다. 부모가 젊은 날 품고 다녔고, {name}이(가) 평생 지녀 온 것이다. 다 자란 자식이 그것을 바라본다.',
     doors: [
       { label: '부모가 했던 말을 그대로 건넨다', hint: '건네는 손이 조금 떨린다', values: { romance: D },
@@ -219,13 +220,13 @@ const MENTORS: Turning[] = [
       { label: '밥을 비우고, 허리의 목검을 가리키며 저것을 가르쳐 달라고 한다', hint: '노인은 한참 웃는다. 그날부터 비를 긋는 처마가 하나 생긴다', values: { ambition: D },
         fx: [{ op: 'person', kind: 'ally', relation: MENTOR, age: { older: 45 } }, flag('mentor'), heavy('노인은 빈 그릇을 거두며 내일부터 물을 길어 오라고 했다. {name}은(는) 그제야 처마 밑에서 함께 갈 자리를 얻었다는 걸 알았다.'), line('늙은 떠돌이를 스승으로 모셨다')] },
       { label: '왜 주느냐고 먼저 묻는다', hint: '노인은 저도 그렇게 얻어먹고 컸다고 한다', values: { inquiry: D },
-        fx: [{ op: 'person', kind: 'ally', relation: MENTOR, age: { older: 45 } }, flag('mentor'), heavy('노인은 어릴 때 받은 밥 한 그릇을 떠올리며 천천히 먹으라고 했다. 비가 잦아든 뒤에도 {name}이(가) 곁에 남자 같이 길을 나섰다.'), line('늙은 떠돌이를 스승으로 모셨다')] },
+        fx: [{ op: 'person', kind: 'ally', relation: MENTOR, age: { older: 45 } }, flag('mentor'), heavy('노인은 제가 어렸을 때에도 누군가 밥을 나눠 줬다며 천천히 먹으라고 했다. 비가 잦아든 뒤에도 {name}이(가) 곁에 남자 같이 길을 나섰다.'), line('늙은 떠돌이를 스승으로 모셨다')] },
       { label: '밥그릇만 낚아채 달아난다', hint: '배는 찬다. 노인은 쫓아오지 않는다', values: { greed: D },
         fx: [{ op: 'hp', add: 5 }, heavy('골목 끝에서 뒤돌아보니 노인은 쫓아오지 않고 빈 그릇을 들고 있었다. {name}은(는) 밥을 삼킨 뒤에도 한동안 그 처마를 피해서 다녔다.')] },
     ],
   },
   {
-    id: 'men_lesson', kind: 'door', when: [...kid(8, 14), has('mentor'), not('menGone')], weight: 12, repeat: 'once', speaker: { relation: MENTOR },
+    id: 'men_lesson', kind: 'door', when: [...kid(8, 14), has('mentor'), known(MENTOR), not('menGone')], weight: 12, repeat: 'once', speaker: { relation: MENTOR },
     title: '스승의 물음', body: '스승은 {name}에게 목검을 쥐여 주고는 온종일 물 긷는 일만 시킨다. 해 질 녘에 스승이 묻는다. 힘은 무엇에 쓰는 것이냐고.',
     doors: [
       { label: '지키는 데 쓴다고 답한다', hint: '스승은 고개를 끄덕이고, 이튿날 물동이를 하나 더 얹는다', values: { justice: D },
@@ -237,7 +238,7 @@ const MENTORS: Turning[] = [
     ],
   },
   {
-    id: 'men_back', kind: 'door', when: [...kid(12, 15), has('mentor'), has('menLesson'), not('menGone')], weight: 14, repeat: 'once', speaker: { relation: MENTOR },
+    id: 'men_back', kind: 'door', when: [...kid(12, 15), has('mentor'), known(MENTOR), has('menLesson'), not('menGone')], weight: 14, repeat: 'once', speaker: { relation: MENTOR },
     title: '스승의 등', body: '산적 떼가 마을을 덮쳤다. 달아나던 {name}의 앞을 칼 든 사내들이 막아선다. 그때 절뚝이는 발소리가 끼어든다. 스승이 닳은 목검 하나로 {name}의 앞에 선다. 돌아보지 않고 말한다. 달려라.',
     doors: [
       { label: '이를 악물고 달린다', hint: '뒤에서 나는 소리를 평생 잊지 못한다', values: { freedom: D },

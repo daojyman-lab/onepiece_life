@@ -21,6 +21,7 @@ function traveler() {
   const s = newLife5(14, { home: 'loguetown' });
   s.pending = null;
   s.age = 24;
+  s.siblingBirths = [];
   Object.assign(s.hero, { island: '자야', sea: 'gl_first', standing: 'pirate', money: 80000, hp: 60 });
   return s;
 }
@@ -32,6 +33,51 @@ function finishPassage(s: ReturnType<typeof traveler>) {
 }
 
 describe('특수 섬 항해', () => {
+  it('입항한 철에 체포되어 돈을 잃으면 첫 화면부터 유료 길이 잠긴다', () => {
+    for (let seed = 1; seed <= 1000; seed++) {
+      const s = traveler(); s.hero.money = 30000; s.part = (V.partsPerYear - 1) as typeof s.part;
+      s.rng = { seed, cursor: 0 };
+      sailTo(s, '스카이피아', 'calm');
+      s.passage!.partsLeft = 1;
+      stepPart(s, 'rest');
+      if (s.hero.standing !== 'prisoner' || s.pending?.kind !== 'door') continue;
+      expect(s.pending.turning).toMatch(/^entry:/);
+      expect(s.hero.money).toBeLessThan(30000);
+      expect(doorView(s, s.pending).doors[1].locked).toBeTruthy();
+      expect(doorView(s, s.pending).doors[0].locked).toBeNull();
+      return;
+    }
+    throw new Error('입항한 철의 체포를 재현하지 못했다');
+  });
+  it('입항한 철의 품삯으로 안내선 값이 생기면 첫 화면부터 유료 길이 열린다', () => {
+    const s = traveler(); s.hero.money = 29999;
+    sailTo(s, '스카이피아', 'calm');
+    s.passage!.partsLeft = 1;
+    stepPart(s, 'work');
+    expect(s.hero.money).toBeGreaterThanOrEqual(30000);
+    if (s.pending?.kind !== 'door') throw new Error('진입 관문이 열리지 않았다');
+    expect(doorView(s, s.pending).doors[1].locked).toBeNull();
+  });
+  it.each([false, true])('입항 질문 뒤 돈을 잃으면 유료 길을 다시 잠그고 다른 길을 고를 수 있다 (저장 %s)', (reload) => {
+    let s = traveler();
+    sailTo(s, '스카이피아', 'calm'); finishPassage(s);
+    if (s.pending?.kind !== 'door') throw new Error('진입 관문이 열리지 않았다');
+    expect(s.pending.doors[1].locked).toBeNull();
+    applyFx(s, [{ op: 'money', add: -1000000 }]);
+    if (reload) {
+      s = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+      if (s.pending?.kind !== 'door') throw new Error('진입 관문을 불러오지 못했다');
+      expect(doorView(s, s.pending).doors[1].locked).toBeTruthy();
+    }
+    answerDoor(s, 1);
+    expect(s.hero.money).toBe(0);
+    expect(s.hero.island).toBe('자야');
+    if (s.pending?.kind !== 'door') throw new Error('무료 진입 길은 남아 있어야 한다');
+    expect(s.pending.doors[1].locked).toBeTruthy();
+    expect(s.pending.doors[0].locked).toBeNull();
+    answerDoor(s, 0);
+    expect(s.pending).toBeNull();
+  });
   it('하이 웨스트를 고르기 전까지 도착과 항로 보상을 보류하고 저장 후에도 한 번만 처리한다', () => {
     const s = traveler();
     const route = buildVoyage(voyageId(s, { calm: '워터 세븐', dream: '스카이피아' }))!;

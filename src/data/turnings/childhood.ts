@@ -34,13 +34,15 @@ export const leaveTo = (island: string, text: string, line: string): Fx[] => [
 
 export const CHILDHOOD: Turning[] = [
   {
-    id: 'kid_bully', kind: 'door', when: kid(3, 10), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'kid_bully', kind: 'door', when: kid(3, 10), weight: 20, repeat: 'once', speaker: 'hero',
     title: '골목대장', body: '{town} 골목에서 덩치 큰 아이가 작은 아이의 빵을 빼앗아 들고 웃는다.',
     doors: [
       { label: '끼어들어 막아선다', hint: '대신 얻어맞을지도 모른다', values: { justice: D }, mark: 'unyielding', fx: [{ op: 'hp', add: -10 }, { op: 'log', text: '골목대장의 주먹에 입술이 터졌다. 작은 아이는 떨어진 빵을 주워 달아났고, {name}은(는) 끝까지 길을 막았다.', weight: 'light' }] },
       { label: '골목대장 편에 붙어 빵 부스러기를 얻는다', hint: '배는 부르다. 빵을 빼앗긴 아이가 {name}을(를) 쳐다본다', values: { greed: D }, fx: [{ op: 'log', text: '빵을 나눠 먹는 동안 작은 아이는 빈손으로 골목을 떠났다. 골목대장은 다음에도 곁에 오라며 자리를 내주었다.', weight: 'light' }] },
-      { label: '골목대장을 꺾고 골목을 차지한다', hint: '골목 아이들이 {name}을(를) 따르게 된다', special: 'dominion', values: { dominion: D },
-        fx: [{ op: 'flag', id: 'kidBoss' }, { op: 'log', text: '그날부터 골목 아이들은 {name}의 눈치를 보았다.', weight: 'heavy' }] },
+      { label: '골목대장에게 도전한다', hint: '이기면 골목의 규칙을 내가 정한다. 지면 대장이 그대로 남는다', danger: true, values: { dominion: D },
+        fx: [{ op: 'chance', p: 0.5, skillCheck: true,
+          then: [{ op: 'flag', id: 'kidBoss' }, { op: 'log', text: '먼저 주저앉은 쪽은 골목대장이었다. 그날부터 골목 아이들은 빵을 나눌 때도 {name}의 눈치를 봤다.', weight: 'heavy' }],
+          else: [{ op: 'hp', add: -10 }, { op: 'log', text: '한 번 버텼지만 다시 달려든 대장에게 밀려 넘어졌다. 골목 아이들은 여전히 그 아이 옆에 섰다.', weight: 'light' }] }] },
     ],
   },
   {
@@ -81,7 +83,7 @@ export const CHILDHOOD: Turning[] = [
     doors: [
       { label: '남의 집 물동이를 날라 약값을 번다', hint: '물동이는 무겁지만 의원을 부를 수 있다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '몇 집의 물동이를 채우고 받은 동전을 세어 의원에게 달려갔다. 할머니는 약을 받아 들고도 먼저 갈라진 손바닥을 살폈다.', weight: 'light' }, sickSeen] },
       { label: '이웃에게 도움을 청한다', hint: '혼자 짊어지지 않아도 된다', values: { loyalty: D }, fx: [{ op: 'log', text: '이웃이 마른 장작과 약초를 들고 왔다. 할머니는 부엌에 다시 불이 붙는 소리를 듣고 겨우 미소를 지었다.', weight: 'light' }, sickSeen] },
-      { label: '할머니가 가르쳐 준 약초를 찾아 달인다', hint: '기억을 더듬어 손수 돌본다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '할머니가 예전에 가리켜 준 잎을 골라 쓴 물을 달였다. 한 모금 넘긴 할머니가 맞는 풀이라고 고개를 끄덕였다.', weight: 'light' }, sickSeen] },
+      { label: '할머니에게 약초를 물어 찾아온다', hint: '가느다란 목소리를 놓치지 않으려 귀를 기울인다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '할머니가 그려 준 잎 모양을 들고 나가 약초를 찾아왔다. 한 모금 넘긴 할머니가 맞는 풀이라고 고개를 끄덕였다.', weight: 'light' }, sickSeen] },
     ],
   },
   {
@@ -95,7 +97,7 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_sick_mentor', kind: 'door', when: [...sickWhen, noParent, noGrandmother, noGrandfather, { c: 'person', relation: '스승', has: true }], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '스승의 빈자리', body: '늘 새벽 수련을 깨우던 스승이 열병으로 일어나지 못했다. 목검은 문 옆에 기대어 있고 약을 구할 사람은 {name}뿐이다.',
+    title: '스승의 빈자리', body: '새벽이 밝았는데도 스승 {person:스승}의 방은 조용하다. 이마에 열이 오르고 식은 찻잔이 손 닿지 않는 곳에 놓여 있다.',
     doors: [
       { label: '심부름을 맡아 스승의 약값을 번다', hint: '수련 대신 하루를 일한다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '해 질 때까지 심부름을 하고 의원에게 품삯을 내밀었다. 스승은 약을 받자마자 오늘 수련은 쉬라며 {name}의 손을 끌어당겼다.', weight: 'light' }, sickSeen] },
       { label: '스승을 오래 알던 사람을 찾아간다', hint: '혼자 감당할 일을 나눈다', values: { loyalty: D }, fx: [{ op: 'log', text: '옛 친구는 스승의 이름을 듣고 약상자를 들고 찾아왔다. 두 사람이 낮은 목소리로 이야기를 나누는 동안 {name}은(는) 물을 데웠다.', weight: 'light' }, sickSeen] },
@@ -104,9 +106,9 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_sick_neighbor', kind: 'door', when: [...sickWhen, noParent, noGrandmother, noGrandfather, noMentor, { c: 'flag', id: 'lonely', has: false }], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '닫힌 이웃집 문', body: '가끔 남은 밥을 내주던 이웃이 열병으로 문을 열지 못한다. {name}은(는) 빈 그릇을 든 채 한참 문 앞에 서 있다.',
+    title: '닫힌 이웃집 문', body: '이웃집 문을 지나는데 안에서 물을 달라는 목소리가 난다. 문틈으로 내민 그릇을 받으니 열 오른 손이 가늘게 떨린다.',
     doors: [
-      { label: '이웃의 약값을 벌려고 짐을 나른다', hint: '빈 그릇을 돌려줄 때 약도 건넨다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '짐을 나르고 번 돈으로 약을 샀다. 이웃은 문틈으로 약봉지를 받고, 전에 건넸던 그릇에 따뜻한 물을 채워 돌려주었다.', weight: 'light' }, sickSeen] },
+      { label: '이웃의 약값을 벌려고 짐을 나른다', hint: '빈 그릇을 돌려줄 때 약도 건넨다', values: { ambition: D }, mark: 'fellowship', fx: [{ op: 'hp', add: -5 }, { op: 'base', key: 'vit', add: 1 }, { op: 'log', text: '짐을 나르고 번 돈으로 약을 샀다. 이웃은 문틈으로 약봉지를 받고, {name}이(가) 채워 온 그릇을 두 손으로 감싸 쥐었다.', weight: 'light' }, sickSeen] },
       { label: '다른 이웃들에게 사정을 알린다', hint: '작은 도움을 모은다', values: { loyalty: D }, fx: [{ op: 'log', text: '한 사람은 물을 끓이고 다른 사람은 의원을 불렀다. 닫혀 있던 이웃집 문이 열리자 {name}은(는) 빈 그릇을 안고 안으로 들어갔다.', weight: 'light' }, sickSeen] },
       { label: '의원에게 할 수 있는 일을 묻는다', hint: '약이 오기 전까지 곁을 지킨다', values: { inquiry: D }, fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'log', text: '의원이 알려 준 대로 물을 조금씩 먹이고 숨소리를 살폈다. 이웃은 정신이 들자 왜 아직 여기 있느냐고 묻고는 이불을 한쪽 내주었다.', weight: 'light' }, sickSeen] },
     ],
@@ -140,7 +142,7 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_wooden_sword', kind: 'door', when: kid(6, 14), weight: 10, repeat: 'once', speaker: 'hero',
-    title: '목검', body: '동네 형이 목검 두 자루를 들고 와 한판 붙자고 한다. 이긴 적이 한 번도 없다.',
+    title: '목검', body: '동네 형이 목검 두 자루를 들고 와 한판 붙자고 한다. 형은 한 자루를 {name}의 발치에 내려놓는다.',
     doors: [
       { label: '지고 또 덤빈다', hint: '해가 질 무렵엔 온몸이 멍투성이다', values: { ambition: D }, mark: 'unyielding', fx: [{ op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '몇 번째로 흙바닥에 누웠는지 잊었다. 형은 돌아서려다 {name}이(가) 다시 목검을 들자 자세를 고쳐 잡았다.', weight: 'light' }] },
       { label: '덤비지 않고 형의 버릇을 지켜본다', hint: '이길 틈이 보이기 시작한다', values: { inquiry: D }, mark: 'composure', fx: [{ op: 'mastery', branch: 'observation', add: 5 }, { op: 'log', text: '형이 내리치기 전 왼발을 고쳐 딛는 것을 알아챘다. 다음 겨룸에서는 그 발이 움직일 때 먼저 몸을 비켰다.', weight: 'light' }] },
@@ -148,7 +150,7 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_stray_dog', kind: 'door', when: kid(3, 10), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'kid_stray_dog', kind: 'door', when: kid(3, 10), weight: 20, repeat: 'once', speaker: 'hero',
     title: '떠돌이 개', body: '비 오는 날, 다리를 저는 떠돌이 개가 처마 밑에서 떨고 있다.',
     doors: [
       { label: '데려가 몰래 돌본다', hint: '먹을 것을 나눠야 한다', values: { peace: D }, fx: [{ op: 'flag', id: 'kidDog' }, { op: 'log', text: '마른 천으로 개의 다리를 감쌌다. 며칠 뒤에는 처마 아래서 {name}의 발소리만 들어도 꼬리를 흔들었다.', weight: 'light' }] },
@@ -157,7 +159,7 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_spyglass', kind: 'door', when: kid(5, 12), weight: 9, repeat: 'once', speaker: 'hero',
+    id: 'kid_spyglass', kind: 'door', when: kid(5, 12), weight: 12, repeat: 'once', speaker: 'hero',
     title: '부잣집 아이의 망원경', body: '부잣집 아이가 새 망원경을 자랑하며, 만져 보고 싶으면 절을 하라고 한다.',
     doors: [
       { label: '절하지 않고 돌아선다', hint: '망원경은 끝내 못 본다', values: { freedom: D }, mark: 'rebel', fx: [{ op: 'log', text: '아이는 망원경을 높이 치켜들고 놀렸지만 {name}은(는) 돌아보지 않았다. 혼자 언덕에 올라 맨눈으로 먼 배를 찾았다.', weight: 'light' }] },
@@ -202,7 +204,7 @@ export const CHILDHOOD: Turning[] = [
     doors: [
       { label: '물에 뛰어들어 사람을 끌어올린다', hint: '파도가 아직 거칠다', needs: ['swim'], values: { justice: D }, mark: 'fellowship', danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'person', kind: 'ally', relation: '구해 준 뱃사람' }, { op: 'log', text: '파도가 둘을 다시 끌어당겼지만 모래밭까지 기어 나왔다. 정신을 차린 뱃사람은 {name}의 손을 놓지 않고 이름을 물었다.', weight: 'light' }] },
-      { label: '부서진 배의 짐을 뒤진다', hint: '쓸 만한 것이 나올지도 모른다', values: { inquiry: D }, fx: [{ op: 'money', add: 2000 }, { op: 'log', text: '부서진 궤짝 틈에서 젖지 않은 동전 꾸러미를 찾아냈다. 멀리서 구조하러 온 어른들의 목소리가 들리자 짐을 닫았다.', weight: 'light' }] },
+      { label: '부서진 배를 뒤져 값나가는 물건을 챙긴다', hint: '구조하는 사람들보다 먼저 궤짝에서 돈을 챙긴다', values: { greed: D }, fx: [{ op: 'money', add: 2000 }, { op: 'log', text: '부서진 궤짝 틈에서 젖지 않은 동전 꾸러미를 찾아냈다. 멀리서 구조하러 온 어른들의 목소리가 들리자 짐을 닫았다.', weight: 'light' }] },
       { label: '어른들을 부르러 달려간다', hint: '어른들이 알아서 한다', values: { peace: D, loyalty: D }, fx: [{ op: 'log', text: '마을에서 들것과 물을 가져온 어른들이 뱃사람을 옮겼다. {name}은(는) 모래 위에 남은 발자국을 따라가며 그가 숨 쉬는지 거듭 확인했다.', weight: 'light' }] },
     ],
   },
@@ -229,7 +231,7 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_promise', kind: 'door', when: [...kid(8, 15), { c: 'person', relation: '어릴 적 동무', has: true, kinds: ['ally'] }], weight: 9, repeat: 'once', speaker: { relation: '어릴 적 동무' },
+    id: 'kid_promise', kind: 'door', when: [...kid(8, 15), { c: 'turningSeen', id: 'kid_ship_friend', has: true }, { c: 'person', relation: '어릴 적 동무', has: true, kinds: ['ally'] }], weight: 9, repeat: 'once', speaker: { relation: '어릴 적 동무' },
     title: '떠나는 친구', body: '부두에서 함께 작은 배를 만들던 {friend}이(가) 먼 섬으로 이사를 간다. 떠나기 전날 밤, 바닷가에서 약속을 하자고 한다.',
     doors: [
       { label: '언젠가 같은 배를 타자고 약속한다', hint: '이 약속은 오래 남는다', values: { romance: D }, mark: 'obsession', fx: [{ op: 'flag', id: 'kidPromise' }, { op: 'personChange', relation: '어릴 적 동무', bond: 10 }, { op: 'log', text: '{friend}은(는) 다음에 만날 배의 이름을 미리 짓자며 웃었다. 배가 떠나는 아침, 둘은 항구 양쪽에서 그 이름을 소리쳐 불렀다.', weight: 'light' }, { op: 'timeline', text: '{friend}와(과) 언젠가 같은 배를 타기로 약속했다' }] },
@@ -242,16 +244,16 @@ export const CHILDHOOD: Turning[] = [
   // ---------------------------------------------------------------- 어느 집 아이에게나 (가족이 없어도)
   {
     id: 'kid_rival', kind: 'door', when: [...kid(3, 9), { c: 'kin', who: 'sibling', has: false }, { c: 'flag', id: 'lonely', has: false }],   // 형제가 있으면 맞수 대신 형제의 이야기가 온다 (bonds.ts)
-    weight: 9, repeat: 'once', speaker: 'hero',
-    title: '눈이 마주친 또래', body: '부둣가에서 고집 센 또래 하나와 눈이 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
+    weight: 12, repeat: 'once', speaker: 'hero',
+    title: '눈이 마주친 또래', body: '골목에서 고집 센 또래 하나와 눈이 마주쳤다. 둘 다 먼저 눈을 피하지 않는다.',
     doors: [
       { label: '먼저 주먹을 날린다', hint: '코피가 터지도록 뒹군다. 그 아이와는 오래 겨루는 사이가 된다', values: { dominion: D }, mark: 'unyielding',
         fx: [{ op: 'hp', add: -8 }, { op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' }, { op: 'log', text: '둘 다 흙투성이가 된 뒤에야 주먹을 내렸다. 다음 날 그 아이는 같은 자리에서 다시 {name}을(를) 기다리고 있었다.', weight: 'light' }] },
-      { label: '등대까지 달리기로 겨루자고 한다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
+      { label: '마을 어귀까지 달리기로 겨루자고 한다', hint: '지면 한 해 내내 놀림감이 된다. 이기든 지든 다음 시합을 약속하게 된다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수' }, { op: 'flag', id: 'kidRival' },
-             { op: 'chance', p: 0.5, skillCheck: true, then: [{ op: 'base', key: 'spd', add: 1 }, { op: 'log', text: '등대 계단에 먼저 손을 짚었다. 뒤따라온 아이는 숨을 고르자마자 내일 다시 겨루자고 했다.', weight: 'light' }], else: [{ op: 'log', text: '등대 앞에서 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
+             { op: 'chance', p: 0.5, skillCheck: true, then: [{ op: 'base', key: 'spd', add: 1 }, { op: 'log', text: '마을 어귀에 먼저 다다랐다. 뒤따라온 아이는 숨을 고르자마자 내일 다시 겨루자고 했다.', weight: 'light' }], else: [{ op: 'log', text: '마을 어귀에서 반 걸음 뒤졌다. 그해 내내 놀림을 받았다.', weight: 'light' }] }] },
       { label: '눈싸움을 그만두고 손을 내민다', hint: '그 아이는 한참 망설이다 손을 잡는다. 겨룰 상대 대신 놀 동무가 생긴다', values: { loyalty: D },
-        fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }, { op: 'log', text: '내민 손을 한참 보던 아이가 마침내 맞잡았다. 둘은 부두 끝까지 나란히 걸으며 서로 이름을 물었다.', weight: 'light' }] },
+        fx: [{ op: 'person', kind: 'ally', relation: '어릴 적 친구' }, { op: 'log', text: '내민 손을 한참 보던 아이가 마침내 맞잡았다. 둘은 골목 끝까지 나란히 걸으며 서로 이름을 물었다.', weight: 'light' }] },
     ],
   },
   {
@@ -268,7 +270,7 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_fever', kind: 'door', when: kid(3, 9), weight: 7, repeat: 'once', speaker: 'hero',
-    title: '열병', body: '{name}이(가) 열병에 걸려 사흘째 끓는다. 돌봐 주는 어른이 의원을 불러왔지만, 듣는 약은 값이 비싸다.',
+    title: '열병', body: '{name}이(가) 열병에 걸려 사흘째 끓는다. 기침 소리를 들은 이웃이 의원을 불러왔지만, 듣는 약은 값이 비싸다.',
     doors: [
       { label: '비싼 약을 쓴다', hint: '사흘 만에 일어난다. 집안 돈이 크게 축난다', when: [RICH], fx: [{ op: 'money', add: -20000 }, { op: 'log', text: '약을 먹고 사흘째 되는 날 열이 내렸다. 침상 곁에 쌓인 빈 약봉투를 치우며 어른은 이제 괜찮다고 몇 번이고 말했다.', weight: 'light' }] },
       { label: '약 없이 이를 악물고 견딘다', hint: '살아나기는 한다. 몸이 더 단단해질 수도, 기침이 평생 남을 수도 있다', values: { ambition: D }, mark: 'unyielding',
@@ -278,7 +280,7 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_lighthouse', kind: 'door', when: kid(5, 11), weight: 8, repeat: 'once', speaker: 'hero',
+    id: 'kid_lighthouse', kind: 'door', when: kid(5, 11), weight: 12, repeat: 'once', speaker: 'hero',
     title: '꺼진 등대', body: '폭풍 치는 밤, {island} 곶의 등대 불이 꺼졌다. 등대지기 노인은 계단에 쓰러져 있고, 먼바다에서 고깃배들의 불빛이 흔들린다.',
     doors: [
       { label: '등대 꼭대기에 올라가 불을 다시 붙인다', hint: '바람에 몇 번이고 넘어진다. 고깃배들이 불빛을 보고 항구로 들어온다', values: { ambition: D }, mark: 'unyielding', danger: true,
@@ -304,16 +306,29 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_scholarship', kind: 'door', when: kid(10, 14), weight: 8, repeat: 'once', speaker: { relation: '학당 선생' },
-    title: '학당 선생의 추천', body: '마을 학당 선생이 {name}의 셈 솜씨를 보고, 큰 섬의 학교가 보는 장학 시험을 권했다. 시험 날은 동무들과 한 해 내내 준비한 축제 날과 겹친다.',
+    title: '학당 선생의 추천', body: '마을 학당 선생이 {name}의 셈 솜씨를 보고, 큰 섬의 학교가 보는 장학 시험을 권했다. 시험 날은 마을 축제와 겹친다. 행진을 준비하던 아이들은 북을 칠 사람이 없다며 {name}에게 북채를 내민다.',
     doors: [
       { label: '장학 시험을 치르러 간다', hint: '붙으면 학교의 문이 열린다. 축제의 북은 다른 아이가 친다', values: { inquiry: D },
         fx: [{ op: 'chance', p: 0.5, skillCheck: true, then: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'scholar' }, { op: 'log', text: '합격자 명단에서 자기 이름을 찾았다. 선생은 축제 이야기를 묻지 않고 새 학교에 가져갈 책부터 챙겨 주었다.', weight: 'heavy' }, { op: 'timeline', text: '장학 시험에 붙었다' }],
                else: [{ op: 'log', text: '시험장에서 손이 떨렸다. 떨어진 채 돌아오니 축제는 끝나 있었다.', weight: 'light' }] }] },
-      { label: '시험 대신 축제의 북을 친다', hint: '동무들과 한 약속을 지킨다. 선생은 다시는 추천장을 쓰지 않는다', values: { loyalty: D }, closes: true,
+      { label: '시험 대신 축제의 북을 친다', hint: '빈자리를 메워 행진을 돕는다. 선생은 다시는 추천장을 쓰지 않는다', values: { loyalty: D }, closes: true,
         fx: [{ op: 'person', kind: 'ally', relation: '축제를 함께한 동무' }, { op: 'log', text: '북소리에 맞춰 동무들이 행진했다. 선생은 관중 속에서 조용히 지켜보다 떠났지만, 축제가 끝나자 친구 하나가 곁에 남아 밤새 북을 옮겼다.', weight: 'light' }] },
       { label: '시험을 보고 밤배로 돌아와 북도 친다', hint: '이틀 밤을 새운다. 둘 다 해낼 수도, 둘 다 망칠 수도 있다', values: { ambition: D }, mark: 'daring',
         fx: [{ op: 'hp', add: -10 }, { op: 'chance', p: 0.4, skillCheck: true, then: [{ op: 'base', key: 'int', add: 1 }, { op: 'flag', id: 'scholar' }, { op: 'log', text: '시험을 마치고 돌아와 마지막 행진에 맞춰 북을 쳤다. 며칠 뒤 합격 소식이 오자 동무들이 먼저 환호했다.', weight: 'heavy' }],
                else: [{ op: 'log', text: '시험지는 반이 비었고 북채는 손에서 미끄러졌다.', weight: 'light' }] }] },
+    ],
+  },
+
+  {
+    id: 'kid_market_stalls', kind: 'door', when: kid(9, 15), weight: 12, repeat: 'once', speaker: 'hero',
+    title: '장터의 좋은 자리', body: '큰 장이 서는 날이다. 아이들은 구운 밤을 팔러 왔는데, 손님이 몰리는 길목에는 돗자리 한 장만 펼 수 있다. 저마다 먼저 왔다고 우긴다.',
+    doors: [
+      { label: '좋은 자리를 원하는 아이에게 자릿값을 받는다', hint: '자리 하나를 넘겨주고 나만 동전을 챙긴다', values: { greed: D },
+        fx: [{ op: 'money', add: 3000 }, { op: 'log', text: '가장 많은 동전을 내민 아이에게 돗자리를 내줬다. 다른 아이들은 밤을 팔 자리를 다시 찾아야 했다.', weight: 'light' }] },
+      { label: '내가 순서를 정하고 다들 따르라고 한다', hint: '아이들이 다투는 동안 내 장사 규칙을 세운다', values: { dominion: D },
+        fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '서로 미는 아이들 사이에 서서 자리를 비우는 때를 정했다. 내 차례에 먼저 돗자리를 펴자 아이들이 각자 순서를 기다렸다.', weight: 'light' }] },
+      { label: '한 돗자리에 밤을 다 올려놓고 같이 판다', hint: '빨리 팔고 각자 올려놓은 몫을 나눈다', values: { loyalty: D },
+        fx: [{ op: 'money', add: 1000 }, { op: 'log', text: '같은 돗자리에서 밤을 팔고 장이 끝난 뒤 빈 바구니 옆에서 동전을 나눴다.', weight: 'light' }] },
     ],
   },
 
@@ -357,7 +372,8 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_sent_away', kind: 'door', when: [...kid(7, 13), POOR], needs: ['parent', 'sibling'], weight: 7, repeat: 'once', speaker: 'hero',
+    id: 'kid_sent_away', kind: 'door', when: [...kid(7, 13), POOR, { c: 'kin', who: 'sibling', has: true, minAge: 5 }],
+    needs: ['parent', 'sibling'], weight: 7, repeat: 'once', speaker: 'hero',
     title: '친척 집에 보낼 아이', body: '먹을 입이 하나 줄어야 겨울을 난다. 부모는 형제 가운데 하나를 먼 섬 친척 집에 일손으로 보내기로 했다.',
     doors: [
       { label: '내가 가겠다고 나선다', hint: '한 해 동안 남의 집 일을 하고 돌아온다. 돌아오면 제 자리가 조금 낯설다', values: { inquiry: D }, mark: 'fellowship',
@@ -472,7 +488,8 @@ export const CHILDHOOD: Turning[] = [
 
   // ---------------------------------------------------------------- 가족이 있는 아이
   {
-    id: 'kid_sibling_boat', kind: 'door', when: kid(8, 13), needs: ['sibling'], weight: 7, repeat: 'once', speaker: 'hero',
+    id: 'kid_sibling_boat', kind: 'door', when: [...kid(8, 13), { c: 'kin', who: 'sibling', has: true, minAge: 5 }],
+    needs: ['sibling'], weight: 7, repeat: 'once', speaker: 'hero',
     title: '형제의 돛단배', body: '형제가 몰래 고친 돛단배로 오늘 밤 앞바다의 무인도까지 가 보자고 한다. 하늘 끝에 먹구름이 걸려 있다.',
     doors: [
       { label: '같이 탄다', hint: '폭풍을 만나면 둘 다 돌아오지 못할 수도 있다. 해내면 평생 이야기할 밤이 된다', values: { romance: D }, mark: 'daring', danger: true,
@@ -513,13 +530,13 @@ export const CHILDHOOD: Turning[] = [
   },
   {
     id: 'kid_away_letter', kind: 'door', when: away(12, 15), weight: 8, repeat: 'once', speaker: { relation: '고향 배의 뱃사람' },
-    title: '고향에서 온 배', body: '{town}에서 온 배의 뱃사람이 고향 소식을 전한다. 함께 자란 아이들이 {name}을(를) 기다린다고 한다. 그 배는 내일 아침 {town}(으)로 돌아간다.',
+    title: '고향에서 온 배', body: '{town}에서 온 배의 뱃사람이 고향 소식을 전한다. 올해도 고향에서는 장이 선다는 말에 떠나온 거리가 눈앞에 그려진다. 그 배는 내일 아침 {town}(으)로 돌아간다.',
     doors: [
-      { label: '고향으로 돌아가는 배에 오른다', hint: '떠나 온 길을 거슬러 간다. 여기서 얻은 일자리는 다른 아이에게 간다', values: { loyalty: D },
+      { label: '고향으로 돌아가는 배에 오른다', hint: '떠나온 길을 거슬러 간다. 낯선 항구가 등 뒤로 멀어진다', values: { loyalty: D },
         fx: [{ op: 'moveHome' }, { op: 'unflag', id: LEFT_HOME }, { op: 'log', text: '{town}의 부두에 내렸다. 떠날 때보다 마을이 작아 보였다.', weight: 'heavy' },
              { op: 'timeline', text: '고향으로 돌아왔다' }] },
-      { label: '돌아가지 않고 이 항구에서 버틴다', hint: '고향의 얼굴들이 꿈에 나온다. 여기서 제 자리를 만든다', values: { ambition: D }, mark: 'obsession',
-        fx: [{ op: 'flag', id: 'stayedAway' }, { op: 'log', text: '고향 배가 떠난 뒤에도 부두에 남아 오늘 맡은 일을 끝냈다. 밤에는 친구들의 얼굴이 떠올랐지만 이 항구에서 아침을 맞았다.', weight: 'heavy' }] },
+      { label: '돌아가지 않고 이 항구에서 버틴다', hint: '이 항구에서 제 자리를 찾는다', values: { ambition: D }, mark: 'obsession',
+        fx: [{ op: 'flag', id: 'stayedAway' }, { op: 'log', text: '고향 배가 떠난 뒤 부두 끝에 서서 돛이 작아지는 것을 보았다. 이튿날 아침에는 이 항구에서 할 일을 찾아 나섰다.', weight: 'heavy' }] },
     ],
   },
 ];

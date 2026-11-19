@@ -5,8 +5,7 @@ import { newLife5 } from '../../src/core/state';
 import type { Fx } from '../../src/core/types';
 
 // 조건이 충족된 문에서 효과 적용기가 직접 결과를 기록하는 연산.
-// 무기 구입/정비는 거래 결과를, 유파 입문/채택/재회는 해당 인연의 장면을 기록한다.
-const SELF_NARRATING = new Set<string>(['buyWeapon', 'serviceWeapon', 'beginStyle', 'adoptStyle', 'refineStyle']);
+const SELF_NARRATING = new Set<string>(['buyWeapon', 'serviceWeapon', 'beginStyle', 'adoptStyle', 'refineStyle', 'welcomeSibling', 'siblingReunion']);
 
 // 확률 분기의 모든 길을 따라간다. 전투와 엔딩은 별도 화면이 곧바로 반응한다.
 function reactionPaths(fx: Fx[], reacted = false): boolean[] {

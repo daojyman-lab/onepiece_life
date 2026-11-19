@@ -79,7 +79,7 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
     (door.when ?? []).flatMap((c) => c.c === 'flag' && !c.has ? [c.id] : []),
   );
   const stand = t.when.flatMap((c) => (c.c === 'standing' ? c.is : [])) as Standing[];
-  const isles = t.when.flatMap((c) => (c.c === 'island' && !c.not ? c.is : []));
+  const isles = islesOf(target);
   const s: Life5 = newLife5(seed, { home });
   const r = rngOf({ seed: seed ^ 0x7a6e, cursor: 0 });
   for (let i = 0; i < 20000; i++) {
@@ -98,9 +98,14 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
       apply5(s, { type: 'answer', index: mustWin || earnFame ? ENGAGE : v === 'peace' ? BACK_OFF : chance(r, 0.5) ? ENGAGE : BACK_OFF });
       continue;
     }
-    if (p.turning === target.turning) { inspect?.(s); return !p.doors[target.index].locked; }
+    if (p.turning === target.turning) {
+      inspect?.(s);
+      const introduction = takeLifeCourse !== true || !target.turning.startsWith('ep_alabasta_')
+        || s.lifeStory?.events.some((event) => event.id === 'departed');
+      return !!introduction && !p.doors[target.index].locked;
+    }
     // Opt-in replay route: take the real age-sixteen Alabasta introduction.
-    if (takeLifeCourse === true && target.turning.startsWith('ep_alabasta_p') &&
+    if (takeLifeCourse === true && target.turning.startsWith('ep_alabasta_') &&
         ['life_course_promise', 'life_course_training', 'life_course_departure'].includes(p.turning) && !p.doors[0]?.locked) {
       apply5(s, { type: 'answer', index: 0 }); continue;
     }
@@ -133,8 +138,14 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
   return false;
 }
 
-/** 노리는 문의 섬 (전환점의 섬 조건). 없으면 빈 배열 */
-const islesOf = (d: SpecialDoor) => TURNING_BY_ID[d.turning].when.flatMap((c) => (c.c === 'island' && !c.not ? c.is : []));
+/** 후속 장면은 when이 비어 있으므로, 실제로 이어지는 첫 장면의 목적지도 찾는다. */
+const islesOf = (d: SpecialDoor): string[] => {
+  const t = TURNING_BY_ID[d.turning];
+  const direct = t.when.flatMap((c) => c.c === 'island' && !c.not ? c.is : []);
+  if (direct.length || !t.id.startsWith('ep_')) return direct;
+  return [...new Set(TURNINGS.filter((root) => root.weight > 0 && root.id.startsWith('ep_') && leadsTo(root.id, t.id))
+    .flatMap((root) => root.when.flatMap((c) => c.c === 'island' && !c.not ? c.is : [])))];
+};
 
 /**
  * 그 문이 섬에 매인 문이면 그 섬에서 태어난 인생(태어난 마을이 그 섬), 없으면 그 섬이 있는 바다의 고향에서 태어난 인생만 쓴다.
