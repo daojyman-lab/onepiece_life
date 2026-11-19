@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { peopleView } from '../../src/ui/view/faces';
 import { faceKeyOf } from '../../src/shared/core/people';
-import { askFight } from '../../src/core/fight';
+import { askFight, RIVAL_AFTER, RIVAL_LOST_FLAG } from '../../src/core/fight';
 import { applyFx } from '../../src/core/fx';
 import { reduce5 } from '../../src/core/reduce';
 import { newLife5 } from '../../src/core/state';
-import { openTurning, resolveDoors } from '../../src/core/turning';
+import { openQueued, openTurning, resolveDoors } from '../../src/core/turning';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import type { Life5 } from '../../src/core/types';
 
@@ -49,6 +49,30 @@ describe('어릴 적 맞수와의 재회', () => {
     expect(done.hero.limbs).toEqual(s.hero.limbs);
     expect(done.queue).not.toContain('after_fight');
     expect(done.flags.some(f => f.startsWith('lostTo:'))).toBe(false);
+  });
+
+  it.each([[500, 'win', RIVAL_AFTER.won], [1, 'lose', RIVAL_AFTER.lost]] as const)('대련 뒤 맞수가 결과에 반응한다 (능력치 %s)', (stat, result, next) => {
+    const { s } = meet(stat);
+    expect(openTurning(s, reunion)).toBe(true);
+    const done = reduce5(reduce5(s, { type: 'answer', index: 0 }), { type: 'answer', index: 0 });
+    expect(done.log.filter(l => l.type === 'battle').at(-1)?.text).toBe(`어릴 적 맞수 단비와 겨뤄 ${result === 'win' ? '이겼다' : '졌다'}.`);
+    expect(done.queue).toContain(next);
+    expect(done.flags.includes(RIVAL_LOST_FLAG)).toBe(result === 'lose');
+    for (const id of Object.values(RIVAL_AFTER)) expect(TURNING_BY_ID[id].when).toEqual([]);   // 어느 섬에서 겨뤄도 반응이 온다
+    expect(openQueued(done)).toBe(true);
+    expect(done.pending).toMatchObject({ kind: 'door', turning: next });
+  });
+
+  it('한 번 진 맞수를 다시 이기면 설욕 장면이 오고, 이긴 뒤에는 동료로 부를 수 있다', () => {
+    const { s, rival } = meet(500);
+    s.flags.push(RIVAL_LOST_FLAG);
+    openTurning(s, reunion);
+    const done = reduce5(reduce5(s, { type: 'answer', index: 0 }), { type: 'answer', index: 0 });
+    expect(done.queue).toContain(RIVAL_AFTER.revenge);
+    expect(done.flags).not.toContain(RIVAL_LOST_FLAG);
+    expect(openQueued(done)).toBe(true);
+    const joined = reduce5(done, { type: 'answer', index: 2 });
+    expect(joined.people.find(p => p.id === rival.id)?.kind).toBe('crew');
   });
 
   it('맞수가 성장하면 다음 대련의 능력치도 높아진다', () => {

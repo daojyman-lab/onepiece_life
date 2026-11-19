@@ -373,6 +373,45 @@ const BONDS: Turning[] = [
         fx: [{ op: 'recruitRival' }, { op: 'log', text: '{rival}은(는) 손을 한참 바라보다 잡았다. 다음 항구에서부터 같은 배에 올랐다.', weight: 'light' }] },
     ],
   },
+  // 맞수와 겨룬 뒤(core/fight.ts의 ackBattle이 줄을 세운다): 승부는 그 자리에서 끝나지 않는다.
+  // 진 맞수는 다음 승부를 걸고(조로와 쿠이나의 약속), 이긴 맞수는 약을 올리며 기다리겠다고 한다.
+  // 한 번 졌던 맞수를 다시 붙어 이기면 설욕이다. 이긴 뒤에만 동료로 부르는 문이 열린다.
+  {
+    id: 'life_rival_duel_won', kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: { relation: '어릴 적 맞수' },
+    title: '흙바닥의 맞수', body: '{rival}이(가) 마당 흙바닥에 대자로 누워 하늘을 본다. 한참 숨을 고르더니 웃음을 터뜨린다. "어릴 때부터 지는 건 질색이었는데. 다음엔 내가 이긴다, {name}."',
+    doors: [
+      { label: '손을 내밀어 일으켜 세운다', hint: '승부는 승부, 술은 술이다. 맞수와의 사이가 깊어진다', values: { peace: D },
+        fx: [{ op: 'personChange', relation: '어릴 적 맞수', bond: 10 }, { op: 'log', text: '{rival}은(는) 손을 잡고 일어나 흙을 털었다. 둘은 식은 술잔을 다시 채웠다.', weight: 'light' }] },
+      { label: '"몇 번을 와도 마찬가지야" 하고 웃어 보인다', hint: '맞수의 승부욕에 불을 붙인다. 다음 승부는 더 거세진다', values: { dominion: D },
+        fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '{rival}이(가) 이를 드러내며 웃었다. "그 말, 다음에 그대로 돌려주지."', weight: 'light' }] },
+      { label: '"그 실력이면 같이 가자" 하고 손을 내민다', hint: '진 맞수를 이번에는 동료로 부른다', values: { loyalty: D }, when: [NOT_SQUAD, has('rival:free')],
+        fx: [{ op: 'recruitRival' }, { op: 'log', text: '{rival}은(는) 흙투성이 얼굴로 손을 한참 보다 잡았다. "같이 가도 승부는 계속이다."', weight: 'heavy' }] },
+    ],
+  },
+  {
+    id: 'life_rival_duel_lost', kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: { relation: '어릴 적 맞수' },
+    title: '이긴 맞수의 한마디', body: '쓰러진 {name}을(를) {rival}이(가) 내려다본다. 숨을 몰아쉬면서도 입꼬리가 올라가 있다. "이번엔 내가 이겼다. 억울하면 더 강해져서 와."',
+    doors: [
+      { label: '흙을 털고 일어나 다음 승부를 약속한다', hint: '오늘 진 것을 잊지 않는다. 다시 붙어 이기면 설욕이다', values: { ambition: D },
+        fx: [{ op: 'base', key: 'str', add: 1 }, { op: 'personChange', relation: '어릴 적 맞수', bond: 4 }, { op: 'log', text: '"다음엔 내가 이긴다." {name}의 말에 {rival}은(는) 기다리겠다며 등을 돌렸다.', weight: 'light' }] },
+      { label: '무엇이 모자랐는지 솔직하게 묻는다', hint: '자존심보다 배움을 고른다. 맞수가 제 눈에 보인 빈틈을 짚어 준다', values: { inquiry: D },
+        fx: [{ op: 'mastery', branch: 'observation', add: 4 }, { op: 'log', text: '{rival}은(는) 잠시 놀란 얼굴을 하더니 마지막 공방에서 {name}의 어깨가 먼저 움직였다고 일러 주었다.', weight: 'light' }] },
+      { label: '졌다고 웃으며 술잔을 다시 든다', hint: '승부는 접어 두고 옛이야기로 돌아간다', values: { peace: D },
+        fx: [{ op: 'personChange', relation: '어릴 적 맞수', bond: 8 }, { op: 'log', text: '"오늘 술값은 진 사람 몫이다." {rival}의 말에 둘 다 한참을 웃었다.', weight: 'light' }] },
+    ],
+  },
+  {
+    id: 'life_rival_duel_revenge', kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: { relation: '어릴 적 맞수' },
+    title: '갚은 빚', body: '지난번에는 {rival}이(가) 서 있던 자리에 이번에는 {name}이(가) 서 있다. {rival}은(는) 바닥에 주저앉아 한참 말이 없다가 고개를 든다. "...그래, 이걸로 빚은 갚았다 이거지."',
+    doors: [
+      { label: '"이제 한 판씩이다" 하고 다음 승부를 정한다', hint: '맞수와의 승부는 끝나지 않는다', values: { ambition: D }, mark: 'unyielding',
+        fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'personChange', relation: '어릴 적 맞수', bond: 6 }, { op: 'log', text: '"다음 판에서 갈린다." 둘은 다음에 겨룰 날을 정하고 헤어졌다.', weight: 'light' }] },
+      { label: '말없이 손바닥을 마주친다', hint: '어릴 적 그대로 승부를 마친다. 맞수와의 사이가 깊어진다', values: { peace: D },
+        fx: [{ op: 'personChange', relation: '어릴 적 맞수', bond: 12 }, { op: 'log', text: '짝, 하고 손바닥이 울렸다. 어릴 적 공터에서 듣던 그 소리였다.', weight: 'light' }] },
+      { label: '"이제 서로 등을 맡겨도 되겠지" 하고 같이 가자고 한다', hint: '빚을 주고받은 맞수를 동료로 부른다', values: { loyalty: D }, when: [NOT_SQUAD, has('rival:free')],
+        fx: [{ op: 'recruitRival' }, { op: 'log', text: '{rival}은(는) 코웃음을 치며 손을 잡았다. "등은 맡겨도 승부는 따로다."', weight: 'heavy' }] },
+    ],
+  },
   {
     id: 'life_injured_retreat', kind: 'door', when: at(age(22, 60), st(...SEAFARING), { c: 'limbLost', min: 1 }, { c: 'standingYears', min: 2 }),
     weight: 5, repeat: 'once', speaker: 'hero',

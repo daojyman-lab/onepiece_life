@@ -1,7 +1,6 @@
 // 싸움: 붙을지 물러날지를 묻고, 붙으면 v4의 자동 전투로 끝까지 돌린 뒤 결과를 몸과 마음에 남긴다.
 import { storyPause } from './turning';
 import { B } from '../shared/data/balance';
-import { battleRecap } from '../shared/core/combat/narrative';
 import { faceKeyOf } from '../shared/core/people';
 import { rivalCombatSkills, rivalPerson, rivalPosition, RIVAL_STAT_TOTAL } from './rival';
 import { KUMA_FOE, KUMA_MET, kumaSighting } from '../data/kuma';
@@ -43,6 +42,10 @@ export const ENGAGE = 0, BACK_OFF = 1;
 /** 이름 있는 상대를 이긴 뒤 줄을 서는 전환점: 쓰러진 적을 어떻게 할지 */
 const RIVAL_DUEL = 'childhood_rival_duel';
 const AFTER_FIGHT = 'after_fight';
+/** 맞수와 겨룬 뒤 맞수가 결과에 반응하는 전환점 (data/turnings/life.ts) */
+export const RIVAL_AFTER = { won: 'life_rival_duel_won', lost: 'life_rival_duel_lost', revenge: 'life_rival_duel_revenge' } as const;
+/** 맞수에게 한 번이라도 진 적이 있다: 다음에 이기면 설욕이 된다 */
+export const RIVAL_LOST_FLAG = 'rivalDuel:lost';
 const WOUND_KIND_NAME: Record<WoundKind, string> = { bruise: '타박', cut: '베인', burn: '화상', fracture: '골절' };
 
 const FACTION: Partial<Record<Standing, Person['faction']>> = {
@@ -338,8 +341,7 @@ export function ackBattle(s: Life5): void {
   if (p.foe.id === KUMA_FOE) { finishKumaFight(s, p.result); return; }
   const foe = p.foe;
   const won = p.result === 'win';
-  const recap = battleRecap(p.battle);
-  const withRecap = (text: string) => recap ? `${text} ${recap}` : text;
+  // 전투의 공방은 전투 창에서 다 보았다. 기록에는 누가 이기고 졌는지만 남긴다.
   const style = primaryStyle(s);
   if (style) {
     const key = `styleCombat:${style}:${foe.id}`;
@@ -354,12 +356,18 @@ export function ackBattle(s: Life5): void {
     s.stats.fights += 1;
     if (won) s.stats.wins += 1;
     const text = fill(`어릴 적 맞수 {rival}과(와) 겨뤄 ${won ? '이겼다' : '졌다'}.`, { rival: foe.name });
-    logLine(s, withRecap(text), 'heavy', 'battle');
+    logLine(s, text, 'heavy', 'battle');
     s.timeline.push({ age: s.age, text });
+    // 맞수는 결과를 그냥 넘기지 않는다: 이기면 다음을 기약하고, 지면 약을 올리고, 예전에 졌던 상대에게 이기면 설욕이다.
+    const revenge = won && s.flags.includes(RIVAL_LOST_FLAG);
+    if (!won && !s.flags.includes(RIVAL_LOST_FLAG)) s.flags.push(RIVAL_LOST_FLAG);
+    if (revenge) s.flags = s.flags.filter((f) => f !== RIVAL_LOST_FLAG);
+    applyFx(s, [{ op: 'queue', turning: revenge ? RIVAL_AFTER.revenge : won ? RIVAL_AFTER.won : RIVAL_AFTER.lost }]);
+    storyPause(s);
     return;
   }
   if (foe.spar) {
-    logLine(s, withRecap(won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`), 'heavy', 'battle');
+    logLine(s, `${foe.name}과(와)의 대련에서 ${won ? '이겼다' : '졌다'}.`, 'heavy', 'battle');
     const next = won ? p.next?.win : p.next?.lose;
     if (next) { applyFx(s, [{ op: 'queue', turning: next }]); storyPause(s); }
     return;
@@ -393,7 +401,7 @@ export function ackBattle(s: Life5): void {
   if (p.minor) {
     s.stats.fights += 1;
     if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
-    logLine(s, withRecap(p.minor.outcomeLine), 'light', 'battle');
+    logLine(s, p.minor.outcomeLine, 'light', 'battle');
     if (!won && p.battle.deathmatch && chance(r, riskOf(s, foe, true, p.atSea).death * F.minorDeathMult)) dieOrSurvive(s, r, foe, battleWound);
     return;
   }
@@ -413,13 +421,13 @@ export function ackBattle(s: Life5): void {
     s.stats.wins += 1;
     recordTraitEvent(s, 'win', s.hero.sea, foe.id);
     s.hero.fame += Math.round(foePower(foe) * F.famePerPower);
-    logLine(s, withRecap(`${foe.name}과(와)의 싸움에서 이겼다.`), 'heavy', 'battle');
+    logLine(s, `${foe.name}과(와)의 싸움에서 이겼다.`, 'heavy', 'battle');
     if (s.flags.includes(grudge)) {           // 한 번 졌던 상대를 다시 붙어 이겼다
       s.flags = s.flags.filter((f) => f !== grudge);
       applyFx(s, [{ op: 'mark', id: 'unyielding' }]);
     }
   } else {
-    logLine(s, withRecap(p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`), 'heavy', 'battle');
+    logLine(s, p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`, 'heavy', 'battle');
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
