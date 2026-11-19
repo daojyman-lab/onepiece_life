@@ -1,4 +1,4 @@
-import type { Cond, Door, Turning } from '../../core/types';
+import type { Cond, Door, Fx, Turning } from '../../core/types';
 
 function ashore(island: string | string[], id: string, title: string, body: string, doors: Door[], conditions: Cond[] = []): Turning {
   return {
@@ -73,3 +73,14 @@ export const RESUPPLY: Turning = {
     { label: '물때를 살핀 뒤 바로 출항한다', hint: '짐을 늘리지 않고 원래 목적지로 간다', fx: [{ op: 'resumeVoyage', stores: 0 }] },
   ],
 };
+
+const supplyLog = (text: string): Fx => ({ op: 'log', text, weight: 'light' });
+export const RESUPPLY_STORIES: Turning[] = [RESUPPLY, {
+  ...RESUPPLY, id: 'islet_rainwater', title: '이름 없는 섬 · 빗물 고인 웅덩이',
+  body: '{destination}(으)로 가는 길에 새들이 낮은 바위섬을 맴돈다. 밤새 고인 빗물이 바위 그늘에 남아 있고 검은 돌 사이에는 조개가 붙어 있다. 밀물이 들기 전까지 작은 배를 댈 수 있다.',
+  doors: [
+    { label: '빗물을 거르고 조개를 삶아 싣는다', hint: '항해 식량 세 몫을 챙긴다. 배에는 여섯 몫까지 실린다', fx: [supplyLog('천으로 거른 빗물과 삶은 조개를 나눠 실었다. 마지막 통의 마개를 단단히 닫았다.'), { op: 'resumeVoyage', stores: 3 }] },
+    { label: '교대로 바위 그늘에서 눈을 붙인다', hint: '체력을 회복하고 물 한 통을 채운다', fx: [supplyLog('먼저 쉰 이가 노를 잡았다. 바위 아래 두었던 물통을 배 안으로 당겼다.'), { op: 'hp', add: 8 }, { op: 'resumeVoyage', stores: 1 }] },
+    { label: '밀물을 따라 항해를 계속한다', hint: '닻을 내리지 않고 목적지를 향한다', fx: [supplyLog('부표 없는 바위섬이 뒤로 멀어졌다. 밀물이 차오른 자리를 배가 빠져나갔다.'), { op: 'resumeVoyage', stores: 0 }] },
+  ],
+}];

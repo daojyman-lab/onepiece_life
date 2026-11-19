@@ -31,8 +31,9 @@ import { DREAM_TURNINGS } from './dreams';
 import { KIN_TURNINGS } from './kin';
 import { EPISODE_TURNINGS } from '../episodes';
 import { TRAINING } from './training';
+import { TRAINING_STORIES } from './training-islands';
 import { ROUTE_STORIES } from './route-stories';
-import { PORT_STORIES, RESUPPLY } from './ports';
+import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
 import { CHILDHOOD_CRISES, CHILDHOOD_MEMORIES } from './childhood-crises';
 import { RIVAL_WORK_LETTERS } from '../rival-letters';
 import { RIVAL_ERRANDS } from './rival-errand';
@@ -73,9 +74,9 @@ const GROUPS: Turning[][] = [
   KIN_TURNINGS,
   EPISODE_TURNINGS,
   TRAINING,
-  ROUTE_STORIES,
+  ROUTE_STORIES, TRAINING_STORIES,
   PORT_STORIES,
-  [RESUPPLY],
+  RESUPPLY_STORIES,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

@@ -86,6 +86,7 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'trainingTrip'; line: string } | { op: 'trainingReturn' }
   | { op: 'base'; key: StatKey | 'all'; add: number }
   | { op: 'hp'; add: number }
   | { op: 'money'; add: number }
@@ -214,4 +215,4 @@ export interface Life5 {
   sail?: boolean;
   passage?: { destination: string; route: 'calm' | 'dream' | 'wild' | 'transfer' | 'drift' };
 }
-export type Command5 = { type: 'step' } | { type: 'answer'; index: number };
+export type Command5 = { type: 'trainingTrip'; line: string } | { type: 'step' } | { type: 'answer'; index: number };

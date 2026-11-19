@@ -8,8 +8,10 @@ import { DEFERRED_ROUTE } from '../data/turnings/route-stories';
 import { DREAMS } from '../data/dreams';
 import { DREAM_ISLANDS, ROUTE, dangerOf, offshoreDays } from '../data/voyage';
 import { logLine } from './log';
-import { connectedPorts, contentClass, destinationAt, portOf, seaOfPort } from '../data/navigation';
+import { availableTrainingLines, connectedPorts, contentClass, destinationAt, portOf, seaOfPort } from '../data/navigation';
 import type { DreamId, Door, Fx, Life5, SeaId, Turning } from './types';
+
+import { AMAZON_ROADS, TRAINING_LINES, trainingLanding } from '../data/training-routes';
 
 export type Route = 'calm' | 'dream' | 'wild';
 export const VOYAGE_PREFIX = 'voyage:';
@@ -21,7 +23,7 @@ type Choices = { calm?: string; dream?: string; wild?: string; coastal?: string 
 export function voyageChoices(s: Life5, r: Rng, departureAge = s.age): Choices | null {
   if (s.passage) return null;
   const ports = connectedPorts(s.hero.island, s.hero.sea, s.flags, departureAge);
-  if (!ports.length) return null;
+  if (!ports.length) return availableTrainingLines(s).length ? {} : null;
   const fresh = (p: string) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh);
   const top = Math.max(...ports.map(dangerOf));
   const wild = top >= 3 ? weighted(r, ports.filter((p) => dangerOf(p) === top), fresh) ?? undefined : undefined;
@@ -38,7 +40,10 @@ export function voyageChoices(s: Life5, r: Rng, departureAge = s.age): Choices |
 /** 후보를 담은 전환점 id: voyage:<나이>:<꿈 id 또는 ->:<잔잔>|<꿈>|<험함> (빈칸이면 그 갈래 없음). 나이가 들어 있어 해마다 다른 장면이다 */
 export function voyageId(s: Life5, c: Choices): string {
   const d = s.dream && c.dream && DREAM_ISLANDS[s.dream.id].includes(c.dream) ? s.dream.id : '-';
-  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}|${c.coastal ?? ''}:${portOf(s.hero.island)}`;
+  const charters = availableTrainingLines(s)
+    .filter(line => line.island === s.hero.island || !s.flags.includes('training:done:' + line.course))
+    .map(line => line.id).join(',');
+  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}|${c.coastal ?? ''}:${portOf(s.hero.island)}:${charters}`;
 }
 
 const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route });
@@ -46,7 +51,7 @@ const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route 
 /** id로 항로 고르기 전환점을 짓는다. 문은 잔잔 · 꿈(또는 소문) · 험함 순서 */
 export function buildVoyage(id: string): Turning | undefined {
   if (!id.startsWith(VOYAGE_PREFIX)) return undefined;
-  const [, dreamId, rest = '', from = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
+  const [, dreamId, rest = '', from = '', charters = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
   const [calm, dream, wild, coastal] = rest.split('|');
   const doors: Door[] = [];
   if (calm) doors.push({ label: josa(`잔잔한 뱃길로 ${calm}에 간다`), hint: '쉬어 가며 숨을 고른다', fx: [sail(calm, 'calm')] });
@@ -65,6 +70,14 @@ export function buildVoyage(id: string): Turning | undefined {
     door.hint += ` · ${contentLabel[contentClass(destination.island)]}`;
     const days = offshoreDays(from, destination.island);
     if (days) door.hint += ` · 예상 ${days}일, 도중 보급 가능`;
+  }
+  for (const id of charters.split(',')) {
+    const line = TRAINING_LINES.find(candidate => candidate.id === id);
+    if (!line || (line.from !== from && line.island !== from)) continue;
+    const back = from === line.island;
+    doors.push({ label: (back ? '귀항 · ' + line.from : '수련 항로 · ' + line.island) + ' · ' + line.vessel,
+      hint: line.days ? `외해 예상 ${line.days}일, 도중 보급 가능` : line.id === 'balloon' ? '관측반의 기구가 오면 함께 이동한다' : '현지 길잡이와 동행한다',
+      fx: [{ op: 'trainingTrip', line: line.id }] });
   }
   doors.push({ label: '이곳에 더 머문다', hint: '준비와 탐색을 이어 간다', fx: [] });
   return {
@@ -108,7 +121,10 @@ export function moveTo(s: Life5, island: string, sea: SeaId): void {
   if (portOf(s.hero.island) !== portOf(island) && s.flags.includes(DEFERRED_ROUTE)) {
     s.flags = s.flags.filter(flag => flag !== DEFERRED_ROUTE);
   }
-  s.hero.island = island;
+  s.hero.island = island === '아마존 릴리' && s.hero.gender === 'm' ? AMAZON_ROADS : island;
+  if (s.hero.island === AMAZON_ROADS) logLine(s, '쿠자 경비선이 여인섬의 상륙 금지선을 가리켰다. 배는 섬 밖의 정박지에 머문다.', 'light');
+  const field = trainingLanding(island, s.flags);
+  if (field && !s.queue.includes(field)) s.queue.unshift(field);
   s.hero.sea = sea;
 }
 
@@ -121,7 +137,7 @@ function arrive(s: Life5, island: string, route: PassageRoute): void {
     logLine(s, josa(`명령에 따라 ${island} 근해에 도착해 본부에 보고했다.`), 'light');
     return;
   }
-  logLine(s, josa(first ? `${island}에 처음 닻을 내렸다.` : `다시 ${island}(으)로 뱃머리를 돌렸다.`), 'light');
+  logLine(s, josa(first ? `${h.island}에 처음 닻을 내렸다.` : `다시 ${h.island}(으)로 뱃머리를 돌렸다.`), 'light');
   if (route === 'drift') return;
   if (route === 'calm') h.hp = Math.min(V.hp.max, h.hp + ROUTE.calm.hp);
   else if (route === 'dream') h.base.wil += ROUTE.dream.wil;

@@ -1,3 +1,4 @@
+import { AMAZON_ROADS } from '../data/training-routes';
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
 import { V } from '../data/balance';
 import { seaOfPort } from '../data/navigation';
@@ -63,6 +64,7 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  if (life.hero.gender === 'm' && life.hero.island === '아마존 릴리' && !life.pending && !life.passage) life.hero.island = AMAZON_ROADS;
   if ((life.hero.island === UNNAMED_ISLET) !== !!life.passage) return null;
   if (life.passage && (!seaOfPort(life.passage.destination) ||
     !['calm', 'dream', 'wild', 'drift', 'transfer'].includes(life.passage.route))) return null;

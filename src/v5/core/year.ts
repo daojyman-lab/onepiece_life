@@ -10,7 +10,7 @@ import { VALUE_IDS } from '../data/values';
 import { MINOR_FIGHT_STANDINGS } from '../data/foes';
 import { connectedPorts, destinationAt, portOf } from '../data/navigation';
 import { ROUTE_ARRIVALS } from '../data/turnings/route-stories';
-import { RESUPPLY } from '../data/turnings/ports';
+import { RESUPPLY_STORIES } from '../data/turnings/ports';
 import { TURNING_BY_ID } from '../data/turnings';
 import { TRAINING } from '../data/turnings/training';
 import { INCIDENTS_BY_TOWN } from '../data/childhood-incidents';
@@ -54,7 +54,11 @@ function firstLap(s: Life5): boolean {
 export function stepPart(s: Life5): void {
   if (s.pending) return;
   if (!s.hero.alive) { endIfDead(s); return; }
-  if (s.passage && openTurning(s, RESUPPLY)) return;
+  if (s.passage) {
+    const [spring, rain] = RESUPPLY_STORIES;
+    const scene = (s.seenCount[spring.id] ?? 0) > (s.seenCount[rain.id] ?? 0) ? rain : spring;
+    if (openTurning(s, scene)) return;
+  }
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
   if (openChildhoodStory(s)) return;
 

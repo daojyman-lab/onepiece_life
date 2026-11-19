@@ -25,6 +25,7 @@ export const DREAM_ISLANDS: Record<DreamId, readonly string[]> = {
 export const dangerOf = (island: string): 1 | 2 | 3 => ISLAND_DANGER[island] ?? 2;
 
 // 보급 가능한 외해 구간의 게임상 예상 일수. 해저·상승 해류·리버스 마운틴 통과 중에는 상륙하지 않는다.
+import { trainingDays } from './training-routes';
 const OFFSHORE_DAYS: Record<string, Record<string, number>> = {
   '서쪽 등대섬': { '일리시아 왕국': 7 }, '북쪽 상업 도시': { '루브니르 왕국': 7 },
   '남쪽 산호초 항구': { '소르베 왕국': 7 }, '코노미 제도': { '로그타운': 7 },
@@ -34,7 +35,7 @@ const OFFSHORE_DAYS: Record<string, Record<string, number>> = {
   '조우': { '홀케이크 아일랜드': 8, '와노쿠니': 9 }, '홀케이크 아일랜드': { '와노쿠니': 8, '조우': 8 },
   '와노쿠니': { '에그헤드': 7, '엘바프': 10 }, '에그헤드': { '엘바프': 7 },
 };
-export const offshoreDays = (from: string, to: string) => OFFSHORE_DAYS[from]?.[to];
+export const offshoreDays = (from: string, to: string) => OFFSHORE_DAYS[from]?.[to] ?? trainingDays(from, to);
 
 /** 고른 뱃길의 효과 */
 export const ROUTE = {
