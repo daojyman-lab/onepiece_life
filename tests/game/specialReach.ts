@@ -113,6 +113,17 @@ function distancesTo(islands: string[]): Map<string, number> {
   return distance;
 }
 
+// 짧은 모집 기한 안에 큰 명성이 필요한 문은 실제 명성 보상과 초대가 함께 있는 앞 장면을 노린다.
+function invitationTo(id: string) {
+  const fame = TURNING_BY_ID[id].when.find(c => c.c === 'fame');
+  if (!fame || !TURNING_BY_ID[id].when.some(c => c.c === 'history' && !c.has)) return;
+  for (const scene of TURNINGS) for (const door of scene.doors) {
+    if (nextsOf(door.fx).includes(id) && door.fx.some(e => e.op === 'fame' && e.add >= fame.min)) {
+      return { conditions: [...scene.when, ...(door.when ?? [])] };
+    }
+  }
+}
+
 /** 이 인생에서 노리는 문이 열리고, 실제로 그 선택을 기록할 수 있는지 확인한다. */
 export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chasePath = true, takeLifeCourse: boolean | ((s: Readonly<Life5>) => void) = false): boolean {
   const inspect = typeof takeLifeCourse === 'function' ? takeLifeCourse : undefined;
@@ -126,8 +137,9 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
   const unavailableIslands = t.when.flatMap(c => c.c === 'island' && c.not ? c.is : []);
   // 노리는 문의 표시 + 노리는 장면으로 곧장 이어지는 문이 요구하는 표시 (그 갈래로 들어가려면 필요하다)
   const into = TURNINGS.flatMap((x) => x.doors.filter((d) => nextsOf(d.fx).includes(target.turning)));
+  const invitation = invitationTo(t.id);
   const { need, avoid } = flagPlan(
-    [...(door.when ?? []), ...(chasePath ? into.flatMap((d) => d.when ?? []) : [])].flatMap((c) => c.c === 'flag' && c.has ? [c.id] : []),
+    [...(door.when ?? []), ...(invitation?.conditions ?? []), ...(chasePath ? into.flatMap((d) => d.when ?? []) : [])].flatMap((c) => c.c === 'flag' && c.has ? [c.id] : []),
     (door.when ?? []).flatMap((c) => c.c === 'flag' && !c.has ? [c.id] : []),
   );
   const stand = t.when.flatMap((c) => (c.c === 'standing' ? c.is : [])) as Standing[];
@@ -248,6 +260,8 @@ export function reach(target: SpecialDoor, tries: number, seed0?: number): numbe
   // 알라바스타로 가는 소개장은 로그타운에서 태어나 페니와 약속한 뒤 열여섯 살에 받을 수 있다.
   const takeLifeCourse = target.turning.startsWith('ep_alabasta_');
   const isles = takeLifeCourse ? ['로그타운'] : islesOf(target);
+  const seas = invitationTo(target.turning)?.conditions.flatMap(c => c.c === 'sea' ? c.is : []) ?? [];
+  const invitationHomes = (Object.keys(HOMES) as HomeId[]).filter(h => seas.includes(HOMES[h].sea));
   const native = HOMETOWNS.filter(town => isles.includes(town.name));
   const distances = distancesTo(isles);
   const nearest = Math.min(...Object.values(HOMES).map(home => distances.get(home.island) ?? Infinity));
@@ -257,6 +271,7 @@ export function reach(target: SpecialDoor, tries: number, seed0?: number): numbe
     storyDepartures.includes(h) || (Number.isFinite(nearest) ? distances.get(HOMES[h].island) === nearest : SEA_BY_ID[HOMES[h].sea].ports.some(p => isles.includes(p))));
   for (let seed = first; k < tries && seed < first + tries * 40; seed++) {
     let home = SITE_HOMES[seed % SITE_HOMES.length];
+    if (invitationHomes.length) home = invitationHomes[seed % invitationHomes.length];
     if (isles.length && homes.length) {
       home = homes[seed % homes.length];
       const born = newLife5(seed, { home }).hero.island;
