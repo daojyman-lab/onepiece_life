@@ -7,6 +7,8 @@ export const V = {
   grade: { fruit: 0.5, haki: 0.25 },
   vow: { powerFloors: [0, 500, 770, 1500] }, // B, A, S
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
+  // 나룻배(core/voyage.ts leave): 배도 없고 바다를 다니는 처지도 아닌 사람이 어느 포구에서나 사서 섬을 떠난다. 폭풍에는 이만큼 더 다친다
+  skiff: { price: 5000, stormHurt: 1.5 },
   // 항해 중(core/passage.ts): 지식(int)이 이만큼이면 항해 실력이 1 오른다 (항해사 동료는 2)
   passage: { navInt: 8 },
   // 원작의 때: 모든 주인공은 루피와 같은 세대다. 열일곱 살이 원작이 시작하는 해원력 1522년이다 (world-history.ts).

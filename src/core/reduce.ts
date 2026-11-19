@@ -6,6 +6,7 @@ import { ackBattle, answerFight } from './fight';
 import { bountyAmount, reportBountyChange } from './first-poster';
 import { answerDoor } from './turning';
 import { stepPart } from './year';
+import { openLeave } from './voyage';
 import { equipWeapon, selectStyle } from './styles';
 import type { Command5, Life5 } from './types';
 
@@ -31,6 +32,7 @@ export function apply5(s: Life5, cmd: Command5): void {
     case 'traits': selectTraits(s, cmd.ids); break;
     case 'step': if (s.pending === null) stepPart(s); break;
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
+    case 'leave': if (s.pending === null) openLeave(s); break;
     case 'answer': answer(s, cmd.index); break;
   }
   reportBountyChange(s, previousBounty, previousStanding);

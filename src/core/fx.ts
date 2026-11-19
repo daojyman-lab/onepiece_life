@@ -11,7 +11,7 @@ import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
 import { resumeVoyage } from './passage';
 import { markPersonDead, parentFound, parentMissing, separateSpouse, welcomeSibling } from './family';
 import { resolveSiblingReunion, siblingReunionWords } from './siblings';
-import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
+import { awardEntryPass, requestArrival, resolveEntry, sailTo, boardSkiff } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
 import { enterPrime } from './stages';
@@ -201,6 +201,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
     case 'welcomeSibling': welcomeSibling(s, e.action); return;
     case 'siblingReunion': resolveSiblingReunion(s, e.action); return;
     case 'sail': sailTo(s, e.island, e.route); return;
+    case 'skiff': boardSkiff(s, e); return;
     case 'entry': resolveEntry(s, e); return;
     case 'entryPass': awardEntryPass(s, e.gate); return;
     case 'deepWater': deepWater(s); return;
