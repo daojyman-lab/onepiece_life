@@ -34,6 +34,7 @@ import { applyEnvironmentPart, growthMultiplier, localFightChance } from './envi
 import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
 import { climatePart } from './climate';
+import { deliverEdition } from './world-news';
 import { agingYear, inPrime, potentialMult, primeYear } from './stages';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
 import { hasLocalStyleLesson, isMartialBranch, practiceStyles, primaryStyle, styleName, styleUsable } from './styles';
@@ -59,6 +60,7 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.pending) return;
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
+  deliverEdition(s);
   if (openLogIslandDay(s)) return;
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)

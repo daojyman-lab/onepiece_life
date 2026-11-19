@@ -21,6 +21,7 @@ import { GRAND_LINE_TALES } from './grand-line-tales';
 import { LIFE_AT_SEA } from './life-at-sea';
 import { LOG_ISLAND_TURNINGS } from './log-island';
 import { SHIP_TURNINGS } from './ship-memory';
+import { CROSS_GUILD_NOTICE } from './cross-guild';
 import { SEA_LEAVE, SEA_RETURN } from './sea';
 import { SEA_GRAND_LINE, SEA_NEW_WORLD } from './sea-2';
 import { LATE } from './late';
@@ -84,6 +85,7 @@ const GROUPS: Turning[][] = [
   LIFE_AT_SEA,
   LOG_ISLAND_TURNINGS,
   SHIP_TURNINGS,
+  [CROSS_GUILD_NOTICE],
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

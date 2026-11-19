@@ -11,11 +11,12 @@ import type { Life5, Standing } from '../../core/types';
 import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
 import { VOWS } from '../../data/vows';
 import { Face, Gauge, Panel } from '../common';
+import { NewsStrip } from '../modals/NewsArchive';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, storyYearLabel, timelineView, yearLabel } from '../view';
 
 const SPEEDS = [0, 1, 2, 4, 8] as const;
-/** 인물 칸 머리 글 (v4 포스터와 같다): 해적 · 칠무해는 WANTED, 해군은 MARINE, 그 밖은 PROFILE */
-const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: 'WANTED', marine: 'MARINE' };
+/** 인물 칸에 현재 신분을 표시한다. 칠무해가 되기 전의 수배서는 신문철에서 볼 수 있다. */
+const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: '칠무해 공인장', marine: 'MARINE' };
 
 function PersonalityMap({ s }: { s: Life5 }) {
   const current = personalityOf(s)?.value;
@@ -108,6 +109,7 @@ function MobileMain({ s }: { s: Life5 }) {
         <SpeedButtons />
         <button class="btn small" onClick={() => actions.open('menu')} aria-label="메뉴">☰</button>
       </header>
+      <NewsStrip s={s} shownId={st.shownId} />
       <div class={`m5-body ${tab === 'story' ? 'fill' : ''}`}>
         {tab === 'story' && <><Scene s={s} ready={caughtUp(s, st.shownId)} /><StoryPanel s={s} /></>}
         {tab === 'hero' && <Profile s={s} />}
@@ -134,6 +136,7 @@ export function Main() {
   return (
     <div class="app desk">
       <TopBar s={s} />
+      <NewsStrip s={s} shownId={st.shownId} />
       <div class="cols">
         <div class="col left"><Profile s={s} /></div>
         <div class="col mid">

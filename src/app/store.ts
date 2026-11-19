@@ -8,7 +8,7 @@ import type { Command5, Life5 } from '../core/types';
 import { caughtUp, lastLogId, nextHidden, nextTick, shouldSave, windowDelay, windowReady } from './flow';
 import { save, type Settings } from './save';
 
-export type ManageModal = null | 'codex' | 'menu';
+export type ManageModal = null | 'codex' | 'menu' | 'news';
 
 export interface AppState {
   screen: 'start' | 'main';

@@ -6,7 +6,7 @@
 import { V } from '../balance';
 import { HOMETOWNS } from '../../shared/data/births';
 import { kid, POOR, RICH } from './childhood';
-import { age, home, st } from './paths';
+import { afterHistory, beforeHistory, age, home, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -199,7 +199,7 @@ export const WATER7: Turning[] = [
   },
   {
     // 원작: 루피가 바다에 나오고 한 해쯤 뒤, 가면을 쓴 자들이 시장의 저택을 습격한다(CP9). 같은 밤 아쿠아 라구나가 온다
-    id: 'w7_cn_masks', kind: 'door', when: adult(17, 20, st('civil', 'shipwright', 'child', 'settled')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'w7_cn_masks', kind: 'door', when: adult(17, 20, st('civil', 'shipwright', 'child', 'settled'), afterHistory('skyBell'), beforeHistory('eniesLobby')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '가면의 밤', body: '시장의 저택에서 총소리가 났다. 가면을 쓴 자들이 지붕 위를 달린다. 그 걸음걸이가, 비둘기를 어깨에 얹고 다니던 조선소의 말 없는 목수와 똑같다.',
     doors: [
       { label: '저택으로 달려가 시장을 끌어낸다', hint: '불길 속이다. 가면들과 마주칠지 모른다', values: { loyalty: D }, danger: true,
@@ -212,7 +212,7 @@ export const WATER7: Turning[] = [
   },
   {
     // 원작: 사법의 섬 사건 뒤, 프랑키가 아담 나무로 밀짚모자의 배를 짓는다
-    id: 'w7_cn_adam_tree', kind: 'door', when: adult(18, 22, st('civil', 'shipwright', 'settled')), weight: 8, repeat: 'once', speaker: { canon: 'franky' },
+    id: 'w7_cn_adam_tree', kind: 'door', when: adult(18, 22, st('civil', 'shipwright', 'settled'), afterHistory('eniesLobby'), beforeHistory('sabaodyIncident')), weight: 8, repeat: 'once', speaker: { canon: 'franky' },
     title: '아담 나무의 배', body: '뒷골목의 해체업자 두목이 귀한 나무로 배를 짓는다. 사자 머리를 단 배다. 두목은 콜라를 들이켜며, 손이 하나 모자란다고 한다.',
     doors: [
       { label: '망치를 들고 사흘 밤을 함께 새운다', hint: '전설의 배에 못 하나를 박는다', values: { romance: D },
@@ -254,7 +254,7 @@ export const WATER7: Turning[] = [
     ],
   },
   {
-    id: 'w7_enies_guard', kind: 'door', when: adult(17, 30, st('child', 'civil'), crossing), weight: 4, repeat: 'once', speaker: { relation: '사법의 섬에서 온 관리' },
+    id: 'w7_enies_guard', kind: 'door', when: adult(17, 30, st('child', 'civil'), crossing, beforeHistory('eniesLobby')), weight: 4, repeat: 'once', speaker: { relation: '사법의 섬에서 온 관리' },
     title: '사법의 섬의 경비병', body: '바다 열차로 이어진 사법의 섬이 경비병을 모은다. 밤이 오지 않는 섬, 죄인이 한번 들어가면 나오지 못하는 문을 지키는 일이다.',
     doors: [
       { label: '경비병이 되어 사법의 섬으로 간다', hint: '해군의 군복을 입는다', values: { justice: D },

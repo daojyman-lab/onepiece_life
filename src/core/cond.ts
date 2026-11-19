@@ -1,5 +1,6 @@
 // 조건 판정과 잠긴 이유. 조건은 값이다.
 import { hasTrait } from './traits';
+import { hasWorldEvent } from '../data/world-history';
 import { watchMealReady } from './watch-meal';
 import { josa } from '../shared/core/josa';
 import { lifePreparation } from './life-story';
@@ -28,6 +29,7 @@ const strengthName = (id: string) => STRENGTHS.find((x) => x.id === id)?.name ??
 export function check(s: Life5, c: Cond): boolean {
   const h = s.hero;
   switch (c.c) {
+    case 'history': return hasWorldEvent(s, c.id) === c.has;
     case 'shipMemory': return shipReady(s, c.stage);
     case 'anyOf': return c.conditions.some(option => check(s, option));
     case 'watchMeal': return watchMealReady(s, c.stage);
@@ -96,6 +98,7 @@ export function checkAll(s: Life5, cs?: Cond[]): boolean {
 /** 어긋난 조건 하나가 왜 막는지 한 줄 */
 function reason(s: Life5, c: Cond): string {
   switch (c.c) {
+    case 'history': return c.has ? '아직 그 사건이 일어나지 않았다' : '그 일은 이미 지나갔다';
     case 'shipMemory': return '이 배와 함께 겪은 일이 아직 맞지 않는다';
     case 'anyOf': return '이 선택으로 이어지는 경험이 아직 없다';
     case 'watchMeal': return '이 배에서 함께 당직을 선 이력이 맞지 않는다';

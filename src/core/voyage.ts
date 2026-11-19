@@ -134,6 +134,7 @@ export function hasEntryContact(s: Life5, gate: 'fishman' | 'zou'): boolean {
 
 function arrive(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void {
   const h = s.hero;
+  const moved = island !== h.island || sea !== h.sea;
   const first = !s.flags.includes(`at:${island}`);
   const priorGate = gateOf(h.island);
   const gate = gateOf(island);
@@ -150,8 +151,13 @@ function arrive(s: Life5, island: string, sea: SeaId, route: ArrivalRoute): void
   if (gate && priorGate !== gate && immune) {
     logLine(s, isNative(s, island) ? '고향 사람만 아는 길을 따라 조용히 돌아왔다.' : '지난 항해에서 받은 증표를 내밀자 익숙한 길이 열렸다.', 'light');
   }
-  const approach = climateOf(island)?.approach;
-  if (gate && priorGate !== gate && !immune && approach?.arrive) logLine(s, approach.arrive, 'light');
+  const approach = climateOf(island, s)?.approach;
+  if (moved && (!gate || (priorGate !== gate && !immune)) && approach?.arrive) {
+    logLine(s, approach.arrive, 'light');
+    if (!gate && route !== 'story' && route !== 'home' && approach.hp && h.town !== island) {
+      h.hp = Math.max(1, Math.min(V.hp.max, h.hp + approach.hp));
+    }
+  }
   if (gate === 'sky' && priorGate !== 'sky' && h.skyAcclimating) {
     logLine(s, '희박한 공기에 숨이 찼다. 몸이 적응할 때까지 힘과 회복이 떨어진다.', 'light', 'life');
   }

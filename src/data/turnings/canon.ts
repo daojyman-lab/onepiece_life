@@ -6,7 +6,7 @@
 // 마을에서 오는 순간(유년기)은 town · island 조건을, 원작이 시작된 뒤의 순간은 sea 조건을 쓴다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { age, at, sea, st } from './paths';
+import { beforeHistory, age, at, sea, st } from './paths';
 import type { Cond, Door, Turning, Values } from '../../core/types';
 
 const D = V.value.door;
@@ -27,7 +27,7 @@ const BEFORE: Turning[] = [
   // ---------------------------------------------------------------- 원작이 시작되기 전 (유년기)
   {
     // v4 cc_ace_thugs. 에이스는 주인공보다 세 살 위, 주인공이 열네 살 때 바다로 떠난다
-    id: 'cn_ace_thugs', kind: 'door', when: at(age(10, 14), KID, not('left_home_young'), { c: 'town', is: ['후샤 마을', '고아 왕국 그레이 터미널'] }, { c: 'island', is: ['후샤 마을', '고아 왕국 그레이 터미널'] }),
+    id: 'cn_ace_thugs', kind: 'door', when: at(age(10, 14), KID, not('left_home_young'), { c: 'town', is: ['후샤 마을', '고아 왕국 그레이 터미널'] }, { c: 'island', is: ['후샤 마을', '고아 왕국 그레이 터미널'] }, beforeHistory('marineford')),
     weight: 8, repeat: 'once', speaker: { canon: 'ace' },
     title: '쇠파이프의 소년', body: '그레이 터미널 어귀에서 어른 불량배 다섯이 주근깨 소년 하나를 둘러쌌다. 소년은 쇠파이프를 고쳐 쥐고 한 발도 물러서지 않는다. 눈이 마주치자 소년이 소리친다. 구경할 거면 꺼지라고.',
     doors: [
@@ -77,7 +77,7 @@ const EAST_ARC: Turning[] = [
   // ---------------------------------------------------------------- 원작이 시작된 무렵의 이스트 블루 (열여섯 ~ 열아홉)
   {
     // v4 cc_luffy_meat. 처형대 이전의 만남 (path_follow_luffy와 겹치지 않게)
-    id: 'cn_luffy_meat', kind: 'door', when: at(age(16, 17), EAST_AROUND, sea('east'), not('sawLuffy')),
+    id: 'cn_luffy_meat', kind: 'door', when: at(age(16, 17), EAST_AROUND, sea('east'), not('sawLuffy'), beforeHistory('strawHatPoster')),
     weight: 7, repeat: 'once', speaker: { canon: 'luffy' },
     title: '고기를 노리는 소년', body: '{island}의 노점에서 고기 한 덩이를 사 들었더니, 밀짚모자를 쓴 소년이 침을 흘리며 따라온다. 작은 배 하나로 해적왕이 되러 간다고, 함께 갈 사람을 찾는 중이라고 웃는다.',
     doors: [
@@ -91,7 +91,7 @@ const EAST_ARC: Turning[] = [
     ],
   },
   {
-    id: 'cn_coby_alvida', kind: 'door', when: at(age(16, 17), EAST_AROUND, sea('east')),
+    id: 'cn_coby_alvida', kind: 'door', when: at(age(16, 17), EAST_AROUND, sea('east'), beforeHistory('strawHatPoster')),
     weight: 6, repeat: 'once', speaker: { canon: 'coby' },
     title: '해적선의 잡일꾼', body: '{island} 앞바다에 알비다 해적단의 배가 닻을 내렸다. 갑판을 닦는 분홍 머리 소년이 몰래 {name}의 소매를 잡는다. 두 해째 붙잡혀 잡일을 하는데, 사실은 해군이 되고 싶다고 떨리는 목소리로 말한다.',
     doors: [
@@ -105,7 +105,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // 셸스 타운. 조로가 모건의 기지 마당에 묶여 있다. 그 마을에 사는 사람만
-    id: 'cn_zoro_stake', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), ...town('셸스 타운')),
+    id: 'cn_zoro_stake', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), ...town('셸스 타운'), beforeHistory('strawHatPoster')),
     weight: 8, repeat: 'once', speaker: { canon: 'zoro' },
     title: '기지 마당의 사내', body: '모건 대령의 기지 마당에 초록 머리 사내가 기둥에 묶여 있다. 대령 집 도련님이 풀어놓은 늑대에게서 마을 아이를 지켜 준 죄라고 한다. 한 달 굶으면 풀어 준다는데, 벌써 아흐레째다.',
     doors: [
@@ -120,7 +120,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // 오렌지 마을. 버기가 마을을 차지했다. 그 마을에 사는 사람만
-    id: 'cn_buggy_orange', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), sea('east'), ...town('오렌지 마을')),
+    id: 'cn_buggy_orange', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), sea('east'), ...town('오렌지 마을'), beforeHistory('strawHatPoster')),
     weight: 7, repeat: 'once', speaker: { canon: 'buggy' },
     title: '광대 해적단의 대포', body: '오렌지 마을 광장에 서커스 북이 울렸다. 외발자전거가 천막을 한 바퀴 돌고, 버기의 흰 장갑 한 짝이 손목에서 떨어져 나와 관객에게 박수를 재촉했다. 도망간 사람들 대신 사자만 앞발을 쳤다. 버기가 심지에 불을 붙이자 집 한 채가 통째로 날아갔다. 부들 촌장이 창을 들고 빈 객석을 가로질렀다.',
     doors: [
@@ -135,7 +135,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // 시럽 마을. 집사 클라하도르의 정체가 드러나는 밤. 그 마을에 사는 사람만
-    id: 'cn_kuro_slope', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), sea('east'), ...town('시럽 마을')),
+    id: 'cn_kuro_slope', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), sea('east'), ...town('시럽 마을'), beforeHistory('strawHatPoster')),
     weight: 8, repeat: 'once', speaker: { canon: 'usopp' },
     title: '해적이 온다는 마지막 거짓말', body: '우솝이 또 해적이 쳐들어온다고 외치며 마을을 달린다. 이번에는 얼굴이 하얗다. 저택의 집사가 해적이었다고, 내일 새벽 북쪽 해안으로 해적들이 올라온다고. 마을 사람들은 빗자루를 들고 그를 쫓는다.',
     doors: [
@@ -149,7 +149,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // 해상 레스토랑 발라티에에 굶주린 크리크 함대가 온다
-    id: 'cn_baratie_krieg', kind: 'door', when: at(age(16, 19), EAST_AROUND, sea('east')),
+    id: 'cn_baratie_krieg', kind: 'door', when: at(age(16, 19), EAST_AROUND, sea('east'), beforeHistory('strawHatPoster')),
     weight: 6, repeat: 'once', speaker: { canon: 'sanji' },
     title: '굶주린 함대', body: '발라티에에서 접시를 받던 날, 너덜너덜한 거대 함선이 식당에 닿았다. 굶주린 해적 함대의 제독이 밥을 내놓으라며 총을 겨눈다. 금발의 요리사는 묵묵히 쌀밥을 볶는다. 굶은 사람은 누구든 먹인다고.',
     doors: [
@@ -165,7 +165,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // 코코야시 마을. 밀짚모자가 아론 파크로 간다. 그 마을에 사는 사람만
-    id: 'cn_arlong_park', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), ...town('코코야시 마을')),
+    id: 'cn_arlong_park', kind: 'door', when: at(age(16, 18), st('child', 'civil', 'settled', 'shipwright'), ...town('코코야시 마을'), beforeHistory('strawHatPoster')),
     weight: 8, repeat: 'once', speaker: { canon: 'nami' },
     title: '여덟 해의 끝', body: '나미가 제 어깨의 문신을 칼로 찌르며 울었다. 여덟 해를 모은 돈은 해군에게 빼앗겼다. 밀짚모자를 쓴 소년이 제 모자를 그녀에게 씌워 주고 아론 파크로 걸어간다. 마을 사람들이 무기를 들고 그 뒤를 따른다.',
     doors: [
@@ -181,7 +181,7 @@ const EAST_ARC: Turning[] = [
   },
   {
     // v4 cc_tashigi_swords. 로그타운 무기점
-    id: 'cn_tashigi_swords', kind: 'door', when: at(age(14, 22), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright', 'settled'), on('로그타운')),
+    id: 'cn_tashigi_swords', kind: 'door', when: at(age(14, 22), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright', 'settled'), on('로그타운'), beforeHistory('loguetownStorm')),
     weight: 6, repeat: 'once', needs: ['sword'], speaker: { canon: 'tashigi' },
     title: '명검을 쫓는 여검사', body: '잇폰마츠의 무기점에서 안경 쓴 해군 여검사가 진열장 구석의 낡은 칼을 유심히 본다. 이름난 칼이 해적 손에 들어가는 꼴은 못 본다며, 그 칼이 사실은 명검이라고 귓속말을 한다.',
     doors: [

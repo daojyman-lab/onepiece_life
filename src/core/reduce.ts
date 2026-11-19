@@ -3,7 +3,7 @@ import { selectTraits } from './traits';
 import { V } from '../data/balance';
 import { VALUE_IDS } from '../data/values';
 import { ackBattle, answerFight } from './fight';
-import { bountyAmount, recordFirstPoster } from './first-poster';
+import { bountyAmount, reportBountyChange } from './first-poster';
 import { answerDoor } from './turning';
 import { stepPart } from './year';
 import { equipWeapon, selectStyle } from './styles';
@@ -14,15 +14,17 @@ import type { Command5, Life5 } from './types';
  * 줄은 한 번 넣은 뒤 고치지 않으므로(넣고 앞에서 잘라 낼 뿐) 함께 써도 안전하다. 나머지는 깊이 복사한다.
  */
 export function cloneLife(prev: Life5): Life5 {
-  const s: Life5 = structuredClone<Life5>({ ...prev, log: [], timeline: [] });
+  const s: Life5 = structuredClone<Life5>({ ...prev, log: [], timeline: [], news: [] });
   s.log = prev.log.slice();
   s.timeline = prev.timeline.slice();
+  s.news = prev.news?.slice() ?? [];
   return s;
 }
 
 /** 명령을 받은 상태에 그대로 적용한다 (복사하지 않는다) */
 export function apply5(s: Life5, cmd: Command5): void {
   const previousBounty = bountyAmount(s.hero);
+  const previousStanding = s.hero.standing;
   switch (cmd.type) {
     case 'style': if (s.hero.alive && !s.pending) selectStyle(s, cmd.style); break;
     case 'equipWeapon': if (s.hero.alive && !s.pending) equipWeapon(s, cmd.id); break;
@@ -31,7 +33,7 @@ export function apply5(s: Life5, cmd: Command5): void {
     case 'rest': if (s.pending === null) stepPart(s, 'rest'); break;
     case 'answer': answer(s, cmd.index); break;
   }
-  recordFirstPoster(s, previousBounty);
+  reportBountyChange(s, previousBounty, previousStanding);
 }
 
 export function reduce5(prev: Life5, cmd: Command5): Life5 {

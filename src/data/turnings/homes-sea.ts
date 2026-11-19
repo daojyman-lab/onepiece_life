@@ -9,7 +9,7 @@
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
 import { HOMETOWNS } from '../../shared/data/births';
-import { age, home, sea, st } from './paths';
+import { beforeHistory, age, home, sea, st } from './paths';
 import type { Cond, HomeId, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -174,7 +174,7 @@ export const HOMES_LEAVE: Turning[] = [
     ],
   },
   {
-    id: 'sky_judgement', kind: 'door', when: atHome('sky', age(16, 50), st('child', 'civil', 'settled'), { c: 'value', id: 'freedom', deep: true }), weight: 2, repeat: 'once', speaker: 'hero',
+    id: 'sky_judgement', kind: 'door', when: atHome('sky', beforeHistory('skyBell'), age(16, 50), st('child', 'civil', 'settled'), { c: 'value', id: 'freedom', deep: true }), weight: 2, repeat: 'once', speaker: 'hero',
     title: '하늘의 심판', body: '신의 이름을 함부로 입에 올린 사람에게 번개가 떨어진다는 소문이 돈다. {name}이(가) 술자리에서 한 말이 신관의 귀에 들어갔다고 한다.',
     doors: [
       { label: '구름 끝으로 달아나 아래로 뛰어내린다', hint: '살지 죽을지 모른다. 심판에서는 벗어난다', values: { freedom: D }, danger: true,
@@ -189,7 +189,7 @@ export const HOMES_LEAVE: Turning[] = [
     title: '코끼리 다리의 밧줄', body: '천 년을 걷는 코끼리의 다리를 타고 바다까지 내려가는 밧줄 길이 있다. 바깥 상선이 오는 날만 내려 준다. 오늘이 그날이다.',
     doors: [
       { label: '밧줄을 타고 내려가 상선에 오른다', hint: '고향의 숲을 떠난다. 코끼리는 계속 걸어간다', values: { romance: D },
-        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '밧줄 끝에서 올려다본 코끼리는 구름보다 컸다. 상선은 장난감의 나라로 갔다.', weight: 'heavy' },
+        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '밧줄 끝에서 올려다본 코끼리는 구름보다 컸다. 상선은 드레스로자의 꽃시장이 선다는 항구로 갔다.', weight: 'heavy' },
              { op: 'timeline', text: '코끼리의 다리를 타고 내려가 바다로 나갔다' }] },
       { label: '상선과 약초를 바꾸고 올라온다', hint: '바깥 물건이 손에 들어온다', values: { ambition: D }, fx: [{ op: 'money', add: 15000 }, { op: 'log', text: "밧줄 길로 내려가 약초 다발을 상선에 건넸다. 받은 물건을 묶어 코끼리 등에 다시 올라왔다.", weight: 'light' }] },
       { label: '숲에 남는다', hint: '바깥은 전사들에게 맡긴다', closes: true, fx: [{ op: 'log', text: "상선이 코끼리 발치에서 닻을 올렸다. 숲의 전사들이 밧줄 길을 걷는 사이 {name}은(는) 나무 사이에 남았다.", weight: 'light' }] },

@@ -9,12 +9,12 @@
 //   원작 그 무렵(스물하나~스물둘) · 녹슨 칼의 밤: 무기 밀수꾼 「쿠치나와 일가」가 불의 축제 밤의 혼란을 틈타 와노의 칼과 대장장이들을 폭포 밖으로 빼돌리려 한다.
 //       오리지널: 토코 항구의 뱃사공 오린(안내) · 대장간 견습 소스케(조사). 적: 물쥐 고로 → 창고지기 사비메 오카네 → 두목 쿠치나와 반조.
 //       원작 인물: 우동에서 풀려난 효고로가 한 일을 보고 판단하고, 키쿠노조가 전야에 들른다. 그 밤 주인공은 해골 섬이 아니라 꽃의 도시 부두에 선다.
-//   원작 뒤(스물셋~) · 금저울의 땅: 개국을 미룬 와노에서 밀수로 들어온 「금저울 상회」가 쿠리 논과 물길을 사들이고 빚으로 공장에 사람을 붙든다.
+//   카이도가 쓰러진 뒤 · 금저울의 땅: 개국을 미룬 와노에서 밀수로 들어온 「금저울 상회」가 쿠리 논과 물길을 사들이고 빚으로 공장에 사람을 붙든다.
 //       오리지널: 쿠리의 젊은 농부 키스케(안내) · 새 부교소 서기 하나에(기록). 적: 헐값 젠타 → 뿔 잘린 가몬 → 회장 바스크.
 //       원작 인물: 히요리가 회합에서 한 일을 보고 판단하고, 야마토가 전야에 마을 어귀를 지킬지 정한다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const WANO = on('와노쿠니', '하나노미야코', '쿠리', '에비스 마을');
 
@@ -300,7 +300,7 @@ export const EP_WANO: Turning[] = [
 
   // ================================================================ 원작 그 무렵 (스물하나~스물둘): 녹슨 칼의 밤
   {
-    id: 'ep_wano_raid_1', kind: 'door', when: at(WANO, age(21, 22), not('ep_wano_raid_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_wano_raid_1', kind: 'door', when: at(WANO, age(21, 22), not('ep_wano_raid_done'), afterHistory('reverie'), beforeHistory('wanoFree')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '상자 틈에서 보인 칼',
     intro: [
       '불의 축제를 앞둔 토코 항구에서는 장사꾼들이 저녁에도 짐을 나른다. 부두를 지나다 상자를 떨어뜨리는 소리에 돌아본다.',
@@ -493,7 +493,7 @@ export const EP_WANO: Turning[] = [
 
   // ================================================================ 원작 뒤 (스물셋~): 금저울의 땅
   {
-    id: 'ep_wano_after_1', kind: 'door', when: at(WANO, age(23, 45), not('ep_wano_done')), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_wano_after_1', kind: 'door', when: at(WANO, age(22, 45), not('ep_wano_done'), afterHistory('wanoFree')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '논을 사겠다는 사람',
     intro: [
       '카이도가 사라지고 모모노스케가 쇼군이 된 뒤, 쿠리 논에 다시 물이 든다. 농부 키스케가 진흙투성이로 모를 내다 고개를 든다.',

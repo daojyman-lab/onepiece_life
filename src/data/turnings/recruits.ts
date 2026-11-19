@@ -6,7 +6,7 @@ import { CANON } from '../canon';
 import { RECRUITS, TEMPS, type RecruitRow, type TempRow } from '../recruits';
 import { ZOU_CARD } from '../voyage';
 import { SQUAD } from './marine';
-import { age, at, sea, st } from './paths';
+import { afterHistory, beforeHistory, age, at, sea, st } from './paths';
 import type { SeaId } from '../../core/types';
 import type { Cond, Door, Turning } from '../../core/types';
 
@@ -27,10 +27,22 @@ const LEVEL: Record<string, number> = {
 const MEDICAL_SKILL: Record<string, number> = { hogback: 90, aladdin: 75 };
 /** 아무나 태울 수 없는 사람: 이름값이 있어야 말을 붙일 수 있고, 쿠잔은 해군을 떠난 뒤(원작 두 해 뒤)에만 만난다 */
 const GATE: Record<string, Cond[]> = {
-  mihawk: [fame(300), { c: 'tier', branch: 'any', min: 4 }], kuzan: [fame(150), { c: 'canonAge', id: 'kuzan', min: 49 }],
-  yamato: [fame(100)], killer: [fame(60)],
-  zoro: [{ c: 'age', min: 16, max: 17 }], vivi: [{ c: 'age', min: 17, max: 19 }], ace: [{ c: 'age', min: 16, max: 19 }],
-  law: [fame(60)], marco: [fame(100)], kid: [fame(100)], sabo: [fame(40)],
+  mihawk: [afterHistory('reverie'), fame(300), { c: 'tier', branch: 'any', min: 4 }],
+  kuzan: [afterHistory('punkDuel'), fame(150), { c: 'canonAge', id: 'kuzan', min: 49 }],
+  hatchan: [afterHistory('strawHatPoster')], kuroobi: [afterHistory('strawHatPoster')],
+  mr5: [afterHistory('alabastaRain')], koza: [afterHistory('alabastaRain')], pell: [afterHistory('alabastaRain')],
+  wiper: [afterHistory('skyBell')], ganfall: [beforeHistory('skyBell')], cricket: [afterHistory('skyBell')],
+  zambai: [afterHistory('eniesLobby')], wadatsumi: [afterHistory('fishmanPact')], hyouzou: [beforeHistory('fishmanPact')],
+  brownbeard: [afterHistory('punkDuel')], pedro: [beforeHistory('wholeCake')], ashura: [beforeHistory('wanoFree')],
+  kawamatsu: [afterHistory('reverie')], kikunojo: [afterHistory('wanoFree')], ulti: [afterHistory('wanoFree')],
+  yamato: [afterHistory('wanoFree'), fame(100)], killer: [fame(60)],
+  zoro: [age(16, 17), beforeHistory('loguetownStorm')],
+  vivi: [age(17), beforeHistory('alabastaRain')], ace: [age(16), beforeHistory('alabastaRain')],
+  law: [afterHistory('fishmanPact'), beforeHistory('dressrosaFree'), fame(60)],
+  smoker: [afterHistory('fishmanPact'), beforeHistory('dressrosaFree')],
+  marco: [afterHistory('reverie'), beforeHistory('wanoFree'), fame(100)],
+  kid: [afterHistory('reverie'), beforeHistory('wanoFree'), fame(100)],
+  sabo: [afterHistory('fishmanPact'), beforeHistory('dressrosaFree'), fame(40)],
 };
 const JOIN_VALUES = ['loyalty', 'romance', 'ambition', 'dominion', 'freedom'] as const;
 

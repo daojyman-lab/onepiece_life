@@ -1,5 +1,6 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
 import type { EntryGate } from '../data/voyage';
+import type { WorldEventId } from '../data/world-history';
 import type { ArrivalRoute } from './voyage';
 import type { CombatStyle, MartialBranch } from '../data/combat-styles';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
@@ -72,6 +73,10 @@ export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 나이·장소 구분선(weight 'year')에만 있다. 그 뒤 기록이 일어난 섬 이름 */
 export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string; moved?: true }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
+export interface NewsIssue {
+  id: string; age: number; part: number; kind: 'big' | 'world' | 'local' | 'bounty';
+  title: string; body: string; logId?: number; amount?: number;
+}
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
 export interface TimelineEntry {
   age: number; text: string; standing?: Standing;
@@ -80,6 +85,7 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'history'; id: WorldEventId; has: boolean }
   | { c: 'shipMemory'; stage: 'unnamed' | 'named' | 'farewell' }
   | { c: 'anyOf'; conditions: Cond[] }
   | { c: 'watchMeal'; stage: 'first' | 'shelf' | 'nextWatch' | 'custom' }
@@ -194,6 +200,7 @@ export type Fx =
 export interface FightNext { win?: string; lose?: string; back?: string }
 
 export interface Door {
+  news?: Pick<NewsIssue, 'title' | 'body'>;
   label: string; hint: string;
   when?: Cond[];                               // 출생 · 처지의 벽. 안 맞으면 잠긴다
   special?: ValueId;                           // 이 가치관이 깊어야 열리는 특별한 문
@@ -230,7 +237,7 @@ export interface Minor {
 }
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =
-  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string }
+  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string; openedTick?: number }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
   | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string }; escape?: { roll: number; need: number } }
   | { kind: 'ending'; cause: string }
@@ -296,6 +303,9 @@ export interface Life5 {
   pending: Pending5;
   stats: Stats5;
   firstBountyIssued: boolean;
+  news?: NewsIssue[];
+  pressTick?: number;
+  publishedBounty?: number;
   seq: number;
   ended: { cause: string; age: number } | null;
   /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */

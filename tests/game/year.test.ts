@@ -116,8 +116,9 @@ describe('한 해의 진행', () => {
     s.hero.island = '조';
     yearDivider(s);
     applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '새 섬에서 일했다.', weight: 'light' }]);
-    expect(s.log.slice(-2)).toMatchObject([
+    expect(s.log.slice(-3)).toMatchObject([
       { weight: 'year', age: 48, island: '드레스로자', moved: true },
+      { text: expect.stringContaining('꽃다발을 든 가족') },
       { text: '새 섬에서 일했다.' },
     ]);
   });
@@ -130,7 +131,8 @@ describe('한 해의 진행', () => {
     expect(s.hero.island).toBe('조');
     arrive(s, s.passage!);
     expect(s.log.filter((l) => l.weight === 'year')).toHaveLength(before + 1);
-    expect(s.log.at(-2)).toMatchObject({ weight: 'year', island: '드레스로자', moved: true });
+    expect(s.log.at(-3)).toMatchObject({ weight: 'year', island: '드레스로자', moved: true });
+    expect(s.log.at(-2)?.text).toContain('꽃다발을 든 가족');
     applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }]);
     expect(s.log.filter((l) => l.weight === 'year')).toHaveLength(before + 1);
     applyFx(s, [{ op: 'moveHome' }]);

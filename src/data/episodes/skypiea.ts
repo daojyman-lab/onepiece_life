@@ -3,12 +3,12 @@
 //  - 원작 전 (주인공 12~17): 에넬의 지배 아래 엔젤섬. 다이얼 중개인 도란이 「신의 공물」이라며 다이얼을 걷고, 이름을 신관에게 판다.
 //    안내자 티카(웨이버 배달꾼) · 기록꾼 벨라(다이얼 공방). 간 폴이 지금까지 한 일을 보고 판단한다.
 //    에넬은 통치의 배경으로 남는다. 플레이어는 공물 장부와 운송로를 다루며 직접 대결하지 않는다.
-//  - 원작 그 무렵 (주인공 18): 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
+//  - 황금종이 울리기 전: 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
 //    주인공은 다른 전선에 선다: 피난으로 빈 엔젤섬을 노리는 약탈단 구름늑대단(두목 무라크). 안내자 파로 · 진료소의 미나. 코니스가 판단한다.
-//  - 원작 뒤 (주인공 19~): 샨도라 유적을 노리는 도굴꾼 그라몬을 막는다. 유적을 지킬 방법은 두 마을 주민이 결정한다.
+//  - 황금종이 울린 뒤: 샨도라 유적을 노리는 도굴꾼 그라몬을 막는다. 유적을 지킬 방법은 두 마을 주민이 결정한다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const SKY = on('스카이피아', '엔젤섬', '샨디아 마을');
 /** 표시 이름 */
@@ -59,7 +59,7 @@ export const EP_SKYPIEA: Turning[] = [
   // ================================================================ 원작 전: 번개 아래의 장부 (주인공 12~17)
   // 표시: tika_trust bella_trust b_cold b_force b_route b_ledger b_shandia b_knight b_record b_deal b_sabotage b_evac / before_done (C3의 특별한 문이 본다)
   {
-    id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done'))), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done')), beforeHistory('alabastaRain')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '공물이라고 빼앗긴 물건',
     intro: [
       '엔젤섬 시장에서 처음 보는 조개 장치가 손님을 부른다. 노점상이 다이얼 뚜껑을 열자 안쪽에서 밝은 빛이 난다.',
@@ -294,7 +294,7 @@ export const EP_SKYPIEA: Turning[] = [
   // 루피가 에넬을 쓰러뜨리고 종을 울린다. 주인공은 피난으로 빈 엔젤섬에서 약탈단과 맞선다.
   // 표시: paro_trust mina_trust c_cold c_force c_route c_list c_shandia c_conis c_record c_deal c_sabotage c_evac / canon_done
   {
-    id: 'ep_skypiea_c1', kind: 'door', when: at(SKY, age(18, 18), not(F('canon_done'))), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_c1', kind: 'door', when: at(SKY, age(17, 18), not(F('canon_done')), afterHistory('alabastaRain'), beforeHistory('skyBell')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '노인의 집을 턴 사람들',
     intro: [
       '엔젤섬에선 요 며칠 숲 너머에서 들리는 망치 소리에 창문을 닫고 잔다고 한다. 지금 내가 선 골목에선 다른 소리가 난다. 누군가 문짝을 걷어차는 소리다.',
@@ -499,7 +499,7 @@ export const EP_SKYPIEA: Turning[] = [
   // ================================================================ 원작 뒤: 잊힌 황금의 수호자 (SKY_B_01, 주인공 19~)
   // 표시: karma_trust lumi_trust a_clue a_respect a_force a_cold a_depot a_shandia a_joint a_open a_record a_deal a_sabotage a_evac / after_done
   {
-    id: 'ep_skypiea_a1', kind: 'door', when: at(SKY, age(19, 60), not(F('after_done'))), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_a1', kind: 'door', when: at(SKY, age(18, 60), not(F('after_done')), afterHistory('skyBell')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '유적에서 나오는 상자',
     intro: [
       '에넬이 떠난 하늘섬의 장터에서 이웃끼리 다이얼을 고쳐 준다. 길가에서는 예전처럼 밥 짓는 냄새가 난다.',

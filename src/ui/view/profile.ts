@@ -55,13 +55,15 @@ export interface ProfileView {
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
-  money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
+  money: string; fame: string;                         // 해적은 현상금, 칠무해는 수배 정지와 종전 액수, 그 밖은 이름값
   hp: number; hurts: string[];                         // 부상과 병의 이름
 }
 
 const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
 function fameWord(s: Life5): string {
+  if (s.hero.standing === 'warlord') return s.publishedBounty
+    ? `수배 정지 · 종전 현상금 ${fmtMoney(s.publishedBounty)} 베리` : '수배 정지 · 정부 공인';
   const fame = Math.round(s.hero.fame);
   if (fame <= 0) return '';
   const amount = bountyAmount(s.hero);
@@ -155,12 +157,13 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const foe = ready && p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
   const fighter = ready && p?.kind === 'battle' ? p.battle.units.find(u => u.hero) : null;
   const hero = fighter ? unitWho(s, fighter) : heroWho5(s);
+  const climate = s.passage ? undefined : climateOf(h.island, s);
   return {
     hero,
     crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),
     foe,
     sailing: !!s.passage,
-    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}${climateOf(h.island) ? ` · ${climateOf(h.island)!.name}` : ''}` : sea.name,
+    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : [sea.name, h.island, climate?.name].filter(Boolean).join(' · '),
     islandColor: ISLAND_COLORS[sea.stage - 1] ?? ISLAND_COLORS[0],
     flag: hero.faction ?? 'civil',
     aura: h.fruit ? '#c890ff' : s.growth.tier.armament > 0 ? '#ff7060' : null,

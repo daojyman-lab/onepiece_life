@@ -1,13 +1,13 @@
 // 와노쿠니에서 태어난 인생 (4단계 과제 5). 폭포에 둘러싸인 쇄국의 나라.
 // 원작의 때: 주인공이 태어나기 몇 해 전 광월 오뎅이 처형되었다. 주인공은 쿠로즈미 오로치가 쇼군이고 백수 카이도가 나라를 쥔 시대에 자란다.
 // 주인공이 스물한 살 무렵 시모츠키 야스이에가 처형되고, 그해 불의 축제 밤에 붉은 칼집의 무사들과 밀짚모자가 오니가시마로 쳐들어간다.
-// 그 뒤 카이도가 쓰러지고 나라가 열린다(쇄국이 풀린다).
+// 그 뒤 새 쇼군 모모노스케가 개국을 미루고 나라를 재건한다.
 // 원작 순간은 전환점과 만남(minors-homes.ts) 가운데 하나로만 쓴다. 문의 말에는 가치관 이름도 숫자도 쓰지 않는다.
 // 와노에는 해군이 없다. 바다로 나가는 길은 homes-sea.ts에 있다(열여덟 이후).
 import { V } from '../balance';
 import { HOMETOWNS } from '../../shared/data/births';
 import { kid, POOR, RICH } from './childhood';
-import { age, home, st } from './paths';
+import { afterHistory, beforeHistory, age, home, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -19,8 +19,6 @@ const adult = (min: number, max: number | undefined, ...more: Cond[]): Cond[] =>
 const LANDED = st('civil', 'settled', 'retired', 'shipwright');
 const SAMURAI: Cond = { c: 'lineage', is: ['samurai'] };
 const crossing: Cond = { c: 'standingYears', min: 1 };
-/** 카이도가 쓰러지고 나라가 열린 뒤 (주인공 스물두 살 이후) */
-const OPENED = 22;
 
 export const WANO: Turning[] = [
   // ---------------------------------------------------------------- 어린 시절
@@ -169,7 +167,7 @@ export const WANO: Turning[] = [
   // ---------------------------------------------------------------- 원작 순간
   {
     // 원작: 루피가 와노에 오는 해(주인공 스물한 살 무렵), 에비스 마을의 「돈 뿌리는 노인」 시모츠키 야스이에가 처형된다
-    id: 'wano_cn_yasuie', kind: 'door', when: adult(19, 23, st('civil', 'settled', 'shipwright', 'child', 'pirate')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'wano_cn_yasuie', kind: 'door', when: adult(19, 23, st('civil', 'settled', 'shipwright', 'child', 'pirate'), afterHistory('reverie'), beforeHistory('wanoFree')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '돈 뿌리는 노인의 처형', body: '꽃의 도시 광장에 십자 형틀이 섰다. 매달린 노인은 가난한 마을에 몰래 돈을 뿌리던 사람이다. 웃는 열매를 먹은 마을 사람들이 울지도 못하고 웃는다. 쏘기 전, 노인이 쇼군을 향해 크게 웃는다.',
     doors: [
       { label: '형틀 앞으로 뛰쳐나간다', hint: '총구가 {name}을(를) 향할지 모른다', values: { justice: D }, danger: true,
@@ -180,7 +178,7 @@ export const WANO: Turning[] = [
   },
   {
     // 원작: 같은 해 불의 축제 밤, 붉은 칼집의 무사들과 밀짚모자가 오니가시마로 쳐들어간다
-    id: 'wano_cn_raid', kind: 'door', when: adult(19, 24, st('civil', 'settled', 'shipwright', 'pirate', 'child')), weight: 10, repeat: 'once', speaker: { relation: '달 문양을 품은 낭인' },
+    id: 'wano_cn_raid', kind: 'door', when: adult(19, 24, st('civil', 'settled', 'shipwright', 'pirate', 'child'), afterHistory('reverie'), beforeHistory('wanoFree')), weight: 10, repeat: 'once', speaker: { relation: '달 문양을 품은 낭인' },
     title: '불의 축제의 밤', body: '불의 축제 밤, 달 문양을 품에 숨긴 낭인들이 항구에 모인다. 오늘 밤 카이도의 섬으로 쳐들어간다고 한다. 배는 낡았고 사람은 모자라다.',
     doors: [
       { label: '칼을 들고 배에 오른다', hint: '살아 돌아올지 모른다. 나라가 바뀌는 밤이다', values: { loyalty: D }, danger: true,
@@ -193,19 +191,19 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    // 원작: 카이도가 쓰러진 뒤 쇄국이 풀리고 나라가 열린다
-    id: 'wano_cn_opened', kind: 'door', when: adult(OPENED, 60, LANDED), weight: 8, repeat: 'once', speaker: 'hero',
-    title: '열린 나라', body: '새 쇼군이 나라를 연다고 했다. 공장이 멈추고 검은 강이 맑아지기 시작했다. 폭포 아래로 내려가는 배가 처음으로 떳떳하게 떠난다.',
+    // 카이도가 쓰러진 뒤에도 국경은 닫혀 있다.
+    id: 'wano_cn_opened', kind: 'door', when: adult(22, 60, LANDED, afterHistory('wanoFree')), weight: 8, repeat: 'once', speaker: 'hero',
+    title: '연기 걷힌 강가', body: '무기 공장의 굴뚝에서 연기가 끊겼다. 국경을 여는 일은 미루겠다고 새 쇼군이 알렸다. 마을에서는 논으로 이어지는 도랑을 파고, 폭포 밑에 길을 아는 뱃사공은 오늘 밤 바깥으로 배를 낸다.',
     doors: [
-      { label: '그 배를 타고 바깥 바다를 보러 간다', hint: '열린 나라의 첫 손님이 된다', values: { romance: D },
-        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '폭포 아래의 바다는 넓었다. 나라는 등 뒤에서 작아졌다.', weight: 'heavy' }, { op: 'timeline', text: '나라가 열린 해 바깥 바다로 나갔다' }] },
-      { label: '맑아진 강가에 논을 다시 일군다', hint: '나라 안에서 새로 시작한다', values: { peace: D }, fx: [{ op: "log", text: "강에서 독한 냄새가 빠지자 물을 논으로 끌어들였다. 첫 모가 서는 것을 보고 이웃들이 밭으로 돌아왔다.", weight: "light" }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '나라가 열린 해 맑아진 강가에 논을 일궜다' }] },
-      { label: '바깥 상인들과 거래를 튼다', hint: '쇄국이 풀린 틈에 돈이 돈다', values: { ambition: D }, fx: [{ op: "log", text: "바깥 상인의 배가 항구에 닿았다. 처음 보는 물건을 내려놓고 와노의 물건을 싣는 동안 거래 장부가 채워졌다.", weight: "light" }, { op: 'money', add: 30000 }] },
+      { label: '그 배를 타고 바깥 바다를 보러 간다', hint: '폭포의 물길을 아는 뱃사공과 떠난다', values: { romance: D },
+        fx: [{ op: 'move', island: '드레스로자', sea: 'nw_first' }, { op: 'log', text: '폭포 아래의 바다는 넓었다. 나라는 등 뒤에서 작아졌다.', weight: 'heavy' }, { op: 'timeline', text: '공장의 연기가 걷힌 뒤 폭포를 내려가 바깥 바다로 나갔다' }] },
+      { label: '맑아진 강가에 논을 다시 일군다', hint: '나라 안에서 새로 시작한다', values: { peace: D }, fx: [{ op: "log", text: "강에서 독한 냄새가 빠지자 물을 논으로 끌어들였다. 첫 모가 서는 것을 보고 이웃들이 밭으로 돌아왔다.", weight: "light" }, { op: 'standing', to: 'settled' }, { op: 'timeline', text: '공장이 멈춘 강가에 다시 논을 일궜다' }] },
+      { label: '그을린 공장 벽돌을 날라 품삯을 받는다', hint: '논둑을 쌓을 돌이 모자란다', values: { ambition: D }, fx: [{ op: "log", text: "벽돌을 실은 수레를 논까지 세 번 밀었다. 품삯을 받아 돌아올 때 새 둑에 첫 물이 찼다.", weight: "light" }, { op: 'money', add: 30000 }] },
     ],
   },
   // ---------------------------------------------------------------- 와노만의 문 (처지 · 핏줄)
   {
-    id: 'wano_beasts', kind: 'door', when: adult(16, OPENED - 1, st('child', 'civil'), crossing), weight: 5, repeat: 'once', speaker: { relation: '백수 해적단의 간부' },
+    id: 'wano_beasts', kind: 'door', when: adult(16, 22, st('child', 'civil'), crossing, beforeHistory('wanoFree')), weight: 5, repeat: 'once', speaker: { relation: '백수 해적단의 간부' },
     title: '백수 해적단의 징집', body: '카이도의 해적단이 마을에서 젊은이를 뽑는다. 이상한 열매를 먹으면 짐승의 힘을 얻는다고 한다. 거절한 집은 쌀 배급에서 빠진다.',
     doors: [
       { label: '해적단에 들어가 힘을 얻는다', hint: '무명 검을 지급받고 해적이 된다. 마을 사람들이 눈을 피한다', values: { dominion: D },
@@ -216,7 +214,7 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wano_oniwaban', kind: 'door', when: adult(16, 30, st('child', 'civil'), crossing, { c: 'tier', branch: 'any', min: 2 }), weight: 4, repeat: 'once', speaker: { relation: '쇼군의 닌자 대장' },
+    id: 'wano_oniwaban', kind: 'door', when: adult(16, 30, st('child', 'civil'), crossing, { c: 'tier', branch: 'any', min: 2 }, beforeHistory('wanoFree')), weight: 4, repeat: 'once', speaker: { relation: '쇼군의 닌자 대장' },
     title: '쇼군의 닌자', body: '쇼군의 닌자 대장이 {name}의 날랜 몸놀림을 보았다고 한다. 쇼군을 위해 그림자로 일하면 집안은 굶지 않는다.',
     doors: [
       { label: '닌자가 된다', hint: '쇼군의 눈과 귀가 된다', values: { ambition: D },
@@ -227,7 +225,7 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wano_samurai_oath', kind: 'door', when: adult(18, 40, SAMURAI, LANDED), weight: 6, repeat: 'once', speaker: { relation: '옛 영주를 섬기던 무사' },
+    id: 'wano_samurai_oath', kind: 'door', when: adult(18, 40, SAMURAI, LANDED, beforeHistory('wanoFree')), weight: 6, repeat: 'once', speaker: { relation: '옛 영주를 섬기던 무사' },
     title: '무사의 맹세', body: '옛 영주를 섬기던 무사가 집에 찾아왔다. 스무 해 전의 맹세를 기억하는 집안을 찾아다닌다고 한다. 언젠가 칼을 들 날이 오면 함께하겠느냐고 묻는다.',
     doors: [
       { label: '집안의 칼을 꺼내 맹세한다', when: [{ c: 'weapon', id: 'wano_heirloom', has: true }], hint: '그날이 오면 목숨을 건다', values: { loyalty: D }, mark: 'obsession', fx: [{ op: "log", text: "집안의 칼을 꺼내 무사 앞에서 맹세했다. 칼날을 닦아 감춰 두고 불의 축제가 올 날을 기다렸다.", weight: "light" }, { op: 'flag', id: 'wano_sworn' }, { op: 'person', kind: 'ally', relation: '옛 영주의 무사' }] },
@@ -236,7 +234,7 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wano_udon', kind: 'door', when: adult(16, 50, st('civil', 'settled', 'child')), weight: 4, repeat: 'once', speaker: 'hero',
+    id: 'wano_udon', kind: 'door', when: adult(16, 50, st('civil', 'settled', 'child'), beforeHistory('wanoFree')), weight: 4, repeat: 'once', speaker: 'hero',
     title: '우동의 광산', body: '세금을 못 낸 사람들이 우동의 감옥 광산으로 끌려간다. 오늘은 이웃집 차례다. 관리는 대신 갈 사람이 있으면 받아 주겠다고 한다.',
     doors: [
       { label: '이웃 대신 광산으로 간다', hint: '죄수가 된다. 이웃은 남는다', values: { justice: D },
@@ -248,7 +246,7 @@ export const WANO: Turning[] = [
   },
   // ---------------------------------------------------------------- 섬에 남은 어른의 삶
   {
-    id: 'wanoa_smile_trade', kind: 'door', when: adult(18, 50, LANDED), weight: 5, repeat: 'once', speaker: { relation: '뒷골목의 거간꾼' },
+    id: 'wanoa_smile_trade', kind: 'door', when: adult(18, 50, LANDED, beforeHistory('wanoFree')), weight: 5, repeat: 'once', speaker: { relation: '뒷골목의 거간꾼' },
     title: '웃는 열매의 거간꾼', body: '뒷골목 거간꾼이 이상한 열매를 판다. 먹으면 짐승의 힘을 얻거나, 아니면 평생 웃기만 한다. 값은 비싸고 사려는 사람은 많다.',
     doors: [
       { label: '열매를 사서 되판다', hint: '팔리면 큰돈이 된다. 누군가는 웃기만 하게 된다', values: { greed: D }, fx: [{ op: 'hardship', add: 1 }, { op: 'money', add: -10000, trade: true }, { op: 'chance', p: 0.7, skillCheck: true, then: [{ op: 'money', add: 52000 }, { op: 'log', text: '열매는 웃돈을 받고 팔려 나갔다.', weight: 'light' }], else: [{ op: 'log', text: '관리의 단속에 열매를 빼앗겼다. 산 값만 날렸다.', weight: 'light' }] }] },
@@ -257,7 +255,7 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wanoa_tax', kind: 'door', when: adult(18, 70, LANDED), weight: 6, repeat: { years: 6 }, speaker: { relation: '쇼군의 세리' },
+    id: 'wanoa_tax', kind: 'door', when: adult(18, 70, LANDED, beforeHistory('wanoFree')), weight: 6, repeat: { years: 6 }, speaker: { relation: '쇼군의 세리' },
     title: '올해의 세금', body: '쇼군의 세리가 올해 세금을 두 배로 올렸다. 못 내면 광산이다. 마을 사람들이 {name}의 집 앞에 모여 어떻게 할지 묻는다.',
     doors: [
       { label: '마을 사람들의 세금을 모아 대신 협상한다', hint: '세리와 담판한다. 미움을 받을지 모른다', values: { dominion: D }, fx: [{ op: "log", text: "세리 앞에 마을의 세금 장부를 펼쳤다. 이웃들이 뒤에 서 있는 동안 낼 수 있는 몫을 다시 적었다.", weight: "light" }, { op: 'money', add: -8000 }, { op: 'fame', add: 2 }] },
@@ -266,7 +264,7 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wanoa_swordsmith', kind: 'door', when: adult(16, OPENED - 1, LANDED), weight: 5, repeat: 'once', speaker: { relation: '늙은 대장장이' },
+    id: 'wanoa_swordsmith', kind: 'door', when: adult(16, 22, LANDED, beforeHistory('wanoFree')), weight: 5, repeat: 'once', speaker: { relation: '늙은 대장장이' },
     title: '명검의 주문', body: '늙은 대장장이가 평생의 마지막 칼을 벼린다. 주문한 사람은 카이도의 간부다. 대장장이는 칼에 혼이 담긴다고, 누구에게 가는지가 중요하다고 한다.',
     doors: [
       { label: '칼을 빼돌려 옛 영주의 무사에게 전한다', hint: '대장장이와 함께 목숨을 건다', values: { loyalty: D }, danger: true, fx: [{ op: 'chance', p: 0.6, then: [{ op: "log", text: "대장장이가 칼을 포에 싸서 건넸다. 옛 영주의 무사가 받아 갔고 간부의 심부름꾼은 빈 칼집만 보고 돌아갔다.", weight: "light" }, { op: 'fame', add: 3 }, { op: 'person', kind: 'ally', relation: '늙은 대장장이', age: 62 }], else: [{ op: "log", text: "간부의 부하가 칼을 옮기던 길을 막았다. 대장장이와 함께 맞서다 다친 채 칼을 빼앗겼다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'hardship', add: 2 }] }] },
@@ -297,9 +295,9 @@ export const WANO: Turning[] = [
   },
   {
     id: 'wanoa_terakoya', kind: 'door', when: adult(36, 75, LANDED), weight: 5, repeat: 'once', speaker: 'hero',
-    title: '마을 서당', body: '마을 아이들이 글을 모른다. 쇼군은 글을 아는 백성을 싫어한다. 빈 헛간 하나면 서당을 열 수 있다.',
+    title: '마을 서당', body: '마을 아이들이 글을 모른다. 할아버지들도 오로치 때는 옛 책을 숨겨 두었다고 한다. 빈 헛간 하나면 서당을 열 수 있다.',
     doors: [
-      { label: '서당을 열어 글과 옛이야기를 가르친다', hint: '관리의 눈에 띌지 모른다', values: { inquiry: D }, fx: [{ op: "log", text: "서당 문을 열자 아이들이 글자를 따라 썼다. 옛 영주의 이야기가 나오자 밖을 지나던 관리가 창가에서 걸음을 늦췄다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '서당의 아이들', age: { younger: 30 } }, { op: 'fame', add: 2 }] },
+      { label: '서당을 열어 글과 옛이야기를 가르친다', hint: '아이들과 마을의 역사를 읽는다', values: { inquiry: D }, fx: [{ op: "log", text: "서당 문을 열자 아이들이 글자를 따라 썼다. 아이들이 옛 영주의 이름을 읽자 창밖의 할머니도 따라 읽었다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '서당의 아이들', age: { younger: 30 } }, { op: 'fame', add: 2 }] },
       { label: '셈과 장사만 가르친다', hint: '먹고사는 법만 가르친다. 탈은 없다', values: { peace: D }, fx: [{ op: "log", text: "아이들은 셈판을 두드리며 장사 값을 맞췄다. 수업이 끝난 뒤에도 시장에서 쓸 숫자를 서로 물었다.", weight: "light" }] },
       { label: '아이들에게 칼을 가르친다', hint: '언젠가 칼을 들 날을 위해', values: { loyalty: D }, fx: [{ op: "log", text: "아이들에게 나무칼을 나눠 주었다. 작은 손들이 같은 자세를 반복하는 소리가 서당 마당에 났다.", weight: "light" }, { op: 'mastery', branch: 'sword', add: 5 }] },
     ],
@@ -309,7 +307,7 @@ export const WANO: Turning[] = [
     title: '부르면 안 되던 노래', body: '어릴 적 술 취한 노인에게서 들었던, 부르면 안 되는 노래가 입가에 맴돈다. 손주뻘 아이들이 무슨 노래냐고 묻는다.',
     doors: [
       { label: '노래를 가르쳐 준다', hint: '이야기는 이어진다', values: { romance: D }, fx: [{ op: "log", text: "잊힌 노래의 첫 구절을 부르자 아이가 곧바로 따라 했다. 다음 날 골목에서 다른 아이들의 목소리로도 들렸다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }] },
-      { label: '아무 노래도 아니라고 한다', hint: '아이들을 지킨다', values: { justice: D }, fx: [{ op: "log", text: "아무 노래도 아니라고 하자 아이는 다른 노래를 흥얼거리며 떠났다. 금지된 이름은 그날 골목에 남지 않았다.", weight: "light" }] },
+      { label: '아무 노래도 아니라고 한다', hint: '아이들을 지킨다', values: { justice: D }, fx: [{ op: "log", text: "아무 노래도 아니라고 하자 아이는 다른 노래를 흥얼거리며 떠났다. 한때 금지됐던 노래는 그날 내 입 안에서만 맴돌았다.", weight: "light" }] },
     ],
   },
   {
@@ -340,8 +338,8 @@ export const WANO: Turning[] = [
     ],
   },
   {
-    id: 'wanoa_outsider', kind: 'door', when: adult(OPENED, 75, LANDED), weight: 5, repeat: 'once', speaker: { relation: '바깥에서 온 상인' },
-    title: '바깥에서 온 사람', body: '나라가 열린 뒤 바깥 상인이 마을에 왔다. 말도 옷도 다르다. 마을 사람들은 문을 닫고, 상인은 길을 묻는다.',
+    id: 'wanoa_outsider', kind: 'door', when: adult(22, 75, LANDED, afterHistory('wanoFree')), weight: 5, repeat: 'once', speaker: { relation: '바깥에서 온 상인' },
+    title: '바깥에서 온 사람', body: '폭포를 몰래 올라온 바깥 상인이 마을에 왔다. 말도 옷도 다르다. 마을 사람들은 문을 닫고, 상인은 길을 묻는다.',
     doors: [
       { label: '집에 들여 바깥 이야기를 듣는다', hint: '바다 너머를 처음 듣는다', values: { inquiry: D }, fx: [{ op: "log", text: "낯선 상인이 바다 건너 항구와 배의 이야기를 했다. 식탁의 불이 꺼질 때까지 모두가 그 말을 들었다.", weight: "light" }, { op: 'base', key: 'int', add: 1 }, { op: 'person', kind: 'ally', relation: '바깥에서 온 상인' }] },
       { label: '상인을 꽃의 도시까지 안내하고 삯을 받는다', hint: '바깥 돈이 들어온다', values: { ambition: D }, fx: [{ op: "log", text: "상인을 꽃의 도시까지 데려가자 그가 바깥 동전을 쥐여 주었다. 시장 사람들은 낯선 물건을 둘러보았다.", weight: "light" }, { op: 'money', add: 10000 }] },

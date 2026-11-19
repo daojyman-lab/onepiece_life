@@ -3,6 +3,8 @@ import { buildEntryGate, buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX } from './voya
 import { josa } from '../shared/core/josa';
 import { chance, int, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
+import { worldTick } from '../data/world-history';
+import { publishIssue } from './world-news';
 import { CANON } from '../data/canon';
 import { ITEM_BY_ID } from '../shared/data/items';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
@@ -57,6 +59,7 @@ function renderDoor(s: Life5, t: Turning, doors: ResolvedDoor[]): Extract<Life5[
   const disciple = t.disciple && discipleFor(s, t.disciple);
   const body = [t.body, ...(t.recall ?? []).filter(line => checkAll(s, line.when)).map(line => line.text)].join('\n\n');
   return { kind: 'door', turning: t.id, moment: t.kind === 'moment',
+    ...(t.when.some(c => c.c === 'history') ? { openedTick: worldTick(s) } : {}),
     title: fillTurning(s, t.title, t), body: fillTurning(s, body, t), speaker: speakerOf(s, t), doors,
     ...(disciple ? { discipleId: disciple.personId } : {}) };
 }
@@ -70,9 +73,12 @@ export function restoreStoryDoor(s: Life5): void {
   if (pending.turning === 'tmp_crocodile') return;
   const t = turningOf(pending.turning);
   if (!t) return;
-  const doors = resolveDoors(s, t);
   const prereqs = t.when.filter(c => !(c.c === 'turningSeen' && c.id === t.id));
-  if (!checkAll(s, prereqs) || !needsOk(s, t.needs) || knownSpeakerIsDead(s, t) || !doors.some(d => !d.locked)) {
+  // 추첨 뒤 같은 명령에서 분기가 바뀔 수 있다. 이미 열린 현장 장면은 개봉 시각으로 복원한다.
+  const historicalMoment = pending.openedTick !== undefined && t.when.some(c => c.c === 'history')
+    ? { ...s, age: Math.floor(pending.openedTick / V.partsPerYear), part: (pending.openedTick % V.partsPerYear) as Life5['part'], prime: null } : s;
+  const doors = resolveDoors(historicalMoment, t);
+  if (!checkAll(historicalMoment, prereqs) || !needsOk(s, t.needs) || knownSpeakerIsDead(s, t) || !doors.some(d => !d.locked)) {
     s.pending = null;
     // 고르기 전에 무효화된 한 번뿐인 만남은, 실제로 조건이 갖춰지면 다시 열 수 있다.
     if (s.seenCount[t.id] === 1 && !s.tried.some(k => k.startsWith(t.id + '#'))) {
@@ -81,7 +87,7 @@ export function restoreStoryDoor(s: Life5): void {
     }
     return;
   }
-  s.pending = renderDoor(s, t, doors);
+  s.pending = renderDoor(historicalMoment, t, doors);
 }
 
 export function refreshEntryDoor(s: Life5): void {
@@ -134,6 +140,7 @@ export function stillOpen(s: Life5, t: Turning): boolean {
  */
 export function openTurning(s: Life5, t: Turning): boolean {
   if (knownSpeakerIsDead(s, t)) return false;
+  if (t.when.some(c => c.c === 'history' && !checkAll(s, [c]))) return false;
   const weaponScene = t.doors.some(d => d.fx.some(e =>
     ['receiveWeapon', 'buyWeapon', 'giveAwayWeapon', 'beginStyle', 'adoptStyle', 'refineStyle'].includes(e.op)));
   if (weaponScene && !checkAll(s, t.when)) return false;
@@ -235,7 +242,8 @@ export function takeQueued(s: Life5, count = true): Turning | null {
     const entry = buildEntryGate(id);
     const t = entry ?? TURNING_BY_ID[id];
     if (entry && !checkAll(s, entry.when)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
-    if (t && !stillOpen(s, t)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
+    const expired = t?.when.some(c => c.c === 'history' && !c.has && !checkAll(s, [c]));
+    if (t && (expired || !stillOpen(s, t))) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
     if (t && fits(s, t)) {
       s.queue.splice(i, 1); delete s.queueTries[id];
       return t;
@@ -301,6 +309,7 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx, p.discipleId);
+  if (door.news) publishIssue(s, { id: `local:${key}`, kind: 'local', ...door.news });
   afterLifeStoryChoice(s, t.id);
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);

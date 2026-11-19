@@ -10,7 +10,9 @@ import { topValues } from './values';
 import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
-import { hadBountyBeforeUpgrade } from './first-poster';
+import { bountyAmount, hadBountyBeforeUpgrade } from './first-poster';
+import { worldTick } from '../data/world-history';
+import { PRESS_LIMIT, reconcileWorld } from './world-news';
 import { emptyLife } from './state';
 import { normalizeStyles } from './styles';
 import { SHIP_MARK } from './ship-memory';
@@ -76,6 +78,22 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  const tick = worldTick(life);
+  const validTick = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0 && n <= tick;
+  if (life.pending?.kind === 'door' && life.pending.openedTick !== undefined && !validTick(life.pending.openedTick)) return null;
+  if (!Array.isArray(life.news) || life.news.length > PRESS_LIMIT || life.news.some(article => !isObj(article) ||
+      typeof article.id !== 'string' || typeof article.title !== 'string' || typeof article.body !== 'string' ||
+      !['big', 'world', 'local', 'bounty'].includes(article.kind) || !Number.isSafeInteger(article.age) || article.age < 0 ||
+      !Number.isInteger(article.part) || article.part < 0 || article.part >= V.partsPerYear || !validTick(worldTick(article)) ||
+      (article.logId !== undefined && (!Number.isSafeInteger(article.logId) || article.logId < 0 || article.logId >= life.seq)) ||
+      (article.amount !== undefined && (!Number.isSafeInteger(article.amount) || article.amount <= 0)))) return null;
+  if (new Set(life.news.map(issue => issue.id)).size !== life.news.length) return null;
+  if (life.pressTick !== undefined && !validTick(life.pressTick)) return null;
+  if (x.publishedBounty === undefined) {
+    const first = life.timeline.find(entry => typeof entry?.text === 'string' && /^첫 현상금 [\d,]+ 베리$/.test(entry.text));
+    life.publishedBounty = Math.max(bountyAmount(life.hero), Number(first?.text.replace(/[^\d]/g, '') || 0), ...life.news.map(issue => issue.amount ?? 0));
+  }
+  if (!Number.isSafeInteger(life.publishedBounty) || life.publishedBounty! < 0) return null;
   if (life.ships !== undefined) {
     const ageOk = (age: number, min = 0) => Number.isInteger(age) && age >= min && age <= life.age;
     if (!Array.isArray(life.ships) || life.ships.some((h, i, hulls) =>
@@ -174,6 +192,7 @@ export function normalizeLife5(x: unknown): Life5 | null {
   try {
     if (x.firstBountyIssued === undefined) life.firstBountyIssued = hadBountyBeforeUpgrade(life);
     if (typeof life.firstBountyIssued !== 'boolean') return null;
+    if (x.news === undefined && !life.ended) reconcileWorld(life, false);
     if (invariants5(life, true).length) return null;
     if (life.firstChoiceAge !== undefined && (!isObj(life.firstChoiceAge) ||
         !Object.values(life.firstChoiceAge).every(age => Number.isInteger(age) && age >= 0 && age <= life.age))) return null;

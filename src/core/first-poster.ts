@@ -3,6 +3,7 @@ import { TURNING_BY_ID } from '../data/turnings';
 import { fmtMoney } from '../shared/core/util';
 import { fullName } from './birth';
 import { logLine } from './log';
+import { publishIssue } from './world-news';
 import { hasRelation, personIs } from './needs';
 import type { Hero5, Life5, Person, Standing } from './types';
 
@@ -65,15 +66,41 @@ const SIBLING_LINES = [
   '종이를 들어 빛에 비춰 봤다. “살아 있네. 얼굴 보니까 이제야 좀 안심된다.”',
 ];
 
-export function recordFirstPoster(s: Life5, previousBounty: number): void {
-  if (s.firstBountyIssued || previousBounty > 0 || !s.hero.alive) return;
+export function reportBountyChange(s: Life5, previousBounty: number, previousStanding: Standing): void {
+  if (!s.hero.alive) return;
+  if (s.hero.standing === 'warlord') {
+    if (previousStanding !== 'warlord') {
+      const name = fullName(s.hero);
+      publishIssue(s, { id: `commission:${s.age}:${s.part}`, kind: 'world', title: `세계정부, ${name}의 칠무해 임명 발표`,
+        body: `해군 지부에 ${name}의 수배를 정지하라는 공문이 도착했다. 게시판에서 수배서를 떼어 봉투에 넣고 공인장을 발급했다.` });
+    }
+    return;
+  }
   const amount = bountyAmount(s.hero);
-  if (amount <= 0) return;
+  if (previousStanding === 'warlord' && s.hero.standing === 'pirate' && s.firstBountyIssued && amount > 0) {
+    const name = fullName(s.hero);
+    s.publishedBounty = Math.max(s.publishedBounty ?? 0, amount);
+    publishIssue(s, { id: `resumed:${s.age}:${s.part}`, kind: 'bounty', amount, title: `${name} 수배 재개 · ${fmtMoney(amount)} 베리`,
+      body: `정부의 보호가 끝났다. 뉴스 쿠의 배달 가방에 ${name}의 수배서가 다시 실렸다.` });
+    return;
+  }
+  if (amount <= previousBounty || amount <= (s.publishedBounty ?? 0)) return;
+  const hero = fullName(s.hero);
+  const price = `${fmtMoney(amount)} 베리`;
+  if (s.firstBountyIssued || previousBounty > 0) {
+    s.firstBountyIssued = true;
+    s.publishedBounty = amount;
+    publishIssue(s, { id: `wanted:${amount}`, kind: 'bounty', amount,
+      title: `${hero} 수배액 인상 · ${price}`, body: `새 수배서가 해군 지부로 보내졌다. ${hero}의 이름 아래 새로 찍힌 액수는 ${price}다.` });
+    return;
+  }
   s.firstBountyIssued = true;
+  s.publishedBounty = amount;
   const prize = `첫 현상금 ${fmtMoney(amount)} 베리`;
   s.timeline.push({ age: s.age, text: prize });
   const tell = (line: string) => logLine(s, line, 'heavy', 'world');
-  tell(`뉴스 쿠가 신문과 함께 새 수배서를 실어 날랐다. ${fullName(s.hero)}의 얼굴 아래 찍힌 첫 현상금은 ${fmtMoney(amount)} 베리였다.`);
+  const report = `뉴스 쿠가 신문과 함께 새 수배서를 실어 날랐다. ${hero}의 얼굴 아래 찍힌 첫 현상금은 ${price}였다.`;
+  publishIssue(s, { id: 'first-wanted', kind: 'bounty', amount, title: `${hero}의 첫 수배서 · ${price}`, body: report }, report);
 
   const people = s.people.filter(available);
   const kin = people.filter(p => personIs(p, 'parent') || personIs(p, 'sibling'));

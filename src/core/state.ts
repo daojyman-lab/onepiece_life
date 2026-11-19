@@ -8,6 +8,7 @@ import { fullName, rollBirth, type BirthOpt } from './birth';
 import { rollFamily } from './family';
 import { LIMBS } from './body';
 import { logLine, yearDivider } from './log';
+import { birthEdition } from './world-news';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
 import { COMBAT_STYLES, DEFAULT_STYLE } from '../data/combat-styles';
@@ -60,7 +61,7 @@ export function emptyLife(seed: number): Life5 {
     log: [], timeline: [], recentLines: [],
     pending: null,
     stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {}, stopsAt: [], stopTries: 0, emptyStops: 0, namedMet: 0 },
-    firstBountyIssued: false,
+    firstBountyIssued: false, news: [], publishedBounty: 0,
     seq: 0,
     ended: null,
     vows: { active: null, history: [] },
@@ -88,6 +89,7 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   s.age = V.birth.startAge;
   rollFamily(s, r);                            // 가족은 시작하는 나이에 맞춰 둔다 (손아래 형제는 이미 태어난 아이만)
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
+  birthEdition(s);
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
   if (first) openTurning(s, first);

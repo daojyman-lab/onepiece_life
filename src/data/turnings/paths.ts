@@ -4,6 +4,7 @@
 // 원작 인물은 주인공의 나이에 맞춰 나온다 (주인공 열일곱 살 무렵이 원작의 시작).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
+import type { WorldEventId } from '../world-history';
 import type { Cond, HomeId, Person, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -30,7 +31,8 @@ export const HUNTED: Standing[] = ['pirate', 'revolution'];
 const ALL_SEAS_BUT_EAST: SeaId[] = ['west', 'north', 'south', 'gl_entry', 'gl_first', 'sabaody', 'nw_first', 'nw_late'];
 const BLUES: SeaId[] = ['east', 'west', 'north', 'south'];
 
-/** 로그타운에서 태어난 사람 + 조건들 */
+export const beforeHistory = (id: WorldEventId): Cond => ({ c: 'history', id, has: false });
+export const afterHistory = (id: WorldEventId): Cond => ({ c: 'history', id, has: true });
 /** 어느 고향에서나. 바다 · 항구 · 세계정부를 전제하는 글은 index.ts의 landlocked가 외딴 고향 섬에서 막는다 */
 export const at = (...c: Cond[]): Cond[] => [...c];
 export const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
@@ -88,14 +90,15 @@ export const PATHS: Turning[] = [
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 15 }, { op: 'money', add: 20000 }, { op: 'log', text: '상선 앞을 가로막던 해적선이 물러났다. 상인은 항구에 닿아 {name}의 깃발을 이야기했다.', weight: 'light' }] },
       { label: '사황의 깃발을 단 배를 건드린다', hint: '신세계 전체가 그 이름을 알게 된다', when: [sea('nw_first', 'nw_late')], values: { ambition: D }, danger: true,
         fx: [{ op: 'fame', add: 300 }, { op: 'hp', add: -30 }, { op: 'injury', severity: 'heavy' },
-             { op: 'log', text: '사황의 보급선을 털었다. 그날로 세상의 모든 신문에 {name}의 얼굴이 실렸다.', weight: 'heavy' }] },
+             { op: 'log', text: '사황의 보급선을 털었다. 그날로 세상의 모든 신문에 {name}의 얼굴이 실렸다.', weight: 'heavy' },
+             { op: 'queue', turning: 'path_warlord' }] },
       { label: '상선을 털지 않고 통행세를 매긴다', hint: '피를 보지 않고 짐칸이 통째로 들어온다', special: 'greed', values: { greed: D },
         fx: [{ op: 'money', add: 110000 }, { op: 'fame', add: 5 }, { op: 'flag', id: 'tollPirate' },
              { op: 'log', text: '상인들은 떨면서도 순순히 금고를 열었다. 다음 항해에도 이 바다를 지나려면 그래야 했다.', weight: 'heavy' }] },
     ],
   },
   {
-    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'standingYears', min: 2 }),
+    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'standingYears', min: 2 }, beforeHistory('reverie')),
     weight: 8, repeat: 'once', speaker: { relation: '세계 정부의 사자' },
     title: '칠무해 제의', body: '세계 정부의 사자가 {island}에 머무는 {name}을(를) 찾아왔다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
     doors: [
@@ -149,7 +152,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east'), inLoguetown),
+    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east'), inLoguetown, beforeHistory('loguetownStorm')),
     weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 쫓아내는 걸 봤다고 한다.',
     doors: [
@@ -223,7 +226,7 @@ export const PATHS: Turning[] = [
 
   // ---------------------------------------------------------------- 혁명군 · 현상금 사냥꾼 · 조선공
   {
-    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east'), inLoguetown),
+    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east'), inLoguetown, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 8, repeat: 'once', speaker: { canon: 'dragon' },
     title: '폭풍 속의 사내', body: '처형대에 벼락이 떨어지던 날, 망토를 두른 사내가 비에 젖은 {name}에게 말을 건다. 이 세상이 왜 이 모양인지 궁금하지 않느냐고.',
     doors: [
@@ -411,7 +414,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east'), inLoguetown),
+    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east'), inLoguetown, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 6, repeat: 'once', speaker: { canon: 'luffy' },
     title: '처형대 위의 웃음', body: '{island} 처형대에서 목이 잘릴 뻔했던 밀짚모자 소년이 벼락 속에서 웃으며 살아났다. 그의 작은 배가 폭풍 속으로 떠나려 한다.',
     doors: [

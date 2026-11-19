@@ -11,6 +11,9 @@ import { HOMES } from '../../src/data/homes';
 import { SEA_BY_ID } from '../../src/shared/data/seas';
 import type { Fx, HomeId, Life5, Standing } from '../../src/core/types';
 import { SEA_STANDINGS } from '../../src/data/landlocked';
+import { hasWorldEvent, WORLD_HISTORY } from '../../src/data/world-history';
+import { V } from '../../src/data/balance';
+import { specialNeed } from '../../src/core/values';
 
 /** 사이트(.env.production)의 고향 가중치 25:15:15:15:15:15 */
 export const SITE_HOMES: HomeId[] = [...Array(5).fill('loguetown'),
@@ -71,7 +74,12 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
   const inspect = typeof takeLifeCourse === 'function' ? takeLifeCourse : undefined;
   const t = TURNING_BY_ID[target.turning], door = t.doors[target.index];
   const v = door.special!;
-  const fameGoal = Math.max(0, ...(t.automatic?.unless ?? []).flatMap((c) => c.c === 'fame' ? [c.min] : []));
+  const fameGoal = Math.max(0, ...[...t.when, ...(t.automatic?.unless ?? [])].flatMap((c) => c.c === 'fame' ? [c.min] : []));
+  const eligibility = t.weight ? t : TURNINGS.find(scene => scene.weight > 0 && scene.id.startsWith('ep_') && leadsTo(scene.id, t.id));
+  const deadline = eligibility?.when.find(c => c.c === 'history' && !c.has);
+  const lastRecruitingAge = deadline?.c === 'history' && t.when.some(c => c.c === 'fame')
+    ? WORLD_HISTORY[deadline.id].age - (WORLD_HISTORY[deadline.id].part === 0 ? 1 : 0) : undefined;
+  const unavailableIslands = t.when.flatMap(c => c.c === 'island' && c.not ? c.is : []);
   // 노리는 문의 표시 + 노리는 장면으로 곧장 이어지는 문이 요구하는 표시 (그 갈래로 들어가려면 필요하다)
   const into = TURNINGS.flatMap((x) => x.doors.filter((d) => nextsOf(d.fx).includes(target.turning)));
   const { need, avoid } = flagPlan(
@@ -84,6 +92,7 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
   const r = rngOf({ seed: seed ^ 0x7a6e, cursor: 0 });
   for (let i = 0; i < 20000; i++) {
     const p = s.pending;
+    if (!p && deadline?.c === 'history' && hasWorldEvent(s, deadline.id) && !s.queue.length) { inspect?.(s); return false; }
     if (p?.kind === 'ending') { inspect?.(s); return false; }
     if (!p) { apply5(s, { type: 'step' }); continue; }
     const prerequisites = need.filter((flag) => !s.flags.includes(flag)).flatMap((flag) => FLAG_SOURCES.get(flag) ?? [])
@@ -119,20 +128,26 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
     const inStand = stand.length > 0 && stand.includes(s.hero.standing);
     const by = (f: (j: number) => boolean) => open.filter(f);
     // 항로: 노리는 섬으로 가는 뱃길을 먼저
-    const sailing = by((j) => flat(doors[j]?.fx).some((e) => e.op === 'sail' && isles.includes(e.island)));
+    const sailing = by((j) => flat(doors[j]?.fx).some((e) => (e.op === 'sail' || (fameGoal > 0 && e.op === 'move')) &&
+      (isles.includes(e.island) || (fameGoal > 0 && unavailableIslands.includes(s.hero.island) && !unavailableIslands.includes(e.island)))));
     const flagged = by((j) => need.some((f) => !s.flags.includes(f) && sets(doors[j]?.fx, f)));
     const toStand = stand.length && !inStand ? by((j) => { const m = moves(doors[j]?.fx); return !!m && stand.includes(m.to); }) : [];
     const keep = inStand ? by((j) => { const m = moves(doors[j]?.fx); return !m || stand.includes(m.to); }) : open;
-    const pool = keep.length ? keep : open;
+    const local = fameGoal > 0 && isles.includes(s.hero.island) ? keep.filter(j => !flat(doors[j]?.fx).some(e =>
+      (e.op === 'move' || e.op === 'sail') && !isles.includes(e.island))) : [];
+    const pool = local.length ? local : keep.length ? keep : open;
     const raise = pool.filter((j) => (doors[j]?.values?.[v] ?? 0) > 0);
     // 알려진 이름을 요구하는 장면은 그 전에 실제 명성 보상을 쌓는다.
-    const fame = s.hero.fame < fameGoal ? pool.filter((j) => flat(doors[j]?.fx).some((e) => e.op === 'fame' && e.add > 0)) : [];
+    const reward = (j: number) => Math.max(0, ...flat(doors[j]?.fx).flatMap(e => e.op === 'fame' ? [e.add] : []));
+    const bestFame = s.hero.fame < fameGoal ? Math.max(...pool.map(reward)) : 0;
+    const fame = bestFame > 0 ? pool.filter(j => reward(j) === bestFame) : [];
+    const childhood = lastRecruitingAge !== undefined && s.age < V.adultAge && s.values[v] < specialNeed(lastRecruitingAge) ? raise : [];
     // 노리는 섬이 바다 건너에 있으면 먼저 바다로 나가는 처지를 고른다
     const away = isles.length > 0 && !isles.includes(s.hero.island) && !SEA_STANDINGS.includes(s.hero.standing) && !stand.length;
     const toSea = away ? by((j) => { const m = moves(doors[j]?.fx); return !!m && SEA_STANDINGS.includes(m.to); }) : [];
     if (!sailing.length && !flagged.length && toSea.length) { apply5(s, { type: 'answer', index: pick(r, toSea) }); continue; }
-    const choice = sailing.length ? pick(r, sailing) : flagged.length ? pick(r, flagged) : toStand.length ? pick(r, toStand) : fame.length ? pick(r, fame) : raise.length ? pick(r, raise) : pick(r, pool);
-    apply5(s, { type: 'answer', index: choice });
+    const preferred = [sailing, flagged, toStand, childhood, fame, raise].find(choices => choices.length) ?? pool;
+    apply5(s, { type: 'answer', index: pick(r, preferred) });
   }
   inspect?.(s);
   return false;

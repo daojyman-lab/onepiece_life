@@ -4,7 +4,7 @@
 // 로그타운으로 못 박아 돌려보내지 않는다 (family.test). 고향으로 돌아가는 일은 moveHome이다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { SEAFARING, age, at, home, sea, st } from './paths';
+import { SEAFARING, afterHistory, beforeHistory, age, at, home, sea, st } from './paths';
 import type { Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -104,7 +104,7 @@ export const SEA_LEAVE: Turning[] = [
     ],
   },
   {
-    id: 'sea_smoker_chase', kind: 'door', when: at(age(17, 20), st('marine'), sea('east')),
+    id: 'sea_smoker_chase', kind: 'door', when: at(age(17, 20), st('marine'), sea('east'), { c: 'island', is: ['로그타운'] }, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '시가 두 대의 대령', body: '로그타운의 대령이 지부의 군함을 끌고 붉은 산으로 간다고 한다. 처형대에서 놓친 밀짚모자를 쫓겠다고, 본부의 허락 따위는 필요 없다고. 시가 연기 너머로 대령이 {name}을(를) 본다. 따라올 테냐고.',
     doors: [

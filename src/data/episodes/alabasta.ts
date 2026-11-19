@@ -1,13 +1,13 @@
 // 섬 장편 에피소드: alabasta (v6.8, 2~3달짜리 시나리오 셋). 규칙: docs/02_설계/섬_장편_에피소드_작성규칙.md
 // 세 시나리오:
 //   원작 전(주인공 14~16) 「마른 우물의 값」: 가뭄을 틈타 우물을 잠그는 모래시계 상단(하잠). 안내 나디르 · 기록 사피야 · 판단 코자.
-//   원작 그 무렵(17~18) 「아르바나의 다른 전선」: 양쪽에 화약을 파는 붉은 낙타단(오르한). 안내 카심 · 기록 레일라 · 판단 코자.
+//   내전 중 「아르바나의 다른 전선」: 양쪽에 화약을 파는 붉은 낙타단(오르한). 안내 카심 · 기록 레일라 · 판단 코자.
 //     결전 날 밀짚모자는 시계탑의 폭탄과 크로커다일을 맡고, 주인공은 서쪽 저수고를 지킨다.
-//   원작 뒤(20~) 「물길의 주인」: 재건의 물 증서를 사들이는 새물 조합(무스타파). 안내 하리스 · 기록 마이사 · 판단 펠.
+//   비가 돌아온 뒤 「물길의 주인」: 재건의 물 증서를 사들이는 새물 조합(무스타파). 안내 하리스 · 기록 마이사 · 판단 펠.
 //     원작 뒤의 크로커다일·미스터 1 재방문을 가정하지 않는다. 위조 증서와 물길의 소유권만 다룬다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const ISL = '알라바스타 왕국';
 
@@ -62,7 +62,7 @@ function sluiceShowdown(prepared: boolean): Turning {
 export const EP_ALABASTA: Turning[] = [
   // ================================================================ 원작 전 (주인공 14~16): 마른 우물의 값
   {
-    id: 'ep_alabasta_p1', kind: 'door', when: at(on(ISL), age(14, 16), not('ep_alabasta_pre_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_alabasta_p1', kind: 'door', when: at(on(ISL), age(14, 16), not('ep_alabasta_pre_done'), afterHistory('alabastaDrought'), beforeHistory('alabastaRain')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '우물의 자물쇠',
     intro: [
       '나노하나 시장에 내리니 스카프 틈으로 모래가 씹힌다. 목부터 축이려고 물통을 든 사람들을 따라간다.',
@@ -210,8 +210,10 @@ export const EP_ALABASTA: Turning[] = [
     body: '그믐밤이 지나도 비는 오지 않는다. 신문은 크로커다일이 해적을 쫓아냈다고 전한다. 우물 앞에는 빈 통을 든 주민이 다시 줄을 섰다.',
     doors: [
       { label: '사피야의 장부를 왕궁에 보내 조사를 요청한다', hint: '상단의 이름이 처음으로 왕궁의 문서에 오른다', when: [has('ep_alabasta_safiya_trust'), has('ep_alabasta_p_ledger'), not('ep_alabasta_p_deal')], values: { inquiry: D },
+        news: { title: '나노하나 물값 장부, 왕궁 조사로', body: '우물의 물값을 적은 장부가 알라바스타 왕궁에 접수됐다. 나노하나에 도착한 관리는 물을 사 간 주민들부터 만나고 있다.' },
         fx: [flag('ep_alabasta_p_map'), { op: 'base', key: 'int', add: 1 }, time('가뭄의 알라바스타에서 우물을 잠근 상단의 장부를 왕궁에 올렸다'), next('ep_alabasta_p11'), log('사피야의 장부가 궁의 봉인을 받았다. 상단의 물값을 묻는 관리가 나노하나로 내려왔다.', 'light')] },
       { label: '하잠이 남긴 열쇠 꾸러미로 물을 판다', hint: '돈은 쌓인다. 우물가의 눈길이 등에 꽂힌다', when: [has('ep_alabasta_p_deal')], values: { greed: D },
+        news: { title: '나노하나 우물 다시 열려, 식수는 유료', body: '잠겨 있던 우물 앞에 물통을 든 줄이 섰다. 주민들은 차례가 오기 전에 오늘 물값부터 묻고 있다.' },
         fx: [{ op: 'money', add: 50000 }, time('가뭄의 알라바스타에서 잠긴 우물의 물을 팔아 돈을 벌었다'), next('ep_alabasta_p11'), log('열쇠를 돌리자 물을 기다리던 이웃이 값을 묻고 주머니를 열었다. 나디르는 눈을 마주치지 않았다.', 'light')] },
       { label: '우물 일은 이 나라 사람들에게 남기고 짐을 꾸린다', hint: '물값은 아직 비싸다. 이 땅에 남긴 자국은 많지 않다', values: { freedom: D },
         fx: [time('가뭄의 알라바스타를 지나왔다. 잠긴 우물은 잠긴 채였다'), next('ep_alabasta_p11'), log('짐을 싣는 동안 우물 앞에서는 여전히 값을 두고 다퉜다. 사피야가 그 소리를 장부에 적었다.', 'light')] },
@@ -234,7 +236,7 @@ export const EP_ALABASTA: Turning[] = [
 
   // ================================================================ 원작 그 무렵 (주인공 17~18): 아르바나의 다른 전선
   {
-    id: 'ep_alabasta_w1', kind: 'door', when: at(on(ISL), age(17, 18), not('ep_alabasta_war_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_alabasta_w1', kind: 'door', when: at(on(ISL), age(17, 18), not('ep_alabasta_war_done'), afterHistory('loguetownStorm'), beforeHistory('alabastaRain')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '소금 상자에서 쏟아진 화약',
     intro: [
       '반란군이 모인 카트레아에 들어서니 물을 사려는 줄 옆으로 낙타 수레가 빠르게 지나간다.',
@@ -413,7 +415,7 @@ export const EP_ALABASTA: Turning[] = [
 
   // ================================================================ 원작 뒤 (주인공 20~): 물길의 주인
   {
-    id: 'ep_alabasta_a1', kind: 'door', when: at(on(ISL), age(20, 60), not('ep_alabasta_post_done')), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_alabasta_a1', kind: 'door', when: at(on(ISL), age(17, 60), not('ep_alabasta_post_done'), afterHistory('alabastaRain')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '농부를 끌어낸 물길',
     intro: [
       '가뭄이 끝난 알라바스타에서 새 물길을 따라 걷는다. 말랐던 밭 사이로 물이 거품을 내며 지난다.',

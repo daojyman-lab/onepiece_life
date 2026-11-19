@@ -55,7 +55,7 @@ describe('첫 현상수배서', () => {
     expect(posters(s).map(p => p.text)).toEqual([first]);
   });
 
-  it('전투 승리도 같은 기준을 쓴다. 해적과 칠무해에게만 수배서가 생긴다', () => {
+  it('해적은 전투 승리로 수배서가 생기고 칠무해 재임 중에는 수배 집행이 정지된다', () => {
     for (const standing of ['pirate', 'warlord', 'marine', 'bountyHunter'] as const) {
       const s = start();
       s.hero.standing = standing;
@@ -65,7 +65,7 @@ describe('첫 현상수배서', () => {
       expect(posters(s)).toHaveLength(0);
       apply5(s, { type: 'answer', index: 0 });
       expect(s.hero.fame).toBeGreaterThan(0);
-      expect(posters(s)).toHaveLength(standing === 'pirate' || standing === 'warlord' ? 1 : 0);
+      expect(posters(s)).toHaveLength(standing === 'pirate' ? 1 : 0);
     }
   });
 

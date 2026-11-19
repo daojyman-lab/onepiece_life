@@ -11,7 +11,7 @@
 // 원작 인물 스모커는 원작 전·그 무렵에만 등장한다. 뒤의 지역 판단자는 페니다.
 import type { Cond, Standing, Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at, st, GROWN } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at, st, GROWN } from '../turnings/paths';
 
 export const FOES_LOGUETOWN: FoeDef[] = [
   // 로그타운 주둔 시절의 스모커 (원작 스모커 b_smoker는 위대한 항로 입구의 상대라 이스트 블루용으로 따로 둔다)
@@ -282,7 +282,7 @@ export const EP_LOGUETOWN: Turning[] = [
 
   // ================================================================ 원작 그 무렵 (주인공 17) · 벼락이 떨어진 날
   {
-    id: 'ep_loguetown_b1', kind: 'door', when: at(LT, age(17, 17), st(...FREE), not('ep_loguetown_canon_done')), weight: 40, repeat: 'once', speaker: 'hero',
+    id: 'ep_loguetown_b1', kind: 'door', when: at(LT, age(17, 17), st(...FREE), not('ep_loguetown_canon_done'), beforeHistory('loguetownStorm')), weight: 40, repeat: 'once', speaker: 'hero',
     title: '폭풍 전의 항구',
     intro: [
       '폭풍이 오기 전에 항구 상인들이 등불을 거둔다.',
@@ -531,7 +531,7 @@ export const EP_LOGUETOWN: Turning[] = [
 
   // ================================================================ 원작 뒤 (주인공 19~) · 출항한 아이들의 빚
   {
-    id: 'ep_loguetown_c1', kind: 'door', when: at(LT, age(19, 45), st(...GROWN), not('ep_loguetown_post_done')), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_loguetown_c1', kind: 'door', when: at(LT, age(19, 45), st(...GROWN), not('ep_loguetown_post_done'), afterHistory('loguetownStorm')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '옛 광장의 호객꾼',
     intro: [
       '옛 처형대 광장에서 누군가 밀짚모자 일당이 나간 항로를 알려 준다며 신참 선원들에게 돈을 받는다.',

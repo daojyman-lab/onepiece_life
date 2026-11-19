@@ -4,6 +4,7 @@
 // 물러서는 줄에는 맞서는 가치관이, 맞서는 줄에는 평온이 깊으면 나오지 않는 조건을 붙인다 (방금 싸움에 끼어든 사람에게 "자리를 피했다"가 나오지 않게).
 // 처지가 배를 타는 처지(해적 · 해군 · 혁명군)면 그 처지가 배를 전제하므로 'ship'을 따로 적지 않는다. 'ship'은 제 배를 가졌을 때다.
 import type { Branch, Cond, Need, Standing, ValueId, Values } from '../core/types';
+import { afterHistory, beforeHistory } from './turnings/paths';
 import { PILOT_CARD, POST_SNAIL } from './keepsakes';
 
 /** money: 글이 말하는 돈의 오감 (보냈다 · 써 버렸다면 음수, 주웠다 · 받아 냈다면 양수). 쓰는 줄은 그만한 돈이 있어야 나온다 */
@@ -375,6 +376,9 @@ export const LINES: DailyLine5[] = [
   L([inTown, ashore, island('쿠라우 도시', '고래숲', '조', '조우')], {}, '즈니샤가 코로 물을 뿜었다. 빗방울인 줄 알고 손을 폈는데 손바닥에 작은 생선이 떨어졌다. 이웃은 벌써 냄비를 받쳐 들고 있었다.'),
   L([inTown, ashore, island('어인섬', '류구 왕국', '어인가', '바다의 숲')], {}, '인어 카페의 배달원이 거품을 타고 이층 창으로 쟁반을 밀어 넣었다. 아래층 손님이 제 거라고 하자 거품째 쏙 내려왔다. 차는 한 방울도 안 쏟았다.'),
   L([inTown, ashore, island('리틀 가든')], {}, '목 긴 공룡의 등을 언덕으로 잘못 알고 그늘에 앉았다. 그늘이 통째로 일어나 잎을 따 먹으러 가는 바람에 햇볕 아래 덩그러니 남았다.'),
+  L([inTown, ashore, island('알라바스타 왕국'), afterHistory('alabastaDrought'), beforeHistory('alabastaRain')], {}, '나노하나의 짐꾼이 빈 물통을 두드려 갈라진 곳을 찾았다. 물 한 방울 샐 통을 사막으로 보낼 수는 없다고 했다.'),
+  L([inTown, ashore, island('알라바스타 왕국'), afterHistory('alabastaRain')], {}, '수로 벽에 아이들이 젖은 자국을 따라 금을 그었다. 내일 와서 물이 또 얼마나 올랐나 재 보자고 약속했다.'),
+  L([inTown, ashore, island('드레스로자'), afterHistory('dressrosaFree')], {}, '꽃시장에 두 이름이 적힌 가게가 있었다. 장난감이 된 사이 가게를 물려받은 조카가 돌아온 삼촌 이름 옆에 자기 이름도 남겼다.'),
   L([inTown, ashore, island('알라바스타 왕국')], { romance: 1 }, '물가에서 쿵푸 듀공이 앞발을 모으고 정중히 인사했다. 따라 인사했더니 결투 신청이었는지 뒤로 듀공 열 마리가 줄을 섰다.'),
   L([inTown, ashore, island('홀케이크 아일랜드'), { c: 'age', min: 17, max: 21 }], {}, '빅 맘 해적단의 다과회 행렬이 지나갔다. 찻잔들이 줄을 맞춰 노래를 불렀고, 각설탕 하나가 제 차례가 되자 코를 막고 홍차에 뛰어들었다.'),
   L([inTown, ashore, island('자야'), { c: 'age', min: 17, max: 18 }], {}, '술집 문틈에서 “제하하하!” 웃음이 새어 나왔다. 빠진 이 사이로 체리 파이가 보였다. 검은수염이 한 판을 더 시키자 주방장은 오늘 몫 밀가루를 몽땅 꺼냈다.'),

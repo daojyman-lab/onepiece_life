@@ -2,7 +2,7 @@
 // 원작의 조연을 배에 태우는 문은 제 배가 있어야 열린다 (needs 'ship'. 제 배를 가진 해적은 선장이다).
 // 주연급(밀짚모자 일당 등)은 배에 태우지 않는다. 문의 말에는 가치관 이름도 숫자도 쓰지 않는다.
 import { V } from '../balance';
-import { SEAFARING, age, at, st } from './paths';
+import { afterHistory, beforeHistory, SEAFARING, age, at, st } from './paths';
 import type { Cond, Fx, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -23,7 +23,7 @@ export const ISLAND_OF: Record<string, string> = {
 export const ISLANDS: Turning[] = [
   // ---------------------------------------------------------------- 이스트 블루
   {
-    id: 'isl_baratie_gin', kind: 'door', when: at(age(16, 40), SAIL, on('해상 레스토랑 발라티에')), weight: 10, repeat: 'once', speaker: { canon: 'gin' },
+    id: 'isl_baratie_gin', kind: 'door', when: at(age(16, 40), SAIL, on('해상 레스토랑 발라티에'), beforeHistory('strawHatPoster')), weight: 10, repeat: 'once', speaker: { canon: 'gin' },
     title: '뒷문 계단의 사내', body: '바다 위의 레스토랑, 그 뒷문 계단에 며칠을 굶은 사내가 쓰러져 있다. 톤파를 쥔 손에 굳은살이 두껍다. 이름난 해적 함대의 전투 총대장이었다고 한다. 요리사들은 돈 없는 손님은 손님이 아니라며 문을 닫았다.',
     doors: [
       { label: '제 돈으로 밥을 시켜 내밀고, 갈 곳이 없으면 타라고 한다', hint: '사내는 눈물을 흘리며 그릇을 비운다. 한 번 받은 밥은 잊지 않는 사람이다', needs: ['ship'], when: [FREE], values: { loyalty: D },
@@ -63,7 +63,7 @@ export const ISLANDS: Turning[] = [
   },
   // ---------------------------------------------------------------- 위대한 항로 전반
   {
-    id: 'isl_alabasta_bonclay', kind: 'door', when: at(age(16, 45), SAIL, on('알라바스타 왕국')), weight: 10, repeat: 'once', speaker: { canon: 'bonclay' },
+    id: 'isl_alabasta_bonclay', kind: 'door', when: at(age(16, 45), SAIL, on('알라바스타 왕국'), beforeHistory('alabastaRain')), weight: 10, repeat: 'once', speaker: { canon: 'bonclay' },
     title: '백조 뱃머리의 배', body: '모래 왕국의 강어귀에 백조 뱃머리를 단 배가 떠 있다. 등에 백조를 멘 화장한 사내가 발레를 추다가 물에 빠졌다. 건져 올리자 사내는 {name}의 얼굴을 만지더니, 눈 깜짝할 사이에 똑같은 얼굴이 되어 웃는다.',
     doors: [
       { label: '밤새 같이 춤추고 노래하다 벗이 된다', hint: '우정에 걸린 시간은 하룻밤이다. 사내는 제 배를 버리고 따라오겠다고 한다', needs: ['ship'], when: [FREE], values: { romance: D },
@@ -76,7 +76,7 @@ export const ISLANDS: Turning[] = [
     ],
   },
   {
-    id: 'isl_enies_gate', kind: 'door', when: at(age(17), SAIL, on('에니에스 로비')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'isl_enies_gate', kind: 'door', when: at(age(17), SAIL, on('에니에스 로비'), beforeHistory('eniesLobby')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '밤이 오지 않는 섬', body: '해가 지지 않는 사법의 섬. 폭포 한가운데에 재판소가 떠 있고, 그 뒤로 바다를 막아선 거대한 문이 보인다. 호송 열차에서 쇠사슬에 묶인 사람들이 줄지어 내린다. 여기서 끌려간 사람은 돌아온 적이 없다고 한다.',
     doors: [
       { label: '줄의 맨 끝, 가장 어린 죄수의 족쇄를 몰래 푼다', hint: '한 사람은 달아난다. 섬 전체가 {name}을(를) 쫓는다', values: { freedom: D }, danger: true,
@@ -89,7 +89,7 @@ export const ISLANDS: Turning[] = [
   },
   // ---------------------------------------------------------------- 샤본디 제도 둘레
   {
-    id: 'isl_sabaody_duval', kind: 'door', when: at(age(17, 50), SAIL, on('샤본디 제도')), weight: 10, repeat: 'once', speaker: { canon: 'duval' },
+    id: 'isl_sabaody_duval', kind: 'door', when: at(age(17, 50), SAIL, on('샤본디 제도'), afterHistory('eniesLobby'), beforeHistory('sabaodyIncident')), weight: 10, repeat: 'once', speaker: { canon: 'duval' },
     title: '철가면의 인신매매단', body: '비눗방울이 떠오르는 맹그로브 숲 앞바다, 날치를 탄 무리가 배를 에워싼다. 철가면을 쓴 두목은 수배서와 닮았다는 까닭 하나로 평생을 쫓겼다며 세상을 저주한다. 가면 밑의 얼굴은 엉망이다.',
     doors: [
       { label: '두들겨 패서 얼굴 뼈를 바로잡아 준다', hint: '두목은 거울을 보고 울음을 터뜨린다. 그날부터 은인이라며 따라다닌다', needs: ['ship'], when: [FREE], values: { dominion: D }, danger: true,
@@ -102,7 +102,7 @@ export const ISLANDS: Turning[] = [
     ],
   },
   {
-    id: 'isl_thriller_shadow', kind: 'door', when: at(age(17), SAIL, on('스릴러 바크')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'isl_thriller_shadow', kind: 'door', when: at(age(17), SAIL, on('스릴러 바크'), beforeHistory('sabaodyIncident')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '안개 속의 떠다니는 섬', body: '짙은 안개 속에서 섬만 한 배가 나타났다. 숲에는 그림자가 없는 사람들이 숨어 산다. 해가 뜨면 몸이 타 버린다고 한다. 성에서는 밤마다 꿰맨 자국투성이의 시체들이 걸어 나온다.',
     doors: [
       { label: '걸어 다니는 시체의 입에 소금을 밀어 넣어 본다', hint: '그림자 하나가 제 주인에게 돌아간다. 성의 주인이 알아챈다', values: { inquiry: D }, danger: true,
@@ -139,7 +139,7 @@ export const ISLANDS: Turning[] = [
   },
   // ---------------------------------------------------------------- 신세계
   {
-    id: 'isl_dressrosa_sai', kind: 'door', when: at(age(18, 55), SAIL, on('드레스로자')), weight: 10, repeat: 'once', speaker: { canon: 'sai' },
+    id: 'isl_dressrosa_sai', kind: 'door', when: at(age(18, 55), SAIL, on('드레스로자'), afterHistory('fishmanPact'), beforeHistory('dressrosaFree')), weight: 10, repeat: 'once', speaker: { canon: 'sai' },
     title: '투기장의 대기실', body: '투기장 대기실은 이름난 싸움꾼들로 가득하다. 꽃 나라에서 온 수군의 젊은 두령이 창을 닦다가 {name}을(를) 본다. 우승 상품이 열매라는 소문에 온 세상의 주먹이 모였다. 두령이 술병을 들어 보인다.',
     doors: [
       { label: '잔을 받고, 한 번 잔을 나눈 사이의 맹세를 한다', hint: '꽃 나라의 수군은 잔을 나눈 상대를 끝까지 따른다', needs: ['ship'], when: [FREE], values: { loyalty: D },
@@ -153,7 +153,7 @@ export const ISLANDS: Turning[] = [
     ],
   },
   {
-    id: 'isl_wholecake_tea', kind: 'door', when: at(age(18), SAIL, on('홀케이크 아일랜드')), weight: 10, repeat: 'once', speaker: 'hero',
+    id: 'isl_wholecake_tea', kind: 'door', when: at(age(18), SAIL, on('홀케이크 아일랜드'), beforeHistory('wholeCake')), weight: 10, repeat: 'once', speaker: 'hero',
     title: '과자로 지은 나라', body: '섬 전체가 달콤한 냄새를 풍긴다. 집은 비스킷이고 강은 주스다. 나무와 문짝이 노래를 한다. 이 나라의 여왕은 여섯 달마다 온 섬에서 수명을 걷어 간다고 한다. 다과회 날이 다가와 거리가 술렁인다.',
     doors: [
       { label: '과자 집 지붕을 뜯어 배가 터지도록 먹는다', hint: '평생 가장 단 하루다. 집주인이 노래로 병사를 부른다', values: { romance: D },

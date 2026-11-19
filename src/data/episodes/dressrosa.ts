@@ -6,12 +6,12 @@
 //  B 원작 그 무렵 (21) 「지하 교역항의 회색 장갑」: 돈키호테 패밀리 산하 회색 장갑단의 선장 그리지오. 패밀리 물자를 운반하며 납치한 일꾼을 몰래 팔아넘긴다.
 //    안내자 트로포(잊힌 양철 기사, 본명은 상선 조타수 마렐) · 기록자 피피(톤타타 족 이름 기록관). 원작 인물: 레오가 한 일을 보고 손을 내민다.
 //    새장이 내려온 날 주인공은 땅 밑 부두라는 다른 전선에 있다. 도플라밍고를 쓰러뜨리는 것은 루피다.
-//  C 원작 뒤 (22~) 「두 이름의 민원실」: 레메디오의 위조 신원 확인서와 상속·점포 분쟁.
+//  C 해방 뒤 「두 이름의 민원실」: 레메디오의 위조 신원 확인서와 상속·점포 분쟁.
 //    안내자 엔리코(기억을 되찾은 빵장수) · 기록자 루시아(이름 되찾기 사무소 서기). 원작 인물: 리쿠 왕(곁에 비올라)이 한 일을 보고 왕궁의 손을 빌려준다.
 // 초판의 A~E 분기를 남긴 장면도 있으나, 새 시나리오는 그 수와 조직 구조를 따르지 않는다. 앞 편의 기념품은 뒤 편에서 되돌아온다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 export const FOES_DRESSROSA: FoeDef[] = [
   // 돈키호테 패밀리 (원작)
@@ -69,7 +69,7 @@ const go = (w: string, l: string = w, b: string = l) => ({ win: w, lose: l, back
 // 표시: a_paco_trust a_isabel_trust a_rough a_ledger a_cellar a_roster a_exit a_tonta a_freed a_fake a_deal a_sabotage a_beaten a_keepsake a_done
 const A: Turning[] = [
   {
-    id: 'ep_dressrosa_a1', kind: 'door', when: at(HERE, age(12, 20), not('ep_dressrosa_a_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_dressrosa_a1', kind: 'door', when: at(HERE, age(12, 20), not('ep_dressrosa_a_done'), afterHistory('dressrosaCoup'), beforeHistory('dressrosaFree')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '끌려가는 검투사',
     intro: [
       '코리다 콜로세움에서 나오는 길에 붕대를 감은 검투사 하나가 벽에 기댄다.',
@@ -342,7 +342,7 @@ const A: Turning[] = [
 // 표시: b_tropo_trust b_pipi_trust b_rough b_info b_route b_crew b_exit b_sop b_freed b_fake b_deal b_sabotage b_beaten b_keepsake b_done
 const B: Turning[] = [
   {
-    id: 'ep_dressrosa_b1', kind: 'door', when: at(HERE, age(21, 21), not('ep_dressrosa_b_done')), weight: 40, repeat: 'once', speaker: 'hero',
+    id: 'ep_dressrosa_b1', kind: 'door', when: at(HERE, age(21, 21), not('ep_dressrosa_b_done'), afterHistory('fishmanPact'), beforeHistory('dressrosaFree')), weight: 40, repeat: 'once', speaker: 'hero',
     title: '자루 속 사람',
     intro: [
       '드레스로자에 닿은 날 오후, 코리다 콜로세움 앞에는 이글이글 열매가 걸린 대회의 표를 사려는 사람들이 줄을 선다.',
@@ -676,12 +676,12 @@ const B: Turning[] = [
   },
 ];
 
-// ================================================================ C. 원작 뒤 (22~): 가짜 신원 확인서를 파는 사무소
+// ================================================================ C. 해방 뒤: 가짜 신원 확인서를 파는 사무소
 // 표시: c_enrico_trust c_lucia_trust c_rough c_info c_lab c_list c_royal c_exit c_freed c_fake c_deal c_sabotage c_beaten c_done
 //      (앞 시나리오의 a_keepsake · b_keepsake가 여기서 되돌아온다)
 const C: Turning[] = [
   {
-    id: 'ep_dressrosa_c1', kind: 'door', when: at(HERE, age(22), not('ep_dressrosa_c_done')), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_dressrosa_c1', kind: 'door', when: at(HERE, age(21), not('ep_dressrosa_c_done'), afterHistory('dressrosaFree')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '제 집에서 쫓겨난 사람',
     intro: [
       '리쿠 왕이 돌아오고, 장난감이었던 사람들도 자기 집으로 돌아오기 시작했다.',
