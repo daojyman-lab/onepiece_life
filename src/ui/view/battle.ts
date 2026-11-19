@@ -1,5 +1,7 @@
 // 자동 전투 창 (v4 src/ui/modals/BattleModal.tsx의 hpAt · line을 옮긴다).
-import { josa } from '../../shared/core/josa';
+import { battleEventProse, battleOpening, type BattleProseLine } from '../../shared/core/combat/narrative';
+import { B } from '../../shared/data/balance';
+export { battleNarrative, battleOpening } from '../../shared/core/combat/narrative';
 import { weaponOfSkills, type Who } from '../pixel/pixelArt';
 import type { Life5 } from '../../core/types';
 import type { BattleEvent, BattleState, CUnit } from '../../shared/core/types';
@@ -8,9 +10,21 @@ import { heroWho5 } from './faces';
 /** 물약(item 'potion')이 되돌리는 체력의 몫 (v4와 같다) */
 const POTION_HEAL = 0.3;
 
+/** 긴 문장이 예전의 짧은 기술명과 같은 속도로 사라지지 않게 한다. */
+export function battleLineDelay(text: string, speed: number): number {
+  return Math.max(B.battleLineMs, Math.min(6000, 400 + text.length * 30)) / Math.max(1, speed);
+}
+
+/** 다음 사건이 아니라 지금 보이는 문장에 읽기 시간을 준다. */
+export function battleReplayDelay(b: BattleState, rows: readonly BattleProseLine[], shown: number, speed: number): number {
+  if (shown === 0) return battleLineDelay(battleOpening(b), speed);
+  const i = Math.min(shown - 1, rows.length - 1);
+  return battleLineDelay(rows[i]?.text ?? '', speed) * (b.events[i]?.k === 'round' ? 0.6 : 1);
+}
+
 /** 사건 upto개까지 진행했을 때 각 인물의 체력 */
 export function hpAt(b: BattleState, upto: number): number[] {
-  const hp = b.units.map((u) => u.maxHp);
+  const hp = b.units.map((u, i) => b.initialHp?.[i] ?? u.maxHp);
   for (let i = 0; i < upto && i < b.events.length; i++) {
     const e = b.events[i];
     if (e.k === 'act') hp[e.target] = Math.max(0, hp[e.target] - e.dmg);
@@ -28,33 +42,9 @@ export function battleFormation(b: BattleState): { mode: 'duel' | 'group'; left:
   return { mode: left.length === 1 && right.length === 1 ? 'duel' : 'group', left, right };
 }
 
-/** 사건 한 줄의 글 */
+/** 기존 진입점도 소설형 본문을 사용한다. 수치는 battleNarrative의 detail로 남긴다. */
 export function battleLine(b: BattleState, e: BattleEvent): string {
-  return josa(rawBattleLine(b, e));
-}
-function rawBattleLine(b: BattleState, e: BattleEvent): string {
-  const n = (i: number) => b.units[i]?.name ?? '?';
-  switch (e.k) {
-    case 'round': return `── ${e.n}합 ──`;
-    case 'act': {
-      if (e.skill === 'bound') return `${n(e.who)}: ${e.name}`;
-      const tail = e.dodge ? (e.note ?? '빗나갔다') : e.dmg > 0 ? `${e.dmg}${e.crit ? ' 치명타!' : ''}${e.note ? ` (${e.note})` : ''}` : (e.note ?? '');
-      return `${n(e.who)} ▶ ${n(e.target)} 「${e.name}」 ${tail}`.trimEnd();
-    }
-    case 'heal': return `${n(e.who)} 「${e.name}」 ${n(e.target)} 체력 +${e.amount}`;
-    case 'guard': return `${n(e.who)} 「${e.name}」`;
-    case 'down': return `${n(e.who)}이(가) 쓰러졌다!`;
-    case 'join': return `${n(e.who)}이(가) ${e.side === 'L' ? '우리 편 싸움에 합세했다' : '적의 싸움에 합세했다'}`;
-    case 'retreat': {
-      const dice = e.roll !== undefined ? ` [주사위 ${e.roll} / ${e.need} 이하 성공]` : '';
-      return (e.ok ? `${n(e.who)}이(가) 물러났다` : `${n(e.who)}이(가) 물러나려다 실패했다`) + dice;
-    }
-    case 'deathmatch': return `⚠ ${n(e.who)}이(가) 빈사 상태다! 목숨을 건 싸움으로 바뀌었다. 이제 물러날 수 없다!`;
-    case 'item': return `${n(e.who)}이(가) ${e.name}을(를) 썼다`;
-    case 'drown': return `${n(e.who)}이(가) 바다에 빠졌다! 힘이 빠진다…`;
-    case 'rest': return `${n(e.who)}이(가) 숨을 고른다`;
-    case 'end': return e.result === 'win' ? '★ 승리 ★' : e.result === 'retreat' ? '물러났다' : '패배…';
-  }
+  return battleEventProse(b, e).text;
 }
 
 /** 전투 인물의 겉모습: 주인공이면 heroWho5 (몸의 표시까지) */

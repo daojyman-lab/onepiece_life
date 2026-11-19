@@ -407,3 +407,12 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 /* 누군가 빈사가 되어 목숨을 건 싸움으로 바뀌었을 때의 경고 */
 .deathmatch-alert { border-color: var(--red, #c0392b); animation: deathmatch-blink 0.5s steps(2) 3; }
 @keyframes deathmatch-blink { 50% { opacity: 0.35; } }
+
+/* 합별 서사 본문과 실제 판정 수치를 분리한다. */
+.battle-prose-log .battle-opening { margin: 4px 4px 8px; line-height: 1.65; color: var(--ink-soft); }
+.battle-log .battle-prose { padding: 7px 5px; line-height: 1.7; font-size: 12px; font-weight: normal; }
+.battle-prose-text { display: block; overflow-wrap: anywhere; }
+.battle-detail { display: block; margin-top: 3px; font-size: 10px; color: var(--ink-soft); font-weight: normal; }
+.battle-log .battle-round { padding: 5px; background: var(--paper-d); }
+.battle-round .battle-prose-text { font-weight: bold; }
+@media (max-width: 760px) { .battle-log .battle-prose { font-size: 13px; line-height: 1.7; } }

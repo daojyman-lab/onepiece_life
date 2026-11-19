@@ -3,29 +3,27 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sfx } from '../../app/sound';
 import { josa } from '../../shared/core/josa';
-import { B } from '../../shared/data/balance';
 import { drawScene } from '../pixel/pixelArt';
 import { battleSpeedOf } from '../../app/flow';
 import { actions, dispatch, useStore } from '../../app/store';
 import type { Life5, Pending5 } from '../../core/types';
 import { Face, Gauge, Modal } from '../common';
-import { battleFormation, battleLine, hpAt, resultLine, sceneOf, unitWho } from '../view';
+import { battleFormation, battleReplayDelay, battleNarrative, battleOpening, hpAt, resultLine, sceneOf, unitWho } from '../view';
 
-/** '합' 구분 줄은 이 몫만큼 빨리 넘긴다 (v4와 같다) */
-const ROUND_PACE = 0.6;
 const SPEEDS = [1, 2, 4] as const;
 
 export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: 'battle' }> }) {
   const st = useStore();
   const b = p.battle;
   const total = b.events.length;
+  const narrative = useMemo(() => battleNarrative(b), [b]);
   const [idx, setIdx] = useState(0);
   const speed = battleSpeedOf(st.settings.battleSpeed, st.settings.speed);   // 이야기가 빠르면 전투도 그만큼 빠르게 (4배속까지)
-  const ms = B.battleLineMs / speed;
+  const ms = battleReplayDelay(b, narrative, idx, speed);
   // 한 줄씩 저절로 넘긴다
   useEffect(() => {
     if (idx >= total) return;
-    const id = setTimeout(() => setIdx((i) => Math.min(total, i + 1)), b.events[idx]?.k === 'round' ? ms * ROUND_PACE : ms);
+    const id = setTimeout(() => setIdx((i) => Math.min(total, i + 1)), ms);
     return () => clearTimeout(id);
   }, [idx, total, ms]);
   const hp = useMemo(() => hpAt(b, idx), [b, idx]);
@@ -109,10 +107,14 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
       )}
       {p.escape && <div class="paper red t9" style={{ textAlign: 'center' }}><b>물러나려 했지만 붙잡혔다! [주사위 {p.escape.roll} / {p.escape.need} 이하 성공]</b></div>}
       {dm && <div class="paper red deathmatch-alert" role="alert" style={{ textAlign: 'center' }}><b>⚠ {josa(`${b.units[dm.who]?.name ?? '누군가'}이(가) 빈사 상태다!`)}<br />목숨을 건 싸움으로 바뀌었다 — 이제 물러날 수 없다!</b></div>}
-      <div class="paper battle-log" ref={logRef}>
+      <div class="paper battle-log battle-prose-log" ref={logRef} role="log" aria-label="전투 이야기">
+        <p class="battle-opening">{battleOpening(b)}</p>
         {b.events.slice(0, idx).map((e, i) => {
           const me = e.k === 'act' && e.who === heroI;
-          return <div key={i} class={`${e.k === 'act' && e.crit ? 'crit' : ''} ${me ? 'me' : ''} ${e.k === 'deathmatch' ? 'red' : ''}`}>{battleLine(b, e)}</div>;
+          return <div key={i} class={`battle-prose ${e.k === 'round' ? 'battle-round' : ''} ${e.k === 'act' && e.crit ? 'crit' : ''} ${me ? 'me' : ''} ${e.k === 'deathmatch' ? 'red' : ''}`}>
+            <span class="battle-prose-text">{narrative[i].text}</span>
+            <span class="battle-detail">{narrative[i].detail}</span>
+          </div>;
         })}
       </div>
       {done ? (

@@ -37,7 +37,7 @@ export function startBattle(units: CUnit[], assign: Record<number, number>, seed
   for (const e of enemies) if (!duels.some((d) => d.r === e)) heroDuel.helpersR.push(e);
 
   return {
-    round: 0, units, duels, events: [], result: null,
+    round: 0, units, duels, events: [], result: null, initialHp: units.map((u) => u.hp),
     rng: { seed, cursor: 0 }, usage: {}, awaiting: null, resting: false, atSea,
     navigator: units.some((u) => u.side === 'L' && u.role === 'navigator'),
   };
@@ -101,14 +101,23 @@ function tacticDeal(u: CUnit, sk: Skill | null, round: number) {
 
 function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skill | null, power: number, extra: { seastone?: boolean; helper?: boolean; proc?: boolean; element?: string; name?: string } = {}) {
   const a = b.units[ai], t = b.units[ti];
+  const facts = {
+    helper: extra.helper === true, stat: sk?.stat ?? 'str' as const, speedGap: a.st.spd - t.st.spd,
+    guarded: (t.guardTurns > 0 && t.guard > 0) || t.pGuard > 0, observation: false,
+    armament: false,
+    actorHp: a.hp, targetHp: t.hp, targetAfter: t.hp,
+  };
   const area = sk?.tags.includes('area');
   // 회피
   let dodge = C.dodge.base + (t.st.spd - a.st.spd) * C.dodge.perSpd;
+  const withoutObservation = Math.max(0, Math.min(C.dodge.max, dodge)) + t.pDodge + (t.evadeTurns > 0 ? t.evade : 0);
   dodge = Math.max(0, Math.min(C.dodge.max, dodge)) + t.observation * C.dodge.perObs + t.pDodge + (t.evadeTurns > 0 ? t.evade : 0);
   if (area) dodge *= C.dodge.areaMult;
   const name = extra.name ?? (sk ? sk.name : extra.seastone ? '해루석 탄환' : extra.helper ? '협공' : '기본 공격');
-  if (r() < Math.min(0.95, dodge)) {
-    b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg: 0, crit: false, dodge: true });
+  const dodgeRoll = r();
+  facts.observation = t.observation > 0 && dodgeRoll >= Math.min(0.95, withoutObservation * (area ? C.dodge.areaMult : 1)) && dodgeRoll < Math.min(0.95, dodge);
+  if (dodgeRoll < Math.min(0.95, dodge)) {
+    b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg: 0, crit: false, dodge: true, facts });
     if (t.evadeTurns > 0) t.evadeTurns = 0;
     return 0;
   }
@@ -120,6 +129,7 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   const am = a.mods, tm = t.mods;
   const crit = r() < C.crit.base + a.st.luk * C.crit.perLuk + (am.crit ?? 0);
   const lg = logiaMult(a, t, sk, extra);
+  facts.armament = a.armament > 0 && lg.mult > logiaMult({ armament: 0, weapon: a.weapon }, t, sk, extra).mult;
   const logia = lg.mult;
   const guard = (t.guardTurns > 0 ? t.guard : 0) + t.pGuard;
   // 패시브: 공격하는 쪽
@@ -146,7 +156,8 @@ function hit(b: BattleState, r: Rng, d: number, ai: number, ti: number, sk: Skil
   if (t.guardTurns > 0) t.guardTurns -= 1;
   checkDeathmatch(b, ti);
   const note = stood ? '쓰러지지 않고 버텼다!' : resist === 0 ? '전혀 통하지 않는다' : resist < 1 ? '잘 안 먹힌다' : lg.why ?? undefined;
-  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note, proc: extra.proc });
+  facts.targetAfter = t.hp;
+  b.events.push({ k: 'act', d, who: ai, target: ti, skill: sk?.id ?? 'basic', name, dmg, crit, dodge: false, note, proc: extra.proc, facts });
   // 패시브: 흡수 · 묶기 · 봉인 · 추가 공격
   if (am.drain && dmg > 0 && a.hp < a.maxHp) {
     const amount = Math.min(a.maxHp - a.hp, Math.max(1, Math.round(dmg * am.drain)));
@@ -263,13 +274,13 @@ function act(b: BattleState, r: Rng, d: Duel, ai: number, ti: number) {
   const e = sk.effect;
   if (!e) return;
   const scale = 0.7 + 0.6 * (a.skills[i].mastery / 100);
-  if (e.type === 'guard') { a.guard = e.value; a.guardTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name }); }
-  else if (e.type === 'dodge') { a.evade = e.value; a.evadeTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name }); }
+  if (e.type === 'guard') { a.guard = e.value; a.guardTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name, skill: sk.id, effect: e.type }); }
+  else if (e.type === 'dodge') { a.evade = e.value; a.evadeTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name, skill: sk.id, effect: e.type }); }
   else if (e.type === 'heal') {
     const amount = Math.round(a.maxHp * e.value * scale);
     a.hp = Math.min(a.maxHp, a.hp + amount);
     b.events.push({ k: 'heal', d: d.id, who: ai, target: ai, amount, name: sk.name });
-  } else if (e.type === 'buff') { a.buff = e.value; a.buffTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name }); }
+  } else if (e.type === 'buff') { a.buff = e.value; a.buffTurns = e.turns; b.events.push({ k: 'guard', d: d.id, who: ai, name: sk.name, skill: sk.id, effect: e.type }); }
   else if (e.type === 'bind' || e.type === 'debuff') {
     const ok = r() < e.value * scale;
     if (ok) t.bound = Math.max(t.bound, e.turns);

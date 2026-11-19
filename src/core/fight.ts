@@ -1,6 +1,7 @@
 // 싸움: 붙을지 물러날지를 묻고, 붙으면 v4의 자동 전투로 끝까지 돌린 뒤 결과를 몸과 마음에 남긴다.
 import { storyPause } from './turning';
 import { B } from '../shared/data/balance';
+import { battleRecap } from '../shared/core/combat/narrative';
 import { makeEnemy } from '../shared/data/bosses';
 import { FRUIT_BY_ID } from '../shared/data/fruits';
 import { ITEM_BY_ID } from '../shared/data/items';
@@ -280,6 +281,8 @@ export function ackBattle(s: Life5): void {
   s.pending = null;
   const foe = p.foe;
   const won = p.result === 'win';
+  const recap = battleRecap(p.battle);
+  const withRecap = (text: string) => recap ? `${text} ${recap}` : text;
   const style = primaryStyle(s);
   if (style) {
     const key = `styleCombat:${style}:${foe.id}`;
@@ -291,7 +294,7 @@ export function ackBattle(s: Life5): void {
     }
   }
   if (foe.spar) {
-    logLine(s, won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`, 'heavy', 'battle');
+    logLine(s, withRecap(won ? `${foe.name}과(와) 대련을 마쳤다. 마지막 공방에서 앞섰다.` : `${foe.name}과(와) 대련을 마쳤다. 이번에는 상대의 움직임을 따라가지 못했다.`), 'heavy', 'battle');
     const next = won ? p.next?.win : p.next?.lose;
     if (next) { applyFx(s, [{ op: 'queue', turning: next }]); storyPause(s); }
     return;
@@ -325,7 +328,7 @@ export function ackBattle(s: Life5): void {
   if (p.minor) {
     s.stats.fights += 1;
     if (won) { s.stats.wins += 1; s.hero.fame += F.minorFame; }
-    logLine(s, p.minor.outcomeLine, 'light', 'battle');
+    logLine(s, withRecap(p.minor.outcomeLine), 'light', 'battle');
     if (!won && p.battle.deathmatch && chance(r, riskOf(s, foe, true, p.atSea).death * F.minorDeathMult)) dieOrSurvive(s, r, foe, battleWound);
     return;
   }
@@ -345,13 +348,13 @@ export function ackBattle(s: Life5): void {
     s.stats.wins += 1;
     recordTraitEvent(s, 'win', s.hero.sea, foe.id);
     s.hero.fame += Math.round(foePower(foe) * F.famePerPower);
-    logLine(s, `${foe.name}을(를) 쓰러뜨렸다.`, 'heavy', 'battle');
+    logLine(s, withRecap(`${foe.name}과(와)의 싸움에서 이겼다.`), 'heavy', 'battle');
     if (s.flags.includes(grudge)) {           // 한 번 졌던 상대를 다시 붙어 이겼다
       s.flags = s.flags.filter((f) => f !== grudge);
       applyFx(s, [{ op: 'mark', id: 'unyielding' }]);
     }
   } else {
-    logLine(s, p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`, 'heavy', 'battle');
+    logLine(s, withRecap(p.result === 'retreat' ? `${foe.name}에게서 간신히 몸을 빼냈다.` : `${foe.name}에게 졌다.`), 'heavy', 'battle');
   }
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {

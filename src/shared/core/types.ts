@@ -196,11 +196,17 @@ export interface CUnit {
 
 export interface Duel { id: number; l: number; r: number; helpersL: number[]; helpersR: number[]; over: boolean; winner: 'L' | 'R' | null }
 
+/** 공격 당시의 사실. 과거 저장에는 없을 수 있다. 서사를 위해 판정이나 난수를 다시 계산하지 않는다. */
+export interface StrikeFacts {
+  helper: boolean; stat: Skill['stat']; speedGap: number;
+  guarded: boolean; observation: boolean; armament: boolean;
+  actorHp: number; targetHp: number; targetAfter: number;
+}
 export type BattleEvent =
   | { k: 'round'; n: number }
-  | { k: 'act'; d: number; who: number; target: number; skill: string; name: string; dmg: number; crit: boolean; dodge: boolean; note?: string; proc?: boolean }
+  | { k: 'act'; d: number; who: number; target: number; skill: string; name: string; dmg: number; crit: boolean; dodge: boolean; note?: string; proc?: boolean; facts?: StrikeFacts }
   | { k: 'heal'; d: number; who: number; target: number; amount: number; name: string }
-  | { k: 'guard'; d: number; who: number; name: string }
+  | { k: 'guard'; d: number; who: number; name: string; skill?: string; effect?: 'guard' | 'dodge' | 'buff' }
   | { k: 'down'; d: number; who: number }
   | { k: 'join'; d: number; who: number; side: 'L' | 'R' }
   | { k: 'retreat'; who: number; ok: boolean; roll?: number; need?: number }   // 주사위: roll(1~100)이 need 이하면 성공
@@ -211,6 +217,7 @@ export type BattleEvent =
   | { k: 'end'; result: 'win' | 'lose' | 'retreat' };
 
 export interface BattleState {
+  initialHp?: number[];       // 전투 시작 시 HP. 옛 저장은 maxHp로 재생한다.
   round: number;
   units: CUnit[];
   duels: Duel[];
