@@ -47,7 +47,7 @@ describe('출생 주사위', () => {
       expect(o.hero.surname).toBeNull();
       expect(o.hero.money).toBe(V.wealthMoney.poor);
       expect(o.hardship).toBe(V.hardship.poor + V.hardship.orphan);
-      expect(o.log[0].text).toContain('불렀다');                 // 고아의 출생 이야기
+      expect(o.log.slice(0, 4).map((l) => l.text).join(' ')).toContain('불렀다');   // 출생 소개는 문장마다 한 줄                 // 고아의 출생 이야기
       const n = newLife5(100 + i, { wealth: 'noble', lineage: 'commoner' });
       expect(n.hero.surname).not.toBeNull();
       expect(n.hero.secretSurname).toBeNull();

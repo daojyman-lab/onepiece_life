@@ -10,6 +10,11 @@ export function logLine(s: Life5, text: string, weight: LogWeight = 'light', typ
   if (s.log.length > V.log.keep) s.log.splice(0, s.log.length - V.log.keep);
 }
 
+/** 문장이 여럿인 글을 문장마다 한 줄씩 남긴다. 화면이 기록을 한 줄씩 띄우므로 긴 소개도 한 문장씩 올라온다. */
+export function logSentences(s: Life5, text: string, weight: LogWeight = 'light', type: LogType = 'life'): void {
+  for (const sentence of text.split(/(?<=[.!?])\s+(?=\S)/)) logLine(s, sentence, weight, type);
+}
+
 /** 해 구분선. 화면은 text 대신 age와 island로 나이와 장소를 보여 준다. */
 export function yearDivider(s: Life5): void {
   logLine(s, `── ${s.age}살 ──`, 'year', 'info', { island: s.hero.island });

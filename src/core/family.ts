@@ -5,7 +5,7 @@ import { V } from '../data/balance';
 import { NEWBORN_SIBLING, SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
 import { RELATION_KIND } from '../data/words';
 import { clamp } from '../shared/core/util';
-import { logLine } from './log';
+import { logLine, logSentences } from './log';
 import type { Life5, Lineage, Person, SiblingWelcomeAction } from './types';
 
 /** 형제의 관계 낱말. 손위는 주인공의 성별에 따라 부르는 말이 다르다 (아들에게 형 · 누나, 딸에게 오빠 · 언니) */
@@ -80,13 +80,13 @@ export function introduceFamily(s: Life5): void {
       ? `${guardian.relation} ${guardian.name}이(가) 어린아이를 거두어 길렀다.`
       : s.flags.includes('lonely') ? '기댈 가족 없이 마을 한구석에서 자랐다.'
       : '부모가 누구인지 알 길은 없었다. 마을에서 어린 시절을 보냈다.';
-    logLine(s, text, 'heavy', 'world');
+    logSentences(s, text, 'heavy', 'world');
     return;
   }
 
   const parents = s.people.filter((p) => RELATION_KIND.parent.includes(p.relation)).map((p) => `${p.relation} ${p.name}`);
   const [father, mother] = parents;
-  logLine(s, `${father}와(과) ${mother}의 손에서 자랐다.${FAMILY_BACKGROUND[s.hero.lineage] ?? ''}`, 'heavy', 'world');
+  logSentences(s, `${father}와(과) ${mother}의 손에서 자랐다.${FAMILY_BACKGROUND[s.hero.lineage] ?? ''}`, 'heavy', 'world');
   const older = s.people.filter((p) => RELATION_KIND.sibling.includes(p.relation)).sort((a, b) => b.age - a.age)
     .map((p) => `${p.age}살 ${p.relation} ${p.name}`);
   if (older.length) logLine(s, `집에는 먼저 태어난 ${older.join(', ')}이(가) 있었다.`, 'heavy', 'world');

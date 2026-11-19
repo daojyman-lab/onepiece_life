@@ -9,7 +9,7 @@ import { introduceFamily, rollFamily } from './family';
 import { townLabel } from '../data/homes';
 import { INLAND_TOWNS } from '../data/landlocked';
 import { LIMBS } from './body';
-import { logLine, yearDivider } from './log';
+import { logLine, logSentences, yearDivider } from './log';
 import { birthEdition } from './world-news';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
@@ -93,12 +93,13 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
     ? `${pick(r, orphanStories).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
     : `${h.town}의 ${WEALTH_HOUSE[h.wealth]}에서 ${fullName(h)}이(가) 태어났다.`;
   const gifts = h.talents.map(traitName).join(', ');
-  for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
+  logSentences(s, born, 'heavy', 'world');
+  logLine(s, `타고난 것: ${gifts}`, 'heavy', 'world');
   s.age = V.birth.startAge;
   rollFamily(s, r);
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
   const town = HOMETOWNS.find((t) => t.home === h.home && t.name === h.town);
-  if (town) logLine(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
+  if (town) logSentences(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
   introduceFamily(s);
   birthEdition(s);
   s.hero.standing = 'child';
