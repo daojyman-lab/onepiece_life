@@ -67,6 +67,7 @@ export function emptyLife(seed: number): Life5 {
     seq: 0,
     ended: null,
     vows: { active: null, history: [] },
+    debut: null,
   };
 }
 

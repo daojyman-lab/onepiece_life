@@ -1,6 +1,7 @@
 // 생애 단계 · 전성기 · 잠재력 · 노화 (통합 기획 4장 · 5장)
 import { chance, pick, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
+import { SEA_STANDINGS } from '../data/landlocked';
 import { POTENTIAL_IDS, POTENTIALS, PRIME_NAME, STAGES } from '../data/stages';
 import { logLine } from './log';
 import type { Branch, Life5, PotentialId, StatKey } from './types';
@@ -45,6 +46,23 @@ export function primeYear(s: Life5): void {
     logLine(s, '가장 빛나던 시절이 조용히 저물었다. 쌓은 것은 남았지만, 시간은 다시 제 빠르기로 흐른다.', 'heavy', 'life');
     s.timeline.push({ age: s.age, text: '전성기가 저물었다' });
   }
+}
+
+/** 첫 출항의 해 한가운데인가: 처음 바다로 나선 그 나이. 전성기와 겹치면 전성기가 이미 느리게 흐르므로 더하지 않는다 */
+export function inDebut(s: Life5, age = s.age): boolean {
+  return !!s.debut && s.debut.age === age && !inPrime(s, age);
+}
+
+/**
+ * 처음 바다로 나선다 (항구를 떠나거나 이야기가 먼 섬으로 데려갈 때). 바다를 다니는 처지로 V.voyage.minAge살이 넘어야 한다.
+ * 그해는 토막을 한 바퀴 더 돈다: 원작의 이스트 블루 ~ 마린포드가 몰린 열여섯~열아홉 무렵을 더 촘촘히 겪는다
+ */
+export function beginDebut(s: Life5): void {
+  if (s.debut !== null) return;                 // 이미 나섰거나(값) 옛 저장(undefined)
+  if (s.age < V.voyage.minAge || !SEA_STANDINGS.includes(s.hero.standing)) return;
+  s.debut = { age: s.age, lap: false };
+  logLine(s, `${s.hero.name}은(는) 처음으로 바다에 나섰다. 보이는 것마다 낯설어서, 하루가 길다.`, 'heavy', 'life');
+  s.timeline.push({ age: s.age, text: '처음 바다에 나섰다' });
 }
 
 const BODY: readonly StatKey[] = ['str', 'spd', 'vit'];

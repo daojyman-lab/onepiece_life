@@ -20,7 +20,7 @@ export function usedTo(s: Life5, island: string, c: IslandClimate): boolean {
  * 같은 인생 · 같은 나이 · 같은 토막이면 같은 기후다 (저장 · 불러오기 뒤에도)
  */
 export function climateRng(s: Life5): Rng {
-  const lap = s.prime?.lap ? 1 : 0;
+  const lap = s.prime?.lap || (s.debut?.lap && s.debut.age === s.age) ? 1 : 0;
   return rngOf({ seed: (s.rng.seed ^ 0x636c696d) >>> 0, cursor: ((s.age * 2 + lap) * 4 + s.part) * 4 });
 }
 

@@ -40,7 +40,7 @@ import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
 import { climatePart } from './climate';
 import { deliverEdition } from './world-news';
-import { agingYear, inPrime, potentialMult, primeYear } from './stages';
+import { agingYear, inDebut, inPrime, potentialMult, primeYear } from './stages';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
 import { hasLocalStyleLesson, isMartialBranch, practiceStyles, primaryStyle, styleName, styleUsable } from './styles';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -55,9 +55,9 @@ export function isQuiet(s: Life5): boolean {
   return s.hero.standing === 'retired' || (s.flags.includes('apex') && !inPrime(s));
 }
 
-/** 전성기의 첫 바퀴인가: 이 바퀴가 끝나도 나이를 먹지 않는다 */
+/** 한 바퀴 더 돌 해의 첫 바퀴인가 (전성기, 첫 출항한 해): 이 바퀴가 끝나도 나이를 먹지 않는다 */
 function firstLap(s: Life5): boolean {
-  return inPrime(s) && !s.prime!.lap;
+  return (inPrime(s) && !s.prime!.lap) || (inDebut(s) && !s.debut!.lap);
 }
 
 /** 한 토막을 진행한다. 대기 중인 일이 있으면 아무것도 하지 않는다. */
@@ -316,20 +316,26 @@ export function lineFits(s: Life5, l: DailyLine5): boolean {
     && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
-/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */
+/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기와 첫 출항한 해에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */
 function nextPart(s: Life5, r: Rng): void {
   const part = s.part + 1;
   if (part < V.partsPerYear) { s.part = part as Life5['part']; return; }
   s.part = 0;
   if (firstLap(s)) {
-    s.prime!.lap = true;
+    if (inPrime(s)) {
+      s.prime!.lap = true;
+      logLine(s, '같은 해, 전성기의 두 번째 항해가 시작되었다.', 'heavy', 'life');
+    } else {
+      s.debut!.lap = true;
+      logLine(s, '해가 바뀐 줄 알았는데, 바다에 나선 첫해는 아직 끝나지 않았다. 배울 것이 끝없이 밀려온다.', 'heavy', 'life');
+    }
     s.stopsThisYear = 0;
-    logLine(s, '같은 해, 전성기의 두 번째 항해가 시작되었다.', 'heavy', 'life');
     partCompanions(s);
     voyage(s);
     return;
   }
   if (s.prime) s.prime.lap = false;
+  if (s.debut) s.debut.lap = false;
   s.age += 1;
   for (const p of s.people) if (p.alive) p.age += 1;   // 이름난 사람도, 곁의 사람도 주인공과 함께 나이를 먹는다
   s.stopsThisYear = 0;

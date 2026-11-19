@@ -80,6 +80,8 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (LIFE_ARRAYS.some((k) => !Array.isArray(s[k])) || LIFE_OBJECTS.some((k) => !isObj(s[k]))) return null;
   if (isObj(s.vows) && (!Array.isArray(s.vows.history) || (s.vows.active !== null && !isObj(s.vows.active)))) return null;
   if (!pendingOk(s.pending)) return null;      // 손으로 고친 파일의 깨진 창이 화면을 무너뜨리지 않게
+  // 첫 출항을 기록하기 전의 옛 저장: 이미 바다로 나설 나이를 넘었으면 지난 일로 둔다 (불러온 뒤 갑자기 느려지지 않게)
+  if (x.debut === undefined && typeof x.age === 'number' && x.age >= V.voyage.minAge) s.debut = { age: -1, lap: false };
   // 태어난 형편을 모르는 옛 저장은 지금의 형편으로 (몰락을 세지 않는다)
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);

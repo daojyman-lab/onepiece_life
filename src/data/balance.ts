@@ -27,6 +27,8 @@ export const V = {
   stopsQuiet: 0.4,
   // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
   prime: { minAge: 22, maxAge: 40, years: 5, tier: 3 },
+  // 첫 출항 (core/stages.ts beginDebut): 바다를 다니는 처지로 voyage.minAge살 넘어 처음 바다에 나선 그해도 토막을 한 바퀴 더 돈다.
+  // 전성기와 겹치면 더하지 않는다
   // 노화: from살부터 한 해에 rolls번, 확률 start + perYear×(나이−from) + wear×(잃은 부위 + 부상)로 근력 · 속도 · 체력 하나가 1 줄어든다 (cap까지)
   aging: { from: 50, start: 0.25, perYear: 0.03, wear: 0.1, cap: 0.9, rolls: 2, lineP: 0.35 },                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
