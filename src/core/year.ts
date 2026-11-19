@@ -24,7 +24,8 @@ import { dayLine, isRecent, logLine, yearDivider } from './log';
 import { openQueued, openTurning, pickTurning, refreshEntryDoor, repeatAllows, STORY_PREFIX, storyRng, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
-import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
+import { expireVow } from './vow';
+import { dreamVowYear } from './dream-vow';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
 import { KUMA_MET, kumaSighting } from '../data/kuma';
 import { TURNING_BY_ID } from '../data/turnings';
@@ -82,8 +83,6 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
     if (openTurning(s, SIBLING_REUNION)) return;
     delete s.siblingMeeting;
   }
-  const vowTurning = chosenActivity ? null : nextLifeVowTurning(s);
-  if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
   const awakening = chosenActivity ? null : nextTraitAwakening(s);
   if (awakening && openTurning(s, TURNING_BY_ID[awakening])) return;
@@ -106,7 +105,6 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   const act = chosenActivity ?? activityOf(s, r);
   const island = s.hero.island;
   if (chosenActivity === 'rest') logLine(s, '한 철 동안 위험한 일을 멈추고 몸을 쉬게 했다.', 'heavy', 'life');
-  recordVowActivity(s, act);
   recordTraitEvent(s, 'activity', act, String(s.age));
   dailyLine(s, act, r);
   growPart(s, act, r);
@@ -344,6 +342,7 @@ function nextPart(s: Life5, r: Rng): void {
   voyage(s);
   primeYear(s);
   dreamYear(s);
+  dreamVowYear(s);
   agingYear(s, r);
 }
 

@@ -187,7 +187,6 @@ describe('한 해의 진행', () => {
   });
   it('조건이 맞는 사건이 하나도 없어도 해는 넘어간다', () => {
     const s0 = { ...newLife5(3), pending: null, age: 30, hero: { ...newLife5(3).hero, standing: 'settled' as const, home: 'zou' as const } };
-    s0.vows!.declined = true; // 생애 서약 제안도 없는 조건에서 시간 진행만 본다
     expect(flow(s0, 4).age).toBe(31);
   });
   it('불변 조건을 지킨다', () => {

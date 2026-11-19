@@ -16,7 +16,6 @@ function traveler(port: string, age = 25) {
   Object.assign(s.hero, { standing: 'pirate', island: port, sea: seaOfPort(port), money: 50000 });
   s.pending = null;
   s.age = age;
-  s.vows!.declined = true;
   return s;
 }
 

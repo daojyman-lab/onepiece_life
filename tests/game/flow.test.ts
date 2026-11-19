@@ -59,10 +59,11 @@ describe('흐름', () => {
     expect(nextTick(base({ life, shownId: lastLogId(life) }))).toEqual({ do: 'wait' });
   });
   it('1배속으로 한 인생은 25~45분이다', () => {
-    const lives = Array.from({ length: 40 }, (_, i) => autoplay5(9000 + i, 'random').s);
+    // 40명만 보면 표본의 흔들림(±3분)이 25~45분의 경계를 넘나든다. 120명의 평균으로 본다
+    const lives = Array.from({ length: 120 }, (_, i) => autoplay5(9000 + i, 'random').s);
     const avg = lives.reduce((a, s) => a + estimateMinutes(s.seq, s.stats.stops), 0) / lives.length;
     expect(avg).toBeGreaterThan(25); expect(avg).toBeLessThan(45);
-  }, 120000);
+  }, 300000);
 });
 
 describe('읽는 동안 멈춤', () => {

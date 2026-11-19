@@ -1,3 +1,4 @@
+import { VOWS } from '../data/vows';
 import { AMAZON_ROADS } from '../data/training-routes';
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
 import { normalizeRouteSave } from './route-save';
@@ -188,15 +189,17 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (life.traits !== undefined && !isObj(life.traits)) return null;
   if (!Array.isArray(life.hero.talents) || !Array.isArray(life.strengths)) return null;
   normalizeTraits(life);
-  // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다.
+  // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다. 없어진 생애 서약(10·22·36살 제안)이 진행 중이면 내려놓는다.
   if (life.vows?.active) {
-    life.vows.active.island ??= life.hero.island;
-    life.vows.active.progress ??= [];
-    if (life.vows.active.level) {
-      life.vows.active.activities ??= [];
-      life.vows.active.choices ??= [];
+    if (!VOWS[life.vows.active.id]) life.vows.active = null;
+    else {
+      life.vows.active.island ??= life.hero.island;
+      life.vows.active.progress ??= [];
     }
   }
+  if (life.vows) delete (life.vows as unknown as Record<string, unknown>).declined;
+  // 꿈의 서약: 옛 저장에는 없다. 꿈을 이미 품었으면 약속한 사람 없이 첫 길목부터 걷는다
+  if (life.dreamVow !== undefined && (!isObj(life.dreamVow) || !isObj(life.dreamVow.cleared) || typeof life.dreamVow.streak !== 'number')) return null;
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;
   // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다

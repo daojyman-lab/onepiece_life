@@ -86,7 +86,6 @@ describe('쿠마에게 패배한 뒤의 수련', () => {
   });
   it('스릴러 바크에서 물러나면 뒤에 샤본디에서 다시 싸움을 권하지 않는다', () => {
     const s = traveler('스릴러 바크', 18);
-    s.vows!.declined = true;
     for (const scene of ['bark_bell', 'florian_echo', 'florian_names']) {
       expect(nextDoor(s).turning).toBe(scene);
       apply5(s, { type: 'answer', index: 0 });

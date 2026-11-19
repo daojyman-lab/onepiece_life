@@ -19,7 +19,7 @@ import { logLine } from './state';
 import { addValues, isDeep, opensSpecial } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
-import { advanceVow, canBeginVow, recordVowChoice } from './vow';
+import { advanceVow, canBeginVow } from './vow';
 import { afterLifeStoryChoice } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
@@ -317,7 +317,7 @@ export function answerDoor(s: Life5, index: number): void {
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, choice: key, ...(canon ? { canon } : {}) });
   // 서약·각성·동생 탄생처럼 때가 되면 반드시 열리는 장면은 보통 사건의 멈춤 예산에서 뺀다.
-  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening' &&
+  if (!t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening' &&
       t.id !== SIBLING_BIRTH_ID && t.id !== SIBLING_BIRTH_AWAY_ID && t.id !== SIBLING_REUNION_ID) {
     s.stats.stops += 1;
     s.stats.stopsAt.push(s.age);
@@ -332,7 +332,6 @@ export function answerDoor(s: Life5, index: number): void {
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
   if (t.id.startsWith(STORY_PREFIX) || t.id.startsWith('life_course_')) storyPause(s);   // 생애 코스에서 장편으로 돌아올 때도 막 사이의 쉼을 잇는다
-  if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
   // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.

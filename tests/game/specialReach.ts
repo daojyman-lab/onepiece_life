@@ -249,13 +249,15 @@ export function tryReach(target: SpecialDoor, seed: number, home: HomeId, chaseP
 export function reach(target: SpecialDoor, tries: number, seed0?: number): number {
   let k = 0;
   // 시간 제한이 있는 초대는 이전에 끝까지 플레이한 출생을 먼저 재현한다.
-  const routes: Record<string, [number, HomeId][]> = {
+  // [시드, 고향, 갈래 표시를 쫓는가(기본 true)] — tools/find-special-replays.ts 또는 같은 방식으로 찾는다
+  const routes: Record<string, [number, HomeId, boolean?][]> = {
     'path_warlord#2': [[60, 'zou']],
-    'ep_dressrosa_b6#3': [[605, 'wano']],
+    'ep_skypiea_c3#3': [[838, 'sky', false]],
+    'ep_fishman_c_3#3': [[2802, 'fishman', false]],
   };
-  for (const [seed, home] of seed0 === undefined ? routes[`${target.turning}#${target.index}`] ?? [] : []) {
+  for (const [seed, home, chase] of seed0 === undefined ? routes[`${target.turning}#${target.index}`] ?? [] : []) {
     if (k >= tries) return -1;
-    if (tryReach(target, seed, home)) return k;
+    if (tryReach(target, seed, home, chase ?? true)) return k;
     k++;
   }
   const first = seed0 ?? 50000;

@@ -16,7 +16,6 @@ function sailor() {
   s.pending = null;
   s.age = 26;
   s.part = 3;
-  s.vows!.declined = true;
   Object.assign(s.hero, { standing: 'pirate', island: '위스키 피크', sea: 'gl_entry' });
   s.dream = { id: 'worldEnd', since: 23, done: null };
   return s;

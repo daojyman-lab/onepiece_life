@@ -40,7 +40,8 @@ import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
 import { notePrisonEscape } from './bounty';
-import { beginVow, declineVow, resolveVow } from './vow';
+import { beginVow, resolveVow } from './vow';
+import { promiseDream } from './dream-vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -220,18 +221,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       settleShipmates(s);
       if (e.id === 'prime') enterPrime(s);
       return;
-    case 'dream': setDream(s, e.id); return;
+    case 'dream': if (setDream(s, e.id)) promiseDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;
-    case 'vowDecline': declineVow(s); return;
-    case 'vowFail': resolveVow(s, e.id, true); return;
-    case 'vowResolve': {
-      const result = resolveVow(s, e.id);
-      if (result?.reward) {
-        addMastery(s, result.reward, result.amount);
-        s.growth.pref[result.reward] += result.amount * V.growth.pref.fromMastery;
-      }
-      return;
-    }
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'welcomeSibling': welcomeSibling(s, e.action); return;

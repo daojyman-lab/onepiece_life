@@ -9,7 +9,7 @@ import { PERSONALITY_GRID, SECONDARY_NAME, personalityOf } from '../../core/pers
 import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
 import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
-import { VOWS } from '../../data/vows';
+import { dreamVowView } from '../../core/dream-vow';
 import { Face, Gauge, Panel } from '../common';
 import { NewsStrip } from '../modals/NewsArchive';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, storyYearLabel, timelineView, yearLabel } from '../view';
@@ -220,8 +220,8 @@ function Profile({ s }: { s: Life5 }) {
         </details>}
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
-        {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}
-        {!!s.vows?.history.some((v) => v.result === 'kept') && <div class="t9"><b>서약 각성</b> {s.vows.history.filter((v) => v.result === 'kept').length}단계 · {VOWS[s.vows.history.filter((v) => v.result === 'kept').at(-1)!.id]?.title}</div>}
+        {(() => { const v = dreamVowView(s); return v && <div class="paper t9"><b>꿈의 서약</b> {v.cleared}/{v.total}{v.streak >= 2 ? ` · 연속 ${v.streak}` : ''} · {v.to ? `${v.to}에게 한 약속` : '스스로에게 한 약속'}<br /><span class="soft">{v.next ? `다음 길목: ${v.next}` : '약속한 꿈을 이루었다'}</span></div>; })()}
+        {s.vows?.active && <div class="paper t9"><b>섬의 약속</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '약속을 지키는 중'}</span></div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         <TraitPicker s={s} />
         <PersonalityMap s={s} />

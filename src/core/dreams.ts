@@ -8,8 +8,9 @@ import { primaryStyle, styleTier } from './styles';
 import type { DreamId, Life5 } from './types';
 
 /** 꿈을 품는다 (처음이든, 바뀌든). 이미 이룬 꿈을 다시 고르면 아무 일도 없다 */
-export function setDream(s: Life5, id: DreamId): void {
-  if (s.dream?.id === id) return;
+/** 꿈을 품거나 바꾸었으면 true (꿈의 서약이 그때 약속한다: core/dream-vow.ts) */
+export function setDream(s: Life5, id: DreamId): boolean {
+  if (s.dream?.id === id) return false;
   const before = s.dream;
   s.dream = { id, since: s.age, done: null };
   const name = DREAMS[id].name;
@@ -20,6 +21,7 @@ export function setDream(s: Life5, id: DreamId): void {
     logLine(s, `${s.hero.name}은(는) 꿈을 품었다. ${name}.`, 'heavy', 'life');
     s.timeline.push({ age: s.age, text: josa(`${name}을(를) 꿈꾸기 시작했다`) });
   }
+  return true;
 }
 
 /** 지금 이 꿈을 이룬 상태인가 */

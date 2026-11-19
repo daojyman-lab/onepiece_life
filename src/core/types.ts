@@ -54,12 +54,19 @@ export interface Hero5 {
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'bestFist' | 'bestWeapon' | 'bestShot' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+/** 섬 서약 (하늘섬 티카). 옛 저장의 생애 서약 기록(history의 life_*)은 읽기만 한다 */
 export interface VowState {
-  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[];
-    level?: 1 | 2 | 3; activities?: Activity[]; choices?: string[]; branch?: Branch; targetPersonId?: string } | null;
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[]; targetPersonId?: string } | null;
   history: { id: string; result: 'kept' | 'failed' }[];
-  declined?: boolean;
-  branch?: Branch;
+}
+/** 꿈의 서약 (core/dream-vow.ts) */
+export interface DreamVowState {
+  /** 꿈마다 지난 길목의 수 (같은 길목을 두 번 받지 않는다) */
+  cleared: Partial<Record<DreamId, number>>;
+  /** 지금 꿈을 바꾸지 않고 이어 지난 길목의 수 */
+  streak: number;
+  /** 지금 꿈을 약속한 사람 (없으면 스스로) */
+  to: string | null;
 }
 export interface Growth5 {
   styleMastery: Partial<Record<CombatStyle, number>>;
@@ -175,9 +182,6 @@ export type Fx =
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
-  | { op: 'vowResolve'; id: string }
-  | { op: 'vowFail'; id: string }
-  | { op: 'vowDecline' }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'welcomeSibling'; action: SiblingWelcomeAction }
@@ -344,6 +348,7 @@ export interface Life5 {
   dream?: { id: DreamId; since: number; done: number | null } | null;
   /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
   vows?: VowState;
+  dreamVow?: DreamVowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
