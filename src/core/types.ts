@@ -127,6 +127,7 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'trainingTrip'; line: string } | { op: 'trainingReturn' }
   | { op: 'resumeVoyage'; stores: number }
   | { op: 'rememberChildhood'; storyId: string; outcome: ChildhoodOutcome }
   | { op: 'separateSpouse' }
@@ -311,5 +312,5 @@ export interface Life5 {
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
   passage?: import('./passage').Passage | null;
 }
-export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
+export type Command5 = { type: 'trainingTrip'; line: string } | { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
   | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] };

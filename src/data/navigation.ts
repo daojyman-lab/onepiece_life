@@ -1,8 +1,11 @@
 // 원작 여정의 연결을 바탕으로 구성한 게임 항로. 실제 거리·방위를 뜻하지 않는다.
 import { SEAS } from '../shared/data/seas';
-import type { SeaId } from '../core/types';
+import type { Life5, SeaId } from '../core/types';
+
+import { AMAZON_ROADS, trainingDepartures, trainingReturn, trainingSite, trainingDays } from './training-routes';
 
 export const ISLAND_ALIASES: Record<string, string> = {
+  [AMAZON_ROADS]: '아마존 릴리', '시케아르 왕국 폐허': '쿠라이가나', '모모이로섬': '카마바카 왕국', '기계장치 섬': '벌지모아',
   '조': '조우', '모코모 공국': '조우', '쿠라우 도시': '조우', '고래숲': '조우',
   '고아 왕국 그레이 터미널': '후샤 마을', '코코야시 마을': '코노미 제도',
   '워터 세븐 뒷골목': '워터 세븐', '시프트 역': '워터 세븐',
@@ -11,6 +14,13 @@ export const ISLAND_ALIASES: Record<string, string> = {
   '엔젤섬': '스카이피아', '샨디아 마을': '스카이피아',
 };
 export const portOf = (place: string): string => ISLAND_ALIASES[place] ?? place;
+
+export function availableTrainingLines(s: Life5) {
+  if (!s.hero.alive || s.ended || s.pending || s.passage || s.hero.standing === 'prisoner' || s.age < 16) return [];
+  if (s.queue.some(id => id.startsWith('field_') || id.startsWith('ep_'))) return [];
+  const back = trainingReturn(s.hero.island, s.flags);
+  return back ? [back] : trainingDepartures(portOf(s.hero.island));
+}
 
 export const CONTENT_CLASS = {
   major: ['로그타운', '알라바스타 왕국', '스카이피아', '어인섬', '드레스로자', '와노쿠니'],
@@ -54,29 +64,29 @@ export const ROUTE_TREE: Record<string, string[]> = {
   '위스키 피크': ['리틀 가든', '드럼 왕국'],
   '리틀 가든': ['드럼 왕국', '알라바스타 왕국'],
   '드럼 왕국': ['알라바스타 왕국', '쌍둥이 곶'],
-  '알라바스타 왕국': ['자야', '워터 세븐'],
+  '알라바스타 왕국': ['자야', '워터 세븐', '드럼 왕국'],
   '자야': ['스카이피아', '롱 링 롱 랜드', '워터 세븐'],
   '스카이피아': ['자야', '롱 링 롱 랜드', '워터 세븐'],
   '롱 링 롱 랜드': ['워터 세븐', '자야'],
   '워터 세븐': ['에니에스 로비', '스릴러 바크', '알라바스타 왕국'],
   '에니에스 로비': ['워터 세븐'],
-  '스릴러 바크': ['샤본디 제도'],
-  '플로리안 트라이앵글': ['샤본디 제도'],
+  '스릴러 바크': ['샤본디 제도', '워터 세븐'],
+  '플로리안 트라이앵글': ['샤본디 제도', '워터 세븐'],
   '샤본디 제도': ['스릴러 바크', '어인섬', '아마존 릴리'],
   '어인섬': ['펑크 해저드', '드레스로자', '샤본디 제도'],
   '아마존 릴리': ['샤본디 제도'],
-  '펑크 해저드': ['드레스로자'],
+  '펑크 해저드': ['드레스로자', '어인섬'],
   '드레스로자': ['조우', '펑크 해저드'],
   '조우': ['홀케이크 아일랜드', '와노쿠니', '드레스로자'],
   '홀케이크 아일랜드': ['와노쿠니', '조우'],
-  '와노쿠니': ['에그헤드', '엘바프'],
+  '와노쿠니': ['에그헤드', '엘바프', '조우'],
   '에그헤드': ['엘바프'],
   '엘바프': ['라프텔 근해', '에그헤드', '와노쿠니'],
   '라프텔 근해': ['엘바프'],
 };
 
 export const seaOfPort = (place: string): SeaId | undefined =>
-  SEAS.find((sea) => sea.ports.includes(portOf(place)))?.id;
+  trainingSite(portOf(place))?.sea ?? SEAS.find((sea) => sea.ports.includes(portOf(place)))?.id;
 
 // 에니에스 로비 사건을 18세에 놓는 게임 연표 기준. 이후에는 거대선의 현 위치를 특정하지 않는다.
 export function destinationAt(place: string, age: number): string {
@@ -85,6 +95,7 @@ export function destinationAt(place: string, age: number): string {
 
 export function connectedPorts(place: string, sea: SeaId, flags: string[], age: number): string[] {
   const port = portOf(place);
+  if (trainingSite(port)) return []; // 답사선으로 온 곳은 해당 귀항편으로 떠난다.
   const exits = ROUTE_TREE[port] ?? SEAS.find((s) => s.id === sea)!.ports.filter((p) => p !== port);
   return [...new Set(exits.map(to => destinationAt(to, age)))].filter((to) => {
     if (to === '리버스 마운틴' && sea !== 'gl_entry') return flags.includes('ship');
@@ -102,4 +113,4 @@ const OFFSHORE_DAYS: Record<string, Record<string, number>> = {
   '조우': { '홀케이크 아일랜드': 8, '와노쿠니': 9 }, '홀케이크 아일랜드': { '와노쿠니': 8, '조우': 8 },
   '와노쿠니': { '에그헤드': 7, '엘바프': 10 }, '에그헤드': { '엘바프': 7 },
 };
-export const offshoreDays = (from: string, to: string) => OFFSHORE_DAYS[from]?.[to];
+export const offshoreDays = (from: string, to: string) => OFFSHORE_DAYS[from]?.[to] ?? trainingDays(from, to);

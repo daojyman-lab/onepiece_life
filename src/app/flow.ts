@@ -84,5 +84,5 @@ export function windowDelay(speed: Settings['speed']): number {
 
 /** 명령 뒤에 저장할 때인가: 답한 뒤, 또는 토막 뒤에 나이가 바뀌었거나 떠 있는 일이 새로 생겼을 때 */
 export function shouldSave(prev: Life5, next: Life5, cmd: Command5): boolean {
-  return cmd.type === 'answer' || cmd.type === 'rest' || cmd.type === 'style' || cmd.type === 'equipWeapon' || cmd.type === 'traits' || next.age !== prev.age || (!prev.pending && !!next.pending);
+  return cmd.type === 'trainingTrip' || cmd.type === 'answer' || cmd.type === 'rest' || cmd.type === 'style' || cmd.type === 'equipWeapon' || cmd.type === 'traits' || next.age !== prev.age || (!prev.pending && !!next.pending);
 }

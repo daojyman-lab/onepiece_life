@@ -43,13 +43,14 @@ import { RIVAL_WORK_LETTERS } from '../rival-letters';
 import { RIVAL_ERRANDS } from './rival-errand';
 import { TRAINING } from './training';
 import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
+import { TRAINING_STORIES } from './training-islands';
 import { ROUTE_STORIES } from './route-stories';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
   CHILDHOOD_CRISES, CHILDHOOD_MEMORIES,
   RIVAL_WORK_LETTERS, RIVAL_ERRANDS,
-  TRAINING, PORT_STORIES, RESUPPLY_STORIES, ROUTE_STORIES,
+  TRAINING, PORT_STORIES, RESUPPLY_STORIES, ROUTE_STORIES, TRAINING_STORIES,
   BONDS,
   FORTUNES,
   MISFORTUNES,

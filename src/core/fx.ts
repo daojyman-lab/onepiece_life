@@ -3,6 +3,7 @@ import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, t
 import { setDream } from './dreams';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
+import { returnFromTraining, takeTrainingLine } from './training-travel';
 import { childhoodWords, rememberChildhood } from './childhood-memory';
 import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
 import { resumeVoyage } from './passage';
@@ -150,6 +151,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       captainByShip(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
+    case 'trainingTrip': takeTrainingLine(s, e.line); return;
+    case 'trainingReturn': returnFromTraining(s); return;
     case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
     case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
