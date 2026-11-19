@@ -57,7 +57,8 @@ describe('시뮬레이터 (설계 7장)', () => {
     const poor = Array.from({ length: 400 }, (_, i) => autoplay5(20000 + i, { value: 'ambition' }, { wealth: 'poor', lineage: 'orphan' }).s);
     expect(rate(rich, (s) => topTier(s) >= 4)).toBeGreaterThan(rate(poor, (s) => topTier(s) >= 4));
     expect(rate(poor, (s) => topTier(s) >= 6)).toBeGreaterThan(rate(rich, (s) => topTier(s) >= 6));
-  });
+  // 800개의 생애를 끝까지 비교하므로 공용 2분 제한 대신 초기 표본 생성과 같은 여유를 준다.
+  }, 600_000);
   it('야망을 좇는 인생은 이름 있는 상대와 싸워 20~70%를 이긴다', () => {
     const named = summarize(ambitious).named;
     expect(named.fights).toBeGreaterThanOrEqual(30);
