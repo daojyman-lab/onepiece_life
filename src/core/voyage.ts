@@ -19,6 +19,8 @@ import { DEFERRED_ROUTE, ROUTE_ARRIVALS } from '../data/turnings/route-stories';
 import { connectedPorts, contentClass, destinationAt, offshoreDays, portOf } from '../data/navigation';
 import type { Cond, DreamId, Door, Fx, Life5, SeaId, Turning } from './types';
 import { depart } from './passage';
+import { SEA_STANDINGS } from '../data/landlocked';
+import { hasLocalStyleLesson } from './styles';
 
 import { AMAZON_ROADS, trainingLanding } from '../data/training-routes';
 
@@ -72,9 +74,10 @@ export function voyageChoices(s: Life5, r: Rng, departureAge = s.age): Choices |
 }
 
 /** 후보를 담은 전환점 id: voyage:<나이>:<꿈 id 또는 ->:<잔잔>|<꿈>|<험함> (빈칸이면 그 갈래 없음). 나이가 들어 있어 해마다 다른 장면이다 */
-export function voyageId(s: Life5, c: Choices): string {
+export function voyageId(s: Life5, c: Choices, boat?: SkiffFare): string {
   const d = s.dream && c.dream && DREAM_ISLANDS[s.dream.id].includes(c.dream) ? s.dream.id : '-';
-  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}|${c.coastal ?? ''}:${portOf(s.hero.island)}`;
+  const tail = boat ? `:${SKIFF}.${boat.buy}.${boat.gate ?? ''}` : '';
+  return `${VOYAGE_PREFIX}${s.age}:${d}:${c.calm ?? ''}|${c.dream ?? ''}|${c.wild ?? ''}|${c.coastal ?? ''}:${portOf(s.hero.island)}${tail}`;
 }
 
 const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route });
@@ -82,7 +85,8 @@ const sail = (island: string, route: Route): Fx => ({ op: 'sail', island, route 
 /** id로 항로 고르기 전환점을 짓는다. 문은 잔잔 · 꿈(또는 소문) · 험함 순서 */
 export function buildVoyage(id: string): Turning | undefined {
   if (!id.startsWith(VOYAGE_PREFIX)) return undefined;
-  const [, dreamId, rest = '', from = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
+  const [, dreamId, rest = '', from = '', boatTag = ''] = id.slice(VOYAGE_PREFIX.length).split(':');
+  const boat = parseFare(boatTag);
   const [calm, dream, wild, coastal] = rest.split('|');
   const doors: Door[] = [];
   if (calm) doors.push({ label: josa(`잔잔한 뱃길로 ${calm}에 간다`), hint: '쉬어 가며 숨을 고른다', fx: [sail(calm, 'calm')] });
@@ -104,17 +108,131 @@ export function buildVoyage(id: string): Turning | undefined {
     const days = offshoreDays(from, destination.island);
     if (days) door.hint += ` · 예상 ${days}일, 도중 보급 가능`;
   }
-  doors.push({ label: '이곳에 더 머문다', hint: '준비와 탐색을 이어 간다', fx: [{ op: 'log', text: '해도를 접고 계류 밧줄을 다시 묶었다.', weight: 'light' }] });
+  if (boat) {
+    const total = fareTotal(boat);
+    const words = [boat.buy ? `나룻배 ${won(boat.buy)}` : '', boat.gate ? SKIFF_EXIT[boat.gate].hint : ''].filter(Boolean).join(' · ');
+    for (const door of doors) {
+      door.fx = [{ op: 'skiff', buy: boat.buy, ...(boat.gate ? { gate: boat.gate } : {}) }, ...door.fx];
+      if (total) door.when = [...(door.when ?? []), { c: 'money', min: total }];
+      if (words) door.hint += ` · ${words}`;
+    }
+  }
+  doors.push(boat
+    ? { label: '아직은 이곳에 머문다', hint: '떠날 날은 다시 정한다', fx: [{ op: 'log', text: '포구에서 발길을 돌렸다. 떠날 날은 아직 아니었다.', weight: 'light' }] }
+    : { label: '이곳에 더 머문다', hint: '준비와 탐색을 이어 간다', fx: [{ op: 'log', text: '해도를 접고 계류 밧줄을 다시 묶었다.', weight: 'light' }] });
   return {
     id, kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: 'hero',
-    title: '다음 항로', body: '{island}에서의 날들이 끝나 간다. 해도를 펼치자 갈 만한 섬이 몇 보인다. 어디로 뱃머리를 돌릴까.',
+    title: boat ? '떠날 채비' : '다음 항로',
+    body: !boat ? '{island}에서의 날들이 끝나 간다. 해도를 펼치자 갈 만한 섬이 몇 보인다. 어디로 뱃머리를 돌릴까.'
+      : boat.buy ? `{island}에서의 볼일은 끝났다. 포구의 늙은 어부가 노 두 자루와 작은 돛이 딸린 낡은 나룻배를 ${won(boat.buy)}에 내놓았다. 다음 섬까지는 노를 저어 갈 수 있다. 어디로 갈까.`
+      : '{island}에서의 볼일은 끝났다. 포구에 매어 둔 나룻배가 물결에 흔들린다. 어디로 노를 저어 갈까.',
     doors,
   };
 }
 
 /** 고른 섬으로 출항한다. 섬은 바다를 건너 닿을 때 바뀐다 (core/passage.ts) */
 export function sailTo(s: Life5, island: string, route: Route): void {
-  depart(s, island, route);
+  depart(s, island, route, false, rowsSkiff(s) && s.flags.includes(SKIFF));
+}
+
+// ---------------------------------------------------------------- 섬을 떠나기 (나룻배)
+// 볼일을 마쳤으면 누구든 스스로 섬을 떠날 수 있다(명령 'leave'). 바다를 다니는 처지(해적 · 혁명군 …)이거나 배가 있으면 그 배로,
+// 그렇지 않으면 어느 포구에서나 나룻배 한 척(V.skiff.price)을 사서 노를 저어 간다. 고르는 장면은 항로 고르기와 같다.
+
+/** 나룻배를 가진 표시. 한 번 사면 계속 쓴다 */
+export const SKIFF = 'skiff';
+
+/** 바다를 다니는 처지도 아니고 배도 없다: 떠나려면 나룻배를 탄다 */
+export function rowsSkiff(s: Life5): boolean {
+  return !SEA_STANDINGS.includes(s.hero.standing) && !s.flags.includes('ship');
+}
+
+type SkiffGate = 'sky' | 'fishman' | 'wano';
+/** 나룻배만으로는 빠져나올 수 없는 외딴 섬과, 원작대로 그 섬을 나오는 길의 값 (조우는 코끼리 다리를 따라 내려오면 된다) */
+export const SKIFF_EXIT: Record<SkiffGate, { cost: number; hint: string; line: string }> = {
+  sky: { cost: ENTRY_COST.highWest, hint: `구름 끝 길잡이 ${won(ENTRY_COST.highWest)}`,
+    line: '하늘섬 길잡이에게 값을 치렀다. 구름 끝에서 나룻배에 커다란 문어 풍선을 매달고 청해로 천천히 내려갔다.' },
+  fishman: { cost: ENTRY_COST.coating, hint: `나룻배 코팅 ${won(ENTRY_COST.coating)}`,
+    line: '코팅 장인에게 나룻배 코팅을 맡겼다. 거품에 싸인 배가 만 미터 바다를 천천히 거슬러 올랐다.' },
+  wano: { cost: ENTRY_COST.smuggler, hint: `밀수선 ${won(ENTRY_COST.smuggler)}`,
+    line: '밤배를 띄우는 밀수꾼에게 값을 치르고, 나룻배를 밀수선 꽁무니에 매단 채 쇄국의 바다를 빠져나갔다.' },
+};
+
+/** 떠날 때 치를 값: 나룻배 값(이미 있으면 0)과 외딴 섬을 나오는 값 */
+export interface SkiffFare { buy: number; gate?: SkiffGate }
+function won(n: number): string { return `${n.toLocaleString('ko-KR')}베리`; }
+const fareTotal = (f: SkiffFare) => f.buy + (f.gate ? SKIFF_EXIT[f.gate].cost : 0);
+function parseFare(tag: string): SkiffFare | undefined {
+  const [kind, buy, gate] = tag.split('.');
+  if (kind !== SKIFF) return undefined;
+  const n = Number(buy);
+  return { buy: Number.isFinite(n) && n > 0 ? n : 0, ...(gate && gate in SKIFF_EXIT ? { gate: gate as SkiffGate } : {}) };
+}
+
+/** 지금 떠나려면 치를 값. 나룻배를 타지 않는 사람은 undefined */
+export function skiffFare(s: Life5): SkiffFare | undefined {
+  if (!rowsSkiff(s)) return undefined;
+  const g = gateOf(s.hero.island);
+  const gate = g && g !== 'zou' ? g : undefined;
+  return { buy: s.flags.includes(SKIFF) ? 0 : V.skiff.price, ...(gate ? { gate } : {}) };
+}
+
+/** 지금 섬을 떠날 수 없는 까닭. 떠날 수 있으면 null */
+export function leaveBlock(s: Life5): string | null {
+  const h = s.hero;
+  if (!h.alive || s.ended) return '이번 생은 끝났다.';
+  if (s.passage) return '이미 바다 위에 있다.';
+  if (s.pending) return '먼저 눈앞의 일을 정해야 한다.';
+  if (s.age < V.voyage.minAge) return `${V.voyage.minAge}살이 되기 전에는 혼자 섬을 떠날 수 없다.`;
+  if (h.standing === 'prisoner') return '갇힌 몸이라 떠날 수 없다.';
+  if (h.standing === 'marine' || h.standing === 'cp') return '전근 명령 없이는 자리를 비울 수 없다.';
+  if (s.queue.length || s.lifeStory?.wait) return '이 섬에서 아직 끝나지 않은 일이 있다.';
+  if (hasLocalStyleLesson(s)) return '이 섬에서 배우던 것을 마저 익혀야 한다.';
+  if (!regularDestinations(s).length) return '이곳에서는 떠날 뱃길이 없다.';
+  const fare = skiffFare(s);
+  if (fare && h.money < fareTotal(fare)) {
+    const need = [fare.buy ? `나룻배 ${won(fare.buy)}` : '', fare.gate ? SKIFF_EXIT[fare.gate].hint : ''].filter(Boolean).join(' + ');
+    return `떠날 돈이 모자라다 (${need}).`;
+  }
+  return null;
+}
+
+/** 떠나기 단추에 보일 말 */
+export function leaveView(s: Life5): { show: boolean; can: boolean; label: string; note: string } {
+  const block = leaveBlock(s);
+  const fare = skiffFare(s);
+  const total = fare ? fareTotal(fare) : 0;
+  return {
+    show: s.hero.alive && !s.ended && s.age >= V.voyage.minAge,
+    can: block === null,
+    label: s.passage ? '⛵ 항해 중' : '⛵ 떠나기',
+    note: block ?? (fare ? (total ? `나룻배로 떠난다 · ${won(total)}` : '나룻배로 떠난다') : '배를 띄워 다음 섬으로 떠난다'),
+  };
+}
+
+/** 스스로 섬을 떠난다: 다음 항로 고르기를 띄운다. 띄웠으면 true */
+export function openLeave(s: Life5): boolean {
+  if (leaveBlock(s) !== null) return false;
+  const r = rngOf(s.rng);
+  const c = voyageChoices(s, r);
+  if (!c) return false;
+  s.sail = false;                                // 해마다 굴리는 항로 고르기를 이것으로 갈음한다
+  const t = buildVoyage(voyageId(s, c, skiffFare(s)));
+  return !!t && openTurning(s, t);
+}
+
+/** 나룻배를 사고, 외딴 섬이면 나오는 값을 치른다 (문의 효과 'skiff') */
+export function boardSkiff(s: Life5, e: Extract<Fx, { op: 'skiff' }>): void {
+  const h = s.hero;
+  const total = e.buy + (e.gate ? SKIFF_EXIT[e.gate].cost : 0);
+  if (h.money < total) return;
+  h.money -= total;
+  if (e.buy && !s.flags.includes(SKIFF)) {
+    s.flags.push(SKIFF);
+    logLine(s, josa(`${h.island}의 포구에서 낡은 나룻배 한 척을 ${won(e.buy)}에 샀다. 노 두 자루와 손바닥만 한 돛이 딸려 왔다.`), 'light');
+    s.timeline.push({ age: s.age, text: josa(`${h.island}에서 나룻배를 샀다`) });
+  }
+  if (e.gate) logLine(s, SKIFF_EXIT[e.gate].line, 'light');
 }
 
 export function buildEntryGate(id: string): Turning | undefined {

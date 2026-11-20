@@ -36,6 +36,7 @@ export interface Passage {
   last?: Weather;          // 지난 토막의 날씨
   stopover?: 'planned' | 'islet_resupply' | 'islet_rainwater';
   from?: string;           // 보급섬에서 보이는 동안에도 원래 출발 항구를 보존한다
+  skiff?: true;            // 나룻배로 노를 저어 간다 (뭍사람도 바다의 날씨를 겪는다. 폭풍에 더 다친다)
 }
 
 export const UNNAMED_ISLET = '이름 없는 섬';
@@ -54,13 +55,15 @@ export function passageParts(sea: string, to: string, route: PassageRoute): numb
 }
 
 /** 출항한다. 섬은 닿을 때 바뀐다 */
-export function depart(s: Life5, to: string, route: PassageRoute, order = false): void {
+export function depart(s: Life5, to: string, route: PassageRoute, order = false, skiff = false): void {
   if (s.passage) return;
   beginDebut(s);
   to = destinationAt(to, s.age);
   const parts = passageParts(s.hero.sea, to, route);
-  s.passage = { to, route, ...(order ? { order } : {}), partsLeft: parts, partsSpent: 0, maxParts: parts + MAX_EXTRA_PARTS };
-  logLine(s, josa(order ? `전근 명령을 받고 ${to}(으)로 가는 군함에 올랐다.` : `${s.hero.island}의 항구를 떠나 ${to}(으)로 돛을 올렸다.`), 'light');
+  s.passage = { to, route, ...(order ? { order } : {}), ...(skiff && !order ? { skiff: true as const } : {}), partsLeft: parts, partsSpent: 0, maxParts: parts + MAX_EXTRA_PARTS };
+  logLine(s, josa(order ? `전근 명령을 받고 ${to}(으)로 가는 군함에 올랐다.`
+    : s.passage.skiff ? `${s.hero.island}의 포구에서 나룻배를 밀어 내고, ${to}(으)로 노를 저었다.`
+    : `${s.hero.island}의 항구를 떠나 ${to}(으)로 돛을 올렸다.`), 'light');
   if (!offshoreDays(portOf(s.hero.island), to)) return;
   const stores = s.hero.provisions ?? 0;
   if (stores > 0) {
@@ -166,13 +169,17 @@ export function passagePart(s: Life5, r: Rng): void {
   const p = s.passage;
   if (!p) return;
   const h = s.hero;
-  if (!SEA_STANDINGS.includes(h.standing)) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다
+  if (!SEA_STANDINGS.includes(h.standing) && !p.skiff) { arrive(s, p); return; }   // 배에서 내리는 처지가 되었으면(은퇴 · 뭍살이) 그대로 닿은 섬에 남는다. 나룻배는 끝까지 노를 젓는다
   if (p.stopover && p.stopover !== 'planned') {
     const t = RESUPPLY_STORIES.find(t => t.id === p.stopover);
     if (t && !s.pending) openTurning(s, t);
     return;
   }
   const step = rollPassage(p, h.sea, Math.max(0, Math.min(3, navigatorLevel(s) + (hasTrait(s, 'orientation') ? 1 : hasTrait(s, 'lostWay') ? -1 : 0))), r, s);
+  if (p.skiff && (step.weather === 'storm' || step.weather === 'anomaly') && step.hp < 0) {
+    step.hp = Math.round(step.hp * V.skiff.stormHurt);
+    step.lines.push('작은 나룻배가 파도에 이리저리 휘둘렸다. 뱃전을 붙잡고 물을 퍼내느라 밤을 새웠다.');
+  }
   for (const line of step.lines) logLine(s, line, 'light');
   if (step.seaKing && !s.flags.includes('sawCalmBeltKing')) {
     s.flags.push('sawCalmBeltKing');

@@ -10,6 +10,7 @@ import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/stor
 import type { Life5, Standing } from '../../core/types';
 import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
 import { dreamVowView } from '../../core/dream-vow';
+import { leaveView } from '../../core/voyage';
 import { Face, Gauge, Panel } from '../common';
 import { NewsStrip } from '../modals/NewsArchive';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, storyYearLabel, timelineView, yearLabel } from '../view';
@@ -107,6 +108,7 @@ function MobileMain({ s }: { s: Life5 }) {
         <span class="tag">{ageWord(at.age)}</span>
         <span class="grow" />
         <SpeedButtons />
+        <LeaveButton s={s} short />
         <button class="btn small" onClick={() => actions.open('menu')} aria-label="메뉴">☰</button>
       </header>
       <NewsStrip s={s} shownId={st.shownId} />
@@ -149,6 +151,18 @@ export function Main() {
   );
 }
 
+/** 섬을 떠나는 단추. 이야기가 따라잡고 떠 있는 일이 없을 때만 누를 수 있다. 막혀 있으면 눌렀을 때 까닭을 알린다 */
+function LeaveButton({ s, short = false }: { s: Life5; short?: boolean }) {
+  const st = useStore();
+  const v = leaveView(s);
+  if (!v.show) return null;
+  const busy = !!s.pending || !!s.passage || !caughtUp(s, st.shownId);
+  return (
+    <button class={`btn small ${v.can && !busy ? '' : 'dim'}`} disabled={busy} title={v.note} aria-label={`${v.label} · ${v.note}`}
+      onClick={() => actions.leave()}>{short ? '⛵' : v.label}</button>
+  );
+}
+
 function TopBar({ s }: { s: Life5 }) {
   const st = useStore();
   const at = shownAt(s, st.shownId);
@@ -159,6 +173,7 @@ function TopBar({ s }: { s: Life5 }) {
       <span class="grow" />
       <SpeedButtons />
       <div class="row">
+        <LeaveButton s={s} />
         <button class="btn small" onClick={() => actions.open('codex')}>도감</button>
         <button class="btn small" onClick={() => actions.open('menu')}>메뉴</button>
       </div>

@@ -187,6 +187,7 @@ export type Fx =
   | { op: 'welcomeSibling'; action: SiblingWelcomeAction }
   | { op: 'siblingReunion'; action: SiblingReunionAction }
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
+  | { op: 'skiff'; buy: number; gate?: 'sky' | 'fishman' | 'wano' }   // 나룻배를 사고(buy베리) 외딴 섬이면 나가는 값을 치른다 (core/voyage.ts)
   | { op: 'entry'; gate: EntryGate; island: string; sea: SeaId; route: ArrivalRoute; option: number }
   | { op: 'entryPass'; gate: EntryGate }
   | { op: 'deepWater' }
@@ -366,4 +367,4 @@ export interface ShipHull {
   end?: { kind: 'helm' | 'playground' | 'house' | 'lost' | 'switched'; age: number; island: string };
 }
 export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
-  | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] };
+  | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] } | { type: 'leave' };
