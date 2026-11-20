@@ -4,14 +4,13 @@ import { newLife5 } from '../../src/core/state';
 import { reduce5, invariants5 } from '../../src/core/reduce';
 import { answerDoor } from '../../src/core/turning';
 import { V } from '../../src/data/balance';
-import { SKIFF, SKIFF_EXIT, leaveBlock, leaveView, openLeave, skiffFare, VOYAGE_PREFIX } from '../../src/core/voyage';
+import { SKIFF, SKIFF_EXIT, leaveBlock, leaveView, skiffFare, VOYAGE_PREFIX } from '../../src/core/voyage';
 import type { Life5 } from '../../src/core/types';
 
 /** 이스트 블루의 마을에 사는 뭍사람 어른 하나 */
 function civilian(seed = 5, money = 20000): Life5 {
   const s = newLife5(seed);
   s.pending = null;
-  s.vows!.declined = true;
   s.queue = [];
   s.age = 20;
   s.hero.standing = 'civil';
