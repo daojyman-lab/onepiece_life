@@ -14,7 +14,7 @@ const trained = (id: string): Fx => ({ op: 'flag', id });
 export const CHILDHOOD_BONDS: Turning[] = [
   {
     id: 'kid_wooden_sword_older_revisit', kind: 'door', when: [...kid(10, 15), person('목검을 가르친 형', true), yes('woodSwordOlderMet')],
-    weight: 12, repeat: 'once', speaker: { relation: '목검을 가르친 형' }, title: '돌아온 목검',
+    weight: 4, repeat: 'once', speaker: { relation: '목검을 가르친 형' }, title: '돌아온 목검',
     body: '몇 해 전 목검을 들고 찾아왔던 {swordElder}이(가) 다시 마을 길에 나타났다. 이제 {name}의 키가 그때보다 훨씬 자랐다. {swordElder}은(는) 예전처럼 한 자루를 건넨다.',
     doors: [
       { label: '이번에는 먼저 목검을 맞댄다', hint: '예전보다 오래 버틴다', values: { ambition: D }, fx: [{ op: 'mastery', branch: 'sword', add: 10 }, { op: 'personChange', relation: '목검을 가르친 형', bond: 7 }, { op: 'log', text: '{swordElder}은(는) 마지막에 목검을 내리며 오늘은 자신도 한 수 배웠다고 했다.', weight: 'heavy' }] },
@@ -24,7 +24,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_wooden_sword_mentor', kind: 'door', when: [...kid(6, 14), person('스승', true)],
-    weight: 9, repeat: 'once', speaker: { relation: '스승' }, title: '스승의 목검',
+    weight: 3, repeat: 'once', speaker: { relation: '스승' }, title: '스승의 목검',
     body: '{mentor}이(가) 닳은 목검 두 자루를 들고 왔다. 한 자루를 {name}에게 건네며 오늘 어디부터 배울지 묻는다.',
     doors: [
       { label: '넘어져도 다시 자세를 잡는다', hint: '손바닥에 물집이 잡힌다', values: { ambition: D }, mark: 'unyielding', fx: [trained('woodSwordTrained'), { op: 'mastery', branch: 'sword', add: 10 }, { op: 'personChange', relation: '스승', bond: 5 }, { op: 'log', text: '{mentor}은(는) 마지막 겨룸에서야 목검을 거두었다. 내일은 발을 먼저 보라고 했다.', weight: 'light' }] },
@@ -34,7 +34,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_wooden_sword_sibling', kind: 'door', when: [...kid(6, 14), person('스승', false), sibling],
-    needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero', title: '형제의 목검',
+    needs: ['sibling'], weight: 3, repeat: 'once', speaker: 'hero', title: '형제의 목검',
     body: '{sibling}이(가) 목검 두 자루를 들고 왔다. 늘 하던 겨룸과 달리 이번에는 누가 먼저 상대의 어깨를 건드리는지 겨루자고 한다.',
     doors: [
       { label: '질 때마다 다시 덤빈다', hint: '손에 물집이 생긴다', values: { ambition: D }, fx: [trained('woodSwordTrained'), { op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '{sibling}은(는) 해가 질 때까지 {name}의 다음 공격을 기다렸다. 마지막에는 둘 다 목검을 제대로 쥐기 어려웠다.', weight: 'light' }] },
@@ -44,7 +44,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_wooden_sword_rival', kind: 'door', when: [...kid(6, 14), person('스승', false), noSibling, person('어릴 적 맞수', true)],
-    weight: 9, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '맞수의 목검',
+    weight: 3, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '맞수의 목검',
     body: '{rival}이(가) 목검 두 자루를 들고 왔다. 지난번 길목에서 겨룬 뒤 오늘은 목검으로 결판을 내자며, 손잡이가 더 닳은 쪽을 {name}에게 건넨다.',
     doors: [
       { label: '넘어져도 다시 덤빈다', hint: '끝내 한 번은 목검을 맞댄다', values: { ambition: D }, mark: 'unyielding', fx: [trained('woodSwordTrained'), { op: 'mastery', branch: 'sword', add: 10 }, { op: 'personChange', relation: '어릴 적 맞수', bond: 5 }, { op: 'log', text: '{rival}은(는) 돌아서려다 {name}이(가) 다시 목검을 들자 자세를 고쳐 잡았다. 둘은 마지막으로 한 번 더 맞붙었다.', weight: 'light' }] },
@@ -54,7 +54,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_wooden_sword_friend', kind: 'door', when: [...kid(6, 14), person('스승', false), noSibling, person('어릴 적 맞수', false), person('어릴 적 동무', true)],
-    weight: 9, repeat: 'once', speaker: { relation: '어릴 적 동무' }, title: '동무의 목검',
+    weight: 3, repeat: 'once', speaker: { relation: '어릴 적 동무' }, title: '동무의 목검',
     body: '작은 배를 함께 만들던 {friend}이(가) 목검 두 자루를 가져왔다. 이번에는 물길 대신 서로의 발놀림을 겨뤄 보자고 한다.',
     doors: [
       { label: '해가 질 때까지 겨룬다', hint: '두 사람 모두 멍투성이가 된다', values: { ambition: D }, fx: [trained('woodSwordTrained'), { op: 'mastery', branch: 'sword', add: 9 }, { op: 'log', text: '{friend}와(과) 번갈아 넘어지고 일어섰다. 목검을 내려놓을 때는 둘 다 어제보다 발을 잘 디뎠다.', weight: 'light' }] },
@@ -65,7 +65,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   {
     id: 'kid_wooden_sword_new_friend', kind: 'door', when: [...kid(6, 14), person('스승', false), noSibling,
       person('어릴 적 맞수', false), person('어릴 적 동무', false), person('어릴 적 친구', true)],
-    weight: 9, repeat: 'once', speaker: { relation: '어릴 적 친구' }, title: '친구의 목검',
+    weight: 3, repeat: 'once', speaker: { relation: '어릴 적 친구' }, title: '친구의 목검',
     body: '길목에서 먼저 손을 내밀었던 {childFriend}이(가) 목검 두 자루를 가져왔다. 축제 때 같은 편으로 설 수 있을지 같이 연습해 보자고 한다.',
     doors: [
       { label: '상대가 되어 끝까지 겨룬다', hint: '친구가 서툰 자세를 고쳐 준다', values: { ambition: D }, fx: [trained('woodSwordTrained'), { op: 'mastery', branch: 'sword', add: 9 }, { op: 'log', text: '{childFriend}와(과) 번갈아 넘어지며 서로의 빈틈을 짚었다. 마지막에는 승부 대신 다음 연습 날을 잡았다.', weight: 'light' }] },
@@ -75,7 +75,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_rival_friend_festival', kind: 'door', when: [...kid(9, 13), person('어릴 적 친구', true)],
-    weight: 12, repeat: 'once', speaker: { relation: '어릴 적 친구' }, title: '같은 편의 축제',
+    weight: 4, repeat: 'once', speaker: { relation: '어릴 적 친구' }, title: '같은 편의 축제',
     body: '길목에서 싸우는 대신 손을 잡았던 {childFriend}이(가) 축제 준비를 도와 달라고 찾아왔다. 경기 팀이 갈라져도 둘은 여전히 친구다. 깃발은 찢어졌고, 등불을 밝힐 시간은 다가온다.',
     doors: [
       { label: '서로 다른 팀의 깃발을 고친다', hint: '경기에서는 겨뤄도 준비는 함께한다', values: { justice: D }, fx: [{ op: 'personChange', relation: '어릴 적 친구', bond: 7 }, { op: 'log', text: '{childFriend}와(과) 서로의 깃발을 번갈아 꿰맸다. 경기 때는 각자 다른 색을 들었지만 해 질 무렵엔 다시 같은 자리에 앉았다.', weight: 'heavy' }] },
@@ -85,7 +85,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_rival_festival_prepare', kind: 'door', when: [...kid(9, 12), person('어릴 적 맞수', true), no('rivalFestivalPrepared')],
-    weight: 12, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '축제의 빈 깃대',
+    weight: 4, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '축제의 빈 깃대',
     body: '마을 축제를 앞두고 경기 깃발이 사라졌다. {rival}은(는) 길목에서 {name}을(를) 기다리며, 깃발 없이는 결승도 없다고 말한다. 낡은 깃대에는 처음 보는 항로 표식이 남아 있다.',
     doors: [
       { label: '{rival}와(과) 함께 깃발을 찾는다', hint: '서로의 버릇을 알게 되지만 연습할 시간은 줄어든다', values: { loyalty: D }, fx: [trained('rivalFestivalPrepared'), trained('rivalSearched'), { op: 'personChange', relation: '어릴 적 맞수', bond: 8 }, { op: 'log', text: '{rival}와(과) 골목을 나눠 살피다 헛간에서 깃발을 찾았다. 돌아오는 길에는 서로 어느 쪽으로 먼저 뛰는지까지 알게 되었다.', weight: 'heavy' }] },
@@ -95,7 +95,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_rival_festival_day', kind: 'door', when: [...kid(10, 13), person('어릴 적 맞수', true), yes('rivalFestivalPrepared')],
-    weight: 12, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '꺼진 축제 등불',
+    weight: 4, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '꺼진 축제 등불',
     body: '{rivalPrepareMemory} {rival}와(과) 결승을 앞두고 축제 등불이 잘못 켜진다. 주민 하나가 길을 잃은 어린아이를 찾는다. 경기는 곧 시작하고, 수색에 나서면 우승 기회는 사라진다.',
     doors: [
       { label: '경기에 남아 {rival}와(과) 끝까지 겨룬다', hint: '승패는 정해지지만 수색의 첫 시간을 놓친다', values: { ambition: D }, fx: [trained('rivalFestivalDay'), trained('rivalChoseMatch'), { op: 'mastery', branch: 'sword', add: 8 }, { op: 'log', text: '{rival}와(과) 마지막까지 겨뤘다. 승부가 끝난 뒤 둘은 곧장 수색에 합류했고, 늦게 움직인 만큼 더 먼 길을 돌아야 했다.', weight: 'heavy' }] },
@@ -105,7 +105,7 @@ export const CHILDHOOD_BONDS: Turning[] = [
   },
   {
     id: 'kid_rival_farewell', kind: 'door', when: [...kid(12, 15), person('어릴 적 맞수', true), yes('rivalFestivalDay')],
-    weight: 12, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '마지막 겨룸',
+    weight: 4, repeat: 'once', speaker: { relation: '어릴 적 맞수' }, title: '마지막 겨룸',
     body: '{rival}이(가) 내일 다른 길로 떠난다고 한다. {rivalFestivalMemory} 손에는 그때의 닳은 목검 두 자루가 있다.',
     doors: [
       { label: '해 질 때까지 다시 겨룬다', hint: '누가 이겨도 다음 만남을 약속한다', values: { ambition: D }, fx: [trained('rivalFarewellDuel'), { op: 'mastery', branch: 'sword', add: 10 }, { op: 'personChange', relation: '어릴 적 맞수', bond: 7 }, { op: 'log', text: '{rival}와(과) 해가 질 때까지 목검을 맞댔다. 승부가 끝나자 둘은 다음번에는 서로가 걸어온 길까지 겨루자고 약속했다.', weight: 'heavy' }, { op: 'timeline', text: '{rival}와(과) 마지막으로 겨루고 재회를 약속했다' }] },

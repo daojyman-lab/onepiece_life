@@ -24,10 +24,8 @@ export function tierMult(tier: number): number {
 /** 가장 높은 단계 */
 export function topTier(s: Life5): number {
   const style = primaryStyle(s);
-  // 패기는 종류별 능력치 강화로 따로 반영한다 (core/body.ts)
-  const t = s.growth.tier;
-  if (style) return Math.max(styleTier(s, style), t.fruit);
-  return Math.max(t.fist, t.sword, t.gun, t.fruit);
+  if (style) return Math.max(styleTier(s, style), s.growth.tier.observation, s.growth.tier.armament, s.growth.tier.conqueror, s.growth.tier.fruit);
+  return Math.max(...Object.values(s.growth.tier));
 }
 
 
