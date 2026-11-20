@@ -141,12 +141,14 @@ export const CHILDHOOD: Turning[] = [
     ],
   },
   {
-    id: 'kid_wooden_sword', kind: 'door', when: kid(6, 14), weight: 10, repeat: 'once', speaker: 'hero',
-    title: '목검', body: '동네 형이 목검 두 자루를 들고 와 한판 붙자고 한다. 형은 한 자루를 {name}의 발치에 내려놓는다.',
+    id: 'kid_wooden_sword', kind: 'door', when: [...kid(6, 14), { c: 'kin', who: 'sibling', has: false }, noMentor,
+      { c: 'person', relation: '어릴 적 맞수', has: false }, { c: 'person', relation: '어릴 적 동무', has: false },
+      { c: 'person', relation: '어릴 적 친구', has: false }], weight: 8, repeat: 'once', speaker: 'hero',
+    title: '목검', body: '동네에서 목검을 가르치던 형이 두 자루를 들고 와 한판 붙자고 한다. 몇 번 마주쳤지만 아직 한 번도 이기지 못했다.',
     doors: [
-      { label: '지고 또 덤빈다', hint: '해가 질 무렵엔 온몸이 멍투성이다', values: { ambition: D }, mark: 'unyielding', fx: [{ op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '몇 번째로 흙바닥에 누웠는지 잊었다. 형은 돌아서려다 {name}이(가) 다시 목검을 들자 자세를 고쳐 잡았다.', weight: 'light' }] },
-      { label: '덤비지 않고 형의 버릇을 지켜본다', hint: '이길 틈이 보이기 시작한다', values: { inquiry: D }, mark: 'composure', fx: [{ op: 'mastery', branch: 'observation', add: 5 }, { op: 'log', text: '형이 내리치기 전 왼발을 고쳐 딛는 것을 알아챘다. 다음 겨룸에서는 그 발이 움직일 때 먼저 몸을 비켰다.', weight: 'light' }] },
-      { label: '그만하고 같이 바다나 보자고 한다', hint: '싸움 없이 하루가 저문다', values: { peace: D }, fx: [{ op: 'log', text: '형은 목검을 내려놓고 함께 방파제에 앉았다. 두 사람은 서로를 이기는 대신 돌아오는 배를 세며 해가 질 때까지 시간을 보냈다.', weight: 'light' }] },
+      { label: '지고 또 덤빈다', hint: '해가 질 무렵엔 온몸이 멍투성이다', values: { ambition: D }, mark: 'unyielding', fx: [{ op: 'person', kind: 'ally', relation: '목검을 가르친 형', age: { older: 4 } }, { op: 'flag', id: 'woodSwordOlderMet' }, { op: 'mastery', branch: 'sword', add: 10 }, { op: 'log', text: '몇 번째로 흙바닥에 누웠는지 잊었다. {swordElder}은(는) 돌아서려다 {name}이(가) 다시 목검을 들자 자세를 고쳐 잡았다.', weight: 'light' }] },
+      { label: '덤비지 않고 형의 버릇을 지켜본다', hint: '이길 틈이 보이기 시작한다', values: { inquiry: D }, mark: 'composure', fx: [{ op: 'person', kind: 'ally', relation: '목검을 가르친 형', age: { older: 4 } }, { op: 'flag', id: 'woodSwordOlderMet' }, { op: 'mastery', branch: 'observation', add: 5 }, { op: 'log', text: '{swordElder}이(가) 내리치기 전 왼발을 고쳐 딛는 것을 알아챘다. 다음 겨룸에서는 그 발이 움직일 때 먼저 몸을 비켰다.', weight: 'light' }] },
+      { label: '그만하고 같이 길을 걷자고 한다', hint: '싸움 없이 하루가 저문다', values: { peace: D }, fx: [{ op: 'person', kind: 'ally', relation: '목검을 가르친 형', age: { older: 4 } }, { op: 'flag', id: 'woodSwordOlderMet' }, { op: 'log', text: '{swordElder}은(는) 목검을 내려놓고 함께 마을 길을 걸었다. 두 사람은 승부 대신 각자 가고 싶은 곳을 이야기했다.', weight: 'light' }] },
     ],
   },
   {

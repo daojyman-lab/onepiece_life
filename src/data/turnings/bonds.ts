@@ -23,7 +23,7 @@ const MENTOR = '스승';
 const SIBLING: Turning[] = [
   {
     id: 'sib_bread', kind: 'door', when: [...kid(4, 9), siblingAge(3)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '하나 남은 빵', body: '저녁상에 빵이 하나뿐이다. 형제와 {name}의 손이 동시에 나갔다가 멈춘다. 둘 다 배에서 소리가 난다.',
+    title: '하나 남은 빵', body: '저녁상에 빵이 하나뿐이다. {sibling}와(과) {name}의 손이 동시에 나갔다가 멈춘다. 둘 다 배에서 소리가 난다.',
     doors: [
       { label: '반으로 갈라 큰 쪽을 내민다', hint: '배는 덜 찬다. 형제는 그 저녁을 오래 기억한다', values: { loyalty: D }, mark: 'fellowship',
         fx: [{ op: 'personChange', who: 'sibling', alias: '빵을 나눈 형제' }, flag('sibBread'), heavy('형제는 큰 쪽을 받아 들고 한참 {name}을(를) 보다가, 아무 말 없이 먹었다.')] },
@@ -35,7 +35,7 @@ const SIBLING: Turning[] = [
   },
   {
     id: 'sib_hill', kind: 'door', when: [...kid(7, 13), siblingAge(4)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '언덕 위의 나무', body: '마을 뒤 언덕 꼭대기의 늙은 나무까지, 형제와 {name}은(는) 해마다 누가 먼저 닿는지 겨룬다. 올해는 중턱에서 형제가 돌부리에 걸려 넘어졌다.',
+    title: '언덕 위의 나무', body: '마을 뒤 언덕 꼭대기의 늙은 나무까지, {sibling}와(과) {name}은(는) 해마다 누가 먼저 닿는지 겨룬다. 올해는 중턱에서 {sibling}이(가) 돌부리에 걸려 넘어졌다.',
     doors: [
       { label: '뒤돌아보지 않고 나무를 먼저 짚는다', hint: '올해의 승자가 된다. 형제는 무릎을 털며 내년을 벼른다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'personChange', who: 'sibling', alias: '언덕을 달린 형제' }, flag('sibHill'), flag('sibWon'), { op: 'base', key: 'spd', add: 1 }, heavy('나무에 먼저 손을 댄 뒤 돌아보니 형제가 무릎을 털며 올라오고 있었다. 형제는 내년에는 절대 지지 않겠다고 했다.')] },
@@ -59,7 +59,7 @@ const SIBLING: Turning[] = [
   },
   {
     id: 'sib_roof', kind: 'door', when: [...kid(12, 15), siblingAge(6)], needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '지붕 위의 약속', body: '잠이 오지 않는 밤, 형제와 지붕에 나란히 누웠다. 형제가 묻는다. 어른이 되면 무엇이 될 거냐고. 그리고 그때에도 우리는 지금 같을 거냐고.',
+    title: '지붕 위의 약속', body: '잠이 오지 않는 밤, {sibling}와(과) 지붕에 나란히 누웠다. {sibling}이(가) 묻는다. 어른이 되면 무엇이 될 거냐고. 그리고 그때에도 우리는 지금 같을 거냐고.',
     doors: [
       { label: '누가 먼저 이름을 떨치는지 겨루자고 한다', hint: '평생 가는 내기가 된다', values: { ambition: D },
         fx: [flag('sibBet'), heavy('형제는 새끼손가락을 걸고 누가 지든 먼저 유명해진 쪽에게 밥을 사기로 했다. 밤이 깊어도 두 사람은 서로의 앞날을 더 크게 떠들었다.'), line('형제와 누가 먼저 이름을 떨치는지 내기했다')] },
@@ -71,7 +71,7 @@ const SIBLING: Turning[] = [
   },
   {
     id: 'sib_news', kind: 'door', when: at(age(20, 45), active), needs: ['sibling'], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '형제의 소식', body: '{island}에 닿은 소식지 귀퉁이에 낯익은 이름이 있다. 형제가 제 자리에서 이름을 얻었다고 한다. {name}은(는) 그 줄을 몇 번이고 다시 읽는다.',
+    title: '형제의 소식', body: '{island}에 닿은 소식지 귀퉁이에 {sibling}의 이름이 있다. {sibling}이(가) 제 자리에서 이름을 얻었다고 한다. {name}은(는) 그 줄을 몇 번이고 다시 읽는다.',
     doors: [
       { label: '질 수 없다며 소식지를 접어 품에 넣는다', hint: '그날부터 잠을 줄인다', values: { ambition: D }, mark: 'obsession',
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 1 }, heavy('형제의 이름이 적힌 소식지를 품 안에 접어 넣었다. 그날 밤 맡은 일을 마치고도 등을 끄지 않고 다음 일을 시작했다.')] },
@@ -83,7 +83,7 @@ const SIBLING: Turning[] = [
   },
   {
     id: 'sib_back', kind: 'door', when: at(age(22, 50), active), needs: ['sibling'], weight: 0, repeat: 'once', speaker: 'hero',
-    title: '등 뒤의 목소리', body: '{island}의 뒷골목에서 건달 여럿에게 둘러싸였다. 그때 낯익은 목소리가 들린다. 볼일이 있어 이 섬에 와 있던 형제다. 형제가 말없이 {name}의 등 뒤에 선다.',
+    title: '등 뒤의 목소리', body: '{island}의 뒷골목에서 건달 여럿에게 둘러싸였다. 그때 낯익은 목소리가 들린다. 볼일이 있어 이 섬에 와 있던 {sibling}이다. {sibling}이(가) 말없이 {name}의 등 뒤에 선다.',
     doors: [
       { label: '어릴 적처럼 등을 맞대고 싸운다', hint: '둘 다 멍투성이가 된다. 골목에는 둘만 서 있게 된다', values: { dominion: D }, danger: true,
         fx: [{ op: 'hp', add: -12 }, { op: 'mastery', branch: 'fist', add: 10 }, { op: 'fame', add: 5 }, flag('sibBackToBack'),
@@ -97,7 +97,7 @@ const SIBLING: Turning[] = [
   // ---- 수미상관
   {
     id: 'sib_echo_bread', kind: 'door', when: at(age(38, 75), grown, has('sibBread'), known('빵을 나눈 형제')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '하나 남은 빵, 다시', body: '오랜만에 {person:빵을 나눈 형제}와(과) 마주 앉았다. 상에 빵이 하나 남았다. 형제가 그것을 반으로 가르더니, 큰 쪽을 {name} 앞으로 민다. 어릴 적 저녁상에서 {name}이(가) 그랬던 것처럼.',
+    title: '하나 남은 빵, 다시', body: '오랜만에 {sibling}와(과) 마주 앉았다. 상에 빵이 하나 남았다. {sibling}이(가) 그것을 반으로 가르더니, 큰 쪽을 {name} 앞으로 민다. 어릴 적 저녁상에서 {name}이(가) 그랬던 것처럼.',
     doors: [
       { label: '웃으며 큰 쪽을 받는다', hint: '돌려받는 데 오래 걸린 저녁이다', values: { peace: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('형제가 말했다. 그날 그 빵이, 평생 먹은 것 가운데 가장 맛있었다고.'), line('형제와 빵 하나를 나눠 먹었다')] },
@@ -109,7 +109,7 @@ const SIBLING: Turning[] = [
   },
   {
     id: 'sib_echo_hill', kind: 'door', when: at(age(42, 75), grown, has('sibHill'), known('언덕을 달린 형제')), needs: ['sibling'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '언덕 위의 나무, 다시', body: '{person:언덕을 달린 형제}에게서 편지가 왔다. 고향 언덕의 늙은 나무가 올겨울을 넘기기 어렵겠다고 한다. 그러니 마지막으로 한 번만 더 겨루자고.',
+    title: '언덕 위의 나무, 다시', body: '{sibling}에게서 편지가 왔다. 고향 언덕의 늙은 나무가 올겨울을 넘기기 어렵겠다고 한다. 그러니 마지막으로 한 번만 더 겨루자고.',
     doors: [
       { label: '돌아가서 숨이 턱에 닿도록 달린다', hint: '무릎이 예전 같지 않다. 형제의 무릎도 그렇다', values: { ambition: D },
         fx: [{ op: 'moveHome' }, { op: 'hp', add: -5 }, heavy('둘 다 중턱에서 주저앉아 웃었다. 나무는 끝내 아무도 먼저 짚지 못했다.'), line('형제와 고향 언덕을 마지막으로 달렸다')] },
@@ -125,7 +125,7 @@ const SIBLING: Turning[] = [
 const PARENT: Turning[] = [
   {
     id: 'par_shoulders', kind: 'door', when: kid(3, 7), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '목말', body: '마을 잔칫날, 어른들 어깨 너머로는 아무것도 보이지 않는다. 부모가 말없이 {name}을(를) 번쩍 들어 목말을 태운다. 세상이 갑자기 넓어진다.',
+    title: '목말', body: '마을 잔칫날, 어른들 어깨 너머로는 아무것도 보이지 않는다. {parentName}이(가) 말없이 {name}을(를) 번쩍 들어 목말을 태운다. 세상이 갑자기 넓어진다.',
     doors: [
       { label: '저 멀리 끝에는 무엇이 있느냐고 묻는다', hint: '부모는 저도 가 보지 못했다고 한다', values: { inquiry: D },
         fx: [{ op: 'personChange', who: 'parent', alias: '목말을 태워 준 부모' }, flag('parShoulders'), heavy('부모는 아직 못 가 본 곳이라며 어깨 위의 {name}을(를) 꼭 붙잡았다. 둘은 잔치가 끝날 때까지 멀리 뻗은 길을 바라보았다.')] },
@@ -137,19 +137,29 @@ const PARENT: Turning[] = [
   },
   {
     id: 'par_hands', kind: 'door', when: kid(6, 11), needs: ['parent'], weight: 8, repeat: 'once', speaker: 'hero',
-    title: '부모의 손', body: '부모가 일하는 것을 하루 종일 지켜보았다. 굳은살 박인 손이 쉬지 않는다. 저녁에 부모가 그 손으로 {name}의 머리를 쓰다듬는다. 손바닥이 거칠다.',
+    title: '부모의 손', body: '{parentName}이(가) 일하는 것을 하루 종일 지켜보았다. 굳은살 박인 손이 쉬지 않는다. 저녁에 {parentName}이(가) 그 손으로 {name}의 머리를 쓰다듬는다. 손바닥이 거칠다.',
     doors: [
       { label: '내일부터 일을 거들겠다고 한다', hint: '손에 물집이 잡힌다. 저녁상의 말수가 는다', values: { peace: D }, mark: 'fellowship',
         fx: [{ op: 'base', key: 'vit', add: 1 }, flag('parHelped'), heavy('처음에는 작은 일만 맡았지만 손에 물집이 생겼다. 저녁마다 부모는 오늘 배운 일을 묻고 전보다 오래 이야기를 나눴다.')] },
       { label: '나는 저렇게 살지 않겠다고 속으로 다짐한다', hint: '부모에게는 끝내 말하지 않는다', values: { ambition: D },
         fx: [flag('parDefy'), { op: 'base', key: 'wil', add: 1 }, heavy('부모의 손이 머리 위에 머무는 동안 아무 말도 하지 않았다. 대신 그날 밤 오래도록 자신이 가고 싶은 길을 그렸다.')] },
       { label: '그 일이 어떻게 돌아가는지 하나하나 묻는다', hint: '부모는 귀찮아하면서도 다 일러 준다', values: { inquiry: D },
-        fx: [{ op: 'base', key: 'int', add: 1 }, heavy('부모는 처음엔 귀찮다며 손을 저었지만, 끝내 도구를 하나씩 보여 주었다. {name}은(는) 다음 날 다시 찾아가 어제 본 순서를 되짚었다.')] },
+        fx: [flag('parAsked'), { op: 'base', key: 'int', add: 1 }, heavy('{parentName}은(는) 처음엔 귀찮다며 손을 저었지만, 끝내 도구를 하나씩 보여 주었다. {name}은(는) 다음 날 다시 찾아가 어제 본 순서를 되짚었다.')] },
+    ],
+  },
+  {
+    id: 'par_work', kind: 'door', when: [...kid(9, 15), { c: 'turningSeen', id: 'par_hands', has: true }],
+    needs: ['parent'], weight: 22, repeat: 'once', speaker: 'hero', title: '같은 손, 다른 길',
+    body: '{parentWorkMemory} 어느 날 {parentName}이(가) 일을 마치고 {name}에게 낡은 도구를 건넨다. 앞으로도 함께할지, 떠날 길을 준비할지 묻는다.',
+    doors: [
+      { label: '{parentName} 곁에서 일을 한 계절 더 배운다', hint: '떠날 계획은 늦춰지지만 두 사람의 손에 같은 굳은살이 생긴다', values: { loyalty: D }, fx: [flag('parSharedWork'), { op: 'base', key: 'vit', add: 1 }, heavy('{parentName}은(는) 말없이 자리를 내주었다. 한 계절 뒤 두 사람은 같은 도구를 번갈아 써도 손에 걸리는 곳이 없었다.')] },
+      { label: '내가 가고 싶은 길을 지도에 짚어 보여 준다', hint: '부모의 걱정을 듣고도 길을 정한다', values: { freedom: D }, fx: [flag('parToldDream'), { op: 'base', key: 'wil', add: 1 }, heavy('{parentName}은(는) 지도 위 손끝을 따라가다가 아직 가 보지 못한 곳이라고 했다. 그리고 떠나는 날에는 꼭 알려 달라고 했다.')] },
+      { label: '그 도구를 처음 썼던 날의 이야기를 묻는다', hint: '부모의 젊은 날을 듣는다', values: { inquiry: D }, fx: [flag('parFamilyStory'), { op: 'base', key: 'int', add: 1 }, heavy('{parentName}은(는) 도구의 흠집 하나를 짚으며 처음 일을 배웠던 날을 들려주었다. {name}은(는) 그날 처음으로 부모의 젊은 이름을 들었다.')] },
     ],
   },
   {
     id: 'par_table', kind: 'door', when: kid(11, 15), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '식은 밥상', body: '부모와 크게 다투고 문을 박차고 나왔다. 밤이 깊어 창밖에서 들여다보니, 부모가 손도 대지 않은 밥상 앞에 그대로 앉아 있다.',
+    title: '식은 밥상', body: '{parentName}와(과) 크게 다투고 문을 박차고 나왔다. 밤이 깊어 창밖에서 들여다보니, {parentName}이(가) 손도 대지 않은 밥상 앞에 그대로 앉아 있다.',
     doors: [
       { label: '들어가서 말없이 마주 앉아 식은 밥을 먹는다', hint: '누구도 먼저 사과하지 않는다. 그래도 밥그릇은 비운다', values: { peace: D },
         fx: [flag('parTable'), heavy('부모는 아무 말 없이 국을 다시 데워 왔다.')] },
@@ -161,7 +171,7 @@ const PARENT: Turning[] = [
   },
   {
     id: 'par_keepsake', kind: 'door', when: kid(13, 15), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '물려받은 것', body: '부모가 장롱 깊은 곳에서 낡은 물건 하나를 꺼낸다. 젊은 날 내내 품고 다니던 것이라고, 이제 {name}의 것이라고 한다. 건네는 손이 조금 떨린다.',
+    title: '물려받은 것', body: '{parentName}이(가) 장롱 깊은 곳에서 낡은 물건 하나를 꺼낸다. 젊은 날 내내 품고 다니던 것이라고, 이제 {name}의 것이라고 한다. 건네는 손이 조금 떨린다.',
     doors: [
       { label: '품에 넣고 평생 지니겠다고 한다', hint: '어디를 가든 품 안이 조금 무겁다', values: { romance: D },
         fx: [flag('parKeepsake'), heavy('부모가 손을 놓자 낡은 물건의 무게가 비로소 느껴졌다. {name}은(는) 품속에 넣고 그날 밤에도 몇 번이나 제대로 있는지 만져 보았다.'), line('부모가 젊은 날 지니던 것을 물려받았다')] },
@@ -171,10 +181,20 @@ const PARENT: Turning[] = [
         fx: [{ op: 'money', add: 15000 }, flag('soldKeepsake'), heavy('장터 상인이 물건을 챙기고 동전을 세어 주었다. 집에 돌아와 부모와 눈이 마주치자 {name}은(는) 빈손을 등 뒤로 감췄다.')] },
     ],
   },
+  {
+    id: 'par_after_table', kind: 'door', when: at(...kid(11, 15), has('parSlam')),
+    needs: ['parent'], weight: 23, repeat: 'once', speaker: 'hero',
+    title: '다음 날의 밥상', body: '지난번 {parentName}와(과) 다투고 헛간에서 밤을 샜다. 이번에는 {parentName}이(가) 식은 밥상을 치우지 않은 채 문간에 앉아 있다. 먼저 말을 걸면 어제의 화를 다시 마주해야 한다.',
+    doors: [
+      { label: '그날 못 한 말을 꺼내고 함께 밥을 데운다', hint: '사과가 늦었어도 함께 먹을 수 있다', values: { peace: D }, fx: [flag('parReconciled'), heavy('{parentName}은(는) 밥그릇을 다시 꺼냈다. 둘은 그날 왜 다퉜는지부터 천천히 이야기했다.')] },
+      { label: '내 길을 택하겠다고 다시 말한다', hint: '서로의 뜻을 듣되 양보하지 않는다', values: { freedom: D }, fx: [flag('parSeparateWay'), heavy('{parentName}은(는) 한참 말이 없었다. 떠나는 길에 밥을 싸 주면서도 생각은 바꾸지 않았다고 했다.')] },
+      { label: '아무 말 없이 상을 닦고 일을 거든다', hint: '화해의 말은 나중으로 미룬다', values: { loyalty: D }, fx: [flag('parHelped'), { op: 'base', key: 'vit', add: 1 }, heavy('{parentName}와(과) 마주 보지 않고 상을 닦았다. 일을 마칠 무렵에는 둘 다 옆자리에 앉을 수 있었다.')] },
+    ],
+  },
   // ---- 수미상관
   {
     id: 'par_echo_carry', kind: 'door', when: at(age(28, 60), grown, has('parShoulders'), known('목말을 태워 준 부모')), needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
-    title: '목말, 다시', body: '오랜만에 {town}에 들렀다. 어릴 적 목말을 태워 주던 {person:목말을 태워 준 부모}의 키가 기억보다 한 뼘은 작다. 마을 잔칫날, 부모가 사람들 어깨 너머를 보려고 까치발을 든다. 어릴 적 {name}이(가) 그랬던 것처럼.',
+    title: '목말, 다시', body: '오랜만에 {town}에 들렀다. {parentName}은(는) 한 뼘은 작아져 있다. 마을 잔칫날, {parentName}이(가) 사람들 어깨 너머를 보려고 까치발을 든다. 어릴 적 {name}이(가) 그랬던 것처럼.',
     doors: [
       { label: '말없이 부모를 등에 업는다', hint: '이번에는 내가 어깨 너머를 보여 준다', values: { loyalty: D },
         fx: [{ op: 'moveHome' }, { op: 'base', key: 'wil', add: 1 }, heavy('등에 업힌 부모는 놀랄 만큼 가벼웠다. 부모가 말했다. 세상이 참 넓구나.'), line('늙은 부모를 업고 잔치를 구경했다')] },
@@ -214,7 +234,7 @@ const PARENT: Turning[] = [
 const GONE: Fx[] = [{ op: 'losePerson', relation: MENTOR }, flag('menGone')];
 const MENTORS: Turning[] = [
   {
-    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 12, repeat: 'once', speaker: 'hero',
+    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 25, repeat: 'once', speaker: 'hero',
     title: '밥 한 그릇', body: '처마 밑에서 비를 긋는 {name} 앞에 늙은 떠돌이 하나가 멈춰 선다. 말없이 제 밥그릇을 반 덜어 내민다. 한쪽 다리를 절고, 허리에는 닳은 목검을 찼다.',
     doors: [
       { label: '밥을 비우고, 허리의 목검을 가리키며 저것을 가르쳐 달라고 한다', hint: '노인은 한참 웃는다. 그날부터 비를 긋는 처마가 하나 생긴다', values: { ambition: D },
@@ -227,7 +247,7 @@ const MENTORS: Turning[] = [
   },
   {
     id: 'men_lesson', kind: 'door', when: [...kid(8, 14), has('mentor'), known(MENTOR), not('menGone')], weight: 12, repeat: 'once', speaker: { relation: MENTOR },
-    title: '스승의 물음', body: '스승은 {name}에게 목검을 쥐여 주고는 온종일 물 긷는 일만 시킨다. 해 질 녘에 스승이 묻는다. 힘은 무엇에 쓰는 것이냐고.',
+    title: '스승의 물음', body: '{mentor}은(는) {name}에게 목검을 쥐여 주고는 온종일 물 긷는 일만 시킨다. 해 질 녘에 {mentor}이(가) 묻는다. 힘은 무엇에 쓰는 것이냐고.',
     doors: [
       { label: '지키는 데 쓴다고 답한다', hint: '스승은 고개를 끄덕이고, 이튿날 물동이를 하나 더 얹는다', values: { justice: D },
         fx: [flag('menLesson'), flag('menProtect'), { op: 'pref', branch: 'sword', add: 10 }, { op: 'base', key: 'vit', add: 1 }, heavy('이튿날 물동이가 하나 더 늘었다. 스승은 누가 마실 물인지 묻고, {name}이(가) 두 통을 모두 채울 때까지 곁에서 기다렸다.')] },
@@ -238,8 +258,18 @@ const MENTORS: Turning[] = [
     ],
   },
   {
+    id: 'men_training', kind: 'door', when: [...kid(9, 14), has('menLesson'), not('menGone'), known(MENTOR)],
+    weight: 60, repeat: 'once', speaker: { relation: MENTOR }, title: '스승의 마지막 수업 전',
+    body: '{mentor}이(가) 지난번 힘을 어디에 쓰겠느냐고 물었던 일을 다시 꺼낸다. 오늘은 닳은 목검을 내려놓고, 다친 아이를 데려오는 길을 막은 어른들 앞에서 무엇을 할지 묻는다.',
+    doors: [
+      { label: '아이를 등 뒤에 세우고 길을 지킨다', hint: '상처는 남지만 아이는 지나간다', values: { justice: D }, fx: [flag('menGuarded'), { op: 'hp', add: -8 }, { op: 'personChange', relation: MENTOR, bond: 8 }, heavy('{mentor}은(는) {name}의 등을 보며, 이제 누구를 지키려는지 알겠다고 했다.')] },
+      { label: '어른들의 발과 시선을 읽고 빠져나간다', hint: '싸우지 않고 아이를 데려간다', values: { inquiry: D }, fx: [flag('menOutwitted'), { op: 'mastery', branch: 'observation', add: 9 }, heavy('{mentor}은(는) 뒤따라오며 길을 찾는 눈도 칼 못지않다고 했다.')] },
+      { label: '스승과 나란히 서서 물러나라고 요구한다', hint: '말로 끝나지 않으면 함께 맞서야 한다', values: { loyalty: D }, fx: [flag('menTogether'), { op: 'hp', add: -5 }, { op: 'personChange', relation: MENTOR, bond: 10 }, heavy('{mentor}은(는) {name}이(가) 혼자 앞으로 나서지 못하게 어깨를 붙였다. 둘이 한 걸음씩 아이를 데리고 나왔다.')] },
+    ],
+  },
+  {
     id: 'men_back', kind: 'door', when: [...kid(12, 15), has('mentor'), known(MENTOR), has('menLesson'), not('menGone')], weight: 14, repeat: 'once', speaker: { relation: MENTOR },
-    title: '스승의 등', body: '산적 떼가 마을을 덮쳤다. 달아나던 {name}의 앞을 칼 든 사내들이 막아선다. 그때 절뚝이는 발소리가 끼어든다. 스승이 닳은 목검 하나로 {name}의 앞에 선다. 돌아보지 않고 말한다. 달려라.',
+    title: '스승의 등', body: '산적 떼가 마을을 덮쳤다. 달아나던 {name}의 앞을 칼 든 사내들이 막아선다. {mentorTrainingMemory} 그때 익숙한 절뚝이는 발소리가 끼어든다. {mentor}이(가) 닳은 목검 하나로 {name}의 앞에 선다. 돌아보지 않고 말한다. 달려라.',
     doors: [
       { label: '이를 악물고 달린다', hint: '뒤에서 나는 소리를 평생 잊지 못한다', values: { freedom: D },
         fx: [...GONE, flag('menRan'), heavy('스승은 돌아오지 않았다. 불탄 자리에는 닳은 목검만 남아 있었다.'), line('스승이 대신 막아서고 돌아오지 못했다')] },
@@ -254,7 +284,7 @@ const MENTORS: Turning[] = [
   // ---- 수미상관
   {
     id: 'men_echo_sword', kind: 'door', when: at(age(22, 55), active, has('menGone')), weight: 8, repeat: 'once', speaker: 'hero',
-    title: '닳은 목검', body: '짐 속에서 스승의 닳은 목검이 나온다. 손잡이에는 스승의 손자국이 패어 있다. 쥐어 보니, {name}의 손이 이제 그 자국에 꼭 맞는다.',
+    title: '닳은 목검', body: '짐 속에서 {mentor}의 닳은 목검이 나온다. 손잡이에는 스승의 손자국이 패어 있다. 쥐어 보니, {name}의 손이 이제 그 자국에 꼭 맞는다.',
     doors: [
       { label: '스승이 묻던 것을 스스로에게 다시 묻는다', hint: '힘은 무엇에 쓰는 것인가. 이제는 답이 조금 다르다', values: { justice: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, heavy('답은 그때와 달라졌다. 그래도 스승은 고개를 끄덕였을 것 같았다.')] },
@@ -266,7 +296,7 @@ const MENTORS: Turning[] = [
   },
   {
     id: 'men_echo_stand', kind: 'door', when: at(age(34, 72), grown, has('menGone')), weight: 10, repeat: 'once', speaker: 'hero',
-    title: '그 자리에 서다', body: '{island}의 장터에 무뢰배들이 들이닥쳤다. 달아나는 사람들 틈에서 아이 하나가 넘어진다. 칼 든 사내가 아이 앞에 선다. 정신을 차려 보니 {name}이(가) 그 사이에 서 있다. 그날 스승이 서 있던 자리다.',
+    title: '그 자리에 서다', body: '{island}의 장터에 무뢰배들이 들이닥쳤다. 달아나는 사람들 틈에서 아이 하나가 넘어진다. 칼 든 사내가 아이 앞에 선다. 정신을 차려 보니 {name}이(가) 그 사이에 서 있다. 그날 {mentor}이(가) 서 있던 자리다.',
     doors: [
       { label: '돌아보지 않고 말한다. 달려라', hint: '그날 들었던 말을 이번에는 건넨다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'fame', add: 10 }, { op: 'chance', p: 0.3,

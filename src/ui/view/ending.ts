@@ -15,6 +15,7 @@ import { ageWord, endWord } from './words';
 const CODEX_FILL = {
   name: '나', town: '고향', island: '그 섬', rival: '어릴 적 맞수', rivalPost: '고향에서 온 길잡이', mentor: '스승', parent: '부모',
   discipleName: '제자', dojoPartner: '함께 겨룰 상대', siblingMeetingName: '형제자매',
+  parentName: '부모', sibling: '형제', friend: '동무', childFriend: '친구', swordElder: '형',
   crisisTitle: '고향 사람들이 함께한 날', crisisTown: '고향', crisisPerson: '그날 곁에 있던 사람', crisisLandmark: '마을 풍경',
 };
 

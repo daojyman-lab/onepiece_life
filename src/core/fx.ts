@@ -47,6 +47,33 @@ import type { Branch, Fx, Life5, Person, StatKey } from './types';
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
+/** 유년기 인연이 이어지는 장면(data/turnings/childhood-bonds.ts · bonds.ts)이 앞 장면의 선택을 기억해 말하는 한 줄 */
+function parentWorkMemory(s: Life5, parentName: string): string {
+  const f = s.flags;
+  if (f.includes('parHelped')) return `${parentName}의 일을 거든 뒤 손에 잡힌 물집이 아직도 기억난다.`;
+  if (f.includes('parDefy')) return `${parentName}처럼 살지 않겠다고 혼자 다짐했던 날을 기억한다.`;
+  if (f.includes('parAsked')) return `${parentName}에게 도구의 쓰임을 하나씩 물었던 날을 기억한다.`;
+  return `${parentName}의 굳은살 박인 손을 지켜보던 날을 기억한다.`;
+}
+function rivalFestivalWords(s: Life5): { rivalPrepareMemory: string; rivalFestivalMemory: string } {
+  const f = s.flags;
+  return {
+    rivalPrepareMemory: f.includes('rivalSearched') ? '잃어버린 깃발을 함께 찾던 때 서로의 달리는 버릇까지 알아챘다.'
+      : f.includes('rivalMadeFlag') ? '둘이 주민과 함께 꿰맨 깃발이 경기장에 걸려 있다.'
+      : f.includes('rivalMapClue') ? '깃대에서 찾은 낡은 지도의 끝이 아직 품에 있다.' : '',
+    rivalFestivalMemory: f.includes('rivalChoseMatch') ? '축제 날 끝낸 승부를 다시 겨뤄 볼지 묻는다.'
+      : f.includes('rivalChoseRescue') ? '축제 날 아이를 찾느라 미룬 승부를 지금 끝낼지 묻는다.'
+      : '축제 날 주민을 도우느라 미룬 승부를 지금 끝낼지 묻는다.',
+  };
+}
+function mentorTrainingMemory(s: Life5): string {
+  const f = s.flags;
+  if (f.includes('menGuarded')) return '지난번에는 다친 아이를 등 뒤에 세우고 길을 지켰다.';
+  if (f.includes('menOutwitted')) return '지난번에는 어른들의 시선을 읽고 싸움 없이 아이를 데려왔다.';
+  if (f.includes('menTogether')) return '지난번에는 스승과 어깨를 맞대고 아이를 데려왔다.';
+  return '스승이 물었던 힘의 쓰임이 다시 떠오른다.';
+}
+
 /** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (!text.includes('{')) return josa(text);
@@ -60,6 +87,15 @@ export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (text.includes('{shipName}')) vars.shipName = ownedHull(s)?.name ?? '배';
   if (text.includes('{shipRepair}')) vars.shipRepair = repairWords(ownedHull(s));
   if (text.includes('{parent}')) vars.parent = livingContact(s, { who: 'parent' })?.relation ?? '';
+  if (text.includes('{parentName}') || text.includes('{parentWorkMemory}')) {
+    const parent = livingContact(s, { who: 'parent' });
+    vars.parentName = parent?.name ?? parent?.relation ?? '부모';
+    if (text.includes('{parentWorkMemory}')) vars.parentWorkMemory = parentWorkMemory(s, vars.parentName);
+  }
+  if (text.includes('{childFriend}')) vars.childFriend = livingContact(s, { relation: '어릴 적 친구' })?.name ?? '친구';
+  if (text.includes('{swordElder}')) vars.swordElder = livingContact(s, { relation: '목검을 가르친 형' })?.name ?? '형';
+  if (text.includes('{rivalPrepareMemory}') || text.includes('{rivalFestivalMemory}')) Object.assign(vars, rivalFestivalWords(s));
+  if (text.includes('{mentorTrainingMemory}')) vars.mentorTrainingMemory = mentorTrainingMemory(s);
   if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
   if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
   if (text.includes('{firstWatch}') || text.includes('{nextWatch}')) Object.assign(vars, watchMealWords(s));
