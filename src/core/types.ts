@@ -344,6 +344,9 @@ export interface Life5 {
   ended: { cause: string; age: number } | null;
   /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
   prime?: { from: number; until: number; lap: boolean } | null;
+  /** 첫 출항: age살에 처음 바다로 나섰다. 그해는 토막을 한 바퀴 더 돈다 (lap: 지금 덧붙은 바퀴인가).
+   *  null은 아직 출항 전, undefined는 이 기록이 생기기 전의 옛 저장이라 다시 열지 않는다 */
+  debut?: { age: number; lap: boolean } | null;
   /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
   dream?: { id: DreamId; since: number; done: number | null } | null;
   /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */

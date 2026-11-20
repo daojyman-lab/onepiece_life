@@ -14,7 +14,7 @@ import { resolveSiblingReunion, siblingReunionWords } from './siblings';
 import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
-import { enterPrime } from './stages';
+import { beginDebut, enterPrime } from './stages';
 import { FRUIT_BY_ID, NATURAL_FRUITS, SMILE_FRUITS } from '../shared/data/fruits';
 import { ITEM_BY_ID } from '../shared/data/items';
 import { SEA_BY_ID } from '../shared/data/seas';
@@ -212,7 +212,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     case 'kumaFight': startKumaFight(s); return;
     case 'trainingReturn': returnFromTraining(s); return;
-    case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
+    case 'move': beginDebut(s); requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
     case 'flag':
       if (e.id === 'ship') takeShip(s, e.newHull);

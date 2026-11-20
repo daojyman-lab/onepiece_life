@@ -18,6 +18,7 @@ import {
 import { climateOf } from '../data/climates';
 import { logLine } from './log';
 import { requestArrival } from './voyage';
+import { beginDebut } from './stages';
 import type { Life5 } from './types';
 
 export type Route = 'calm' | 'dream' | 'wild';
@@ -55,6 +56,7 @@ export function passageParts(sea: string, to: string, route: PassageRoute): numb
 /** 출항한다. 섬은 닿을 때 바뀐다 */
 export function depart(s: Life5, to: string, route: PassageRoute, order = false): void {
   if (s.passage) return;
+  beginDebut(s);
   to = destinationAt(to, s.age);
   const parts = passageParts(s.hero.sea, to, route);
   s.passage = { to, route, ...(order ? { order } : {}), partsLeft: parts, partsSpent: 0, maxParts: parts + MAX_EXTRA_PARTS };
