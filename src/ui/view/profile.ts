@@ -10,6 +10,8 @@ import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { altitudeEffect } from '../../core/environment';
 import { bountyAmount } from '../../core/first-poster';
 import { KEEPSAKES } from '../../data/keepsakes';
+
+const MENTOR_STAT: Record<string, string> = { str: '힘', spd: '속도', vit: '체력', int: '지력', wil: '의지', luk: '운' };
 import { townLabel } from '../../data/homes';
 import { SHIP_CAPTAIN, SHIPMATE } from '../../data/shipmates';
 import { STRENGTHS } from '../../data/strengths';
@@ -49,6 +51,7 @@ export interface ProfileView {
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
+  mentorHistory: { teacher: string; kind: string; age: number; detail: string; result: string }[]; // 스승에게 배운 기술 · 특훈 (최근 것부터)
   weapon: string;
   keepsakes: string[];
   shipName: string | null;
@@ -124,6 +127,9 @@ export function profileView(s: Life5): ProfileView {
     path: style ? `${weaponPath ? '무기술' : '체술'} · ${style.name}` : g.path ? `${weaponPath ? '무기술 · ' : ''}${BRANCH_NAME[g.path]}` : null,
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
+    mentorHistory: (g.mentorHistory ?? []).slice().reverse().map((m) => ({ teacher: m.teacher, kind: m.kind === 'technique' ? '기술 전수' : '특훈', age: m.age, detail: m.detail,
+      result: m.kind === 'technique' ? `${COMBAT_STYLE_BY_ID[m.style!]?.name ?? '유파'} 숙련 +${m.mastery ?? 0}`
+        : Object.entries(m.stats ?? {}).map(([k, v]) => `${MENTOR_STAT[k] ?? k} +${v}`).join(' · ') })),
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     weapon: equippedWeapon(s)?.name ?? (weaponPath ? '장착한 무기 없음' : '맨손'),
     keepsakes: KEEPSAKES.filter(item => s.flags.includes(item.flag)).map(item => item.name),

@@ -37,6 +37,22 @@ export function rollFortune(s: Life5, r: Rng): boolean {
 }
 
 /**
+ * 10~15세 수련기에 패기의 첫 감각을 일깨우는 기연(id가 fortune_haki_로 시작)을 만날지 해마다 판정한다.
+ * 수련기 여섯 해에 걸친 누적 확률이 V.fortune.hakiTrainingP가 되도록 나눈다. 큰 기연(rollFortune)은 16세부터라 겹치지 않는다.
+ */
+export function rollTrainingHakiFortune(s: Life5, r: Rng): boolean {
+  if (s.pending || s.age < 10 || s.age > 15) return false;
+  const annual = 1 - Math.pow(1 - V.fortune.hakiTrainingP, 1 / 6);
+  if (!chance(r, annual)) return false;
+  const pool = TURNINGS.filter((t) => t.kind === 'fortune' && t.id.startsWith('fortune_haki_')
+    && checkAll(s, t.when) && needsOk(s, t.needs) && repeatAllows(s, t) && resolveDoors(s, t).some((d) => !d.locked));
+  const t = weighted(r, pool, (x) => x.weight);
+  if (!t || !openTurning(s, t)) return false;
+  s.stats.fortunes += 1;
+  return true;
+}
+
+/**
  * 해마다 한 번, 조건이 맞는 불행 가운데 하나가 일어날지 판정한다. 각 불행의 가중치가 곧 그 해의 확률이다
  * (한 해에 많아야 하나). 일어나면 무겁게 기록하고 효과를 적용한다. 문은 띄우지 않는다.
  */

@@ -45,6 +45,7 @@ import { promiseDream } from './dream-vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
+const STAT_LABEL: Record<StatKey, string> = { str: '힘', spd: '속도', vit: '체력', int: '지력', wil: '의지', luk: '운' };
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /** 유년기 인연이 이어지는 장면(data/turnings/childhood-bonds.ts · bonds.ts)이 앞 장면의 선택을 기억해 말하는 한 줄 */
@@ -448,6 +449,25 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
         const id = focusedStyle(s, e.branch);
         s.growth.styleMastery[id] = Math.max(s.growth.styleMastery[id] ?? 0, clamp(e.to, 0, V.growth.maxTier) * V.growth.tierUp);
       }
+      return;
+    }
+    case 'learnTechnique': {
+      const style = focusedStyle(s, e.branch);
+      s.growth.styleMastery[style] = Math.max(0, (s.growth.styleMastery[style] ?? 0) + e.add);
+      s.growth.mentorHistory.push({ kind: 'technique', teacher: e.teacher, age: s.age, detail: e.name, style, mastery: e.add });
+      logLine(s, fillText(s, `${e.teacher}에게 「${e.name}」을(를) 배웠다.`), 'heavy', 'growth');
+      return;
+    }
+    case 'specialTraining': {
+      const gains: Partial<Record<StatKey, number>> = {};
+      for (const [key, value] of Object.entries(e.stats) as [StatKey, number][]) {
+        if (!Number.isFinite(value) || value <= 0) continue;
+        h.base[key] = Math.max(0, h.base[key] + value);
+        gains[key] = value;
+      }
+      s.growth.mentorHistory.push({ kind: 'training', teacher: e.teacher, age: s.age, detail: e.training, stats: gains });
+      const gained = (Object.entries(gains) as [StatKey, number][]).map(([k, v]) => `${STAT_LABEL[k]} +${v}`).join(' · ');
+      logLine(s, fillText(s, `${e.teacher}와(과) ${e.training}을(를) 마쳤다. ${gained}.`), 'heavy', 'growth');
       return;
     }
     case 'master':

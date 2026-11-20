@@ -53,7 +53,7 @@ export function emptyLife(seed: number): Life5 {
       bornWealth: 'common',
     },
     growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null,
-      styleMastery: Object.fromEntries(COMBAT_STYLES.map((x) => [x.id, 0])), styleFocus: { ...DEFAULT_STYLE }, styleWeapons: {}, weapons: [], primaryStyle: null, styleBonds: {} },
+      styleMastery: Object.fromEntries(COMBAT_STYLES.map((x) => [x.id, 0])), styleFocus: { ...DEFAULT_STYLE }, styleWeapons: {}, weapons: [], primaryStyle: null, styleBonds: {}, mentorHistory: [] },
     values, personality: { row: 1, col: 1, pullRow: 0, pullCol: 0, choices: 0, hold: 0, established: false }, strengths: [], marks: {},
     hardship: 0,
     people: [],

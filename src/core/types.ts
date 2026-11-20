@@ -68,6 +68,16 @@ export interface DreamVowState {
   /** 지금 꿈을 약속한 사람 (없으면 스스로) */
   to: string | null;
 }
+/** 스승에게 배운 기술(전수)과 특훈의 기록 (프로필에 남는다) */
+export interface MentorRecord {
+  kind: 'technique' | 'training';
+  teacher: string;
+  age: number;
+  detail: string;
+  style?: CombatStyle;
+  mastery?: number;
+  stats?: Partial<Stats>;
+}
 export interface Growth5 {
   styleMastery: Partial<Record<CombatStyle, number>>;
   styleFocus: Partial<Record<MartialBranch, CombatStyle>>;
@@ -80,6 +90,7 @@ export interface Growth5 {
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
   pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
+  mentorHistory: MentorRecord[];               // 스승에게 배운 기술과 특훈 이력
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 나이·장소 구분선(weight 'year')에만 있다. 그 뒤 기록이 일어난 섬 이름 */
@@ -178,6 +189,10 @@ export type Fx =
   | { op: 'tier'; branch: Branch; to: number }
   | { op: 'traitAwaken'; branch: Branch }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
+  /** 스승의 기술 전수: 그 갈래의 지금 유파에 숙련을 바로 쌓고 이력에 남긴다 */
+  | { op: 'learnTechnique'; teacher: string; branch: 'fist' | 'sword' | 'gun'; name: string; add: number }
+  /** 스승의 특훈: 기본 능력치를 올리고 이력에 남긴다 */
+  | { op: 'specialTraining'; teacher: string; training: string; stats: Partial<Stats> }
   | { op: 'flag'; id: string; newHull?: true } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }

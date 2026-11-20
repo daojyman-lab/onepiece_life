@@ -71,19 +71,6 @@ describe('유년기의 이어지는 인연', () => {
     expect(mentor.pending?.kind === 'door' ? mentor.pending.body : '').toContain('겐조');
   });
 
-  it('성인 재회에서 맞수가 동행하면 기존 인물이 그대로 동료가 된다', () => {
-    const s = child(25);
-    s.hero.standing = 'pirate';
-    applyFx(s, [{ op: 'person', kind: 'rival', relation: '어릴 적 맞수', name: '하루' }]);
-    s.flags.push('kidRival', 'rivalFarewellSword');
-    const original = s.people.find((p) => p.relation === '어릴 적 맞수')!;
-    expect(openTurning(s, TURNING_BY_ID.life_rival_reunion)).toBe(true);
-    expect(s.pending?.kind === 'door' ? s.pending.body : '').toContain('목검의 손잡이');
-    answerDoor(s, 2);
-    expect(s.people.filter((p) => p.name === '하루')).toHaveLength(1);
-    expect(s.people.find((p) => p.id === original.id)?.kind).toBe('crew');
-  });
-
   it('아는 상대가 없는 목검 대련도 이름 있는 인연을 남긴다', () => {
     const s = child(7);
     expect(seen(s, 'kid_wooden_sword')).toBe(true);

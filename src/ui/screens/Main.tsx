@@ -245,6 +245,7 @@ function Profile({ s }: { s: Life5 }) {
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
+        {p.mentorHistory.length > 0 && <div class="paper t9"><b>스승에게 배운 것</b>{p.mentorHistory.map((m, i) => <div key={i}><b>{m.teacher}</b> · {m.kind} · {m.age}세<br /><span class="soft">{m.detail} · {m.result}</span></div>)}</div>}
         {lifeProgress(s).length > 0 && <div class="paper t9"><b>약속에서 이어진 수련</b>{lifeProgress(s).map((line) => <div key={line}>{line}</div>)}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
         <div class="t9"><b>전투력</b> {p.power}</div>

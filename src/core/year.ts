@@ -13,7 +13,7 @@ import { checkAll } from './cond';
 import { familyYear } from './family';
 import { minorFight } from './fight';
 import { needsOk } from './needs';
-import { rollFortune, rollMisfortune } from './fortune';
+import { rollFortune, rollMisfortune, rollTrainingHakiFortune } from './fortune';
 import { canUse } from './body';
 import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
@@ -156,6 +156,7 @@ function yearTurn(s: Life5, r: Rng): void {
   yearRisks(s, r);
   if (!s.hero.alive) return;
   rollMisfortune(s, r);
+  rollTrainingHakiFortune(s, r);
   rollFortune(s, r);
 }
 

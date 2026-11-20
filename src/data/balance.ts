@@ -5,6 +5,9 @@ export const V = {
   // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
   // 화면과 싸움의 기본 계산식은 다르지만 서약으로 보장하는 하한은 같다. 등급 경계는 data/words.ts의 GRADES
   grade: { fruit: 0.5, haki: 0.25 },
+  // 패기 능력치 강화: 단계마다 곱해지고, 서로 다른 패기의 강화는 겹친다 (core/body.ts의 effectiveStats5).
+  // 패기는 이 강화로 따로 반영하므로 전투력의 공통 단계 배율(core/power.ts의 topTier)에서는 뺀다.
+  haki: { armament: { strPerTier: 0.05, vitPerTier: 0.07 }, observation: { spdPerTier: 0.06 }, conqueror: { allPerTier: 0.03 } },
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
   // 나룻배(core/voyage.ts leave): 배도 없고 바다를 다니는 처지도 아닌 사람이 어느 포구에서나 사서 섬을 떠난다. 폭풍에는 이만큼 더 다친다
   skiff: { price: 5000, stormHurt: 1.5 },
@@ -69,7 +72,8 @@ export const V = {
     lineBoost: 3,                              // 활동과 같은 쪽으로 기운 일상 기록이 뽑힐 배율
   },
   hardship: { poor: 40, orphan: 60, outcast: 10, limb: 20, loss: 6, defeat: 3, afterFortune: 0.5 },
-  fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16 },
+  fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16,
+             hakiTrainingP: 0.015 },         // 10~15세 수련기 전체에 걸쳐 패기 기연을 만날 누적 확률 (core/fortune.ts)
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
   fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25, healthDamage: 35,
            injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 0.6,
