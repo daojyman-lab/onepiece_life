@@ -149,7 +149,7 @@ const PARENT: Turning[] = [
   },
   {
     id: 'par_work', kind: 'door', when: [...kid(9, 15), { c: 'turningSeen', id: 'par_hands', has: true }],
-    needs: ['parent'], weight: 22, repeat: 'once', speaker: 'hero', title: '같은 손, 다른 길',
+    needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero', title: '같은 손, 다른 길',
     body: '{parentWorkMemory} 어느 날 {parentName}이(가) 일을 마치고 {name}에게 낡은 도구를 건넨다. 앞으로도 함께할지, 떠날 길을 준비할지 묻는다.',
     doors: [
       { label: '{parentName} 곁에서 일을 한 계절 더 배운다', hint: '떠날 계획은 늦춰지지만 두 사람의 손에 같은 굳은살이 생긴다', values: { loyalty: D }, fx: [flag('parSharedWork'), { op: 'base', key: 'vit', add: 1 }, heavy('{parentName}은(는) 말없이 자리를 내주었다. 한 계절 뒤 두 사람은 같은 도구를 번갈아 써도 손에 걸리는 곳이 없었다.')] },
@@ -183,7 +183,7 @@ const PARENT: Turning[] = [
   },
   {
     id: 'par_after_table', kind: 'door', when: at(...kid(11, 15), has('parSlam')),
-    needs: ['parent'], weight: 23, repeat: 'once', speaker: 'hero',
+    needs: ['parent'], weight: 9, repeat: 'once', speaker: 'hero',
     title: '다음 날의 밥상', body: '지난번 {parentName}와(과) 다투고 헛간에서 밤을 샜다. 이번에는 {parentName}이(가) 식은 밥상을 치우지 않은 채 문간에 앉아 있다. 먼저 말을 걸면 어제의 화를 다시 마주해야 한다.',
     doors: [
       { label: '그날 못 한 말을 꺼내고 함께 밥을 데운다', hint: '사과가 늦었어도 함께 먹을 수 있다', values: { peace: D }, fx: [flag('parReconciled'), heavy('{parentName}은(는) 밥그릇을 다시 꺼냈다. 둘은 그날 왜 다퉜는지부터 천천히 이야기했다.')] },
@@ -234,7 +234,7 @@ const PARENT: Turning[] = [
 const GONE: Fx[] = [{ op: 'losePerson', relation: MENTOR }, flag('menGone')];
 const MENTORS: Turning[] = [
   {
-    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'men_meet', kind: 'door', when: [...kid(5, 10), NO_PARENT, not('mentor'), not('grandGuard'), not('lonely')], weight: 12, repeat: 'once', speaker: 'hero',
     title: '밥 한 그릇', body: '처마 밑에서 비를 긋는 {name} 앞에 늙은 떠돌이 하나가 멈춰 선다. 말없이 제 밥그릇을 반 덜어 내민다. 한쪽 다리를 절고, 허리에는 닳은 목검을 찼다.',
     doors: [
       { label: '밥을 비우고, 허리의 목검을 가리키며 저것을 가르쳐 달라고 한다', hint: '노인은 한참 웃는다. 그날부터 비를 긋는 처마가 하나 생긴다', values: { ambition: D },
@@ -259,7 +259,7 @@ const MENTORS: Turning[] = [
   },
   {
     id: 'men_training', kind: 'door', when: [...kid(9, 14), has('menLesson'), not('menGone'), known(MENTOR)],
-    weight: 60, repeat: 'once', speaker: { relation: MENTOR }, title: '스승의 마지막 수업 전',
+    weight: 12, repeat: 'once', speaker: { relation: MENTOR }, title: '스승의 마지막 수업 전',
     body: '{mentor}이(가) 지난번 힘을 어디에 쓰겠느냐고 물었던 일을 다시 꺼낸다. 오늘은 닳은 목검을 내려놓고, 다친 아이를 데려오는 길을 막은 어른들 앞에서 무엇을 할지 묻는다.',
     doors: [
       { label: '아이를 등 뒤에 세우고 길을 지킨다', hint: '상처는 남지만 아이는 지나간다', values: { justice: D }, fx: [flag('menGuarded'), { op: 'hp', add: -8 }, { op: 'personChange', relation: MENTOR, bond: 8 }, heavy('{mentor}은(는) {name}의 등을 보며, 이제 누구를 지키려는지 알겠다고 했다.')] },

@@ -1,7 +1,7 @@
 // 시련과 기연 (설계 5.3), 고를 수 없는 불행, 고아의 비밀 성씨 (설계 5.4).
 // 해가 바뀔 때 불행 → 기연 순으로 한 번씩 굴린다. 기연은 문을 띄우고, 불행은 문 없이 일어난다.
 import { SURNAMES } from '../shared/data/births';
-import { chance, weighted, type Rng } from '../shared/core/rng';
+import { chance, hashString, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { checkAll } from './cond';
@@ -40,8 +40,10 @@ export function rollFortune(s: Life5, r: Rng): boolean {
  * 10~15세 수련기에 패기의 첫 감각을 일깨우는 기연(id가 fortune_haki_로 시작)을 만날지 해마다 판정한다.
  * 수련기 여섯 해에 걸친 누적 확률이 V.fortune.hakiTrainingP가 되도록 나눈다. 큰 기연(rollFortune)은 16세부터라 겹치지 않는다.
  */
-export function rollTrainingHakiFortune(s: Life5, r: Rng): boolean {
+export function rollTrainingHakiFortune(s: Life5, rng?: Rng): boolean {
   if (s.pending || s.age < 10 || s.age > 15) return false;
+  // 인생의 주 난수열을 건드리지 않도록 씨앗과 나이로 따로 만든 난수를 쓴다 (다른 사건의 흐름이 바뀌지 않는다)
+  const r = rng ?? rngOf({ seed: (s.rng.seed ^ hashString(`hakiTraining:${s.age}`)) >>> 0, cursor: 0 });
   const annual = 1 - Math.pow(1 - V.fortune.hakiTrainingP, 1 / 6);
   if (!chance(r, annual)) return false;
   const pool = TURNINGS.filter((t) => t.kind === 'fortune' && t.id.startsWith('fortune_haki_')
