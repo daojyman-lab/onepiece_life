@@ -10,6 +10,7 @@ import { DoorModal } from './modals/DoorModal';
 import { EndingModal } from './modals/EndingModal';
 import { FightModal } from './modals/FightModal';
 import { MenuModal } from './modals/MenuModal';
+import { NewsArchive } from './modals/NewsArchive';
 import { Main } from './screens/Main';
 import { Start } from './screens/Start';
 
@@ -21,7 +22,7 @@ export function App() {
   const s = st.life;
   const p = s?.pending ?? null;
   // 창은 기록이 다 떠오르고, 마지막 줄을 읽을 틈(CLOCK.windowDelayMs ÷ 배속)이 지난 뒤에 뜬다. 그때 store가 다시 그리게 한다
-  const ready = windowReady(s, st.shownId, performance.now() - st.revealedAt, st.settings.speed);
+  const ready = st.modal !== 'news' && windowReady(s, st.shownId, performance.now() - st.revealedAt, st.settings.speed);
   // 배경음악: 싸움 창이 떠 있으면 전투곡, 바다의 처지는 바다, 시작 화면과 뭍의 처지는 잔잔한 곡
   const bgm = st.screen !== 'main' || !s ? 'home'
     : ready && p && (p.kind === 'fight' || p.kind === 'battle') ? 'battle'
@@ -47,6 +48,7 @@ export function App() {
   if (!pendingView) {
     if (st.modal === 'codex') manage = <CodexModal meta={st.meta} />;
     else if (st.modal === 'menu') manage = <MenuModal />;
+    else if (st.modal === 'news') manage = <NewsArchive s={s} shownId={st.shownId} />;
   }
   return (
     <>

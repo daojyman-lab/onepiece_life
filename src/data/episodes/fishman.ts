@@ -1,12 +1,12 @@
 // 섬 장편 에피소드: fishman (v6.8, 2~3달짜리 시나리오 셋). 규칙: docs/02_설계/섬_장편_에피소드_작성규칙.md
 // 원작 전(주인공 12~20): 오토히메 왕비가 쓰러진 뒤, 왕자들이 서명을 잇는 시절. 사봉디의 코팅 뱃길을 타고 들어온
 //   인간 노예상 '흰 닻 상회'가 인어 입강의 인어들을 노린다. 어인가에서는 호디 존스가 붉은 알약으로 무리를 키운다.
-// 원작 그 무렵(21~22): 신어인 해적단의 반란. 결판은 밀짚모자가 낸다. 주인공은 다른 전선, 붉은 알약을 파는 '심해 약방'을 맡는다.
+// 왕궁을 되찾기 전: 신어인 해적단의 반란. 결판은 밀짚모자가 낸다. 주인공은 다른 전선, 붉은 알약을 파는 '심해 약방'을 맡는다.
 // 원작 뒤(22~): 지상으로 옮겨 가자는 약속. 가짜 땅문서를 파는 '해돋이 이주 조합'과 시라호시 공주, 후카보시 왕자.
 // 오리지널 인물: 페론(문어 어인 짐꾼) · 시엘라(인어 서기) / 토르(거북 어인 우편배달부) · 미오(인어 간호사) / 바스(가오리 어인 도선사) · 루네(인어 측량사).
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const HERE = on('어인섬', '어인가', '류구 왕국', '바다의 숲');
 
@@ -39,7 +39,7 @@ export const FOES_FISHMAN: FoeDef[] = [
 export const EP_FISHMAN: Turning[] = [
   // ================================================================ 원작 전: 흰 닻의 그물 (주인공 12~20)
   {
-    id: 'ep_fishman_b_1', kind: 'door', when: at(HERE, age(12, 20), not('ep_fishman_b_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_fishman_b_1', kind: 'door', when: at(HERE, age(12, 20), not('ep_fishman_b_done'), beforeHistory('fishmanPact')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '흰 닻 아래서 들린 비명',
     intro: [
       '어인섬에 닿아 인어들이 사는 만을 걷는다. 물 위에 조개 모양 집들이 늘어서 있고, 배를 감싼 거품 너머로 볕이 비친다.',
@@ -101,7 +101,7 @@ export const EP_FISHMAN: Turning[] = [
         fx: [{ op: 'fame', add: 2 }, log('명부에 적힌 이름 가운데 사라진 인어들의 이름도 있었다. 몇 사람이 횃불을 내렸다. 시엘라는 새 종이를 꺼냈다.'), next('ep_fishman_b_5')] },
       { label: '성난 무리 앞에 서서 인간 상인들을 항구에서 몰아낸다', hint: '골목의 박수와 시엘라의 굳은 얼굴을 함께 받는다', values: { dominion: D },
         fx: [flag('ep_fishman_b_mob'), { op: 'hardship', add: 1 }, log('죄 없는 인간 상인들까지 짐을 버리고 달아났다. 시엘라가 낮게 말했다. 미움으로 그물을 찢으면 다음 그물은 더 촘촘해진다고.'), next('ep_fishman_b_5')] },
-      { label: '붉은 눈의 패거리가 남긴 순찰표를 가져온다', hint: '납치범의 배를 도운 사람을 찾을 수 있다', special: 'dominion', when: [ready(4), has('ep_fishman_b_hodyleak')], danger: true, values: { dominion: D },
+      { label: '붉은 눈의 패거리가 남긴 순찰표를 가져온다', hint: '납치범의 배를 도운 사람을 찾을 수 있다', special: 'dominion', when: [has('ep_fishman_b_hodyleak')], danger: true, values: { dominion: D },
         fx: [flag('ep_fishman_b_jinbe'), next('ep_fishman_b_hody'), log('시엘라가 젖은 순찰표를 광장에 펼쳤다. 납치된 인어 가족들이 붉은 표시 옆의 이름을 짚었다.', 'light')] },
     ],
   },
@@ -277,9 +277,9 @@ export const EP_FISHMAN: Turning[] = [
     ],
   },
 
-  // ================================================================ 원작 그 무렵: 붉은 알약의 거리 (주인공 21~22)
+  // ================================================================ 원작 그 무렵: 붉은 알약의 거리 (왕궁 탈환 전)
   {
-    id: 'ep_fishman_c_1', kind: 'door', when: at(HERE, age(21, 22), not('ep_fishman_c_done')), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_fishman_c_1', kind: 'door', when: at(HERE, age(20, 21), not('ep_fishman_c_done'), afterHistory('punkDuel'), beforeHistory('fishmanPact')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '소년의 주름진 손',
     intro: [
       '어인가 골목에 들어서는데 소년이 빈 약병을 떨어뜨리고 벽을 짚는다. 소년이 고개를 들자 어린 얼굴에 주름이 번진다.',
@@ -548,7 +548,7 @@ export const EP_FISHMAN: Turning[] = [
 
   // ================================================================ 원작 뒤: 해돋이 땅문서 (주인공 22~)
   {
-    id: 'ep_fishman_a_1', kind: 'door', when: at(HERE, age(22, 40), not('ep_fishman_a_done')), weight: 25, repeat: 'once', speaker: { relation: '거대한 인어 공주 시라호시' },
+    id: 'ep_fishman_a_1', kind: 'door', when: at(HERE, age(22, 40), not('ep_fishman_a_done'), afterHistory('reverie')), weight: 25, repeat: 'once', speaker: { relation: '거대한 인어 공주 시라호시' },
     title: '햇빛 드는 땅을 팝니다',
     intro: [
       '세계 회의에서 돌아온 시라호시 공주가 지상 이야기를 듣고 싶은 주민들을 만난다. 한 아이가 공주를 붙잡고 햇빛은 바다의 숲보다 밝으냐고 묻는다.',

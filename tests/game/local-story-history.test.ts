@@ -109,7 +109,7 @@ describe('섬에서 겪은 일이 뒤에 남는 선택', () => {
   });
 
   it('배신은 배에 남은 사람에게만 일어나며 그 사람의 이름과 신분이 이어진다', () => {
-    const s = newLife5(23); s.age = 25;
+    const s = newLife5(23, { home: 'loguetown' }); s.age = 25;
     expect(eligible(s, 'mis_betrayal')).toBe(false);
     applyFx(s, [{ op: 'person', kind: 'crew', relation: '항구의 요리사' }]);
     const p = s.people.at(-1)!;

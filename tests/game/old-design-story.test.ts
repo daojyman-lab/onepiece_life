@@ -13,7 +13,7 @@ function choose(s: Life5, id: string, index: number): void {
 }
 
 function promisedFriend(): { s: Life5; id: string; name: string } {
-  const s = newLife5(11);
+  const s = newLife5(11, { home: 'loguetown' });
   s.siblingBirths = [];
   s.age = 7;
   choose(s, 'kid_ship_friend', 0);

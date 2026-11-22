@@ -4,7 +4,7 @@
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
 import { COATING_CONTACT } from '../voyage';
-import { SEAFARING, age, at, sea, st } from './paths';
+import { afterHistory, beforeHistory, SEAFARING, age, at, sea, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -15,7 +15,7 @@ const HERE = st(...SEAFARING, 'civil', 'shipwright');
 export const SEA_GRAND_LINE: Turning[] = [
   // ---------------------------------------------------------------- 위대한 항로 입구와 전반, 샤본디
   {
-    id: 'gl_whisky_peak', kind: 'door', when: at(age(16), HERE, sea('gl_entry')),
+    id: 'gl_whisky_peak', kind: 'door', when: at(age(16), HERE, sea('gl_entry'), beforeHistory('alabastaRain')),
     weight: 5, repeat: 'once', speaker: { relation: '선인장 바위 마을의 촌장' },
     title: '너무 반가운 마을', body: '선인장 바위가 솟은 항구 마을 사람들이 뱃사람들을 환영한다며 잔치를 열었다. 술이 끝없이 나온다. 그런데 술집 벽에 걸린 현상수배서들이 하나같이 뜯긴 자국투성이다.',
     doors: [
@@ -29,7 +29,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     ],
   },
   {
-    id: 'gl_little_garden', kind: 'door', when: at(age(16), HERE, sea('gl_entry')),
+    id: 'gl_little_garden', kind: 'door', when: at(age(16, 18), HERE, sea('gl_entry')),
     weight: 4, repeat: 'once', speaker: 'hero',
     title: '백 년의 결투', body: '공룡이 사는 원시의 섬 한가운데서 두 거인이 도끼와 칼을 맞대고 있다. 백 년째 끝나지 않는 결투라고 한다. 화산이 연기를 뿜을 때마다 둘은 다시 맞붙는다.',
     doors: [
@@ -82,7 +82,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     ],
   },
   {
-    id: 'gl_skypiea_toll', kind: 'door', when: at(age(17), st(...SEAFARING), sea('gl_first'), { c: 'island', is: ['스카이피아'] }),
+    id: 'gl_skypiea_toll', kind: 'door', when: at(age(17), st(...SEAFARING), sea('gl_first'), { c: 'island', is: ['스카이피아'] }, beforeHistory('skyBell')),
     weight: 5, repeat: 'once', speaker: { relation: '하늘섬 입구의 문지기 노파' },
     title: '구름 위의 입국세', body: '하늘섬의 입구, 구름 위에서 날개 달린 노파가 사진기를 들고 묻는다. 관광인지 전쟁인지. 입국세는 한 사람에 금 열 냥이다. 내지 않아도 들어갈 수는 있다고, 대신 책임은 지지 않는다고.',
     doors: [
@@ -96,7 +96,7 @@ export const SEA_GRAND_LINE: Turning[] = [
     ],
   },
   {
-    id: 'gl_sabaody_auction', kind: 'door', when: at(age(17), HERE, sea('sabaody')),
+    id: 'gl_sabaody_auction', kind: 'door', when: at(age(17), HERE, sea('sabaody'), beforeHistory('sabaodyIncident')),
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '휴먼 숍', body: '샤본디 제도 1번 그로브의 경매장에 사람들이 줄지어 들어간다. 오늘의 상품은 사람이다. 무대 뒤의 우리 안에서 어린 인어가 울고 있다. 앞줄에 천룡인이 앉아 있다.',
     doors: [
@@ -125,6 +125,34 @@ export const SEA_GRAND_LINE: Turning[] = [
 ];
 
 export const SEA_NEW_WORLD: Turning[] = [
+  {
+    id: 'nw_dressrosa_tiles', kind: 'door',
+    when: at(afterHistory('dressrosaCoup'), beforeHistory('dressrosaFree'), { c: 'ashore' }, { c: 'island', is: ['드레스로자'] }, st('child', 'civil', 'settled', 'retired', 'shipwright', ...SEAFARING)),
+    weight: 9, repeat: 'once', speaker: 'hero',
+    title: '꽃무늬 문패', body: '꽃시장 골목의 도공이 낡은 문패를 떼고 있다. 양철 인형 하나가 파란 꽃무늬 문패를 가리키며 제발 이것만 남겨 달라고 한다. 도공은 어깨를 으쓱한다. 그 집은 오래전부터 비어 있었다고 한다.',
+    doors: [
+      { label: '문패 뒷면의 이름과 번지를 종이에 본뜬다', hint: '양철 인형이 종이를 간직해 달라고 한다', values: { inquiry: D },
+        fx: [{ op: 'flag', id: 'dressrosaTileRubbing' }, { op: 'log', text: '종이에 숯을 문지르자 「루사, 꽃시장 여덟 번지」가 떠올랐다. 인형은 파란 꽃에 입을 맞추고 골목을 돌아갔다.', weight: 'heavy' }] },
+      { label: '도공의 수레에 문패를 실어 주고 삯을 받는다', hint: '도공이 깨지지 않은 타일을 세어 품삯을 준다', values: { greed: D },
+        fx: [{ op: 'money', add: 3000 }, { op: 'log', text: '수레가 자갈 위를 지날 때마다 타일이 달그락거렸다. 품삯을 다 세고 돌아보니 양철 인형은 사라지고 없었다.', weight: 'light' }] },
+    ],
+  },
+  {
+    id: 'nw_dressrosa_tile_home', kind: 'door',
+    when: at(afterHistory('dressrosaFree'), { c: 'ashore' }, { c: 'island', is: ['드레스로자'] }, st('civil', 'settled', 'retired', 'shipwright', ...SEAFARING)),
+    weight: 9, repeat: 'once', speaker: 'hero',
+    title: '여덟 번지의 꽃', body: '꽃시장에서 루사라는 여자가 자기 집을 찾고 있다. 장난감으로 살던 동안 골목에 층계가 새로 생겼고 집마다 번지가 바뀌었다. “문 옆에 파란 꽃이 있었어요. 우리 애 손바닥만 했는데.”',
+    recall: [{ when: [{ c: 'flag', id: 'dressrosaTileRubbing', has: true }], text: '낯익은 번지다. 접어 두었던 종이에 숯으로 뜬 꽃잎 다섯 장이 남아 있다.' }],
+    doors: [
+      { label: '간직한 탁본을 펴서 도공과 옛집을 찾는다', hint: '옛 이름이 남은 종이를 루사에게 돌려준다', when: [{ c: 'flag', id: 'dressrosaTileRubbing', has: true }], values: { loyalty: D },
+        fx: [{ op: 'person', kind: 'ally', name: '루사', gender: 'f', relation: '꽃시장 여덟 번지의 이웃' }, { op: 'timeline', text: '장난감의 부탁으로 본뜬 문패를 루사에게 돌려주었다' }, { op: 'log', text: '도공이 종이를 들고 층계를 세 번 올랐다. 문을 두드리자 키가 훌쩍 큰 아이가 열었다. 루사는 꽃잎 다섯 장이 찍힌 종이를 아이 손바닥 위에 올려놓았다.', weight: 'heavy' }] },
+      { label: '골목 어귀에 앉아 돌아온 사람들의 주소를 적는다', hint: '동네 사람들과 옛 번지와 새 번지를 맞춰 본다', values: { justice: D },
+        news: { title: '드레스로자 꽃시장에 옛 주소 대조표', body: '꽃시장 주민들이 옛 번지와 새 번지를 한 장에 적었다. 첫날 열 줄이 채워졌다. 자기 집을 찾는 사람은 가마터에서 도공에게 물어보면 된다.' },
+        fx: [{ op: 'fame', add: 3 }, { op: 'log', text: '저녁 장이 파할 때까지 주소가 열 줄 모였다. 루사가 종이를 가마터로 가져가자 도공이 앞치마를 벗고 자리 하나를 내주었다.', weight: 'light' }] },
+      { label: '도공의 새 문패를 배달한다', hint: '주소를 찾은 집마다 문패를 달고 품삯을 받는다', values: { greed: D },
+        fx: [{ op: 'money', add: 6000 }, { op: 'log', text: '새 문패 여섯 장을 달았다. 해 질 무렵 루사가 여전히 도공 옆에서 타일 조각들을 맞추고 있었다.', weight: 'light' }] },
+    ],
+  },
   // ---------------------------------------------------------------- 신세계
   {
     id: 'nw_tribute', kind: 'door', when: at(age(18), st(...SEAFARING), sea('nw_first')),
@@ -140,7 +168,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     ],
   },
   {
-    id: 'nw_dressrosa_toys', kind: 'door', when: at(age(18), HERE, sea('nw_first'), { c: 'island', is: ['드레스로자'] }),
+    id: 'nw_dressrosa_toys', kind: 'door', when: at(age(18), HERE, sea('nw_first'), { c: 'island', is: ['드레스로자'] }, afterHistory('dressrosaCoup'), beforeHistory('dressrosaFree')),
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '말하는 장난감들의 나라', body: '드레스로자의 거리에는 사람과 장난감이 함께 산다. 외다리 장난감 병정이 {name}의 옷자락을 잡고 속삭인다. 이 장난감들은 원래 사람이었다고, 아무도 그들을 기억하지 못한다고.',
     doors: [
@@ -153,7 +181,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     ],
   },
   {
-    id: 'nw_zou', kind: 'door', when: at(age(18), HERE, sea('nw_first')),
+    id: 'nw_zou', kind: 'door', when: at(age(18), HERE, sea('nw_first'), afterHistory('dressrosaFree'), beforeHistory('wholeCake')),
     weight: 4, repeat: 'once', speaker: { relation: '털복숭이 밍크족 전사' },
     title: '걷는 코끼리 위의 나라', body: '천 년을 걷는 거대한 코끼리의 등 위에 밍크족의 나라가 있다. 숲이 부서지고 연기가 오른다. 사황의 부하가 누군가를 찾는다며 나라를 짓밟고 갔다고 한다. 다친 밍크족들이 나무 아래 누워 있다.',
     doors: [
@@ -165,7 +193,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     ],
   },
   {
-    id: 'nw_wano_smile', kind: 'door', when: at(age(18), HERE, sea('nw_late'), { c: 'island', is: ['와노쿠니'] }),
+    id: 'nw_wano_smile', kind: 'door', when: at(age(18), HERE, sea('nw_late'), { c: 'island', is: ['와노쿠니'] }, beforeHistory('wanoFree')),
     weight: 5, repeat: 'once', speaker: 'hero',
     title: '웃음밖에 남지 않은 마을', body: '와노쿠니의 가난한 마을 사람들이 굶주린 얼굴로 웃고 있다. 가짜 열매를 먹고 웃음 말고는 모든 표정을 잃었다고 한다. 성 아랫마을에서는 쇼군의 잔치가 한창이다.',
     doors: [
@@ -178,7 +206,7 @@ export const SEA_NEW_WORLD: Turning[] = [
     ],
   },
   {
-    id: 'nw_egghead', kind: 'door', when: at(age(18), HERE, sea('nw_late'), { c: 'island', is: ['에그헤드'] }),
+    id: 'nw_egghead', kind: 'door', when: at(age(18), HERE, sea('nw_late'), { c: 'island', is: ['에그헤드'] }, afterHistory('wanoFree')),
     weight: 5, repeat: 'once', speaker: { relation: '천재 박사의 조수' },
     title: '미래의 섬', body: '에그헤드는 오백 년 뒤의 기술이 굴러다니는 섬이다. 천재 박사의 조수가 일손을 구한다며 다가온다. 그런데 섬 둘레의 바다에 해군의 군함들이 하나둘 모이고 있다.',
     doors: [

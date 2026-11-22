@@ -45,7 +45,7 @@ describe('문', () => {
     const money = s.hero.money;
     expect(openTurning(s, TURNING_BY_ID.after_fight)).toBe(true);
     answerDoor(s, index);
-    addValues(expected, index === 1 ? { greed: V.value.door, dominion: V.value.door } : { peace: V.value.door });
+    addValues(expected, index === 1 ? { greed: V.value.door * V.value.greedProfit, dominion: V.value.door } : { peace: V.value.door });
     expect(s.values).toEqual(expected.values);
     expect(s.hero.money).toBe(money + (index === 1 ? 75000 : 0));
   });

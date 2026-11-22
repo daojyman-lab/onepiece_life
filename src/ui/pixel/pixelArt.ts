@@ -158,7 +158,61 @@ function seakingBody(w: Who, frame: number): HTMLCanvasElement {
 }
 
 const faceCache = new Map<string, string>();
+
+// 브룩의 빈 눈구멍과 쵸파의 뿔은 사람 얼굴에 모자를 씌워서는 표현되지 않는다.
+function musicianOrDoctor(key: 'brook' | 'chopper'): string {
+  const [canvas, ctx] = makeCanvas(24, 24);
+  const paint = (color: string, x: number, y: number, width: number, height: number) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
+  };
+  if (key === 'brook') {
+    const hair = '#3a3044', bone = '#f6e7c3', socket = '#342939';
+    paint(hair, 2, 7, 20, 10);
+    paint(hair, 4, 5, 16, 15);
+    paint('#252036', 7, 1, 10, 6);
+    paint('#ac643f', 7, 5, 10, 2);
+    paint('#252036', 4, 7, 16, 2);
+    paint(bone, 6, 10, 12, 8);
+    paint(bone, 8, 17, 8, 4);
+    paint(socket, 7, 12, 4, 3);
+    paint(socket, 13, 12, 4, 3);
+    paint(socket, 11, 15, 2, 2);
+    paint(socket, 8, 18, 8, 1);
+    for (let tooth = 9; tooth <= 15; tooth += 2) paint(socket, tooth, 19, 1, 1);
+    paint('#e9a342', 7, 21, 4, 2);
+    paint('#e9a342', 13, 21, 4, 2);
+  } else {
+    const antler = '#835432', fur = '#c98955', hat = '#e16b95';
+    for (const x of [1, 19]) {
+      paint(antler, x, 3, 3, 5);
+      paint(antler, x + 2, 1, 2, 4);
+      paint(antler, x + 1, 7, 3, 2);
+    }
+    paint(fur, 2, 12, 20, 3);
+    paint(fur, 5, 13, 14, 7);
+    paint('#efbc86', 8, 17, 8, 5);
+    paint('#362538', 7, 15, 2, 2);
+    paint('#362538', 15, 15, 2, 2);
+    paint('#329cdd', 10, 17, 4, 2);
+    paint('#634033', 11, 20, 3, 1);
+    paint(hat, 5, 4, 14, 8);
+    paint('#c44877', 3, 11, 18, 2);
+    for (let i = 0; i < 5; i++) {
+      paint('#fff0dc', 9 + i, 5 + i, 2, 1);
+      paint('#fff0dc', 13 - i, 5 + i, 2, 1);
+    }
+  }
+  outline(ctx, 24, 24);
+  return canvas.toDataURL('image/png');
+}
+
 export function faceURL(w: Who): string {
+  if (w.key === 'brook' || w.key === 'chopper') {
+    const face = faceCache.get(w.key) ?? musicianOrDoctor(w.key);
+    faceCache.set(w.key, face);
+    return face;
+  }
   if (w.form === 'seaking') {
     const k = 'seaking|' + w.key;
     const hit = faceCache.get(k);
@@ -392,6 +446,8 @@ export interface SceneStrike {
 
 export interface SceneInput {
   hero: Who; crew: Who[]; foe: Who | null;
+  /** 남의 배에 탄 말단 선원일 때 모시는 선장. 있으면(싸우지 않을 때) 선장이 맨 앞에 서고 주인공은 줄 끝에 선다 */
+  captain?: Who | null;
   sailing: boolean; place: string; location: SceneLocation; weather: Weather; flag: NonNullable<Who['faction']>;
   aura: string | null; strike?: SceneStrike;
 }
@@ -519,22 +575,34 @@ export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t
       bx.drawImage(sp, sx, sy, sp.width * zoom, sp.height * zoom);
     }
   };
-  crew.forEach((c, i) => {
-    const right = i >= leftCrew;
-    put(c, slot(right ? i + front : i), 1, null, right, ground - 1);
-  });
-  const attacking = phase >= .18 && phase < .78;
-  put(sc.hero, heroX, size, strike?.hero && attacking ? 'attack' : null, false);
-  if (sc.foe) put(sc.foe, foeX, size, strike && !strike.hero && attacking ? 'attack' : null, true);
-  if (strike && phase >= .23 && phase < .90) {
-    strikeEffect(art, strike, weapon, strike.hero ? heroX + 9 * size : foeX - 9 * size,
-      strike.hero ? foeX - 3 * size : heroX + 3 * size, ground - 11 * size, phase);
+  let auraX = heroX;
+  if (sc.captain && !fighting) {
+    // 말단 선원: 주인공(줄 끝) → 선배 선원들 → 선장(맨 앞, 뱃머리 쪽). 모두 앞을 본다
+    const count = crew.length + 2;
+    const lineSpacing = Math.min(size * 33, stageWidth / (count - 1));
+    const at = (index: number) => mid + (index - (count - 1) / 2) * lineSpacing;
+    put(sc.hero, at(0), size, null, false);
+    crew.forEach((c, i) => put(c, at(i + 1), 1, null, false, ground - 1));
+    put(sc.captain, at(count - 1), size, null, false);
+    auraX = at(0);
+  } else {
+    crew.forEach((c, i) => {
+      const right = i >= leftCrew;
+      put(c, slot(right ? i + front : i), 1, null, right, ground - 1);
+    });
+    const attacking = phase >= .18 && phase < .78;
+    put(sc.hero, heroX, size, strike?.hero && attacking ? 'attack' : null, false);
+    if (sc.foe) put(sc.foe, foeX, size, strike && !strike.hero && attacking ? 'attack' : null, true);
+    if (strike && phase >= .23 && phase < .90) {
+      strikeEffect(art, strike, weapon, strike.hero ? heroX + 9 * size : foeX - 9 * size,
+        strike.hero ? foeX - 3 * size : heroX + 3 * size, ground - 11 * size, phase);
+    }
   }
   if (sc.aura) {
     const color = sc.aura;
     for (let i = 0; i < 5; i++) {
       const life = (t * 6 + i * 2) % 10;
-      if (life < 7) art.rect(heroX + (i * 5 % 19 - 9) * size, ground - (5 + i + life) * size, 1, 2, color);
+      if (life < 7) art.rect(auraX + (i * 5 % 19 - 9) * size, ground - (5 + i + life) * size, 1, 2, color);
     }
   }
   if (sc.sailing) drawSeaAir(art, t, sc.weather, seed);

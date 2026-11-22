@@ -4,6 +4,9 @@
 // 원작 인물은 주인공의 나이에 맞춰 나온다 (주인공 열일곱 살 무렵이 원작의 시작).
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
+import type { WorldEventId } from '../world-history';
+import { ISOLATED_TOWNS } from '../landlocked';
+import { JOIN_SHIP } from '../shipmates';
 import type { Cond, HomeId, Person, SeaId, Standing, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -30,7 +33,8 @@ export const HUNTED: Standing[] = ['pirate', 'revolution'];
 const ALL_SEAS_BUT_EAST: SeaId[] = ['west', 'north', 'south', 'gl_entry', 'gl_first', 'sabaody', 'nw_first', 'nw_late'];
 const BLUES: SeaId[] = ['east', 'west', 'north', 'south'];
 
-/** 로그타운에서 태어난 사람 + 조건들 */
+export const beforeHistory = (id: WorldEventId): Cond => ({ c: 'history', id, has: false });
+export const afterHistory = (id: WorldEventId): Cond => ({ c: 'history', id, has: true });
 /** 어느 고향에서나. 바다 · 항구 · 세계정부를 전제하는 글은 index.ts의 landlocked가 외딴 고향 섬에서 막는다 */
 export const at = (...c: Cond[]): Cond[] => [...c];
 export const st = (...is: Standing[]): Cond => ({ c: 'standing', is });
@@ -51,7 +55,7 @@ export const PATHS: Turning[] = [
     title: '해적에게 붙잡히다', body: '{island} 앞바다에서 해적선이 고깃배를 덮쳤다. 선장이 {name}의 멱살을 움켜쥐고, 마침 일손이 모자랐다며 웃는다.',
     doors: [
       { label: '끌려가 선원이 된다', hint: '돌아갈 길은 당분간 없다', values: { romance: D },
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'log', text: '해적선의 막내 선원이 되었다. 갑판을 닦으며 바다를 배운다.', weight: 'heavy' },
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'log', text: '해적선의 막내 선원이 되었다. 갑판을 닦으며 바다를 배운다.', weight: 'heavy' },
              { op: 'timeline', text: '해적선에 끌려가 선원이 되었다' }] },
       { label: '해군에 밀고하고 빠져나온다', hint: '해적들이 원한을 품는다', values: { justice: D },
         fx: [{ op: 'fame', add: 2 }, { op: 'flag', id: 'piratesGrudge' }, { op: 'log', text: '해군 순찰선이 해적선을 덮쳤다. {name}은(는) 그 틈에 빠져나왔다.', weight: 'heavy' }] },
@@ -67,10 +71,10 @@ export const PATHS: Turning[] = [
     title: '깃발을 올리다', body: '{island} 부두에 낡은 배 한 척이 헐값에 나왔다. 해골 깃발 하나만 그려 넣으면 내일이라도 바다로 나갈 수 있다.',
     doors: [
       { label: '배를 사서 해골 깃발을 올린다', hint: '오늘부터 쫓기는 몸이 된다', values: { freedom: D },
-        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' },
+        fx: [{ op: 'money', add: -10000, trade: true }, { op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship', newHull: true },
              { op: 'log', text: '낡은 돛대 끝에 직접 그린 해골 깃발이 펄럭였다.', weight: 'heavy' }, { op: 'timeline', text: '해적 깃발을 올렸다' }] },
       { label: '이름난 해적선에 견습으로 오른다', hint: '남의 깃발 아래서 바다를 배운다', values: { romance: D }, 
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'ally', relation: '모시는 해적 선장' }, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'timeline', text: '해적선의 견습 선원이 되었다' }, { op: 'log', text: '이름난 해적선의 갑판을 닦으며 항로를 외웠다. 선원들은 아직 {name}에게 키를 맡기지 않았다.', weight: 'light' }] },
       { label: '바다는 꿈으로만 둔다', hint: '뭍에서의 삶이 이어진다', values: { peace: D }, fx: [ { op: 'log', text: '부두에서 배가 떠나는 걸 지켜봤다. 이튿날에도 익숙한 골목으로 출근했다.', weight: 'light' }] },
       { label: '부두의 건달들을 모아 선단을 꾸린다', hint: '처음부터 우두머리로 바다에 나선다', special: 'dominion', values: { dominion: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'flag', id: 'captain' }, { op: 'flag', id: 'ship' }, { op: 'fame', add: 10 },
@@ -83,19 +87,20 @@ export const PATHS: Turning[] = [
     title: '수평선의 상선', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이 호위도 없이 {island} 쪽으로 느릿느릿 움직이고 있다.',
     doors: [
       { label: '상선을 덮친다', hint: '현상금이 오른다', values: { dominion: D },
-        fx: [{ op: 'money', add: 60000 }, { op: 'fame', add: 30 }, { op: 'log', text: '상선의 짐칸을 털었다. 수배서의 숫자가 또 올랐다.', weight: 'heavy' }] },
+        fx: [{ op: 'money', add: 60000 }, { op: 'fame', add: 30 }, { op: 'log', text: '상선의 짐칸을 털었다. 피해를 본 선장이 항구에 닿자마자 해군 지부를 찾아갔다.', weight: 'heavy' }] },
       { label: '상선을 노리는 다른 해적을 쫓아낸다', hint: '상인들에게 이름이 알려진다', values: { dominion: D }, 
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 15 }, { op: 'money', add: 20000 }, { op: 'log', text: '상선 앞을 가로막던 해적선이 물러났다. 상인은 항구에 닿아 {name}의 깃발을 이야기했다.', weight: 'light' }] },
       { label: '사황의 깃발을 단 배를 건드린다', hint: '신세계 전체가 그 이름을 알게 된다', when: [sea('nw_first', 'nw_late')], values: { ambition: D }, danger: true,
         fx: [{ op: 'fame', add: 300 }, { op: 'hp', add: -30 }, { op: 'injury', severity: 'heavy' },
-             { op: 'log', text: '사황의 보급선을 털었다. 그날로 세상의 모든 신문에 {name}의 얼굴이 실렸다.', weight: 'heavy' }] },
+             { op: 'log', text: '사황의 보급선을 털었다. 그날로 세상의 모든 신문에 {name}의 얼굴이 실렸다.', weight: 'heavy' },
+             { op: 'flag', id: 'raidedEmperorSupply' }, { op: 'queue', turning: 'path_warlord' }] },
       { label: '상선을 털지 않고 통행세를 매긴다', hint: '피를 보지 않고 짐칸이 통째로 들어온다', special: 'greed', values: { greed: D },
         fx: [{ op: 'money', add: 110000 }, { op: 'fame', add: 5 }, { op: 'flag', id: 'tollPirate' },
              { op: 'log', text: '상인들은 떨면서도 순순히 금고를 열었다. 다음 항해에도 이 바다를 지나려면 그래야 했다.', weight: 'heavy' }] },
     ],
   },
   {
-    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'bounty', min: 300000000 }, { c: 'standingYears', min: 2 }),
+    id: 'path_warlord', kind: 'door', when: at(st('pirate'), { c: 'fame', min: WARLORD_FAME }, { c: 'bounty', min: 300000000 }, { c: 'standingYears', min: 2 }, beforeHistory('reverie')),
     weight: 8, repeat: 'once', speaker: { relation: '세계 정부의 사자' },
     title: '칠무해 제의', body: '세계 정부의 사자가 {island}에 머무는 {name}을(를) 찾아왔다. 현상금을 거두는 대신, 정부의 깃발 아래로 들어오라는 제의다.',
     doors: [
@@ -149,7 +154,7 @@ export const PATHS: Turning[] = [
     ],
   },
   {
-    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east'), inLoguetown),
+    id: 'path_smoker', kind: 'door', when: at(age(14, 17), st('child', 'civil'), sea('east'), inLoguetown, beforeHistory('loguetownStorm')),
     weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '흰 연기의 대령', body: '시가 두 대를 문 해군 대령이 {island} 뒷골목에서 {name}을(를) 불러 세운다. 건달 셋을 혼자 쫓아내는 걸 봤다고 한다.',
     doors: [
@@ -223,7 +228,7 @@ export const PATHS: Turning[] = [
 
   // ---------------------------------------------------------------- 혁명군 · 현상금 사냥꾼 · 조선공
   {
-    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east'), inLoguetown),
+    id: 'path_rev_dragon', kind: 'door', when: at(age(17, 18), st('child', 'civil', 'pirate'), sea('east'), inLoguetown, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 8, repeat: 'once', speaker: { canon: 'dragon' },
     title: '폭풍 속의 사내', body: '처형대에 벼락이 떨어지던 날, 망토를 두른 사내가 비에 젖은 {name}에게 말을 건다. 이 세상이 왜 이 모양인지 궁금하지 않느냐고.',
     doors: [
@@ -321,14 +326,14 @@ export const PATHS: Turning[] = [
   },
   {
     id: 'prison_release', kind: 'door', when: at(st('prisoner')),
-    weight: 4, repeat: { years: 1 }, speaker: { relation: '간수' },
+    weight: 4, repeat: { years: 1 }, max: Infinity, speaker: { relation: '간수' },
     title: '형기를 마치다', body: '녹슨 문이 열린다. 간수가 {name}의 짐 꾸러미를 바닥에 던지며, 다시는 보지 말자고 한다.',
     doors: [
       { label: '고개를 숙이고 뭍의 삶으로 돌아간다', hint: '조용히 다시 시작한다', values: { peace: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'log', text: '감옥 문을 나섰다. 바깥 공기가 낯설었다.', weight: 'heavy' }, { op: 'timeline', text: '형기를 마치고 풀려났다' }] },
-      { label: '감옥에서 만난 자들과 바다로 나간다', hint: '쫓기는 삶으로 돌아간다', values: { freedom: D },
+      { label: '감옥에서 만난 자들과 바다로 나간다', hint: '쫓기는 삶으로 돌아간다', when: [{ c: 'island', is: ISOLATED_TOWNS, not: true }], values: { freedom: D },
         fx: [{ op: 'standing', to: 'pirate' }, { op: 'person', kind: 'crew', relation: '감옥 동기' }, { op: 'timeline', text: '감옥 동기들과 바다로 나갔다' }, { op: 'log', text: '감옥에서 만난 자들이 부두에 기다렸다. 낡은 배에 오르자 다시 수배장에 이름이 올랐다.', weight: 'light' }] },
-      { label: '해군의 끄나풀이 되기로 하고 나온다', hint: '옛 동료들을 팔아 남은 형기를 지운다', needs: ['crew'], values: { greed: D }, 
+      { label: '해군의 끄나풀이 되기로 하고 나온다', hint: '옛 동료들을 팔아 남은 형기를 지운다', when: [{ c: 'island', is: ISOLATED_TOWNS, not: true }], needs: ['crew'], values: { greed: D },
         fx: [{ op: 'standing', to: 'bountyHunter' }, { op: 'flag', id: 'informant' }, { op: 'log', text: '간수는 비밀 보고서 첫 장을 내밀었다. 옛 동료의 이름을 적어야 문이 열렸다.', weight: 'light' }] },
     ],
   },
@@ -406,14 +411,14 @@ export const PATHS: Turning[] = [
     title: '주인 잃은 배', body: '{island} 항구에 주인을 잃은 범선 한 척이 묶여 있다. 위대한 항로를 건널 만한 배다.',
     doors: [
       { label: '배를 얻어 붉은 산을 넘는다', hint: '세상에서 가장 험한 바다로 들어선다', values: { romance: D },
-        fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 5 },
+        fx: [{ op: 'flag', id: 'ship', newHull: true }, { op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 5 },
              { op: 'log', text: '배는 붉은 산의 물길을 거슬러 올라 위대한 항로에 들어섰다.', weight: 'heavy' }, { op: 'timeline', text: '위대한 항로에 들어섰다' }] },
       { label: '배를 팔아 돈을 챙긴다', hint: '당분간은 이 바다로 족하다', values: { ambition: D }, fx: [{ op: 'money', add: 80000 }, { op: 'log', text: '배를 사겠다는 사람에게 열쇠를 넘겼다. 빈 부두를 지나 새 주머니를 쥐었다.', weight: 'light' }] },
       { label: '원래 주인을 찾아 돌려준다', hint: '고맙다는 말만 듣는다', values: { justice: D }, fx: [{ op: 'fame', add: 3 }, { op: 'log', text: '낡은 선실에 남은 이름표로 주인을 찾았다. 그는 돛을 만지며 몇 번이나 고맙다고 했다.', weight: 'light' }] },
     ],
   },
   {
-    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east'), inLoguetown),
+    id: 'path_follow_luffy', kind: 'door', when: at(age(17, 19), st('child', 'civil', 'pirate', 'bountyHunter', 'shipwright'), sea('east'), inLoguetown, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 6, repeat: 'once', speaker: { canon: 'luffy' },
     title: '처형대 위의 웃음', body: '{island} 처형대에서 목이 잘릴 뻔했던 밀짚모자 소년이 벼락 속에서 웃으며 살아났다. 그의 작은 배가 폭풍 속으로 떠나려 한다.',
     doors: [
@@ -457,9 +462,9 @@ export const PATHS: Turning[] = [
       { label: '비눗방울 섬으로 배를 몬다', hint: '이름난 자들이 모이는 곳으로 간다', values: { ambition: D },
         fx: [{ op: 'move', island: '샤본디 제도', sea: 'sabaody' }, { op: 'log', text: '비눗방울이 떠오르는 섬, 샤본디 제도에 닻을 내렸다.', weight: 'heavy' }] },
       { label: '이 바다에 머문다', hint: '아직은 이 바다가 맞다', values: { peace: D }, fx: [ { op: 'log', text: '붉은 벽 아래에서 배를 돌렸다. 아직 익숙한 항로를 더 항해하기로 했다.', weight: 'light' }] },
-      { label: '안개 속의 거대한 유령선에 다가간다', hint: '살아서 나올 수 있을지 모른다', values: { romance: D }, danger: true,
+      { label: '유령선이 목격된 안개 속으로 들어간다', hint: '짙은 안개 속에서 들리는 소리를 따라간다', values: { romance: D }, danger: true,
         fx: [{ op: 'hp', add: -25 }, { op: 'move', island: '스릴러 바크', sea: 'sabaody' },
-             { op: 'log', text: '안개 속의 유령섬 스릴러 바크에 발을 들였다. 그림자가 멋대로 움직였다.', weight: 'heavy' }] },
+             { op: 'log', text: '선체를 때리는 큰 파도를 겨우 넘었다. 뱃전의 그림자가 일렁이고 안개 속 사슬이 울렸다.', weight: 'heavy' }] },
     ],
   },
   {

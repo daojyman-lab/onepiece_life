@@ -121,6 +121,7 @@ describe('주무기와 실물 보관', () => {
 
   it('타시기의 명검은 실제로 지불한 뒤에만 현물과 인연으로 남는다', () => {
     const s = adult();
+    s.age = 17; s.part = 0;
     s.growth.tier.sword = 1;
     const t = TURNING_BY_ID.cn_tashigi_swords;
     expect(openTurning(s, t)).toBe(true);

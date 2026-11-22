@@ -1,14 +1,20 @@
 // 효과 적용. 효과는 값이고, 연산(op)마다 한 갈래씩 처리한다.
 import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, traitMastery } from './traits';
 import { setDream } from './dreams';
+import { loseShip, nameShip, ownedHull, partShip, repairShip, repairWords, takeShip } from './ship-memory';
+import { recordWatchMeal, watchMealWords } from './watch-meal';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
-import { parentFound, parentMissing, welcomeSibling } from './family';
+import { returnFromTraining } from './training-travel';
+import { childhoodWords, rememberChildhood } from './childhood-memory';
+import { rivalCrewRole, rivalPerson, rivalPosition } from './rival';
+import { resumeVoyage } from './passage';
+import { markPersonDead, parentFound, parentMissing, separateSpouse, welcomeSibling } from './family';
 import { resolveSiblingReunion, siblingReunionWords } from './siblings';
-import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
+import { awardEntryPass, requestArrival, resolveEntry, sailTo, boardSkiff } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
-import { enterPrime } from './stages';
+import { beginDebut, enterPrime } from './stages';
 import { FRUIT_BY_ID, NATURAL_FRUITS, SMILE_FRUITS } from '../shared/data/fruits';
 import { ITEM_BY_ID } from '../shared/data/items';
 import { SEA_BY_ID } from '../shared/data/seas';
@@ -20,10 +26,11 @@ import { V } from '../data/balance';
 import { CANON, canonAge } from '../data/canon';
 import { FOES } from '../data/foes';
 import { HOMES } from '../data/homes';
+import { SHIP_CAPTAIN, SHIPMATE, SHIPMATE_FOLLOWED } from '../data/shipmates';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
 import { fitProsthetic, loseLimb } from './body';
-import { askFight } from './fight';
+import { askFight, rivalCombatStat, startKumaFight, startRivalDuel } from './fight';
 import { fillContacts, hasRelation, livingContact } from './needs';
 import { josa } from '../shared/core/josa';
 import { revealSurname } from './fortune';
@@ -33,20 +40,66 @@ import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
 import { notePrisonEscape } from './bounty';
-import { beginVow, declineVow, resolveVow } from './vow';
+import { beginVow, resolveVow } from './vow';
+import { promiseDream } from './dream-vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
+const STAT_LABEL: Record<StatKey, string> = { str: '힘', spd: '속도', vit: '체력', int: '지력', wil: '의지', luk: '운' };
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+
+/** 유년기 인연이 이어지는 장면(data/turnings/childhood-bonds.ts · bonds.ts)이 앞 장면의 선택을 기억해 말하는 한 줄 */
+function parentWorkMemory(s: Life5, parentName: string): string {
+  const f = s.flags;
+  if (f.includes('parHelped')) return `${parentName}의 일을 거든 뒤 손에 잡힌 물집이 아직도 기억난다.`;
+  if (f.includes('parDefy')) return `${parentName}처럼 살지 않겠다고 혼자 다짐했던 날을 기억한다.`;
+  if (f.includes('parAsked')) return `${parentName}에게 도구의 쓰임을 하나씩 물었던 날을 기억한다.`;
+  return `${parentName}의 굳은살 박인 손을 지켜보던 날을 기억한다.`;
+}
+function rivalFestivalWords(s: Life5): { rivalPrepareMemory: string; rivalFestivalMemory: string } {
+  const f = s.flags;
+  return {
+    rivalPrepareMemory: f.includes('rivalSearched') ? '잃어버린 깃발을 함께 찾던 때 서로의 달리는 버릇까지 알아챘다.'
+      : f.includes('rivalMadeFlag') ? '둘이 주민과 함께 꿰맨 깃발이 경기장에 걸려 있다.'
+      : f.includes('rivalMapClue') ? '깃대에서 찾은 낡은 지도의 끝이 아직 품에 있다.' : '',
+    rivalFestivalMemory: f.includes('rivalChoseMatch') ? '축제 날 끝낸 승부를 다시 겨뤄 볼지 묻는다.'
+      : f.includes('rivalChoseRescue') ? '축제 날 아이를 찾느라 미룬 승부를 지금 끝낼지 묻는다.'
+      : '축제 날 주민을 도우느라 미룬 승부를 지금 끝낼지 묻는다.',
+  };
+}
+function mentorTrainingMemory(s: Life5): string {
+  const f = s.flags;
+  if (f.includes('menGuarded')) return '지난번에는 다친 아이를 등 뒤에 세우고 길을 지켰다.';
+  if (f.includes('menOutwitted')) return '지난번에는 어른들의 시선을 읽고 싸움 없이 아이를 데려왔다.';
+  if (f.includes('menTogether')) return '지난번에는 스승과 어깨를 맞대고 아이를 데려왔다.';
+  return '스승이 물었던 힘의 쓰임이 다시 떠오른다.';
+}
 
 /** 문장의 자리표시 {name} {town} {island} {parent}를 현재 상태로 채우고 조사를 고른다 */
 export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (!text.includes('{')) return josa(text);
   const vars: Record<string, string> = { name: s.hero.name, town: s.hero.town, island: s.hero.island };
+  if (text.includes('{rival}')) vars.rival = rivalPerson(s)?.name ?? '맞수';
+  if (text.includes('{rivalPost}')) vars.rivalPost = rivalPosition(s);
+  if (text.includes('{crisis')) Object.assign(vars, childhoodWords(s));
+  if (text.includes('{mentor}')) vars.mentor = livingContact(s, { relation: '스승' })?.name ?? '스승';
+  if (text.includes('{destination}')) vars.destination = s.passage?.to ?? '';
   if (text.includes('{weapon}')) vars.weapon = equippedWeapon(s)?.name ?? '';
+  if (text.includes('{shipName}')) vars.shipName = ownedHull(s)?.name ?? '배';
+  if (text.includes('{shipRepair}')) vars.shipRepair = repairWords(ownedHull(s));
   if (text.includes('{parent}')) vars.parent = livingContact(s, { who: 'parent' })?.relation ?? '';
+  if (text.includes('{parentName}') || text.includes('{parentWorkMemory}')) {
+    const parent = livingContact(s, { who: 'parent' });
+    vars.parentName = parent?.name ?? parent?.relation ?? '부모';
+    if (text.includes('{parentWorkMemory}')) vars.parentWorkMemory = parentWorkMemory(s, vars.parentName);
+  }
+  if (text.includes('{childFriend}')) vars.childFriend = livingContact(s, { relation: '어릴 적 친구' })?.name ?? '친구';
+  if (text.includes('{swordElder}')) vars.swordElder = livingContact(s, { relation: '목검을 가르친 형' })?.name ?? '형';
+  if (text.includes('{rivalPrepareMemory}') || text.includes('{rivalFestivalMemory}')) Object.assign(vars, rivalFestivalWords(s));
+  if (text.includes('{mentorTrainingMemory}')) vars.mentorTrainingMemory = mentorTrainingMemory(s);
   if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
   if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
+  if (text.includes('{firstWatch}') || text.includes('{nextWatch}')) Object.assign(vars, watchMealWords(s));
   if (text.includes('{sibling}')) vars.sibling = livingContact(s, { who: 'sibling' })?.name ?? '형제';
   if (text.includes('{dojoPartner}')) vars.dojoPartner = livingContact(s, { who: 'sibling' })?.name
     ?? s.people.find(p => p.alive && p.kind === 'rival' && hasRelation(p, '어릴 적 맞수'))?.name ?? '함께 겨룰 상대';
@@ -65,8 +118,9 @@ export function tierCap(s: Life5, b: Branch): number {
   // 입문 자체는 상한을 바꾸지 않는다. 실제 시련·실전을 거친 재회의 고급 수련만 극의까지 연다.
   if (isMartialBranch(b) && s.growth.styleBonds[focusedStyle(s, b)]?.refined) return V.growth.maxTier;
   const m = s.growth.master;
-  if (!m || m.branch !== b) return V.growth.noMasterCap;
-  return Math.max(V.growth.noMasterCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
+  const baseCap = s.flags.includes('focused_training') && isMartialBranch(b) ? Math.max(4, V.growth.noMasterCap) : V.growth.noMasterCap;
+  if (!m || m.branch !== b) return baseCap;
+  return Math.max(baseCap, Math.min(m.cap, m.paid ? V.growth.paidCap : V.growth.maxTier));
 }
 
 /** 숙련을 더한다. tierUp에 닿으면 단계를 하나 올리고 숙련을 0으로 돌린다. 상한에 닿으면 숙련은 tierUp에서 멈춘다. */
@@ -92,9 +146,46 @@ function captainByShip(s: Life5): void {
   if ((st === 'warlord' || (st === 'pirate' && s.flags.includes('ship'))) && !s.flags.includes('captain')) s.flags.push('captain');
 }
 
+/** 선배 선원 (남의 배에서 함께 탄 선원들). 주인공을 따라온 뒤에는 이 앞말이 빠진다 */
+const isShipmate = (p: Person) => p.alive && p.kind === 'crew' && p.relation.startsWith(`${SHIPMATE} · `);
+/** '선배 선원 · 갑판장' → '갑판장' */
+const shipmateTitle = (p: Person) => p.relation.slice(SHIPMATE.length + 3);
+
+/** 선배 선원을 배에 남기고 떠난다: 동료에서 빠지고 아는 사람으로 남는다 */
+function leaveShipmates(s: Life5): void {
+  for (const p of s.people) {
+    if (!isShipmate(p)) continue;
+    p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+    p.relation = `옛 배의 ${shipmateTitle(p)}`;
+    delete p.crew; delete p.tempUntil; p.kind = 'ally';
+  }
+}
+
+/**
+ * 처지 · 선장 표시가 바뀐 뒤 선배 선원의 자리를 맞춘다.
+ * 해적을 그만두면 배에 남는다. 선장이 되었을 때 모시던 선장이 아직 그 배에 있으면(제 배를 따로 얻었으면) 배에 남고,
+ * 모시던 선장이 없으면(물려받았거나 빼앗았으면) 주인공을 새 선장으로 따른다.
+ */
+function settleShipmates(s: Life5): void {
+  if (!s.people.some(isShipmate)) return;
+  const st = s.hero.standing;
+  if (st !== 'pirate' && st !== 'warlord') { leaveShipmates(s); return; }
+  if (!s.flags.includes('captain')) return;
+  if (s.people.some(p => p.alive && p.kind === 'ally' && hasRelation(p, SHIP_CAPTAIN))) { leaveShipmates(s); return; }
+  for (const p of s.people) {
+    if (!isShipmate(p)) continue;
+    p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+    p.relation = `${SHIPMATE_FOLLOWED} ${shipmateTitle(p)}`;
+  }
+}
+
 function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
   const h = s.hero;
   switch (e.op) {
+    case 'nameShip': nameShip(s, e.name); return;
+    case 'repairShip': repairShip(s, e.mark); return;
+    case 'partShip': partShip(s, e.how); return;
+    case 'watchMeal': recordWatchMeal(s, e.action); return;
     case 'recruitDefeated': {
       const foe = FOES[s.defeatedFoe ?? ''];
       if (foe) applyOne(s, { op: 'person', kind: 'crew', relation: '쓰러뜨린 적이었던 동료',
@@ -153,28 +244,28 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       h.standing = e.to;
       s.standingSince = s.age;
       captainByShip(s);
+      settleShipmates(s);
       s.timeline.push({ age: s.age, text, standing: e.to });
       return;
-    case 'move': requestArrival(s, e.island, e.sea, 'story'); return;
+    case 'kumaFight': startKumaFight(s); return;
+    case 'trainingReturn': returnFromTraining(s); return;
+    case 'move': beginDebut(s); requestArrival(s, e.island, e.sea, 'story'); return;
     case 'moveHome': requestArrival(s, h.town, HOMES[h.home].sea, 'home'); return;
-    case 'flag': if (!s.flags.includes(e.id)) s.flags.push(e.id); captainByShip(s); if (e.id === 'prime') enterPrime(s); return;
-    case 'dream': setDream(s, e.id); return;
-    case 'vowStart': beginVow(s, e.id); return;
-    case 'vowDecline': declineVow(s); return;
-    case 'vowFail': resolveVow(s, e.id, true); return;
-    case 'vowResolve': {
-      const result = resolveVow(s, e.id);
-      if (result?.reward) {
-        addMastery(s, result.reward, result.amount);
-        s.growth.pref[result.reward] += result.amount * V.growth.pref.fromMastery;
-      }
+    case 'flag':
+      if (e.id === 'ship') takeShip(s, e.newHull);
+      else if (!s.flags.includes(e.id)) s.flags.push(e.id);
+      captainByShip(s);
+      settleShipmates(s);
+      if (e.id === 'prime') enterPrime(s);
       return;
-    }
+    case 'dream': if (setDream(s, e.id)) promiseDream(s, e.id); return;
+    case 'vowStart': beginVow(s, e.id); return;
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'welcomeSibling': welcomeSibling(s, e.action); return;
     case 'siblingReunion': resolveSiblingReunion(s, e.action); return;
     case 'sail': sailTo(s, e.island, e.route); return;
+    case 'skiff': boardSkiff(s, e); return;
     case 'entry': resolveEntry(s, e); return;
     case 'entryPass': awardEntryPass(s, e.gate); return;
     case 'deepWater': deepWater(s); return;
@@ -197,7 +288,10 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       logLine(s, branch ? '장인이 무기를 손질하고 손잡이를 손에 맞춰 줬다.' : '공방 뒤뜰에서 장인들의 이야기를 들으며 한숨 돌렸다.', 'light');
       return;
     }
-    case 'unflag': s.flags = s.flags.filter((f) => f !== e.id); return;
+    case 'unflag':
+      if (e.id === 'ship') loseShip(s);
+      else s.flags = s.flags.filter(f => f !== e.id);
+      return;
     case 'mark': {
       const got = addMark(s, e.id);
       const st = got ? STRENGTHS.find((x) => x.id === got) : undefined;
@@ -231,11 +325,13 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       const r = rngOf(s.rng);
       const c = e.canon ? CANON[e.canon] : undefined;
       const gender = existing?.gender ?? c?.gender ?? e.gender ?? pick(r, ['m', 'f'] as const);
+      const localCompanion = e.relation === '어릴 적 맞수' || e.relation === '스승';
+      const natives = HOMES[h.home].species;
       const p: Person = existing ?? {
         id: `p${s.seq++}`, name: c?.name ?? e.name ?? npcName(s, r, gender), gender, age: personAge(s, e),
         ...(e.reuseName && !e.canon && e.name ? { storyName: e.name } : {}),
         kind: e.kind, relation: e.relation, canon: e.canon ?? null,
-        bond: V.person.bond, faction: c?.faction ?? e.faction ?? 'civil', species: c?.species ?? e.species ?? 'human', alive: true,
+        bond: V.person.bond, faction: c?.faction ?? e.faction ?? 'civil', species: c?.species ?? e.species ?? (localCompanion ? (natives.includes(h.species) ? h.species : natives[0]) : 'human'), alive: true,
       };
       // 동료는 싸움에 함께 나선다: v4 동료와 같은 꼴의 싸움 정보를 지금 바다에 맞춰 준다
       if (e.kind === 'crew') {
@@ -252,7 +348,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
           p.kind = 'crew';
         }
         if (e.years) p.tempUntil = s.age + e.years;
-        p.crew = { role: e.role ?? role, level, power: crewPowerFor(SEA_BY_ID[h.sea].stage, level), skills: [], injuredMonths: 0,
+        const power = p.canon === 'bellamy' ? V.person.crew.bellamyPower : crewPowerFor(SEA_BY_ID[h.sea].stage, level);
+        p.crew = { role: e.role ?? role, level, power, skills: [], injuredMonths: 0,
           ...((e.role ?? role) === 'medic' ? { medicalSkill: e.medicalSkill ?? 50 } : {}) };
       }
       if (!existing) s.people.push(p);
@@ -290,12 +387,28 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     }
     case 'partCrew':
+      if (e.prefix === SHIPMATE) { leaveShipmates(s); return; }
       for (const p of s.people) if (p.alive && p.crew && p.relation.startsWith(e.prefix)) { delete p.crew; p.kind = 'ally'; }
       return;
+    case 'rememberChildhood': rememberChildhood(s, e.storyId, e.outcome); return;
+    case 'separateSpouse': separateSpouse(s); return;
+    case 'resumeVoyage': resumeVoyage(s, e.stores); return;
+    case 'rivalDuel': startRivalDuel(s); return;
+    case 'recruitRival': {
+      const rival = rivalPerson(s);
+      if (!rival?.alive || rival.kind === 'crew' || h.standing === 'marine' || !s.flags.includes('rival:free')) return;
+      rival.kind = 'crew';
+      rival.crew = { role: rivalCrewRole(s), level: V.person.crew.level, power: rivalCombatStat(rival), skills: [], injuredMonths: 0 };
+      if (rival.crew.role === 'medic') rival.crew.medicalSkill = 50;
+      recordTraitEvent(s, 'crew', '', rival.id);
+      s.flags = s.flags.filter(id => id !== 'rival:free');
+      s.timeline.push({ age: s.age, text: fillText(s, '어릴 적 맞수 {rival}과(와) 동료가 되었다.') });
+      return;
+    }
     case 'losePerson': {
       const p = livingContact(s, e);
       if (!p) return;
-      p.alive = false;
+      markPersonDead(s, p);
       recordTraitEvent(s, 'loss', '', p.id);
       s.hardship += V.hardship.loss;
       return;
@@ -336,6 +449,25 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
         const id = focusedStyle(s, e.branch);
         s.growth.styleMastery[id] = Math.max(s.growth.styleMastery[id] ?? 0, clamp(e.to, 0, V.growth.maxTier) * V.growth.tierUp);
       }
+      return;
+    }
+    case 'learnTechnique': {
+      const style = focusedStyle(s, e.branch);
+      s.growth.styleMastery[style] = Math.max(0, (s.growth.styleMastery[style] ?? 0) + e.add);
+      s.growth.mentorHistory.push({ kind: 'technique', teacher: e.teacher, age: s.age, detail: e.name, style, mastery: e.add });
+      logLine(s, fillText(s, `${e.teacher}에게 「${e.name}」을(를) 배웠다.`), 'heavy', 'growth');
+      return;
+    }
+    case 'specialTraining': {
+      const gains: Partial<Record<StatKey, number>> = {};
+      for (const [key, value] of Object.entries(e.stats) as [StatKey, number][]) {
+        if (!Number.isFinite(value) || value <= 0) continue;
+        h.base[key] = Math.max(0, h.base[key] + value);
+        gains[key] = value;
+      }
+      s.growth.mentorHistory.push({ kind: 'training', teacher: e.teacher, age: s.age, detail: e.training, stats: gains });
+      const gained = (Object.entries(gains) as [StatKey, number][]).map(([k, v]) => `${STAT_LABEL[k]} +${v}`).join(' · ');
+      logLine(s, fillText(s, `${e.teacher}와(과) ${e.training}을(를) 마쳤다. ${gained}.`), 'heavy', 'growth');
       return;
     }
     case 'master':

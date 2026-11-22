@@ -7,6 +7,7 @@ import { V } from '../balance';
 import { known, age, at, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 import { PIRATE_2 } from './pirate-2';
+import { JOIN_SHIP, SHIP_CAPTAIN, SHIPMATE } from '../shipmates';
 
 const D = V.value.door;
 const PIR = st('pirate');
@@ -22,7 +23,7 @@ export const PIRATE: Turning[] = [
   {
     id: 'crew_raid', kind: 'door', when: at(age(16), PIR, noFlag('captain')),
     weight: 8, repeat: { years: 3 }, speaker: { relation: '선장' },
-    title: '선장의 명령', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이다. 선장이 칼을 뽑아 들고 외친다. 건너가라. {name}은(는) 밧줄을 쥔 선원들 틈에 서 있다.',
+    title: '선장의 명령', body: '망루에서 고함이 울린다. 짐을 가득 실은 상선이다. 선장이 칼을 뽑아 들고 상선으로 건너가라는 명령을 내린다. {name}은(는) 밧줄을 쥔 선원들 틈에 서 있다.',
     doors: [
       { label: '맨 먼저 밧줄을 타고 건너간다', hint: '선장의 눈에 든다. 맨 앞은 칼도 먼저 맞는다', values: { ambition: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 12 }, { op: 'money', add: 15000 }, { op: 'flag', id: 'captainsEye' },
@@ -57,7 +58,7 @@ export const PIRATE: Turning[] = [
         fx: [{ op: 'flag', id: 'firstMate' }, { op: 'fame', add: 10 }, { op: 'money', add: 10000 }, { op: 'timeline', text: '해적선의 부선장이 되었다' }, { op: 'log', text: '선장이 키를 넘기자 선원들이 {name}의 첫 명령을 기다렸다. 새벽 항로를 정한 뒤 선장은 부선장의 몫을 따로 챙겨 주었다.', weight: 'heavy' }] },
       { label: '언젠가 제 깃발을 올릴 거라고 털어놓는다', hint: '선장은 크게 웃고, 떠나는 날 밑천을 쥐여 주겠다고 한다', values: { ambition: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'flag', id: 'ownFlagDream' },
-             { op: 'log', text: '선장이 말했다. 나도 네 나이 때 남의 배에서 똑같은 소리를 했지.', weight: 'heavy' }] },
+             { op: 'log', text: '선장은 젊을 때 남의 배를 타면서 같은 말을 한 적이 있다고 했다.', weight: 'heavy' }] },
       { label: '자리는 사양하고 지금처럼 밧줄이나 잡겠다고 한다', hint: '매이는 것이 없다. 언제든 내릴 수 있다', values: { freedom: D },
         fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: '선장은 잠시 키를 붙잡고 있다가 다른 선원을 불렀다. {name}은(는) 다시 밧줄 곁으로 돌아가 다음 항구에서 내릴 자유를 남겨 두었다.', weight: 'light' }] },
     ],
@@ -69,7 +70,7 @@ export const PIRATE: Turning[] = [
     title: '짐칸의 어둠', body: '물을 길으러 {island}에 들른 해적선이 내일 새벽 닻을 올린다고 한다. 부두에 내려 둔 짐칸 덮개가 반쯤 열려 있다.',
     doors: [
       { label: '밤을 틈타 짐칸에 숨어든다', hint: '들키면 바다 한가운데서 끌려 나온다', values: { romance: D }, danger: true,
-        fx: [{ op: 'standing', to: 'pirate' }, { op: 'chance', p: 0.5,
+        fx: [{ op: 'standing', to: 'pirate' }, ...JOIN_SHIP, { op: 'chance', p: 0.5,
                then: [{ op: 'log', text: '사흘 만에 짐칸에서 끌려 나왔다. 선장은 한참 웃더니 갑판 닦을 걸레를 던져 주었다.', weight: 'heavy' }],
                else: [{ op: 'hp', add: -15 }, { op: 'log', text: '짐칸에서 끌려 나와 실컷 두들겨 맞았다. 그래도 배에서 내쫓기지는 않았다.', weight: 'heavy' }] },
              { op: 'timeline', text: '해적선에 몰래 숨어 타 바다로 나갔다' }] },
@@ -94,9 +95,9 @@ export const PIRATE: Turning[] = [
         fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'chance', p: 0.5,
                then: [{ op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'log', text: '손을 든 선원이 더 많았다. 배는 {name}의 것이 되었다.', weight: 'heavy' },
                       { op: 'timeline', text: '선원들의 손으로 선장에 뽑혔다' }],
-               else: [{ op: 'log', text: '갑판장이 선장이 되었다. {name}은(는) 그 밑에서 다시 밧줄을 잡았다.', weight: 'heavy' }] }] },
+               else: [{ op: 'personChange', relation: `${SHIPMATE} · 갑판장`, kind: 'ally', rename: SHIP_CAPTAIN }, { op: 'log', text: '갑판장이 선장이 되었다. {name}은(는) 그 밑에서 다시 밧줄을 잡았다.', weight: 'heavy' }] }] },
       { label: '선장이 숨겨 둔 금고만 챙겨 배를 떠난다', hint: '돈은 남지만 함께 싸운 배는 남의 것이 된다', values: { greed: D },
-        fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'money', add: 75000 }, { op: 'flag', id: 'leftCrew' }, { op: 'log', text: '금고를 품에 안고 다음 항구에서 내렸다. 뒤에서 욕설이 쏟아졌다.', weight: 'heavy' }] },
+        fx: [{ op: 'losePerson', relation: '모시는 해적 선장' }, { op: 'money', add: 75000 }, { op: 'flag', id: 'leftCrew' }, { op: 'partCrew', prefix: SHIPMATE }, { op: 'log', text: '금고를 품에 안고 다음 항구에서 내렸다. 뒤에서 욕설이 쏟아졌다.', weight: 'heavy' }] },
     ],
   },
   {
@@ -106,7 +107,7 @@ export const PIRATE: Turning[] = [
     doors: [
       { label: '반란을 이끌어 배를 빼앗는다', hint: '실패하면 돛대에 매달린다', values: { dominion: D }, danger: true,
         fx: [{ op: 'chance', p: 0.65,
-               then: [{ op: 'hp', add: -15 }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 15 },
+               then: [{ op: 'hp', add: -15 }, { op: 'personChange', relation: SHIP_CAPTAIN, kind: 'enemy', rename: '반란으로 쫓아낸 옛 선장' }, { op: 'flag', id: 'ship' }, { op: 'flag', id: 'captain' }, { op: 'fame', add: 15 },
                       { op: 'log', text: '선장을 작은 보트에 태워 바다에 띄워 보냈다. 깃발은 {name}의 손으로 다시 그렸다.', weight: 'heavy' },
                       { op: 'timeline', text: '반란을 일으켜 해적선을 빼앗았다' }],
                else: [{ op: 'injury', severity: 'heavy' }, { op: 'hp', add: -30 },
@@ -145,8 +146,8 @@ export const PIRATE: Turning[] = [
     title: '떠돌이 의사', body: '{island}의 천막 진료소에서 해진 외투의 의사가 돈 없는 뱃사람들을 공짜로 꿰매 준다. 약값이 떨어져 이 섬을 떠나야 한다며, 바다로 나가는 배를 찾고 있다.',
     doors: [
       { label: '배에 태워 선의로 삼는다', hint: '약값은 이제 배의 몫이 된다', values: { peace: D },
-        fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'person', kind: 'crew', relation: '떠돌이 의사', role: 'medic', medicalSkill: 65 },
-             { op: 'log', text: '의사가 약 상자를 메고 배에 올랐다. 선실 한 칸이 진료실이 되었다.', weight: 'heavy' }] },
+        fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'person', kind: 'crew', relation: '떠돌이 의사', role: 'medic', medicalSkill: 65 }, { op: 'repairShip', mark: 'medicine' },
+             { op: 'log', text: '의사가 약 상자를 메고 배에 올랐다. 새 진료실의 약장 맨 위 칸에 붕대를 넣으려니 발뒤꿈치가 들렸다. {name}은(는) 나사를 풀어 약장을 한 뼘 낮췄다. 이번에는 선의의 손이 꼭 닿았다.', weight: 'heavy' }] },
       { label: '치료만 받고 약값을 넉넉히 치른다', hint: '몸은 가벼워지고 의사는 다른 배를 찾는다',
         fx: [{ op: 'money', add: -DOCTOR_FEE }, { op: 'hp', add: 25 }, { op: 'log', text: '의사는 상처를 꿰맨 뒤 약값을 받아 천막의 빈 약장을 채웠다. {name}은(는) 몸을 추슬러 배로 돌아갔고 의사는 다른 배의 환자를 기다렸다.', weight: 'light' }] },
       { label: '진료소째로 배에 실어 간다', hint: '의사의 뜻은 묻지 않는다', values: { dominion: D },
@@ -278,14 +279,14 @@ export const PIRATE: Turning[] = [
   {
     id: 'pirate_first_poster', kind: 'door', when: at(age(16), PIR, fame(5)),
     weight: 6, repeat: 'once', speaker: 'hero',
-    title: '첫 수배서', body: '{island} 게시판에 {name}의 얼굴이 실린 수배서가 붙었다. 그림은 영 딴판이지만 이름은 틀림없다. 이제 바다의 모든 사냥꾼이 그 얼굴을 찾는다.',
+    title: '게시판에 걸린 내 얼굴', body: '{island} 게시판에 {name}의 수배서가 걸려 있다. 눈매도 턱도 영 딴판인데 이름만큼은 틀림없다. 지나가던 사냥꾼이 종이와 행인들의 얼굴을 번갈아 살핀다.',
     doors: [
       { label: '수배서를 떼어 품에 넣고 다닌다', hint: '숫자가 오를 때마다 새것으로 바꿔 넣을 생각이다', values: { romance: D },
-        fx: [{ op: 'fame', add: 3 }, { op: 'flag', id: 'firstPoster' }, { op: 'log', text: '게시판에서 수배서를 떼어 접었다. 배에 돌아와 선실 벽에 붙이자 선원들이 그림이 닮지 않았다며 웃었다.', weight: 'light' }] },
+        fx: [{ op: 'fame', add: 3 }, { op: 'flag', id: 'firstPoster' }, { op: 'log', text: '사냥꾼이 돌아선 사이 수배서를 떼어 접었다. 주머니에 넣고 두어 걸음 가다가, 대체 얼마나 안 닮았나 싶어 다시 꺼내 봤다.', weight: 'light' }] },
       { label: '가면을 쓰고 이름을 바꿔 다닌다', hint: '쫓기는 일은 줄고 이름은 묻힌다', values: { freedom: D },
         fx: [{ op: 'fame', add: -3 }, { op: 'flag', id: 'masked' }, { op: 'log', text: '가면을 쓰고 다른 이름을 댔다. 수배서를 든 사냥꾼이 바로 옆을 지나갔지만 얼굴을 알아보지 못했다.', weight: 'light' }] },
       { label: '더 큰 일을 벌여 숫자를 끌어올린다', hint: '쫓는 눈도 그만큼 늘어난다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'fame', add: 25 }, { op: 'hp', add: -15 }, { op: 'log', text: '한 달 사이에 상선 셋을 털었다. 새 수배서의 숫자가 두 배가 되었다.', weight: 'heavy' }] },
+        fx: [{ op: 'fame', add: 25 }, { op: 'hp', add: -15 }, { op: 'log', text: '한 달 사이에 상선 셋을 털었다. 다음 항구에 붙은 수배서에는 더 큰 액수가 찍혀 있었다.', weight: 'heavy' }] },
     ],
   },
   {

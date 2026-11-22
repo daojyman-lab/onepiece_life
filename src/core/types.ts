@@ -1,5 +1,7 @@
 import type { Stats, StatKey, Species, SeaId, Person, Injury, Illness, BattleState, EnemySpec, LogType, CrewRole } from '../shared/core/types';
+import type { ExtraCareerId } from '../data/rival-careers';
 import type { EntryGate } from '../data/voyage';
+import type { WorldEventId } from '../data/world-history';
 import type { ArrivalRoute } from './voyage';
 import type { CombatStyle, MartialBranch } from '../data/combat-styles';
 export type { Stats, StatKey, Species, SeaId, Person, EnemySpec, BattleState };
@@ -14,6 +16,9 @@ export interface Personality5 {
   hold: number; established: boolean;
 }
 export type HomeId = 'loguetown' | 'water7' | 'wano' | 'fishman' | 'sky' | 'zou';
+export type RivalCareer = 'captain' | 'fifth' | 'marine' | 'warden' | ExtraCareerId;
+export type RivalLoveStatus = 'dating' | 'steady' | 'partners' | 'friends' | 'married';
+export type ChildhoodOutcome = 'loss' | 'parentSafe' | 'mentor' | 'rival';
 export type Wealth = 'poor' | 'common' | 'comfortable' | 'noble';
 export type Lineage = 'orphan' | 'commoner' | 'marineFamily' | 'pirateChild' | 'samurai' | 'outcast';
 export type Standing = 'child' | 'civil' | 'pirate' | 'marine' | 'revolution' | 'bountyHunter' | 'warlord'
@@ -42,18 +47,36 @@ export interface Hero5 {
   standing: Standing; island: string; sea: SeaId;
   alive: boolean;
   bornWealth: Wealth;                          // 태어날 때의 집안 형편 (몰락을 세는 데 쓴다)
+  provisions?: number;
   potential?: PotentialId;                     // 타고난 잠재력 (data/stages.ts). 옛 저장에는 없다: 균형형으로 본다
   skyAcclimating?: true;                       // 하늘섬에 닿은 뒤 첫 토막
   weapon?: string;                             // 전투에 가져가는 무기의 상품 ID
 }
 export type PotentialId = 'genius' | 'balanced' | 'late' | 'special';
 export type DreamId = 'pirateKing' | 'bestSword' | 'bestFist' | 'bestWeapon' | 'bestShot' | 'marineTop' | 'changeWorld' | 'worldEnd' | 'truth' | 'treasure' | 'peace';
+/** 섬 서약 (하늘섬 티카). 옛 저장의 생애 서약 기록(history의 life_*)은 읽기만 한다 */
 export interface VowState {
-  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[];
-    level?: 1 | 2 | 3; activities?: Activity[]; choices?: string[]; branch?: Branch; targetPersonId?: string } | null;
+  active: { id: string; value: ValueId; title: string; target: string; since: number; island: string; progress: string[]; targetPersonId?: string } | null;
   history: { id: string; result: 'kept' | 'failed' }[];
-  declined?: boolean;
-  branch?: Branch;
+}
+/** 꿈의 서약 (core/dream-vow.ts) */
+export interface DreamVowState {
+  /** 꿈마다 지난 길목의 수 (같은 길목을 두 번 받지 않는다) */
+  cleared: Partial<Record<DreamId, number>>;
+  /** 지금 꿈을 바꾸지 않고 이어 지난 길목의 수 */
+  streak: number;
+  /** 지금 꿈을 약속한 사람 (없으면 스스로) */
+  to: string | null;
+}
+/** 스승에게 배운 기술(전수)과 특훈의 기록 (프로필에 남는다) */
+export interface MentorRecord {
+  kind: 'technique' | 'training';
+  teacher: string;
+  age: number;
+  detail: string;
+  style?: CombatStyle;
+  mastery?: number;
+  stats?: Partial<Stats>;
 }
 export interface Growth5 {
   styleMastery: Partial<Record<CombatStyle, number>>;
@@ -67,11 +90,16 @@ export interface Growth5 {
   master: { name: string; branch: Branch; cap: number; yearsLeft: number; paid: boolean } | null;
   pref: Record<Branch, number>;                // 선호도 (숙련과 별개): 수련할 갈래를 정한다. 재능 · 수련 · 고른 일 · 스승이 쌓는다
   path: Branch | null;                         // 기록에 알린 지금의 길 (바뀌면 큰 일로 남긴다)
+  mentorHistory: MentorRecord[];               // 스승에게 배운 기술과 특훈 이력
 }
 export type LogWeight = 'light' | 'heavy' | 'year';
 /** 기록 한 줄. island: 나이·장소 구분선(weight 'year')에만 있다. 그 뒤 기록이 일어난 섬 이름 */
 export interface LogLine { id: number; age: number; text: string; weight: LogWeight; type: LogType; island?: string; moved?: true }
 export interface Unchosen { age: number; turning: string; title: string; door: string }
+export interface NewsIssue {
+  id: string; age: number; part: number; kind: 'big' | 'world' | 'local' | 'bounty';
+  title: string; body: string; logId?: number; amount?: number;
+}
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
 export interface TimelineEntry {
   age: number; text: string; standing?: Standing;
@@ -81,8 +109,14 @@ export interface TimelineEntry {
 }
 
 export type Cond =
+  | { c: 'history'; id: WorldEventId; has: boolean }
+  | { c: 'shipMemory'; stage: 'unnamed' | 'named' | 'farewell' }
+  | { c: 'single' }
+  | { c: 'rivalAtWork'; career: ExtraCareerId }
   | { c: 'defeatedFoe' }
   | { c: 'anyOf'; conditions: Cond[] }
+  | { c: 'watchMeal'; stage: 'first' | 'shelf' | 'nextWatch' | 'custom' }
+  | { c: 'ashore' }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
   | { c: 'lifePreparation'; mode: 'guard' | 'duel' }
@@ -125,6 +159,15 @@ export type Cond =
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'nameShip'; name: string }
+  | { op: 'repairShip'; mark: ShipRepair }
+  | { op: 'partShip'; how: 'helm' | 'playground' | 'house' }
+  | { op: 'watchMeal'; action: 'share' | 'close' | 'reserve' | 'passOn' }
+  | { op: 'kumaFight' } | { op: 'trainingReturn' }
+  | { op: 'resumeVoyage'; stores: number }
+  | { op: 'rememberChildhood'; storyId: string; outcome: ChildhoodOutcome }
+  | { op: 'separateSpouse' }
+  | { op: 'rivalDuel' } | { op: 'recruitRival' }
   | { op: 'recruitDefeated' }
   | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
   | { op: 'beginStyle'; style: CombatStyle; teacherRelation?: string }
@@ -146,18 +189,20 @@ export type Fx =
   | { op: 'tier'; branch: Branch; to: number }
   | { op: 'traitAwaken'; branch: Branch }
   | { op: 'master'; name: string; branch: Branch; cap: number; years: number; paid: boolean }
-  | { op: 'flag'; id: string } | { op: 'unflag'; id: string }
+  /** 스승의 기술 전수: 그 갈래의 지금 유파에 숙련을 바로 쌓고 이력에 남긴다 */
+  | { op: 'learnTechnique'; teacher: string; branch: 'fist' | 'sword' | 'gun'; name: string; add: number }
+  /** 스승의 특훈: 기본 능력치를 올리고 이력에 남긴다 */
+  | { op: 'specialTraining'; teacher: string; training: string; stats: Partial<Stats> }
+  | { op: 'flag'; id: string; newHull?: true } | { op: 'unflag'; id: string }
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
-  | { op: 'vowResolve'; id: string }
-  | { op: 'vowFail'; id: string }
-  | { op: 'vowDecline' }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'welcomeSibling'; action: SiblingWelcomeAction }
   | { op: 'siblingReunion'; action: SiblingReunionAction }
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
+  | { op: 'skiff'; buy: number; gate?: 'sky' | 'fishman' | 'wano' }   // 나룻배를 사고(buy베리) 외딴 섬이면 나가는 값을 치른다 (core/voyage.ts)
   | { op: 'entry'; gate: EntryGate; island: string; sea: SeaId; route: ArrivalRoute; option: number }
   | { op: 'entryPass'; gate: EntryGate }
   | { op: 'deepWater' }
@@ -196,6 +241,7 @@ export type Fx =
 export interface FightNext { win?: string; lose?: string; back?: string }
 
 export interface Door {
+  news?: Pick<NewsIssue, 'title' | 'body'>;
   label: string; hint: string;
   when?: Cond[];                               // 출생 · 처지의 벽. 안 맞으면 잠긴다
   special?: ValueId;                           // 이 가치관이 깊어야 열리는 특별한 문
@@ -215,6 +261,7 @@ export interface Turning {
   fortuneOf?: ValueId;                         // kind 'fortune': 이 가치관이 가장 높을 때 온다
   speaker: 'hero' | { canon: string } | { relation: string } | { who: ContactRole };
   title: string; body: string;
+  recall?: { when: Cond[]; text: string }[];    // 실제로 겪은 과거에만 보이는 장면 속 한마디
   intro?: readonly string[];                   // 선택창이 열리기 전에 이야기 창에 한 줄씩 보여 준다
   automatic?: { unless: Cond[]; fx: Fx[] };     // 조건을 채우지 못하면 선택 대신 즉시 일어나는 일
   doors: Door[];                               // misfortune은 빈 배열
@@ -231,7 +278,7 @@ export interface Minor {
 }
 export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
 export type Pending5 =
-  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string }
+  | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string; openedTick?: number }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
   | { kind: 'battle'; foe: EnemySpec; lethal: boolean; battle: BattleState; result: 'win' | 'lose' | 'retreat'; next?: FightNext; atSea?: true; minor?: { outcomeLine: string }; escape?: { roll: number; need: number } }
   | { kind: 'ending'; cause: string }
@@ -261,6 +308,14 @@ export interface DiscipleRecord {
   outcome?: 'duel' | 'reconciled' | 'reported';
 }
 export interface Life5 {
+  watchMeal?: {
+    hullId: number; sailorId: string; sharedAt: number; stage: 'shared' | 'reserved' | 'passed' | 'closed';
+    shelfSince?: number; originalCrew?: string[];
+  };
+  childhoodMemory?: { storyId: string; outcome: ChildhoodOutcome; town: string; personId: string; personName: string; relation: string };
+  rivalLove?: { personId: string; status: RivalLoveStatus; since: number };
+  rivalAffinity?: { personId: string; timePoints: number; lastSharedAge: number };
+  rival?: { personId: string; career: RivalCareer; crewName: string; stage: number; port: string; fame: number };
   defeatedFoe?: string;                       // 처리 대기 중인 전투 뒤 선택의 실제 상대 ID
   /** 실제로 받아들인 제자들. 기술과 시기는 가르치기 시작한 때의 사실로 남긴다. */
   disciples?: DiscipleRecord[];
@@ -297,18 +352,34 @@ export interface Life5 {
   recentLines: string[];                       // 최근에 낸 일상 · 자잘한 일의 글 (V.lines.noRepeat개까지). 이 안의 글은 다시 뽑지 않는다
   pending: Pending5;
   stats: Stats5;
+  firstBountyIssued: boolean;
+  news?: NewsIssue[];
+  pressTick?: number;
+  publishedBounty?: number;
   seq: number;
   ended: { cause: string; age: number } | null;
   /** 전성기: from살부터 until살 전까지. 그동안 한 살은 토막을 두 바퀴 돈다 (lap: 지금 두 번째 바퀴인가) */
   prime?: { from: number; until: number; lap: boolean } | null;
+  /** 첫 출항: age살에 처음 바다로 나섰다. 그해는 토막을 한 바퀴 더 돈다 (lap: 지금 덧붙은 바퀴인가).
+   *  null은 아직 출항 전, undefined는 이 기록이 생기기 전의 옛 저장이라 다시 열지 않는다 */
+  debut?: { age: number; lap: boolean } | null;
   /** 꿈 (인생 과업): since살에 품었고, done살에 이루었다 (못 이루었으면 null) */
   dream?: { id: DreamId; since: number; done: number | null } | null;
   /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
   vows?: VowState;
+  dreamVow?: DreamVowState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */
   passage?: import('./passage').Passage | null;
+  ships?: ShipHull[];
+}
+export type ShipRepair = 'plank' | 'helm' | 'seam' | 'plating' | 'keel' | 'medicine';
+export interface ShipHull {
+  id: number; name?: string; acquiredAt?: number;
+  repairs: { kind: ShipRepair; age: number; island: string }[];
+  helmFrom?: number; spiritAt?: number;
+  end?: { kind: 'helm' | 'playground' | 'house' | 'lost' | 'switched'; age: number; island: string };
 }
 export type Command5 = { type: 'step' } | { type: 'rest' } | { type: 'answer'; index: number } | { type: 'style'; style: CombatStyle }
-  | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] };
+  | { type: 'equipWeapon'; id: string } | { type: 'traits'; ids: string[] } | { type: 'leave' };

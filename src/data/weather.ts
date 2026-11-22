@@ -1,7 +1,8 @@
 // 바다의 날씨. 항해 중(core/passage.ts) 한 토막마다 그 해역의 표로 날씨를 굴린다.
-// 연혁 보정(세계 정세)은 나중에 YEAR_WEATHER로 더한다.
+// 섬 앞바다의 가뭄 · 폭풍 · 결투 흔적은 그 시기 목적지의 approach.tilt(climates.ts)를 더한다.
 
 export type Weather = 'clear' | 'tailwind' | 'fog' | 'storm' | 'calm' | 'anomaly';
+export type WeatherTilt = Partial<Record<Weather, number>>;
 export type SeaZone = 'blue' | 'paradise' | 'newWorld' | 'calmBelt';
 
 /** 해역별 날씨 확률 (합 100) */
@@ -20,7 +21,7 @@ export function zoneOf(sea: string): SeaZone {
 }
 
 /** 칼름벨트를 건너야 닿는 섬 */
-export const CALM_BELT_ISLANDS: readonly string[] = ['아마존 릴리'];
+export const CALM_BELT_ISLANDS: readonly string[] = ['아마존 릴리', '루스카이나'];
 
 /** 칼름벨트에서 한 토막마다 해왕류와 마주칠 확률 */
 export const SEA_KING_CHANCE = 0.4;
@@ -50,9 +51,3 @@ export const WEATHER_EFFECT: Record<Weather, { progress: number; hp: number }> =
 
 /** 안개 · 이상기후에서 길을 잃을 확률 (항해 실력 0~3에 따라) */
 export const DRIFT_CHANCE = [0.5, 0.3, 0.15, 0.05] as const;
-
-/**
- * 연혁에 따른 날씨 보정 (해원력 → 해역 → 날씨 → 더할 확률). 아직 비워 둔다.
- * 예: { 1522: { newWorld: { storm: +10 } } }
- */
-export const YEAR_WEATHER: Record<number, Partial<Record<SeaZone, Partial<Record<Weather, number>>>>> = {};

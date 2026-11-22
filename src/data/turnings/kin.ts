@@ -21,10 +21,10 @@ const goneGrand: Fx[] = [{ op: 'losePerson', relation: '할머니' }, { op: 'los
 const GRANDPARENTS: Turning[] = [
   {
     id: 'grand_tale', kind: 'door', when: [...kid(5, 10), has('grandGuard'), livingGrand], weight: 12, repeat: 'once', speaker: 'hero',
-    title: '아궁이 앞의 옛이야기', body: '아궁이 불이 사위어 간다. 주름진 손이 {name}의 머리를 쓸어 넘긴다. 네 부모 이야기를 해 줄까. 늘 하던 말을 꺼내다가, 오늘은 말끝이 조금 흐려진다.',
+    title: '아궁이 앞의 옛이야기', body: '아궁이 불이 사위어 간다. 주름진 손이 {name}의 머리를 쓸어 넘긴다. 부모가 떠나던 날 아침 이야기를 꺼내다가 한동안 불만 바라본다.',
     doors: [
-      { label: '흐려진 말끝을 붙잡고 더 묻는다', hint: '처음 듣는 이야기가 하나 섞여 나온다', values: { inquiry: D },
-        fx: [flag('grandTold'), heavy('부모는 먼 곳으로 떠났다고 했다. 왜 떠났는지는, 네가 더 크면 이야기해 주마.'), line('보호자에게 부모의 이야기를 들었다')] },
+      { label: '부모가 그날 어디로 떠났는지 묻는다', hint: '장작을 한 토막 더 넣고 대답을 기다린다', values: { inquiry: D },
+        fx: [flag('grandTold'), heavy('부모는 먼 곳으로 떠났다고 했다. 왜 떠났는지는 조금 더 자라면 알려 주겠다고 했다.'), line('보호자에게 부모의 이야기를 들었다')] },
       { label: '무릎을 베고 이야기를 들으며 잠든다', hint: '이야기보다 무릎의 온기가 오래 남는다', values: { peace: D },
         fx: [{ op: 'hp', add: 5 }, flag('grandLap'), heavy('잠결에 들리는 이야기는 끝을 알 수 없었다. 아침이 오자 무릎을 내어 준 사람의 손이 아직 머리 위에 있었다.')] },
       { label: '언젠가 부모를 찾아내겠다고 말한다', hint: '주름진 손이 잠깐 멈춘다', values: { romance: D },
@@ -57,7 +57,7 @@ const GRANDPARENTS: Turning[] = [
   },
   {
     id: 'grand_letter', kind: 'door', when: at(age(18, 40), st(...ACTIVE), has('grandGuard'), livingGrand, not('grandGone'), not('parentFound'), not('parentRefused')), weight: 8, repeat: 'once', speaker: 'hero',
-    title: '마지막 편지', body: '고향에서 편지가 왔다. 보호자가 세상을 떠났다는 소식이다. 편지 끝에는 떨리는 글씨로 쓴 몇 줄이 덧붙어 있다. 네 부모는 죽지 않았다. 바다 어딘가에 살아 있을지도 모른다. 진작 말해 주지 못해 미안하다.',
+    title: '마지막 편지', body: '고향에서 편지가 왔다. 보호자가 세상을 떠났다는 소식이다. 편지 끝에는 떨리는 글씨로 쓴 몇 줄이 덧붙어 있다. 부모가 바다 어딘가에 살아 있을지도 모른다는 내용이다. 마지막 줄에는 이 소식을 뒤늦게 전한 미안함이 담겨 있다.',
     doors: [
       { label: '하던 일을 모두 내려놓고 고향의 무덤을 찾아간다', hint: '무덤 앞에서 처음으로 소리 내어 운다', values: { loyalty: D },
         fx: [...goneGrand, { op: 'hp', add: -5 }, flag('parentsLost'), heavy('무덤 앞 흙은 이미 굳어 있었다. 편지를 펼쳐 놓고 늦게 와서 미안하다고 말하자, 참아 두었던 울음이 터졌다.'), line('보호자의 무덤 앞에서 울었다')] },
@@ -72,7 +72,7 @@ const GRANDPARENTS: Turning[] = [
     title: '아궁이 앞에서', body: '{name}은(는) 어느새 그날의 보호자만큼 늙었다. 동네 아이 하나가 무릎 곁에 쪼그려 앉아 옛날이야기를 조른다. 목에 건 낡은 부적이 불빛에 흔들린다.',
     doors: [
       { label: '그날 들었던 이야기를 그대로 들려준다', hint: '말끝이 흐려지는 곳까지 똑같다', when: [has('grandTold')], values: { peace: D },
-        fx: [heavy('아이는 떠난 사람들이 어디로 갔느냐고 물었다. {name}은(는) 부적을 만지며 그날 보호자가 들려준 데까지만 이야기했다.'), line('보호자에게 들은 이야기를 아이에게 들려주었다')] },
+        fx: [heavy('아이는 이야기 속 꼬마가 어떻게 됐는지 물었다. 그 꼬마가 바로 {name}이란 걸 알고는 이야기를 처음부터 다시 들려 달라고 졸랐다.'), line('보호자에게 들은 이야기를 아이에게 들려주었다')] },
       { label: '부적을 풀어 아이의 목에 걸어 준다', hint: '목이 조금 허전하다. 마음은 가볍다', values: { loyalty: D },
         fx: [flag('grandPassed'), heavy('아이는 부적을 두 손으로 감싸 쥐고 왜 자신에게 주느냐고 물었다. {name}은(는) 오래전 같은 부적을 건네던 손을 떠올리며 매듭을 고쳐 주었다.'), line('평생 걸었던 부적을 아이에게 건넸다')] },
     ],

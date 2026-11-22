@@ -4,6 +4,7 @@ import { normalizeLife5 } from '../../src/core/load';
 import { newLife5 } from '../../src/core/state';
 import { openTurning } from '../../src/core/turning';
 import { reduce5 } from '../../src/core/reduce';
+import { resolveVow } from '../../src/core/vow';
 import { EP_SKYPIEA } from '../../src/data/episodes/skypiea';
 import type { Life5 } from '../../src/core/types';
 
@@ -37,21 +38,22 @@ describe('서약', () => {
   it('준비와 결전의 결과가 모자라면 보상 없이 실패한다', () => {
     const s = eligibleLife();
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
-    applyFx(s, [{ op: 'vowResolve', id: vowId }]);
+    expect(resolveVow(s, vowId)).toEqual({ reward: null, amount: 0 });
     expect(s.vows?.active).toBeNull();
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'failed' }]);
-    expect(s.growth.mastery.sword).toBe(0);
   });
 
-  it('피난 준비와 결전 뒤 피난처까지 완성해야 첫 각성을 얻고 재수령할 수 없다', () => {
+  it('피난 준비와 결전 뒤 피난처까지 완성해야 섬 이야기의 몫(숙련)을 받고 재수령할 수 없다', () => {
     const s = eligibleLife();
     const beforeVit = s.hero.base.vit;
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
     s.flags.push('ep_skypiea_b_evac', 'ep_skypiea_b_vow_prepared', 'ep_skypiea_b_vow_refuge');
-    applyFx(s, [{ op: 'vowResolve', id: vowId }, { op: 'vowStart', id: vowId }, { op: 'vowResolve', id: vowId }]);
+    expect(resolveVow(s, vowId)).toEqual({ reward: 'sword', amount: 25 });
+    applyFx(s, [{ op: 'vowStart', id: vowId }]);
+    expect(resolveVow(s, vowId)).toBeNull();
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'kept' }]);
-    expect(s.growth.tier.sword).toBe(1);
-    expect(s.hero.base.vit).toBe(beforeVit + 2);
+    expect(s.growth.tier.sword).toBe(0);            // 섬 서약은 단계나 능력치를 직접 올리지 않는다 (꿈의 서약과 따로)
+    expect(s.hero.base.vit).toBe(beforeVit);
     expect(s.queue).toContain('sky_vow_awakening');
   });
 
@@ -59,7 +61,7 @@ describe('서약', () => {
     const s = eligibleLife();
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
     s.flags.push('ep_skypiea_b_evac', 'ep_skypiea_b_vow_prepared', 'ep_skypiea_b_vow_refuge', 'ep_skypiea_b_deal');
-    applyFx(s, [{ op: 'vowResolve', id: vowId }]);
+    resolveVow(s, vowId);
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'failed' }]);
   });
 
@@ -67,7 +69,7 @@ describe('서약', () => {
     const s = eligibleLife();
     applyFx(s, [{ op: 'vowStart', id: vowId }]);
     s.flags.push('ep_skypiea_b_evac', 'ep_skypiea_b_vow_refuge');
-    applyFx(s, [{ op: 'vowResolve', id: vowId }]);
+    resolveVow(s, vowId);
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'failed' }]);
   });
 
@@ -160,7 +162,17 @@ describe('하늘섬 서약 장편', () => {
     expect(s.vows?.active?.id).toBe(vowId);
     answer('ep_skypiea_b9', '깃 장식을 받는다');
     expect(s.vows?.history).toEqual([{ id: vowId, result: 'kept' }]);
-    expect(s.growth.tier.sword).toBe(1);
-    expect(s.hero.base.vit).toBe(beforeVit + 2);
+    expect(s.growth.mastery.sword).toBeGreaterThanOrEqual(25);
+    expect(s.hero.base.vit).toBe(beforeVit);
+  });
+
+  it('없어진 생애 서약이 진행 중인 옛 저장은 그 서약을 내려놓고 이어 간다', () => {
+    const s = newLife5(41);
+    const old = JSON.parse(JSON.stringify(s));
+    old.vows = { active: { id: 'life_1_justice', value: 'justice', title: '옛 서약', target: '자신', since: 10, island: s.hero.island, progress: [], level: 1 },
+      history: [{ id: 'life_1_greed', result: 'kept' }], declined: true };
+    const loaded = normalizeLife5(old);
+    expect(loaded?.vows?.active).toBeNull();
+    expect(loaded?.vows?.history).toEqual([{ id: 'life_1_greed', result: 'kept' }]);
   });
 });

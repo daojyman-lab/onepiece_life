@@ -4,7 +4,7 @@
 // 로그타운으로 못 박아 돌려보내지 않는다 (family.test). 고향으로 돌아가는 일은 moveHome이다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town} 태어난 마을, {island} 지금 있는 섬.
 import { V } from '../balance';
-import { SEAFARING, age, at, home, sea, st } from './paths';
+import { SEAFARING, afterHistory, beforeHistory, age, at, home, sea, st } from './paths';
 import type { Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -98,13 +98,13 @@ export const SEA_LEAVE: Turning[] = [
         fx: [{ op: 'move', island: '리버스 마운틴', sea: 'gl_entry' }, { op: 'log', text: '배가 붉은 산을 거슬러 올라 반대편 바다로 떨어졌다. 등 뒤로 이스트 블루가 사라졌다.', weight: 'heavy' },
              { op: 'timeline', text: '제 배로 붉은 산을 넘어 위대한 항로에 들어섰다' }] },
       { label: '한 해 더 이 바다에서 배와 사람을 다진다', hint: '서두르지 않는다. 더 단단해져서 간다', mark: 'composure', values: { loyalty: D },
-        fx: [{ op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "늙은 목수와 선체의 약한 이음새를 다시 박았다. 선원들과 이스트 블루의 해류를 한 해 더 익히기로 했다.", weight: 'light' }] },
+        fx: [{ op: 'repairShip', mark: 'seam' }, { op: 'base', key: 'wil', add: 1 }, { op: 'log', text: "늙은 목수와 선체의 약한 이음새를 다시 박았다. 선원들과 이스트 블루의 해류를 한 해 더 익히기로 했다.", weight: 'light' }] },
       { label: '배를 고깃배로 고쳐 이 바다에서 산다', hint: '모험은 접는다. 바다는 계속 곁에 있다', values: { peace: D },
         fx: [{ op: 'standing', to: 'civil' }, { op: 'money', add: 10000 }, { op: 'timeline', text: '배를 고깃배로 고쳐 이스트 블루에 남았다' }, { op: 'log', text: "배의 화물칸을 고기 저장고로 고치자 첫 어획물을 실을 수 있었다. 항구 상인이 값을 치르고 돌아갔다.", weight: 'light' }] },
     ],
   },
   {
-    id: 'sea_smoker_chase', kind: 'door', when: at(age(17, 20), st('marine'), sea('east')),
+    id: 'sea_smoker_chase', kind: 'door', when: at(age(17, 20), st('marine'), sea('east'), { c: 'island', is: ['로그타운'] }, afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 6, repeat: 'once', speaker: { canon: 'smoker' },
     title: '시가 두 대의 대령', body: '로그타운의 대령이 지부의 군함을 끌고 붉은 산으로 간다고 한다. 처형대에서 놓친 밀짚모자를 쫓겠다고, 본부의 허락 따위는 필요 없다고. 시가 연기 너머로 대령이 {name}을(를) 본다. 따라올 테냐고.',
     doors: [

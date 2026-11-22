@@ -13,8 +13,7 @@ import { FOES } from '../../src/data/foes';
 import type { Life5 } from '../../src/core/types';
 
 function hero(seed: number) {
-  const s = newLife5(seed); s.pending = null; s.age = 22; s.hero.standing = 'pirate'; s.vows!.declined = true;
-  for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 40;
+  const s = newLife5(seed); s.pending = null; s.age = 22; s.hero.standing = 'pirate';  for (const k of Object.keys(s.hero.base) as (keyof typeof s.hero.base)[]) s.hero.base[k] = 40;
   return s;
 }
 

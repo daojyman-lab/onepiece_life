@@ -242,6 +242,7 @@ export interface BattleState {
   resting: boolean;
   atSea: boolean;
   navigator: boolean;
+  spar?: true;           // 친선 대련 중에는 빈사가 되어도 목숨을 걸지 않는다
   deathmatch?: boolean;   // 누군가 빈사가 된 뒤: 물러날 수 없다
 }
 

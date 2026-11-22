@@ -28,7 +28,9 @@ export const FORTUNES: Turning[] = [
     title: '암시장의 큰손', body: '뒷골목 암시장의 큰손이 {name} 앞으로 빈 장부를 펼친다. 장부에 이름을 올리면, 돈으로는 살 수 없는 총잡이를 붙여 주겠다고 한다.',
     doors: [
       { label: '장부에 이름을 올리고 총잡이를 받는다', hint: '어둠의 거래에 발을 들인다. 그 총잡이는 끝까지 가르친다', values: { greed: D },
-        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'money', add: 75000 }, { op: 'log', text: '장부에 이름이 올라가자 계약금이 손에 들어왔다. 큰손이 붙인 총잡이는 그날 밤부터 사격 자세를 고쳐 주었다.', weight: 'heavy' }] },
+        fx: [{ op: 'master', name: '암시장의 총잡이', branch: 'gun', cap: TOP, years: 12, paid: false }, { op: 'learnTechnique', teacher: '암시장의 총잡이', branch: 'gun', name: '속사', add: 18 }, { op: 'money', add: 75000 }, { op: 'log', text: '장부에 이름이 올라가자 계약금이 손에 들어왔다. 큰손이 붙인 총잡이는 그날 밤부터 사격 자세를 고쳐 주었다.', weight: 'heavy' }] },
+      { label: '총잡이의 특훈만 받는다', hint: '장부에는 이름을 올리지 않는다. 호흡과 조준을 되풀이해 몸의 반응을 끌어올린다', values: { inquiry: D },
+        fx: [{ op: 'specialTraining', teacher: '암시장의 총잡이', training: '호흡·조준 특훈', stats: { spd: 2, int: 1 } }] },
       decline('총잡이를 받지 않는다', '그 돈의 냄새가 싫다', '암시장의 장부를 덮고 돌아섰다. 큰손은 총잡이를 다른 손님에게 붙였다.'),
     ],
   }),
@@ -47,7 +49,9 @@ export const FORTUNES: Turning[] = [
     title: '난파선의 검객', body: '부서진 배 위에서 홀로 칼을 닦던 검객이 {name}에게 칼끝을 겨눈다. 견뎌 내면 가르쳐 주겠다고 한다.',
     doors: [
       { label: '검객의 시험을 받는다', hint: '죽을 만큼 몰아붙여진다. 견디면 칼의 끝을 본다', values: { ambition: D }, danger: true,
-        fx: [{ op: 'hp', add: -20 }, { op: 'master', name: '난파선의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'log', text: '검객의 칼끝을 피하다 온몸에 상처가 났다. 끝내 검을 놓지 않자 그가 칼을 내리고 수련을 허락했다.', weight: 'heavy' }] },
+        fx: [{ op: 'hp', add: -20 }, { op: 'master', name: '난파선의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'learnTechnique', teacher: '난파선의 검객', branch: 'sword', name: '흐름을 끊는 발도', add: 22 }, { op: 'log', text: '검객의 칼끝을 피하다 온몸에 상처가 났다. 끝내 검을 놓지 않자 그가 칼을 내리고 수련을 허락했다.', weight: 'heavy' }] },
+      { label: '검객의 특훈을 받는다', hint: '검을 쥐지 않은 채 하체와 중심을 단련한다', values: { ambition: D },
+        fx: [{ op: 'hp', add: -10 }, { op: 'specialTraining', teacher: '난파선의 검객', training: '하체·중심 단련', stats: { str: 1, spd: 2, vit: 1 } }] },
       decline('시험을 받지 않는다', '칼끝을 피해 물러난다', '검객의 칼끝에서 한 걸음 물러섰다. 그는 다시 칼을 닦기 시작했다.'),
     ],
   }),
@@ -85,7 +89,9 @@ export const FORTUNES: Turning[] = [
     title: '늙은 권법가', body: '곁의 사람들을 등지지 않고 끝까지 버티는 {name}을(를) 지켜보던 늙은 권법가가 다가온다. 그런 사람에게만 가르친다고 한다.',
     doors: [
       { label: '권법가의 가르침을 받는다', hint: '돈으로는 들일 수 없는 스승이다', values: { loyalty: D },
-        fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 15, paid: false }, { op: 'log', text: '권법가는 곁의 사람들부터 지켜 보라고 했다. {name}이(가) 그 말을 받아들이자 직접 주먹을 가르치기 시작했다.', weight: 'heavy' }] },
+        fx: [{ op: 'master', name: '늙은 권법가', branch: 'fist', cap: TOP, years: 15, paid: false }, { op: 'learnTechnique', teacher: '늙은 권법가', branch: 'fist', name: '상대의 힘을 흘리는 받아치기', add: 20 }, { op: 'log', text: '권법가는 곁의 사람들부터 지켜 보라고 했다. {name}이(가) 그 말을 받아들이자 직접 주먹을 가르치기 시작했다.', weight: 'heavy' }] },
+      { label: '권법가의 특훈을 받는다', hint: '기초 체력과 타격을 버티는 몸을 만든다', values: { loyalty: D },
+        fx: [{ op: 'specialTraining', teacher: '늙은 권법가', training: '기초 체력·타격 내성 특훈', stats: { str: 2, vit: 2 } }] },
       decline('가르침을 받지 않는다', '지금 곁의 사람들과 함께 자라겠다', '권법가에게 인사하고 곁의 사람들에게 돌아갔다. 수련장은 뒤에 남았다.'),
     ],
   }),
@@ -119,6 +125,53 @@ export const FORTUNES: Turning[] = [
     ],
   }),
 
+  // 패기의 첫 감각을 일깨우는 기연. 10~15세에는 수련기 판정(core/fortune.ts의 rollTrainingHakiFortune)으로만 온다
+  fortune('fortune_haki_unknown', 'dominion', {
+    when: [{ c: 'age', min: 10, max: 15 }],
+    speaker: { relation: '신원미상의 고수' },
+    title: '길 위의 고수', body: '사람 발길이 드문 길목에서 만난 노인이 {name}의 움직임을 한참 바라본다. 그가 말하는 힘은 근육이나 기술만으로 얻는 것이 아니라고 한다.',
+    doors: [
+      { label: '몸을 두르는 기운의 가르침을 받는다', hint: '손끝에서부터 단단한 힘을 깨운다', values: { dominion: D },
+        fx: [{ op: 'tier', branch: 'armament', to: 1 }, { op: 'log', text: '노인은 돌덩이를 쥐여 주고 손바닥을 펴 보라고 했다. 한참 뒤 돌 표면에 금이 갔다.', weight: 'heavy' }] },
+      { label: '주변의 기척을 읽는 가르침을 받는다', hint: '눈을 감고도 움직임을 알아차린다', values: { inquiry: D },
+        fx: [{ op: 'tier', branch: 'observation', to: 1 }, { op: 'log', text: '노인은 눈을 감으라고 했다. 발밑의 자갈이 구르는 소리만으로 다가오는 방향을 짚을 때까지 자리를 뜨지 않았다.', weight: 'heavy' }] },
+      decline('가르침을 받지 않는다', '아직은 제 길을 걷고 싶다', '노인은 더 붙잡지 않았다. 길모퉁이를 돌아섰을 때는 이미 발소리가 들리지 않았다.'),
+    ],
+  }),
+  fortune('fortune_haki_hyogoro', 'justice', {
+    when: [{ c: 'age', min: 10 }, { c: 'island', is: ['와노쿠니', '하나노미야코', '쿠리', '에비스 마을'] }],
+    speaker: { relation: '꽃의 효고로' },
+    title: '꽃의 효고로', body: '와노쿠니의 감옥과 뒷골목에서 이름을 숨기고 살아온 노인이 {name}의 주먹을 살핀다. 힘으로 누르는 법이 아니라, 몸 안쪽으로 기운을 흘려보내는 법을 보여 주겠다고 한다.',
+    doors: [
+      { label: '류오의 가르침을 받는다', hint: '무장색의 기운을 몸 안쪽으로 흘리는 법', values: { justice: D },
+        fx: [{ op: 'tier', branch: 'armament', to: 1 }, { op: 'log', text: '효고로는 손바닥을 펴고 기운을 밀어내 보라고 했다. 처음에는 아무 일도 없었지만, 며칠 뒤 바위 표면이 안쪽에서부터 갈라졌다.', weight: 'heavy' }] },
+      decline('가르침을 받지 않는다', '지금은 다른 일을 먼저 끝내야 한다', '효고로는 고개를 끄덕였다. 다시 만날 때까지 그 가르침은 남겨 두겠다고 했다.'),
+    ],
+  }),
+  fortune('fortune_haki_rayleigh', 'freedom', {
+    when: [{ c: 'age', min: 10 }, { c: 'island', is: ['샤본디 제도'] }],
+    speaker: { relation: '명왕 레일리' },
+    title: '명왕의 짧은 가르침', body: '샤본디 제도의 술집에서 은발의 노인이 {name}을(를) 불러 세운다. 세상에는 눈에 보이는 힘 말고도 사람마다 지닌 기운이 있다고 한다.',
+    doors: [
+      { label: '몸을 두르는 힘의 가르침을 받는다', hint: '무장색의 첫 감각', values: { ambition: D },
+        fx: [{ op: 'tier', branch: 'armament', to: 1 }, { op: 'log', text: '레일리는 주먹을 내밀라고 했다. 손등에 닿은 손가락 하나를 밀어내지 못한 뒤에야, 보이지 않는 힘을 몸에 두르는 법을 알았다.', weight: 'heavy' }] },
+      { label: '기척을 읽는 힘의 가르침을 받는다', hint: '견문색의 첫 감각', values: { inquiry: D },
+        fx: [{ op: 'tier', branch: 'observation', to: 1 }, { op: 'log', text: '레일리는 눈을 감고 술집 안의 사람 수를 맞혀 보라고 했다. 몇 번을 틀린 끝에 발소리와 숨소리가 하나씩 구분되기 시작했다.', weight: 'heavy' }] },
+      decline('가르침을 받지 않는다', '지금은 제 힘으로 나아가고 싶다', '레일리는 웃으며 술잔을 내려놓았다. 바다에서 다시 만나면 그때는 다른 이야기를 하자고 했다.'),
+    ],
+  }),
+  fortune('fortune_haki_mihawk', 'ambition', {
+    when: [{ c: 'age', min: 17 }, { c: 'dream', has: true, is: ['bestSword'] }],
+    speaker: { canon: 'mihawk' },
+    title: '검은 칼날 아래', body: '매의 눈 미호크가 {name}의 검을 바라본다. 칼끝만 좇아서는 상대의 움직임을 모두 읽을 수 없다며, 검을 거두고 마주 서라고 한다.',
+    doors: [
+      { label: '무장색으로 칼날을 두르는 가르침을 받는다', hint: '검을 다루는 힘을 한 단계 끌어올린다', values: { ambition: D },
+        fx: [{ op: 'tier', branch: 'armament', to: 1 }, { op: 'log', text: '미호크는 검을 뽑지 않았다. 손등으로 날아드는 목검을 막아 보라는 말뿐이었다. 몇 번을 놓친 뒤에야 칼자루를 쥔 손에 기운이 맺혔다.', weight: 'heavy' }] },
+      { label: '상대의 움직임을 읽는 가르침을 받는다', hint: '견문색으로 검의 궤적을 읽는다', values: { inquiry: D },
+        fx: [{ op: 'tier', branch: 'observation', to: 1 }, { op: 'log', text: '미호크는 검을 천천히 들었다. 칼끝이 움직이기 전 어깨와 발이 먼저 움직인다는 사실을 몸으로 익히게 했다.', weight: 'heavy' }] },
+      decline('가르침을 받지 않는다', '제 검은 제 손으로 완성하겠다', '미호크는 더 말하지 않았다. 검은 칼날이 다시 천천히 검집으로 들어갔다.'),
+    ],
+  }),
   // ---------------------------------------------------------------- 과제 11: 가치관마다 둘 (서른여섯 이후에도 온다)
   fortune('fortune_wronged_officer', 'justice', {
     speaker: { relation: '누명 쓴 장교의 후손' },
@@ -135,7 +188,9 @@ export const FORTUNES: Turning[] = [
     title: '정점의 초대', body: '이름난 늙은 검객이 마당 한가운데서 {name}에게 검을 마주 들어 보라 한다. 제 검을 완성할 마지막 상대를 찾고 있다고, 이기든 지든 가진 것을 모두 보여 주겠다고 한다.',
     doors: [
       { label: '검객의 초대를 받는다', hint: '사흘 밤낮을 겨루며 정점의 검을 몸으로 익힌다. 돈으로는 들일 수 없는 스승이다', values: { ambition: D },
-        fx: [{ op: 'master', name: '전설의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'hp', add: -20 }, { op: 'log', text: '사흘 밤낮의 승부 끝에 {name}은(는) 상처투성이로 검을 내렸다. 늙은 검객은 그제야 자신의 마지막 제자로 인정했다.', weight: 'heavy' }] },
+        fx: [{ op: 'master', name: '전설의 검객', branch: 'sword', cap: TOP, years: 15, paid: false }, { op: 'learnTechnique', teacher: '전설의 검객', branch: 'sword', name: '간격을 지배하는 검격', add: 25 }, { op: 'hp', add: -20 }, { op: 'log', text: '사흘 밤낮의 승부 끝에 {name}은(는) 상처투성이로 검을 내렸다. 늙은 검객은 그제야 자신의 마지막 제자로 인정했다.', weight: 'heavy' }] },
+      { label: '검객의 특훈을 받는다', hint: '실전 대련 대신 지구력과 집중력을 단련한다', values: { ambition: D },
+        fx: [{ op: 'specialTraining', teacher: '전설의 검객', training: '장시간 대련·집중력 특훈', stats: { vit: 2, wil: 2 } }] },
       decline('초대를 받지 않는다', '제 검은 제가 완성하겠다고 답한다', '검을 거두고 혼자 수련하겠다고 답했다. 상대는 더 권하지 않았다.'),
     ],
   }),

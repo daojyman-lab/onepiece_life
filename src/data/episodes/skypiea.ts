@@ -3,12 +3,12 @@
 //  - 원작 전 (주인공 12~17): 에넬의 지배 아래 엔젤섬. 다이얼 중개인 도란이 「신의 공물」이라며 다이얼을 걷고, 이름을 신관에게 판다.
 //    안내자 티카(웨이버 배달꾼) · 기록꾼 벨라(다이얼 공방). 간 폴이 지금까지 한 일을 보고 판단한다.
 //    에넬은 통치의 배경으로 남는다. 플레이어는 공물 장부와 운송로를 다루며 직접 대결하지 않는다.
-//  - 원작 그 무렵 (주인공 18): 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
+//  - 황금종이 울리기 전: 어퍼 야드의 서바이벌과 방주 맥심, 황금의 종. 에넬을 쓰러뜨리고 종을 울리는 것은 루피다.
 //    주인공은 다른 전선에 선다: 피난으로 빈 엔젤섬을 노리는 약탈단 구름늑대단(두목 무라크). 안내자 파로 · 진료소의 미나. 코니스가 판단한다.
-//  - 원작 뒤 (주인공 19~): 샨도라 유적을 노리는 도굴꾼 그라몬을 막는다. 유적을 지킬 방법은 두 마을 주민이 결정한다.
+//  - 황금종이 울린 뒤: 샨도라 유적을 노리는 도굴꾼 그라몬을 막는다. 유적을 지킬 방법은 두 마을 주민이 결정한다.
 import type { Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at } from '../turnings/paths';
 
 const SKY = on('스카이피아', '엔젤섬', '샨디아 마을');
 /** 표시 이름 */
@@ -59,7 +59,7 @@ export const EP_SKYPIEA: Turning[] = [
   // ================================================================ 원작 전: 번개 아래의 장부 (주인공 12~17)
   // 표시: tika_trust bella_trust b_cold b_force b_route b_ledger b_shandia b_knight b_record b_deal b_sabotage b_evac / before_done (C3의 특별한 문이 본다)
   {
-    id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done'))), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_b1', kind: 'door', when: at(SKY, age(12, 17), not(F('before_done')), beforeHistory('alabastaRain')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '공물이라고 빼앗긴 물건',
     intro: [
       '엔젤섬 시장에서 처음 보는 조개 장치가 손님을 부른다. 노점상이 다이얼 뚜껑을 열자 안쪽에서 밝은 빛이 난다.',
@@ -121,7 +121,7 @@ export const EP_SKYPIEA: Turning[] = [
     body: '간 폴에게 내가 알아낸 일을 말하거나, 숲에서 온 사람들의 피난길을 열 수 있다.',
     doors: [
       { label: '모아 둔 쪽지와 장부를 노기사 앞에 펼친다', hint: '노기사가 처음으로 입을 연다', when: [has(F('b_ledger'))], values: { justice: D },
-        fx: [flag(F('b_knight')), log('간 폴은 장부를 오래 들여다보더니 창을 고쳐 쥐었다. 이름을 판 자를 잡는 일은 그대의 몫이다, 나는 그날 사람들 곁에 서겠다고 했다.'), next('ep_skypiea_b5')] },
+        fx: [flag(F('b_knight')), log('간 폴은 장부를 오래 들여다보더니 창을 고쳐 쥐었다. 간 폴은 이름을 판 자를 쫓는 일을 {name}에게 맡기고 자신은 주민들을 지키기로 했다.'), next('ep_skypiea_b5')] },
       { label: '숨은 샨디아 전사들에게 피난 길을 알려 준다', hint: '신관의 순찰을 피해야 한다', values: { loyalty: D }, danger: true,
         fx: [flag(F('b_shandia')), next('ep_skypiea_b5'), log('붕대 감은 샨디아 전사들이 구름길을 건넜다. 멀리 신관의 피리가 울리자 모두 엎드렸다.', 'light')] },
       { label: '어른들이 스스로 정하게 두고 물러난다', hint: '노기사는 고개만 끄덕인다', values: { peace: D },
@@ -295,7 +295,7 @@ export const EP_SKYPIEA: Turning[] = [
   // 루피가 에넬을 쓰러뜨리고 종을 울린다. 주인공은 피난으로 빈 엔젤섬에서 약탈단과 맞선다.
   // 표시: paro_trust mina_trust c_cold c_force c_route c_list c_shandia c_conis c_record c_deal c_sabotage c_evac / canon_done
   {
-    id: 'ep_skypiea_c1', kind: 'door', when: at(SKY, age(18, 18), not(F('canon_done'))), weight: 30, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_c1', kind: 'door', when: at(SKY, age(17, 18), not(F('canon_done')), afterHistory('alabastaRain'), beforeHistory('skyBell')), weight: 30, repeat: 'once', speaker: 'hero',
     title: '노인의 집을 턴 사람들',
     intro: [
       '엔젤섬에선 요 며칠 숲 너머에서 들리는 망치 소리에 창문을 닫고 잔다고 한다. 지금 내가 선 골목에선 다른 소리가 난다. 누군가 문짝을 걷어차는 소리다.',
@@ -352,7 +352,7 @@ export const EP_SKYPIEA: Turning[] = [
     body: '코니스는 나와 함께 사람들에게 어느 길을 알려 줄지 정하려 한다.',
     doors: [
       { label: '미나와 함께 피난처로 가는 길을 그려 보인다', hint: '코니스가 그 길을 사람들에게 전하겠다고 한다', when: [has(F('mina_trust'))], values: { justice: D },
-        fx: [flag(F('c_conis')), log('코니스는 지도를 오래 들여다보았다. 그날이 오면 제가 먼저 외치겠어요, 하지만 사람들을 끝까지 데려가는 건 당신들 몫이에요.'), next('ep_skypiea_c5')] },
+        fx: [flag(F('c_conis')), log('코니스는 지도를 오래 들여다보았다. 코니스는 위험이 닥치면 먼저 주민들에게 알리기로 했다. 사람들을 피난처까지 데려가는 일은 {name} 일행에게 부탁했다.'), next('ep_skypiea_c5')] },
       { label: '샨디아 노인들을 찾아가 피난처를 청한다', hint: '숲의 신관에게 들키지 않도록 돌아가야 한다', values: { loyalty: D }, danger: true,
         fx: [flag(F('c_shandia')), next('ep_skypiea_c5'), log('샨디아 노인들이 숲길 하나를 열어 줬다. 신관의 피리 소리가 날 때마다 일행은 움직임을 멈췄다.', 'light')] },
       { label: '노인들끼리 정하게 두고 자리를 뜬다', hint: '코니스는 아무 말도 하지 않는다', values: { peace: D },
@@ -400,7 +400,7 @@ export const EP_SKYPIEA: Turning[] = [
         fx: [{ op: 'fame', add: 5 }, log('무라크는 침을 뱉고 지붕에서 뛰어내렸다. 그날 밤 진료소 창문마다 등불이 켜졌다.'), next('ep_skypiea_c6p')] },
       { label: '같이 털겠다고 속이고 배를 숨겨 둔 곳을 묻는다', hint: '약탈단이 쓰는 구름길과 배가 있는 곳을 알아낸다', values: { ambition: D },
         fx: [flag(F('c_route')), log('무라크는 껄껄 웃으며 굴의 바람길과 웨이버를 매어 두는 자리를 일러 주었다.'), next('ep_skypiea_c6p')] },
-      { label: '털 집 순서를 함께 짠다', hint: '반은 내 몫이다. 진료소의 문은 닫힌다', values: { greed: D },
+      { label: '털 집 순서를 함께 짠다', hint: '훔친 물건의 절반을 받는다. 진료소의 문은 닫힌다', values: { greed: D },
         fx: [flag(F('c_deal')), { op: 'money', add: 70000 }, log('미나는 그 뒤로 진료소 문을 걸어 잠갔다.'), next('ep_skypiea_c6p')] },
       { label: '진료소와 피난처만은 건드리지 말라고 흥정한다', hint: '무라크가 받아들인다. 약속을 지킬지는 알 수 없다', special: 'peace', values: { peace: D },
         fx: [log('무라크는 좋다고 했다. 늑대의 약속이 얼마나 갈지는 아무도 몰랐다.'), next('ep_skypiea_c6p')] },
@@ -500,7 +500,7 @@ export const EP_SKYPIEA: Turning[] = [
   // ================================================================ 원작 뒤: 잊힌 황금의 수호자 (SKY_B_01, 주인공 19~)
   // 표시: karma_trust lumi_trust a_clue a_respect a_force a_cold a_depot a_shandia a_joint a_open a_record a_deal a_sabotage a_evac / after_done
   {
-    id: 'ep_skypiea_a1', kind: 'door', when: at(SKY, age(19, 60), not(F('after_done'))), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_skypiea_a1', kind: 'door', when: at(SKY, age(18, 60), not(F('after_done')), afterHistory('skyBell')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '유적에서 나오는 상자',
     intro: [
       '에넬이 떠난 하늘섬의 장터에서 이웃끼리 다이얼을 고쳐 준다. 길가에서는 예전처럼 밥 짓는 냄새가 난다.',
@@ -559,7 +559,7 @@ export const EP_SKYPIEA: Turning[] = [
     body: '와이퍼는 내가 본 일을 듣고 유적 바깥을 지킬 사람들을 모으려 한다.',
     doors: [
       { label: '샨디아 쪽의 유적 보호안에 힘을 싣는다', hint: '와이퍼가 처음으로 담배를 내린다', when: [has(F('a_respect')), not(F('a_force'))], values: { loyalty: D },
-        fx: [flag(F('a_shandia')), flag(F('karma_trust')), log('와이퍼는 짧게 고개를 끄덕였다. 말보다 지난 몇 주가 먼저 와 있었다. 그날이 오면 주민들 앞은 내가 막는다, 놈은 네가 상대해라.'), next('ep_skypiea_a5')] },
+        fx: [flag(F('a_shandia')), flag(F('karma_trust')), log('와이퍼는 짧게 고개를 끄덕였다. 지난 몇 주 동안 {name}이(가) 한 일을 들은 와이퍼는 주민들을 지키기로 했다. 도굴단 두목은 {name}에게 맡겼다.'), next('ep_skypiea_a5')] },
       { label: '양쪽이 함께 지키는 공동 관리안을 낸다', hint: '두 마을의 노인들이 서로를 쳐다본다', values: { justice: D },
         fx: [flag(F('a_joint')), log('누구도 박수 치지 않았다. 그래도 아무도 자리를 뜨지 않았다. 와이퍼는 벽에 기댄 채 끝까지 들었다.'), next('ep_skypiea_a5')] },
       { label: '기록은 열되 유물 반출은 막자고 한다', hint: '루미의 눈이 반짝이고 카르마의 눈썹이 굳는다', values: { inquiry: D },
@@ -606,7 +606,7 @@ export const EP_SKYPIEA: Turning[] = [
     body: '그라몬이 도굴에 가담하면 값을 나눠 주겠다고 한다.',
     doors: [
       { label: '제안을 거절하고 계획을 캐묻는다', hint: '그라몬의 경계가 높아진다. 주민들이 그 소식을 듣는다', values: { justice: D },
-        fx: [{ op: 'fame', add: 5 }, log('그라몬은 웃으며 일어섰다. 아깝군. 그날 엔젤섬 사람들이 {name}에게 먼저 인사했다.'), next('ep_skypiea_a6p')] },
+        fx: [{ op: 'fame', add: 5 }, log('그라몬은 아쉽다는 듯 웃으며 일어섰다. 그날 엔젤섬 사람들이 {name}에게 먼저 인사했다.'), next('ep_skypiea_a6p')] },
       { label: '받아들이는 척 손을 잡는다', hint: '조직의 배치와 창고를 안에서 본다', values: { ambition: D },
         fx: [flag(F('a_depot')), log('그라몬은 술잔을 채우며 보급 창고와 기억의 방으로 갈 날을 털어놓았다.'), next('ep_skypiea_a6p')] },
       { label: '돈을 받고 도굴에 가담한다', hint: '그라몬이 선금을 준다. 루미가 더는 기록을 보여 주지 않는다', values: { greed: D },

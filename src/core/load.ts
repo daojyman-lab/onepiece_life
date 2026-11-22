@@ -1,4 +1,8 @@
+import { VOWS } from '../data/vows';
+import { AMAZON_ROADS } from '../data/training-routes';
 // 저장 읽기: 저장해 둔 JSON을 인생 · 도감으로 되살린다. 옛 저장에 빠진 칸은 기본값으로 채운다.
+import { normalizeRouteSave } from './route-save';
+import { restoreRecruitedRival, updateRival } from './rival';
 import { normalizeTraits } from './traits';
 import { V } from '../data/balance';
 import { RETIRED_FRUIT_IDS } from '../shared/data/fruits';
@@ -10,8 +14,12 @@ import { topValues } from './values';
 import { mainBranch } from './year';
 import { emptyMeta5, type Meta5 } from './meta';
 import { invariants5 } from './reduce';
+import { bountyAmount, hadBountyBeforeUpgrade } from './first-poster';
+import { worldTick } from '../data/world-history';
+import { PRESS_LIMIT, reconcileWorld } from './world-news';
 import { emptyLife } from './state';
 import { normalizeStyles } from './styles';
+import { SHIP_MARK } from './ship-memory';
 import { isCombatStyle } from '../data/combat-styles';
 import { discipleFor } from './disciples';
 import { restoreStoryDoor } from './turning';
@@ -73,14 +81,54 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (LIFE_ARRAYS.some((k) => !Array.isArray(s[k])) || LIFE_OBJECTS.some((k) => !isObj(s[k]))) return null;
   if (isObj(s.vows) && (!Array.isArray(s.vows.history) || (s.vows.active !== null && !isObj(s.vows.active)))) return null;
   if (!pendingOk(s.pending)) return null;      // 손으로 고친 파일의 깨진 창이 화면을 무너뜨리지 않게
+  // 첫 출항을 기록하기 전의 옛 저장: 이미 바다로 나설 나이를 넘었으면 지난 일로 둔다 (불러온 뒤 갑자기 느려지지 않게)
+  if (x.debut === undefined && typeof x.age === 'number' && x.age >= V.voyage.minAge) s.debut = { age: -1, lap: false };
   // 태어난 형편을 모르는 옛 저장은 지금의 형편으로 (몰락을 세지 않는다)
   if (isObj(s.hero) && s.hero.bornWealth === undefined) s.hero = { ...s.hero, bornWealth: s.hero.wealth };
   for (const k of ['stats', 'hero', 'growth'] as const) s[k] = withDefaults(s[k] as Obj, def[k]);
   const life = s as unknown as Life5;
+  const tick = worldTick(life);
+  const validTick = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0 && n <= tick;
+  if (life.pending?.kind === 'door' && life.pending.openedTick !== undefined && !validTick(life.pending.openedTick)) return null;
+  if (!Array.isArray(life.news) || life.news.length > PRESS_LIMIT || life.news.some(article => !isObj(article) ||
+      typeof article.id !== 'string' || typeof article.title !== 'string' || typeof article.body !== 'string' ||
+      !['big', 'world', 'local', 'bounty'].includes(article.kind) || !Number.isSafeInteger(article.age) || article.age < 0 ||
+      !Number.isInteger(article.part) || article.part < 0 || article.part >= V.partsPerYear || !validTick(worldTick(article)) ||
+      (article.logId !== undefined && (!Number.isSafeInteger(article.logId) || article.logId < 0 || article.logId >= life.seq)) ||
+      (article.amount !== undefined && (!Number.isSafeInteger(article.amount) || article.amount <= 0)))) return null;
+  if (new Set(life.news.map(issue => issue.id)).size !== life.news.length) return null;
+  if (life.pressTick !== undefined && !validTick(life.pressTick)) return null;
+  if (life.ships !== undefined) {
+    const ageOk = (age: number, min = 0) => Number.isInteger(age) && age >= min && age <= life.age;
+    if (!Array.isArray(life.ships) || life.ships.some((h, i, hulls) =>
+      !isObj(h) || h.id !== i + 1 || (h.name !== undefined && typeof h.name !== 'string') ||
+      (h.acquiredAt !== undefined && !ageOk(h.acquiredAt, hulls[i - 1]?.end?.age)) ||
+      !Array.isArray(h.repairs) || h.repairs.some(r => !isObj(r) || !Object.hasOwn(SHIP_MARK, r.kind) ||
+        !ageOk(r.age, h.acquiredAt) || typeof r.island !== 'string' || (h.end && r.age > h.end.age)) ||
+      (h.helmFrom !== undefined && (!i || h.helmFrom !== i || hulls[i - 1].end?.kind !== 'helm')) ||
+      (h.spiritAt !== undefined && h.spiritAt !== h.end?.age) ||
+      (h.end === undefined ? i !== hulls.length - 1 || !life.flags.includes('ship') :
+        !isObj(h.end) || !['helm', 'playground', 'house', 'lost', 'switched'].includes(h.end.kind) ||
+        !ageOk(h.end.age, h.acquiredAt) || typeof h.end.island !== 'string'))) return null;
+  }
+  const meal = life.watchMeal;
+  if (meal !== undefined && (!isObj(meal) || !Number.isSafeInteger(meal.hullId) || meal.hullId < 1 ||
+    typeof meal.sailorId !== 'string' || !Number.isInteger(meal.sharedAt) || meal.sharedAt < 0 || meal.sharedAt > life.age ||
+    !['shared', 'reserved', 'passed', 'closed'].includes(meal.stage) ||
+    ((meal.stage === 'reserved' || meal.stage === 'passed') && (meal.shelfSince === undefined ||
+      !Number.isInteger(meal.shelfSince) || meal.shelfSince <= meal.sharedAt || meal.shelfSince > life.age ||
+      !Array.isArray(meal.originalCrew) || !meal.originalCrew.includes(meal.sailorId) || !meal.originalCrew.every(id => typeof id === 'string'))))) return null;
+  if (life.hero.gender === 'm' && life.hero.island === '아마존 릴리' && !life.pending && !life.passage) life.hero.island = AMAZON_ROADS;
+  if (!normalizeRouteSave(life)) return null;
   if (life.siblingBirths !== undefined && (!Array.isArray(life.siblingBirths) ||
-    life.siblingBirths.some(b => !isObj(b) || !Number.isInteger(b.age) || b.age <= life.age || b.age > V.family.siblingGap[1] ||
+    life.siblingBirths.some(b => !isObj(b) || !Number.isInteger(b.age) || b.age <= V.birth.startAge || b.age > V.family.siblingGap[1] ||
       typeof b.name !== 'string' || !b.name.trim() || (b.gender !== 'm' && b.gender !== 'f')) ||
     new Set(life.siblingBirths.map(b => b.age)).size !== life.siblingBirths.length)) return null;
+  // 지나간 출생 예정일은 지운다. 뒤늦게 동생이나 출생 장면을 만들지 않는다.
+  if (life.siblingBirths?.some(b => b.age <= life.age)) {
+    life.siblingBirths = life.siblingBirths.filter(b => b.age > life.age);
+    if (!life.siblingBirths.length) delete life.siblingBirths;
+  }
   if (life.people.some((p) => {
     const story = p?.siblingLife;
     return story !== undefined && (!isObj(story) || !isSiblingCareer(story.career) ||
@@ -143,15 +191,17 @@ export function normalizeLife5(x: unknown): Life5 | null {
   if (life.traits !== undefined && !isObj(life.traits)) return null;
   if (!Array.isArray(life.hero.talents) || !Array.isArray(life.strengths)) return null;
   normalizeTraits(life);
-  // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다.
+  // 초기 서약 저장의 진행 칸이 없으면 현재 자리에서 이어 간다. 없어진 생애 서약(10·22·36살 제안)이 진행 중이면 내려놓는다.
   if (life.vows?.active) {
-    life.vows.active.island ??= life.hero.island;
-    life.vows.active.progress ??= [];
-    if (life.vows.active.level) {
-      life.vows.active.activities ??= [];
-      life.vows.active.choices ??= [];
+    if (!VOWS[life.vows.active.id]) life.vows.active = null;
+    else {
+      life.vows.active.island ??= life.hero.island;
+      life.vows.active.progress ??= [];
     }
   }
+  if (life.vows) delete (life.vows as unknown as Record<string, unknown>).declined;
+  // 꿈의 서약: 옛 저장에는 없다. 꿈을 이미 품었으면 약속한 사람 없이 첫 길목부터 걷는다
+  if (life.dreamVow !== undefined && (!isObj(life.dreamVow) || !isObj(life.dreamVow.cleared) || typeof life.dreamVow.streak !== 'number')) return null;
   // 4단계에서 헌신(devotion)이 빠지고 탐욕(greed)이 들어왔다: 옛 점수는 버린다
   if (isObj(life.values)) delete (life.values as Record<string, unknown>).devotion;
   // 선호도가 없는 옛 저장: 지금까지 간 만큼(단계와 숙련)을 선호도로 삼고, 지금의 길은 알린 것으로 친다
@@ -161,6 +211,15 @@ export function normalizeLife5(x: unknown): Life5 | null {
     if (life.age >= V.growth.pref.pathAge) g.path = mainBranch(life);
   }
   try {
+    restoreEscapeNotoriety(life);
+    if (x.publishedBounty === undefined) {
+      const first = life.timeline.find(entry => typeof entry?.text === 'string' && /^첫 현상금 [\d,]+ 베리$/.test(entry.text));
+      life.publishedBounty = Math.max(bountyAmount(life), Number(first?.text.replace(/[^\d]/g, '') || 0), ...life.news.map(issue => issue.amount ?? 0));
+    }
+    if (!Number.isSafeInteger(life.publishedBounty) || life.publishedBounty! < 0) return null;
+    if (x.firstBountyIssued === undefined) life.firstBountyIssued = hadBountyBeforeUpgrade(life);
+    if (typeof life.firstBountyIssued !== 'boolean') return null;
+    if (x.news === undefined && !life.ended) reconcileWorld(life, false);
     if (invariants5(life, true).length) return null;
     if (life.firstChoiceAge !== undefined && (!isObj(life.firstChoiceAge) ||
         !Object.values(life.firstChoiceAge).every(age => Number.isInteger(age) && age >= 0 && age <= life.age))) return null;
@@ -173,9 +232,16 @@ export function normalizeLife5(x: unknown): Life5 | null {
         (life.firstChoiceAge ??= {})[key] = lastVisit;
       }
     }
+    restoreRecruitedRival(life);
+    for (const p of life.people) {
+      if (p.canon === 'bellamy' && p.crew) p.crew.power = Math.max(p.crew.power, V.person.crew.bellamyPower);
+    }
+    const obsoleteRivalChoices = ['life_rival_invitation', 'life_rival_date', 'life_rival_promise'];
+    if (life.pending?.kind === 'door' && obsoleteRivalChoices.includes(life.pending.turning)) life.pending = null;
+    life.queue = life.queue.filter(id => !obsoleteRivalChoices.includes(id));
+    if (life.pending?.kind === 'door' && life.pending.turning === 'life_rival_reunion' && !life.rival) updateRival(life);
     repairEpisodeContacts(life);
     restoreStoryDoor(life);
-    restoreEscapeNotoriety(life);
     if (life.pending?.kind !== 'door' || life.pending.turning !== SIBLING_REUNION_ID) delete life.siblingMeeting;
     return life;
   } catch {

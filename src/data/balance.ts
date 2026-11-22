@@ -5,15 +5,19 @@ export const V = {
   // 전투 등급(화면 표시): 종합 전투력 = 능력치 합 × (무술 단계의 배율 + fruit × (열매 단계의 배율 − 1) + haki × Σ(패기 단계의 배율 − 1)).
   // 화면과 싸움의 기본 계산식은 다르지만 서약으로 보장하는 하한은 같다. 등급 경계는 data/words.ts의 GRADES
   grade: { fruit: 0.5, haki: 0.25 },
-  vow: { powerFloors: [0, 500, 770, 1500] }, // B, A, S
+  // 패기 능력치 강화: 단계마다 곱해지고, 서로 다른 패기의 강화는 겹친다 (core/body.ts의 effectiveStats5).
+  haki: { armament: { strPerTier: 0.05, vitPerTier: 0.07 }, observation: { spdPerTier: 0.06 }, conqueror: { allPerTier: 0.03 } },
   voyage: { p: 0.45, minAge: 16, fresh: 3 },
+  // 나룻배(core/voyage.ts leave): 배도 없고 바다를 다니는 처지도 아닌 사람이 어느 포구에서나 사서 섬을 떠난다. 폭풍에는 이만큼 더 다친다
+  skiff: { price: 5000, stormHurt: 1.5 },
   // 항해 중(core/passage.ts): 지식(int)이 이만큼이면 항해 실력이 1 오른다 (항해사 동료는 2)
   passage: { navInt: 8 },
-  // 원작의 때: 모든 주인공은 루피와 같은 세대다. 열일곱 살이 원작이 시작하는 해원력 1522년이다 (연혁 보정 YEAR_WEATHER의 열쇠)
+  // 원작의 때: 모든 주인공은 루피와 같은 세대다. 열일곱 살이 원작이 시작하는 해원력 1522년이다 (world-history.ts).
   canon: { startYear: 1522, heroAge: 17 },
   // 섬의 기후(core/climate.ts): 그 섬에서 나고 자란 사람에게는 기후가 이만큼 드물게 눈에 띈다
   climate: { localMult: 0.25 },
   value: { max: 100, door: 6, moment: 18, deep: 55, leanBase: 10,
+           greedProfit: 1.5,                   // 제 잇속을 택해 실제로 돈을 챙기는 선택
            greedMoney: 1.25,                   // 탐욕이 깊으면 들어오는 돈(효과 money의 양수)이 이만큼 불어난다 (돈 냄새를 맡는다)
            soften: 0.85,                       // 과제 13: 높을수록 덜 오른다. 오르는 양 × (1 − 지금 점수/max × soften)
            // 특별한 문의 문턱: 그 나이(to살까지)에 이만큼 쌓였으면 연다. 그 가치관을 꾸준히 고른 사람의 나이별 중앙값 둘레다
@@ -22,10 +26,12 @@ export const V = {
                       { to: 17, need: 32 }, { to: 19, need: 36 }, { to: 21, need: 40 }, { to: 24, need: 45 }, { to: 29, need: 50 },
                       { to: Infinity, need: 55 } ] },
   // 유파 연습 완료·생애 후속처럼 별도로 열리는 선택을 고려한 일반 사건의 빈도.
-  stopsPerYear: [ { to: 9, n: 1.5 }, { to: 15, n: 1.5 }, { to: 35, n: 1.9 }, { to: 200, n: 0.77 } ],
+  stopsPerYear: [ { to: 15, n: 1.5 }, { to: 35, n: 2.5 }, { to: 200, n: 0.9 } ],
   stopsQuiet: 0.4,
   // 전성기 (통합 기획 5장): minAge~maxAge살에 들어설 수 있고 years해 동안, 한 살에 토막을 두 바퀴 돈다
   prime: { minAge: 22, maxAge: 40, years: 5, tier: 3 },
+  // 첫 출항 (core/stages.ts beginDebut): 바다를 다니는 처지로 voyage.minAge살 넘어 처음 바다에 나선 그해도 토막을 한 바퀴 더 돈다.
+  // 전성기와 겹치면 더하지 않는다
   // 노화: from살부터 한 해에 rolls번, 확률 start + perYear×(나이−from) + wear×(잃은 부위 + 부상)로 근력 · 속도 · 체력 하나가 1 줄어든다 (cap까지)
   aging: { from: 50, start: 0.25, perYear: 0.03, wear: 0.1, cap: 0.9, rolls: 2, lineP: 0.35 },                             // 정점 이후, 은퇴 후
   queue: { maxTries: 8 },                      // 줄 선 전환점을 이만큼 열지 못하면 줄에서 버린다
@@ -65,7 +71,8 @@ export const V = {
     lineBoost: 3,                              // 활동과 같은 쪽으로 기운 일상 기록이 뽑힐 배율
   },
   hardship: { poor: 40, orphan: 60, outcast: 10, limb: 20, loss: 6, defeat: 3, afterFortune: 0.5 },
-  fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16 },
+  fortune: { baseP: 0.0002, perHardship: 0.0003, capP: 0.06, minAge: 16,
+             hakiTrainingP: 0.015 },         // 10~15세 수련기 전체에 걸쳐 패기 기연을 만날 누적 확률 (core/fortune.ts)
   surname: { revealMult: 3 },                  // 숨은 성이 밝혀지면 그 성씨의 bonus를 이만큼 곱해 한 번 더 더한다
   fight: { injuryBase: 0.15, injuryPerGap: 0.5, limbPerGap: 0.25, limbCap: 0.25, wonMult: 0.4, deathPerGap: 0.5, deathCap: 0.5, minorP: 0.25, healthDamage: 35,
            injuryFloor: 0.05, injuryCap: 0.9, injuryGapFrom: 0.8, limbGapFrom: 1, deathGapFrom: 0.6,
@@ -83,8 +90,7 @@ export const V = {
            famePerPower: 0.1, minorFame: 1,
            // 이름 있는 상대의 능력치(간부 포함)에 곱하는 배율, 상대가 나오는 바다별 (v4 보스는 v4의 레벨 성장에 맞춰져 있다)
            foeScale: { east: 0.46, west: 0.4, north: 0.4, south: 0.4, gl_entry: 0.28, gl_first: 0.3, sabaody: 0.17, nw_first: 0.36, nw_late: 0.25 },
-           dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
-           minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
+           dangerKidAge: 15 },                // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
   fame: { bounty: 1000000 },                   // 기존 이름값·공적 문턱의 환산 단위. 실제 현상금은 bounty 규칙을 쓴다.
   bounty: {
@@ -96,6 +102,7 @@ export const V = {
       { perFame: 1000000, cap: 5500000000 },
     ],
     political: [
+      { flag: 'raidedEmperorSupply', perFame: 1000000, cap: 300000000 },
       { flag: 'readForbidden', perFame: 1000000, cap: 300000000 },
       { flag: 'ruler', perFame: 1000000, cap: 500000000 },
     ],
@@ -145,7 +152,7 @@ export const V = {
   log: { keep: 400 },                          // 기록은 최근 이만큼만 남긴다
   person: { bond: 50, bondMax: 100,            // 새로 만난 사람의 처음 유대, 유대의 끝
             // 새 동료의 싸움 자리와 레벨. 힘은 v4 crewPowerFor(지금 바다의 단계, level)
-            crew: { role: 'vanguard', level: 1, maxLevel: 30 } },
+            crew: { role: 'vanguard', level: 1, maxLevel: 30, bellamyPower: 580 } },
   ending: { knownFame: 10,                     // 이 명성(현상금 1,000만)부터 신문 1면에 실린다. 아래는 고향의 소문
             bondHigh: 70,                      // 원작 인물의 한마디: 유대가 이만큼이면 가까운 사이의 말
             canonWords: 3, unchosen: 3, oneLine: 3 },   // 엔딩에 꼽는 원작 인물 · 가지 않은 길 · 한 줄 인생의 처지 변화 수

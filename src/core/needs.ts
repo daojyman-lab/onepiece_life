@@ -2,6 +2,7 @@
 // 전환점의 needs가 안 맞으면 그 전환점은 오지 않고, 문의 needs가 안 맞으면 그 문은 잠긴다.
 import { RELATION_KIND } from '../data/words';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
+import { rivalPerson } from './rival';
 import { primaryStyle } from './styles';
 import type { ContactRole, Life5, Need, Person } from './types';
 
@@ -15,8 +16,16 @@ export function hasRelation(p: Person, relation: string): boolean {
 }
 
 export function livingContact(s: Life5, by: { relation: string } | { who: ContactRole }): Person | undefined {
-  return s.people.find(p => p.alive && ('relation' in by ? hasRelation(p, by.relation)
-    : personIs(p, by.who) && (by.who !== 'crew' || !p.crew?.separatedMonths)));
+  if ('relation' in by) return livingRelation(s, by.relation);
+  return s.people.find(p => p.alive && personIs(p, by.who) && (by.who !== 'crew' || !p.crew?.separatedMonths));
+}
+
+export function livingRelation(s: Life5, relation: string): Person | undefined {
+  if (relation === '어릴 적 맞수') {
+    const p = rivalPerson(s);
+    return p?.alive && !p.missing ? p : undefined;
+  }
+  return s.people.find(p => p.alive && hasRelation(p, relation));
 }
 
 export function fillContacts(s: Life5, text: string): string {

@@ -5,7 +5,7 @@ import { newLife5 } from '../../src/core/state';
 import type { Fx } from '../../src/core/types';
 
 // 조건이 충족된 문에서 효과 적용기가 직접 결과를 기록하는 연산.
-const SELF_NARRATING = new Set<string>(['buyWeapon', 'serviceWeapon', 'beginStyle', 'adoptStyle', 'refineStyle', 'welcomeSibling', 'siblingReunion']);
+const SELF_NARRATING = new Set<string>(['buyWeapon', 'serviceWeapon', 'beginStyle', 'adoptStyle', 'refineStyle', 'welcomeSibling', 'siblingReunion', 'learnTechnique', 'specialTraining']);
 
 // 확률 분기의 모든 길을 따라간다. 전투와 엔딩은 별도 화면이 곧바로 반응한다.
 function reactionPaths(fx: Fx[], reacted = false): boolean[] {

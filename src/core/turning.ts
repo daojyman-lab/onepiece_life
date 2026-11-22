@@ -3,6 +3,8 @@ import { buildEntryGate, buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX } from './voya
 import { josa } from '../shared/core/josa';
 import { chance, int, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { V } from '../data/balance';
+import { worldTick } from '../data/world-history';
+import { publishIssue } from './world-news';
 import { CANON } from '../data/canon';
 import { ITEM_BY_ID } from '../shared/data/items';
 import { TURNING_BY_ID, TURNINGS } from '../data/turnings';
@@ -17,7 +19,7 @@ import { logLine } from './state';
 import { addValues, isDeep, opensSpecial } from './values';
 import { applyPersonalityChoice } from './personality';
 import { isQuiet } from './year';
-import { advanceVow, canBeginVow, recordVowChoice } from './vow';
+import { advanceVow, canBeginVow } from './vow';
 import { afterLifeStoryChoice } from './life-story';
 import { EPISODE_NATIVE_TRUST } from '../data/episodes';
 import { environmentOf, isNative, tradeEffects } from './environment';
@@ -60,8 +62,10 @@ function knownSpeakerIsDead(s: Life5, t: Turning): boolean {
 
 function renderDoor(s: Life5, t: Turning, doors: ResolvedDoor[]): Extract<Life5['pending'], { kind: 'door' }> {
   const disciple = t.disciple && discipleFor(s, t.disciple);
+  const body = [t.body, ...(t.recall ?? []).filter(line => checkAll(s, line.when)).map(line => line.text)].join('\n\n');
   return { kind: 'door', turning: t.id, moment: t.kind === 'moment',
-    title: fillTurning(s, t.title, t), body: fillTurning(s, t.body, t), speaker: speakerOf(s, t), doors,
+    ...(t.when.some(c => c.c === 'history') ? { openedTick: worldTick(s) } : {}),
+    title: fillTurning(s, t.title, t), body: fillTurning(s, body, t), speaker: speakerOf(s, t), doors,
     ...(disciple ? { discipleId: disciple.personId } : {}) };
 }
 
@@ -74,9 +78,12 @@ export function restoreStoryDoor(s: Life5): void {
   if (pending.turning === 'tmp_crocodile') return;
   const t = turningOf(pending.turning);
   if (!t) return;
-  const doors = resolveDoors(s, t);
   const prereqs = t.when.filter(c => !(c.c === 'turningSeen' && c.id === t.id));
-  if (!checkAll(s, prereqs) || !needsOk(s, t.needs) || knownSpeakerIsDead(s, t) || !doors.some(d => !d.locked)) {
+  // 추첨 뒤 같은 명령에서 분기가 바뀔 수 있다. 이미 열린 현장 장면은 개봉 시각으로 복원한다.
+  const historicalMoment = pending.openedTick !== undefined && t.when.some(c => c.c === 'history')
+    ? { ...s, age: Math.floor(pending.openedTick / V.partsPerYear), part: (pending.openedTick % V.partsPerYear) as Life5['part'], prime: null } : s;
+  const doors = resolveDoors(historicalMoment, t);
+  if (!checkAll(historicalMoment, prereqs) || !needsOk(s, t.needs) || knownSpeakerIsDead(s, t) || !doors.some(d => !d.locked)) {
     s.pending = null;
     // 고르기 전에 무효화된 한 번뿐인 만남은, 실제로 조건이 갖춰지면 다시 열 수 있다.
     if (s.seenCount[t.id] === 1 && !s.tried.some(k => k.startsWith(t.id + '#'))) {
@@ -85,7 +92,7 @@ export function restoreStoryDoor(s: Life5): void {
     }
     return;
   }
-  s.pending = renderDoor(s, t, doors);
+  s.pending = renderDoor(historicalMoment, t, doors);
 }
 
 export function refreshEntryDoor(s: Life5): void {
@@ -132,12 +139,17 @@ export function stillOpen(s: Life5, t: Turning): boolean {
   return !s.closed.includes(t.id) && (s.seenCount[t.id] ?? 0) < capOf(t);
 }
 
+function canAttend(s: Life5, t: Turning): boolean {
+  return s.hero.standing !== 'prisoner' || t.kind !== 'door' || t.id.startsWith('prison_');
+}
+
 /**
  * 전환점을 띄운다. 닫혔거나 상한에 닿았거나, 글이 전제하는 것(needs)이 없거나, 열린 문이 하나도 없으면
  * false를 돌려주고 아무것도 하지 않는다.
  */
 export function openTurning(s: Life5, t: Turning): boolean {
-  if (knownSpeakerIsDead(s, t)) return false;
+  if (!canAttend(s, t) || knownSpeakerIsDead(s, t)) return false;
+  if (t.when.some(c => c.c === 'history' && !checkAll(s, [c]))) return false;
   const weaponScene = t.doors.some(d => d.fx.some(e =>
     ['receiveWeapon', 'buyWeapon', 'giveAwayWeapon', 'beginStyle', 'adoptStyle', 'refineStyle'].includes(e.op)));
   const prerequisites = weaponScene ? t.when : t.when.filter(c => ['choiceAgo', 'person', 'canonPerson', 'opponent', 'anyOf', 'siblingReunion'].includes(c.c));
@@ -168,11 +180,10 @@ function stopsGoal(s: Life5): number {
   return V.stopsPerYear.find((x) => s.age <= x.to)?.n ?? 0;
 }
 
-/** 이 토막에 멈출 차례인가. 올해 목표를 한 번 넘게 넘기면 더 멈추지 않는다. */
+/** 항해·수련·고향 사건을 포함해 이미 고른 만큼 올해의 일반 사건 추첨을 줄인다. */
 export function wantsStop(s: Life5, r: Rng): boolean {
-  const n = stopsGoal(s);
-  if (s.stopsThisYear >= Math.ceil(n) + 1) return false;
-  return chance(r, n / V.partsPerYear);
+  const remaining = stopsGoal(s) - s.stopsThisYear;
+  return remaining > 0 && chance(r, remaining / V.partsPerYear);
 }
 
 /**
@@ -188,7 +199,7 @@ export function repeatAllows(s: Life5, t: Turning): boolean {
 
 /** 조건과 필요한 것이 맞고 열린 문이 하나라도 있다 (반복 · 상한은 보지 않는다) */
 function fits(s: Life5, t: Turning): boolean {
-  return checkAll(s, t.when) && !knownSpeakerIsDead(s, t) && needsOk(s, t.needs) && t.doors.some(d => !doorAccess(s, d).locked);
+  return canAttend(s, t) && checkAll(s, t.when) && !knownSpeakerIsDead(s, t) && needsOk(s, t.needs) && t.doors.some(d => !doorAccess(s, d).locked);
 }
 
 /** 섬 장편 에피소드의 전환점 id 머리 (data/episodes) */
@@ -241,7 +252,8 @@ export function takeQueued(s: Life5, count = true): Turning | null {
     const scene = id === SIBLING_BIRTH_ID && !atFamilyHome(s) ? SIBLING_BIRTH_AWAY_ID : id;
     const t = entry ?? TURNING_BY_ID[scene];
     if (entry && !checkAll(s, entry.when)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
-    if (t && !stillOpen(s, t)) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
+    const expired = t?.when.some(c => c.c === 'history' && !c.has && !checkAll(s, [c]));
+    if (t && (expired || !stillOpen(s, t))) { s.queue.splice(i, 1); delete s.queueTries[id]; continue; }
     if (t && fits(s, t)) {
       s.queue.splice(i, 1); delete s.queueTries[id];
       return t;
@@ -289,7 +301,9 @@ export function answerDoor(s: Life5, index: number): void {
   s.traitSource = t.id;
   s.traitScene = t.tags ?? [];
   const before = { ...s.values };
-  const rose = addValues(s, door.values ?? {}, p.moment ? V.value.moment / V.value.door : 1);
+  const values = { ...door.values };
+  if (values.greed && door.fx.some(fx => fx.op === 'money' && fx.add > 0)) values.greed *= V.value.greedProfit;
+  const rose = addValues(s, values, p.moment ? V.value.moment / V.value.door : 1);
   applyPersonalityChoice(s, door.values ?? {});
   if (door.mark) applyFx(s, [{ op: 'mark', id: door.mark }]);   // 강점을 얻으면 그 이름을 기록한다
 
@@ -303,7 +317,7 @@ export function answerDoor(s: Life5, index: number): void {
   const canon = typeof t.speaker === 'object' && 'canon' in t.speaker ? t.speaker.canon : undefined;
   s.timeline.push({ age: s.age, text: `${p.title}: ${chosen.label}`, choice: key, ...(canon ? { canon } : {}) });
   // 서약·각성·동생 탄생처럼 때가 되면 반드시 열리는 장면은 보통 사건의 멈춤 예산에서 뺀다.
-  if (!t.id.startsWith('life_vow_') && !t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening' &&
+  if (!t.id.startsWith('trait_awaken_') && t.id !== 'sky_vow_awakening' &&
       t.id !== SIBLING_BIRTH_ID && t.id !== SIBLING_BIRTH_AWAY_ID && t.id !== SIBLING_REUNION_ID) {
     s.stats.stops += 1;
     s.stats.stopsAt.push(s.age);
@@ -312,12 +326,12 @@ export function answerDoor(s: Life5, index: number): void {
 
   s.pending = null;                            // 효과가 새 대기(죽음 등)를 만들면 그것이 남는다
   applyFx(s, door.fx, p.discipleId);
+  if (door.news) publishIssue(s, { id: `local:${key}`, kind: 'local', ...door.news });
   if (t.id === 'after_fight') delete s.defeatedFoe;
   afterLifeStoryChoice(s, t.id);
   if (door.meal) recordTraitEvent(s, 'meal', '', `${t.id}:${s.age}`);
   for (const [value, gain] of Object.entries(door.values ?? {})) if (gain && gain > 0) recordTraitEvent(s, 'value', value, t.id);
   if (t.id.startsWith(STORY_PREFIX) || t.id.startsWith('life_course_')) storyPause(s);   // 생애 코스에서 장편으로 돌아올 때도 막 사이의 쉼을 잇는다
-  if (door.values?.[s.vows?.active?.value ?? 'justice']) recordVowChoice(s, t.id, s.vows?.active?.value ?? null);
   const vow = advanceVow(s, t.id);
   if (vow?.reward) applyFx(s, [{ op: 'mastery', branch: vow.reward, add: vow.amount }]);
   // 선택의 실제 결과를 먼저 보여 준 뒤 가치관의 변화를 남긴다.

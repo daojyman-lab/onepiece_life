@@ -1,5 +1,6 @@
 // v5 상태 보관, 명령 전달, 자동 진행 타이머, 저장. 화면은 여기만 본다. (v4 src/app/store.ts와 같은 짜임)
 import { useEffect, useState } from 'preact/hooks';
+import { leaveBlock } from '../core/voyage';
 import { setSound, sfx } from './sound';
 import { knownDoors, recordLife, type Meta5 } from '../core/meta';
 import { reduce5 } from '../core/reduce';
@@ -8,7 +9,7 @@ import type { Command5, Life5 } from '../core/types';
 import { caughtUp, lastLogId, nextHidden, nextTick, shouldSave, windowDelay, windowReady } from './flow';
 import { save, type Settings } from './save';
 
-export type ManageModal = null | 'codex' | 'menu';
+export type ManageModal = null | 'codex' | 'menu' | 'news';
 
 export interface AppState {
   screen: 'start' | 'main';
@@ -128,6 +129,14 @@ export const actions = {
     setSound({ [kind]: settings[kind] });
   },
   open(modal: ManageModal) { set({ modal }); },
+  /** 섬을 떠난다: 떠날 수 없으면 까닭을 알리고, 떠날 수 있으면 다음 항로 고르기를 띄운다 */
+  leave() {
+    const life = state.life;
+    if (!life) return;
+    const why = leaveBlock(life);
+    if (why) { toast(why); return; }
+    dispatch({ type: 'leave' });
+  },
   close() { if (state.modal) windowClosedAt = performance.now(); set({ modal: null }); },
   /** 지금 저장: 누른 사람에게는 실패도 매번 알린다 */
   saveNow() {

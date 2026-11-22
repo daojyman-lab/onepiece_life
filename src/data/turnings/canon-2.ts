@@ -2,11 +2,11 @@
 // 원작의 때: 알라바스타는 주인공이 열일곱, 워터 세븐은 열여덟, 샤본디와 정상결전은 열아홉 무렵. 두 해 뒤 신세계.
 // 주인공은 원작의 결말을 바꾸지 않는다. 문의 말에는 가치관 이름도 숫자도 쓰지 않는다.
 import { V } from '../balance';
-import { SEAFARING, age, at, sea, st } from './paths';
+import { afterHistory, beforeHistory, SEAFARING, age, at, sea, st } from './paths';
 import type { Turning } from '../../core/types';
 
 const D = V.value.door;
-const PIRATE_SIDE = st('pirate', 'revolution', 'bountyHunter', 'warlord');
+const dock = (...is: string[]) => at({ c: 'ashore' }, { c: 'island', is });
 
 export const CANON_SEA: Turning[] = [
   // ---------------------------------------------------------------- 위대한 항로
@@ -27,13 +27,19 @@ export const CANON_SEA: Turning[] = [
   },
   {
     // v4 cc_ace_bar
-    id: 'cn_ace_bar', kind: 'door', when: at(age(17, 20), PIRATE_SIDE, sea('gl_entry', 'gl_first')),
-    weight: 5, repeat: 'once', speaker: { canon: 'ace' },
+    id: 'cn_ace_bar', kind: 'door', when: at(age(17, 18), st(...SEAFARING, 'civil', 'shipwright', 'settled'), sea('gl_entry', 'gl_first'), ...dock('드럼 왕국', '알라바스타 왕국'), beforeHistory('alabastaRain')),
+    weight: 15, repeat: 'once', speaker: { canon: 'ace' },
     title: '밥 먹다 잠든 사내', body: '{island}의 식당에서 등에 해골 문신을 한 사내가 밥을 먹다 그대로 접시에 얼굴을 묻고 잠들었다. 흰수염 해적단의 2번대 대장이라는 수군거림이 돈다. 불량배 셋이 그의 모자와 돈주머니로 손을 뻗는다.',
+    recall: [
+      { when: [{ c: 'choiceAgo', turning: 'cn_ace_thugs', door: 0 }], text: '고개를 옆으로 돌리는 순간 뺨의 주근깨가 보였다. 그레이 터미널에서 불량배들을 쫓고 고깃덩이를 반 뜯어 던져 주던 바로 그 얼굴이었다.' },
+      { when: [{ c: 'person', relation: '주근깨 소년', has: true }], text: '어릴 적 산적들을 불러 불량배들을 쫓던 날, 저 주근깨 소년과 흙먼지 속에서 눈이 마주쳤다. 주근깨는 그때 그대로였다.' },
+      { when: [{ c: 'choiceAgo', turning: 'cn_ace_thugs', door: 2 }], text: '주근깨를 보고서야 알아보았다. 그레이 터미널에서 이 소년의 싸움을 두고 내기를 걸었다가 차가운 눈총을 받은 적이 있다.' },
+    ],
     doors: [
-      { label: '불량배들의 손목을 잡아챈다', hint: '잠든 거물의 편에 선다. 이 바다의 이름 있는 자들에게 얼굴이 알려진다', values: { loyalty: D }, danger: true,
+      { label: '모자를 지켜 주고 깨어난 사내와 밥을 나눈다', hint: '불량배들을 먼저 막아야 한다. 사내의 팔꿈치 옆에는 빈자리가 하나 있다', meal: true, values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -10 }, { op: 'fame', add: 8 }, { op: 'person', kind: 'ally', relation: '불주먹의 사내', canon: 'ace' },
-             { op: 'log', text: '깨어난 사내가 고맙다며 고개를 숙이고, 식당의 밥값을 모두 냈다. 물론 제 몫은 내지 않고 달아났다.', weight: 'heavy' }] },
+             { op: 'flag', id: 'ateWithAce' },
+             { op: 'log', text: '깨어난 에이스가 검지 하나로 식은 수프를 데우고 고기를 반씩 나눴다. “우리 배에선 마르코랑 죠즈 사이에 앉으면 뼈도 안 남거든.” 주방장이 모자에 계산서를 꽂아 돌려주자 에이스가 웃다가 수프에 코를 박았다.', weight: 'heavy' }] },
       { label: '소란을 틈타 사내의 돈주머니를 먼저 챙긴다', hint: '불의 주먹이 깨어나면 끝이다', values: { greed: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5, then: [{ op: "log", text: "불량배들이 뒤엉킨 틈에 돈주머니를 빼내 식당 뒷문으로 빠져나왔다. 사내는 접시에서 고개도 들지 않았다.", weight: "light" }, { op: 'money', add: 45000 }],
                else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }, { op: 'person', kind: 'rival', relation: '돈주머니를 지킨 불주먹', canon: 'ace' },
@@ -43,9 +49,9 @@ export const CANON_SEA: Turning[] = [
     ],
   },
   {
-    id: 'cn_chopper_drum', kind: 'door', when: at(age(17, 26), st(...SEAFARING, 'civil'), sea('gl_entry')),
+    id: 'cn_chopper_drum', kind: 'door', when: at(age(12, 17), st('child', ...SEAFARING, 'civil'), sea('gl_entry'), ...dock('드럼 왕국')),
     weight: 5, repeat: 'once', speaker: { canon: 'chopper' },
-    title: '눈밭의 파란 코', body: '드럼 왕국의 눈 덮인 산자락에서 파란 코의 작은 순록이 약초를 캐고 있다. {name}과(와) 눈이 마주치자 나무 뒤로 숨는데, 몸이 거의 다 보인다. 사람처럼 말을 하는 순록이다.',
+    title: '눈밭의 파란 코', body: '드럼 왕국 산자락에서 분홍 모자에 뿔이 달린 순록이 약초를 캐고 있었다. 발소리가 나자 나무 뒤로 숨었다. 얼굴만 가렸고 몸통이 통째로 나와 있었다. “거기, 그 버섯은 내려놔! 그건 배가 아파지는 거야!” 들키는 것보다 환자가 생기는 게 더 무서운 모양이었다.',
     doors: [
       { label: '못 본 척 등을 돌리고 앉아 약초 캐는 걸 돕는다', hint: '해 질 때까지 말없이 캔다. 순록이 조금씩 다가온다', values: { peace: D },
         fx: [{ op: "log", text: "말없이 약초를 골라 바구니에 담자 순록이 나무 뒤에서 나왔다. 돌아갈 때는 상처에 바를 약까지 쥐여 주었다.", weight: "light" }, { op: 'person', kind: 'ally', relation: '파란 코의 의사', canon: 'chopper' }, { op: 'hp', add: 10 }] },
@@ -57,13 +63,13 @@ export const CANON_SEA: Turning[] = [
   },
   {
     // 알라바스타 내전. 비비가 반란군을 멈추려 한다
-    id: 'cn_vivi_rebellion', kind: 'door', when: at(age(17, 19), st(...SEAFARING, 'civil'), sea('gl_first')),
+    id: 'cn_vivi_rebellion', kind: 'door', when: at(age(17, 19), st(...SEAFARING, 'civil'), sea('gl_first'), ...dock('알라바스타 왕국'), afterHistory('loguetownStorm'), beforeHistory('alabastaRain')),
     weight: 6, repeat: 'once', speaker: { canon: 'vivi' },
     title: '멈춰 달라는 왕녀', body: '알라바스타의 수도 앞에서 반란군과 왕국군이 마주 섰다. 비는 세 해째 내리지 않았다. 푸른 머리의 왕녀가 두 군대 사이로 달려가며 멈춰 달라고 외치지만, 포성에 묻힌다. 그녀가 {name}을(를) 보고 손을 뻗는다.',
     doors: [
       { label: '왕녀와 함께 시계탑으로 달린다', hint: '광장을 날려 버릴 포탄이 숨겨져 있다고 한다. 포탄에 휘말릴 수 있다', values: { loyalty: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'fame', add: 10 }, { op: 'person', kind: 'ally', relation: '사막의 왕녀', canon: 'vivi' },
-             { op: 'log', text: '시계탑 위에서 포탄이 하늘로 날아가 터졌다. 그날 오후, 세 해 만에 비가 내렸다.', weight: 'heavy' }] },
+             { op: 'log', text: '왕녀가 시계탑을 가리켰다. 광장을 가로질러 쓰러진 사람을 돌계단 뒤로 끌어냈다. 고개를 들자 커다란 매가 폭탄을 안고 하늘로 솟았다.', weight: 'heavy' }] },
       { label: '반란군 진영으로 가서 무기를 내리라고 외친다', hint: '성난 군중이 귀를 기울일지 모른다. 짓밟힐 수도 있다', values: { justice: D }, danger: true,
         fx: [{ op: 'chance', p: 0.5, then: [{ op: "log", text: "앞줄의 병사가 먼저 창을 내렸고, 왕녀의 목소리가 그 틈으로 퍼졌다. 두 군대 사이에 잠깐 침묵이 흘렀다.", weight: "light" }, { op: 'fame', add: 6 }, { op: 'person', kind: 'ally', relation: '외침을 들어 준 왕녀', canon: 'vivi' }],
                else: [{ op: "log", text: "성난 반란군이 밀려오며 외침은 포성에 묻혔다. 군홧발에 짓밟힌 채 왕녀가 건너편에서 손을 뻗는 것을 보았다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'injury', severity: 'light' }] }] },
@@ -72,38 +78,39 @@ export const CANON_SEA: Turning[] = [
     ],
   },
   {
-    id: 'cn_franky_backstreet', kind: 'door', when: at(age(18, 28), st(...SEAFARING, 'shipwright', 'civil'), sea('gl_first')),
+    id: 'cn_franky_backstreet', kind: 'door', when: at(age(14, 18), st('child', ...SEAFARING, 'shipwright', 'civil'), sea('gl_first'), ...dock('워터 세븐', '워터 세븐 뒷골목'), beforeHistory('eniesLobby')),
     weight: 5, repeat: 'once', speaker: { canon: 'franky' },
-    title: '뒷골목의 해체업자', body: '워터 세븐의 뒷골목에서 팬티 한 장 차림의 사내가 기괴한 포즈를 잡는다. 해체업자 프랑키 일가의 두목이다. 콜라 한 병을 들이켜더니, 그 배 꼴이 뭐냐며 고쳐 주든 뜯어 가든 하겠다고 한다.',
+    title: '뒷골목의 해체업자', body: '워터 세븐의 해체장에서 팬티 바람의 사내가 제 배를 열었다. 배꼽 안쪽 냉장고에 콜라병이 딱 세 개 들어갔다. 병마개가 튀자 쇠팔에서 바람이 터져 나와 선체를 덮은 톱밥을 싹 걷어냈다. 프랑키가 두 팔을 붙여 별을 만들었다. 뒤에 서 있던 인부들 눈썹에도 톱밥이 수북했다.',
     doors: [
       { label: '배를 맡기고 고쳐 달라고 한다', hint: '수리비 대신 콜라 상자를 요구한다. 배가 이상하게 튼튼해진다', values: { romance: D }, needs: ['ship'],
-        fx: [{ op: "log", text: "프랑키가 콜라 상자를 받아 들고 선체에 철판을 덧댔다. 수리한 배를 두드려 보더니 이제 파도 좀 맞아도 버티겠다고 웃었다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '배를 고쳐 준 해체업자', canon: 'franky' }, { op: 'flag', id: 'frankyShip' }] },
+        fx: [{ op: 'repairShip', mark: 'plating' }, { op: "log", text: "프랑키가 콜라 상자를 받아 들고 선체에 철판을 덧댔다. 수리한 배를 두드려 보더니 이제 파도 좀 맞아도 버티겠다고 웃었다.", weight: "light" }, { op: 'money', add: -10000 }, { op: 'person', kind: 'ally', relation: '배를 고쳐 준 해체업자', canon: 'franky' }, { op: 'flag', id: 'frankyShip' }] },
       { label: '해체업자 일가의 일을 거들며 배 짓는 법을 배운다', hint: '고철 더미 속에서 몇 달을 산다. 손이 거칠어진다', values: { inquiry: D },
-        fx: [{ op: "log", text: "고철 더미에서 쓸 만한 부품을 가려내며 몇 달을 보냈다. 프랑키는 삐뚤어진 못질을 고쳐 주며 배의 무게중심을 가르쳤다.", weight: "light" }, { op: 'base', key: 'int', add: 1 }, { op: 'base', key: 'str', add: 1 }, { op: 'person', kind: 'ally', relation: '뒷골목의 두목', canon: 'franky' }] },
+        fx: [{ op: 'log', text: '고철 더미에서 부품을 골라 프랑키와 배수 펌프를 고쳤다. 마지막으로 건넨 콜라를 프랑키가 기계에 부었다. 꾸르륵, 딸꾹, 콸콸! 물벼락을 맞은 두목은 머리를 쓸어 올리며 “수퍼!” 하고 외쳤다.', weight: 'light' }, { op: 'flag', id: 'learnedColaPump' }, { op: 'base', key: 'int', add: 1 }, { op: 'base', key: 'str', add: 1 }, { op: 'person', kind: 'ally', relation: '뒷골목의 두목', canon: 'franky' }] },
       { label: '배를 노리는 해체업자 졸개들을 쫓아낸다', hint: '두목이 웃으며 나선다. 거칠게 한 판 붙는다', values: { dominion: D }, danger: true,
         fx: [{ op: "log", text: "졸개들과 주먹을 주고받다 프랑키가 뛰어들었다. 그는 코피를 닦는 {name}을(를) 보고 제법이라며 웃었다.", weight: "light" }, { op: 'hp', add: -20 }, { op: 'mastery', branch: 'fist', add: 8 }, { op: 'person', kind: 'rival', relation: '한 판 붙은 해체업자', canon: 'franky' }] },
     ],
   },
   {
     // 정상결전. 해적 쪽이면 흰수염의 편에 설지, 해군이면 그 바다에 설지
-    id: 'cn_whitebeard_war', kind: 'door', when: at(age(19, 20), st(...SEAFARING), sea('gl_first', 'sabaody')),
+    id: 'cn_whitebeard_war', kind: 'door', when: at(age(19, 20), st(...SEAFARING), sea('gl_first', 'sabaody'), beforeHistory('marineford')),
     weight: 6, repeat: 'once', speaker: { canon: 'whitebeard' },
-    title: '정상결전', body: '해군 본부가 불주먹의 처형을 알렸다. 흰수염이 식구라 부르는 해적들을 모두 이끌고 마린포드로 간다. 샤본디의 거리마다 영상 전전충 앞에 사람들이 모였다. 바다를 가르는 웃음소리가 화면 너머로 울린다. 그라라라라라.',
+    title: '정상결전', body: '해군 본부가 불주먹의 처형을 알렸다. 흰수염이 식구라 부르는 해적들을 모두 이끌고 마린포드로 간다. 영상 전보벌레가 비춘 만 한가운데로 고래 머리 뱃머리가 솟았다. “그라라라라!” 화면 밖에서도 사람들이 고개를 들어 그 큰 얼굴을 찾았다.',
+    recall: [{ when: [{ c: 'flag', id: 'ateWithAce', has: true }], text: '처형대 위에서 고개를 든 사람은 한 식탁에서 고기를 먹었던 에이스다. 모자에 계산서가 들었다며 웃던 그와 같은 얼굴인데, 오늘은 모자를 쓰지 않았다.' }],
     doors: [
       { label: '배를 몰아 마린포드로 간다', hint: '세계에서 가장 큰 싸움이다. 살아 돌아올지 모른다', values: { loyalty: D }, danger: true, when: [{ c: 'standing', is: ['pirate', 'revolution', 'warlord'] }],
         fx: [{ op: 'hp', add: -35 }, { op: 'fame', add: 40 }, { op: 'person', kind: 'ally', relation: '세상을 흔든 늙은 선장', canon: 'whitebeard' },
              { op: 'chance', p: 0.3, then: [{ op: 'injury', severity: 'heavy' }, { op: 'log', text: '빙판 위에서 날아온 포탄 파편이 몸에 깊이 박혔다. 동료의 어깨를 빌려서야 만을 빠져나왔다.', weight: 'heavy' }],
                else: [{ op: 'log', text: '포탄이 갑판을 부쉈지만 쓰러진 동료를 부축해 만 바깥까지 걸어 나왔다. 온몸이 멍들어 있었다.', weight: 'light' }] },
-             { op: 'log', text: '빙판이 된 만에서 끝까지 버텼다. 늙은 선장은 선 채로 숨을 거두었다. 그 등에는 도망친 상처가 하나도 없었다.', weight: 'heavy' },
+             { op: 'log', text: '빙판이 된 만에서 끝까지 버텼다. 불타는 돛 너머로 늙은 선장이 부하들에게 물러가라고 외쳤다. 그가 버틴 틈에 마지막 부상자가 배에 올랐다.', weight: 'heavy' },
              { op: 'timeline', text: '정상결전에 뛰어들었다' }] },
       { label: '해군의 대열에 서서 만을 지킨다', hint: '명령을 따라 해적들과 싸운다. 무엇을 지키는지 보게 된다', values: { justice: D }, danger: true, when: [{ c: 'standing', is: ['marine', 'cp'] }],
         fx: [{ op: 'hp', add: -30 }, { op: 'fame', add: 25 }, { op: 'chance', p: 0.25,
                then: [{ op: 'injury', severity: 'heavy' }, { op: 'log', text: '만을 지키던 대열에 포탄이 떨어졌다. 의무병이 깊은 상처를 싸매고 후방으로 실어 날랐다.', weight: 'heavy' }],
                else: [{ op: 'log', text: '포탄이 떨어진 자리를 지나며 대열을 끝까지 지켰다. 전투가 멎은 뒤에야 다리에 힘이 풀렸다.', weight: 'light' }] },
-             { op: 'log', text: '포성 속에서 분홍 머리의 해군이 멈춰 달라고 외쳤다. 전쟁은 그 목소리와 함께 멎었다.', weight: 'heavy' },
+             { op: 'log', text: '포성 속에서 분홍 머리의 해군이 멈춰 달라고 외쳤다. 바로 옆 의무병이 그 소리를 듣고 쓰러진 해적의 상처부터 눌렀다.', weight: 'heavy' },
              { op: 'timeline', text: '정상결전에서 해군의 대열에 섰다' }] },
-      { label: '영상 전전충 앞에서 끝까지 지켜본다', hint: '아무것도 할 수 없다. 시대가 바뀌는 것을 본다', values: { inquiry: D },
-        fx: [{ op: "log", text: "영상 전전충 속에서 늙은 선장이 쓰러졌다. 거리의 구경꾼들이 말을 잃었고, 전쟁이 끝난 뒤에도 그 자리를 떠나지 못했다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 2 }] },
+      { label: '영상 전보벌레 앞에서 끝까지 지켜본다', hint: '아무것도 할 수 없다. 시대가 바뀌는 것을 본다', values: { inquiry: D },
+        fx: [{ op: "log", text: "화면이 흔들리더니 영상이 끊겼다. 거리의 구경꾼들은 누구도 먼저 자리를 뜨지 않았다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }, { op: 'hardship', add: 2 }] },
     ],
   },
   // ---------------------------------------------------------------- 해군 · 혁명군 쪽의 만남
@@ -151,7 +158,7 @@ export const CANON_SEA: Turning[] = [
   },
   // ---------------------------------------------------------------- 샤본디 너머와 신세계
   {
-    id: 'cn_jinbe_island', kind: 'door', when: at(age(18, 35), st(...SEAFARING, 'civil'), sea('sabaody', 'nw_first')),
+    id: 'cn_jinbe_island', kind: 'door', when: at(age(18, 35), st(...SEAFARING, 'civil'), sea('sabaody'), ...dock('어인섬', '어인가', '류구 왕국', '바다의 숲')),
     weight: 5, repeat: 'once', speaker: { canon: 'jinbe' },
     title: '바다 밑의 무인', body: '어인섬의 해변에서 고래상어 어인 무인이 아이들에게 정권 지르기를 가르치고 있다. 인간을 처음 보는 아이 하나가 {name}을(를) 보고 무인의 다리 뒤로 숨는다. 무인이 웃으며 손짓한다.',
     doors: [
@@ -165,7 +172,7 @@ export const CANON_SEA: Turning[] = [
   },
   {
     // 펑크 해저드의 아이들
-    id: 'cn_law_punk', kind: 'door', when: at(age(20, 30), st(...SEAFARING), sea('nw_first')),
+    id: 'cn_law_punk', kind: 'door', when: at(age(20, 30), st(...SEAFARING), sea('nw_first'), ...dock('펑크 해저드'), afterHistory('fishmanPact'), beforeHistory('dressrosaFree')),
     weight: 4, repeat: 'once', speaker: { canon: 'law' },
     title: '얼음과 불의 섬의 외과의', body: '펑크 해저드의 연구소에서 몸집이 커진 아이들이 쇠창살 안에서 울고 있다. 큰 칼을 멘 외과의가 창살 앞에서 차갑게 말한다. 아이들의 피에서 약을 빼야 하는데, 손이 모자란다고.',
     doors: [
@@ -180,9 +187,9 @@ export const CANON_SEA: Turning[] = [
   },
   {
     // 정상결전 뒤, 해적의 시대를 뒤흔든 사황의 빈자리
-    id: 'cn_whitebeard_grave', kind: 'door', when: at(age(20, 40), st(...SEAFARING, 'civil'), sea('nw_first', 'nw_late')),
-    weight: 3, repeat: 'once', speaker: { canon: 'whitebeard' },
-    title: '이름 없는 섬의 무덤', body: '신세계의 이름 없는 섬, 언덕 위에 거대한 언월도가 꽂힌 무덤이 있다. 흰수염의 무덤이다. 붉은 머리 선장이 묻었다는 말이 돈다. 그 둘레의 섬들은 이제 지켜 주는 깃발이 없다.',
+    id: 'cn_whitebeard_grave', kind: 'door', when: at(age(20, 40), st(...SEAFARING, 'civil'), sea('nw_first', 'nw_late'), afterHistory('marineford')),
+    weight: 3, repeat: 'once', speaker: { canon: 'marco' },
+    title: '이름 없는 섬의 무덤', body: '신세계의 한 언덕에 거대한 언월도가 꽂혀 있다. 곁에 앉은 마르코가 돌에 낀 이끼를 떼며 말한다. “아버지가 지켜 주던 섬에서 또 연락이 왔어. 깃발이 사라진 걸 벌써들 안 모양이야.” 무덤 아래 바다로 작은 배 한 척이 지나간다.',
     doors: [
       { label: '무덤 앞에 술 한 병을 따른다', hint: '그 바다를 산 사람에게 인사한다', values: { romance: D },
         fx: [{ op: "log", text: "언월도 아래로 술이 스며들었다. 바람에 깃발 자락이 흔들리고, 언덕을 내려올 때까지 병은 비어 있었다.", weight: "light" }, { op: 'base', key: 'wil', add: 1 }, { op: 'timeline', text: '흰수염의 무덤에 술을 따랐다', canon: 'whitebeard' }] },

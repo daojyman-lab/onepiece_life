@@ -5,7 +5,7 @@ import { V } from '../data/balance';
 import { NEWBORN_SIBLING, SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
 import { RELATION_KIND } from '../data/words';
 import { clamp } from '../shared/core/util';
-import { logLine } from './log';
+import { logLine, logSentences } from './log';
 import type { Life5, Lineage, Person, SiblingWelcomeAction } from './types';
 
 /** 형제의 관계 낱말. 손위는 주인공의 성별에 따라 부르는 말이 다르다 (아들에게 형 · 누나, 딸에게 오빠 · 언니) */
@@ -80,13 +80,13 @@ export function introduceFamily(s: Life5): void {
       ? `${guardian.relation} ${guardian.name}이(가) 어린아이를 거두어 길렀다.`
       : s.flags.includes('lonely') ? '기댈 가족 없이 마을 한구석에서 자랐다.'
       : '부모가 누구인지 알 길은 없었다. 마을에서 어린 시절을 보냈다.';
-    logLine(s, text, 'heavy', 'world');
+    logSentences(s, text, 'heavy', 'world');
     return;
   }
 
   const parents = s.people.filter((p) => RELATION_KIND.parent.includes(p.relation)).map((p) => `${p.relation} ${p.name}`);
   const [father, mother] = parents;
-  logLine(s, `${father}와(과) ${mother}의 손에서 자랐다.${FAMILY_BACKGROUND[s.hero.lineage] ?? ''}`, 'heavy', 'world');
+  logSentences(s, `${father}와(과) ${mother}의 손에서 자랐다.${FAMILY_BACKGROUND[s.hero.lineage] ?? ''}`, 'heavy', 'world');
   const older = s.people.filter((p) => RELATION_KIND.sibling.includes(p.relation)).sort((a, b) => b.age - a.age)
     .map((p) => `${p.age}살 ${p.relation} ${p.name}`);
   if (older.length) logLine(s, `집에는 먼저 태어난 ${older.join(', ')}이(가) 있었다.`, 'heavy', 'world');
@@ -139,6 +139,25 @@ export function welcomeSibling(s: Life5, action: SiblingWelcomeAction): void {
 
 const FAMILY_WORDS: readonly string[] = Object.values(RELATION_KIND).flat();
 
+export function markPersonDead(s: Life5, p: Person): void {
+  p.alive = false;
+  if (RELATION_KIND.spouse.includes(p.relation)) s.flags = s.flags.filter(f => f !== 'married');
+}
+
+export function separateSpouse(s: Life5): void {
+  const spouse = s.people.find(p => p.alive && RELATION_KIND.spouse.includes(p.relation));
+  if (!spouse) return;
+  if (s.rivalLove?.personId === spouse.id) {
+    spouse.relation = '어릴 적 맞수';
+    s.rivalLove = { personId: spouse.id, status: 'friends', since: s.age };
+  } else {
+    spouse.relation = '헤어진 배우자';
+    if (spouse.kind === 'family') spouse.kind = 'ally';
+  }
+  s.flags = s.flags.filter(f => f !== 'married');
+  s.hardship += V.hardship.loss;
+}
+
 /**
  * 한 해가 지날 때: 동생이 태어나고, 늙은 가족(원작 인물 · 함께 싸우는 동료 제외)은 노환으로 세상을 떠날 수 있다.
  * V.family.oldFrom살부터 해마다 확률이 오른다. 떠나면 무거운 기록 한 줄을 남긴다.
@@ -149,7 +168,7 @@ export function familyYear(s: Life5): void {
   for (const p of s.people) {
     if (!p.alive || p.canon || p.crew || !FAMILY_WORDS.includes(p.relation) || p.age < F.oldFrom) continue;
     if (!chance(r, Math.min(F.oldP.cap, F.oldP.start + F.oldP.perYear * (p.age - F.oldFrom)))) continue;
-    p.alive = false;
+    markPersonDead(s, p);
     const lateReunion = s.hero.lineage === 'orphan' && p.aliases?.includes('다시 만난 부모');
     const grief = lateReunion
       ? `늦게 만난 ${p.relation}와(과) 나누지 못한 세월이 떠올라 마음이 먹먹했다.`

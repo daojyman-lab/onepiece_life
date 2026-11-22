@@ -62,7 +62,7 @@ export function rollDice(r: Rng, p: number): { roll: number; need: number; ok: b
 
 /** 누군가 빈사(체력이 deathmatchBelow 아래)가 되면 목숨을 건 싸움으로 바꾼다. 한 번만 */
 function checkDeathmatch(b: BattleState, who: number) {
-  if (b.deathmatch) return;
+  if (b.spar || b.deathmatch) return;
   if (ratio(b.units[who]) >= C.deathmatchBelow) return;
   b.deathmatch = true;
   b.events.push({ k: 'deathmatch', who });

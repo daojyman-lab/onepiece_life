@@ -17,19 +17,26 @@ describe('고향의 마을 (과제 1)', () => {
     for (const id of IDS) expect(HOMETOWNS.filter((t) => t.home === id).length, id).toBeGreaterThanOrEqual(2);
   });
   it('첫해 이야기에서 태어난 마을의 모습을 소개한다', () => {
-    const opening = IDS.flatMap((id) => born(id, 40)).flatMap((s) =>
-      s.log.filter((l) => l.age === s.age && l.weight === 'heavy').map((l) => l.text));
+    // 고향 소개는 문장마다 한 줄이므로, 한 인생의 첫해 이야기를 이어 붙여 본다
+    const opening = IDS.flatMap((id) => born(id, 40)).map((s) =>
+      s.log.filter((l) => l.age === s.age && l.weight === 'heavy').map((l) => l.text).join(' '));
     expect(opening.some((line) => line.includes('후샤 마을') && line.includes('풍차'))).toBe(true);
     expect(opening.some((line) => line.includes('시프트 역') && line.includes('바다 열차'))).toBe(true);
     expect(opening.some((line) => line.includes('쿠라우 도시') && line.includes('코끼리'))).toBe(true);
   });
-  it('시모츠키 마을의 대숲과 도장 풍경이 첫해 이야기 한 줄에 담긴다', () => {
+  it('시모츠키 마을의 대숲과 도장 풍경이 첫해 이야기에 한 문장씩 따로 올라온다', () => {
     const s = born('loguetown', 100).find((life) => life.hero.town === '시모츠키 마을')!;
     expect(s).toBeDefined();
-    const landscape = s.log.find((line) => line.age === s.age && line.text.startsWith('고향은 '));
-    expect(landscape).toMatchObject({ type: 'world', weight: 'heavy' });
-    expect(landscape?.text).toContain('대숲');
-    expect(landscape?.text).toContain('목검');
+    const at = s.log.findIndex((line) => line.age === s.age && line.text.startsWith('고향은 '));
+    const town = HOMETOWNS.find((t) => t.name === '시모츠키 마을')!;
+    const count = town.text.split(/(?<=[.!?])\s+/).length;
+    const landscape = s.log.slice(at, at + 1 + count);
+    expect(landscape[0].text).toMatch(/^고향은 [^.]+\.$/);
+    for (const line of landscape) expect(line).toMatchObject({ type: 'world', weight: 'heavy' });
+    for (const line of landscape) expect(line.text.match(/[.!?](\s|$)/g)?.length, line.text).toBe(1);
+    const text = landscape.map((l) => l.text).join(' ');
+    expect(text).toContain('대숲');
+    expect(text).toContain('목검');
   });
   it('고향을 정하면 늘 그 고향의 마을에서 태어나고, 그 마을이 첫 섬이며, 고향의 바다에 있다', () => {
     for (const id of IDS) {

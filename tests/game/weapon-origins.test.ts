@@ -135,7 +135,9 @@ describe('나이와 섬에 맞는 무기 인연', () => {
     openTurning(s, levy); answerDoor(s, 0);
     expect(s.growth.weapons).toContain('sw1');
     expect(s.hero.weapon).toBe('wano_last_order');
-    s.age = 22; s.hero.standing = 'civil';
+    s.age = 22; s.part = 1; s.hero.standing = 'civil';
+    expect(checkAll(s, levy.when)).toBe(true);
+    s.part = 2;
     expect(checkAll(s, levy.when)).toBe(false);
   });
 

@@ -12,7 +12,7 @@ export function usedTo(s: Life5, island: string, c: IslandClimate): boolean {
   const h = s.hero;
   if (h.town === island || HOMES[h.home].island === island) return true;
   if (c.natives?.includes(h.species)) return true;
-  return climateOf(h.town) === c;               // 하늘섬의 다른 섬 · 어인섬의 다른 거리처럼 같은 기후의 섬에서 나고 자랐다
+  return climateOf(h.town, s) === c;            // 하늘섬의 다른 섬 · 어인섬의 다른 거리처럼 같은 기후의 섬에서 나고 자랐다
 }
 
 /**
@@ -20,7 +20,7 @@ export function usedTo(s: Life5, island: string, c: IslandClimate): boolean {
  * 같은 인생 · 같은 나이 · 같은 토막이면 같은 기후다 (저장 · 불러오기 뒤에도)
  */
 export function climateRng(s: Life5): Rng {
-  const lap = s.prime?.lap ? 1 : 0;
+  const lap = s.prime?.lap || (s.debut?.lap && s.debut.age === s.age) ? 1 : 0;
   return rngOf({ seed: (s.rng.seed ^ 0x636c696d) >>> 0, cursor: ((s.age * 2 + lap) * 4 + s.part) * 4 });
 }
 
@@ -28,7 +28,7 @@ export function climateRng(s: Life5): Rng {
 export function climatePart(s: Life5, r: Rng = climateRng(s)): void {
   const h = s.hero;
   if (s.passage || !h.island) return;
-  const c = climateOf(h.island);
+  const c = climateOf(h.island, s);
   if (!c) return;
   const local = usedTo(s, h.island, c);
   const hurt = (n: number | undefined) => { if (n && !local) h.hp = Math.max(1, Math.min(V.hp.max, h.hp + n)); };

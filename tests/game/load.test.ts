@@ -4,12 +4,23 @@ import { normalizeLife5, normalizeMeta5 } from '../../src/core/load';
 import { newLife5 } from '../../src/core/state';
 import { reduce5 } from '../../src/core/reduce';
 import { emptyMeta5 } from '../../src/core/meta';
+import { applyFx } from '../../src/core/fx';
 import { askFight } from '../../src/core/fight';
 import { FOES } from '../../src/data/foes';
 import { valueWords } from '../../src/ui/view/words';
 import type { Pending5 } from '../../src/core/types';
 
 describe('저장 읽기', () => {
+  it('옛 저장의 동료 베라미는 기본 전력을 회복하고, 이미 더 강하면 그대로 남는다', () => {
+    const s = newLife5(12);
+    applyFx(s, [{ op: 'person', kind: 'crew', canon: 'bellamy', relation: '하이에나' }]);
+    const crew = s.people.find(p => p.canon === 'bellamy')!.crew!;
+    for (const power of [20, 810]) {
+      crew.power = power;
+      const loaded = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+      expect(loaded.people.find(p => p.canon === 'bellamy')?.crew?.power).toBe(Math.max(580, power));
+    }
+  });
   it('성향 위치가 없는 옛 저장은 가장 깊은 가치관의 칸에서 이어 간다', () => {
     const s = JSON.parse(JSON.stringify(newLife5(1)));
     s.values.loyalty = 70;

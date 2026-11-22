@@ -9,7 +9,8 @@ import { rngOf } from '../../src/shared/core/rng';
 const branches = { sword: '검술', gun: '총술', fist: '권법' } as const;
 
 function child() {
-  const s = newLife5(88, { wealth: 'poor' });
+  const s = newLife5(88, { home: 'loguetown', wealth: 'poor' });
+  s.traits!.active = []; // 특성과 섬 보정이 없는 기본 수업료와 숙련을 확인한다.
   s.pending = null;
   s.queue = [];
   s.age = 12;

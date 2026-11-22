@@ -2,7 +2,8 @@
 // 펑크 해저드의 불과 얼음, 하늘섬의 구름 바다, 코끼리 등 위의 조우처럼 원작에서 이름난 섬만 적는다. 적지 않은 섬은 기후가 없다.
 // 그 섬에서 나고 자란 사람 · 그 땅의 종족은 몸이 기후에 익어서 다치지 않는다 (core/climate.ts).
 import type { Species } from '../shared/core/types';
-import type { Weather } from './weather';
+import type { WeatherTilt } from './weather';
+import { hasWorldEvent, historyTick, worldTick, type WorldClock } from './world-history';
 
 export interface IslandClimate {
   name: string;                                // 기후의 이름 (장면 · 기록)
@@ -13,7 +14,7 @@ export interface IslandClimate {
   /** 해마다 정해진 토막(0~3)에 오는 큰 기후. 아쿠아 라구나처럼 섬 사람 모두가 대비한다 */
   season?: { part: 0 | 1 | 2 | 3; p: number; line: string; hp: number };
   /** 이 섬으로 가는 뱃길: 날씨 확률 보정과 닿을 때의 장면 */
-  approach?: { tilt?: Partial<Record<Weather, number>>; arrive?: string; hp?: number };
+  approach?: { tilt?: WeatherTilt; arrive?: string; hp?: number };
 }
 
 const SKY: IslandClimate = {
@@ -32,7 +33,7 @@ const FISHMAN: IslandClimate = {
 const WANO: IslandClimate = {
   name: '쇄국의 나라', p: 0.2,
   lines: ['벚꽃잎이 바람을 타고 처마 끝까지 날아들었다.', '높은 절벽 너머로 바다 소리만 아득했다.', '쿠리 쪽 강물이 검게 흐린 채 흘러갔다. 공장 굴뚝의 연기 때문이라 했다.'],
-  approach: { arrive: '배로는 절벽을 넘을 수 없었다. 폭포를 거슬러 오르는 거대한 잉어 등에 매달려 겨우 쇄국의 나라에 들어섰다.', hp: -6 },
+  approach: { arrive: '절벽 너머로 와노쿠니의 지붕들이 보였다. 쿠리 쪽 하늘에는 공장 굴뚝에서 나온 연기가 띠를 이루고 있었다.', hp: -6 },
 };
 
 export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
@@ -56,9 +57,9 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
   },
   // ---------------- 위대한 항로 전반
   '알라바스타 왕국': {
-    name: '사막의 나라', p: 0.4, hp: -3,
-    lines: ['모래바람이 몰아쳐 눈을 뜰 수 없었다.', '한낮의 열기에 물통이 금세 바닥났다.', '사막의 밤은 낮과 달리 뼈가 시리게 추웠다.', '비가 오지 않은 지 몇 해째라고 마을 노인이 한숨을 쉬었다.'],
-    approach: { arrive: '바닷바람에 모래 냄새가 섞여 들었다. 끝없는 모래 언덕 너머로 왕국의 강이 보였다.' },
+    name: '가뭄에 마른 사막', p: 0.4, hp: -3,
+    lines: ['우물 벽에 그어진 눈금보다 한참 아래에서 두레박이 물에 닿았다.', '한낮의 열기에 물통이 금세 바닥났다.', '물장수가 오자 마을 사람이 그릇을 들고 그늘 밖으로 나왔다.'],
+    approach: { tilt: { clear: 15, storm: -15 }, arrive: '나노하나 부두에 빈 물통이 줄지어 있었다. 닻이 닿기도 전에 사공들이 마실 물을 싣고 왔느냐고 소리쳤다.' },
   },
   '스카이피아': SKY, '엔젤섬': SKY, '샨디아 마을': SKY,
   '워터 세븐': {
@@ -81,6 +82,11 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
     lines: ['짙은 안개가 걷히지 않았다. 해가 뜨는지 지는지도 알 수 없었다.', '안개 속에서 누군가 웃는 소리가 들렸다. 돌아보면 아무도 없었다.'],
     approach: { tilt: { fog: +30, clear: -20 }, arrive: '안개 속에서 섬만 한 배가 소리 없이 다가왔다. 마의 삼각지대였다.' },
   },
+  '플로리안 트라이앵글': {
+    name: '마의 삼각지대', p: 0.35, hp: -2,
+    lines: ['안개에 젖은 뱃전에서 물시계만 내려다보았다.', '낡은 부표에서 녹슨 종이 울렸다. 그 너머에 무엇이 있는지는 보이지 않았다.'],
+    approach: { tilt: { fog: +30, clear: -20 }, arrive: '견시대 아래까지 안개가 차올랐다. 낡은 부표만 남은 마의 삼각지대에 닿았다.' },
+  },
   '어인섬': FISHMAN, '어인가': FISHMAN, '류구 왕국': FISHMAN, '바다의 숲': FISHMAN,
   '아마존 릴리': {
     name: '바람 없는 바다의 섬', p: 0.2,
@@ -97,8 +103,9 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
   '드레스로자': {
     name: '정열의 나라', p: 0.15,
     lines: ['한낮의 볕이 뜨겁고 바람은 꽃향기로 가득했다.', '광장마다 탱고 가락이 흘렀다. 장난감들이 사람처럼 거리를 걸어 다녔다.'],
+    approach: { arrive: '태엽을 등에 단 장난감이 부두의 짐을 받아 어깨에 척 올렸다.' },
   },
-  '조': {
+  '조우': {
     name: '코끼리 등 위의 섬', p: 0.35, hp: -2, natives: ['mink'],
     lines: ['줌보가 크게 걸음을 내딛자 온 땅이 한쪽으로 기울었다.', '거대한 코끼리가 몸을 씻는지 하늘에서 소나기 같은 물이 쏟아졌다.',
       '천 년을 걸었다는 코끼리 등 위에도 숲과 강이 있었다.'],
@@ -125,6 +132,66 @@ export const ISLAND_CLIMATE: Record<string, IslandClimate> = {
     approach: { tilt: { anomaly: +10, storm: +10, clear: -20 } },
   },
 };
-ISLAND_CLIMATE['조우'] = ISLAND_CLIMATE['조'];   // 조우 고향의 섬 이름
+const LOGUETOWN_STORM: IslandClimate = {
+  name: '처형대의 폭풍', p: 0.8, hp: -2,
+  lines: ['번개가 내리치자 처형대 꼭대기가 하얗게 번쩍였다. 광장에 모였던 사람들이 처마 밑으로 뛰었다.', '비바람에 생선 가게 차양이 뒤집혔다. 주인과 함께 젖은 천을 걷었다.'],
+  approach: { tilt: { clear: -30, tailwind: -10, storm: 40 }, arrive: '빗속에서 로그타운의 종이 울렸다. 부두 사람들이 끊어진 계류줄 대신 밧줄을 던져 주었다.' },
+};
+const ALABASTA_BEFORE: IslandClimate = {
+  name: '사막의 나라', p: 0.3, hp: -2,
+  lines: ['강가의 종려나무 아래에서 물주머니를 채웠다. 물가를 떠나 모래 언덕에 오르니 금세 목이 말랐다.', '사막의 밤은 낮과 달리 뼈가 시리게 추웠다.'],
+  approach: { arrive: '바닷바람에 모래 냄새가 섞여 들었다. 끝없는 모래 언덕 사이로 산도라강이 바다에 닿았다.' },
+};
+const ALABASTA_AFTER: IslandClimate = {
+  name: '사막에 돌아온 물길', p: 0.3, hp: -1,
+  lines: ['밭 사이로 물길이 흘렀다. 농부가 발뒤꿈치로 흙을 밀어 다음 고랑에도 물이 들게 했다.', '우물 곁에서 염소들이 물을 마셨다. 돌벽에는 가뭄 때 두레박 줄을 이었던 매듭이 걸려 있었다.'],
+  approach: { arrive: '산도라강 어귀에서 짐배와 마주쳤다. 뱃사공이 손을 흔들자 갑판에 쌓인 보릿단에서 낟알이 떨어졌다.' },
+};
+const PUNK_BEFORE: IslandClimate = {
+  name: '정부 연구소의 섬', p: 0.2,
+  lines: ['연구소 철문에 세계정부의 표식이 붙어 있었다. 바람이 불 때마다 경첩이 끼익 울었다.', '바닷물이 밀려왔다 빠지는 사이 연구동 아래 암초가 모습을 드러냈다.'],
+  approach: { arrive: '해안에서 연구소로 이어지는 철책이 보였다. 세계정부의 표식을 단 문은 바다 쪽에서도 알아볼 수 있었다.' },
+};
+const ENIES_AFTER: IslandClimate = {
+  name: '밤이 없는 사법 섬의 폐허', p: 0.25,
+  lines: ['한밤중에도 대낮처럼 밝았다. 무너진 재판소의 창틀만 섬 바닥에 그림자를 드리웠다.', '섬 아래 거대한 구멍으로 바닷물이 쏟아졌다. 그 소리만 포격 전과 같다고 뱃사람이 말했다.'],
+  approach: { arrive: '대낮처럼 환한 바다 한가운데 사법 섬의 폐허가 드러났다. 포격에 무너진 법정 너머로 바닷물이 끝없이 떨어졌다.' },
+};
+const DRESSROSA_BEFORE: IslandClimate = {
+  name: '꽃향기 어린 항구', p: 0.15,
+  lines: ['해바라기밭을 건너온 바람에서 흙냄새가 났다.', '돌바닥에 탱고 구둣발 소리가 울렸다. 지나는 사람들이 걸음을 늦추고 박자를 맞췄다.'],
+  approach: { arrive: '해바라기가 고개를 든 언덕 아래 옹기종기 모인 붉은 지붕들이 보였다.' },
+};
+const DRESSROSA_AFTER: IslandClimate = {
+  name: '새장이 걷힌 꽃의 나라', p: 0.15,
+  lines: ['햇볕에 달궈진 돌계단에 꽃 한 송이가 놓여 있었다. 새장이 지나간 날 헤어졌던 가족이 여기서 다시 만났다고 했다.', '광장에서 탱고를 추던 사람이 곁에 선 딸에게 손을 내밀었다. 둘이 박자를 놓칠 때마다 같은 얼굴로 웃었다.'],
+  approach: { arrive: '항구에 배가 닿자 꽃다발을 든 가족들이 앞으로 나섰다. 선원 하나가 난간 너머로 두 손을 흔들었다.' },
+};
+const WANO_AFTER: IslandClimate = {
+  name: '매연이 걷힌 하늘', p: 0.2,
+  lines: ['연기가 멎은 굴뚝에 제비가 앉았다. 강둑에서는 사람들이 검은 진흙을 삽으로 퍼냈다.', '쿠리로 가는 수레에 깨끗한 물이 실렸다. 아이들이 물 한 동이를 나눠 들고 집으로 돌아갔다.'],
+  approach: { arrive: '여전히 높은 절벽이 나라를 둘러싸고 있었다. 그 위로 보이던 공장의 검은 연기는 걷혔다.', hp: -6 },
+};
 
-export const climateOf = (island: string): IslandClimate | undefined => ISLAND_CLIMATE[island];
+/** 섬에 있거나 그 섬으로 향하는 현재 토막의 풍경. 시계가 없는 자료 조회는 대표 기후를 보여 준다. */
+export function climateOf(island: string, clock?: WorldClock): IslandClimate | undefined {
+  const usual = ISLAND_CLIMATE[island === '조' ? '조우' : island];
+  if (!clock) return usual;
+  if (usual === WANO && hasWorldEvent(clock, 'wanoFree')) return WANO_AFTER;
+  switch (island) {
+    case '로그타운':
+      return worldTick(clock) === historyTick('loguetownStorm') ? LOGUETOWN_STORM : usual;
+    case '알라바스타 왕국':
+      if (hasWorldEvent(clock, 'alabastaRain')) return ALABASTA_AFTER;
+      return hasWorldEvent(clock, 'alabastaDrought') ? usual : ALABASTA_BEFORE;
+    case '펑크 해저드':
+      return hasWorldEvent(clock, 'punkDuel') ? usual : PUNK_BEFORE;
+    case '에니에스 로비':
+      return hasWorldEvent(clock, 'eniesLobby') ? ENIES_AFTER : usual;
+    case '드레스로자':
+      if (hasWorldEvent(clock, 'dressrosaFree')) return DRESSROSA_AFTER;
+      return hasWorldEvent(clock, 'dressrosaCoup') ? usual : DRESSROSA_BEFORE;
+    default:
+      return usual;
+  }
+}

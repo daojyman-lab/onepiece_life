@@ -11,7 +11,7 @@
 // 원작 인물 스모커는 원작 전·그 무렵에만 등장한다. 뒤의 지역 판단자는 페니다.
 import type { Cond, Standing, Turning } from '../../core/types';
 import { D, on, flag, has, not, next, log, time, fight, ready, type FoeDef } from './kit';
-import { age, at, st, GROWN } from '../turnings/paths';
+import { afterHistory, beforeHistory, age, at, st, GROWN } from '../turnings/paths';
 
 export const FOES_LOGUETOWN: FoeDef[] = [
   // 로그타운 주둔 시절의 스모커 (원작 스모커 b_smoker는 위대한 항로 입구의 상대라 이스트 블루용으로 따로 둔다)
@@ -119,9 +119,9 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '맞춰 본 장부와 창고 자리를 대령 앞에 내놓는다', hint: '대령은 대답 없이 연기만 내뿜는다. 그래도 기억은 한다', when: [has('ep_loguetown_a_depot')], values: { justice: D },
         fx: [flag('ep_loguetown_a_smoker'), { op: 'person', kind: 'ally', relation: '장부를 받아 든 연기의 대령', canon: 'smoker' },
-             log('대령은 장부를 넘기다 말했다. 증거는 받아 두지. 하지만 이건 네가 시작한 일이다. 끝도 네가 봐라.'), next('ep_loguetown_a5')] },
+             log('대령은 장부를 훑어보고 증거로 받아 두었다. 사건을 마무리하는 일은 처음 나섰던 {name}에게 맡겼다.'), next('ep_loguetown_a5')] },
       { label: '거리에서 힘으로 밀어붙인 일을 따지는 대령 앞에서 고개를 든다', hint: '연기가 목덜미를 감는다. 다음은 없다는 경고다', when: [has('ep_loguetown_a_force')], values: { dominion: D },
-        fx: [{ op: 'hp', add: -5 }, log('대령은 연기로 {name}의 멱살을 들어 올렸다가 내려놓았다. 해적이든 아니든 이 거리를 주먹으로 휘두르는 놈은 내가 잡는다고.'), next('ep_loguetown_a5')] },
+        fx: [{ op: 'hp', add: -5 }, log('대령은 연기로 {name}의 멱살을 들어 올렸다가 내려놓았다. 누가 됐든 주먹으로 거리를 휘두르면 직접 잡아들이겠다는 경고였다.'), next('ep_loguetown_a5')] },
       { label: '먹물회의 아이들도 이 거리 사람이라고 말한다', hint: '대령의 눈썹이 꿈틀한다. 리코가 문밖에서 듣고 있다', values: { loyalty: D },
         fx: [flag('ep_loguetown_a_riko'), log('“지도 장수와 심부름꾼 중 누가 돈을 챙겼지?” 대령은 그 대답을 기다렸다. 아이들을 잡아들이란 말은 하지 않았다.', 'light'), next('ep_loguetown_a5')] },
       { label: '짓테 앞에 서서 한 수 겨뤄 달라고 한다', hint: '잡으려는 싸움이 아니다. 대령의 진짜 힘을 몸으로 안다', special: 'ambition', when: [ready(3)], values: { ambition: D }, danger: true,
@@ -231,7 +231,7 @@ export const EP_LOGUETOWN: Turning[] = [
     body: '도링과 장부를 누구에게 맡길지 정한다.',
     doors: [
       { label: '두목을 묶어 대령에게 넘기고 장부를 증거로 댄다', hint: '대령이 시가를 문 채 고개를 끄덕인다', when: [has('ep_loguetown_a_smoker')], values: { justice: D },
-        fx: [flag('ep_loguetown_a_won'), { op: 'fame', add: 5 }, log('결말 · 연기가 거둔 먹물. 스모커는 도링을 끌고 가며 말했다. 다음엔 내가 먼저 잡는다. 그게 칭찬이었다.'),
+        fx: [flag('ep_loguetown_a_won'), { op: 'fame', add: 5 }, log('결말 · 연기가 거둔 먹물. 스모커는 도링을 끌고 가며 다음에는 자신이 먼저 범인을 잡겠다고 했다. 나름의 칭찬이었다.'),
              time('로그타운의 가짜 지도 사기단을 무너뜨리고 그 두목을 스모커에게 넘겼다', 'smoker'), next('ep_loguetown_a10')] },
       { label: '두목을 묶어 둔 채 아이들에게 정하게 한다', hint: '리코가 처음으로 큰 소리를 낸다', values: { loyalty: D },
         fx: [flag('ep_loguetown_a_won'), next('ep_loguetown_a9'), log('리코는 아이들을 모아 금고 열쇠를 누구에게 맡길지 물었다. 처음으로 도링의 이름을 빼고 결정했다.', 'light')] },
@@ -270,7 +270,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '리코가 내민 가짜 지도를 받는다', hint: '뒷면에 리코가 삐뚤빼뚤 그린 진짜 항로가 있다', when: [has('ep_loguetown_a_riko')], values: { romance: D },
         fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_riko'), log('가짜 지도 뒷면의 진짜 항로. 리코는 언젠가 그 길로 가겠다고 했다.')] },
-      { label: '페니가 찢어 준 장부 한 장을 품에 넣는다', hint: '거기에 내 이름도 적혀 있다', when: [has('ep_loguetown_a_penny')], values: { inquiry: D },
+      { label: '페니가 찢어 준 장부 한 장을 품에 넣는다', hint: '거기에 {name}의 이름도 적혀 있다', when: [has('ep_loguetown_a_penny')], values: { inquiry: D },
         fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_penny'), log('장부 한 장에 {name}의 이름과 날짜가 적혀 있었다. 처형대를 지나간 사람, 이라고.')] },
       { label: '손을 흔들고 부두로 걸어간다', hint: '처형대가 등 뒤에서 작아진다', values: { freedom: D },
         fx: [flag('ep_loguetown_pre_done'), log('처형대 그림자가 길게 늘어졌다. {name}은(는) 그 끝이 바다를 가리킨다고 생각했다.', 'light')] },
@@ -282,7 +282,7 @@ export const EP_LOGUETOWN: Turning[] = [
 
   // ================================================================ 원작 그 무렵 (주인공 17) · 벼락이 떨어진 날
   {
-    id: 'ep_loguetown_b1', kind: 'door', when: at(LT, age(17, 17), st(...FREE), not('ep_loguetown_canon_done')), weight: 40, repeat: 'once', speaker: 'hero',
+    id: 'ep_loguetown_b1', kind: 'door', when: at(LT, age(17, 17), st(...FREE), not('ep_loguetown_canon_done'), beforeHistory('loguetownStorm')), weight: 40, repeat: 'once', speaker: 'hero',
     title: '폭풍 전의 항구',
     intro: [
       '폭풍이 오기 전에 항구 상인들이 등불을 거둔다.',
@@ -367,11 +367,11 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '하수도에서 본 것과 우산단의 숨은 배를 털어놓는다', hint: '대령이 안경 쓴 상사에게 받아 적으라고 턱짓한다', when: [has('ep_loguetown_b_vault')], values: { justice: D },
         fx: [flag('ep_loguetown_b_smoker'), { op: 'person', kind: 'ally', relation: '부두에서 증언을 받아 간 연기의 대령', canon: 'smoker' },
-             log('스모커는 아이 둘을 풀어 주라고 한마디 하고 트랩을 올랐다. 우산단을 잡는 건 끝내 네 몫이라고 덧붙였다.'), next('ep_loguetown_b6')] },
+             log('스모커는 아이 둘을 풀어 주라고 한마디 하고 트랩을 올랐다. 우산단을 잡는 일은 {name}에게 맡겼다.'), next('ep_loguetown_b6')] },
       { label: '끌려온 아이들 앞을 막아서고 누명이라고 소리친다', hint: '대령은 대답 대신 연기를 내뿜는다. 리코가 이를 악문다', values: { loyalty: D },
         fx: [flag('ep_loguetown_b_riko'), log('그날 광장에서 뭘 했는지 보면 안다고, 대령은 그 말만 남겼다. 아이들은 해 질 녘에야 풀려났다.', 'light'), next('ep_loguetown_b6')] },
       { label: '그날 광장에서 사람들을 내보낸 일을 묻는 대령에게 고개를 끄덕인다', hint: '대령이 상인회를 돌아보며 시가를 짓씹는다', when: [has('ep_loguetown_b_plaza')], values: { peace: D },
-        fx: [flag('ep_loguetown_b_evac'), log('그 녀석이 광장 출구를 열었다, 대령은 상인회에 그 말만 했다. 상인과 짐꾼이 한 조로 밤길을 돌기로 했다.', 'light'), next('ep_loguetown_b6')] },
+        fx: [flag('ep_loguetown_b_evac'), log('대령은 {name}이(가) 광장 출구를 열었다는 사실만 상인회에 전했다. 상인과 짐꾼이 한 조로 밤길을 돌기로 했다.', 'light'), next('ep_loguetown_b6')] },
       { label: '항구의 우산단 연락책을 붙잡아 배 이름을 묻는다', hint: '광장의 혼란을 이용한 도둑들의 배를 알아낸다', special: 'dominion', when: [ready(2)], values: { dominion: D }, danger: true,
         fx: [flag('ep_loguetown_b_vault'), log('연락책의 젖은 장부에 압수품을 실을 배의 이름이 적혀 있었다.'), next('ep_loguetown_b6')] },
     ],
@@ -480,7 +480,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '대령이 남긴 쪽지대로 바넷과 압수품을 지부에 넘긴다', hint: '부두 아이들의 누명도 함께 벗겨진다', when: [has('ep_loguetown_b_smoker')], values: { justice: D },
         fx: [flag('ep_loguetown_b_won'), { op: 'fame', add: 5 },
-             log('결말 · 연기가 남긴 쪽지. 스모커의 쪽지에는 단 한 줄, 그 녀석 말을 들어라, 라고 적혀 있었다. 우산단은 붙잡혔고 아이들의 이름은 지부 장부에서 지워졌다.'),
+             log('결말 · 연기가 남긴 쪽지. 스모커가 남긴 쪽지에는 {name}의 말을 들어 보라는 지시가 한 줄 적혀 있었다. 우산단은 붙잡혔고 아이들의 이름은 지부 장부에서 지워졌다.'),
              time('스모커가 떠난 로그타운에서 처형대의 날을 틈탄 약탈단을 붙잡았다', 'smoker'), next('ep_loguetown_b11')] },
       { label: '바넷을 묶어 부두 사람들 앞에 세운다', hint: '부두가 처음으로 큰 소리로 웃는다', values: { ambition: D },
         fx: [flag('ep_loguetown_b_won'), next('ep_loguetown_b10'), log('묶인 바넷을 보자 부두 사람들이 창고 문을 열고 나왔다. 누명 쓴 아이들도 그 자리에 섰다.', 'light')] },
@@ -531,7 +531,7 @@ export const EP_LOGUETOWN: Turning[] = [
 
   // ================================================================ 원작 뒤 (주인공 19~) · 출항한 아이들의 빚
   {
-    id: 'ep_loguetown_c1', kind: 'door', when: at(LT, age(19, 45), st(...GROWN), not('ep_loguetown_post_done')), weight: 25, repeat: 'once', speaker: 'hero',
+    id: 'ep_loguetown_c1', kind: 'door', when: at(LT, age(19, 45), st(...GROWN), not('ep_loguetown_post_done'), afterHistory('loguetownStorm')), weight: 25, repeat: 'once', speaker: 'hero',
     title: '옛 광장의 호객꾼',
     intro: [
       '옛 처형대 광장에서 누군가 밀짚모자 일당이 나간 항로를 알려 준다며 신참 선원들에게 돈을 받는다.',
@@ -746,7 +746,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '리코가 벽에서 내려 준 액자 속 지도를 받는다', hint: '그 시절 창고에서 마지막으로 남은 한 장이다', when: [has('ep_loguetown_c_riko')], values: { loyalty: D },
         fx: [flag('ep_loguetown_post_done'), log('액자 속 가짜 지도는 그날 창고에서 마지막으로 남은 한 장이었다. 리코는 이제 이게 진짜 보물이라고 했다.')] },
-      { label: '페니가 장부에 내 이름을 마지막 줄로 적는 것을 본다', hint: '처형대를 지나간 사람, 이라고 쓴다', when: [has('ep_loguetown_c_penny')], values: { inquiry: D },
+      { label: '페니가 장부 마지막 줄에 이름을 적는 모습을 본다', hint: '처형대를 지나간 사람, 이라고 쓴다', when: [has('ep_loguetown_c_penny')], values: { inquiry: D },
         fx: [flag('ep_loguetown_post_done'), log('장부의 마지막 줄에 {name}의 이름이 적혔다. 첫 장의 글씨와 같은 손이었다.')] },
       { label: '갓 들어온 풋내기 배에 로그 포스 하나를 던져 주고 떠난다', hint: '저 배가 어디까지 갈지는 아무도 모른다', values: { freedom: D },
         fx: [flag('ep_loguetown_post_done'), { op: 'money', add: -2000 }, time('로그타운에서 새 세대의 풋내기에게 항로를 열어 주었다'), log('풋내기들이 받은 로그 포스를 돌려 보며 새 항로를 적었다. 배가 떠날 때 첫 바늘이 흔들렸다.', 'light')] },

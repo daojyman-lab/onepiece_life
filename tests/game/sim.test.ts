@@ -9,6 +9,7 @@ const N = 600;
 let runs: ReturnType<typeof autoplay5>[] = [];
 let lives: Life5[] = [];
 let ambitious: Life5[] = [];
+let leanLives: Life5[] = [];
 let leanReport: ReturnType<typeof summarize>;
 let randomReport: ReturnType<typeof summarize>;
 beforeAll(() => {
@@ -16,7 +17,8 @@ beforeAll(() => {
   lives = runs.map((r) => r.s);
   ambitious = Array.from({ length: 300 }, (_, i) => autoplay5(9000 + i, { value: 'ambition' }).s);
   randomReport = summarize(lives);
-  leanReport = summarize(Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'lean').s));
+  leanLives = Array.from({ length: N }, (_, i) => autoplay5(9000 + i, 'lean').s);
+  leanReport = summarize(leanLives);
 }, 600_000);
 const avg = (f: (s: Life5) => number, xs = lives) => xs.reduce((a, s) => a + f(s), 0) / xs.length;
 const topTier = (s: Life5) => Math.max(...Object.values(s.growth.tier));
@@ -68,8 +70,11 @@ describe('시뮬레이터 (설계 7장)', () => {
   it('신체를 잃는 인생은 절반 이하이고, 잃은 뒤에도 열 해 넘게 사는 인생이 그중 절반 이상이다', () => {
     const lost = lives.filter((s) => s.stats.limbsLost > 0);
     expect(lost.length / N).toBeLessThanOrEqual(0.5);
-    const after = lost.filter((s) => s.ended!.age - (s.timeline.find((t) => /잃었다/.test(t.text))?.age ?? 0) > 10);
-    expect(after.length / Math.max(1, lost.length)).toBeGreaterThanOrEqual(0.5);
+    // 신체를 잃는 인생은 표본의 열에 하나 남짓이라 600명으로는 70명 안팎뿐이다(표준오차 ±0.06).
+    // 이미 돌린 세 표본(무작위 · lean · 야망)을 모두 모아 그 뒤의 삶을 잰다.
+    const lostAll = [...lives, ...leanLives, ...ambitious].filter((s) => s.stats.limbsLost > 0);
+    const after = lostAll.filter((s) => s.ended!.age - (s.timeline.find((t) => /잃었다/.test(t.text))?.age ?? 0) > 10);
+    expect(after.length / Math.max(1, lostAll.length)).toBeGreaterThanOrEqual(0.5);
   });
 });
 

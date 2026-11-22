@@ -9,7 +9,12 @@ import { SPECIES_NAMES } from '../../shared/data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { altitudeEffect } from '../../core/environment';
+import { bountyAmount } from '../../core/first-poster';
+import { KEEPSAKES } from '../../data/keepsakes';
+
+const MENTOR_STAT: Record<string, string> = { str: '힘', spd: '속도', vit: '체력', int: '지력', wil: '의지', luk: '운' };
 import { townLabel } from '../../data/homes';
+import { SHIP_CAPTAIN, SHIPMATE } from '../../data/shipmates';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
 import { DREAMS } from '../../data/dreams';
@@ -20,13 +25,13 @@ import {
   POWER_TOP, POWER_WORDS, STANDING_NAME, TIER_WORD, VALUE_ADJ, WEALTH_NAME,
 } from '../../data/words';
 import { activeValue } from '../../core/personality';
+import { ownedHull, SHIP_MARK } from '../../core/ship-memory';
 import { rating5 } from '../../core/power';
-import { bountyOf } from '../../core/bounty';
 import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
 import { equippedWeapon, isMartialBranch, primaryStyle } from '../../core/styles';
 import { bandWord } from './words';
 import { GRADES, GRADE_TOP } from '../../data/words';
-import type { Branch, Life5, LogLine, Standing } from '../../core/types';
+import type { Branch, Life5, LogLine } from '../../core/types';
 import { foeWho, heroWho5, personWho5 } from './faces';
 import { unitWho } from './battle';
 import { ageWord, valueWords } from './words';
@@ -47,21 +52,27 @@ export interface ProfileView {
   body: { limb: string; word: string }[];              // 멀쩡하지 않은 부위만
   skills: { name: string; tier: string }[];            // 단계가 1 이상인 갈래만
   master: string | null; fruit: string | null;
+  mentorHistory: { teacher: string; kind: string; age: number; detail: string; result: string }[]; // 스승에게 배운 기술 · 특훈 (최근 것부터)
   weapon: string;
+  keepsakes: string[];
+  shipName: string | null;
+  shipHistory: { id: number; name: string; lines: string[] }[];
   path: string | null;                                 // 주력 (걷는 길): 검술 · 체술 · 사격 …
   haki: string | null;                                 // 패기: 깨운 것만 (견문색 2단계 · 무장색 1단계)
   power: string;                                       // 전투력: 수와 대충의 격 (예: '189 · 이스트 블루의 해적 선장급')
-  money: string; fame: string;                         // fame: 해적 · 칠무해는 '현상금 n 베리', 그 밖은 '이름값 n' (0이면 빈 글자)
+  money: string; fame: string;                         // 해적은 현상금, 칠무해는 수배 정지와 종전 액수, 그 밖은 이름값
   hp: number; hurts: string[];                         // 부상과 병의 이름
 }
 
-const BOUNTY_STANDINGS: readonly Standing[] = ['pirate', 'warlord'];
 const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun', 'observation', 'armament', 'conqueror', 'fruit'];
 
 function fameWord(s: Life5): string {
+  if (s.hero.standing === 'warlord') return s.publishedBounty
+    ? `수배 정지 · 종전 현상금 ${fmtMoney(s.publishedBounty)} 베리` : '수배 정지 · 정부 공인';
   const fame = Math.round(s.hero.fame);
   if (fame <= 0) return '';
-  return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(bountyOf(s))} 베리` : `이름값 ${fmtMoney(fame)}`;
+  const amount = bountyAmount(s);
+  return amount > 0 ? `현상금 ${fmtMoney(amount)} 베리` : `이름값 ${fmtMoney(fame)}`;
 }
 
 /**
@@ -96,6 +107,7 @@ export function profileView(s: Life5): ProfileView {
     : INJURY_NAME[i.severity]);
   if (h.illness) hurts.push(ILLNESS_NAME[h.illness.id] ?? '병');
   if (altitudeEffect(s)) hurts.push('고산병');
+  const endNames = { helm: '키를 새 배로 옮김', playground: '선체를 아이들의 놀이터로 남김', house: '선체를 집으로 삼음', lost: '배를 잃음', switched: '다른 배로 옮김' };
   return {
     name: fullName(h).trim(),
     age: ageWord(s.age),
@@ -116,8 +128,23 @@ export function profileView(s: Life5): ProfileView {
     path: style ? `${weaponPath ? '무기술' : '체술'} · ${style.name}` : g.path ? `${weaponPath ? '무기술 · ' : ''}${BRANCH_NAME[g.path]}` : null,
     haki: (['observation', 'armament', 'conqueror'] as const).filter((b) => g.tier[b] >= 1).map((b) => `${BRANCH_NAME[b]} ${TIER_WORD[g.tier[b]] ?? ''}`.trim()).join(' · ') || null,
     master: g.master ? `${g.master.name} (${BRANCH_NAME[g.master.branch]})` : null,
+    mentorHistory: (g.mentorHistory ?? []).slice().reverse().map((m) => ({ teacher: m.teacher, kind: m.kind === 'technique' ? '기술 전수' : '특훈', age: m.age, detail: m.detail,
+      result: m.kind === 'technique' ? `${COMBAT_STYLE_BY_ID[m.style!]?.name ?? '유파'} 숙련 +${m.mastery ?? 0}`
+        : Object.entries(m.stats ?? {}).map(([k, v]) => `${MENTOR_STAT[k] ?? k} +${v}`).join(' · ') })),
     fruit: h.fruit ? FRUIT_BY_ID[h.fruit.id]?.name ?? null : null,
     weapon: equippedWeapon(s)?.name ?? (weaponPath ? '장착한 무기 없음' : '맨손'),
+    keepsakes: KEEPSAKES.filter(item => s.flags.includes(item.flag)).map(item => item.name),
+    shipName: s.flags.includes('ship') ? ownedHull(s)?.name ?? '이름 없는 배' : null,
+    shipHistory: (s.ships ?? []).map(hull => ({
+      id: hull.id, name: hull.name ?? '이름 없는 배',
+      lines: [
+        ...(hull.acquiredAt === undefined ? [] : [`${hull.acquiredAt}살 · 배를 얻음`]),
+        ...(hull.helmFrom ? [`${hull.helmFrom}번째 배에서 옮겨 온 키`] : []),
+        ...hull.repairs.map(mark => `${mark.age}살 · ${mark.island} · ${SHIP_MARK[mark.kind]}`),
+        ...(hull.spiritAt === undefined ? [] : [`${hull.spiritAt}살 · 작별 전날 들은 망치 소리`]),
+        ...(hull.end ? [`${hull.end.age}살 · ${hull.end.island} · ${endNames[hull.end.kind]}`] : []),
+      ],
+    })),
     power: (() => { const p = Math.round(rating5(s)); return `${bandWord(p, GRADES, GRADE_TOP)}급 · ${fmtMoney(p)} · ${bandWord(p, POWER_WORDS, POWER_TOP)}`; })(),
     money: `${fmtMoney(h.money)} 베리`,
     fame: fameWord(s),
@@ -137,13 +164,20 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const foe = ready && p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
   const fighter = ready && p?.kind === 'battle' ? p.battle.units.find(u => u.hero) : null;
   const hero = fighter ? unitWho(s, fighter) : heroWho5(s);
-  const climate = climateOf(h.island);
+  const climate = s.passage ? undefined : climateOf(h.island, s);
+  // 남의 배의 말단 선원: 모시는 선장이 앞에 서고 주인공은 선배 선원들 뒤 줄 끝에 선다
+  const shipCaptain = (h.standing === 'pirate' && !s.flags.includes('captain'))
+    ? s.people.find((x) => x.alive && x.kind === 'ally' && (x.relation === SHIP_CAPTAIN || x.aliases?.includes(SHIP_CAPTAIN))) : undefined;
+  const crewPeople = s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths);
+  // 선배 선원을 먼저 세운다 (선장 바로 뒤 자리부터)
+  if (shipCaptain) crewPeople.sort((a, b) => Number(b.relation.startsWith(SHIPMATE)) - Number(a.relation.startsWith(SHIPMATE)));
   return {
     hero,
-    crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),
+    crew: crewPeople.slice(0, SCENE_CREW).map(personWho5),
+    captain: shipCaptain ? { ...personWho5(shipCaptain), faction: 'pirate' } : null,
     foe,
     sailing: !!s.passage,
-    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}${climate ? ` · ${climate.name}` : ''}` : sea.name,
+    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : [sea.name, h.island, climate?.name].filter(Boolean).join(' · '),
     location: sceneLocation(h.island),
     weather: s.passage?.last ?? 'clear',
     flag: hero.faction ?? 'civil',

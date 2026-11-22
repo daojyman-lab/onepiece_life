@@ -3,7 +3,6 @@ import { BRANCH_NAMES } from '../shared/data/skills';
 import { traitMastery, traitEffects, traitFactor, recordTraitEvent, nextTraitAwakening } from './traits';
 import { chance, pick, rngOf, weighted, type Rng } from '../shared/core/rng';
 import { josa } from '../shared/core/josa';
-import { SEA_BY_ID } from '../shared/data/seas';
 import { V } from '../data/balance';
 import { SEA_STANDINGS } from '../data/landlocked';
 import { LINES, type DailyLine5 } from '../data/lines';
@@ -14,7 +13,7 @@ import { checkAll } from './cond';
 import { familyYear } from './family';
 import { minorFight } from './fight';
 import { needsOk } from './needs';
-import { rollFortune, rollMisfortune } from './fortune';
+import { rollFortune, rollMisfortune, rollTrainingHakiFortune } from './fortune';
 import { canUse } from './body';
 import { addMastery, fillText, tierCap } from './fx';
 import { runMinor } from './minor';
@@ -22,21 +21,27 @@ import { BRANCH_ID } from './power';
 import { partRisks, yearRisks } from './risk';
 import { recoverHealthPart } from './health';
 import { dayLine, isRecent, logLine, yearDivider } from './log';
-import { openQueued, openTurning, pickTurning, refreshEntryDoor, STORY_PREFIX, storyRng, wantsStop } from './turning';
+import { openQueued, openTurning, pickTurning, refreshEntryDoor, repeatAllows, STORY_PREFIX, storyRng, wantsStop } from './turning';
 import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
-import { expireVow, nextLifeVowTurning, recordVowActivity } from './vow';
+import { expireVow } from './vow';
+import { dreamVowYear } from './dream-vow';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
+import { KUMA_MET, kumaSighting } from '../data/kuma';
 import { TURNING_BY_ID } from '../data/turnings';
+import { MORO, MORO_LANDING } from '../data/turnings/log-island';
+import { buildVoyage, ENTRY_PREFIX, openLogIslandDay, openRouteArrival, regularDestinations, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
+import { advanceRestingRival, openChildhoodAndRival } from './childhood-and-rival';
+import { TRAINING } from '../data/turnings/training';
 import { SIBLING_BIRTH_ID } from '../data/turnings/sibling-birth';
 import { SIBLING_REUNION } from '../data/turnings/sibling-reunion';
 import { findSiblingReunion, siblingYear } from './siblings';
-import { buildVoyage, ENTRY_PREFIX, VOYAGE_PREFIX, voyageChoices, voyageId } from './voyage';
 import { applyEnvironmentPart, growthMultiplier, localFightChance } from './environment';
 import { gateOf } from '../data/voyage';
 import { depart, passagePart } from './passage';
 import { climatePart } from './climate';
-import { agingYear, inPrime, potentialMult, primeYear } from './stages';
+import { deliverEdition } from './world-news';
+import { agingYear, inDebut, inPrime, potentialMult, primeYear } from './stages';
 import { COMBAT_STYLE_BY_ID } from '../data/combat-styles';
 import { hasLocalStyleLesson, isMartialBranch, practiceStyles, primaryStyle, styleName, styleUsable } from './styles';
 import type { Activity, Branch, Life5, StatKey, ValueId } from './types';
@@ -51,9 +56,9 @@ export function isQuiet(s: Life5): boolean {
   return s.hero.standing === 'retired' || (s.flags.includes('apex') && !inPrime(s));
 }
 
-/** 전성기의 첫 바퀴인가: 이 바퀴가 끝나도 나이를 먹지 않는다 */
+/** 한 바퀴 더 돌 해의 첫 바퀴인가 (전성기, 첫 출항한 해): 이 바퀴가 끝나도 나이를 먹지 않는다 */
 function firstLap(s: Life5): boolean {
-  return inPrime(s) && !s.prime!.lap;
+  return (inPrime(s) && !s.prime!.lap) || (inDebut(s) && !s.debut!.lap);
 }
 
 /** 한 토막을 진행한다. 대기 중인 일이 있으면 아무것도 하지 않는다. */
@@ -61,10 +66,15 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.pending) return;
   expireVow(s);
   if (!s.hero.alive) { endIfDead(s); return; }
+  deliverEdition(s);
+  if (openLogIslandDay(s)) return;
   partCompanions(s, true);
   if (s.queue[0] === SIBLING_BIRTH_ID && openQueued(s)) return;
   if (storyInterlude(s)) return;               // 섬 장편의 장면 사이: 다음 장면 전에 섬의 며칠을 보낸다
   if (openQueued(s)) return;                   // 싸움 뒤 · 큰 계기처럼 줄 선 일은 그 일 바로 다음에 연다 (설계 5.7, 5.2a)
+  const sighting = kumaSighting(s);
+  if (sighting && !s.flags.includes(KUMA_MET) && !s.queue.some(id => id.startsWith('ep_')) && openTurning(s, TURNING_BY_ID[sighting.id])) return;
+  if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
   const sibling = findSiblingReunion(s);
@@ -73,22 +83,28 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
     if (openTurning(s, SIBLING_REUNION)) return;
     delete s.siblingMeeting;
   }
-  const vowTurning = chosenActivity ? null : nextLifeVowTurning(s);
-  if (vowTurning && openTurning(s, TURNING_BY_ID[vowTurning])) return;
 
   const awakening = chosenActivity ? null : nextTraitAwakening(s);
   if (awakening && openTurning(s, TURNING_BY_ID[awakening])) return;
+  if (chosenActivity) advanceRestingRival(s);
+  if (!chosenActivity && (openChildhoodAndRival(s) || openRouteArrival(s))) return;
   s.traitScene = [];
   delete s.traitSource;
   const r = rngOf(s.rng);
-  if (s.passage) passagePart(s, r);            // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
-  else climatePart(s);                         // 섬 위: 그 섬의 기후가 끼어든다 (펑크 해저드 · 하늘섬 · 조우 …). 따로 된 주사위를 쓴다
+  if (s.passage) {
+    passagePart(s, r);                         // 바다 위: 날씨를 만나고, 닿으면 섬을 옮긴다
+    if (!s.passage && s.hero.island === MORO && s.queue[0] === MORO_LANDING) {
+      advanceLifeTime(s);                      // 방금 마친 항해의 마지막 토막은 달력에 센다
+      nextPart(s, r);
+      openLogIslandDay(s);
+      return;
+    }
+  } else climatePart(s);                       // 섬 위: 그 섬의 기후가 끼어든다 (펑크 해저드 · 하늘섬 · 조우 …). 따로 된 주사위를 쓴다
   partRisks(s, r);
   if (!s.hero.alive) return;
   const act = chosenActivity ?? activityOf(s, r);
   const island = s.hero.island;
   if (chosenActivity === 'rest') logLine(s, '한 철 동안 위험한 일을 멈추고 몸을 쉬게 했다.', 'heavy', 'life');
-  recordVowActivity(s, act);
   recordTraitEvent(s, 'activity', act, String(s.age));
   dailyLine(s, act, r);
   growPart(s, act, r);
@@ -140,12 +156,18 @@ function yearTurn(s: Life5, r: Rng): void {
   yearRisks(s, r);
   if (!s.hero.alive) return;
   rollMisfortune(s, r);
+  rollTrainingHakiFortune(s);
   rollFortune(s, r);
 }
 
 /** 멈출 차례면 전환점 하나를 띄운다 */
 function turningPoint(s: Life5, r: Rng): void {
-  if (s.pending || !wantsStop(s, r)) return;
+  if (s.pending) return;
+  if (!s.passage) {
+    const lesson = TRAINING.find(t => repeatAllows(s, t) && checkAll(s, t.when));
+    if (lesson && openTurning(s, lesson)) return;
+  }
+  if (!wantsStop(s, r)) return;
   s.stats.stopTries += 1;
   if (s.sail && openVoyage(s, r)) return;          // 섬을 옮길 때면 이번 멈춤은 항로 고르기
   const t = pickTurning(s, r);
@@ -293,20 +315,26 @@ export function lineFits(s: Life5, l: DailyLine5): boolean {
     && (l.money === undefined || l.money >= 0 || s.hero.money >= -l.money);
 }
 
-/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */
+/** 토막을 넘긴다. 네 토막이 차면 한 살을 먹는다. 전성기와 첫 출항한 해에는 네 토막을 두 바퀴 돌아야 한 살을 먹는다 */
 function nextPart(s: Life5, r: Rng): void {
   const part = s.part + 1;
   if (part < V.partsPerYear) { s.part = part as Life5['part']; return; }
   s.part = 0;
   if (firstLap(s)) {
-    s.prime!.lap = true;
+    if (inPrime(s)) {
+      s.prime!.lap = true;
+      logLine(s, '같은 해, 전성기의 두 번째 항해가 시작되었다.', 'heavy', 'life');
+    } else {
+      s.debut!.lap = true;
+      logLine(s, '해가 바뀐 줄 알았는데, 바다에 나선 첫해는 아직 끝나지 않았다. 배울 것이 끝없이 밀려온다.', 'heavy', 'life');
+    }
     s.stopsThisYear = 0;
-    logLine(s, '같은 해, 전성기의 두 번째 항해가 시작되었다.', 'heavy', 'life');
     partCompanions(s);
     voyage(s);
     return;
   }
   if (s.prime) s.prime.lap = false;
+  if (s.debut) s.debut.lap = false;
   s.age += 1;
   for (const p of s.people) if (p.alive) p.age += 1;   // 이름난 사람도, 곁의 사람도 주인공과 함께 나이를 먹는다
   s.stopsThisYear = 0;
@@ -321,6 +349,7 @@ function nextPart(s: Life5, r: Rng): void {
   voyage(s);
   primeYear(s);
   dreamYear(s);
+  dreamVowYear(s);
   agingYear(s, r);
 }
 
@@ -354,7 +383,7 @@ export function voyage(s: Life5): void {
   if (!s.sail && !chance(r, V.voyage.p)) return;
   if (!military && !s.sail) { s.sail = true; return; }   // 다음 멈춤에 항로를 고른다
   s.sail = false;                              // 해군은 명령으로, 고를 틈이 없던 사람은 바람 닿는 대로
-  const ports = SEA_BY_ID[h.sea].ports.filter((p) => p !== h.island && (!military || gateOf(p) !== 'wano'));
+  const ports = regularDestinations(s, military);
   const next = weighted(r, ports, (p) => (s.flags.includes(`at:${p}`) ? 1 : V.voyage.fresh));
   if (!next) return;
   depart(s, next, 'drift', military);         // 바다를 건너 닿는다 (core/passage.ts)
@@ -365,7 +394,8 @@ function openVoyage(s: Life5, r: Rng): boolean {
   s.sail = false;
   if (hasLocalStyleLesson(s)) return false;
   if (!SEA_STANDINGS.includes(s.hero.standing) || s.hero.standing === 'marine' || s.hero.standing === 'cp') return false;
-  const c = voyageChoices(s, r);
+  const arrivalAge = s.part === V.partsPerYear - 1 && !firstLap(s) ? s.age + 1 : s.age;
+  const c = voyageChoices(s, r, arrivalAge);
   const t = c && buildVoyage(voyageId(s, c));
   return !!t && openTurning(s, t);
 }

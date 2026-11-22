@@ -24,7 +24,7 @@ function choose(s: Life5, id: string, door: number) {
 describe('결정을 기억하는 인연', () => {
   it('검객의 미룬 승부는 검술로 만난 실제 상대가 살아 있고 스무 해가 지난 뒤에 온다', () => {
     for (const firstDoor of [0, 1]) {
-      const s = newLife5(11);
+      const s = newLife5(11, { home: 'loguetown' });
       s.hero.standing = 'pirate';
       s.age = 20;
       s.growth.path = 'sword';
@@ -51,7 +51,7 @@ describe('결정을 기억하는 인연', () => {
       [0, 'life_fallen_benefactor', 'life_friend_debt'],
       [2, 'life_friend_debt', 'life_fallen_benefactor'],
     ] as const) {
-      const s = newLife5(11);
+      const s = newLife5(11, { home: 'loguetown' });
       s.hero.standing = 'civil';
       s.age = 20;
       choose(s, 'life_merchant_meeting', door);
@@ -65,7 +65,7 @@ describe('결정을 기억하는 인연', () => {
   });
 
   it('꽃가게에서 만난 뒤 편지를 기다린 사람이 직접 배우자가 된다', () => {
-    const s = newLife5(11);
+    const s = newLife5(11, { home: 'loguetown' });
     s.age = 20;
     s.hero.standing = 'civil';
     choose(s, 'life_meet', 0);
@@ -80,7 +80,7 @@ describe('결정을 기억하는 인연', () => {
 
   it('사관학교에 진학하지 않은 해군 장교에게는 포로 교관이 생기지 않는다', () => {
     for (const door of [0, 1]) {
-      const s = newLife5(11);
+      const s = newLife5(11, { home: 'loguetown' });
       s.age = 18;
       s.hero.standing = 'civil';
       s.hero.money = 300000;
@@ -96,7 +96,7 @@ describe('결정을 기억하는 인연', () => {
   });
 
   it('배에서 내쫓은 선원이 살아서 다시 오고, 용서를 받으면 같은 인물의 관계가 바뀐다', () => {
-    const s = newLife5(11);
+    const s = newLife5(11, { home: 'loguetown' });
     s.age = 25;
     s.hero.standing = 'pirate';
     s.hero.fame = 30;
@@ -113,7 +113,7 @@ describe('결정을 기억하는 인연', () => {
   });
 
   it('어린 날 목말을 태운 부모를 잃으면 다른 부모가 살아 있어도 그 장면은 오지 않는다', () => {
-    const s = newLife5(11);
+    const s = newLife5(11, { home: 'loguetown' });
     s.age = 6;
     const parent = { id: 'test-parent-1', name: '모란', gender: 'f', age: 33, kind: 'family',
       relation: '어머니', canon: null, bond: 50, faction: 'civil', species: 'human', alive: true } as const;

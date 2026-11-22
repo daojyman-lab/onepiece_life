@@ -2,6 +2,7 @@
 // 원작의 만남은 한 인생에 한 번(cooldownYears 99)이고, 결과마다 연표에 원작 표시를 남긴다.
 // 같은 원작 순간을 전환점으로도 쓰지 않는다 (turnings/<고향>.ts와 겹치지 않게).
 import { HOMETOWNS } from '../shared/data/births';
+import { beforeHistory } from './turnings/paths';
 import type { Cond, HomeId, Minor, Standing } from '../core/types';
 
 type Out = Minor['outcomes'][number];
@@ -27,13 +28,13 @@ const WATER7: Minor[] = [
       met('kokoro', '시프트 역에서 할머니 역장을 거들었다', { romance: 1 }, ['시프트 역 인어 할머니 역장의 장바구니를 역까지 들어 주었다.', '역장 할머니가 떨어뜨린 술병을 주워 주고 사탕을 받았다.']),
       met('kokoro', '시프트 역의 인어 할머니가 웃는 소리를 들었다', {}, ['시프트 역 쪽에서 인어 할머니 역장의 큰 웃음소리가 들려왔다.', '역장 할머니가 열차 앞에서 크게 웃으며 깃발을 흔들었다.']),
     ] },
-  { id: 'm_w7_cn_lucci', when: at('water7', 12, 18), weight: 6, cooldownYears: ONCE,
+  { id: 'm_w7_cn_lucci', when: at('water7', 12, 18, beforeHistory('eniesLobby')), weight: 6, cooldownYears: ONCE,
     outcomes: [
       met('lucci', '비둘기를 얹은 목수에게 말을 걸었다', { inquiry: 1 }, ['비둘기를 어깨에 얹은 말 없는 목수에게 말을 걸었다. 대답은 비둘기가 했다.', '조선소의 말 없는 목수가 들보를 한 손으로 드는 것을 보고 어떻게 그러냐고 물었다. 비둘기가 비밀이라고 했다.']),
       met('lucci', '비둘기를 얹은 목수의 눈이 무서워 길을 비켰다', { peace: 1 }, ['비둘기를 얹은 목수와 눈이 마주치자 등골이 서늘해 길을 비켰다.', '말 없는 목수의 눈빛이 짐승 같아서 다리 밑으로 돌아갔다.']),
       met('lucci', '비둘기를 얹은 목수를 보았다', {}, ['조선소 지붕 위에서 비둘기를 얹은 목수가 바람을 맞고 서 있었다.', '말 없는 목수가 시장 지붕의 비둘기를 불렀다. 비둘기가 어깨로 날아오자 목수는 조선소로 돌아갔다.']),
     ] },
-  { id: 'm_w7_cn_franky', when: at('water7', 8, 18), weight: 6, cooldownYears: ONCE,
+  { id: 'm_w7_cn_franky', when: at('water7', 8, 18, beforeHistory('eniesLobby')), weight: 6, cooldownYears: ONCE,
     outcomes: [
       met('franky', '해체업자 두목의 콜라 심부름을 했다', { loyalty: 1 }, ['파란 머리 해체업자 두목이 콜라를 사 오라며 동전을 던졌다. 거스름돈은 가지라고 했다.', '콜라를 부탁한 해체업자 두목에게 병을 건네자 그가 「슈퍼」라며 엄지를 세웠다.']),
       met('franky', '해체업자 두목이 고철로 만든 물건을 구경했다', { romance: 1 }, ['뒷골목에서 해체업자 두목이 고철로 만든 이상한 배를 띄우는 것을 구경했다.', '해체업자 두목이 버려진 대포로 불꽃을 쏘아 올리는 것을 보았다.']),
@@ -79,13 +80,13 @@ const WATER7: Minor[] = [
 
 // ======================================================== 와노쿠니 (과제 5)
 const WANO: Minor[] = [
-  { id: 'm_wano_cn_komurasaki', when: [...inTown('하나노미야코', 15, 22)], weight: 6, cooldownYears: ONCE,
+  { id: 'm_wano_cn_komurasaki', when: [...inTown('하나노미야코', 15, 22, beforeHistory('wanoFree'))], weight: 6, cooldownYears: ONCE,
     outcomes: [
       met('hiyori', '꽃의 도시의 이름난 기녀 행렬을 보았다', { romance: 1 }, ['꽃의 도시 큰길로 이름난 기녀 무라사키의 행렬이 지나갔다. 그 눈이 슬퍼 보였다.', '기녀 무라사키가 탄 가마의 발이 바람에 들려 얼굴이 잠깐 보였다.']),
       met('hiyori', '기녀 무라사키의 행렬에서 떨어진 물건을 주워 주었다', { justice: 1 }, ['행렬에서 떨어진 부채를 주워 건네자 기녀 무라사키가 작게 고맙다고 했다.', '기녀 무라사키의 하녀가 흘린 짐을 주워 주었다.']),
       met('hiyori', '기녀 무라사키의 소문을 들었다', {}, ['기녀 무라사키가 쇼군의 술잔을 거절했다는 소문이 돌았다.', '찻집에서 기녀 무라사키의 거문고를 들은 손님이 솜씨를 자랑하고 있었다.']),
     ] },
-  { id: 'm_wano_cn_kyoshiro', when: [...inTown('하나노미야코', 16, 22)], weight: 5, cooldownYears: ONCE,
+  { id: 'm_wano_cn_kyoshiro', when: [...inTown('하나노미야코', 16, 22, beforeHistory('wanoFree'))], weight: 5, cooldownYears: ONCE,
     outcomes: [
       met('denjiro', '협객 두목이 지나가자 소란하던 거리가 잠잠해졌다', { peace: 1 }, ['꽃의 도시 협객 두목 쿄시로가 하품을 하며 지나가자 모두 길을 비켰다.', '졸린 눈의 협객 두목이 찻집에 들어서자 떠들던 건달들이 입을 다물었다.']),
       met('denjiro', '협객 두목이 찬 칼을 눈여겨보았다', { inquiry: 1 }, ['졸린 눈의 협객 두목이 눈 깜짝할 새 칼을 뽑았다가 넣는 것을 보았다. 어떻게 한 건지 알 수 없었다.', '협객 두목 쿄시로의 칼집 끝이 붉게 칠해져 있는 것을 보았다.']),
@@ -115,7 +116,7 @@ const WANO: Minor[] = [
       { lean: { greed: 1 }, text: ['쌀 배급 줄에서 앞자리를 팔아 돈을 벌었다.', '남은 쌀을 웃돈을 받고 팔았다.'], fx: [{ op: 'money', add: 800 }] },
       { lean: {}, text: ['쌀 배급 줄에서 반나절을 기다렸다.', '배급받은 쌀에 돌이 섞여 있었다.'], fx: [] },
     ] },
-  { id: 'm_wano_river', when: at('wano', 5), weight: 6, cooldownYears: 2,
+  { id: 'm_wano_river', when: at('wano', 5, undefined, beforeHistory('wanoFree')), weight: 6, cooldownYears: 2,
     outcomes: [
       { lean: { inquiry: 1 }, text: ['검은 강물을 숯으로 걸러 마셔 보았다.', '검은 강의 물고기가 왜 죽는지 공장 쪽 물길을 따라가 보았다.'], fx: [] },
       { lean: { justice: 1 }, text: ['강에 공장 물을 버리는 일꾼들을 관리에게 따졌다가 쫓겨났다.', '검은 강에 몰래 표지를 세워 아이들이 마시지 않게 했다.'], fx: [] },

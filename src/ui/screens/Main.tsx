@@ -9,13 +9,15 @@ import { PERSONALITY_GRID, SECONDARY_NAME, personalityOf } from '../../core/pers
 import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
 import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
-import { VOWS } from '../../data/vows';
+import { dreamVowView } from '../../core/dream-vow';
+import { leaveView } from '../../core/voyage';
 import { Face, Gauge, Panel } from '../common';
+import { NewsStrip } from '../modals/NewsArchive';
 import { ageWord, heroWho5, peopleView, profileView, sceneOf, storyLines, storyYearLabel, timelineView, yearLabel } from '../view';
 
 const SPEEDS = [0, 1, 2, 4, 8] as const;
-/** 인물 칸 머리 글 (v4 포스터와 같다): 해적 · 칠무해는 WANTED, 해군은 MARINE, 그 밖은 PROFILE */
-const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: 'WANTED', marine: 'MARINE' };
+/** 인물 칸에 현재 신분을 표시한다. 칠무해가 되기 전의 수배서는 신문철에서 볼 수 있다. */
+const WANTED_LABEL: Partial<Record<Standing, string>> = { pirate: 'WANTED', warlord: '칠무해 공인장', marine: 'MARINE' };
 
 function PersonalityMap({ s }: { s: Life5 }) {
   const current = personalityOf(s)?.value;
@@ -106,8 +108,10 @@ function MobileMain({ s }: { s: Life5 }) {
         <span class="tag">{ageWord(at.age)}</span>
         <span class="grow" />
         <SpeedButtons />
+        <LeaveButton s={s} short />
         <button class="btn small" onClick={() => actions.open('menu')} aria-label="메뉴">☰</button>
       </header>
+      <NewsStrip s={s} shownId={st.shownId} />
       <div class={`m5-body ${tab === 'story' ? 'fill' : ''}`}>
         {tab === 'story' && <><Scene s={s} ready={caughtUp(s, st.shownId)} /><StoryPanel s={s} /></>}
         {tab === 'hero' && <Profile s={s} />}
@@ -134,6 +138,7 @@ export function Main() {
   return (
     <div class="app desk">
       <TopBar s={s} />
+      <NewsStrip s={s} shownId={st.shownId} />
       <div class="cols">
         <div class="col left"><Profile s={s} /></div>
         <div class="col mid">
@@ -143,6 +148,18 @@ export function Main() {
         <div class="col right"><SideTabs s={s} /></div>
       </div>
     </div>
+  );
+}
+
+/** 섬을 떠나는 단추. 이야기가 따라잡고 떠 있는 일이 없을 때만 누를 수 있다. 막혀 있으면 눌렀을 때 까닭을 알린다 */
+function LeaveButton({ s, short = false }: { s: Life5; short?: boolean }) {
+  const st = useStore();
+  const v = leaveView(s);
+  if (!v.show) return null;
+  const busy = !!s.pending || !!s.passage || !caughtUp(s, st.shownId);
+  return (
+    <button class={`btn small ${v.can && !busy ? '' : 'dim'}`} disabled={busy} title={v.note} aria-label={`${v.label} · ${v.note}`}
+      onClick={() => actions.leave()}>{short ? '⛵' : v.label}</button>
   );
 }
 
@@ -156,6 +173,7 @@ function TopBar({ s }: { s: Life5 }) {
       <span class="grow" />
       <SpeedButtons />
       <div class="row">
+        <LeaveButton s={s} />
         <button class="btn small" onClick={() => actions.open('codex')}>도감</button>
         <button class="btn small" onClick={() => actions.open('menu')}>메뉴</button>
       </div>
@@ -188,6 +206,7 @@ function TraitPicker({ s }: { s: Life5 }) {
 function Profile({ s }: { s: Life5 }) {
   const st = useStore();
   const p = profileView(s);
+  const provisions = s.hero.provisions ?? 0;
   const at = shownAt(s, st.shownId);
   const age = at.age;
   return (
@@ -202,15 +221,22 @@ function Profile({ s }: { s: Life5 }) {
         <dl class="profile-gear">
           <dt>주무기</dt><dd><b>{p.weapon}</b></dd>
           <dt>{s.growth.primaryStyle || !p.path ? '주력 유파' : '주력 갈래'}</dt><dd>{p.path ?? '아직 정하지 않음'}</dd>
+          {p.keepsakes.length > 0 && <><dt>소지품</dt><dd>{p.keepsakes.join(' · ')}</dd></>}
+          {p.shipName && <><dt>내 배</dt><dd>{p.shipName}</dd></>}
         </dl>
       </div>
       <div class="stack" style={{ marginTop: 8 }}>
         <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         <div class="t9">{p.born}</div>
+        {p.shipHistory.length > 0 && <details class="paper t9">
+          <summary>배의 기록</summary>
+          {p.shipHistory.map(hull => <div key={hull.id}><b>{hull.id}번째 배 · {hull.name}</b>
+            {hull.lines.map((line, i) => <div class="soft" key={i}>{line}</div>)}</div>)}
+        </details>}
         <div class="t9"><b>재능</b> {p.potential}</div>
         {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
-        {s.vows?.active && <div class="paper t9"><b>서약</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '결심을 지키는 중'}</span></div>}
-        {!!s.vows?.history.some((v) => v.result === 'kept') && <div class="t9"><b>서약 각성</b> {s.vows.history.filter((v) => v.result === 'kept').length}단계 · {VOWS[s.vows.history.filter((v) => v.result === 'kept').at(-1)!.id]?.title}</div>}
+        {(() => { const v = dreamVowView(s); return v && <div class="paper t9"><b>꿈의 서약</b> {v.cleared}/{v.total}{v.streak >= 2 ? ` · 연속 ${v.streak}` : ''} · {v.to ? `${v.to}에게 한 약속` : '스스로에게 한 약속'}<br /><span class="soft">{v.next ? `다음 길목: ${v.next}` : '약속한 꿈을 이루었다'}</span></div>; })()}
+        {s.vows?.active && <div class="paper t9"><b>섬의 약속</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '약속을 지키는 중'}</span></div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         <TraitPicker s={s} />
         <PersonalityMap s={s} />
@@ -219,10 +245,12 @@ function Profile({ s }: { s: Life5 }) {
         {p.haki && <div class="t9"><b>패기</b> {p.haki}</div>}
         {p.skills.length > 0 && <div class="t9"><b>익힌 것</b> {p.skills.map((k) => `${k.name} ${k.tier}`).join(' · ')}</div>}
         {p.master && <div class="t9"><b>스승</b> {p.master}</div>}
+        {p.mentorHistory.length > 0 && <div class="paper t9"><b>스승에게 배운 것</b>{p.mentorHistory.map((m, i) => <div key={i}><b>{m.teacher}</b> · {m.kind} · {m.age}세<br /><span class="soft">{m.detail} · {m.result}</span></div>)}</div>}
         {lifeProgress(s).length > 0 && <div class="paper t9"><b>약속에서 이어진 수련</b>{lifeProgress(s).map((line) => <div key={line}>{line}</div>)}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
         <div class="t9"><b>전투력</b> {p.power}</div>
         <div class="row between"><span>돈</span><b class={s.hero.money < 0 ? 'red' : ''}>{p.money}</b></div>
+        {(provisions > 0 || s.passage) && <div class="row between"><span>항해 식량</span><b>{provisions}몫</b></div>}
         <div>
           <div class="row between t9"><span>체력</span><span>{p.hp} / 100</span></div>
           <Gauge value={p.hp} max={100} />

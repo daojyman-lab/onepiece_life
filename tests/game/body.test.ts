@@ -119,7 +119,8 @@ describe('신체 손실의 세부', () => {
     expect(effectiveStats5(s).int).toBeCloseTo(b.int * V.limb.bothEyes);
     s.growth.tier.observation = 2;
     expect(effectiveStats5(s).int).toBeCloseTo(b.int);
-    expect(effectiveStats5(s).spd).toBeCloseTo(b.spd * V.limb.eye.spd * V.limb.eye.spd);
+    // 견문색 2단계는 속도를 따로 강화한다 (core/body.ts의 패기 강화)
+    expect(effectiveStats5(s).spd).toBeCloseTo(b.spd * V.limb.eye.spd * V.limb.eye.spd * (1 + 2 * V.haki.observation.spdPerTier));
   });
   it('부상은 능력치를 깎고, 흉터는 한 능력치를 깎는다', () => {
     const s = adult(); const b = effectiveStats5(s);

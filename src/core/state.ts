@@ -9,7 +9,8 @@ import { introduceFamily, rollFamily } from './family';
 import { townLabel } from '../data/homes';
 import { INLAND_TOWNS } from '../data/landlocked';
 import { LIMBS } from './body';
-import { logLine, yearDivider } from './log';
+import { logLine, logSentences, yearDivider } from './log';
+import { birthEdition } from './world-news';
 import { checkAll } from './cond';
 import { openTurning } from './turning';
 import { COMBAT_STYLES, DEFAULT_STYLE } from '../data/combat-styles';
@@ -46,13 +47,13 @@ export function emptyLife(seed: number): Life5 {
       injuries: [], illness: null,
       limbs,
       fruit: null,
-      money: 0, fame: 0, rank: 0,
+      money: 0, fame: 0, rank: 0, provisions: 0,
       standing: 'child', island: '', sea: 'east',
       alive: true,
       bornWealth: 'common',
     },
     growth: { tier: fill(BRANCHES, 0), mastery: fill(BRANCHES, 0), master: null, pref: fill(BRANCHES, 0), path: null,
-      styleMastery: Object.fromEntries(COMBAT_STYLES.map((x) => [x.id, 0])), styleFocus: { ...DEFAULT_STYLE }, styleWeapons: {}, weapons: [], primaryStyle: null, styleBonds: {} },
+      styleMastery: Object.fromEntries(COMBAT_STYLES.map((x) => [x.id, 0])), styleFocus: { ...DEFAULT_STYLE }, styleWeapons: {}, weapons: [], primaryStyle: null, styleBonds: {}, mentorHistory: [] },
     values, personality: { row: 1, col: 1, pullRow: 0, pullCol: 0, choices: 0, hold: 0, established: false }, strengths: [], marks: {},
     hardship: 0,
     people: [],
@@ -62,9 +63,11 @@ export function emptyLife(seed: number): Life5 {
     log: [], timeline: [], recentLines: [],
     pending: null,
     stats: { stops: 0, fights: 0, wins: 0, fortunes: 0, limbsLost: 0, years: 0, named: {}, stopsAt: [], stopTries: 0, emptyStops: 0, namedMet: 0 },
+    firstBountyIssued: false, news: [], publishedBounty: 0,
     seq: 0,
     ended: null,
     vows: { active: null, history: [] },
+    debut: null,
   };
 }
 
@@ -91,13 +94,15 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
     ? `${pick(r, orphanStories).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
     : `${h.town}의 ${WEALTH_HOUSE[h.wealth]}에서 ${fullName(h)}이(가) 태어났다.`;
   const gifts = h.talents.map(traitName).join(', ');
-  for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
+  logSentences(s, born, 'heavy', 'world');
+  logLine(s, `타고난 것: ${gifts}`, 'heavy', 'world');
   s.age = V.birth.startAge;
   rollFamily(s, r);
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
   const town = HOMETOWNS.find((t) => t.home === h.home && t.name === h.town);
-  if (town) logLine(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
+  if (town) logSentences(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
   introduceFamily(s);
+  birthEdition(s);
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
   if (first) openTurning(s, first);

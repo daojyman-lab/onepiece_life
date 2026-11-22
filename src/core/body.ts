@@ -64,6 +64,11 @@ export function effectiveStats5(s: Life5): Stats {
   for (const k of STAT_KEYS) st[k] = Math.max(st[k], floor[k] * V.limb.floor);
   const altitude = altitudeEffect(s);
   if (altitude) for (const k of ['str', 'spd', 'vit'] as const) st[k] *= altitude.physical;
+  // 패기는 단계만큼 특정 능력치를 강화한다. 여러 패기의 강화는 곱으로 겹친다.
+  const tier = s.growth.tier, H = V.haki;
+  if (tier.armament > 0) { st.str *= 1 + tier.armament * H.armament.strPerTier; st.vit *= 1 + tier.armament * H.armament.vitPerTier; }
+  if (tier.observation > 0) st.spd *= 1 + tier.observation * H.observation.spdPerTier;
+  if (tier.conqueror > 0) for (const k of STAT_KEYS) st[k] *= 1 + tier.conqueror * H.conqueror.allPerTier;
   return st;
 }
 

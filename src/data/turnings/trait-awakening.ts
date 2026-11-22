@@ -21,7 +21,7 @@ export const TRAIT_AWAKENINGS: Turning[] = (['observation', 'armament', 'conquer
 TRAIT_AWAKENINGS.push({
   id: 'trait_market_meal', kind: 'door',
   when: [{ c: 'age', min: 6 }, { c: 'standing', is: ['child', 'civil', 'pirate', 'marine', 'revolution', 'bountyHunter', 'warlord', 'shipwright', 'cp', 'settled', 'retired'] }, { c: 'island', is: ['로그타운', '워터 세븐', '알라바스타 왕국', '하나노미야코', '쿠리', '어인가', '류구 왕국', '엔젤섬', '샨디아 마을', '조우', '쿠라우 도시', '고래숲'] }],
-  weight: 2, repeat: { years: 3 }, max: 8, speaker: 'hero',
+  weight: 2, repeat: { years: 3 }, speaker: 'hero',
   title: '시장의 늦은 식사', body: '{island} 시장의 가게에서 따뜻한 밥 냄새가 난다. 그릇을 비우면 주인이 한 번 더 담아 준다고 한다. 오늘은 발길을 멈추고 배를 채워도 좋겠다.',
   doors: [
     { label: '든든히 먹고 한 그릇 더 청한다', hint: '밥값을 치르고 기운을 되찾는다', meal: true, fx: [{ op: 'money', add: -500, trade: true }, { op: 'hp', add: 12 }, { op: 'log', text: '빈 그릇을 내밀자 따뜻한 밥이 한 번 더 올라왔다.', weight: 'light' }] },

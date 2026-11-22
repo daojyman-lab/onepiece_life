@@ -2,7 +2,7 @@
 // pirate.ts가 500줄을 넘어 나누었다. pirate.ts의 PIRATE가 이 묶음을 함께 내보낸다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { chose, known, age, at, sea, st } from './paths';
+import { beforeHistory, chose, known, age, at, sea, st } from './paths';
 import type { Cond, Turning } from '../../core/types';
 
 const D = V.value.door;
@@ -15,7 +15,7 @@ const LATE = sea('nw_first', 'nw_late');
 export const PIRATE_2: Turning[] = [
   // ---------------------------------------------------------------- 칠무해
   {
-    id: 'pirate_warlord_summons', kind: 'door', when: at(WAR, settledIn(2), chose('hunter_pirate_invite', 0, 4), known('사냥감이었던 선장', 'ally')),
+    id: 'pirate_warlord_summons', kind: 'door', when: at(WAR, settledIn(2), beforeHistory('reverie'), chose('hunter_pirate_invite', 0, 4), known('사냥감이었던 선장', 'ally')),
     weight: 6, repeat: 'once', speaker: { relation: '정부의 전령' },
     title: '정부의 소집령', body: '정부의 전령이 소집령을 내민다. 이름 없는 해적단 하나를 쳐부수라는 명령이다. 명령서에는 수배서 대신 술병을 내밀며 {name}을(를) 배에 태웠던 {person:사냥감이었던 선장}의 이름이 있다.',
     doors: [
@@ -34,7 +34,7 @@ export const PIRATE_2: Turning[] = [
     ],
   },
   {
-    id: 'pirate_warlord_island', kind: 'door', when: at(WAR, settledIn(2)),
+    id: 'pirate_warlord_island', kind: 'door', when: at(WAR, settledIn(2), beforeHistory('reverie')),
     weight: 5, repeat: 'once', speaker: { relation: '섬의 원로들' },
     title: '해적에게 바친 섬', body: '정부의 손이 닿지 않는 작은 섬의 원로들이 {name}을(를) 찾아왔다. 칠무해의 이름 아래 섬을 맡아 달라고, 대신 해마다 공물을 바치겠다고 한다.',
     doors: [

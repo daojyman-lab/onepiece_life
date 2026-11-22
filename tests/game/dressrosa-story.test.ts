@@ -77,7 +77,7 @@ describe('드레스로자 〈자루 속 사람〉', () => {
     ackBattle(loaded);
     expect(loaded.hero).toMatchObject({ hp, injuries, limbs, fame });
     expect(loaded.stats).toEqual(stats);
-    expect(loaded.log.some((line) => line.text.includes('대련을 마쳤다'))).toBe(true);
+    expect(loaded.log.some((line) => line.text.includes('대련에서'))).toBe(true);
     expect(openQueued(loaded)).toBe(true);
     expect(loaded.pending).toMatchObject({ turning: 'ep_dressrosa_b5' });
   });

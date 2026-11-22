@@ -118,7 +118,7 @@ describe('실제 공방을 읽는 전투 서사', () => {
     expect(battleRecap(b).startsWith(battleNarrative(b)[0].text)).toBe(true);
   });
 
-  it('실제 엔진의 각 사건이 보존되고 전투를 넘겨도 생애 기록에 공방이 남는다', () => {
+  it('실제 엔진의 각 사건이 보존되고 전투 기록에는 승패만 남는다', () => {
     const b = runBattle(startBattle([unit('루카', 'L'), unit('산적', 'R')], { 0: 1 }, 46, false), true);
     expect(battleNarrative(b)).toHaveLength(b.events.length);
     expect(b.events.some((e) => e.k === 'act' && !!e.facts)).toBe(true);
@@ -126,7 +126,9 @@ describe('실제 공방을 읽는 전투 서사', () => {
     askFight(s, 'b_alvida', false, true);
     if (s.pending?.kind !== 'battle') throw new Error('전투가 시작되지 않았다');
     const recap = battleRecap(s.pending.battle);
+    const result = s.pending.result;
     ackBattle(s);
-    expect(s.log.some((l) => l.type === 'battle' && l.text.includes(recap))).toBe(true);
+    expect(s.log.some((l) => l.type === 'battle' && l.text.includes(recap))).toBe(false);
+    expect(s.log.some((l) => l.type === 'battle' && l.text.includes(result === 'win' ? '이겼다' : result === 'retreat' ? '몸을 빼냈다' : '졌다'))).toBe(true);
   });
 });

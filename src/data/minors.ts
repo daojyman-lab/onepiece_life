@@ -8,6 +8,7 @@
 // id는 전환점과 seen을 함께 쓰므로 'm_'로 시작한다 (기존 시비 사건 'brawl'만 예외).
 // 자리표시: {name} 이름만, {town} 자란 마을, {island} 지금 있는 섬, {parent} 살아 있는 부모의 호칭
 import type { Cond, Minor, SeaId, Standing, ValueId } from '../core/types';
+import { beforeHistory } from './turnings/paths';
 import { HOME_MINORS } from './minors-homes';
 import { landlockedMinor } from './landlocked';
 
@@ -74,7 +75,7 @@ function canonPassing(): Minor[] {
         met('smoker', '시가 두 대를 문 해군을 피해 골목으로 숨었다', { freedom: 1 }, ['시가 연기 냄새가 나자 골목으로 숨었다. 해적 흉내를 내던 참이었다.', '흰 연기를 뿜는 해군이 지나갈 때 뒷골목 아이들과 함께 흩어졌다.']),
         met('smoker', '시가 두 대를 문 해군이 광장을 지나가는 것을 보았다', {}, ['시가 두 대를 문 해군이 처형대 앞을 지나갔다.', '시가 두 대를 문 해군이 지나간 광장에 연기 냄새가 오래 남았다.']),
       ] },
-    { id: 'm_cn_sanji', when: [...atSeaAge(['east'], 14, 17)], weight: 4, cooldownYears: ONCE,
+    { id: 'm_cn_sanji', when: [...atSeaAge(['east'], 14, 17), beforeHistory('loguetownStorm')], weight: 4, cooldownYears: ONCE,
       outcomes: [
         met('sanji', '발라티에의 금발 요리사에게 볶음밥을 얻어먹었다', { romance: 1 }, ['돈 없이 발라티에에 들렀다가 금발의 요리사가 내준 볶음밥을 먹었다.', '발라티에의 금발 요리사가 뒷문을 열어 볶음밥을 건넸다. 배고프면 언제든 오라고 했다.']),
         met('sanji', '발라티에에서 밥값을 치렀다', { justice: 1 }, ['발라티에에서 밥을 먹고 요리사가 받지 않겠다는 밥값을 탁자에 두고 나왔다.', '발라티에의 요리사들 싸움을 구경하다 밥값을 넉넉히 치렀다.']),
@@ -110,13 +111,13 @@ function canonPassing(): Minor[] {
         met('jinbe', '어인 공수도 수련을 보며 동작을 따라 해 봤다', { ambition: 1 }, ['고래상어 어인이 아이들에게 가르치는 정권 지르기를 어깨너머로 따라 했다.', '물을 쳐서 멀리 보내는 어인 가라테를 몰래 흉내 내 보았다.']),
         met('jinbe', '바다 밑의 섬을 걸었다', {}, ['바다 밑 섬의 빛나는 나무들 사이를 걸었다.', '산책길을 지나는 인어들이 서로 손을 흔들었다.']),
       ] },
-    { id: 'm_cn_colosseum', when: [...atSeaAge(['nw_first'], 18, 20), { c: 'island', is: ['드레스로자'] }], weight: 5, cooldownYears: ONCE,
+    { id: 'm_cn_colosseum', when: [...atSeaAge(['nw_first'], 18, 20), { c: 'island', is: ['드레스로자'] }, beforeHistory('dressrosaFree')], weight: 5, cooldownYears: ONCE,
       outcomes: [
         met('kyros', '콜로세움에서 외다리 병정의 싸움을 응원했다', { ambition: 1 }, ['콜로세움에서 외다리로 싸우는 장난감 병정에게 돈을 걸었다. 병정이 이겼다.', '외다리 병정의 싸움을 보며 함성을 질렀다.']),
         met('kyros', '콜로세움 뒷골목에서 외다리 병정을 도왔다', { peace: 1 }, ['콜로세움 뒷골목에서 외다리 장난감 병정에게 빵 한 조각을 나눠 주었다.', '장난감 병정이 넘어지자 손을 내밀어 일으켜 주었다.']),
         met('kyros', '콜로세움의 함성을 들었다', {}, ['콜로세움 쪽에서 큰 함성이 들렸다.', '콜로세움의 함성이 거리까지 울렸다. 장난감 병정 하나가 아이 곁에서 귀를 기울였다.']),
       ] },
-    { id: 'm_cn_wano', when: [...atSeaAge(['nw_late'], 18), { c: 'island', is: ['와노쿠니'] }], weight: 5, cooldownYears: ONCE,
+    { id: 'm_cn_wano', when: [...atSeaAge(['nw_late'], 18), { c: 'island', is: ['와노쿠니'] }, beforeHistory('wanoFree')], weight: 5, cooldownYears: ONCE,
       outcomes: [
         met('wano', '꽃의 도읍에서 어묵 냄비를 짊어진 무사를 만났다', { romance: 1 }, ['꽃의 도읍 뒷길에서 어묵 냄비를 짊어진 털북숭이 무사에게 어묵 한 꼬치를 얻었다.', '어묵 냄비를 진 무사가 스무 해 전의 영주 이야기를 하다 울었다.']),
         met('wano', '와노쿠니에서 길을 가던 무사를 도왔다', { loyalty: 1 }, ['쇼군의 순찰에 쫓기는 무사를 쌀가마 뒤에 숨겨 주었다.', '산속으로 가는 무사에게 주먹밥을 싸 주었다.']),
@@ -182,7 +183,7 @@ export const MINORS: Minor[] = ([
     id: 'm_kid_lean_supper', when: [kid, { c: 'wealth', max: 'poor' }], weight: 7, cooldownYears: 1,
     outcomes: [
       { lean: { loyalty: 1 }, text: ['모아 둔 동전을 몰래 쌀독에 넣어 두었다.', '제 몫의 감자를 반으로 쪼개 옆집 꼬마에게 주었다.'], fx: [{ op: 'money', add: -100 }] },
-      { lean: { ambition: 1 }, text: ['묽은 죽을 비우며 언젠가 큰돈을 벌겠다고 이를 악물었다.', '빈 그릇을 보며 커서 배 한 척을 사겠다고 다짐했다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['묽은 죽에서 콩 한 알을 건졌다. 나중에 식당을 열면 국자로 한 번 뜰 때마다 콩이 수북이 담기게 하리라 마음먹었다.', '빈 그릇을 배 삼아 숟가락으로 노를 저었다. 배 한 척을 사서 직접 잡은 생선으로 죽을 끓이는 상상을 했다.'], fx: [] },
       { lean: {}, text: ['저녁이 묽은 죽 한 그릇뿐이었다.', '배가 고파 잠이 오지 않는 밤이었다.'], fx: [{ op: 'hp', add: -2 }] },
     ],
   },
@@ -251,7 +252,7 @@ export const MINORS: Minor[] = ([
     outcomes: [
       { lean: { romance: 1 }, text: ['배에서 내린 선원에게 거인과 하늘섬 이야기를 들으며 눈을 반짝였다.', '늙은 항해사의 허풍을 해 질 때까지 따라다니며 들었다.'], fx: [] },
       { lean: { inquiry: 1 }, text: ['정박한 배의 나침반이 어떻게 생겼는지 선원에게 꼬치꼬치 물었다.', '선원들에게 매듭 묶는 법을 하나씩 배웠다.'], fx: [] },
-      { lean: { ambition: 1 }, text: ['언젠가 저 배의 선장이 되겠다고 선원들 앞에서 큰소리쳤다.', '배에서 가장 힘센 선원에게 팔씨름을 걸었다가 손등이 바닥에 닿았다.'], fx: [] },
+      { lean: { ambition: 1 }, text: ['밧줄을 감던 선원이 모자를 씌워 주었다. 눈을 덮는 챙을 한 손으로 받쳐 들고 선장 흉내를 냈다.', '배에서 가장 힘센 선원에게 팔씨름을 걸었다가 손등이 바닥에 닿았다.'], fx: [] },
       { lean: {}, text: ['배 둘레를 맴돌다 선원이 던져 준 사과를 받아먹었다.', '항구에 들어온 큰 범선을 구경하며 오후를 보냈다.'], fx: [] },
     ],
   },

@@ -3,6 +3,7 @@ import type { Cond, Fx, Turning } from '../../core/types';
 import { COASTAL_WORDS, INLAND_TOWNS, ISOLATED_TOWNS, SEA_STANDINGS, WORLD_GOV_WORDS } from '../landlocked';
 export { COASTAL_WORDS, INLAND_TOWNS, ISOLATED_TOWNS, WORLD_GOV_WORDS } from '../landlocked';
 import { CHILDHOOD } from './childhood';
+import { CHILDHOOD_BONDS } from './childhood-bonds';
 import { FORTUNES } from './fortunes';
 import { MISFORTUNES } from './misfortunes';
 import { MOMENTS } from './moments';
@@ -17,6 +18,11 @@ import { LAND } from './land';
 import { LIFE } from './life';
 import { CANON_EAST } from './canon';
 import { CANON_SEA } from './canon-2';
+import { GRAND_LINE_TALES } from './grand-line-tales';
+import { LIFE_AT_SEA } from './life-at-sea';
+import { LOG_ISLAND_TURNINGS } from './log-island';
+import { SHIP_TURNINGS } from './ship-memory';
+import { CROSS_GUILD_NOTICE } from './cross-guild';
 import { SEA_LEAVE, SEA_RETURN } from './sea';
 import { SEA_GRAND_LINE, SEA_NEW_WORLD } from './sea-2';
 import { LATE } from './late';
@@ -40,8 +46,21 @@ import { WEAPON_STORIES } from './weapon-stories';
 import { LIFE_COURSE } from './life-course';
 import { DISCIPLES } from './disciples';
 
+import { CHILDHOOD_CRISES, CHILDHOOD_MEMORIES } from './childhood-crises';
+import { RIVAL_WORK_LETTERS } from '../rival-letters';
+import { RIVAL_ERRANDS } from './rival-errand';
+import { TRAINING } from './training';
+import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
+import { KUMA_ENCOUNTERS } from '../kuma';
+import { TRAINING_STORIES } from './training-islands';
+import { ROUTE_STORIES } from './route-stories';
+
 const GROUPS: Turning[][] = [
   CHILDHOOD,
+  CHILDHOOD_BONDS,
+  CHILDHOOD_CRISES, CHILDHOOD_MEMORIES,
+  RIVAL_WORK_LETTERS, RIVAL_ERRANDS,
+  TRAINING, PORT_STORIES, RESUPPLY_STORIES, ROUTE_STORIES, KUMA_ENCOUNTERS, TRAINING_STORIES,
   BONDS,
   FORTUNES,
   MISFORTUNES,
@@ -80,6 +99,11 @@ const GROUPS: Turning[][] = [
   WEAPON_STORIES,
   LIFE_COURSE,
   DISCIPLES,
+  GRAND_LINE_TALES,
+  LIFE_AT_SEA,
+  LOG_ISLAND_TURNINGS,
+  SHIP_TURNINGS,
+  [CROSS_GUILD_NOTICE],
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));
@@ -92,6 +116,8 @@ const textOf = (t: Turning) => [t.title, t.body, ...t.doors.flatMap((d) => [d.la
  * 섬을 떠나 바다에 나가면(hero.island가 바뀌면) 다시 열린다.
  */
 export function landlocked(t: Turning): Turning {
+  // 어느 섬의 감옥에서도 형기는 끝난다. 바다로 나가는 선택만 개별적으로 제한한다.
+  if (t.id === 'prison_release') return t;
   if (t.when.some((c) => c.c === 'home' || c.c === 'town' || c.c === 'island')) return t;
   const x = textOf(t);
   const add: Cond[] = [];
