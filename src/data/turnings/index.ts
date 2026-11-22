@@ -54,6 +54,7 @@ import { PORT_STORIES, RESUPPLY_STORIES } from './ports';
 import { KUMA_ENCOUNTERS } from '../kuma';
 import { TRAINING_STORIES } from './training-islands';
 import { ROUTE_STORIES } from './route-stories';
+import { PROMISE_TURNINGS } from '../promises';
 
 const GROUPS: Turning[][] = [
   CHILDHOOD,
@@ -104,6 +105,7 @@ const GROUPS: Turning[][] = [
   LOG_ISLAND_TURNINGS,
   SHIP_TURNINGS,
   [CROSS_GUILD_NOTICE],
+  PROMISE_TURNINGS,
 ];
 
 const allFx = (fx: Fx[] = []): Fx[] => fx.flatMap((e) => (e.op === 'chance' ? [e, ...allFx(e.then), ...allFx(e.else)] : [e]));

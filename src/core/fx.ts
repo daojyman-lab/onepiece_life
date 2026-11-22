@@ -42,6 +42,7 @@ import { isDeep } from './values';
 import { notePrisonEscape } from './bounty';
 import { beginVow, resolveVow } from './vow';
 import { promiseDream } from './dream-vow';
+import { makePromise, offerPerson } from './goals';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
 const STAT_KEYS: readonly StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -97,6 +98,7 @@ export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (text.includes('{swordElder}')) vars.swordElder = livingContact(s, { relation: '목검을 가르친 형' })?.name ?? '형';
   if (text.includes('{rivalPrepareMemory}') || text.includes('{rivalFestivalMemory}')) Object.assign(vars, rivalFestivalWords(s));
   if (text.includes('{mentorTrainingMemory}')) vars.mentorTrainingMemory = mentorTrainingMemory(s);
+  if (text.includes('{promisee}')) vars.promisee = offerPerson(s)?.name ?? '그 사람';
   if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
   if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
   if (text.includes('{firstWatch}') || text.includes('{nextWatch}')) Object.assign(vars, watchMealWords(s));
@@ -260,6 +262,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     case 'dream': if (setDream(s, e.id)) promiseDream(s, e.id); return;
     case 'vowStart': beginVow(s, e.id); return;
+    case 'promise': makePromise(s, e.id); return;
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
     case 'welcomeSibling': welcomeSibling(s, e.action); return;

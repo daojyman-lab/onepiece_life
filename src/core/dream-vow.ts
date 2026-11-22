@@ -7,6 +7,7 @@ import { DREAM_VOW_REWARD, DREAM_VOWS, type DreamCheck } from '../data/dream-vow
 import { BRANCH_NAME } from '../data/words';
 import { SEA_BY_ID } from '../shared/data/seas';
 import { bountyOf } from './bounty';
+import { rating5 } from './power';
 import { dreamMet } from './dreams';
 import { addMastery } from './fx';
 import { logLine } from './log';
@@ -43,7 +44,8 @@ function islandsVisited(s: Life5, among?: string[]): number {
   return s.flags.filter((f) => f.startsWith('at:') && (!among || among.includes(f.slice(3)))).length;
 }
 
-function passes(s: Life5, id: DreamId, c: DreamCheck): boolean {
+/** 길목 · 약속의 조건 하나 (core/goals.ts도 쓴다). id는 'met'(꿈을 이룸)에만 쓴다 */
+export function passes(s: Life5, id: DreamId | null, c: DreamCheck): boolean {
   const h = s.hero;
   switch (c.k) {
     case 'standing': return c.is.includes(h.standing);
@@ -58,8 +60,11 @@ function passes(s: Life5, id: DreamId, c: DreamCheck): boolean {
     case 'bond': return s.people.filter((p) => p.alive && p.bond >= (c.at ?? 80)).length >= c.min;
     case 'int': return h.base.int >= c.min;
     case 'age': return s.age >= c.min;
+    case 'crew': return s.people.filter((p) => p.alive && p.kind === 'crew' && p.crew && !p.crew.separatedMonths).length >= c.min;
+    case 'rating': return rating5(s) >= c.min;
+    case 'wealthMax': return c.is === 'poor' ? h.bornWealth === 'poor' : h.bornWealth === 'poor' || h.bornWealth === 'common';
     case 'any': return c.of.some((x) => passes(s, id, x));
-    case 'met': return (s.dream?.id === id && s.dream.done !== null) || dreamMet(s, id);
+    case 'met': return id !== null && ((s.dream?.id === id && s.dream.done !== null) || dreamMet(s, id));
   }
 }
 

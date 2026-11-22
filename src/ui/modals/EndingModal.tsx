@@ -7,6 +7,7 @@ import type { Meta5 } from '../../core/meta';
 import type { Life5 } from '../../core/types';
 import { Face, Modal } from '../common';
 import { endingView, heroWho5 } from '../view';
+import { PowerSpark } from '../screens/Goals';
 
 /** meta: 이 인생을 더하기 전의 도감 */
 export function EndingModal({ s, meta }: { s: Life5; meta: Meta5 }) {
@@ -60,6 +61,17 @@ export function EndingModal({ s, meta }: { s: Life5; meta: Meta5 }) {
         )}
       </div>
     ) }] : []),
+    { key: 'goals', body: (
+      <div class="scene5">
+        <div class="t9 soft">항해의 목표</div>
+        {v.goals.dreamVow && <div class="t9">★ {v.goals.dreamVow}</div>}
+        {v.goals.promises.map((p, i) => <div key={i} class="t9">{p}</div>)}
+        {!v.goals.dreamVow && v.goals.promises.length === 0 && <div class="t9">누구와도 약속하지 않고, 바람 부는 대로 살았다.</div>}
+        <div class="t9 soft" style={{ marginTop: 8 }}>성장</div>
+        <div class="t9">마지막 Lv {v.growth.level} · 가장 강했을 때 Lv {v.growth.peakLevel} ({v.growth.peakGrade}급)</div>
+        <PowerSpark points={v.growth.history} w={260} h={48} />
+      </div>
+    ) },
     { key: 'record', body: (
       <div class="scene5">
         <div class="t9 soft">기록</div>

@@ -77,7 +77,7 @@ export interface DoorView {
 export function doorView(s: Life5, p: Extract<Pending5, { kind: 'door' }>): DoorView {
   const sp = speakerOf(s, p);
   const turning = turningOf(p.turning);
-  const isHero = turning?.speaker === 'hero';
+  const isHero = turning?.speaker === 'hero' && !p.turning.startsWith('promise_');
   const showHints = p.turning.startsWith(ENTRY_PREFIX) || p.turning.startsWith(VOYAGE_PREFIX)
     || turning?.doors.some((d) => d.fx.some((e) => e.op === 'buyWeapon'));
   return {
@@ -89,6 +89,7 @@ export function doorView(s: Life5, p: Extract<Pending5, { kind: 'door' }>): Door
       index, label: d.label, locked: d.locked, danger: d.danger,
       hint: d.locked ? `✕ ${d.locked}` : showHints ? d.hint : '',
       tags: [
+        d.goal && { text: `🎯 ${d.goal}`, red: false },
         d.special && { text: '특별한 문', red: false },
         d.tried && { text: '전에 골라 본 문', red: false },
         d.danger && { text: '위험', red: true },

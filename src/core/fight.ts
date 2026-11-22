@@ -46,6 +46,8 @@ const AFTER_FIGHT = 'after_fight';
 export const RIVAL_AFTER = { won: 'life_rival_duel_won', lost: 'life_rival_duel_lost', revenge: 'life_rival_duel_revenge' } as const;
 /** 맞수에게 한 번이라도 진 적이 있다: 다음에 이기면 설욕이 된다 */
 export const RIVAL_LOST_FLAG = 'rivalDuel:lost';
+/** 맞수를 한 번이라도 이겼다 (v7 '다음엔 반드시 이긴다' 약속) */
+export const RIVAL_BEATEN_FLAG = 'rivalDuel:beaten';
 const WOUND_KIND_NAME: Record<WoundKind, string> = { bruise: '타박', cut: '베인', burn: '화상', fracture: '골절' };
 
 const FACTION: Partial<Record<Standing, Person['faction']>> = {
@@ -362,6 +364,7 @@ export function ackBattle(s: Life5): void {
     const revenge = won && s.flags.includes(RIVAL_LOST_FLAG);
     if (!won && !s.flags.includes(RIVAL_LOST_FLAG)) s.flags.push(RIVAL_LOST_FLAG);
     if (revenge) s.flags = s.flags.filter((f) => f !== RIVAL_LOST_FLAG);
+    if (won && !s.flags.includes(RIVAL_BEATEN_FLAG)) s.flags.push(RIVAL_BEATEN_FLAG);   // v7 맞수와의 약속
     applyFx(s, [{ op: 'queue', turning: revenge ? RIVAL_AFTER.revenge : won ? RIVAL_AFTER.won : RIVAL_AFTER.lost }]);
     storyPause(s);
     return;

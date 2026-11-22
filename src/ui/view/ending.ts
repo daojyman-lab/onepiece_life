@@ -10,6 +10,9 @@ import { VALUE_NAME } from '../../data/values';
 import { TIER_WORD } from '../../data/words';
 import type { Life5 } from '../../core/types';
 import { ageWord, endWord } from './words';
+import { promiseLines } from '../../core/goals';
+import { levelView } from '../../core/level';
+import { dreamVowView } from '../../core/dream-vow';
 
 /** 도감에는 지금 인생이 없으므로 문 이름의 자리표시를 이 말로 채운다 */
 const CODEX_FILL = {
@@ -54,6 +57,10 @@ export interface EndingView {
   canonWords: { who: string; line: string }[]; canonMoments: string[];
   unchosen: string[]; secret: string | null; newCodex: string[];
   record: { label: string; value: string }[];        // 접힌 칸 (끝난 까닭이 없으면 그 줄은 없다)
+  /** v7 항해의 목표: 꿈의 서약이 어디까지 왔는가와 인연의 약속들 */
+  goals: { dreamVow: string | null; promises: string[] };
+  /** v7 성장: 마지막 · 가장 높았던 레벨과 등급, 해마다의 전투력 */
+  growth: { level: number; peakLevel: number; peakGrade: string; history: { age: number; rating: number }[] };
 }
 
 /** 엔딩 창의 자료. meta는 이 인생을 더하기 전의 도감이어야 '새로 채운 것'이 나온다 */
@@ -64,6 +71,11 @@ export function endingView(s: Life5, meta: Meta5): EndingView {
     persona: e.persona, dream: e.dream, onePiece: e.onePiece, oneLine: e.oneLine, remembered: e.remembered,
     canonWords: e.canonWords, canonMoments: e.canonMoments,
     unchosen: e.unchosen, secret: e.secret, newCodex: e.newCodex,
+    goals: (() => {
+      const v = dreamVowView(s);
+      return { dreamVow: v ? `꿈의 서약 ${v.cleared}/${v.total} · ${v.to ? `${v.to}에게 한 약속` : '스스로에게 한 약속'}` : null, promises: promiseLines(s) };
+    })(),
+    growth: (() => { const l = levelView(s); return { level: l.level, peakLevel: l.peakLevel, peakGrade: l.peakGrade, history: l.history }; })(),
     record: [
       { label: '끝난 나이', value: ageWord(r.age) },
       ...(r.cause ? [{ label: '까닭', value: r.cause }] : []),

@@ -16,6 +16,9 @@ export type DreamCheck =
   | { k: 'bond'; min: number; at?: number }            // 유대가 at(기본 80) 이상인 살아 있는 사람의 수
   | { k: 'int'; min: number }                          // 타고난 지식(능력치)
   | { k: 'age'; min: number }
+  | { k: 'crew'; min: number }                         // 함께 다니는 살아 있는 동료의 수 (v7 약속)
+  | { k: 'rating'; min: number }                       // 종합 전투력 (v7 약속)
+  | { k: 'wealthMax'; is: 'poor' | 'common' }          // 집안 형편이 이만큼 이하 (v7 약속)
   | { k: 'any'; of: DreamCheck[] }                     // 가운데 하나라도
   | { k: 'met' };                                      // 꿈을 이루었다 (마지막 길목)
 

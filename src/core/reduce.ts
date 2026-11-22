@@ -8,6 +8,7 @@ import { answerDoor } from './turning';
 import { stepPart } from './year';
 import { openLeave } from './voyage';
 import { equipWeapon, selectStyle } from './styles';
+import { levelCheck } from './level';
 import type { Command5, Life5 } from './types';
 
 /**
@@ -36,6 +37,7 @@ export function apply5(s: Life5, cmd: Command5): void {
     case 'answer': answer(s, cmd.index); break;
   }
   reportBountyChange(s, previousBounty, previousStanding);
+  if (cmd.type === 'step' || cmd.type === 'rest' || cmd.type === 'answer') levelCheck(s);   // v7: 처음 닿은 레벨 · 등급
 }
 
 export function reduce5(prev: Life5, cmd: Command5): Life5 {

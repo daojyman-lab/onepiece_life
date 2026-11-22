@@ -453,3 +453,27 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .battle-log .battle-round { padding: 5px; background: var(--paper-d); }
 .battle-round .battle-prose-text { font-weight: bold; }
 @media (max-width: 760px) { .battle-log .battle-prose { font-size: 13px; line-height: 1.7; } }
+
+/* ── v7 항해의 목표 · 성장 ── */
+.goals-panel .goal-row { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--wood-d); }
+.goals-panel .goal-row.main { border-top: none; }
+.goals-panel .goal-row.kept { opacity: .8; }
+.goals-panel .goal-row.lost { opacity: .55; }
+.goals-panel .gauge { margin: 3px 0; }
+.level-card .lv-big { font-family: 'Galmuri14', sans-serif; font-size: 18px; color: var(--ink); }
+.level-card .grade-badge { font-family: 'Galmuri14', sans-serif; font-size: 14px; padding: 0 8px; background: var(--gold); border: 2px solid var(--gold-d); }
+.level-card .gauge { margin: 4px 0; }
+.level-card .spark { color: var(--blue); margin-top: 4px; display: block; }
+.goal-strip { display: flex; gap: 8px; align-items: center; padding: 4px 8px; background: var(--paper); border: 2px solid var(--wood-d); overflow: hidden; }
+.goal-strip .lv-chip { flex: none; padding: 0 6px; background: var(--wood-d); color: var(--gold); font-family: 'Galmuri11', sans-serif; }
+.goal-strip-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.scene-wrap { position: relative; }
+.level-banner { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); padding: 4px 12px; font-family: 'Galmuri14', sans-serif; font-size: 13px;
+  color: var(--ink); background: var(--gold); border: 2px solid var(--gold-d); box-shadow: 2px 2px 0 var(--wood-dd); white-space: nowrap; pointer-events: none;
+  animation: lvpop 1.6s ease-out both; }
+.level-banner.grade { background: var(--red); color: var(--paper-l); border-color: var(--red-d); }
+.level-banner.promise { background: #b8e0a8; border-color: var(--green-d); }
+@keyframes lvpop { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.9); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.08); } 30% { transform: translate(-50%, 0) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .level-banner { animation: none; } }
+.opt .tag.goal { background: #b8d4f0; }
+.v7-howto { background: var(--paper-l); border: 2px dashed var(--wood-d); padding: 6px 8px; }

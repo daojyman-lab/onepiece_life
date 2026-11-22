@@ -1,4 +1,6 @@
 // 얼굴: 주인공 · 곁의 사람 · 상대를 픽셀 그림의 Who로 바꾼다.
+import { offerPerson } from '../../core/goals';
+import { PROMISE_TURNING_PREFIX } from '../../data/promises';
 import { crewGrade } from './words';
 import { weaponOfSkills, weaponOfStyle, type Who } from '../pixel/pixelArt';
 import type { Item } from '../../shared/core/types';
@@ -71,6 +73,10 @@ export function speakerOf(s: Life5, p: Extract<Pending5, { kind: 'door' }>): { n
   if (p.turning === SIBLING_REUNION_ID) {
     const sibling = meetingSibling(s);
     if (sibling) return { name: sibling.name, who: personWho5(sibling) };
+  }
+  if (p.turning.startsWith(PROMISE_TURNING_PREFIX)) {       // v7 약속의 장면: 약속을 나눌 사람이 말한다
+    const person = offerPerson(s);
+    if (person) return { name: person.name, who: personWho5(person) };
   }
   const sp = TURNING_BY_ID[p.turning]?.speaker;
   if (!sp) return { name: p.speaker, who: { key: p.speaker } };

@@ -51,7 +51,7 @@ export function Start() {
     <div class="app start-screen">
       <div class="frame frame-pad" style={{ textAlign: 'center', width: '100%' }}>
         <h1 class="game-title">원피스 라이프</h1>
-        <div class="t9 soft">v6.9 · 갈래 치는 인생 (개발 중)</div>
+        <div class="t9 soft">v7 · 약속을 품고 떠나는 항해</div>
         <JollyRoger />
 
         {life && (
@@ -75,6 +75,10 @@ export function Start() {
             </select>
           </label>
           <div class="t9 soft">어디서, 어떤 집에서, 어떤 몸으로 태어날지는 주사위가 정한다.</div>
+          <div class="t9 v7-howto">
+            <div>🎯 <b>목표</b> — 소중한 사람과 약속하고, 열세 살 무렵 꿈을 품는다. 그 약속과 꿈이 인생의 방향을 끈다.</div>
+            <div>▲ <b>성장</b> — 수련 · 싸움 · 지킨 약속이 쌓여 레벨과 등급이 오른다. 약속을 지키면 크게 강해진다.</div>
+          </div>
           <button class="btn gold block" onClick={() => {
             if (life && !confirm('진행 중인 인생을 버리고 새로 시작할까? (되돌릴 수 없다)')) return;
             actions.newLife({ name: cleanName || undefined, gender: gender || undefined });

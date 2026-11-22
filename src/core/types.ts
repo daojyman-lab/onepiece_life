@@ -68,6 +68,28 @@ export interface DreamVowState {
   /** 지금 꿈을 약속한 사람 (없으면 스스로) */
   to: string | null;
 }
+/** v7 인연의 약속 하나 (data/promises.ts · core/goals.ts) */
+export interface PromiseRecord {
+  id: string;                                  // data/promises.ts의 약속 id
+  personId: string; name: string; relation: string;
+  madeAt: number;                              // 약속한 나이
+  status: 'active' | 'kept' | 'lost';
+  doneAt?: number;                             // 지켰거나 지킬 수 없게 된 나이
+  orphaned?: boolean;                          // 그 사람이 세상을 떠나 약속이 유언으로 남았다
+}
+/** v7 항해의 목표: 꿈의 서약(주목표) 곁의 인연의 약속들과, 다음 약속을 물을 때 */
+export interface GoalState {
+  promises: PromiseRecord[];
+  offer: { id: string; personId: string } | null;   // 지금 떠 있는 약속의 장면
+  asked: string[];                             // 이미 물어본 약속 id (한 인생에 한 번)
+  nextAt: number;                              // 이 나이부터 다음 약속을 물을 수 있다
+}
+/** v7 성장의 기록: 레벨 · 등급과 해마다의 전투력 (core/level.ts) */
+export interface RpgState {
+  level: number; grade: string; peak: number;
+  history: Record<number, number>;             // 나이 → 그해 끝의 종합 전투력
+  mark: { age: number; base: Stats; branch: Record<string, number>; rating: number; level: number } | null;   // 올해가 시작될 때
+}
 /** 스승에게 배운 기술(전수)과 특훈의 기록 (프로필에 남는다) */
 export interface MentorRecord {
   kind: 'technique' | 'training';
@@ -197,6 +219,7 @@ export type Fx =
   | { op: 'mark'; id: string }
   | { op: 'dream'; id: DreamId }
   | { op: 'vowStart'; id: string }
+  | { op: 'promise'; id: string | null }                // v7 약속의 장면: 약속한다(id) · 약속하지 않는다(null)
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
   | { op: 'welcomeSibling'; action: SiblingWelcomeAction }
@@ -276,7 +299,7 @@ export interface Minor {
   // lean이 빈 객체면 누구나. needs · when이 안 맞는 결과는 고르지 않는다 (when: 반대쪽 가치관이 깊으면 빼는 데 쓴다)
   outcomes: { lean: Partial<Values>; text: string[]; fx: Fx[]; needs?: Need[]; when?: Cond[] }[];
 }
-export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean }
+export interface ResolvedDoor { label: string; hint: string; locked: string | null; special: boolean; tried: boolean; danger: boolean; goal?: string }
 export type Pending5 =
   | { kind: 'door'; turning: string; moment: boolean; title: string; body: string; speaker: string; doors: ResolvedDoor[]; discipleId?: string; openedTick?: number }
   | { kind: 'fight'; foe: EnemySpec; lethal: boolean; risk: { injury: number; limb: number; death: number }; next?: FightNext; atSea?: true }
@@ -368,6 +391,10 @@ export interface Life5 {
   /** 서약: 활성 약속 하나와 이번 인생의 결산 기록. 옛 저장은 load.ts에서 빈 값으로 채운다. */
   vows?: VowState;
   dreamVow?: DreamVowState;
+  /** v7 항해의 목표 (core/goals.ts). 옛 저장에는 없다: 처음 볼 때 빈 값으로 채운다 */
+  goals?: GoalState;
+  /** v7 성장의 기록 (core/level.ts). 옛 저장에는 없다 */
+  rpg?: RpgState;
   /** 섬을 옮길 때가 되었다: 다음 멈춤에 항로를 고른다 (해가 다 가도록 멈추지 않으면 저절로 옮긴다) */
   sail?: boolean;
   /** 항해 중: 다음 섬으로 가는 바다 위에 있다 (core/passage.ts). 닿으면 null */

@@ -27,6 +27,8 @@ import { recordTraitEvent, tradeCost } from './traits';
 import { discipleFor, discipleReady } from './disciples';
 import { atFamilyHome } from './family';
 import { meetingSibling } from './siblings';
+import { activeFocus, doorGoals, offerPerson, turningGoalMult } from './goals';
+import { PROMISE_TURNING_PREFIX } from '../data/promises';
 import type { Door, Life5, ResolvedDoor, Turning } from './types';
 
 /**
@@ -48,6 +50,7 @@ function speakerOf(s: Life5, t: Turning): string {
     const pupil = discipleFor(s, t.disciple);
     return s.people.find(p => p.id === pupil?.personId)?.name ?? '제자';
   }
+  if (t.id.startsWith(PROMISE_TURNING_PREFIX)) return offerPerson(s)?.name ?? s.hero.name;
   const sp = t.speaker;
   if (sp === 'hero') return s.hero.name;
   if ('canon' in sp) return CANON[sp.canon]?.name ?? sp.canon;
@@ -117,12 +120,14 @@ function doorAccess(s: Life5, d: Door) {
 
 /** 선택지를 띄울 때에만 실제 사람의 이름을 넣어 문장을 완성한다. */
 export function resolveDoors(s: Life5, t: Turning): ResolvedDoor[] {
+  const goals = doorGoals(s, t);
   return t.doors.map((d, i) => {
     const { locked, cost } = doorAccess(s, d);
     const key = `${t.id}#${i}`;
     return {
       label: fillTurning(s, d.label, t), hint: fillTurning(s, d.hint, t) + (cost > 0 ? ` · 거래 ${cost.toLocaleString('ko-KR')} 베리` : ''), locked,
       special: d.special !== undefined, tried: s.known.includes(key), danger: d.danger ?? false,
+      ...(goals[i] && !locked ? { goal: goals[i] } : {}),
     };
   });
 }
@@ -280,7 +285,8 @@ export function pickTurning(s: Life5, r: Rng): Turning | null {
   if (queued) return queued;
   const pool = TURNINGS.filter((t) => t.weight > 0 && (t.kind === 'door' || t.kind === 'moment') && repeatAllows(s, t) && fits(s, t));
   const commerce = environmentOf(s)?.commerce?.events;
-  return weighted(r, pool, (t) => commerce && t.doors.some((d) => tradeEffects(d.fx)) ? t.weight * commerce : t.weight);
+  const focus = activeFocus(s);                // v7: 목표와 같은 방향의 사건이 더 자주 온다
+  return weighted(r, pool, (t) => (commerce && t.doors.some((d) => tradeEffects(d.fx)) ? t.weight * commerce : t.weight) * turningGoalMult(s, t, focus));
 }
 
 /** 떠 있는 문 가운데 index번째를 고른다. 잠긴 문이나 없는 문이면 아무것도 하지 않는다. */

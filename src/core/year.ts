@@ -26,6 +26,8 @@ import { leanPick, topValues } from './values';
 import { dreamYear } from './dreams';
 import { expireVow } from './vow';
 import { dreamVowYear } from './dream-vow';
+import { dropOffer, goalActivity, goalYear, promiseOffer } from './goals';
+import { yearGrowth } from './level';
 import { advanceLifeTime, lifeStoryScene } from './life-story';
 import { KUMA_MET, kumaSighting } from '../data/kuma';
 import { TURNING_BY_ID } from '../data/turnings';
@@ -77,6 +79,10 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
+  if (!chosenActivity) {                       // v7 인연의 약속: 때가 되면 중요한 사람과의 장면이 온다
+    const promise = promiseOffer(s);
+    if (promise) { if (openTurning(s, promise)) return; dropOffer(s); }
+  }
   const sibling = findSiblingReunion(s);
   if (sibling) {
     s.siblingMeeting = sibling.id;
@@ -185,6 +191,7 @@ export function activityOf(s: Life5, r: Rng): Activity {
   }
   if (h.wealth === 'poor') w.work += s.age <= A.kidAge ? A.poorKidWork : A.poorWork;
   if (h.standing === 'marine' || h.standing === 'cp') w.work += A.dutyWork;
+  goalActivity(s, w);                          // v7: 꿈과 약속이 바라보는 쪽으로 기운다
   for (const e of traitEffects(s)) for (const a of ACTIVITIES) w[a] *= e.activity?.[a] ?? 1;
   return weighted(r, ACTIVITIES, (a) => w[a])!;
 }
@@ -335,6 +342,7 @@ function nextPart(s: Life5, r: Rng): void {
   }
   if (s.prime) s.prime.lap = false;
   if (s.debut) s.debut.lap = false;
+  yearGrowth(s);                               // v7: 지난 한 해의 성장을 결산한다 (나이를 먹기 전에)
   s.age += 1;
   for (const p of s.people) if (p.alive) p.age += 1;   // 이름난 사람도, 곁의 사람도 주인공과 함께 나이를 먹는다
   s.stopsThisYear = 0;
@@ -350,6 +358,7 @@ function nextPart(s: Life5, r: Rng): void {
   primeYear(s);
   dreamYear(s);
   dreamVowYear(s);
+  goalYear(s);                                 // v7: 인연의 약속을 지켰는가
   agingYear(s, r);
 }
 

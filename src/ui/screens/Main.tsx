@@ -9,7 +9,7 @@ import { PERSONALITY_GRID, SECONDARY_NAME, personalityOf } from '../../core/pers
 import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
 import type { Life5, Standing } from '../../core/types';
 import { activeTraitIds, ownedTraitIds, traitName, traitDescription, canSelectTraits, traitSelectionError } from '../../core/traits';
-import { dreamVowView } from '../../core/dream-vow';
+import { GoalsPanel, GoalStrip, LevelBanner, LevelCard } from './Goals';
 import { leaveView } from '../../core/voyage';
 import { Face, Gauge, Panel } from '../common';
 import { NewsStrip } from '../modals/NewsArchive';
@@ -113,7 +113,7 @@ function MobileMain({ s }: { s: Life5 }) {
       </header>
       <NewsStrip s={s} shownId={st.shownId} />
       <div class={`m5-body ${tab === 'story' ? 'fill' : ''}`}>
-        {tab === 'story' && <><Scene s={s} ready={caughtUp(s, st.shownId)} /><StoryPanel s={s} /></>}
+        {tab === 'story' && <><Scene s={s} ready={caughtUp(s, st.shownId)} shownId={st.shownId} /><GoalStrip s={s} /><StoryPanel s={s} /></>}
         {tab === 'hero' && <Profile s={s} />}
         {tab === 'people' && <PeoplePanel s={s} />}
         {tab === 'timeline' && <TimelinePanel s={s} />}
@@ -142,7 +142,8 @@ export function Main() {
       <div class="cols">
         <div class="col left"><Profile s={s} /></div>
         <div class="col mid">
-          <Scene s={s} ready={caughtUp(s, st.shownId)} />
+          <Scene s={s} ready={caughtUp(s, st.shownId)} shownId={st.shownId} />
+          <GoalStrip s={s} />
           <StoryPanel s={s} />
         </div>
         <div class="col right"><SideTabs s={s} /></div>
@@ -226,6 +227,8 @@ function Profile({ s }: { s: Life5 }) {
         </dl>
       </div>
       <div class="stack" style={{ marginTop: 8 }}>
+        <LevelCard s={s} power={p.power.split(' · ').slice(2).join(' · ')} />
+        <GoalsPanel s={s} />
         <Styles s={s} disabled={!!s.pending || !s.hero.alive || !caughtUp(s, st.shownId)} />
         <div class="t9">{p.born}</div>
         {p.shipHistory.length > 0 && <details class="paper t9">
@@ -234,8 +237,6 @@ function Profile({ s }: { s: Life5 }) {
             {hull.lines.map((line, i) => <div class="soft" key={i}>{line}</div>)}</div>)}
         </details>}
         <div class="t9"><b>재능</b> {p.potential}</div>
-        {p.dream && <div class="t9"><b>꿈</b> {p.dream}</div>}
-        {(() => { const v = dreamVowView(s); return v && <div class="paper t9"><b>꿈의 서약</b> {v.cleared}/{v.total}{v.streak >= 2 ? ` · 연속 ${v.streak}` : ''} · {v.to ? `${v.to}에게 한 약속` : '스스로에게 한 약속'}<br /><span class="soft">{v.next ? `다음 길목: ${v.next}` : '약속한 꿈을 이루었다'}</span></div>; })()}
         {s.vows?.active && <div class="paper t9"><b>섬의 약속</b> {s.vows.active.title} · {s.vows.active.target}<br /><span class="soft">{s.vows.active.progress.length ? s.vows.active.progress.join(' · ') : '약속을 지키는 중'}</span></div>}
         {p.values.length > 0 && <div class="paper">{p.values.slice(0, 2).map((v) => <div key={v}>{v}</div>)}</div>}
         <TraitPicker s={s} />
@@ -248,7 +249,6 @@ function Profile({ s }: { s: Life5 }) {
         {p.mentorHistory.length > 0 && <div class="paper t9"><b>스승에게 배운 것</b>{p.mentorHistory.map((m, i) => <div key={i}><b>{m.teacher}</b> · {m.kind} · {m.age}세<br /><span class="soft">{m.detail} · {m.result}</span></div>)}</div>}
         {lifeProgress(s).length > 0 && <div class="paper t9"><b>약속에서 이어진 수련</b>{lifeProgress(s).map((line) => <div key={line}>{line}</div>)}</div>}
         {p.fruit && <div class="t9"><b>열매</b> {p.fruit}</div>}
-        <div class="t9"><b>전투력</b> {p.power}</div>
         <div class="row between"><span>돈</span><b class={s.hero.money < 0 ? 'red' : ''}>{p.money}</b></div>
         {(provisions > 0 || s.passage) && <div class="row between"><span>항해 식량</span><b>{provisions}몫</b></div>}
         <div>
@@ -267,7 +267,7 @@ function Profile({ s }: { s: Life5 }) {
 }
 
 /** 장면: v4 Scene과 같은 캔버스 반복 그리기. 인생이나 따라잡음이 바뀔 때만 그림 자료를 다시 만든다. ready 전에는 싸움 상대를 그리지 않는다 */
-function Scene({ s, ready }: { s: Life5; ready: boolean }) {
+function Scene({ s, ready, shownId }: { s: Life5; ready: boolean; shownId: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const live = useRef({ s, ready });
   live.current = { s, ready };
@@ -289,8 +289,9 @@ function Scene({ s, ready }: { s: Life5; ready: boolean }) {
     return () => cancelAnimationFrame(raf);
   }, []);
   return (
-    <div class="frame" style={{ padding: 0 }}>
+    <div class="frame scene-wrap" style={{ padding: 0 }}>
       <canvas ref={ref} class="scene" aria-label="현재 장면" />
+      <LevelBanner s={s} shownId={shownId} />
     </div>
   );
 }
