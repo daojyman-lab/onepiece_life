@@ -30,7 +30,7 @@ export function GoalsPanel({ s }: { s: Life5 }) {
           <Gauge value={v.dream.cleared} max={v.dream.total} kind="gold" thin />
           <div class="soft">{v.dream.to ? `${v.dream.to}에게 한 약속` : '스스로에게 한 약속'} · {v.dream.done ? '꿈을 이루었다' : `다음 길목: ${v.dream.next ?? '—'}`}</div>
         </div>
-      ) : <div class="soft">아직 꿈이 없다. 열세 살 무렵 수평선 너머를 보게 될 것이다.</div>}
+      ) : <div class="soft">{s.age < 13 ? '아직 꿈이 없다. 열세 살 무렵 수평선 너머를 보게 될 것이다.' : '꿈을 품지 않았다. 대신 사람들과의 약속이 길을 끈다.'}</div>}
       {v.promises.map((p) => <PromiseRow key={p.id} p={p} />)}
       {v.promises.length === 0 && <div class="soft">아직 누구와도 약속하지 않았다. 소중한 사람과의 약속이 목표가 된다.</div>}
     </div>
