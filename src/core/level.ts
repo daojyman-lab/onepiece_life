@@ -9,6 +9,8 @@ import { rating5 } from './power';
 import type { Branch, Life5, RpgState, StatKey, Stats } from './types';
 
 export const MAX_LEVEL = 99;
+/** 한 해의 성장을 결산하는 전투력 증가 비율 (이만큼 자란 해만 한 줄로 남긴다) */
+const GROWTH_NOTE = 1.05;
 const K = 1.3;
 const STAT_NAME: Record<StatKey, string> = { str: '근력', spd: '속도', vit: '체력', int: '지능', wil: '의지', luk: '운' };
 const STAT_KEYS: StatKey[] = ['str', 'spd', 'vit', 'int', 'wil', 'luk'];
@@ -73,16 +75,18 @@ export function levelCheck(s: Life5): void {
   const rating = rating5(s);
   const level = levelOf(rating);
   if (rating > st.peak) st.peak = Math.round(rating);
+  const grade = gradeOf(rating);
+  const gradeUp = gradeRank(grade) > gradeRank(st.grade);
   if (level > st.level) {
     const from = st.level;
     st.level = level;
-    logLine(s, `▲ 레벨 업 · Lv ${from} → Lv ${level}`, level % 10 === 0 || level - from >= 3 ? 'heavy' : 'light', 'growth');
+    // 등급이 함께 오르면 등급 상승 줄에 레벨을 함께 적는다
+    if (!gradeUp) logLine(s, `▲ 레벨 업 · Lv ${from} → Lv ${level}`, level % 10 === 0 || level - from >= 3 ? 'heavy' : 'light', 'growth');
   }
-  const grade = gradeOf(rating);
-  if (gradeRank(grade) > gradeRank(st.grade)) {
+  if (gradeUp) {
     const from = st.grade;
     st.grade = grade;
-    logLine(s, `★ 등급 상승 · ${from}급 → ${grade}급. ${GRADE_LINE[grade] ?? ''}`.trim(), 'heavy', 'growth');
+    logLine(s, `★ 등급 상승 · ${from}급 → ${grade}급 · Lv ${level}. ${GRADE_LINE[grade] ?? ''}`.trim(), 'heavy', 'growth');
     s.timeline.push({ age: s.age, text: `${grade}급에 올랐다 (Lv ${level})` });
   }
 }
@@ -105,7 +109,7 @@ export function yearGrowth(s: Life5): void {
   const grown = BRANCHES.map((b) => [b, Math.round(now[b] - (m.branch[b] ?? 0))] as const).filter(([, d]) => d >= 5).sort((a, b) => b[1] - a[1]).slice(0, 2);
   for (const [b, d] of grown) parts.push(`${BRANCH_NAME[b]} 숙련 +${d}`);
   const r0 = m.rating, r1 = Math.round(rating);
-  if (r1 <= r0) return;                        // 늙어 가며 오르고 내린 것은 결산하지 않는다
+  if (r1 < r0 * GROWTH_NOTE) return;           // 눈에 띄게 자란 해만 결산한다 (늙어 가며 오르고 내린 해는 남기지 않는다)
   logLine(s, `한 해의 성장 · ${parts.length ? `${parts.join(' · ')} · ` : ''}전투력 ${r0.toLocaleString('ko-KR')} → ${r1.toLocaleString('ko-KR')}`, 'light', 'growth');
 }
 

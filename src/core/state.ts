@@ -1,4 +1,5 @@
 import { HOMETOWNS, ORPHAN_STORIES, SPECIES_NAMES } from '../shared/data/births';
+import { rpgState } from './level';
 import { traitName } from './traits';
 import { pick, rngOf, weighted } from '../shared/core/rng';
 import { V } from '../data/balance';
@@ -106,5 +107,6 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
   if (first) openTurning(s, first);
+  rpgState(s);                                 // v7 성장의 기록: 태어난 때의 레벨에서 시작한다
   return s;
 }

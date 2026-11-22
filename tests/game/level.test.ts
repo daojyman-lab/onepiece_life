@@ -44,8 +44,14 @@ describe('성장의 기록', () => {
     s.growth.tier.sword = 2;
     levelCheck(s);
     const up = s.log.slice(n);
-    expect(up.some((l) => l.text.startsWith('▲ 레벨 업'))).toBe(true);
-    expect(up.some((l) => l.text.startsWith('★ 등급 상승'))).toBe(true);
+    // 등급이 함께 오르면 레벨은 등급 상승 줄에 함께 적는다
+    expect(up.filter((l) => l.text.startsWith('★ 등급 상승'))).toHaveLength(1);
+    expect(up[0].text).toContain(`Lv ${s.rpg!.level}`);
+    const k = s.log.length;
+    s.hero.base.vit += 15;                              // 같은 등급 안에서 레벨만 오른다
+    levelCheck(s);
+    expect(s.log.slice(k).some((l) => l.text.startsWith('▲ 레벨 업'))).toBe(true);
+    s.hero.base.vit -= 15;
     // 내려갔다 다시 오르면 남기지 않는다
     const m = s.log.length;
     s.hero.base.str -= 40; levelCheck(s);
@@ -57,20 +63,22 @@ describe('성장의 기록', () => {
     const s = newLife5(4);
     s.pending = null;
     rpgState(s);
-    s.hero.base.vit += 3;
+    s.hero.base.vit += 12;
     s.growth.mastery.fist += 30;
     yearGrowth(s);
     const line = s.log.at(-1)!;
     expect(line.type).toBe('growth');
-    expect(line.text).toContain('체력 +3');
+    expect(line.text).toContain('체력 +12');
     expect(s.rpg!.history[s.age]).toBe(Math.round(rating5(s)));
   });
 
   it('한 인생을 돌리면 레벨이 오르고 궤적이 쌓인다', () => {
-    const { s } = autoplay5(9123, 'lean');
+    let seed = 9000, s = autoplay5(seed, 'lean').s;
+    while (s.age <= 40) s = autoplay5(++seed, 'lean').s;           // 마흔을 넘긴 첫 인생
     const v = levelView(s);
-    expect(v.peakLevel).toBeGreaterThan(7);
-    expect(v.history.length).toBeGreaterThan(5);
-    expect(s.log.some((l) => l.text.startsWith('▲ 레벨 업')) || s.age < 15).toBe(true);
+    expect(v.peakLevel).toBeGreaterThan(15);
+    expect(v.history.length).toBeGreaterThan(30);
+    expect(s.rpg!.level).toBeGreaterThan(levelOf(36));
+    expect(s.timeline.some((e) => /급에 올랐다/.test(e.text))).toBe(true);
   });
 });

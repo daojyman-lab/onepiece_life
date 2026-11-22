@@ -79,10 +79,6 @@ export function stepPart(s: Life5, chosenActivity?: Activity): void {
   if (s.hero.standing === 'prisoner' && s.age - s.standingSince >= 3 && openTurning(s, TURNING_BY_ID.prison_release)) return;
   const storyScene = lifeStoryScene(s);
   if (storyScene && openTurning(s, TURNING_BY_ID[storyScene])) return;
-  if (!chosenActivity) {                       // v7 인연의 약속: 때가 되면 중요한 사람과의 장면이 온다
-    const promise = promiseOffer(s);
-    if (promise) { if (openTurning(s, promise)) return; dropOffer(s); }
-  }
   const sibling = findSiblingReunion(s);
   if (sibling) {
     s.siblingMeeting = sibling.id;
@@ -176,6 +172,8 @@ function turningPoint(s: Life5, r: Rng): void {
   if (!wantsStop(s, r)) return;
   s.stats.stopTries += 1;
   if (s.sail && openVoyage(s, r)) return;          // 섬을 옮길 때면 이번 멈춤은 항로 고르기
+  const promise = promiseOffer(s);                 // v7 인연의 약속: 때가 되면 이번 멈춤은 중요한 사람과의 장면
+  if (promise) { if (openTurning(s, promise)) return; dropOffer(s); }
   const t = pickTurning(s, r);
   if (!(t && openTurning(s, t))) s.stats.emptyStops += 1;   // 멈추려 했는데 띄울 것이 없었다
 }
