@@ -8,7 +8,7 @@ export const V = {
   // v7 항해의 목표 (core/goals.ts): 약속의 장면은 토막마다 offerP로 오고, 한 번 물으면 spacing해 동안 다시 묻지 않는다.
   // 목표가 바라보는 방향의 활동에 activity를 더하고, 그 방향의 사건은 turning배 더 자주 온다 (minAge살부터).
   // 지킨 약속: 능력치 keptStat(유언이 된 약속은 orphanStat 더) · 지금 갈래 숙련 keptMastery · 그 사람과의 유대 keptBond
-  goal: { offerP: 0.3, spacing: 2, maxActive: 3, maxAsked: 6, minAge: 7, activity: 6, turning: 1.3,
+  goal: { offerP: 0.3, spacing: 2, maxActive: 3, maxAsked: 6, minAge: 7, activity: 3, turning: 1.3,
           promiseBond: 8, keptStat: 2, orphanStat: 1, keptMastery: 40, keptBond: 15, remindAfter: 8, remindEvery: 8 },
   // 패기 능력치 강화: 단계마다 곱해지고, 서로 다른 패기의 강화는 겹친다 (core/body.ts의 effectiveStats5).
   haki: { armament: { strPerTier: 0.05, vitPerTier: 0.07 }, observation: { spdPerTier: 0.06 }, conqueror: { allPerTier: 0.03 } },

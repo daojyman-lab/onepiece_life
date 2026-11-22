@@ -252,7 +252,7 @@ export function reach(target: SpecialDoor, tries: number, seed0?: number): numbe
   // [시드, 고향, 갈래 표시를 쫓는가(기본 true)] — tools/find-special-replays.ts 또는 같은 방식으로 찾는다
   const routes: Record<string, [number, HomeId, boolean?][]> = {
     'path_warlord#2': [[1222, 'zou', false]],
-    'ep_skypiea_c3#3': [[680, 'sky', false]],
+    'ep_skypiea_c3#3': [[5797, 'sky', false]],
     'ep_fishman_c_3#3': [[296, 'fishman', false]],
   };
   for (const [seed, home, chase] of seed0 === undefined ? routes[`${target.turning}#${target.index}`] ?? [] : []) {
