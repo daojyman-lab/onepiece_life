@@ -4,6 +4,7 @@ import { fmtMoney } from '../../shared/core/util';
 import { FRUIT_BY_ID } from '../../shared/data/fruits';
 import { SEA_BY_ID } from '../../shared/data/seas';
 import type { SceneInput } from '../pixel/pixelArt';
+import { sceneLocation } from '../pixel/locations';
 import { SPECIES_NAMES } from '../../shared/data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
@@ -153,7 +154,6 @@ export function profileView(s: Life5): ProfileView {
 }
 
 // ── 장면 ──
-const ISLAND_COLORS = ['#70b582', '#c8b070', '#8ab0d0', '#b0d890', '#d0a0a0', '#90c0a0'];
 /** 장면에 그리는 동료 수 (v4 drawScene이 그리는 만큼) */
 const SCENE_CREW = 3;
 
@@ -178,7 +178,8 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
     foe,
     sailing: !!s.passage,
     place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : [sea.name, h.island, climate?.name].filter(Boolean).join(' · '),
-    islandColor: ISLAND_COLORS[sea.stage - 1] ?? ISLAND_COLORS[0],
+    location: sceneLocation(h.island),
+    weather: s.passage?.last ?? 'clear',
     flag: hero.faction ?? 'civil',
     aura: h.fruit ? '#c890ff' : s.growth.tier.armament > 0 ? '#ff7060' : null,
   };

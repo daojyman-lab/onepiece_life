@@ -2,8 +2,8 @@
 import { stageName } from '../../core/stages';
 import { lifeProgress } from '../../core/life-story';
 import { Styles } from './Styles';
-import { useEffect, useRef, useState } from 'preact/hooks';
-import { drawScene, type SceneInput } from '../pixel/pixelArt';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { usePixelScene } from '../pixel/usePixelScene';
 import { caughtUp, shouldRead } from '../../app/flow';
 import { PERSONALITY_GRID, SECONDARY_NAME, personalityOf } from '../../core/personality';
 import { actions, dispatch, msSinceWindowClosed, useStore } from '../../app/store';
@@ -266,28 +266,10 @@ function Profile({ s }: { s: Life5 }) {
   );
 }
 
-/** 장면: v4 Scene과 같은 캔버스 반복 그리기. 인생이나 따라잡음이 바뀔 때만 그림 자료를 다시 만든다. ready 전에는 싸움 상대를 그리지 않는다 */
+/** 이야기가 따라잡은 뒤에 싸움 상대를 장면에 함께 그린다. */
 function Scene({ s, ready, shownId }: { s: Life5; ready: boolean; shownId: number }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const live = useRef({ s, ready });
-  live.current = { s, ready };
-  useEffect(() => {
-    const c = ref.current!;
-    let raf = 0, t = 0;
-    let last: Life5 | null = null, lastReady = false, input: SceneInput | null = null;
-    const loop = () => {
-      t += 1;
-      const w = c.clientWidth, h = c.clientHeight;
-      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-      const cur = live.current;
-      if (cur.s !== last || cur.ready !== lastReady || !input) { last = cur.s; lastReady = cur.ready; input = sceneOf(cur.s, cur.ready); }
-      const ctx = c.getContext('2d');
-      if (ctx && w > 0) drawScene(ctx, w, h, t, input);
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  const input = useMemo(() => sceneOf(s, ready), [s, ready]);
+  const ref = usePixelScene(input);
   return (
     <div class="frame scene-wrap" style={{ padding: 0 }}>
       <canvas ref={ref} class="scene" aria-label="현재 장면" />

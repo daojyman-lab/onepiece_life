@@ -2,6 +2,9 @@
 // 같은 인물은 언제나 같은 모습이다 (docs/01_기획/04_UI_그래픽_방향.md 3장).
 import type { Species } from '../../shared/core/types';
 import { isCombatStyle, type CombatStyle } from '../../data/combat-styles';
+import type { Weather } from '../../data/weather';
+import type { SceneLocation } from './locations';
+import { drawLand, drawLandAir, drawSea, drawSeaAir, landGround, Scenery } from './scenery';
 
 type Pair = [string, string];
 const SKIN: Record<'human' | 'fish' | 'mink' | 'sky' | 'luna', Pair[]> = {
@@ -434,143 +437,184 @@ export function bodySprite(w: Who, frame: number, pose: 'attack' | null): HTMLCa
 
 // ---------------------------------------------------------------- 장면
 
+export interface SceneStrike {
+  hero: boolean;
+  hit: boolean;
+  dodge: boolean;
+  critical: boolean;
+}
+
 export interface SceneInput {
   hero: Who; crew: Who[]; foe: Who | null;
   /** 남의 배에 탄 말단 선원일 때 모시는 선장. 있으면(싸우지 않을 때) 선장이 맨 앞에 서고 주인공은 줄 끝에 선다 */
   captain?: Who | null;
-  sailing: boolean; place: string; islandColor: string; flag: 'pirate' | 'marine' | 'rev' | 'civil';
-  aura: string | null;
+  sailing: boolean; place: string; location: SceneLocation; weather: Weather; flag: NonNullable<Who['faction']>;
+  aura: string | null; strike?: SceneStrike;
 }
 
-const [buf, bx] = typeof document !== 'undefined' ? makeCanvas(8, 8) : [null as unknown as HTMLCanvasElement, null as unknown as CanvasRenderingContext2D];
+const FLAGS = {
+  pirate: ['#373245', '#c37767'],
+  marine: ['#dbe7e3', '#57829f'],
+  rev: ['#536e69', '#93a87d'],
+  civil: ['#a96462', '#c89871'],
+} as const;
+const PROJECTILE_WEAPONS = new Set<Weapon>(['gun', 'rifle', 'sniper', 'slingshot']);
 
-/** 저해상도로 그린 뒤 정수 배율로 키운다 */
-export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, sc: SceneInput) {
-  const S = w < 520 ? 2 : 3;
-  const W = Math.ceil(w / S), H = Math.ceil(h / S);
+function ship(s: Scenery, y: number, t: number, weather: Weather, flag: SceneInput['flag']) {
+  const cx = s.x(.53), half = Math.min(96, s.x(.39));
+  const left = cx - half, right = cx + half;
+  const mast = cx + Math.round(half * .25);
+  const sailTop = Math.max(10, y - 52);
+  const billow = weather === 'calm' ? 0 : Math.round(Math.sin(t * 4) * 2);
+  const sailWidth = Math.min(43, half - 13);
+  const [banner, stripe] = FLAGS[flag];
+  s.shape([[left - 4, y], [right + 6, y], [right - 9, y + 12],
+    [right - 24, y + 17], [left + 17, y + 17], [left + 7, y + 12]], '#533f49');
+  s.shape([[left, y + 3], [right, y + 2], [right - 10, y + 9],
+    [left + 10, y + 9]], '#a27055');
+  s.rect(left + 13, y + 10, right - left - 28, 2, '#805748');
+  s.rect(left - 1, y, right - left + 2, 2, '#e4b183');
+  for (let px = left + 18; px < right - 13; px += 13) {
+    s.rect(px, y + 5, 4, 4, '#4c3841');
+    s.rect(px + 1, y + 6, 2, 2, '#e3af79');
+  }
+  s.rect(mast, sailTop - 5, 2, y - sailTop + 5, '#725360');
+  s.shape([[mast - sailWidth + 5, sailTop + 3], [mast - 1, sailTop],
+    [mast - 2 + billow, y - 17], [mast - sailWidth, y - 20], [mast - sailWidth + billow, sailTop + 11]], '#f1e1c6');
+  s.shape([[mast - sailWidth, y - 20], [mast - 2 + billow, y - 17],
+    [mast - 1 + billow, y - 21], [mast - sailWidth + 1, y - 24]], '#c7a578');
+  s.rect(mast - sailWidth + 3, sailTop + 2, sailWidth - 4, 1, '#fff3d7');
+  s.shape([[mast + 4, sailTop + 7], [mast + sailWidth * .62, y - 19], [mast + 3, y - 18]], '#d6c1a9');
+  s.shape([[mast + 2, sailTop - 5], [mast + 18, sailTop - 4 + billow],
+    [mast + 13, sailTop + billow], [mast + 2, sailTop + 1]], banner);
+  s.rect(mast + 3, sailTop - 2, 10, 1, stripe);
+  if (weather !== 'calm') {
+    for (let i = 0; i < 5; i++) {
+      const wave = (Math.floor(t * 11) + i * 9) % 45;
+      s.rect(left - 22 + wave, y + 13 + i % 3 * 3, 3 + i, 1, '#c9dfdb');
+    }
+  }
+  return { left, right };
+}
+
+function strikeEffect(s: Scenery, strike: SceneStrike, weapon: Weapon, from: number, to: number, y: number, phase: number) {
+  const d = strike.hero ? 1 : -1;
+  const accent = strike.critical ? '#ffe79d' : '#c1e7f1';
+  if (PROJECTILE_WEAPONS.has(weapon)) {
+    const shot = from + (to - from) * Math.min(1, Math.max(0, (phase - .23) * 4));
+    if (phase < .4) s.rect(from - 2, y - 1, 4, 3, '#fff4d3');
+    s.rect(shot - 2 * d, y, 5, 1, accent);
+  } else if (weapon === 'sword' || weapon === 'naginata' || weapon === 'spear') {
+    const center = to - d * (strike.hit ? 0 : 8);
+    s.shape([[center - 9 * d, y + 7], [center - 4 * d, y - 4], [center + 8 * d, y - 8],
+      [center + 2 * d, y - 4], [center - 3 * d, y]], '#fff3de');
+    s.rect(center - 2 * d, y + 3, 3, 1, accent);
+  }
+  if (!strike.hit || phase < .39) return;
+  for (let i = 0; i < (strike.critical ? 11 : 6); i++) {
+    const a = i * 2.4, length = 3 + (phase - .39) * (12 + i % 3 * 4);
+    s.rect(to + Math.cos(a) * length, y + Math.sin(a) * length, i % 3 ? 2 : 3, 1, accent);
+  }
+  if (phase < .53) {
+    s.rect(to - 3, y, 7, 1, '#fffae1');
+    s.rect(to, y - 3, 1, 7, '#fffae1');
+  }
+}
+
+let buffer: ReturnType<typeof makeCanvas> | undefined;
+
+/** Draw at a small, integer pixel scale. Times are seconds since this canvas mounted. */
+export function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, t: number, sc: SceneInput, strikeAge = 1) {
+  const scale = 2;
+  const W = Math.ceil(w / scale), H = Math.ceil(h / scale);
+  const [buf, bx] = buffer ??= makeCanvas(W, H);
   if (buf.width !== W || buf.height !== H) { buf.width = W; buf.height = H; }
   bx.imageSmoothingEnabled = false;
-  const r = (px: number, py: number, rw: number, rh: number, col: string) => { bx.fillStyle = col; bx.fillRect(Math.round(px), Math.round(py), Math.round(rw), Math.round(rh)); };
-  const tt = Math.floor(t / 10);
-  const fighting = !!sc.foe;
-  const hz = Math.floor(H * 0.46);
-  const sky = fighting ? ['#e8845c', '#f4ac74', '#fcd49c'] : ['#58b0ec', '#80c8f4', '#b4e4f8'];
-  r(0, 0, W, hz, sky[0]); r(0, hz * 0.45, W, hz, sky[1]); r(0, hz * 0.8, W, hz, sky[2]);
-  r(W - 26, 7, 8, 10, '#fff4a8'); r(W - 27, 8, 10, 8, '#fff4a8'); r(W - 24, 9, 4, 5, '#ffffff');
-  for (let i = 0; i < 4; i++) {
-    const cx = Math.floor((i * 67 + t * 0.06) % (W + 40)) - 30, cy = 5 + (i % 3) * 9;
-    r(cx + 3, cy, 9, 2, '#ffffff'); r(cx, cy + 2, 17, 3, '#ffffff'); r(cx + 2, cy + 5, 12, 1, '#d4ecf8');
-  }
-  r(0, hz, W, H - hz, '#2f8fd0'); r(0, hz, W, 2, '#8cd0ec'); r(0, hz + (H - hz) * 0.5, W, H, '#2a7fc0');
-  for (let y = hz + 4, row = 0; y < H; y += 5, row++) {
-    for (let i = 0; i < W / 22 + 1; i++) {
-      const wx = (i * 22 + row * 9 + tt * 2) % (W + 12) - 6;
-      r(wx, y, 5, 1, row % 2 ? '#7cc8ec' : '#b8e8f4');
-    }
-  }
-  let ground: number;
-  if (!sc.sailing) {
-    const ic = sc.islandColor, ix = Math.floor(W * 0.52);
-    r(ix + 10, hz - 22, W, 30, ic); r(ix + 2, hz - 14, W, 22, ic); r(ix - 4, hz - 6, W, 14, ic);
-    r(ix + 18, hz - 26, 30, 4, ic); r(ix + 14, hz - 18, W, 3, '#ffffff22');
-    r(ix - 8, hz + 4, W, 6, '#f0dca0'); r(ix - 8, hz + 9, W, 2, '#d8bc78');
-    for (let i = 0; i < 3; i++) {
-      const hx = ix + 8 + i * 22, hy = hz - 12 + (i % 2) * 3, roof = i % 2 ? '#c8503c' : '#3c6cb0';
-      r(hx, hy, 14, 13, '#f8ecc0'); r(hx + 11, hy, 3, 13, '#dcc890');
-      r(hx - 2, hy - 2, 18, 3, roof); r(hx, hy - 4, 14, 2, roof); r(hx + 3, hy - 6, 8, 2, roof);
-      r(hx + 5, hy + 6, 4, 7, '#6a4426'); r(hx + 1, hy + 3, 3, 3, '#58a8dc'); r(hx + 10, hy + 3, 3, 3, '#58a8dc');
-    }
-    r(ix + 2, hz - 12, 2, 12, '#7a5030'); r(ix - 2, hz - 16, 10, 3, '#3f8a4a'); r(ix, hz - 19, 6, 3, '#58a85c');
-    ground = Math.floor(H * 0.74);
-    const dx = Math.floor(W * 0.06), dw = Math.floor(W * 0.80);
-    r(dx, ground, dw, 3, '#d8a868'); r(dx, ground + 3, dw, 4, '#9c6a3c'); r(dx, ground + 7, dw, 1, '#6a4426');
-    for (let i = 0; i <= dw; i += 12) r(dx + i, ground, 1, 3, '#b08048');
-    for (let i = 4; i < dw; i += 24) { r(dx + i, ground + 7, 3, H, '#6a4426'); r(dx + i, ground + 7, 1, H, '#8a5c34'); }
-  } else {
-    const bob = tt % 4 < 2 ? 0 : 1, sx = Math.floor(W * 0.2), sw = Math.floor(W * 0.6), dy = Math.floor(H * 0.70) + bob;
-    ground = dy;
-    const mx = sx + Math.floor(sw * 0.5);
-    r(mx, dy - 46, 2, 46, '#6a4426');
-    r(mx + 3, dy - 42, 28, 24, '#f8f0d8'); r(mx + 3, dy - 30, 28, 3, '#d8483c'); r(mx + 27, dy - 42, 4, 24, '#dcd0b0');
-    r(mx - 22, dy - 36, 20, 18, '#f8f0d8'); r(mx - 22, dy - 36, 3, 18, '#dcd0b0');
-    const flag = sc.flag === 'marine' ? '#f4f8fa' : sc.flag === 'pirate' ? '#241c28' : sc.flag === 'rev' ? '#3f6244' : '#d8483c';
-    r(mx + 2, dy - 52 + (tt % 2), 10, 6, flag); r(mx + 5, dy - 50 + (tt % 2), 3, 2, flag === '#f4f8fa' ? '#2a4a8a' : '#f8f0d8');
-    r(sx, dy, sw, 3, '#d8a868'); r(sx + 2, dy + 3, sw - 4, 6, '#9c6a3c'); r(sx + 6, dy + 9, sw - 12, 4, '#7a4c28'); r(sx + 12, dy + 13, sw - 24, 3, '#5c3418');
-    r(sx - 6, dy - 2, 8, 3, '#9c6a3c'); r(sx + sw - 2, dy - 4, 8, 4, '#9c6a3c');
-    for (let i = 8; i < sw - 8; i += 14) r(sx + i, dy + 5, 3, 3, '#3a2414');
-    r(sx - 4, dy + 15, sw + 8, 2, '#d8f0f8');
-  }
-  const frame = (tt >> 1) & 1;
-  const put = (who: Who, cx: number, pose: 'attack' | null, flip: boolean) => {
-    const sp = bodySprite(who, pose === 'attack' ? 0 : frame, pose), py = ground - 22;
-    if (flip) { bx.save(); bx.translate(Math.round(cx) + 20, py); bx.scale(-1, 1); bx.drawImage(sp, 0, 0); bx.restore(); }
-    else bx.drawImage(sp, Math.round(cx), py);
-  };
+  const art = new Scenery(bx, W, H);
+  const seed = hash(sc.location.name);
+  const ground = sc.sailing ? drawSea(art, t, sc.weather) : landGround(art);
+  const deck = sc.sailing ? ship(art, ground, t, sc.weather, sc.flag) : null;
+  if (!sc.sailing) drawLand(art, sc.location, t, seed);
+
+  const size = W >= 220 && H >= 72 ? 2 : 1;
   const crew = sc.crew.slice(0, 3);
-  const lunge = fighting ? Math.round(Math.sin(t * 0.13) * 4) : 0;
-  let heroX = W * 0.36 + lunge;
-  if (sc.captain && !fighting) {
-    // 말단 선원: 선장 → 선배 선원들 → 주인공(맨 끝). 배 위에서는 선장이 돛대 앞(뱃머리 쪽)에 선다
-    const tailX = sc.sailing ? Math.floor(W * 0.2) + 2 : W * 0.10;
-    const frontX = sc.sailing ? W * 0.56 : W * 0.45;
-    const lineL = tailX + 15, lineR = sc.sailing ? W * 0.43 : W * 0.36;
-    put(sc.captain, frontX, null, false);
-    crew.forEach((c, i) => put(c, crew.length > 1 ? lineL + ((lineR - lineL) * i) / (crew.length - 1) : (lineL + lineR) / 2, null, false));
-    put(sc.hero, tailX, null, false);
-    heroX = tailX;
-  } else {
-  if (sc.sailing) {
-    // 배 위: 갑판(폭의 20~80%) 안에 세운다. 싸우지 않을 때는 셋째를 돛대 오른쪽에
-    const deckL = Math.floor(W * 0.2) + 2, heroX = W * 0.36;
-    const behind = !fighting && crew.length === 3 ? crew.slice(0, 2) : crew;
-    const span = Math.max(0, heroX - 14 - deckL);
-    behind.forEach((c, i) => put(c, deckL + (behind.length > 1 ? (span * i) / (behind.length - 1) : span / 2), null, false));
-    if (behind.length < crew.length) put(crew[2], W * 0.56, null, false);
-  } else {
-    crew.forEach((c, i) => put(c, W * (0.10 + i * 0.085), null, false));
-  }
-  put(sc.hero, W * 0.36 + lunge, fighting && tt % 4 < 2 ? 'attack' : null, false);
-  if (sc.foe) {
-    put(sc.foe, W * 0.58 - lunge, tt % 4 >= 2 ? 'attack' : null, true);
-    if (tt % 4 === 1 || tt % 4 === 3) {
-      // 공격하는 쪽의 무기에 맞는 효과: 칼은 베는 자국, 주먹은 충격파, 총은 총구 불꽃과 탄도
-      const heroTurn = tt % 4 === 1;
-      const wp = (heroTurn ? sc.hero.weapon : sc.foe.weapon) ?? 'sword';
-      const heroX = W * 0.36 + lunge, foeX = W * 0.58 - lunge;
-      const tx = heroTurn ? foeX + 10 : heroX + 10;          // 맞는 쪽 몸통
-      const fy = ground - 14;
-      if (wp === 'sword') {
-        for (let i = 0; i < 11; i++) { r(tx - 6 + i, fy - 7 + i, 2, 1, '#ffffff'); r(tx - 5 + i, fy - 7 + i, 1, 1, '#bfe0ff'); }
-        r(tx - 7, fy - 8, 2, 1, '#fff8c0'); r(tx + 5, fy + 4, 2, 1, '#fff8c0');
-      } else if (wp === 'gun') {
-        const mx = heroTurn ? heroX + 19 : foeX + 1, my = ground - 12;
-        const hx = heroTurn ? foeX + 5 : heroX + 14;          // 맞는 쪽 몸의 앞면
-        r(heroTurn ? mx : mx - 2, my - 1, 2, 3, '#fff8c0');
-        const a = Math.min(mx, hx), b = Math.max(mx, hx);
-        for (let x = a + 3; x < b - 2; x += 3) r(x, my, 2, 1, '#ffe080');
-        r(hx, my - 1, 1, 1, '#ffd060'); r(hx + (heroTurn ? -1 : 1), my + 1, 1, 1, '#ffd060');
-      } else {
-        // 맞는 쪽 몸의 앞면, 가슴 높이에 작은 충격파
-        const hx = heroTurn ? W * 0.58 - lunge + 4 : W * 0.36 + lunge + 15, cy = ground - 11;
-        r(hx, cy - 3, 1, 7, '#fff8c0'); r(hx - 3, cy, 7, 1, '#fff8c0'); r(hx, cy, 1, 1, '#ffffff');
-        [[-3, -3], [3, -3], [-3, 3], [3, 3]].forEach(([ox, oy]) => r(hx + ox, cy + oy, 1, 1, '#ffd890'));
-      }
+  const mid = deck ? (deck.left + deck.right) / 2 : art.x(.51);
+  const fighting = !!sc.foe;
+  const front = fighting ? 2 : 1;
+  const leftCrew = Math.ceil(crew.length / 2);
+  const gaps = Math.max(1, crew.length + front - 1);
+  const stageWidth = Math.max(0, (deck ? deck.right - deck.left : W) - 20);
+  const spacing = Math.min(size * (fighting ? 44 : 33), stageWidth / gaps);
+  const slot = (index: number) => mid + (index - (crew.length + front - 1) / 2) * spacing;
+  const strike = sc.foe && sc.strike && strikeAge < .54 ? sc.strike : null;
+  const phase = strikeAge / .54;
+  const reach = strike ? Math.sin(Math.PI * phase) * size : 0;
+  const weapon = (strike?.hero ? sc.hero : sc.foe)?.weapon ?? 'fist';
+  const ranged = PROJECTILE_WEAPONS.has(weapon);
+  const move = ranged ? reach * -2 : reach * Math.max(0, spacing / size - 11);
+  const guard = strike?.dodge ? reach * 5 : strike?.hit && phase > .45 ? reach * 3 : 0;
+  const heroX = slot(leftCrew) + (strike?.hero ? move : -guard);
+  const foeX = slot(leftCrew + 1) - (strike && !strike.hero ? move : -guard);
+
+  const put = (who: Who, cx: number, zoom: number, pose: 'attack' | null, flip: boolean, y = ground) => {
+    const idle = t !== 0 && (t + (hash(who.key) % 20) * .13) % 2.8 > 2.49 ? 1 : 0;
+    const sp = bodySprite(who, pose ? 0 : idle, pose);
+    // The body is left-aligned in its sprite so it has room to swing a weapon.
+    const anchor = (who.form === 'seaking' ? 10 : 8) * zoom;
+    const sx = Math.round(cx - (flip ? sp.width * zoom - anchor : anchor));
+    const sy = y - 22 * zoom;
+    art.rect(cx - 5 * zoom, y - 1, 10 * zoom, 2, '#33293766');
+    art.rect(cx - 3 * zoom, y + 1, 6 * zoom, 1, '#33293744');
+    if (flip) {
+      bx.save();
+      bx.translate(sx + sp.width * zoom, sy);
+      bx.scale(-1, 1);
+      bx.drawImage(sp, 0, 0, sp.width * zoom, sp.height * zoom);
+      bx.restore();
+    } else {
+      bx.drawImage(sp, sx, sy, sp.width * zoom, sp.height * zoom);
     }
-  }
+  };
+  let auraX = heroX;
+  if (sc.captain && !fighting) {
+    // 남의 배의 말단 선원: 주인공(줄 끝) → 선배 선원들 → 모시는 선장(맨 앞, 오른쪽)
+    const line = [sc.hero, ...crew, sc.captain];
+    const step = Math.min(size * 30, stageWidth / Math.max(1, line.length - 1));
+    const at = (i: number) => mid + (i - (line.length - 1) / 2) * step;
+    crew.forEach((c, i) => put(c, at(i + 1), 1, null, false, ground - 1));
+    put(sc.captain, at(line.length - 1), size, null, false);
+    auraX = at(0);
+    put(sc.hero, auraX, size, null, false);
+  } else {
+    crew.forEach((c, i) => {
+      const right = i >= leftCrew;
+      put(c, slot(right ? i + front : i), 1, null, right, ground - 1);
+    });
+    const attacking = phase >= .18 && phase < .78;
+    put(sc.hero, heroX, size, strike?.hero && attacking ? 'attack' : null, false);
+    if (sc.foe) put(sc.foe, foeX, size, strike && !strike.hero && attacking ? 'attack' : null, true);
+    if (strike && phase >= .23 && phase < .90) {
+      strikeEffect(art, strike, weapon, strike.hero ? heroX + 9 * size : foeX - 9 * size,
+        strike.hero ? foeX - 3 * size : heroX + 3 * size, ground - 11 * size, phase);
+    }
   }
   if (sc.aura) {
-    const ax = heroX;
-    [[1, 4], [17, 9], [3, 15], [16, 1]].forEach(([ox, oy], i) => { if ((tt + i) % 4 < 2) r(ax + ox, ground - 22 + oy - ((tt + i) % 4), 1, 2, sc.aura!); });
+    const color = sc.aura;
+    for (let i = 0; i < 5; i++) {
+      const life = (t * 6 + i * 2) % 10;
+      if (life < 7) art.rect(auraX + (i * 5 % 19 - 9) * size, ground - (5 + i + life) * size, 1, 2, color);
+    }
   }
+  if (sc.sailing) drawSeaAir(art, t, sc.weather, seed);
+  else drawLandAir(art, sc.location, t, seed);
+
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(buf, 0, 0, W * S, H * S);
-  // 지명 팻말
-  const label = sc.place;
+  ctx.drawImage(buf, 0, 0, W * scale, H * scale);
   ctx.font = "12px 'Galmuri11', sans-serif";
-  const lw = Math.min(w - 16, Math.ceil(ctx.measureText(label).width) + 20);
-  ctx.fillStyle = '#2c170b'; ctx.fillRect(8, 8, lw, 24);
-  ctx.fillStyle = '#9c5f33'; ctx.fillRect(10, 10, lw - 4, 20);
-  ctx.fillStyle = '#4b2a17'; ctx.fillRect(12, 12, lw - 8, 16);
-  ctx.fillStyle = '#f8e8b8'; ctx.textBaseline = 'middle'; ctx.fillText(label, 18, 21);
+  const labelWidth = Math.max(0, Math.min(w - 34, Math.ceil(ctx.measureText(sc.place).width)));
+  if (!labelWidth) return;
+  ctx.fillStyle = '#292336dc'; ctx.fillRect(8, 8, labelWidth + 18, 22);
+  ctx.fillStyle = '#c89e76'; ctx.fillRect(8, 8, 2, 22);
+  ctx.fillStyle = '#fff0cf'; ctx.textBaseline = 'middle'; ctx.fillText(sc.place, 17, 19, labelWidth);
   ctx.textBaseline = 'alphabetic';
 }
