@@ -75,11 +75,13 @@ export interface Unchosen { age: number; turning: string; title: string; door: s
 /** 연표 한 줄. standing: 처지가 이리로 바뀐 줄, canon: 이 원작 인물이 말한 전환점에서 고른 줄, limb: 이 부위를 잃은 줄 */
 export interface TimelineEntry {
   age: number; text: string; standing?: Standing;
+  choice?: string;                            // 당시 화면에서 결정한 문의 키. 인물 이름이 담긴 원문을 엔딩에도 쓴다.
   canon?: string;                              // 원작 인물 id (3단계부터). 옛 저장에는 표시 이름이 남아 있다. 있는지만 본다
   limb?: Limb;
 }
 
 export type Cond =
+  | { c: 'defeatedFoe' }
   | { c: 'anyOf'; conditions: Cond[] }
   | { c: 'disciple'; stage: DiscipleStage }
   | { c: 'styleBond'; style: CombatStyle; phase: 'new' | 'ready' | 'refine' }
@@ -98,10 +100,12 @@ export type Cond =
   | { c: 'equippedWeapon' }
   | { c: 'prime' }
   | { c: 'fame'; min: number }
+  | { c: 'bounty'; min: number }
   | { c: 'grade'; is: string[] }                 // 화면에 표시하는 종합 전투 등급
   | { c: 'turningSeen'; id: string; has: boolean } // 이 인생에서 해당 전환점을 이미 보았는가
   | { c: 'choiceAgo'; turning: string; door: number; years?: number }
   | { c: 'canonPerson'; id: string; has: boolean; kinds?: Person['kind'][] }
+  | { c: 'opponent'; canon: string }
   | { c: 'tier'; branch: Branch | 'any'; min: number }
   | { c: 'flag'; id: string; has: boolean }
   | { c: 'fruit'; has: boolean }
@@ -113,13 +117,15 @@ export type Cond =
   | { c: 'standingYears'; min: number }         // 지금의 처지가 된 지 몇 해
   | { c: 'island'; is: string[]; not?: boolean } // 지금 있는 섬 (hero.island). not이면 그 섬들이 아닐 때
   | { c: 'species'; is: Species[] }             // 종족
-  | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean }   // 살아 있는 형제 · 부모가 있는가 (없을 때만 여는 이야기에 쓴다)
-  | { c: 'person'; relation: string; has: boolean; kinds?: Person['kind'][] }
+  | { c: 'kin'; who: 'sibling' | 'parent'; has: boolean; minAge?: number }
+  | { c: 'siblingReunion'; action?: 'share' | 'join' }
+  | { c: 'person'; relation: string; has: boolean; kinds?: Person['kind'][]; minAge?: number }
   | { c: 'path'; is: (Branch | 'none')[] }      // 지금 걷는 길 (growth.path, 아직 없으면 'none')
   | { c: 'canonAge'; id: string; min?: number; max?: number }
   | { c: 'dream'; has: boolean; done?: boolean; is?: DreamId[]; years?: number };   // 꿈을 품었는가 (done: 이루었는가, is: 그 꿈인가, years: 품은 지 몇 해)
 
 export type Fx =
+  | { op: 'recruitDefeated' }
   | { op: 'disciple'; action: 'accept' | 'train' | 'sail' | 'delay' | 'resolve'; outcome?: DiscipleRecord['outcome'] }
   | { op: 'beginStyle'; style: CombatStyle; teacherRelation?: string }
   | { op: 'adoptStyle' | 'refineStyle'; style: CombatStyle }
@@ -130,6 +136,7 @@ export type Fx =
   | { op: 'hp'; add: number }
   | { op: 'money'; add: number; trade?: boolean }
   | { op: 'fame'; add: number }
+  | { op: 'escapeNotoriety'; riot?: boolean }
   | { op: 'rank'; add: number }
   | { op: 'standing'; to: Standing }
   | { op: 'wealth'; to: Wealth }                         // 집안 형편이 바뀐다 (몰락 등)
@@ -148,6 +155,8 @@ export type Fx =
   | { op: 'vowDecline' }
   | { op: 'parentMissing' }                              // 살아 있는 부모 하나가 바다에서 돌아오지 않는다 (행방불명)
   | { op: 'parentFound' }                                // 행방불명된 부모를 다시 만난다 (없으면 처음 만나는 부모로 들인다)
+  | { op: 'welcomeSibling'; action: SiblingWelcomeAction }
+  | { op: 'siblingReunion'; action: SiblingReunionAction }
   | { op: 'sail'; island: string; route: 'calm' | 'dream' | 'wild' }   // 고른 항로로 섬을 옮긴다 (core/voyage.ts)
   | { op: 'entry'; gate: EntryGate; island: string; sea: SeaId; route: ArrivalRoute; option: number }
   | { op: 'entryPass'; gate: EntryGate }
@@ -165,7 +174,7 @@ export type Fx =
       medicalSkill?: number;                   // 선의의 치료 솜씨. 전투 레벨과 별개
       years?: number }                         // 임시 동행: 이 햇수만 함께하고 제 길로 떠난다 (kind 'crew'에만)                          // 동료(crew)의 싸움 자리. 없으면 V.person.crew.role
   | { op: 'pref'; branch: Branch; add: number } // 그 갈래의 선호도를 올린다 (자잘한 일도 쓸 수 있다)
-  | { op: 'personChange'; relation: string; kind?: Person['kind']; bond?: number }
+  | ({ op: 'personChange'; kind?: Person['kind']; bond?: number; rename?: string; alias?: string } & ({ relation: string } | { who: ContactRole }))
   | { op: 'crewTrain'; add: number }            // 살아 있는 동료 모두의 레벨을 올린다 (해군 분대를 키운다)
   | { op: 'partCrew'; prefix: string }          // 관계 글이 prefix로 시작하는 동료가 떠난다: 동료에서 빠지고 아는 사람(ally)으로 남는다
   | { op: 'losePerson'; relation: string }
@@ -243,6 +252,8 @@ export interface TraitState {
   crewSeen: string[];
 }
 export type DiscipleStage = 'meeting' | 'training' | 'sailing' | 'reunion';
+export type SiblingWelcomeAction = 'hold' | 'name' | 'letter';
+export type SiblingReunionAction = 'share' | 'join' | 'part';
 export type ContactRole = 'crew' | 'spouse' | 'child' | 'sibling' | 'parent';
 export interface DiscipleRecord {
   personId: string; style: CombatStyle; since: number; island: string;
@@ -250,6 +261,7 @@ export interface DiscipleRecord {
   outcome?: 'duel' | 'reconciled' | 'reported';
 }
 export interface Life5 {
+  defeatedFoe?: string;                       // 처리 대기 중인 전투 뒤 선택의 실제 상대 ID
   /** 실제로 받아들인 제자들. 기술과 시기는 가르치기 시작한 때의 사실로 남긴다. */
   disciples?: DiscipleRecord[];
   /** 코스별 사실과 실제로 진행한 토막. 옛 저장에는 없다. */
@@ -268,6 +280,8 @@ export interface Life5 {
   values: Values; personality: Personality5; strengths: string[]; marks: Record<string, number>;
   hardship: number;
   people: Person[];
+  siblingBirths?: { age: number; name: string; gender: Person['gender'] }[];   // 주인공이 이 나이가 되면 동생이 태어난다
+  siblingMeeting?: string;                   // 지금 재회 선택창에 나온 형제의 인물 ID
   flags: string[]; seen: Record<string, number>; queue: string[];   // seen: id → 마지막으로 본 나이
   seenCount: Record<string, number>;           // 전환점 id → 이번 인생에 열린 횟수
   firstChoiceAge?: Record<string, number>;    // 이번 생에서 이 선택을 처음 한 나이

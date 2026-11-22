@@ -88,7 +88,7 @@ describe('크로커다일의 봉쇄된 항구 거래', () => {
     expect(life.pending).toBeNull();
   });
 
-  it('옛 저장의 이미 열린 질문은 옛 선택 결과로 마무리한다', () => {
+  it.each([[0, 'crew'], [1, 'ally'], [2, null]] as const)('옛 저장의 이미 열린 질문 %i는 옛 선택 결과로 마무리한다', (choice, relation) => {
     const old = newLife5(13);
     const door = (label: string): ResolvedDoor => ({ label, hint: '', locked: null, special: false, tried: false, danger: false });
     old.pending = {
@@ -97,11 +97,13 @@ describe('크로커다일의 봉쇄된 항구 거래', () => {
       doors: [door('갈 길이 갈릴 때까지 한 뱃길을 간다'), door('길은 따로 가되 소식은 주고받기로 한다'), door('무엇을 쫓는 사람인지만 캐묻고 헤어진다')],
     };
     const life = normalizeLife5(JSON.parse(JSON.stringify(old)))!;
+    expect(life.pending).toMatchObject({ kind: 'door', turning: 'tmp_crocodile' });
     const before = life.hero.base.int;
-    answerDoor(life, 2);
-    expect(life.hero.base.int).toBe(before + 1);
-    expect(life.people.some((person) => person.canon === 'crocodile')).toBe(false);
+    answerDoor(life, choice);
+    expect(life.hero.base.int).toBe(before + (choice === 2 ? 1 : 0));
+    expect(life.people.filter((person) => person.canon === 'crocodile').map((person) => person.kind)).toEqual(relation ? [relation] : []);
     expect(life.pending).toBeNull();
+    expect(checkAll(eligibleLife(), TURNING_BY_ID.tmp_crocodile.when)).toBe(false);
   });
 
   it('옛 크로커다일 만남을 이미 본 인생에는 새 거래가 다시 뜨지 않는다', () => {

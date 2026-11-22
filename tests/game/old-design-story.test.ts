@@ -14,6 +14,7 @@ function choose(s: Life5, id: string, index: number): void {
 
 function promisedFriend(): { s: Life5; id: string; name: string } {
   const s = newLife5(11);
+  s.siblingBirths = [];
   s.age = 7;
   choose(s, 'kid_ship_friend', 0);
   const first = s.people.find((p) => p.relation === '어릴 적 동무');
@@ -88,9 +89,10 @@ describe('돌아온 도면의 인연', () => {
 
   it('옛 저장에 이미 떠 있던 근거 없는 황혼기 창을 닫는다', () => {
     const s = newLife5(11);
+    s.siblingBirths = [];
     s.age = 60;
     s.pending = null;
-    expect(openTurning(s, TURNING_BY_ID.late_old_design)).toBe(true);
+    s.pending = { kind: 'door', turning: 'late_old_design', moment: false, title: '옛 도면', body: '옛 저장의 창', speaker: '동무', doors: [] };
     const restored = normalizeLife5(JSON.parse(JSON.stringify(s)));
     expect(restored).not.toBeNull();
     expect(restored?.pending).toBeNull();

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sfx } from '../../app/sound';
 import { josa } from '../../shared/core/josa';
-import { drawScene } from '../pixel/pixelArt';
+import { usePixelScene } from '../pixel/usePixelScene';
 import { battleSpeedOf } from '../../app/flow';
 import { actions, dispatch, useStore } from '../../app/store';
 import type { Life5, Pending5 } from '../../core/types';
@@ -53,28 +53,18 @@ export function BattleModal({ s, p }: { s: Life5; p: Extract<Pending5, { kind: '
   const dm = b.events.slice(0, idx).find((e) => e.k === 'deathmatch') as { who: number } | undefined;
   const lethalNow = p.lethal || !!dm;
 
-  // 장면: v4와 같은 캔버스. 공격하는 쪽이 번갈아 자세를 잡는다. 이기고 나면 상대가 사라진다
-  const cv = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = cv.current;
-    if (!c) return;
-    const base = sceneOf(s, true);   // 전투 창은 이야기가 다 떠오른 뒤에 뜬다
-    let raf = 0, t = 0;
-    const loop = () => {
-      t++;
-      const w = c.clientWidth, h = c.clientHeight;
-      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-      const ctx = c.getContext('2d');
-      if (ctx && w) drawScene(ctx, w, h, t, {
-        ...base, crew: [],
-        foe: foe && !(done && p.result === 'win') ? unitWho(s, foe) : null,
-        sailing: b.atSea, place: `${round ? `${round.n}합` : '대치'} · ${p.foe.name}`,
-      });
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [foeI, done, round?.n]);
+  const base = useMemo(() => sceneOf(s, true), [s]);
+  const sceneFoe = useMemo(() => foe && !(done && p.result === 'win') ? unitWho(s, foe) : null, [s, foe, done, p.result]);
+  const strike = useMemo(() => {
+    if (current?.k !== 'act' || current.skill === 'bound' || !sceneFoe) return;
+    if (!((actor === heroI && target === foeI) || (actor === foeI && target === heroI))) return;
+    return { hero: actor === heroI, hit: current.dmg > 0, dodge: current.dodge, critical: current.crit };
+  }, [current, actor, target, heroI, foeI, sceneFoe]);
+  const scene = useMemo(() => ({
+    ...base, crew: [], foe: sceneFoe, strike,
+    sailing: b.atSea, place: `${round ? `${round.n}합` : '대치'} · ${p.foe.name}`,
+  }), [base, sceneFoe, strike, b.atSea, round, p.foe.name]);
+  const cv = usePixelScene(scene);
 
   return (
     <Modal title={`${lethalNow ? '목숨을 건 ' : ''}${formation.mode === 'duel' ? '1대1 전투' : '집단전'} · ${p.foe.name}`} cls="pend battle5" wide>

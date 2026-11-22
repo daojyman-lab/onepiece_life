@@ -197,7 +197,7 @@ export const HOMES_LEAVE: Turning[] = [
   },
   {
     id: 'zou_mission', kind: 'door', when: atHome('zou', age(18, 40), LANDED, { c: 'tier', branch: 'any', min: 2 }), weight: 2, repeat: 'once', speaker: { relation: '낮 왕의 부하 장수' },
-    title: '바깥 임무', body: '공작의 명으로 바깥 바다에 나가 동맹의 소식을 알아 올 전사를 뽑는다. 장수는 {name}의 창 솜씨를 보았다고 한다.',
+    title: '바깥 임무', body: '공작의 명으로 바깥 바다에 나가 동맹의 소식을 알아 올 전사를 뽑는다. 장수가 봉한 전갈을 내보이며 {name}에게 이 일을 맡겠느냐고 묻는다.',
     doors: [
       { label: '임무를 받고 바깥 바다로 나간다', hint: '동맹의 나라를 찾아 떠난다', values: { loyalty: D },
         fx: [{ op: 'fame', add: 5 }, { op: 'log', text: '전갈을 기름 먹인 종이에 싸서 품고 배에 올랐다.', weight: 'light' },
@@ -234,7 +234,7 @@ export const HOMES_RETURN: Turning[] = [
     id: 'wano_return', kind: 'door', when: away('wano', age(22), ROAMING, sea('nw_first', 'nw_late')), weight: 2, repeat: { years: 10 }, speaker: 'hero',
     title: '폭포를 오르는 잉어', body: '{island}의 뱃사람들이, 쇄국의 나라를 두른 폭포를 큰 잉어가 거슬러 오르는 철이라고 한다. 고향의 벚꽃이 필 무렵이다.',
     doors: [
-      { label: '폭포 뒤의 비밀 물길을 따라간다', hint: '어릴 때 본 물길을 찾아 고향으로 돌아간다', values: { loyalty: D },
+      { label: '폭포 뒤의 비밀 물길을 따라간다', hint: '잉어들이 오르는 폭포 뒤로 고향 길이 열린다', values: { loyalty: D },
         fx: [{ op: 'moveHome' }, { op: 'log', text: '물소리가 잦아들자 고향의 산이 보였다.', weight: 'heavy' }, { op: 'timeline', text: '비밀 물길을 따라 고향 {town}(으)로 돌아왔다' }] },
       { label: '고향 쪽 하늘에 술잔을 올린다', hint: '돌아가지 않는다', values: { romance: D }, fx: [{ op: 'log', text: "고향의 벚꽃이 필 하늘을 향해 술을 조금 부었다. 잔을 거둔 뒤 폭포로 향하는 배 대신 제 항로를 택했다.", weight: 'light' }] },
     ],
@@ -252,7 +252,7 @@ export const HOMES_RETURN: Turning[] = [
     id: 'sky_return', kind: 'door', when: away('sky', age(20), ROAMING, sea('gl_entry', 'gl_first')), weight: 2, repeat: { years: 10 }, speaker: 'hero',
     title: '거꾸로 솟는 물기둥', body: '{island} 앞바다에서 바닷물이 하늘로 솟구치는 날이 다가온다고 한다. 그 물기둥을 타면 구름 위까지 오른다.',
     doors: [
-      { label: '고향의 숨은 구름길을 찾는다', hint: '어릴 때 배운 항로를 따라 하늘섬으로 돌아간다', values: { romance: D },
+      { label: '고향의 숨은 구름길을 찾는다', hint: '물기둥이 솟는 날 구름 바다로 올라간다', values: { romance: D },
         fx: [{ op: 'moveHome' }, { op: 'log', text: '옅은 구름 띠를 지나자 흰 구름 바다가 펼쳐졌다. 고향이었다.', weight: 'heavy' }, { op: 'timeline', text: '숨은 구름길을 따라 하늘섬으로 돌아왔다' }] },
       { label: '청해에 남는다', hint: '이제 이 바다가 사는 곳이다', values: { freedom: D }, fx: [{ op: 'log', text: "물기둥이 솟는 시각을 듣고도 배의 돛을 다른 쪽으로 돌렸다. 하늘로 오르는 항로는 수평선 뒤에 남았다.", weight: 'light' }] },
     ],

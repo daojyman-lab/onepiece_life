@@ -359,12 +359,12 @@ select:focus-visible, input:focus-visible { outline: 2px dashed var(--red); outl
 .battle5-member-info .row { gap: 2px; }
 .battle5-member-info b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .battle5-scene { padding: 0; margin: 0 0 6px; }
-.battle5-scene .scene { height: 150px; }
+.battle5-scene .scene { height: 176px; }
 .modal.battle5 > .battle-log { flex: 1 1 auto; min-height: 72px; max-height: none; }
 .battle5-bar, .battle5-end { margin-top: 6px; }
 .battle5-end .btn { margin-top: 6px; }
 @media (max-width: 760px) {
-  .battle5-scene .scene { height: 104px; }
+  .battle5-scene .scene { height: 150px; }
   .battle5-vs .face.sm { width: 28px; height: 28px; }
   .battle5-vs .side { grid-template-columns: 28px 1fr; }
   .battle5-roster { max-height: 140px; }

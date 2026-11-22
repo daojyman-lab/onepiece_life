@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
 import { reduce5 } from '../../src/core/reduce';
-import { askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/core/fight';
+import { ackBattle, askFight, backOffChance, riskOf, heroUnit5, gapOf, foePower, minorFoe, minorFight } from '../../src/core/fight';
 import { openTurning } from '../../src/core/turning';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import { crewPowerFor } from '../../src/shared/core/people';
@@ -209,11 +209,17 @@ describe('싸움', () => {
   });
   it('쓰러진 적을 동료로 받으면 그 동료는 다음 싸움에 함께 나선다', () => {
     let s = fighter(2); s.hero.sea = 'gl_first';
+    const defeated = FOES[weak];
+    s.pending = { kind: 'battle', foe: defeated, lethal: false, battle: {} as never, result: 'win' };
+    ackBattle(s);
     openTurning(s, TURNING_BY_ID.after_fight);
     s = reduce5(s, { type: 'answer', index: 2 });
     const mate = s.people.find((p) => p.kind === 'crew')!;
+    expect(mate.canon).toBe(defeated.canon ?? null);
+    expect(mate.gender).toBe(defeated.gender);
     expect(mate.crew).toEqual({ role: V.person.crew.role, level: V.person.crew.level, power: crewPowerFor(3, V.person.crew.level), skills: [], injuredMonths: 0 });
-    askFight(s, weak, false, true);
+    const other = Object.values(FOES).find(foe => foe.canon && foe.canon !== mate.canon)!;
+    askFight(s, other.id, false, true);
     const b = s.pending as Extract<Life5['pending'], { kind: 'battle' }>;
     expect(b.battle.units.some((u) => u.personId === mate.id && u.side === 'L')).toBe(true);
   });

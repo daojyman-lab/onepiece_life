@@ -1,11 +1,13 @@
-import { ORPHAN_STORIES, SPECIES_NAMES } from '../shared/data/births';
+import { HOMETOWNS, ORPHAN_STORIES, SPECIES_NAMES } from '../shared/data/births';
 import { traitName } from './traits';
 import { pick, rngOf, weighted } from '../shared/core/rng';
 import { V } from '../data/balance';
 import { TURNINGS } from '../data/turnings';
 import { VALUE_IDS } from '../data/values';
 import { fullName, rollBirth, type BirthOpt } from './birth';
-import { rollFamily } from './family';
+import { introduceFamily, rollFamily } from './family';
+import { townLabel } from '../data/homes';
+import { INLAND_TOWNS } from '../data/landlocked';
 import { LIMBS } from './body';
 import { logLine, yearDivider } from './log';
 import { checkAll } from './cond';
@@ -67,6 +69,11 @@ export function emptyLife(seed: number): Life5 {
 }
 
 const WEALTH_HOUSE: Record<Wealth, string> = { poor: '가난한 집', common: '평범한 집', comfortable: '넉넉한 집', noble: '이름난 집안' };
+const ORPHAN_INLAND_STORIES = [
+  '{place}의 한 집 문턱에서 갓난아이가 발견되었다.',
+  '이른 아침, {place} 길가에 놓인 바구니에서 아기 울음이 들렸다.',
+  '{place}에 들른 나그네가 어린아이를 맡기고 떠났다.',
+];
 
 /**
  * 새 인생: 출생 주사위를 굴리고 가족을 두고 세 살 아이로 시작한다. 유년기의 첫 문이 떠 있다.
@@ -79,14 +86,18 @@ export function newLife5(seed: number, opt: BirthOpt & { known?: readonly string
   const h = s.hero;
   h.bornWealth = h.wealth;
   const r = rngOf(s.rng);
+  const orphanStories = INLAND_TOWNS.includes(h.town) || h.town === '고아 왕국 그레이 터미널' ? ORPHAN_INLAND_STORIES : ORPHAN_STORIES;
   const born = h.lineage === 'orphan'
-    ? `${pick(r, ORPHAN_STORIES).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
+    ? `${pick(r, orphanStories).replace('{place}', h.town)} 마을 사람들은 ${h.species === 'human' ? '' : `${SPECIES_NAMES[h.species]} `}아이를 「${fullName(h)}」(이)라 불렀다.`
     : `${h.town}의 ${WEALTH_HOUSE[h.wealth]}에서 ${fullName(h)}이(가) 태어났다.`;
   const gifts = h.talents.map(traitName).join(', ');
   for (const text of [born, `타고난 것: ${gifts}`]) logLine(s, text, 'heavy', 'world');
   s.age = V.birth.startAge;
-  rollFamily(s, r);                            // 가족은 시작하는 나이에 맞춰 둔다 (손아래 형제는 이미 태어난 아이만)
+  rollFamily(s, r);
   yearDivider(s);                              // 시작하는 해에도 구분선이 있다
+  const town = HOMETOWNS.find((t) => t.home === h.home && t.name === h.town);
+  if (town) logLine(s, `고향은 ${townLabel(h.home, h.town)}. ${town.text}`, 'heavy', 'world');
+  introduceFamily(s);
   s.hero.standing = 'child';
   const first = weighted(r, TURNINGS.filter((t) => t.id.startsWith('kid_') && checkAll(s, t.when)), (t) => t.weight);
   if (first) openTurning(s, first);

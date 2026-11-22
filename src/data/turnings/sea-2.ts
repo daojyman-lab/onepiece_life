@@ -111,7 +111,7 @@ export const SEA_GRAND_LINE: Turning[] = [
   {
     id: 'gl_sabaody_coating', kind: 'door', when: at(age(17), st(...SEAFARING), sea('sabaody'), { c: 'flag', id: 'ship', has: true }),
     weight: 5, repeat: 'once', speaker: { relation: '코팅 장인' },
-    title: '코팅의 값', body: '배를 비눗방울로 감싸야 깊은 바닷속 길을 지나 신세계에 갈 수 있다. 코팅 장인이 부른 값은 가진 돈의 몇 배다. 사흘이 걸리고, 그동안 이 섬에서는 해군 대장의 그림자가 어른거린다.',
+    title: '코팅의 값', body: '배를 비눗방울로 감싸야 깊은 바닷속 길을 지나 신세계에 갈 수 있다. 장인은 값이 부담되면 일손을 보태는 길도 있다고 한다. 사흘이 걸리고, 그동안 이 섬에서는 해군 대장의 그림자가 어른거린다.',
     doors: [
       { label: '장인 밑에서 일해 코팅 값을 갚는다', hint: '한 해를 이 섬에서 보낸다. 손은 고되지만 빚은 없다', values: { loyalty: D },
         fx: [{ op: 'hp', add: -10 }, { op: 'base', key: 'str', add: 1 }, { op: 'flag', id: COATING_CONTACT }, { op: 'log', text: "장인의 일터에서 거품 막을 덧입히고 새는 부분을 막았다. 손은 상했지만 코팅 값을 치른 뒤 빚 장부가 비었다. 장인은 다음에도 도움이 필요하면 찾아오라 했다.", weight: 'light' }] },
@@ -206,14 +206,14 @@ export const SEA_NEW_WORLD: Turning[] = [
   {
     id: 'nw_weather', kind: 'door', when: at(age(18), st(...SEAFARING), sea('nw_first', 'nw_late')),
     weight: 4, repeat: { years: 6 }, speaker: 'hero',
-    title: '신세계의 날씨', body: '맑던 하늘에서 번개가 떨어지고, 바다 한가운데서 불기둥이 솟는다. 신세계의 날씨는 한 시간 앞을 모른다. 항해사가 얼굴이 하얘져서 어느 쪽으로 가야 할지 모르겠다고 한다.',
+    title: '신세계의 날씨', body: '맑던 하늘에서 번개가 떨어지고, 바다 한가운데서 불기둥이 솟는다. 신세계의 날씨는 한 시간 앞을 모른다. 뱃머리 양쪽에서 물빛이 번갈아 뒤집힌다. 어느 쪽으로 가야 할지 눈으로는 가려지지 않는다.',
     doors: [
       { label: '가까운 섬의 만에 배를 숨기고 기다린다', hint: '며칠을 잃는다. 배는 무사하다', values: { peace: D },
-        fx: [{ op: 'hp', add: 5 }, { op: 'log', text: "가까운 섬의 만에 배를 묶었다. 며칠 뒤 불기둥과 번개가 멎자 선원들이 다시 돛을 올렸다.", weight: 'light' }] },
+        fx: [{ op: 'hp', add: 5 }, { op: 'log', text: "가까운 섬의 만에 배를 묶었다. 며칠 뒤 불기둥과 번개가 멎고서야 다시 돛을 올렸다.", weight: 'light' }] },
       { label: '폭풍의 한가운데를 뚫고 나간다', hint: '돛이 찢어질 수 있다. 빠져나가면 남보다 앞선다', values: { romance: D }, danger: true,
         fx: [{ op: 'chance', p: 0.6, then: [{ op: 'fame', add: 5 }, { op: 'log', text: '폭풍을 뚫고 남보다 먼저 잔잔한 바다에 나왔다. 뒤따르던 배들이 한참 뒤에야 보였다.', weight: 'light' }], else: [{ op: 'hp', add: -25 }, { op: 'injury', severity: 'light' }, { op: 'log', text: '폭풍에 돛이 찢기고 갑판에서 넘어졌다. 배는 간신히 바람 밖으로 빠져나왔다.', weight: 'heavy' }] }] },
       { label: '구름과 바람의 냄새를 읽어 길을 찾는다', hint: '틀리면 번개를 맞는다', values: { inquiry: D },
-        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'mastery', branch: 'observation', add: 6 }, { op: 'log', text: "구름의 흐름과 바람 냄새를 따라 배를 돌렸다. 번개가 선미 뒤 바다에 떨어지고 항해사가 새 항로를 적었다.", weight: 'light' }] },
+        fx: [{ op: 'base', key: 'int', add: 1 }, { op: 'mastery', branch: 'observation', add: 6 }, { op: 'log', text: "구름의 흐름과 바람 냄새를 따라 배를 돌렸다. 선미 뒤 바다에 번개가 떨어졌다. {name}은(는) 무사히 지난 물길을 해도에 옮겼다.", weight: 'light' }] },
     ],
   },
   {

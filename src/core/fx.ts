@@ -3,7 +3,8 @@ import { traitFactor, hasTrait, recordTraitEvent, initializeTraits, tradeCost, t
 import { setDream } from './dreams';
 import { acceptDisciple, discipleWords } from './disciples';
 import { lifeGuardMethod, lifeOutcome, recordLifeEvent, waitForLifeEvidence } from './life-story';
-import { parentFound, parentMissing } from './family';
+import { parentFound, parentMissing, welcomeSibling } from './family';
+import { resolveSiblingReunion, siblingReunionWords } from './siblings';
 import { awardEntryPass, requestArrival, resolveEntry, sailTo } from './voyage';
 import { deepWater, growthMultiplier, recoveryMultiplier } from './environment';
 import { npcName } from './names';
@@ -17,6 +18,7 @@ import { chance, pick, rngOf, weighted } from '../shared/core/rng';
 import { fill } from '../shared/core/util';
 import { V } from '../data/balance';
 import { CANON, canonAge } from '../data/canon';
+import { FOES } from '../data/foes';
 import { HOMES } from '../data/homes';
 import { STANDING_FROM_CHILD, STANDING_PHRASE } from '../data/standings';
 import { STRENGTHS } from '../data/strengths';
@@ -30,6 +32,7 @@ import { addStyleMastery, adoptStyle, beginStyle, equippedWeapon, focusedStyle, 
 import { logLine } from './state';
 import { addMark } from './strengths';
 import { isDeep } from './values';
+import { notePrisonEscape } from './bounty';
 import { beginVow, declineVow, resolveVow } from './vow';
 import type { Branch, Fx, Life5, Person, StatKey } from './types';
 
@@ -45,10 +48,14 @@ export function fillText(s: Life5, text: string, discipleId?: string): string {
   if (text.includes('{friend}')) vars.friend = livingContact(s, { relation: '어릴 적 동무' })?.name ?? '동무';
   if (text.includes('{crew}')) vars.crew = livingContact(s, { who: 'crew' })?.name ?? '동료';
   if (text.includes('{sibling}')) vars.sibling = livingContact(s, { who: 'sibling' })?.name ?? '형제';
+  if (text.includes('{dojoPartner}')) vars.dojoPartner = livingContact(s, { who: 'sibling' })?.name
+    ?? s.people.find(p => p.alive && p.kind === 'rival' && hasRelation(p, '어릴 적 맞수'))?.name ?? '함께 겨룰 상대';
+  if (text.includes('{siblingMeetingName}') || text.includes('{siblingVisit}')) Object.assign(vars, siblingReunionWords(s));
   if (text.includes('{child}')) vars.child = livingContact(s, { who: 'child' })?.name ?? '자식';
   if (text.includes('{spouse}')) vars.spouse = livingContact(s, { who: 'spouse' })?.name ?? '짝';
   if (text.includes('{lifeGuardMethod}')) vars.lifeGuardMethod = lifeGuardMethod(s);
   if (text.includes('{lifeOutcome}')) vars.lifeOutcome = lifeOutcome(s);
+  if (text.includes('{defeatedFoe}')) vars.defeatedFoe = FOES[s.defeatedFoe ?? '']?.name ?? '상대';
   if (text.includes('{disciple')) Object.assign(vars, discipleWords(s, discipleId));
   return fill(fillContacts(s, text), vars);
 }
@@ -88,6 +95,12 @@ function captainByShip(s: Life5): void {
 function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
   const h = s.hero;
   switch (e.op) {
+    case 'recruitDefeated': {
+      const foe = FOES[s.defeatedFoe ?? ''];
+      if (foe) applyOne(s, { op: 'person', kind: 'crew', relation: '쓰러뜨린 적이었던 동료',
+        name: foe.name, canon: foe.canon ?? undefined, reuseName: true, gender: foe.gender, age: foe.age, species: foe.species, faction: foe.faction }, context);
+      return;
+    }
     case 'disciple': {
       if (e.action === 'accept') { context.discipleId = acceptDisciple(s); return; }
       const d = s.disciples?.find(x => x.personId === context.discipleId);
@@ -131,6 +144,7 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     }
     case 'fame': h.fame = Math.max(0, h.fame + e.add); return;
+    case 'escapeNotoriety': notePrisonEscape(s, e.riot ?? false); return;
     case 'rank': h.rank = Math.max(0, h.rank + e.add); return;
     // 처지가 실제로 바뀔 때만 연표에 짧게 남긴다 (한 줄 인생이 이 줄들을 잇는다)
     case 'standing':
@@ -158,6 +172,8 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
     }
     case 'parentMissing': parentMissing(s); return;
     case 'parentFound': parentFound(s); return;
+    case 'welcomeSibling': welcomeSibling(s, e.action); return;
+    case 'siblingReunion': resolveSiblingReunion(s, e.action); return;
     case 'sail': sailTo(s, e.island, e.route); return;
     case 'entry': resolveEntry(s, e); return;
     case 'entryPass': awardEntryPass(s, e.gate); return;
@@ -244,8 +260,13 @@ function applyOne(s: Life5, e: Fx, context: { discipleId?: string }): void {
       return;
     }
     case 'personChange': {
-      const p = s.people.find((x) => x.alive && x.relation === e.relation);
+      const p = livingContact(s, e);
       if (!p) return;
+      if (e.alias && e.alias !== p.relation) p.aliases = [...new Set([...(p.aliases ?? []), e.alias])];
+      if (e.rename && e.rename !== p.relation) {
+        p.aliases = [...new Set([...(p.aliases ?? []), p.relation])];
+        p.relation = e.rename;
+      }
       if (e.bond) p.bond = clamp(p.bond + e.bond, 0, V.person.bondMax);
       if (e.kind) {
         p.kind = e.kind;

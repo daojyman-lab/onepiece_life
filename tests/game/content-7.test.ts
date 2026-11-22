@@ -64,7 +64,13 @@ describe('과제 7: 해적과 현상금 사냥꾼', () => {
     const mine = [...PIRATE, ...HUNTER];
     const firstCrew = mine.filter((t) => !t.needs?.includes('crew') && doorFx(t).some((f) => f.op === 'person' && f.kind === 'crew'));
     expect(firstCrew.length).toBeGreaterThanOrEqual(5);
-    expect(mine.filter((t) => doorFx(t).some((f) => f.op === 'losePerson')).length).toBeGreaterThanOrEqual(4);
+    const partsWithCrew = (t: Turning) => doorFx(t).some((f) =>
+      (f.op === 'losePerson' && 'who' in f && f.who === 'crew') ||
+      (f.op === 'personChange' && f.kind !== undefined && f.kind !== 'crew' && (
+        ('who' in f && f.who === 'crew') ||
+        ('relation' in f && t.when.some(c => c.c === 'person' && c.relation === f.relation && c.kinds?.includes('crew')))
+      )));
+    expect(mine.filter(partsWithCrew).length).toBeGreaterThanOrEqual(4);
     expect(mine.filter((t) => t.needs?.includes('crew')).length).toBeGreaterThanOrEqual(5);
   });
   it('감옥으로 가는 문과 칠무해의 전환점이 있다', () => {

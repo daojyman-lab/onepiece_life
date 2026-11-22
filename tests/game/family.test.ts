@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { newLife5 } from '../../src/core/state';
 import { applyFx } from '../../src/core/fx';
 import { normalizeLife5 } from '../../src/core/load';
-import { personIs } from '../../src/core/needs';
+import { needOk, personIs } from '../../src/core/needs';
+import { apply5 } from '../../src/core/reduce';
 import { familyYear, parentFound } from '../../src/core/family';
-import { check } from '../../src/core/cond';
+import { check, checkAll } from '../../src/core/cond';
 import { HOMES } from '../../src/data/homes';
 import { TURNING_BY_ID } from '../../src/data/turnings';
 import { CANON, canonAge } from '../../src/data/canon';
@@ -16,6 +17,13 @@ import type { Fx, Life5 } from '../../src/core/types';
 const family = (s: Life5) => s.people.filter((p) => p.kind === 'family');
 const siblings = (s: Life5) => s.people.filter((p) => personIs(p, 'sibling'));
 const lives = (n: number, from: number, opt: Parameters<typeof newLife5>[1]) => Array.from({ length: n }, (_, i) => newLife5(from + i, opt));
+
+function answerFamilyScene(s: Life5, label: RegExp): void {
+  if (s.pending?.kind !== 'door') throw new Error('동생을 맞는 선택이 열리지 않았다');
+  const index = s.pending.doors.findIndex((d) => !d.locked && label.test(d.label));
+  expect(index).toBeGreaterThanOrEqual(0);
+  apply5(s, { type: 'answer', index });
+}
 
 describe('가족', () => {
   it('고아는 가족이 없다', () => {
@@ -31,7 +39,13 @@ describe('가족', () => {
         expect(p.age - s.age).toBeLessThanOrEqual(V.family.parentOlder[1]);
       }
       const sib = siblings(s);
-      expect(sib.length).toBeLessThanOrEqual(V.family.maxSiblings);
+      const births = s.siblingBirths ?? [];
+      expect(sib.length + births.length).toBeLessThanOrEqual(V.family.maxSiblings);
+      expect(new Set(births.map((b) => b.age)).size).toBe(births.length);
+      for (const b of births) {
+        expect(b.age).toBeGreaterThan(s.age);
+        expect(b.age).toBeLessThanOrEqual(8);
+      }
       for (const p of sib) {
         const gap = Math.abs(p.age - s.age);
         expect(gap).toBeGreaterThanOrEqual(1); expect(gap).toBeLessThanOrEqual(8);
@@ -44,13 +58,94 @@ describe('가족', () => {
     }
   });
   it('가난한 집은 이름난 집안보다 형제가 많다', () => {
-    const avg = (w: 'poor' | 'noble') => lives(300, 5000, { wealth: w, lineage: 'commoner' }).reduce((a, s) => a + siblings(s).length, 0) / 300;
-    expect(avg('poor')).toBeGreaterThan(avg('noble'));
+    const total = (w: 'poor' | 'noble') => lives(300, 5000, { wealth: w, lineage: 'commoner' })
+      .reduce((a, s) => a + siblings(s).length + (s.siblingBirths?.length ?? 0), 0);
+    expect(total('poor')).toBeGreaterThan(total('noble'));
   });
   it('형제 · 부모가 있으니 그 필요가 맞는 사람이 나온다', () => {
     const ss = lives(200, 1000, { lineage: 'commoner' });
     expect(ss.some((s) => siblings(s).length > 0)).toBe(true);
     expect(ss.some((s) => siblings(s).length === 0)).toBe(true);
+  });
+  it('첫 장면에 부모와 손위 형제만 이름과 관계, 나이로 소개한다', () => {
+    const ss = lives(100, 1000, { lineage: 'commoner', wealth: 'poor' });
+    expect(ss.some((s) => siblings(s).length > 0)).toBe(true);
+    for (const s of ss) {
+      const afterBirth = s.log.filter((l) => l.age === s.age && l.weight === 'heavy').map((l) => l.text).join('\n');
+      for (const p of family(s)) {
+        expect(p.age).toBeGreaterThan(s.age);
+        expect(afterBirth).toContain(`${p.relation} ${p.name}`);
+        if (personIs(p, 'sibling')) expect(afterBirth).toContain(`${p.age}살`);
+      }
+    }
+  });
+  it('조부모가 키우는 고아의 첫 장면에는 실제 보호자 이름을 남긴다', () => {
+    const s = lives(100, 1, { lineage: 'orphan' }).find((life) => life.flags.includes('grandGuard'))!;
+    const guardian = s.people.find((p) => p.relation === '할머니' || p.relation === '할아버지')!;
+    expect(s.log.some((l) => l.age === s.age && l.text.includes(`${guardian.relation} ${guardian.name}`))).toBe(true);
+  });
+  it('해가 바뀌면 동생을 처음 안을 수 있고 저장을 불러와도 출생과 선택을 한 번씩만 기록한다', () => {
+    const s = lives(200, 1000, { lineage: 'commoner', wealth: 'poor' }).find((life) =>
+      siblings(life).length === 0 && life.siblingBirths?.some((b) => b.age === 4))!;
+    expect(s).toBeDefined();
+    expect(needOk(s, 'sibling')).toBe(false);
+    const baby = s.siblingBirths!.find((b) => b.age === 4)!;
+    expect(s.log.some((l) => l.text.includes(baby.name))).toBe(false);
+    s.pending = null;
+    s.part = 3;
+    s.stopsThisYear = 100;
+    const restored = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+    apply5(restored, { type: 'rest' });
+    expect(restored.age).toBe(4);
+    expect(siblings(restored)).toEqual([expect.objectContaining({ name: baby.name, age: 0, alive: true })]);
+    expect(needOk(restored, 'sibling')).toBe(true);
+    expect(restored.log.some((l) => l.age === 4 && l.weight === 'heavy' && /동생이 태어났다/.test(l.text))).toBe(true);
+    expect(restored.timeline.some((e) => e.age === 4 && /동생이 태어났다/.test(e.text))).toBe(true);
+    expect(checkAll(restored, TURNING_BY_ID.sib_bread.when)).toBe(false);
+    const after = normalizeLife5(JSON.parse(JSON.stringify(restored)))!;
+    answerFamilyScene(after, /안아/);
+    expect(after.log.some((l) => l.text.includes(baby.name) && /품/.test(l.text))).toBe(true);
+    expect(after.stopsThisYear).toBe(0);
+    expect(after.pending).toBeNull();
+    after.part = 3;
+    apply5(after, { type: 'rest' });
+    expect(siblings(after).filter((p) => p.name === baby.name)).toEqual([expect.objectContaining({ age: 1 })]);
+    expect(after.timeline.filter((e) => e.age === 4 && /동생이 태어났다/.test(e.text))).toHaveLength(1);
+    expect(after.timeline.filter((e) => e.age === 4 && /안아/.test(e.text))).toHaveLength(1);
+  });
+  it('이름을 함께 지으면 갓 태어난 동생의 이름만 바뀐 채 저장된다', () => {
+    const s = lives(180, 1100, { lineage: 'commoner', wealth: 'poor' }).find((life) =>
+      siblings(life).length > 0 && life.siblingBirths?.some((b) => b.age === 4))!;
+    const older = siblings(s).map(({ id, name, bond }) => ({ id, name, bond }));
+    const reserved = s.siblingBirths!.map((b) => b.name);
+    s.pending = null;
+    s.part = 3;
+    s.stopsThisYear = 100;
+    apply5(s, { type: 'rest' });
+    const baby = siblings(s).find((p) => p.age === 0)!;
+    answerFamilyScene(s, /이름을 함께/);
+    const saved = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+    expect(siblings(saved).filter((p) => p.age > 0).map(({ id, name, bond }) => ({ id, name, bond }))).toEqual(older);
+    const named = siblings(saved).find((p) => p.id === baby.id)!;
+    expect(reserved).not.toContain(named.name);
+    expect(saved.people.filter((p) => p.name === named.name)).toHaveLength(1);
+    expect(saved.log.some((l) => l.text.includes(named.name) && /이름/.test(l.text))).toBe(true);
+  });
+  it('다른 선택이 열려 있다면 방해하지 않고 고향을 떠난 뒤의 장면에 편지 선택지를 보여 준다', () => {
+    const s = lives(120, 1300, { lineage: 'commoner', wealth: 'poor' }).find((life) =>
+      life.siblingBirths?.some((b) => b.age === 4))!;
+    const previous = s.pending;
+    expect(previous?.kind).toBe('door');
+    s.age = 4;
+    familyYear(s);
+    expect(s.pending).toBe(previous);
+    s.pending = null;
+    applyFx(s, [{ op: 'move', island: '드레스로자', sea: 'nw_first' }]);
+    const saved = normalizeLife5(JSON.parse(JSON.stringify(s)))!;
+    apply5(saved, { type: 'rest' });
+    expect(saved.age).toBe(4);
+    answerFamilyScene(saved, /축하 편지/);
+    expect(saved.log.at(-1)?.text).toMatch(/편지/);
   });
 });
 
@@ -96,6 +191,7 @@ describe('태어난 마을', () => {
   it('가족이 없는 옛 저장은 가족을 새로 만들지 않고 그대로 이어진다', () => {
     const s = JSON.parse(JSON.stringify(newLife5(9, { lineage: 'commoner' })));
     s.people = [];
+    delete s.siblingBirths;
     const f = normalizeLife5(s)!;
     expect(f).not.toBeNull();
     expect(f.people).toEqual([]);

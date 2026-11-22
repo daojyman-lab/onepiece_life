@@ -86,7 +86,22 @@ export const V = {
            dangerKidAge: 15,                  // 이 나이 이하로 고향 섬에 있으면 가장 낮은 바다의 위험 속에 산다
            minorSpread: 0.35 },               // 사소한 싸움의 상대 힘 = 지금 사는 곳의 위험 × (1 ± minorSpread)
   adultAge: 16,                                // 아직 아이인 사람은 이 나이에 저절로 어른(civil)이 된다
-  fame: { bounty: 1000000 },                   // 명성 1 = 현상금(해군은 공적) 100만 베리
+  fame: { bounty: 1000000 },                   // 기존 이름값·공적 문턱의 환산 단위. 실제 현상금은 bounty 규칙을 쓴다.
+  bounty: {
+    // 이름만 알려진 초보와 실력을 쌓은 거물은 같은 소문에도 정부가 매기는 위협이 다르다.
+    byTier: [
+      { perFame: 100000, cap: 5000000 }, { perFame: 150000, cap: 15000000 },
+      { perFame: 250000, cap: 50000000 }, { perFame: 500000, cap: 150000000 },
+      { perFame: 750000, cap: 500000000 }, { perFame: 1000000, cap: 1500000000 },
+      { perFame: 1000000, cap: 5500000000 },
+    ],
+    political: [
+      { flag: 'readForbidden', perFame: 1000000, cap: 300000000 },
+      { flag: 'ruler', perFame: 1000000, cap: 500000000 },
+    ],
+    roundTo: 10000,
+    escapeFame: 2, riotFame: 6,
+  },
   // 자연산 열매를 무작위로 먹을 때 등급(1~5)별 가중치. 원작 보유자 여부와 관계없이 뽑는다
   fruit: { gradeWeight: { 1: 40, 2: 30, 3: 15, 4: 6, 5: 2 },
            smileChance: 0.03, smileSuccessChance: 0.1,

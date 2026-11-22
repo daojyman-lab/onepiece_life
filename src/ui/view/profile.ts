@@ -4,11 +4,11 @@ import { fmtMoney } from '../../shared/core/util';
 import { FRUIT_BY_ID } from '../../shared/data/fruits';
 import { SEA_BY_ID } from '../../shared/data/seas';
 import type { SceneInput } from '../pixel/pixelArt';
+import { sceneLocation } from '../pixel/locations';
 import { SPECIES_NAMES } from '../../shared/data/births';
 import { fullName } from '../../core/birth';
 import { LIMB_NAME, LIMBS, WOUND_PART_NAME } from '../../core/body';
 import { altitudeEffect } from '../../core/environment';
-import { V } from '../../data/balance';
 import { townLabel } from '../../data/homes';
 import { STRENGTHS } from '../../data/strengths';
 import { POTENTIALS } from '../../data/stages';
@@ -21,6 +21,7 @@ import {
 } from '../../data/words';
 import { activeValue } from '../../core/personality';
 import { rating5 } from '../../core/power';
+import { bountyOf } from '../../core/bounty';
 import { COMBAT_STYLE_BY_ID } from '../../data/combat-styles';
 import { equippedWeapon, isMartialBranch, primaryStyle } from '../../core/styles';
 import { bandWord } from './words';
@@ -60,7 +61,7 @@ const BRANCHES: readonly Branch[] = ['fist', 'sword', 'polearm', 'blunt', 'gun',
 function fameWord(s: Life5): string {
   const fame = Math.round(s.hero.fame);
   if (fame <= 0) return '';
-  return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(fame * V.fame.bounty)} 베리` : `이름값 ${fmtMoney(fame)}`;
+  return BOUNTY_STANDINGS.includes(s.hero.standing) ? `현상금 ${fmtMoney(bountyOf(s))} 베리` : `이름값 ${fmtMoney(fame)}`;
 }
 
 /**
@@ -126,7 +127,6 @@ export function profileView(s: Life5): ProfileView {
 }
 
 // ── 장면 ──
-const ISLAND_COLORS = ['#70b582', '#c8b070', '#8ab0d0', '#b0d890', '#d0a0a0', '#90c0a0'];
 /** 장면에 그리는 동료 수 (v4 drawScene이 그리는 만큼) */
 const SCENE_CREW = 3;
 
@@ -137,13 +137,15 @@ export function sceneOf(s: Life5, ready: boolean): SceneInput {
   const foe = ready && p && (p.kind === 'fight' || p.kind === 'battle') ? foeWho(p.foe) : null;
   const fighter = ready && p?.kind === 'battle' ? p.battle.units.find(u => u.hero) : null;
   const hero = fighter ? unitWho(s, fighter) : heroWho5(s);
+  const climate = climateOf(h.island);
   return {
     hero,
     crew: s.people.filter((x) => x.alive && x.kind === 'crew' && !x.crew?.separatedMonths).slice(0, SCENE_CREW).map(personWho5),
     foe,
     sailing: !!s.passage,
-    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}${climateOf(h.island) ? ` · ${climateOf(h.island)!.name}` : ''}` : sea.name,
-    islandColor: ISLAND_COLORS[sea.stage - 1] ?? ISLAND_COLORS[0],
+    place: s.passage ? josa(`${sea.name} · ${s.passage.to}(으)로 항해 중`) : h.island ? `${sea.name} · ${h.island}${climate ? ` · ${climate.name}` : ''}` : sea.name,
+    location: sceneLocation(h.island),
+    weather: s.passage?.last ?? 'clear',
     flag: hero.faction ?? 'civil',
     aura: h.fruit ? '#c890ff' : s.growth.tier.armament > 0 ? '#ff7060' : null,
   };

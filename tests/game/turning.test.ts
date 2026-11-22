@@ -10,6 +10,8 @@ import { rngOf } from '../../src/shared/core/rng';
 import { checkAll } from '../../src/core/cond';
 import { addValues } from '../../src/core/values';
 import { TURNING_BY_ID, TURNINGS } from '../../src/data/turnings';
+import { SIBLING_BIRTH_AWAY_ID, SIBLING_BIRTH_ID } from '../../src/data/turnings/sibling-birth';
+import { SIBLING_REUNION_ID } from '../../src/data/turnings/sibling-reunion';
 import { VALUE_NAME } from '../../src/data/values';
 import { STRENGTHS } from '../../src/data/strengths';
 import { V } from '../../src/data/balance';
@@ -27,6 +29,26 @@ const T: Turning = {
 };
 
 describe('문', () => {
+  it.each(['sky', 'zou', 'fishman', 'wano'] as const)('공통 도장과 또래 사건은 %s 고향에서도 열리고 바닷가 사건은 막힌다', (home) => {
+    const s = newLife5(1, { home }); s.pending = null; s.people = [];
+    expect(checkAll(s, TURNING_BY_ID.kid_rival.when)).toBe(true);
+    expect(resolveDoors(s, TURNING_BY_ID.kid_rival).some((d) => !d.locked)).toBe(true);
+    expect(checkAll(s, TURNING_BY_ID.kid_drown.when)).toBe(false);
+    s.pending = null; s.age = 12;
+    expect(checkAll(s, TURNING_BY_ID.pp_dojo.when)).toBe(true);
+    expect(checkAll(s, TURNING_BY_ID.pp_fist_dojo.when)).toBe(true);
+    expect(openTurning(s, TURNING_BY_ID.pp_fist_dojo)).toBe(true);
+  });
+  it.each([0, 1])('쓰러진 적을 약탈할 때만 탐욕과 패도가 함께 쌓인다 (선택 %i)', (index) => {
+    const s = newLife5(1); s.pending = null;
+    const expected = structuredClone(s);
+    const money = s.hero.money;
+    expect(openTurning(s, TURNING_BY_ID.after_fight)).toBe(true);
+    answerDoor(s, index);
+    addValues(expected, index === 1 ? { greed: V.value.door, dominion: V.value.door } : { peace: V.value.door });
+    expect(s.values).toEqual(expected.values);
+    expect(s.hero.money).toBe(money + (index === 1 ? 75000 : 0));
+  });
   it('도크의 녹슨 못은 세 선택과 허락의 두 결과를 장면으로 전한 뒤 가치관을 기록한다', () => {
     const t = TURNING_BY_ID.w7k_dock_nails;
     const seen = new Set<string>();
@@ -164,14 +186,16 @@ describe('전환점의 흐름', () => {
     for (let i = 0; i < 4 * 12 && s.hero.alive; i++) {
       if (s.pending?.kind === 'door') {
         opened.push(s.pending.turning);
-        if (!s.pending.turning.startsWith('life_vow_') && !s.pending.turning.startsWith('trait_awaken_') && s.pending.turning !== 'sky_vow_awakening')
+        if (!s.pending.turning.startsWith('life_vow_') && !s.pending.turning.startsWith('trait_awaken_') &&
+            !['sky_vow_awakening', SIBLING_BIRTH_ID, SIBLING_BIRTH_AWAY_ID, SIBLING_REUNION_ID].includes(s.pending.turning))
           perYear[s.age] = (perYear[s.age] ?? 0) + 1;
         s = reduce5(s, { type: 'answer', index: s.pending.doors.findIndex((d) => !d.locked) });
       }
       s = reduce5(s, { type: 'step' });
     }
     expect(opened.length).toBeGreaterThanOrEqual(6);
-    expect(new Set(opened).size).toBe(opened.length);
+    const once = opened.filter((id) => TURNING_BY_ID[id]?.repeat === 'once');
+    expect(new Set(once).size).toBe(once.length);
     expect(s.stats.stops).toBe(Object.values(perYear).reduce((a, n) => a + n, 0));
     for (const [age, count] of Object.entries(perYear)) {
       const n = V.stopsPerYear.find((x) => Number(age) <= x.to)!.n;

@@ -136,6 +136,9 @@ describe('하늘섬 서약 장편', () => {
     expect(vowWindow.doors[pledge].locked).toBeNull();
     const vowed = reduce5(after, { type: 'answer', index: pledge });
     expect(vowed.vows?.active?.id).toBe(vowId);
+    const guide = vowed.people.find(p => p.storyName === '티카');
+    expect(guide?.id).toBeTruthy();
+    expect(vowed.vows?.active?.targetPersonId).toBe(guide?.id);
     expect(vowed.queue).toContain('ep_skypiea_b6p');
     expect(scene('ep_skypiea_b8').doors.some((d) => d.fx.some((e) => e.op === 'flag' && e.id === 'ep_skypiea_b_vow_refuge'))).toBe(true);
   });

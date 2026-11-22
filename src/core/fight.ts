@@ -222,7 +222,7 @@ export function combatCrew(s: Life5): Person[] {
 }
 
 function fightBattle(s: Life5, foe: EnemySpec, atSea?: true): BattleState {
-  const crew = foe.spar ? [] : combatCrew(s);
+  const crew = foe.spar ? [] : combatCrew(s).filter(p => !foe.canon || p.canon !== foe.canon);
   const stage = SEA_BY_ID[s.hero.sea].stage;   // v5에는 단계가 없으니 지금 있는 바다의 단계로
   const units: CUnit[] = [heroUnit5(s, atSea), ...crew.map((p) => crewUnit(p, stage))];
   const enemyStart = units.length;
@@ -362,7 +362,10 @@ export function ackBattle(s: Life5): void {
   if (chance(r, risk.limb * mult)) loseLimb(s, 'random', r);
   if (won) {
     if (p.next?.win) { applyFx(s, [{ op: 'queue', turning: p.next.win }]); storyPause(s); }   // 이야기가 이어지는 싸움
-    else if (FOES[foe.id]) applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);   // queue는 이미 줄 서 있으면 다시 세우지 않는다
+    else if (FOES[foe.id] && !s.queue.includes(AFTER_FIGHT)) {
+      s.defeatedFoe = foe.id;
+      applyFx(s, [{ op: 'queue', turning: AFTER_FIGHT }]);
+    }
     return;
   }
   // 목숨을 건 싸움에서는 간신히 몸을 빼도(retreat) 그 몫(retreatDeath)만큼 죽을 수 있다

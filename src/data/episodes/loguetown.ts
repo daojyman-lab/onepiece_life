@@ -48,7 +48,7 @@ export const FOES_LOGUETOWN: FoeDef[] = [
 /** 감옥에 갇히지 않은 사람 (아이 포함) */
 const FREE: Standing[] = ['child', ...GROWN];
 const LT: Cond = on('로그타운');
-const RIKO = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '리코', gender: 'm' as const, age: { younger: 3 } });
+const RIKO = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '리코', reuseName: true, gender: 'm' as const, age: { younger: 3 } });
 const PENNY = (relation: string) => ({ op: 'person' as const, kind: 'ally' as const, relation, name: '페니', gender: 'f' as const, reuseName: true });
 
 export const EP_LOGUETOWN: Turning[] = [
@@ -120,10 +120,10 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '맞춰 본 장부와 창고 자리를 대령 앞에 내놓는다', hint: '대령은 대답 없이 연기만 내뿜는다. 그래도 기억은 한다', when: [has('ep_loguetown_a_depot')], values: { justice: D },
         fx: [flag('ep_loguetown_a_smoker'), { op: 'person', kind: 'ally', relation: '장부를 받아 든 연기의 대령', canon: 'smoker' },
              log('대령은 장부를 넘기다 말했다. 증거는 받아 두지. 하지만 이건 네가 시작한 일이다. 끝도 네가 봐라.'), next('ep_loguetown_a5')] },
-      { label: '주먹으로 거리를 휘저은 일을 따지는 대령 앞에서 고개를 든다', hint: '연기가 목덜미를 감는다. 다음은 없다는 경고다', when: [has('ep_loguetown_a_force')], values: { dominion: D },
+      { label: '거리에서 힘으로 밀어붙인 일을 따지는 대령 앞에서 고개를 든다', hint: '연기가 목덜미를 감는다. 다음은 없다는 경고다', when: [has('ep_loguetown_a_force')], values: { dominion: D },
         fx: [{ op: 'hp', add: -5 }, log('대령은 연기로 {name}의 멱살을 들어 올렸다가 내려놓았다. 해적이든 아니든 이 거리를 주먹으로 휘두르는 놈은 내가 잡는다고.'), next('ep_loguetown_a5')] },
       { label: '먹물회의 아이들도 이 거리 사람이라고 말한다', hint: '대령의 눈썹이 꿈틀한다. 리코가 문밖에서 듣고 있다', values: { loyalty: D },
-        fx: [flag('ep_loguetown_a_riko'), log('주먹을 휘두른 놈이 할 소리냐고 대령이 말했다. 그래도 아이들을 잡아들이란 말은 끝내 하지 않았다.', 'light'), next('ep_loguetown_a5')] },
+        fx: [flag('ep_loguetown_a_riko'), log('“지도 장수와 심부름꾼 중 누가 돈을 챙겼지?” 대령은 그 대답을 기다렸다. 아이들을 잡아들이란 말은 하지 않았다.', 'light'), next('ep_loguetown_a5')] },
       { label: '짓테 앞에 서서 한 수 겨뤄 달라고 한다', hint: '잡으려는 싸움이 아니다. 대령의 진짜 힘을 몸으로 안다', special: 'ambition', when: [ready(3)], values: { ambition: D }, danger: true,
         fx: [{ op: 'person', kind: 'rival', relation: '광장에서 겨룬 연기의 대령', canon: 'smoker' },
              log('대련 · 로그타운 광장 / 해군 대령 스모커'), fight('b_smoker_lt', false, { win: 'ep_loguetown_a5', lose: 'ep_loguetown_a5', back: 'ep_loguetown_a5' })] },
@@ -275,8 +275,8 @@ export const EP_LOGUETOWN: Turning[] = [
       { label: '손을 흔들고 부두로 걸어간다', hint: '처형대가 등 뒤에서 작아진다', values: { freedom: D },
         fx: [flag('ep_loguetown_pre_done'), log('처형대 그림자가 길게 늘어졌다. {name}은(는) 그 끝이 바다를 가리킨다고 생각했다.', 'light')] },
       { label: '갈 곳 없는 리코에게 함께 가자고 한다', hint: '꼬마가 눈을 크게 뜨고 짐을 꾸리러 달려간다', special: 'loyalty', when: [has('ep_loguetown_a_riko'), has('ep_loguetown_a_evac')], values: { loyalty: D },
-        fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_riko'), { op: 'person', kind: 'crew', relation: '로그타운에서 따라나선 꼬마 리코', name: '리코', gender: 'm', age: { younger: 3 }, years: 1 },
-             time('로그타운을 떠나며 먹물회의 막내 리코를 데려갔다'), log('리코가 배에 실을 보따리를 들고 달려왔다. 페니가 장부 한쪽에 출항 날짜를 적었다.', 'light')] },
+        fx: [flag('ep_loguetown_pre_done'), flag('ep_loguetown_a_gift_riko'), { op: 'person', kind: 'crew', relation: '로그타운에서 따라나선 꼬마 리코', name: '리코', reuseName: true, gender: 'm', age: { younger: 3 }, years: 1 },
+             time('로그타운을 떠나며 먹물회의 막내 리코를 데려갔다'), log('리코가 보따리를 들고 달려왔다. 배에 오르자 자기가 그린 항로를 내 손에 쥐여 주었다. 페니가 장부 한쪽에 출항 날짜를 적었다.', 'light')] },
     ],
   },
 
@@ -523,9 +523,9 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [flag('ep_loguetown_canon_done'), log('누렇게 바랠 신문 한 장. 처형대 위의 웃는 얼굴이 찍혀 있었다.')] },
       { label: '나도 언젠가 저 항로로 간다고 다짐하며 돌아선다', hint: '등대 불빛이 처음으로 가깝게 느껴진다', values: { ambition: D },
         fx: [flag('ep_loguetown_canon_done'), { op: 'base', key: 'wil', add: 1 }, time('스모커가 위대한 항로로 떠난 해, 그 뒤를 따르리라 다짐했다', 'smoker'), log('군함이 등대 밖으로 사라질 때 출항 일지를 펼쳤다. 다음 항로에 스모커의 이름을 적었다.', 'light')] },
-      { label: '리코에게 위대한 항로까지 함께 가 보자고 한다', hint: '부두를 떠나 본 적 없는 녀석이 등불을 쥐고 웃는다', special: 'freedom', when: [has('ep_loguetown_b_riko'), has('ep_loguetown_b_evac')], values: { freedom: D },
-        fx: [flag('ep_loguetown_canon_done'), flag('ep_loguetown_b_gift_riko'), { op: 'person', kind: 'crew', relation: '로그타운 부두에서 따라나선 리코', name: '리코', gender: 'm', age: { younger: 3 }, years: 2 },
-             time('처형대의 날이 지난 로그타운에서 부두 심부름꾼 리코와 함께 떠났다'), log('리코는 술집 문을 걸어 잠그고 배에 올랐다. 페니가 부두에서 수첩을 흔들었다.', 'light')] },
+      { label: '리코에게 위대한 항로까지 함께 가 보자고 한다', hint: '리코가 등불을 쥐고 부두 끝으로 달려온다', special: 'freedom', when: [has('ep_loguetown_b_riko'), has('ep_loguetown_b_evac')], values: { freedom: D },
+        fx: [flag('ep_loguetown_canon_done'), flag('ep_loguetown_b_gift_riko'), { op: 'person', kind: 'crew', relation: '로그타운 부두에서 따라나선 리코', name: '리코', reuseName: true, gender: 'm', age: { younger: 3 }, years: 2 },
+             time('처형대의 날이 지난 로그타운에서 부두 심부름꾼 리코와 함께 떠났다'), log('리코가 부두에서 쓰던 등불을 건네고 배에 올랐다. 페니가 부두에서 수첩을 흔들었다.', 'light')] },
     ],
   },
 
@@ -543,7 +543,7 @@ export const EP_LOGUETOWN: Turning[] = [
     doors: [
       { label: '등록비를 뜯긴 풋내기 편에 서서 호객꾼을 막는다', hint: '릴리가 치맛자락 밑에서 권총을 뽑는다', values: { justice: D },
         fx: [log('전투 · 옛 처형대 광장 / 조합 호객꾼 릴리'), fight('b_lt_lili', false, { win: 'ep_loguetown_c2', lose: 'ep_loguetown_c2', back: 'ep_loguetown_c2' })] },
-      { label: '술집 문을 열고 리코의 이름을 부른다', hint: '옛 얼굴은 옛 얼굴을 알아본다', values: { loyalty: D },
+      { label: '술집 문을 열고 리코의 이름을 부른다', hint: '리코가 술을 한 잔 따르며 선원들의 사정을 들려준다', values: { loyalty: D },
         fx: [flag('ep_loguetown_c_riko'), RIKO('술집 주인이 된 리코'), log('리코는 말없이 가장 좋은 술을 따랐다. 벽의 액자에 누렇게 바랜 가짜 지도가 걸려 있었다.', 'light'), next('ep_loguetown_c2')] },
       { label: '찌그러진 부두 등불을 술집 카운터에 올려놓는다', hint: '그 폭풍의 해에 리코가 건넨 등불이다', when: [has('ep_loguetown_b_gift_riko')], values: { romance: D },
         fx: [flag('ep_loguetown_c_riko'), RIKO('등불을 알아본 술집 주인 리코'), log('리코는 등불에 기름을 새로 채워 술집 문간에 걸었다.', 'light'), next('ep_loguetown_c2')] },
@@ -595,7 +595,7 @@ export const EP_LOGUETOWN: Turning[] = [
     body: '페니는 조합이 강제로 데려간 선원의 증거를 모으려 한다.',
     doors: [
       { label: '맞춰 본 장부와 빚배 창고 자리를 내놓는다', hint: '페니가 한 장씩 넘기며 옛 장부와 맞춘다', when: [has('ep_loguetown_c_depot')], values: { justice: D },
-        fx: [flag('ep_loguetown_c_tashigi'), { op: 'person', kind: 'ally', relation: '옛 지부의 장부를 맞춰 준 기록계 페니' },
+        fx: [flag('ep_loguetown_c_tashigi'), PENNY('옛 지부의 장부를 맞춰 준 기록계 페니'),
              log('페니는 증거를 지부 금고에 남기겠다고 했다. 마무리는 당신이 해야 한다고 덧붙였다.'), next('ep_loguetown_c5')] },
       { label: '상인회에 조합 없이도 풋내기를 맞을 길을 내놓자고 한다', hint: '진짜 해도와 정직한 로그 포스를 파는 가게 이야기다', values: { peace: D },
         fx: [log('상인 몇이 고개를 끄덕였다. 페니는 그 말을 수첩에 적었을 뿐 아무 편도 들지 않았다.', 'light'), next('ep_loguetown_c5')] },
@@ -731,7 +731,7 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [log('결말 · 처형대 장부의 두 번째 권. 페니의 게시판 앞에서 풋내기들은 등록비 대신 항로를 받아 적었다. 그 장부의 첫 장은 오래전 처형대 아래서 쓴 것이었다.'),
              time('로그타운 항만에 풋내기를 위한 정직한 항로 게시판을 세웠다'), next('ep_loguetown_c10')] },
       { label: '광장 옆 벤치에 앉아 해가 질 때까지 머문다', hint: '이 거리의 이야기는 이제 지켜보는 쪽이 된다', values: { peace: D },
-        fx: [log('결말 · 벤치의 구경꾼. 조합의 천막은 다른 이름으로 다시 쳐졌다. 광장의 저녁 그림자는 어릴 적 본 것과 같았다.'),
+        fx: [log('결말 · 벤치의 구경꾼. 조합의 천막은 다른 이름으로 다시 쳐졌다. 광장의 저녁 그림자가 벤치 발치까지 길어졌다.'),
              time('시작과 끝의 마을 로그타운에 머문 뒤 떠났다'), next('ep_loguetown_c10')] },
     ],
   },
@@ -750,9 +750,9 @@ export const EP_LOGUETOWN: Turning[] = [
         fx: [flag('ep_loguetown_post_done'), log('장부의 마지막 줄에 {name}의 이름이 적혔다. 첫 장의 글씨와 같은 손이었다.')] },
       { label: '갓 들어온 풋내기 배에 로그 포스 하나를 던져 주고 떠난다', hint: '저 배가 어디까지 갈지는 아무도 모른다', values: { freedom: D },
         fx: [flag('ep_loguetown_post_done'), { op: 'money', add: -2000 }, time('로그타운에서 새 세대의 풋내기에게 항로를 열어 주었다'), log('풋내기들이 받은 로그 포스를 돌려 보며 새 항로를 적었다. 배가 떠날 때 첫 바늘이 흔들렸다.', 'light')] },
-      { label: '술집을 맡기고 따라나서겠다는 리코의 손을 잡는다', hint: '그 시절 등불을 든 녀석이 이번엔 짐을 든다', special: 'romance', when: [has('ep_loguetown_c_riko'), has('ep_loguetown_c_evac')], values: { romance: D },
-        fx: [flag('ep_loguetown_post_done'), { op: 'person', kind: 'crew', relation: '처형대 아래 한 잔의 주인 리코', name: '리코', gender: 'm', age: { younger: 3 }, years: 2 },
-             time('로그타운의 술집 주인 리코와 함께 다시 바다로 나갔다'), log('리코가 술집 열쇠를 페니에게 맡겼다. 새벽에는 {name}의 배에서 돛줄을 당겼다.', 'light')] },
+      { label: '술집을 맡기고 따라나서겠다는 리코의 손을 잡는다', hint: '리코가 술집 문을 닫고 짐을 꾸린다', special: 'romance', when: [has('ep_loguetown_c_riko'), has('ep_loguetown_c_evac')], values: { romance: D },
+        fx: [flag('ep_loguetown_post_done'), { op: 'person', kind: 'crew', relation: '처형대 아래 한 잔의 주인 리코', name: '리코', reuseName: true, gender: 'm', age: { younger: 3 }, years: 2 },
+             time('로그타운의 술집 주인 리코와 함께 바다로 나갔다'), log('리코가 술집 열쇠를 페니에게 맡겼다. 새벽에는 둘이 같은 갑판에서 돛줄을 당겼다.', 'light')] },
     ],
   },
 ];

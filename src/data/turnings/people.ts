@@ -5,8 +5,8 @@
 // 경지가 모자란 사람에게는 맞서는 문이 잠기고 숨기 · 달아나기 · 흥정 같은 문만 열린다.
 // 문의 말에는 가치관 이름도 숫자도 쓰지 않는다. 자리표시: {name} 이름만, {town}, {island}.
 import { V } from '../balance';
-import { ACTIVE, GROWN, HUNTED, LAWFUL, SEAFARING, age, at, sea, st } from './paths';
-import type { Cond, Door, Turning, Values } from '../../core/types';
+import { known, ACTIVE, GROWN, HUNTED, LAWFUL, SEAFARING, age, at, sea, st } from './paths';
+import type { Cond, Door, Fx, Turning, Values } from '../../core/types';
 
 const D = V.value.door;
 const PAID_CAP = V.growth.paidCap;
@@ -27,11 +27,61 @@ const duelDoor = (label: string, hint: string, values: Partial<Values>, foe: str
 /** 해군은 떠돌이를 동료로 받지 않는다: 분대원은 분대장이 된 뒤 신병으로 받는다 (marine.ts의 mn_squad_pick) */
 const NOT_SQUAD: Cond = { c: 'standing', is: ['child', 'civil', 'pirate', 'revolution', 'bountyHunter', 'warlord', 'shipwright', 'cp', 'settled', 'prisoner', 'retired'] };
 
+const DOJO_WHEN = at(age(12, 40), st('child', 'civil', 'pirate', 'marine', 'bountyHunter', 'shipwright', 'settled', 'revolution'));
+const DOJO_PARTNER: Cond = { c: 'anyOf', conditions: [
+  { c: 'kin', who: 'sibling', has: true },
+  { c: 'person', relation: '어릴 적 맞수', has: true, kinds: ['rival'] },
+] };
+const DOJO_STYLES = [
+  { branch: 'sword', art: '검술', weight: 4, value: 'ambition', practice: '아이들이 목검을 맞댄다.',
+    tip: '칼을 내려칠 때 손에 힘을 주지 말고 앞발부터 딛으라고 알려 줬다.', spar: '나뭇가지를 들고 한 번씩 번갈아 공격을 막았다.' },
+  { branch: 'gun', art: '총술', weight: 4, value: 'inquiry', practice: '사범이 빈 깡통을 세우고 사격 자세를 보여 준다.',
+    tip: '숨을 내쉰 뒤 어깨가 흔들리지 않을 때 방아쇠를 당기라고 알려 줬다.', spar: '빈 깡통 세 개를 세우고 누가 먼저 맞히는지 겨뤘다.' },
+  { branch: 'fist', art: '권법', weight: 12, value: 'dominion', practice: '수련생들이 모래밭에서 맨주먹으로 겨룬다.',
+    tip: '주먹을 뻗을 때 발뒤꿈치와 허리를 함께 돌리는 법을 보여 줬다.', spar: '모래밭에 금을 긋고 누가 먼저 선 밖으로 밀리는지 겨뤘다.' },
+] as const;
+
+const DOJO_TURNINGS = DOJO_STYLES.flatMap(({ branch, art, weight, value, practice, tip, spar }): Turning[] => {
+  const name = `도장의 ${art} 사범`;
+  const log = (text: string): Fx => ({ op: 'log', text, weight: 'light' });
+  const dojo: Turning = {
+    id: `pp_dojo_${branch}`, kind: 'door', when: DOJO_WHEN, weight, repeat: { years: 6 }, speaker: { relation: name },
+    title: `${art} 도장`,
+    body: `{island}의 ${art} 도장이다. ${practice} 문 옆에는 입문하려면 수업료를 내라는 팻말이 걸려 있다.`,
+    doors: [
+      { label: '수업료를 내고 입문한다', hint: `${art}을 처음부터 배운다`, when: [{ c: 'money', min: DOJO_FEE }], needs: ['arms'], values: { [value]: D },
+        fx: [{ op: 'money', add: -DOJO_FEE, trade: true }, { op: 'master', branch, name, cap: PAID_CAP, years: 8, paid: true },
+          log('수업료를 내자 사범이 내일 아침 첫 수업에 나오라고 했다.')] },
+      { label: '담 너머로 수련을 훔쳐본다', hint: '수련생들의 동작을 눈에 익힌다. 가끔 사범이 요령을 알려 주기도 한다', values: { inquiry: D },
+        fx: [{ op: 'mastery', branch, add: 8 }, { op: 'chance', p: 0.3,
+          then: [{ op: 'mastery', branch, add: 10 }, log(`담 너머에서 지켜보는 걸 본 사범이 안으로 불렀다. ${tip} 수업이 끝나자 다시 담 밖으로 나왔다.`)],
+          else: [log('사범이 다음 수련생을 부르는 동안 발을 옮기는 순서와 자세를 눈에 담았다. 문이 닫힐 때쯤 혼자 담을 내려왔다.')] }] },
+      { label: '도장은 못 가니 {dojoPartner}에게 대련을 하자고 한다', hint: '도장 밖에서 서로 겨루며 연습한다', when: [DOJO_PARTNER], needs: ['arms'],
+        values: { dominion: D }, fx: [{ op: 'mastery', branch, add: 8 }, log(`{dojoPartner}와(과) 도장에서 조금 떨어진 빈터로 갔다. ${spar}`)] },
+    ],
+  };
+  // 직전 도장 창에서 무료 입문을 묻고 저장한 경우에도 같은 사범의 현재 선택지를 띄운다.
+  return [dojo, { ...dojo, id: `${dojo.id}_admission`, weight: 0 }];
+});
+
 export const PEOPLE: Turning[] = [
-  // ---------------------------------------------------------------- 스승
   {
-    id: 'pp_dojo', kind: 'door', when: at(age(12, 40), st('child', 'civil', 'pirate', 'marine', 'bountyHunter', 'shipwright', 'settled', 'revolution')),
-    weight: 8, repeat: { years: 6 }, speaker: { relation: '도장의 사범' },
+    id: 'pp_bookseller', kind: 'door', when: at(age(7, 14), st('child'), { c: 'flag', id: 'left_home_young', has: false }),
+    weight: 6, repeat: 'once', speaker: { relation: '먼지 묻은 책방 주인' },
+    title: '책갈피의 글씨', body: '책방 문 앞에서 주운 책갈피에 모르는 글씨가 적혀 있다. 책방 주인이 가게 안에서 연필을 내민다. 들고 와 앉으면 읽는 법을 가르쳐 주겠다고 한다.',
+    doors: [
+      { label: '가게 문이 닫힐 때까지 함께 읽는다', hint: '다음에 읽을 책도 한 권 빌린다', values: { inquiry: D },
+        fx: [{ op: 'person', kind: 'ally', relation: '글을 가르쳐 준 책방 주인', age: { older: 22 } }, { op: 'base', key: 'int', add: 1 }, { op: 'log', text: '{person:글을 가르쳐 준 책방 주인}이(가) 책갈피 뒤에 {name}의 이름을 써 줬다. 빌려 간 책을 다 읽으면 다시 오라고 했다.', weight: 'light' }] },
+      { label: '책갈피를 돌려주고 놀러 간다', hint: '책방 주인이 문간에서 손을 흔든다', values: { freedom: D },
+        fx: [{ op: 'log', text: '책갈피를 건네자 책방 주인이 읽던 책에 끼웠다. 골목 저쪽에서 아이들이 부르는 소리가 났다.', weight: 'light' }] },
+    ],
+  },
+  // ---------------------------------------------------------------- 스승
+  ...DOJO_TURNINGS,
+  // 오래된 저장에서 이미 열린 도장 창은 같은 번호와 결과로 마저 고를 수 있다.
+  {
+    id: 'pp_dojo', kind: 'door', when: DOJO_WHEN,
+    weight: 0, repeat: { years: 6 }, speaker: { relation: '도장의 사범' },
     title: '도장의 문', body: '{island}에 이름난 사범들이 모인 도장이 있다. 수업료만 낸다면 누구든 받아 준다고 한다.',
     doors: [
       { label: '검술 사범에게 수업료를 낸다', hint: '칼 쓰는 법을 처음부터 제대로 배운다', when: [{ c: 'money', min: DOJO_FEE }], values: { ambition: D },
@@ -42,10 +92,9 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    // 도장의 문이 셋을 넘지 않도록 권법 사범은 따로 온다
-    id: 'pp_fist_dojo', kind: 'door', when: at(age(12, 40), st('child', 'civil', 'pirate', 'marine', 'bountyHunter', 'shipwright', 'settled', 'revolution')),
-    weight: 4, repeat: { years: 6 }, speaker: { relation: '권법 사범' },
-    title: '권법 도장', body: '{island} 부둣가의 권법 도장에서는 맨주먹으로 뱃사람들을 바닥에 눕힌다. 수업료를 내면 누구든 받지만, 첫날은 사범에게 얻어맞는 것으로 시작한다고 한다.',
+    id: 'pp_fist_dojo', kind: 'door', when: DOJO_WHEN,
+    weight: 0, repeat: { years: 6 }, speaker: { relation: '권법 사범' },
+    title: '권법 도장', body: '{island}의 권법 도장에서는 수련생들이 맨주먹으로 겨룬다. 수업료를 내면 누구든 받지만, 첫날은 사범에게 얻어맞는 것으로 시작한다고 한다.',
     doors: [
       { label: '권법 사범에게 수업료를 낸다', hint: '맨몸으로 버티고 때리는 법을 배운다', when: [{ c: 'money', min: DOJO_FEE }], values: { dominion: D },
         fx: [{ op: 'money', add: -DOJO_FEE, trade: true }, { op: 'master', name: '도장의 권법 사범', branch: 'fist', cap: PAID_CAP, years: 8, paid: true }, { op: 'log', text: '사범의 첫 주먹에 바닥을 굴렀다. 일어서는 법부터 다시 배웠다.', weight: 'light' }] },
@@ -58,7 +107,7 @@ export const PEOPLE: Turning[] = [
   {
     id: 'pp_wander_master', kind: 'door', when: at(age(14, 45), st('child', ...ACTIVE)),
     weight: 3, repeat: 'once', speaker: { relation: '떠돌이 무인' },
-    title: '밥값 대신', body: '{island}에서 끼니를 얻으려 장작을 패던 떠돌이 무인이 {name}의 손바닥 굳은살을 본다. 밥만 사 주면 몇 해 가르쳐 주겠다고 한다.',
+    title: '밥값 대신', body: '{island}에서 끼니를 얻으려 장작을 패던 떠돌이 무인이 쉬어 가던 {name}에게 빈 밥그릇을 보인다. 밥만 사 주면 몇 해 가르쳐 주겠다고 한다.',
     doors: [
       { label: '스승으로 모신다', hint: '돈은 들지 않지만 끝까지 가르칠 사람은 아니다', values: { inquiry: D }, 
         fx: [{ op: 'master', name: '떠돌이 무인', branch: 'fist', cap: V.growth.noMasterCap, years: 3, paid: false }, { op: 'log', text: '밥그릇을 비운 뒤 무인은 빈터에서 첫 자세를 보였다. 떠날 날은 말하지 않았다.', weight: 'light' }] },
@@ -79,6 +128,18 @@ export const PEOPLE: Turning[] = [
     ],
   },
 
+  {
+    id: 'pp_harbor_duel', kind: 'door', when: at(age(16, 40), st(...SEAFARING), { c: 'path', is: ['sword'] }),
+    needs: ['sword'], weight: 6, repeat: 'once', speaker: { relation: '막배를 기다리는 검객' },
+    title: '막배의 종', body: '부두의 검객이 빈터에서 한 수 겨뤄 보자고 한다. 검을 맞댄 지 얼마 되지 않아 막배의 종이 울린다. 검객은 이 배를 놓치면 고향에 갈 수 없다며 칼을 거둔다.',
+    doors: [
+      { label: '다음에 만나 결판을 내자고 약속한다', hint: '검객이 고향 섬의 이름을 적어 준다', values: { ambition: D },
+        fx: [{ op: 'person', kind: 'rival', relation: '결판을 미룬 검객' }, { op: 'log', text: '{person:결판을 미룬 검객}이(가) 섬 이름 옆에 자기 이름을 썼다. 배가 떠날 때까지 둘은 칼집을 들어 인사했다.', weight: 'heavy' }] },
+      { label: '오늘 겨룬 것으로 족하다며 배웅한다', hint: '검객은 웃으며 배에 오른다', values: { freedom: D },
+        fx: [{ op: 'mastery', branch: 'sword', add: 3 }, { op: 'log', text: '검객은 웃으며 떠났다. 빈터에는 둘의 발자국만 남았다.', weight: 'light' }] },
+    ],
+  },
+
   // ---------------------------------------------------------------- 동료 · 배신 · 약속
   {
     id: 'pp_crew', kind: 'door', when: at(age(16), st('pirate', 'revolution', 'bountyHunter', 'warlord')),
@@ -92,17 +153,17 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'pp_traitor', kind: 'door', when: at(st(...GROWN), { c: 'flag', id: 'betrayed', has: true }),
+    id: 'pp_traitor', kind: 'door', when: at(st(...GROWN), { c: 'flag', id: 'betrayed', has: true }, known('배신한 옛 동료', 'rival')),
     weight: 8, repeat: 'once', speaker: { relation: '배신한 옛 동료' },
-    title: '배신자와의 재회', body: '몇 해 만에 {island}의 길목에서 그 얼굴을 다시 보았다. {name}을(를) 팔아넘겼던 그자가 들고 있던 짐을 떨어뜨린다.',
+    title: '배신자와의 재회', body: '{island}의 길목에서 {person:배신한 옛 동료}와(과) 눈이 마주쳤다. 떠나던 날의 일을 떠올렸는지, 그가 들고 있던 짐을 떨어뜨린다.',
     doors: [
       { label: '용서하고 손을 내민다', hint: '오래 묵은 것을 내려놓는다', values: { peace: D },
-        fx: [{ op: 'hardship', add: -5 }, { op: 'log', text: '말없이 손을 내밀었다. 옛 동료는 고개를 들지 못했다.', weight: 'heavy' }] },
+        fx: [{ op: 'personChange', relation: '배신한 옛 동료', kind: 'ally', rename: '용서한 옛 동료', bond: 10 }, { op: 'hardship', add: -5 }, { op: 'log', text: '말없이 손을 내밀었다. 옛 동료는 고개를 들지 못했다.', weight: 'heavy' }] },
       { label: '빼앗긴 것을 받아 낸다', hint: '그 자리에서 값을 치르게 한다', values: { dominion: D },
         fx: [{ op: 'money', add: 30000 }, { op: 'fame', add: 5 }, { op: 'log', text: '빼앗긴 것을 이자까지 쳐서 받아 냈다.', weight: 'heavy' }] },
       { label: '말없이 등을 돌린다', hint: '다시는 엮이지 않는다', values: { freedom: D }, fx: [ { op: 'log', text: '뒤돌아 걸었다. 떨어진 짐을 줍는 소리만 뒤에서 들렸다.', weight: 'light' }] },
       { label: '다시 한번 믿어 본다', hint: '돌아올 자리를 내어 준다', special: 'loyalty', values: { loyalty: D }, when: [NOT_SQUAD],
-        fx: [{ op: 'person', kind: 'crew', relation: '돌아온 옛 동료' }, { op: 'timeline', text: '배신한 동료를 다시 받아들였다' }, { op: 'log', text: '빈 자리를 가리키자 옛 동료가 한참 서 있었다. 마침내 배의 난간을 잡고 올랐다.', weight: 'light' }] },
+        fx: [{ op: 'personChange', relation: '배신한 옛 동료', kind: 'crew', rename: '돌아온 옛 동료', bond: 15 }, { op: 'timeline', text: '배신한 동료를 다시 받아들였다' }, { op: 'log', text: '빈 자리를 가리키자 옛 동료가 한참 서 있었다. 마침내 배의 난간을 잡고 올랐다.', weight: 'light' }] },
     ],
   },
   {
@@ -113,26 +174,26 @@ export const PEOPLE: Turning[] = [
       { label: '약속대로 같은 배에 오른다', hint: '어릴 적 약속을 지킨다', values: { loyalty: D }, when: [NOT_SQUAD],
         fx: [{ op: 'personChange', relation: '어릴 적 동무', kind: 'crew', bond: 20 }, { op: 'timeline', text: '{friend}와(과) 어린 시절 약속대로 같은 배에 올랐다' }, { op: 'log', text: '{friend}이(가) 약속한 배의 이름을 말했다. 둘은 같은 갑판에서 돛줄을 당겼다.', weight: 'light' }] },
       { label: '서로 다른 길을 걷고 있음을 받아들인다', hint: '웃으며 다시 헤어진다', values: { peace: D }, fx: [{ op: 'personChange', relation: '어릴 적 동무', bond: 5 }, { op: 'log', text: '{friend}와(과) 부두 끝에서 서로 다른 배표를 보여 주고 웃었다. 이번에는 돌아보지 않았다.', weight: 'light' }] },
-      { label: '서로 칼을 겨눌 사이가 되었음을 안다', hint: '평생의 맞수가 생긴다', values: { dominion: D }, 
-        fx: [{ op: 'personChange', relation: '어릴 적 동무', kind: 'rival', bond: -10 }, { op: 'log', text: '{friend}은(는) 칼자루에 손을 얹었다. 옛 약속을 대신해 다음 만남의 장소를 정했다.', weight: 'light' }] },
+      { label: '다른 깃발 아래서 맞수가 되기로 한다', hint: '평생의 맞수가 생긴다', values: { dominion: D },
+        fx: [{ op: 'personChange', relation: '어릴 적 동무', kind: 'rival', bond: -10 }, { op: 'log', text: '{friend}은(는) 해군 모자를 꺼내 보였다. 둘은 각자 고른 깃발을 따르되 다시 만나면 물러서지 않기로 했다.', weight: 'light' }] },
     ],
   },
 
   // ---------------------------------------------------------------- 가족
   {
-    id: 'pp_marriage', kind: 'door', when: at(age(20, 45), st(...ACTIVE), { c: 'flag', id: 'sweetheart', has: true }),   // 마음에 둔 사람(life_meet)이 있어야 온다
-    weight: 5, repeat: 'once', speaker: { relation: '마음에 둔 사람' },
-    title: '청혼', body: '{island}의 바닷가에서, 오래 곁에 있던 사람이 {name}의 손을 잡는다. 함께 살자고, 이번에는 대답을 듣고 싶다고.',
+    id: 'pp_marriage', kind: 'door', when: at(age(20, 45), st(...ACTIVE), { c: 'flag', id: 'sweetheart', has: true }, known('꽃가게에서 만난 사람', 'ally')),   // 마음에 둔 사람(life_meet)이 있어야 온다
+    weight: 5, repeat: 'once', speaker: { relation: '꽃가게에서 만난 사람' },
+    title: '청혼', body: '{island}의 바닷가에서, {person:꽃가게에서 만난 사람}이(가) {name}의 손을 잡는다. 함께 살자고, 이번에는 대답을 듣고 싶다고.',
     doors: [
       { label: '청혼을 받아들인다', hint: '평생을 함께할 사람이 생긴다', values: { justice: D },
-        fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'person', kind: 'family', relation: '배우자' }, { op: 'flag', id: 'married' }, { op: 'timeline', text: '혼인했다' }, { op: 'log', text: '바닷가에서 대답하자 상대가 손을 더 꼭 쥐었다. 둘의 이름이 혼인 장부에 나란히 올랐다.', weight: 'light' }] },
+        fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'personChange', relation: '꽃가게에서 만난 사람', kind: 'family', rename: '배우자', bond: 12 }, { op: 'flag', id: 'married' }, { op: 'timeline', text: '혼인했다' }, { op: 'log', text: '바닷가에서 대답하자 상대가 손을 더 꼭 쥐었다. 둘의 이름이 혼인 장부에 나란히 올랐다.', weight: 'light' }] },
       { label: '바다를 택한다', hint: '그 사람은 기다려 주지 않는다', values: { freedom: D }, fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'hardship', add: 3 }, { op: 'log', text: '상대는 쥐고 있던 손을 놓았다. 떠나는 배에서 바닷가를 다시 보지 못했다.', weight: 'light' }] },
       { label: '돌아올 때까지 기다려 달라고 한다', hint: '약속 하나를 품고 떠난다', values: { romance: D }, fx: [{ op: 'unflag', id: 'sweetheart' }, { op: 'flag', id: 'waitingLove' }, { op: 'log', text: '돌아올 항구의 이름을 함께 적었다. 상대는 약속을 접어 품에 넣었다.', weight: 'light' }] },
     ],
   },
   {
     id: 'pp_child', kind: 'door', when: at(age(21, 40), st(...ACTIVE), { c: 'flag', id: 'married', has: true }),   // 마흔까지: 자식이 자라서 오는 사건(life.ts)은 쉰 넘어 온다
-    weight: 6, repeat: 'once', speaker: 'hero',
+    weight: 6, repeat: 'once', needs: ['spouse'], speaker: 'hero',
     title: '작은 손', body: '갓난아이가 {name}의 손가락을 꼭 쥐었다. 이 작은 손이 앞으로의 날들을 바꿔 놓을 것 같다.',
     doors: [
       { label: '{island}에 자리 잡고 곁에서 키운다', hint: '바다보다 아이를 고른다', values: { romance: D },
@@ -195,14 +256,14 @@ export const PEOPLE: Turning[] = [
   {
     // 이름 있는 상대를 이기면 ackBattle이 줄에 세운다. 가중치 0: 저절로 뽑히지 않는다
     id: 'after_fight', kind: 'door', when: [], weight: 0, repeat: { years: 0 }, speaker: 'hero',
-    title: '쓰러진 적', body: '싸움이 끝났다. 쓰러진 상대가 피를 흘리며 {name}을(를) 올려다본다. 이 자를 어떻게 할지는 이제 {name}에게 달렸다.',
+    title: '쓰러진 적', body: '싸움이 끝났다. 쓰러진 {defeatedFoe}이(가) 피를 흘리며 {name}을(를) 올려다본다. 이 자를 어떻게 할지는 이제 {name}에게 달렸다.',
     doors: [
       { label: '살려서 보내 준다', hint: '언젠가 다시 마주칠지도 모른다', values: { peace: D },
         fx: [{ op: 'log', text: '상대를 일으켜 세워 보내 주었다. 등 뒤에서 이를 가는 소리가 들렸다.', weight: 'light' }] },
-      { label: '가진 것을 모두 빼앗는다', hint: '이긴 자의 몫을 챙긴다', values: { greed: D },
+      { label: '가진 것을 모두 빼앗는다', hint: '이긴 자의 몫을 챙긴다', values: { greed: D, dominion: D },
         fx: [{ op: 'money', add: 75000 }, { op: 'log', text: '쓰러진 자의 금고를 털었다.', weight: 'light' }] },
-      { label: '동료가 되라고 손을 내민다', hint: '어제의 적이 등을 맡길 사람이 될지도 모른다', values: { loyalty: D }, when: [NOT_SQUAD],
-        fx: [{ op: 'person', kind: 'crew', relation: '쓰러뜨린 적이었던 동료' }, { op: 'log', text: '한참을 노려보던 상대가 마침내 손을 잡았다.', weight: 'heavy' }] },
+      { label: '동료가 되라고 손을 내민다', hint: '어제의 적이 등을 맡길 사람이 될지도 모른다', values: { loyalty: D }, when: [NOT_SQUAD, { c: 'defeatedFoe' }],
+        fx: [{ op: 'recruitDefeated' }, { op: 'log', text: '한참을 노려보던 상대가 마침내 손을 잡았다.', weight: 'heavy' }] },
     ],
   },
 
@@ -244,7 +305,7 @@ export const PEOPLE: Turning[] = [
 
   // ---------------------------------------------------------------- 이름 있는 상대 (바다마다)
   {
-    id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east')),
+    id: 'meet_morgan', kind: 'door', when: at(age(15, 24), st(...HUNTED), sea('east'), { c: 'opponent', canon: 'morgan' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'morgan' },
     title: '도끼손 대령', body: '셸스 타운의 해군 기지. 도끼 손의 대령이 마을 사람들을 처형대 앞에 세워 놓고, 해적 깃발을 단 {name}이(가) 탄 배를 노려본다.',
     doors: [
@@ -255,7 +316,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_arlong', kind: 'door', when: at(age(15, 24), st(...LAWFUL), sea('east')),
+    id: 'meet_arlong', kind: 'door', when: at(age(15, 24), st(...LAWFUL), sea('east'), { c: 'opponent', canon: 'arlong' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'arlong' },
     title: '톱상어의 섬', body: '코노미 제도의 마을들이 어인 해적에게 공물을 바치고 있다. 톱니 코의 선장이 {name}을(를) 보고 이빨을 드러낸다.',
     doors: [
@@ -266,7 +327,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_smoker', kind: 'door', when: at(age(17), st(...HUNTED), sea('gl_entry')),
+    id: 'meet_smoker', kind: 'door', when: at(age(17), st(...HUNTED), sea('gl_entry'), { c: 'opponent', canon: 'smoker' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'smoker' },
     title: '연기의 추격자', body: '흰 연기가 {island}의 거리를 뒤덮는다. 시가 두 대를 문 해군이 {name}의 앞을 막아선다. 이 바다까지 쫓아왔다.',
     doors: [
@@ -276,7 +337,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_mr1', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_entry')),
+    id: 'meet_mr1', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_entry'), { c: 'opponent', canon: 'daz' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'daz' },
     title: '칼날의 사내', body: '{island}의 어둠 속에서 민머리의 사내가 팔을 칼날로 바꾼다. 비밀 결사의 사냥꾼이 {name}을(를) 다음 목표로 정했다.',
     doors: [
@@ -287,7 +348,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_lucci', kind: 'door', when: at(age(18), st(...HUNTED), sea('gl_first')),
+    id: 'meet_lucci', kind: 'door', when: at(age(18), st(...HUNTED), sea('gl_first'), { c: 'opponent', canon: 'lucci' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'lucci' },
     title: '정부의 암살자', body: '{island}의 다리 위, 비둘기를 어깨에 얹은 사내가 길을 막는다. 정부의 이름으로 {name}을(를) 처리하러 왔다고 한다.',
     doors: [
@@ -299,7 +360,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_crocodile', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_first')),
+    id: 'meet_crocodile', kind: 'door', when: at(age(16, 24), st(...LAWFUL, 'revolution'), sea('gl_first'), { c: 'opponent', canon: 'crocodile' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'crocodile' },
     title: '사막의 왕', body: '모래폭풍 너머, 갈고리 손의 칠무해가 왕국을 삼키려 한다. 그가 {name}을(를) 내려다보며 시가 연기를 내뿜는다.',
     doors: [
@@ -310,18 +371,18 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_kizaru', kind: 'door', when: at(age(18), st(...HUNTED), sea('sabaody')),
+    id: 'meet_kizaru', kind: 'door', when: at(age(18), st(...HUNTED), sea('sabaody'), { c: 'opponent', canon: 'kizaru' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'kizaru' },
     title: '빛의 대장', body: '{island}의 하늘이 눈부시게 번쩍인다. 느릿한 말투의 해군 대장이 {name} 앞에 빛으로 내려선다. 빛보다 빠른 발차기가 날아온다.',
     doors: [
       fightDoor('빛에 맞선다', '해군 대장이다. 살아남을 수 있을지 모른다', { ambition: D }, 'b_darc', READY(4)),
       { label: '동료들을 흩어지게 하고 달아난다', hint: '다시 모일 수 있을지는 모른다', needs: ['crew'], values: { loyalty: D },
         fx: [{ op: 'hp', add: -25 }, { op: 'hardship', add: 6 }, { op: 'log', text: '빛이 쏟아지는 섬에서 동료들과 흩어져 달아났다.', weight: 'heavy' }] },
-      { label: '숨어서 대장이 떠나기를 기다린다', hint: '숨소리도 내지 않는다. 빛이 숨은 곳을 비추면 맞닥뜨린다', values: { peace: D }, fx: [{ op: 'hp', add: -5 }, { op: 'chance', p: 0.5, then: [{ op: 'fight', foe: 'b_darc', lethal: false, forced: false }] , else: [{ op: 'log', text: '빛이 숨은 자리 옆을 스쳤다. 대장의 발소리가 멀어진 뒤 동료들과 다시 모였다.', weight: 'light' }]}] },
+      { label: '숨어서 대장이 떠나기를 기다린다', hint: '숨소리도 내지 않는다. 빛이 숨은 곳을 비추면 맞닥뜨린다', values: { peace: D }, fx: [{ op: 'hp', add: -5 }, { op: 'chance', p: 0.5, then: [{ op: 'fight', foe: 'b_darc', lethal: false, forced: false }] , else: [{ op: 'log', text: '빛이 숨은 자리 옆을 스쳤다. 대장의 발소리가 멀어진 뒤 골목을 빠져나왔다.', weight: 'light' }]}] },
     ],
   },
   {
-    id: 'meet_hody', kind: 'door', when: at(age(18, 26), st(...SEAFARING), sea('sabaody')),
+    id: 'meet_hody', kind: 'door', when: at(age(18, 26), st(...SEAFARING), sea('sabaody'), { c: 'opponent', canon: 'hody' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'hody' },
     title: '바다 밑의 증오', body: '어인섬의 광장. 붉은 약에 취한 어인이 인간을 몰아내자고 외친다. 핏발 선 눈이 {name}에게 꽂힌다.',
     doors: [
@@ -331,7 +392,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_fujitora', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first')),
+    id: 'meet_fujitora', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first'), { c: 'opponent', canon: 'fujitora' }),
     weight: 3, repeat: { years: 8 }, speaker: { canon: 'fujitora' },
     title: '눈 감은 대장', body: '{island}의 하늘에서 운석이 떨어진다. 눈을 감은 해군 대장이 지팡이 칼을 짚고 {name}의 기척을 읽는다.',
     doors: [
@@ -345,7 +406,7 @@ export const PEOPLE: Turning[] = [
   },
   // 신세계 전반에서 쫓기는 사람이 만나는 다른 원작 인물들 (눈 감은 대장만 되풀이되지 않게)
   {
-    id: 'meet_sabo_colosseum', kind: 'door', when: at(age(19, 26), st(...HUNTED), sea('nw_first')),
+    id: 'meet_sabo_colosseum', kind: 'door', when: at(age(19, 26), st(...HUNTED), sea('nw_first'), { c: 'opponent', canon: 'sabo' }),
     weight: 3, repeat: 'once', speaker: { canon: 'sabo' },
     title: '투기장의 불꽃', body: '{island}의 투기장에서 실크해트를 쓴 사내가 불꽃을 두르고 서 있다. 사내는 {name}을(를) 흘끗 보더니, 이 나라를 뒤집을 거라며 손을 내민다. 바깥에서 해군의 함대가 섬을 둘러싼다.',
     doors: [
@@ -357,7 +418,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_tsuru', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first', 'sabaody')),
+    id: 'meet_tsuru', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_first', 'sabaody'), { c: 'opponent', canon: 'tsuru' }),
     weight: 3, repeat: { years: 8 }, speaker: { canon: 'tsuru' },
     title: '빨래하는 중장', body: '{island} 앞바다에 군함 한 척이 닻을 내렸다. 갑판의 노파가 빨래판을 들고, 너 같은 녀석들은 한 번 빨아서 널어야 정신을 차린다며 웃는다. 노련한 함대가 퇴로를 막는다.',
     doors: [
@@ -368,11 +429,11 @@ export const PEOPLE: Turning[] = [
       { label: '안개를 틈타 퇴로를 뚫는다', hint: '함대 사이를 빠져나간다. 몇 발은 맞는다', values: { freedom: D }, danger: true,
         fx: [{ op: 'hp', add: -20 }, { op: 'timeline', text: '츠루 중장의 함대를 뚫고 달아났다', canon: 'tsuru' }, { op: 'log', text: '안개 속 군함 사이를 가로질렀다. 포탄 몇 발이 선미를 스쳤지만 항로가 열렸다.', weight: 'light' }] },
       { label: '부하들을 미끼로 남기고 혼자 달아난다', hint: '혼자는 산다. 남은 이들은 빨래판 앞에 선다', values: { greed: D }, needs: ['crew'],
-        fx: [{ op: 'hardship', add: 2 }, { op: 'losePerson', who: 'crew' }, { op: 'timeline', text: '츠루 중장의 함대 앞에 부하들을 두고 달아났다', canon: 'tsuru' }, { op: 'log', text: '부하들의 배가 함대 앞에 남았다. 혼자 빠져나온 뒤 빈 갑판을 오래 봤다.', weight: 'light' }] },
+        fx: [{ op: 'hardship', add: 2 }, { op: 'personChange', who: 'crew', kind: 'rival', rename: '함대 앞에 남겨진 동료' }, { op: 'timeline', text: '츠루 중장의 함대 앞에 부하들을 두고 달아났다', canon: 'tsuru' }, { op: 'log', text: '부하들의 배가 함대 앞에 남았다. 혼자 빠져나온 뒤 빈 갑판을 오래 봤다.', weight: 'light' }] },
     ],
   },
   {
-    id: 'meet_ryokugyu', kind: 'door', when: at(age(22), st(...HUNTED), sea('nw_first', 'nw_late')),
+    id: 'meet_ryokugyu', kind: 'door', when: at(age(22), st(...HUNTED), sea('nw_first', 'nw_late'), { c: 'opponent', canon: 'ryokugyu' }),
     weight: 3, repeat: { years: 8 }, speaker: { canon: 'ryokugyu' },
     title: '숲이 된 섬', body: '하룻밤 사이 {island}의 거리가 숲으로 뒤덮였다. 나무 위에 걸터앉은 해군 대장이 하품을 하며, 사흘을 굶었더니 배가 고프다고 한다. 뿌리가 발목을 감아 온다.',
     doors: [
@@ -385,7 +446,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_doflamingo', kind: 'door', when: at(age(17, 26), st('civil', 'shipwright', 'settled', ...SEAFARING), sea('nw_first')),
+    id: 'meet_doflamingo', kind: 'door', when: at(age(17, 26), st('civil', 'shipwright', 'settled', ...SEAFARING), sea('nw_first'), { c: 'opponent', canon: 'doflamingo' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'doflamingo' },
     title: '하늘의 악마', body: '드레스로자의 하늘에 실로 엮은 새장이 내려온다. 분홍 깃털 외투의 왕이 웃으며 {name}을(를) 꼭두각시로 만들려 한다.',
     doors: [
@@ -396,7 +457,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_akainu', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_late')),
+    id: 'meet_akainu', kind: 'door', when: at(age(19), st(...HUNTED), sea('nw_late'), { c: 'opponent', canon: 'akainu' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'akainu' },
     title: '마그마의 원수', body: '바다가 끓어오른다. 철저한 정의를 외치는 해군의 정점이 마그마의 주먹을 들고 {name}이(가) 탄 배를 막아선다.',
     doors: [
@@ -408,7 +469,7 @@ export const PEOPLE: Turning[] = [
     ],
   },
   {
-    id: 'meet_kaido', kind: 'door', when: at(age(17, 30), st(...LAWFUL, 'pirate', 'revolution'), sea('nw_late')),
+    id: 'meet_kaido', kind: 'door', when: at(age(17, 30), st(...LAWFUL, 'pirate', 'revolution'), sea('nw_late'), { c: 'opponent', canon: 'kaido' }),
     weight: 8, repeat: { years: 5 }, speaker: { canon: 'kaido' },
     title: '가장 강한 생물', body: '와노쿠니의 하늘을 푸른 용이 가른다. 세상에서 가장 강하다는 사황이 술병을 기울이며 {name}을(를) 내려다본다.',
     doors: [

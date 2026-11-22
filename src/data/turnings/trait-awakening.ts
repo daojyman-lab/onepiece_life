@@ -3,15 +3,15 @@ import type { Branch, Turning } from '../../core/types';
 export const TRAIT_AWAKENINGS: Turning[] = (['observation', 'armament', 'conqueror'] as Branch[]).map(branch => {
   const names = { observation: '눈을 감고 듣는 기척', armament: '물러서지 않는 손바닥', conqueror: '쓰러진 이들 앞에서' };
   const bodies = {
-    observation: '스승이 천으로 눈을 가리게 했다. 발자국을 외우는 대신, 움직이기 직전의 기척을 붙잡아 보라고 한다. 여러 해 반복한 연습이 손끝까지 닿는다.',
-    armament: '타격을 흘리던 스승이 이번에는 손바닥으로 받아 보라고 했다. 몸에 힘만 주면 아프다. 여러 해 배운 호흡을 다시 가다듬는다.',
-    conqueror: '돌아온 길에는 함께 버텼던 사람들의 상처가 남았다. 또다시 누군가를 앞세울 수는 없었다. 한 발 앞으로 나서자 마주 선 자들이 숨을 삼킨다.',
+    observation: '눈을 감으니 발소리가 한 박자 늦게 들린다. 발이 바닥에 닿기 전에 옷자락이 먼저 스친다. 그 가느다란 기척에 귀를 기울인다.',
+    armament: '마당의 기둥에 손바닥을 대고 숨을 고른다. 온몸에 힘을 주자 어깨부터 굳는다. 천천히 숨을 내쉬자 손이 닿은 곳에 힘이 모인다.',
+    conqueror: '길을 가로막은 자들이 흩어지라고 소리친다. 주변 사람들이 걸음을 멈춘다. 한 발 앞으로 나서자 눈앞의 사내가 먼저 숨을 삼킨다.',
   };
   return {
     id: `trait_awaken_${branch}`, kind: 'door', when: [], weight: 0, repeat: { years: 1 }, max: 2, speaker: 'hero',
     title: names[branch as keyof typeof names], body: bodies[branch as keyof typeof bodies],
     doors: [
-      { label: '배운 감각을 끝까지 붙잡는다', hint: branch === 'conqueror' ? '왕의 자질을 몸 밖으로 드러낸다' : '입문 성공률은 보통 사 할, 패기 재능이 있으면 육 할 오 푼이다',
+      { label: '방금 일어난 감각을 끝까지 붙잡는다', hint: branch === 'conqueror' ? '왕의 자질을 몸 밖으로 드러낸다' : '입문 성공률은 보통 사 할, 패기 재능이 있으면 육 할 오 푼이다',
         fx: [{ op: 'traitAwaken', branch }, { op: 'log', text: '숨을 고르고 몸 안의 감각을 밖으로 내보냈다.', weight: 'light' }] },
       { label: '지금은 몸을 추스른다', hint: '이 갈래의 발현 시도는 여기서 마친다', fx: [{ op: 'flag', id: `trait_awaken_declined_${branch}` }, { op: 'log', text: '무리하지 않고 감각을 가라앉혔다.', weight: 'light' }] },
     ],

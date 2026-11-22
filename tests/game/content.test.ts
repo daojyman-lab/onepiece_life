@@ -63,9 +63,10 @@ describe('사건 데이터의 짜임', () => {
   });
   it('글이 전제하는 것은 needs에 적혀 있다', () => {
     for (const t of doorTurnings) {
+      const prose = `${t.title} ${t.body}`.replace(/\{person:[^{}]+\}/g, '');
       for (const [re, need] of WORD_NEEDS) {
         if (exempt(t.id, need)) continue;
-        if (re.test(`${t.title} ${t.body}`)) expect(t.needs ?? [], `${t.id} 본문 → ${need}`).toContain(need);
+        if (re.test(prose)) expect(t.needs ?? [], `${t.id} 본문 → ${need}`).toContain(need);
         for (const d of t.doors) if (re.test(`${d.label} ${d.hint}`)) expect([...(t.needs ?? []), ...(d.needs ?? [])], `${t.id} 문 '${d.label}' → ${need}`).toContain(need);
       }
     }

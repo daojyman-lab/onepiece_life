@@ -75,6 +75,16 @@ export interface CrewInfo {
   growth?: number;            // 잠재력: 해마다 자라는 힘 배율 (원작 인물은 1보다 크다)
 }
 
+export type SiblingCareer = 'merchant' | 'medic' | 'shipwright' | 'marine';
+export interface SiblingLife {
+  career: SiblingCareer;
+  island: string;
+  nextNewsAt: number;
+  latestNews: string;
+  metAt?: number;
+  vivreCard?: true;
+}
+
 export interface Person {
   storyName?: string;          // 여러 장면이 같은 사람으로 지정한 이름. 무작위 동명이인과 구별한다.
   aliases?: string[];         // 같은 인물을 다른 장면의 관계 이름으로 다시 부를 때
@@ -87,6 +97,7 @@ export interface Person {
   species: Species;
   crew?: CrewInfo;
   tempUntil?: number;         // v5 임시 동행: 주인공이 이 나이가 되면 제 길로 떠난다 (없으면 끝까지 함께하는 동료)
+  siblingLife?: SiblingLife;
   epithet?: string;           // 이명 (동료). 없으면 성격에서 정한다
   power?: number;             // 라이벌 같은 비동료의 대략적 힘
   alive: boolean;

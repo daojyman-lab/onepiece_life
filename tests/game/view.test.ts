@@ -387,6 +387,25 @@ describe('연표', () => {
 });
 
 describe('장면', () => {
+  it.each([
+    ['후샤 마을', 'windmill'], ['로그타운', 'square'], ['시모츠키 마을', 'dojo'],
+    ['워터 세븐', 'canal'], ['알라바스타 왕국', 'desert'], ['드럼 왕국', 'winter'],
+    ['엔젤섬', 'sky'], ['류구 왕국', 'underwater'], ['하나노미야코', 'castle'],
+    ['등록되지 않은 섬', 'harbor'],
+  ])('%s의 장면은 현재 머무는 장소로 정한다', (island, landscape) => {
+    const s = newLife5(1);
+    s.hero.island = island;
+    expect(sceneOf(s, false).location).toMatchObject({ landscape, name: island });
+  });
+  it('항해 중에는 지난 날씨를 전달하고, 목적지의 풍경은 도착 후에 쓴다', () => {
+    const s = newLife5(1);
+    s.hero.island = '워터 세븐';
+    s.passage = { to: '스카이피아', route: 'calm', partsLeft: 1, partsSpent: 1, maxParts: 3, last: 'storm' };
+    expect(sceneOf(s, false)).toMatchObject({ sailing: true, weather: 'storm', location: { landscape: 'canal' } });
+    s.passage = null;
+    s.hero.island = '스카이피아';
+    expect(sceneOf(s, false)).toMatchObject({ sailing: false, weather: 'clear', location: { landscape: 'sky' } });
+  });
   it('장면에 그리는 동료는 셋까지 (v4 장면이 그리던 만큼)', () => {
     const s = newLife5(1);
     const base = s.people[0];
