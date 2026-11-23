@@ -1354,10 +1354,39 @@
           b.hline(Math.max(rx - 4, 48), rx - 1, y, outfit.dark);
         }
       }
-      // Crisp 1px black shoulder outer silhouette
-      if (topShoulderX <= nxL) {
-        b.hline(topShoulderX, nxL, startY - 1, K);
-        b.hline(nxR, 63 - topShoulderX, startY - 1, K);
+      // 2. MIDDLE LAYER: Neck + clean under-chin shadow + subtle muscle lines
+      b.rect(nxL, 45, (nxR - nxL) + 1, 18, skin.base);
+      for (let y = geo.chinY + 1; y <= Math.min(60, geo.chinY + 4); y++) {
+        const inset = Math.max(0, (y - geo.chinY) - 1);
+        b.hline(nxL + inset, nxR - inset, y, skin.shadow);
+      }
+      b.rect(nxL + 1, 48, 2, 13, skin.mid);
+      b.rect(nxR - 2, 48, 2, 13, skin.mid);
+      b.vline(nxL, 45, 62, K);
+      b.vline(nxR, 45, 62, K);
+      if (nw >= 7) {
+        b.line(nxL + 2, 52, nxL + 4, 57, skin.shadow);
+        b.line(nxR - 2, 52, nxR - 4, 57, skin.shadow);
+      }
+
+      // 3. TOP LAYER: shirt over the neck. One unbroken 1px ink seam runs
+      //    shoulder → U-neckline → shoulder, with a 1px collar trim just inside the fabric.
+      const seamTop = startY - 1;                       // same row as the shoulder line
+      const depth = bType === 'gaunt' ? 4 : (bType === 'chubby' ? 8 : 6);
+      const halfSpan = Math.max(3, (nxR - nxL) / 2);
+      const seamY = (x) => {
+        const t = Math.max(-1, Math.min(1, (x - 31.5) / halfSpan));
+        return Math.min(61, Math.round(seamTop + (1 - t * t) * depth));
+      };
+      for (let x = nxL; x <= nxR; x++) {
+        const y0 = seamY(x);
+        b.vline(x, y0 + 1, 62, outfit.base);           // fabric covers the neck below the seam
+        b.px(x, y0 + 1, outfit.inner);                 // collar trim
+      }
+      // shoulder outlines meet the seam exactly at the neck edges
+      if (topShoulderX < nxL) {
+        b.hline(topShoulderX, nxL - 1, seamTop, K);
+        b.hline(nxR + 1, 63 - topShoulderX, seamTop, K);
       }
       for (let y = startY; y <= 62; y++) {
         const lx = leftEdge[y];
@@ -1366,44 +1395,12 @@
         b.hline(lx, Math.max(lx, prevLx - 1), y, K);
         b.hline(Math.min(rx, 63 - prevLx + 1), rx, y, K);
       }
-
-      // 2. MIDDLE LAYER: Neck + clean under-chin shadow + subtle muscle lines
-      b.rect(nxL, 45, (nxR - nxL) + 1, 18, skin.base);
-      // Clean under-chin neck shadow (strictly below chinY)
-      for (let y = geo.chinY + 1; y <= Math.min(60, geo.chinY + 4); y++) {
-        const inset = Math.max(0, (y - geo.chinY) - 1);
-        b.hline(nxL + inset, nxR - inset, y, skin.shadow);
-      }
-      // Subtle side neck shading
-      b.rect(nxL + 1, 48, 2, 13, skin.mid);
-      b.rect(nxR - 2, 48, 2, 13, skin.mid);
-      // Neck outer outlines
-      b.vline(nxL, 45, 57, K);
-      b.vline(nxR, 45, 57, K);
-      // Subtle neck sternocleidomastoid lines
-      if (nw >= 7) {
-        b.line(nxL + 2, 52, nxL + 4, 57, skin.shadow);
-        b.line(nxR - 2, 52, nxR - 4, 57, skin.shadow);
-      }
-
-      // 3. TOP LAYER (OVER NECK): Smooth rounded crew-neck collar rim wrapping naturally around the throat!
-      const colL = Math.max(nxL - 2, 16);
-      const colR = 63 - colL;
-      const halfSpan = Math.max(4, 31.5 - colL);
-      for (let x = colL; x <= colR; x++) {
-        const t = (x - 31.5) / halfSpan; // -1..+1
-        // Smooth parabolic U-curve neckline: y=53 at neck sides, dipping gently to y=60 at center
-        const rimTopY = Math.round(60 - (t * t) * 7);
-        const rimBotY = Math.min(62, rimTopY + 2);
-        // Cover anything below the collar rim cleanly with outfit.base so neck never pokes through!
-        if (rimBotY + 1 <= 62) {
-          b.vline(x, rimBotY + 1, 62, outfit.base);
-        }
-        // Crisp 2px rounded collar band in outfit.inner
-        b.vline(x, rimTopY, rimBotY, outfit.inner);
-        // Crisp 1px black upper & lower seam outlines on the rounded collar
-        b.px(x, rimTopY, K);
-        if (rimBotY < 62) b.px(x, rimBotY + 1, K);
+      // continuous seam line (Bresenham between neighbours so steep steps never leave gaps)
+      let px0 = nxL, py0 = seamY(nxL);
+      for (let x = nxL + 1; x <= nxR; x++) {
+        const y1 = seamY(x);
+        b.line(px0, py0, x, y1, K);
+        px0 = x; py0 = y1;
       }
     }
 
@@ -2409,7 +2406,7 @@
         if (pxEye.base) stampMap(b, pxEye.base.rows, 19, pxEye.base.y, pal, true);
         if (isBlinking && !pxEye.noBlink) drawUnifiedClosedEyes(b, skin);
         else stampMap(b, pxEye.eye.rows, 19, pxEye.eye.y, pal, true);
-        stampMap(b, pxEye.brow.rows, 19, pxEye.brow.y, pal, true);
+        stampMap(b, pxEye.brow.rows, 19, pxEye.brow.y, { ...pal, K: browCol }, true);
         const lashCount = Number(cfg.eyelashes || 0);
         if (lashCount > 0 && !isBlinking && !pxEye.noBlink) {
           b.symPx(20, 27, K);
@@ -2432,78 +2429,78 @@
         // Exact pixel-for-pixel match with each eye style's open-state eyebrows (zero eyebrow jump!)
         switch (cfg.eyes) {
           case 'basic':
-            b.symLine(22, 24, 26, 24, K);
-            b.symPx(21, 25, K); b.symPx(27, 25, K);
+            b.symLine(22, 24, 26, 24, browCol);
+            b.symPx(21, 25, browCol); b.symPx(27, 25, browCol);
             break;
           case 'squarejaw':
-            b.symLine(19, 25, 28, 28, K);
+            b.symLine(19, 25, 28, 28, browCol);
             b.symLine(20, 26, 28, 29, browCol);
             break;
           case 'vline':
-            b.line(20, 25, 28, 27, K);
-            b.line(35, 27, 43, 25, K);
-            b.px(36, 25, K); b.px(36, 23, K); b.px(37, 22, K); b.px(39, 22, K); b.px(40, 23, K); b.px(39, 25, K); b.px(38, 24, K);
+            b.line(20, 25, 28, 27, browCol);
+            b.line(35, 27, 43, 25, browCol);
+            b.px(36, 25, browCol); b.px(36, 23, browCol); b.px(37, 22, browCol); b.px(39, 22, browCol); b.px(40, 23, browCol); b.px(39, 25, browCol); b.px(38, 24, browCol);
             break;
           case 'darkcircle':
-            b.symLine(20, 25, 28, 27, K);
+            b.symLine(20, 25, 28, 27, browCol);
             break;
           case 'hawk':
-            b.symLine(19, 25, 28, 28, K);
+            b.symLine(19, 25, 28, 28, browCol);
             b.symLine(19, 24, 28, 27, browCol);
             break;
           case 'veteran':
-            b.symLine(19, 25, 28, 27, K);
+            b.symLine(19, 25, 28, 27, browCol);
             break;
           case 'tough':
             b.symRect(20, 25, 8, 2, browCol);
-            b.symLine(20, 27, 28, 27, K);
+            b.symLine(20, 27, 28, 27, browCol);
             break;
           case 'openround':
-            b.symLine(21, 24, 26, 24, K);
+            b.symLine(21, 24, 26, 24, browCol);
             break;
           case 'droopy':
           case 'sleepy_heavy':
-            b.symLine(20, 25, 27, 26, K);
+            b.symLine(20, 25, 27, 26, browCol);
             break;
           case 'dot':
-            b.symLine(24, 25, 26, 25, K);
+            b.symLine(24, 25, 26, 25, browCol);
             break;
           case 'crazy':
-            b.line(20, 23, 27, 25, K);
-            b.line(35, 26, 43, 24, K);
+            b.line(20, 23, 27, 25, browCol);
+            b.line(35, 26, 43, 24, browCol);
             break;
           case 'f_clear':
-            b.symLine(22, 24, 27, 24, K);
-            b.symPx(21, 25, K);
+            b.symLine(22, 24, 27, 24, browCol);
+            b.symPx(21, 25, browCol);
             break;
           case 'f_bright':
-            b.symLine(22, 24, 27, 24, K);
+            b.symLine(22, 24, 27, 24, browCol);
             break;
           case 'f_glam':
           case 'f_calm':
-            b.symLine(21, 25, 28, 26, K);
+            b.symLine(21, 25, 28, 26, browCol);
             break;
           case 'doublelid':
-            b.symLine(22, 23, 27, 23, K);
-            b.symPx(21, 24, K);
+            b.symLine(22, 23, 27, 23, browCol);
+            b.symPx(21, 24, browCol);
             break;
           case 'droopydown':
-            b.symLine(21, 24, 26, 24, K);
-            b.symPx(27, 25, K);
+            b.symLine(21, 24, 26, 24, browCol);
+            b.symPx(27, 25, browCol);
             break;
           case 'sleepy_arch':
-            b.symLine(20, 25, 23, 23, K); b.symLine(23, 23, 27, 25, K);
+            b.symLine(20, 25, 23, 23, browCol); b.symLine(23, 23, 27, 25, browCol);
             b.symLine(21, 25, 23, 24, browCol); b.symLine(24, 24, 26, 25, browCol);
             break;
           case 'sleepy_flat':
-            b.symRect(20, 25, 8, 2, K);
+            b.symRect(20, 25, 8, 2, browCol);
             b.symLine(21, 26, 27, 26, browCol);
             break;
           case 'sleepy_tired':
-            b.symLine(20, 26, 28, 25, K);
+            b.symLine(20, 26, 28, 25, browCol);
             break;
           default:
-            b.symLine(21, 25, 26, 25, K);
+            b.symLine(21, 25, 26, 25, browCol);
         }
         return;
       }
@@ -2520,15 +2517,15 @@
         ], 19, 27, { K, W: '#FFFFFF', I: eyeCol.hex === '#111111' ? '#3A3046' : eyeCol.hex, H: '#FFFFFF' }, true);
         b.symPx(24, 30, K); // pupil core
         // Clean floating arched eyebrows
-        b.symLine(22, 24, 26, 24, K);
-        b.symPx(21, 25, K); b.symPx(27, 25, K);
+        b.symLine(22, 24, 26, 24, browCol);
+        b.symPx(21, 25, browCol); b.symPx(27, 25, browCol);
       } else if (cfg.eyes === 'squarejaw') {
         // Row 1 Col 2: Fierce narrow slanted eyes + sharp angled eyebrows right on top
         b.symRect(21, 29, 7, 3, '#FFFFFF');
         b.symLine(20, 28, 28, 29, K);
         b.symLine(21, 31, 27, 31, K);
         b.symRect(24, 29, 2, 2, eyeCol.hex);
-        b.symLine(19, 25, 28, 28, K);
+        b.symLine(19, 25, 28, 28, browCol);
         b.symLine(20, 26, 28, 29, browCol);
       } else if (cfg.eyes === 'vline') {
         // Cool half-lidded eyes + original single-side spiral eyebrow (@) on right brow!
@@ -2536,9 +2533,9 @@
         b.symLine(20, 28, 28, 28, K);
         b.symLine(21, 32, 27, 32, K);
         b.symRect(24, 29, 2, 2, eyeCol.hex);
-        b.line(20, 25, 28, 27, K);
-        b.line(35, 27, 43, 25, K);
-        b.px(36, 25, K); b.px(36, 23, K); b.px(37, 22, K); b.px(39, 22, K); b.px(40, 23, K); b.px(39, 25, K); b.px(38, 24, K);
+        b.line(20, 25, 28, 27, browCol);
+        b.line(35, 27, 43, 25, browCol);
+        b.px(36, 25, browCol); b.px(36, 23, browCol); b.px(37, 22, browCol); b.px(39, 22, browCol); b.px(40, 23, browCol); b.px(39, 25, browCol); b.px(38, 24, browCol);
       } else if (cfg.eyes === 'darkcircle') {
         // Row 5 Col 1: Heavy dark-purple/gray under-eye bags framing cool half-lidded eyes
         b.symRect(20, 27, 9, 7, '#6B5A6E');
@@ -2546,7 +2543,7 @@
         b.symLine(20, 28, 28, 29, K);
         b.symLine(21, 32, 27, 32, K);
         b.symRect(24, 29, 2, 2, eyeCol.hex);
-        b.symLine(20, 25, 28, 27, K);
+        b.symLine(20, 25, 28, 27, browCol);
       } else if (cfg.eyes === 'hawk') {
         // Row 4 Col 2: Iconic golden-yellow slanted Hawk-Eyes with dark winged upper lash & steep V-brows
         const iris = eyeCol.hex === '#111111' ? '#FACC15' : eyeCol.hex;
@@ -2561,7 +2558,7 @@
         b.symLine(20, 28, 28, 30, K);
         b.symLine(21, 32, 27, 32, K);
         // Piercing steep V-brows
-        b.symLine(19, 25, 28, 28, K);
+        b.symLine(19, 25, 28, 28, browCol);
         b.symLine(19, 24, 28, 27, browCol);
       } else if (cfg.eyes === 'veteran') {
         // Row 4 Col 1: Steady calm veteran pirate eyes
@@ -2569,7 +2566,7 @@
         b.symLine(20, 28, 28, 28, K);
         b.symLine(21, 32, 27, 32, K);
         b.symRect(24, 29, 2, 2, eyeCol.hex);
-        b.symLine(19, 25, 28, 27, K);
+        b.symLine(19, 25, 28, 27, browCol);
       } else if (cfg.eyes === 'tough') {
         // Row 7 Col 3: Heavy thick eyebrows + sharp glare
         b.symRect(21, 29, 7, 3, '#FFFFFF');
@@ -2577,7 +2574,7 @@
         b.symLine(21, 32, 27, 32, K);
         b.symRect(24, 29, 2, 2, eyeCol.hex);
         b.symRect(20, 25, 8, 2, browCol);
-        b.symLine(20, 27, 28, 27, K);
+        b.symLine(20, 27, 28, 27, browCol);
       } else if (cfg.eyes === 'openround') {
         // Slightly squashed (~10%) rounded eyes with top & bottom eyelid outlines ONLY (open left/right sides)
         b.symRect(21, 28, 7, 4, '#FFFFFF');
@@ -2587,7 +2584,7 @@
         b.symPx(21, 31, K); b.symPx(27, 31, K);
         b.symRect(23, 29, 3, 2, eyeCol.hex);
         b.symPx(24, 29, '#FFFFFF');
-        b.symLine(21, 24, 26, 24, K);
+        b.symLine(21, 24, 26, 24, browCol);
       } else if (cfg.eyes === 'droopy') {
         // Row 7 Col 2: Relaxed sleepy half-lidded eyes with curved brows
         b.symRect(21, 29, 7, 3, '#FFFFFF');
@@ -2596,7 +2593,7 @@
         b.symLine(21, 30, 27, 30, K);
         b.symLine(22, 32, 26, 32, K);
         b.symPx(24, 31, eyeCol.hex); b.symPx(25, 31, eyeCol.hex);
-        b.symLine(20, 25, 27, 26, K);
+        b.symLine(20, 25, 27, 26, browCol);
       } else if (cfg.eyes === 'smilearc') {
         // Warm laughing crescent eyes (^ ^)
         b.symLine(21, 30, 23, 28, K);
@@ -2607,13 +2604,13 @@
       } else if (cfg.eyes === 'dot') {
         b.symRect(24, 29, 3, 3, eyeCol.hex);
         b.symPx(24, 29, '#FFFFFF');
-        b.symLine(24, 25, 26, 25, K);
+        b.symLine(24, 25, 26, 25, browCol);
       } else if (cfg.eyes === 'slit') {
         // Calm/cunning narrow anime slit eyes (실눈)
         b.symLine(22, 30, 28, 30, K);
         b.symPx(21, 31, K);
         b.symLine(23, 31, 27, 31, skin.shadow);
-        b.symLine(22, 25, 28, 26, K);
+        b.symLine(22, 25, 28, 26, browCol);
       } else if (cfg.eyes === 'crazy') {
         // Row 5 Col 4-5: Wild asymmetric comic eyes
         b.rect(20, 27, 8, 6, '#FFFFFF');
@@ -2623,8 +2620,8 @@
         b.rect(36, 29, 7, 2, '#FFFFFF');
         b.hline(35, 43, 28, K); b.hline(36, 42, 31, K);
         b.px(39, 29, eyeCol.hex);
-        b.line(20, 23, 27, 25, K);
-        b.line(35, 26, 43, 24, K);
+        b.line(20, 23, 27, 25, browCol);
+        b.line(35, 26, 43, 24, browCol);
       } else if (cfg.eyes === 'f_clear') {
         const iris = eyeCol.hex === '#111111' ? '#92400E' : eyeCol.hex;
         b.symRect(22, 28, 7, 4, '#FFFFFF');
@@ -2639,8 +2636,8 @@
         b.symPx(25, 30, K);
         b.symPx(24, 29, '#FFFFFF');
         // Delicate arched brows
-        b.symLine(22, 24, 27, 24, K);
-        b.symPx(21, 25, K);
+        b.symLine(22, 24, 27, 24, browCol);
+        b.symPx(21, 25, browCol);
       } else if (cfg.eyes === 'f_bright') {
         b.symRect(22, 28, 7, 4, '#FFFFFF');
         b.symLine(23, 27, 27, 27, K);
@@ -2649,7 +2646,7 @@
         b.symLine(23, 32, 27, 32, K);
         b.symRect(24, 28, 3, 4, eyeCol.hex);
         b.symPx(24, 29, '#FFFFFF');
-        b.symLine(22, 24, 27, 24, K);
+        b.symLine(22, 24, 27, 24, browCol);
       } else if (cfg.eyes === 'f_glam') {
         b.symRect(22, 29, 7, 3, '#FFFFFF');
         b.symLine(22, 27, 28, 28, '#F472B6');
@@ -2658,7 +2655,7 @@
         b.symLine(23, 32, 28, 32, K);
         b.symRect(24, 29, 3, 3, eyeCol.hex);
         b.symPx(25, 29, '#FFFFFF');
-        b.symLine(21, 25, 28, 26, K);
+        b.symLine(21, 25, 28, 26, browCol);
       } else if (cfg.eyes === 'f_calm') {
         b.symRect(22, 28, 7, 4, '#FFFFFF');
         b.symLine(22, 28, 28, 28, K);
@@ -2667,7 +2664,7 @@
         b.symRect(24, 29, 3, 3, eyeCol.hex);
         b.symPx(25, 30, K);
         b.symPx(24, 29, '#FFFFFF');
-        b.symLine(21, 25, 28, 26, K);
+        b.symLine(21, 25, 28, 26, browCol);
       } else if (cfg.eyes === 'doublelid') {
         // Female Double-Eyelid Eye (쌍꺼풀): distinct curved double-eyelid crease above wide sparkling almond eye!
         b.symRect(22, 28, 7, 4, '#FFFFFF');
@@ -2684,8 +2681,8 @@
         b.symPx(25, 30, K);
         b.symPx(24, 29, '#FFFFFF');
         // Refined arched brows sitting cleanly above the double-eyelid crease
-        b.symLine(22, 23, 27, 23, K);
-        b.symPx(21, 24, K);
+        b.symLine(22, 23, 27, 23, browCol);
+        b.symPx(21, 24, browCol);
       } else if (cfg.eyes === 'droopydown') {
         // Gentle Droopy Puppy Eyes (처진눈): outer corners slope softly downward!
         const eL = [[21,30],[23,28],[28,28],[28,32],[22,32]];
@@ -2700,8 +2697,8 @@
         b.symRect(24, 29, 3, 3, eyeCol.hex);
         b.symPx(24, 29, '#FFFFFF');
         // Clean straight/slightly-confident eyebrows (outer tip stays lifted, never drooping!)
-        b.symLine(21, 24, 26, 24, K);
-        b.symPx(27, 25, K);
+        b.symLine(21, 24, 26, 24, browCol);
+        b.symPx(27, 25, browCol);
       } else if (cfg.eyes === 'sleepy_heavy') {
         // Row 7 Col 1: Heavy drooping shaded upper eyelids covering top half + curved relaxed brows
         b.symRect(21, 28, 7, 4, '#FFFFFF');
@@ -2710,7 +2707,7 @@
         b.symLine(20, 29, 28, 30, K);      // Flat sleepy lid cut
         b.symLine(22, 32, 26, 32, K);
         b.symPx(24, 30, eyeCol.hex); b.symPx(25, 30, eyeCol.hex);
-        b.symLine(20, 25, 27, 26, K);
+        b.symLine(20, 25, 27, 26, browCol);
       } else if (cfg.eyes === 'sleepy_arch') {
         // Row 7 Col 2: Big round lower semicircle eyes + flat sleepy upper lid + thick raised arched brows!
         b.symRect(21, 29, 7, 4, '#FFFFFF');
@@ -2719,7 +2716,7 @@
         b.symLine(22, 33, 26, 33, K); // Rounded bottom semicircle
         b.symRect(24, 30, 2, 2, eyeCol.hex);
         // Thick high arched eyebrows (Row 7 Col 2)
-        b.symLine(20, 25, 23, 23, K); b.symLine(23, 23, 27, 25, K);
+        b.symLine(20, 25, 23, 23, browCol); b.symLine(23, 23, 27, 25, browCol);
         b.symLine(21, 25, 23, 24, browCol); b.symLine(24, 24, 26, 25, browCol);
       } else if (cfg.eyes === 'sleepy_flat') {
         b.symRect(21, 29, 7, 3, '#FFFFFF');
@@ -2727,7 +2724,7 @@
         b.symLine(21, 32, 27, 32, K);
         b.symPx(24, 30, eyeCol.hex); b.symPx(25, 30, eyeCol.hex);
         // Heavy flat thick eyebrows right above
-        b.symRect(20, 25, 8, 2, K);
+        b.symRect(20, 25, 8, 2, browCol);
         b.symLine(21, 26, 27, 26, browCol);
       } else if (cfg.eyes === 'sleepy_tired') {
         // Row 7 Col 5: Exhausted dark-shadowed eye sockets wrapping around half-closed flat eyes!
@@ -2737,7 +2734,7 @@
         b.symLine(21, 32, 27, 32, K);
         b.symPx(24, 30, eyeCol.hex); b.symPx(25, 30, eyeCol.hex);
         // Drooped tired brows
-        b.symLine(20, 26, 28, 25, K);
+        b.symLine(20, 26, 28, 25, browCol);
       }
 
       // Universal Eyelashes Overlay (delicate 1px thin lashes, 1~3 count)
