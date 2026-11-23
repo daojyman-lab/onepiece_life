@@ -403,7 +403,7 @@
 
           <div id="panelColorEars" class="hidden">
             <div class="opt-head">
-              <span class="opt-title">수인 귀 색</span>
+              <span class="opt-title">수인 털색 (귀·갈기)</span>
               <label class="check opt-hint"><input id="chkSyncEar" type="checkbox" checked /> 머리색 맞추기</label>
             </div>
             <div id="earSwatches" class="swatches"></div>
@@ -552,6 +552,7 @@
       { id: 'scar',    label: '흉터',   desc: '꿰맨 흉터, 3줄 할퀴기, 문신, 분장, 주근깨' },
       { id: 'glasses', label: '안경',   desc: '뿔테·무테·둥근안경·선글라스 (하단 슬라이더로 투명도 조절)' },
       { id: 'ears',    label: '귀',     desc: '인간귀 및 밍크족 수인 귀(토끼·고양이·늑대·곰·여우)·어인지느러미' },
+      { id: 'mane',    label: '갈기',   desc: '수인 갈기·볼털·가슴털 (색은 수인 털색을 따름)' },
       { id: 'earring', label: '귀걸이', desc: '링, 펜듈럼, 큐빅, 십자가, 더블링 귀걸이' },
       { id: 'adjust',  label: '조정',   desc: '턱 크기와 눈·코·입·안경 위치 및 크기를 미세 조정' },
       { id: 'preset',  label: '프리셋', desc: '오리지널 해적 캐릭터 프리셋 모음' }
@@ -690,7 +691,24 @@
         { id: 'bandana',   name: '두건',     gender: 'both' },
         { id: 'turban',    name: '터번',     gender: 'both' },
         { id: 'topknot3',  name: '고리상투', gender: 'male' },
-        { id: 'fishknot',     name: '어인상투', gender: 'male' }
+        { id: 'fishknot',     name: '어인상투', gender: 'male' },
+        { id: 'px_crew',      name: '스포츠컷', gender: 'male' },
+        { id: 'px_twoblock',  name: '투블럭',   gender: 'male' },
+        { id: 'px_wolfcut',   name: '울프컷',   gender: 'both' },
+        { id: 'px_messy',     name: '부스스',   gender: 'both' },
+        { id: 'px_curtain',   name: '가르마',   gender: 'both' },
+        { id: 'px_highpony',  name: '하이포니', gender: 'both' },
+        { id: 'px_braid',     name: '땋은머리', gender: 'female' }
+      ],
+      mane: [
+        { id: 'none',   name: '없음',     gender: 'both' },
+        { id: 'wolf',   name: '늑대갈기', gender: 'both' },
+        { id: 'lion',   name: '사자갈기', gender: 'both' },
+        { id: 'cat',    name: '고양이볼털', gender: 'both' },
+        { id: 'dog',    name: '강아지털', gender: 'both' },
+        { id: 'fox',    name: '여우목털', gender: 'both' },
+        { id: 'shaggy', name: '장발갈기', gender: 'both' },
+        { id: 'chest',  name: '가슴털',   gender: 'both' }
       ],
       beard: [
         { id: 'none',          name: '없음',       gender: 'both' },
@@ -768,7 +786,7 @@
       { name: '수상한 상인', en: 'SHADY MERCHANT', bounty: '77,000,000-',
         cfg: { face:'gaunt', eyes:'px_shock', nose:'long', mouth:'px_smug', hair:'turban', beard:'goatee', scar:'none', earring:'double', earringColor:'gold', skin:'pale', hairColor:'black', beardColor:'black', eyeColor:'violet', outfitColor:'pink', bg:'wanted' } },
       { name: '은빛 늑대 밍크', en: 'SILVER WOLF', bounty: '150,000,000-',
-        cfg: { face:'squarejaw', eyes:'px_fierce', nose:'mink_dog', mouth:'mink_roar', muzzleColor:'gray', hair:'spiky', beard:'none', scar:'none', ears:'wolf', earColor:'silver', skin:'fur_gray', skinPattern:'fur', hairColor:'silver', beardColor:'silver', eyeColor:'amber', outfitColor:'red', bg:'gbc' } }
+        cfg: { face:'squarejaw', eyes:'px_fierce', nose:'mink_dog', mouth:'mink_roar', muzzleColor:'gray', hair:'spiky', beard:'none', scar:'none', ears:'wolf', mane:'wolf', earColor:'silver', skin:'fur_gray', skinPattern:'fur', hairColor:'silver', beardColor:'silver', eyeColor:'amber', outfitColor:'red', bg:'gbc' } }
     ];
 
     const FEMALE_BANGS = [
@@ -789,7 +807,7 @@
       { name: '불꽃 포수', en: 'CANNONEER MII', bounty: '280,000,000-',
         cfg: { face:'f_cat', eyes:'px_fierce', nose:'px_sideshade', mouth:'px_grit', hair:'f_short', bangs:'auto', beard:'none', scar:'bandaid_cheek', earring:'ring', earringColor:'ruby', skin:'bronze', hairColor:'red', beardColor:'red', eyeColor:'crimson', outfitColor:'yellow', bg:'wanted' } },
       { name: '고양이 밍크', en: 'CAT MINK MII', bounty: '90,000,000-',
-        cfg: { face:'f_round', eyes:'px_lash', nose:'mink_cat', mouth:'mink_w', muzzleColor:'cream', hair:'f_bob', bangs:'straight', beard:'none', scar:'none', ears:'cat', earColor:'brown', earring:'none', skin:'fur_gold', skinPattern:'spotted', hairColor:'brown', beardColor:'brown', eyeColor:'amber', outfitColor:'pink', bg:'sky' } }
+        cfg: { face:'f_round', eyes:'px_lash', nose:'mink_cat', mouth:'mink_w', muzzleColor:'cream', hair:'f_bob', bangs:'straight', beard:'none', scar:'none', ears:'cat', mane:'cat', earColor:'brown', earring:'none', skin:'fur_gold', skinPattern:'spotted', hairColor:'brown', beardColor:'brown', eyeColor:'amber', outfitColor:'pink', bg:'sky' } }
     ];
 
     // =========================================================================
@@ -1122,8 +1140,188 @@
       return full;
     }
 
+    // =========================================================================
+    // FUR MANES (수인 갈기) + EXTRA HAIRSTYLES
+    // =========================================================================
+    function mirrorHalf(half) {
+      return [...half, ...[...half].reverse().map(([x, y]) => [63 - x, y])];
+    }
+    // Filled disc with a crisp 1px ink rim (draw all rims first, then fills, for merged blobs)
+    function inkBlobs(b, discs, fill) {
+      for (const [cx, cy, r] of discs) b.fillEllipse(cx, cy, r + 1, r + 1, K);
+      for (const [cx, cy, r] of discs) b.fillEllipse(cx, cy, r, r, fill);
+    }
+    function furPalette(cfg, hair) {
+      return HAIR_PALETTES.find(h => h.id === cfg.earColor) || hair;
+    }
+
+    function drawMane(b, cfg, hair) {
+      const m = cfg.mane || 'none';
+      if (m === 'none') return;
+      const fur = furPalette(cfg, hair);
+      if (m === 'wolf') {
+        // Jagged ruff flaring from the cheeks down into a pointed chest V
+        const poly = mirrorHalf([[17,26],[11,29],[14,32],[8,36],[13,38],[7,43],[12,45],[8,50],[14,50],[12,55],[19,54],[19,59],[25,56],[27,61],[31,58]]);
+        b.fillPoly(poly, fur.base);
+        for (const [x0, y0, x1, y1] of [[12,36,16,35],[11,43,16,42],[12,50,17,48],[18,55,22,52],[25,58,27,55]]) b.symLine(x0, y0, x1, y1, fur.dark);
+        b.symLine(9, 37, 11, 36, fur.light); b.symLine(9, 44, 11, 43, fur.light);
+        b.strokePoly(poly, K);
+      } else if (m === 'lion') {
+        // Big round spiked mane framing the whole head
+        const pts = [];
+        for (let i = 0; i < 28; i++) {
+          const a = (i / 28) * Math.PI * 2 - Math.PI / 2;
+          const r = i % 2 === 0 ? 26 : 21.5;
+          pts.push([Math.round(31.5 + Math.cos(a) * r), Math.round(31 + Math.sin(a) * r * 1.02)]);
+        }
+        b.fillPoly(pts, fur.base);
+        const inner = [];
+        for (let i = 0; i < 28; i++) {
+          const a = (i / 28) * Math.PI * 2 - Math.PI / 2;
+          const r = i % 2 === 0 ? 20 : 17.5;
+          inner.push([Math.round(31.5 + Math.cos(a) * r), Math.round(31 + Math.sin(a) * r)]);
+        }
+        b.fillPoly(inner, fur.dark);
+        for (let i = 0; i < 28; i += 2) {
+          const a = (i / 28) * Math.PI * 2 - Math.PI / 2;
+          b.line(Math.round(31.5 + Math.cos(a) * 21), Math.round(31 + Math.sin(a) * 21),
+                 Math.round(31.5 + Math.cos(a) * 24), Math.round(31 + Math.sin(a) * 24), fur.light);
+        }
+        b.strokePoly(pts, K);
+      } else if (m === 'cat') {
+        // Three-point cheek tufts poking out past the jaw
+        const tuft = [[18,33],[12,35],[16,37],[10,40],[16,41],[12,45],[19,44]];
+        const tuftR = tuft.map(([x, y]) => [63 - x, y]);
+        for (const t of [tuft, tuftR]) { b.fillPoly(t, fur.base); b.strokePoly(t, K); }
+        b.symLine(13, 40, 16, 40, fur.light);
+      } else if (m === 'dog') {
+        // Soft scalloped fluff along the jaw meeting under the chin
+        const discs = [[14,37,3.5],[13,43,3.5],[15,48,3.5],[19,52,3.5],[24,54,3.5],[28,56,3.5]];
+        const all = [...discs, ...discs.map(([x, y, r]) => [63 - x, y, r]), [31.5, 56.5, 3.5]];
+        inkBlobs(b, all, fur.base);
+        for (const [x, y] of discs) b.symPx(Math.round(x) - 1, Math.round(y) - 1, fur.light);
+      } else if (m === 'fox') {
+        // Wide pale ruff under the chin, tips pointing down
+        const pale = fur.light;
+        const poly = mirrorHalf([[16,44],[11,47],[14,49],[9,53],[15,54],[12,59],[19,58],[18,63],[25,60],[27,63],[31,61]]);
+        b.fillPoly(poly, pale);
+        b.symLine(14, 52, 19, 50, fur.base); b.symLine(16, 57, 21, 54, fur.base); b.symLine(24, 59, 27, 56, fur.base);
+        b.strokePoly(poly, K);
+      } else if (m === 'shaggy') {
+        // Long shaggy locks falling over both shoulders (kept off the neck)
+        const lockL = [[17,22],[11,27],[9,36],[7,46],[5,57],[9,54],[9,62],[13,57],[15,62],[18,56],[20,60],[21,50],[19,40],[18,30]];
+        const lockR = lockL.map(([x, y]) => [63 - x, y]);
+        for (const l of [lockL, lockR]) b.fillPoly(l, fur.base);
+        b.symLine(12, 32, 9, 50, fur.dark); b.symLine(16, 34, 15, 54, fur.dark); b.symLine(14, 29, 12, 40, fur.light);
+        for (const l of [lockL, lockR]) b.strokePoly(l, K);
+      } else if (m === 'chest') {
+        const tuft = [[24,52],[27,58],[29,55],[31,61],[32,61],[34,55],[36,58],[39,52]];
+        b.fillPoly(tuft, fur.base);
+        b.line(31, 55, 31, 59, fur.dark); b.line(32, 55, 32, 59, fur.dark);
+        b.strokePoly(tuft, K);
+      }
+    }
+
+    // New hairstyles: back = behind head/neck, front = over forehead
+    const PX_HAIR = {
+      px_crew: {
+        front(b, hair) {
+          const pts = [[16,22],[15,14],[19,9],[26,7],[37,7],[44,9],[48,14],[47,22],[45,18],[38,17],[25,17],[18,18]];
+          b.fillPoly(pts, hair.base);
+          for (let y = 9; y <= 15; y += 2) for (let x = 19 + (y % 4 ? 1 : 0); x <= 44; x += 3) b.px(x, y, hair.dark);
+          b.hline(24, 39, 8, hair.light);
+          b.strokePoly(pts, K);
+        }
+      },
+      px_twoblock: {
+        front(b, hair) {
+          // shaved sides (dotted) + heavy top sweeping to the viewer's right
+          for (let y = 16; y <= 27; y++) for (const x of [16, 17]) if ((x + y) % 2 === 0) b.symPx(x, y, hair.dark);
+          const pts = [[17,18],[16,12],[21,7],[31,5],[42,7],[48,12],[48,21],[46,26],[44,20],[39,23],[36,19],[30,22],[26,18],[21,20]];
+          b.fillPoly(pts, hair.base);
+          b.line(24, 9, 35, 8, hair.light); b.line(27, 12, 38, 11, hair.light);
+          b.line(30, 16, 42, 14, hair.dark);
+          b.strokePoly(pts, K);
+        }
+      },
+      px_wolfcut: {
+        back(b, hair) {
+          const pts = mirrorHalf([[16,10],[12,18],[11,28],[8,34],[12,36],[9,42],[14,42],[13,47],[19,45],[22,48]]);
+          b.fillPoly(pts, hair.dark);
+          b.strokePoly(pts, K);
+        },
+        front(b, hair) {
+          const pts = [[15,30],[14,15],[19,9],[27,6],[37,6],[45,9],[49,15],[48,30],[46,24],[44,27],[42,20],[39,24],[36,19],[33,24],[30,19],[27,24],[24,19],[21,26],[19,22],[17,27]];
+          b.fillPoly(pts, hair.base);
+          b.hline(23, 30, 10, hair.light); b.hline(34, 40, 10, hair.light);
+          b.strokePoly(pts, K);
+        }
+      },
+      px_messy: {
+        front(b, hair) {
+          const pts = [[15,27],[14,16],[12,12],[17,12],[18,6],[23,9],[26,3],[30,8],[34,3],[37,8],[42,5],[44,10],[50,10],[48,16],[49,27],[46,21],[43,25],[41,18],[37,23],[33,18],[29,23],[26,18],[22,24],[19,19]];
+          b.fillPoly(pts, hair.base);
+          b.line(22, 12, 26, 9, hair.light); b.line(35, 9, 40, 12, hair.light); b.line(28, 14, 32, 11, hair.light);
+          b.strokePoly(pts, K);
+        }
+      },
+      px_curtain: {
+        back(b, hair) {
+          const pts = [[16,12],[14,22],[14,32],[49,32],[49,22],[47,12]];
+          b.fillPoly(pts, hair.dark); b.strokePoly(pts, K);
+        },
+        front(b, hair) {
+          // centre part, two curtains curving down to the temples
+          const L = [[31,8],[24,8],[18,11],[15,17],[15,29],[18,27],[19,21],[23,17],[28,14],[31,13]];
+          const R = L.map(([x, y]) => [63 - x, y]);
+          for (const c of [L, R]) b.fillPoly(c, hair.base);
+          b.symLine(20, 13, 26, 10, hair.light); b.symLine(17, 19, 19, 15, hair.light);
+          b.vline(31, 8, 12, K); b.vline(32, 8, 12, K);
+          for (const c of [L, R]) b.strokePoly(c, K);
+        }
+      },
+      px_highpony: {
+        back(b, hair) {
+          // tail rising from the crown and falling behind the viewer's right side
+          const tail = [[40,5],[47,4],[52,9],[53,18],[51,28],[54,38],[49,44],[48,34],[47,24],[45,14]];
+          b.fillPoly(tail, hair.base);
+          b.line(49, 10, 50, 30, hair.dark); b.line(47, 8, 48, 16, hair.light);
+          b.strokePoly(tail, K);
+        },
+        front(b, hair) {
+          const pts = [[16,24],[15,14],[20,9],[31,7],[43,9],[48,14],[47,24],[44,18],[36,16],[27,16],[19,18]];
+          b.fillPoly(pts, hair.base);
+          b.line(22, 12, 30, 10, hair.light); b.line(34, 10, 41, 12, hair.light);
+          b.strokePoly(pts, K);
+          inkBlobs(b, [[43, 7, 2]], hair.base);
+          b.px(43, 7, '#F59E0B'); b.px(42, 7, '#F59E0B');
+        }
+      },
+      px_braid: {
+        back(b, hair) {
+          const pts = [[16,12],[14,22],[14,34],[49,34],[49,22],[47,12]];
+          b.fillPoly(pts, hair.dark); b.strokePoly(pts, K);
+        },
+        front(b, hair) {
+          const pts = [[15,28],[14,15],[19,9],[31,7],[44,9],[49,15],[48,28],[45,19],[33,16],[22,18],[18,22]];
+          b.fillPoly(pts, hair.base);
+          b.line(21, 12, 30, 10, hair.light);
+          b.strokePoly(pts, K);
+          // single braid over the viewer's right shoulder
+          const links = [[47,30],[46,35],[46,40],[45,45],[45,50],[44,55]];
+          inkBlobs(b, links.map(([x, y]) => [x, y, 2.5]), hair.base);
+          for (const [x, y] of links) { b.px(x - 1, y - 1, hair.light); b.hline(x - 1, x + 1, y + 2, hair.dark); }
+          b.vline(44, 57, 59, '#F59E0B'); b.vline(45, 57, 59, '#F59E0B');
+          const tip = [[42,59],[47,59],[46,63],[43,63]];
+          b.fillPoly(tip, hair.base); b.strokePoly(tip, K);
+        }
+      }
+    };
+
     // --- Layer: Back Hair & Hat Brims (behind head/neck) ---
     function drawBackHair(b, cfg, hair, geo) {
+      const pxh = PX_HAIR[cfg.hair];
+      if (pxh) { if (pxh.back) pxh.back(b, hair, geo); return; }
       if (cfg.hair === 'strawhat') {
         // Strawhat uses unified front brim layer only (no duplicate back brim)
       } else if (cfg.hair === 'cowboy') {
@@ -1172,25 +1370,26 @@
         b.strokePoly(aceBack, K);
       } else if (cfg.hair === 'cornrow' || cfg.hair === 'cornrow_gear') {
         // Seamless cornrow back braids connecting cleanly up into the temple/crown (zero gap!)
-        const fullC = [[15,15],[14,34],[13,52],[20,54],[43,54],[50,52],[49,34],[48,15]];
-        b.fillPoly(fullC, hair.base);
-        b.fillPoly([[19,36],[19,53],[44,53],[44,36]], hair.dark);
-        for (let y = 32; y <= 50; y += 3) {
-          b.symLine(14, y, 18, y, hair.dark);
-          b.symPx(16, y + 1, hair.light);
-        }
+        const fullC = [[16,12],[14,20],[14,30],[16,34],[47,34],[49,30],[49,20],[47,12]];
+        b.fillPoly(fullC, hair.dark);
+        for (let y = 20; y <= 32; y += 2) b.symPx(15, y, hair.light);
         b.strokePoly(fullC, K);
       } else if (cfg.hair === 'dreads') {
         // Seamless full dreadlock crown + thick hanging dreads (extends smoothly up to y=6 so ZERO seam hole!)
-        const locs = [[20,6],[13,10],[10,18],[8,34],[7,56],[19,58],[44,58],[56,56],[55,34],[53,18],[50,10],[43,6]];
-        b.fillPoly(locs, hair.base);
-        b.fillPoly([[17,34],[17,57],[46,57],[46,34]], hair.dark);
-        // Distinct vertical dreadlock separation grooves & twist highlights
-        for (const lx of [11, 15, 48, 52]) {
-          b.vline(lx, 18, 56, K);
-          for (let y = 22; y <= 54; y += 4) b.px(lx + 1, y, hair.light);
+        const crown = [[16,10],[13,16],[13,26],[50,26],[50,16],[47,10]];
+        b.fillPoly(crown, hair.dark); b.strokePoly(crown, K);
+        // individual locks: 3px rounded strips, each outlined, staggered lengths
+        // 3px-wide locks packed side by side (shared 1px ink between them), staggered ends
+        const locks = [[9,20,50],[13,16,56],[17,18,46],[46,18,46],[50,16,56],[54,20,50]];
+        for (const [x, y0, y1] of locks) {
+          b.rect(x - 2, y0, 5, y1 - y0 + 1, K);
+          b.fillEllipse(x, y1 + 0.5, 2.4, 2, K);
         }
-        b.strokePoly(locs, K);
+        for (const [x, y0, y1] of locks) {
+          b.rect(x - 1, y0 + 1, 3, y1 - y0, hair.base);
+          b.fillEllipse(x, y1 + 0.5, 1.4, 1, hair.base);
+          for (let y = y0 + 2; y < y1; y += 3) { b.px(x - 1, y, hair.light); b.hline(x - 1, x + 1, y + 1, hair.dark); }
+        }
       } else if (cfg.hair === 'f_short') {
         // Sleek feminine short pixie cut with soft rounded nape behind ears
         const sh = [[14,17],[13,32],[15,42],[21,46],[42,46],[48,42],[50,32],[49,17]];
@@ -1207,9 +1406,9 @@
         b.strokePoly(pts, K);
       } else if (cfg.hair === 'slick') {
         // Seamless unified swept-back volume hugging crown, temples & nape (zero seam gap!)
-        const fullSlick = [[15,10],[13,17],[12,32],[13,45],[20,47],[43,47],[50,45],[51,32],[50,17],[48,10],[42,7],[21,7]];
+        const fullSlick = [[16,9],[13,16],[13,26],[16,31],[47,31],[50,26],[50,16],[47,9],[40,6],[23,6]];
         b.fillPoly(fullSlick, hair.dark);
-        b.symLine(14, 18, 14, 40, hair.base);
+        b.symLine(14, 17, 15, 27, hair.base);
         b.strokePoly(fullSlick, K);
       } else if (cfg.hair === 'fishknot') {
         // Unified Fish-Man wavy back hair connecting seamlessly to crown (zero temple gap!)
@@ -2911,6 +3110,8 @@
 
     // --- Layer: Front Hair / Bangs & Hats ---
     function drawFrontHair(b, cfg, hair, geo) {
+      const pxh = PX_HAIR[cfg.hair];
+      if (pxh) { pxh.front(b, hair, geo); return; }
       if (cfg.hair === 'spiky') {
         const pts = [
           [16,28],[15,17],[19,11],[26,8],[32,8],[38,8],[44,11],[48,17],[47,28],
@@ -3028,10 +3229,9 @@
         b.strokePoly(wrap, K);
       } else if (cfg.hair === 'topknot3') {
         // Mr.3 style slicked hair + iconic tall curved topknot bun
-        const loop = [[27,2],[36,2],[37,9],[26,9]];
-        b.fillPoly(loop, hair.base);
-        b.strokePoly(loop, K);
-        b.hline(27, 36, 9, '#F59E0B'); // Gold hair tie
+        inkBlobs(b, [[31.5, 5, 4]], hair.base);
+        b.hline(29, 31, 3, hair.light);
+        b.hline(28, 35, 9, '#F59E0B'); b.hline(27, 36, 10, K);
         const base = [[16,27],[15,13],[22,9],[41,9],[48,13],[47,27],[45,19],[37,16],[31,18],[26,16],[18,19]];
         b.fillPoly(base, hair.base);
         b.hline(22, 41, 12, hair.light);
@@ -3072,17 +3272,12 @@
         b.strokePoly([[14,16],[20,9],[31,8],[32,8],[43,9],[49,16]], K, false);
         b.strokePoly([[18,22],[22,25],[26,18],[31,15],[32,15],[37,18],[41,25],[45,22]], K, false);
       } else if (cfg.hair === 'slick') {
-        const pts = [
-          [15,28],[13,16],[16,10],[21,7],[42,7],[47,10],[50,16],[48,28],
-          [45,20],[40,17],[35,17],[32,20],[31,20],[28,17],[23,17],[18,20]
-        ];
+        // High swept-back hairline with an M-shaped widow's peak and comb grooves running back
+        const pts = [[16,24],[14,15],[18,9],[24,6],[39,6],[45,9],[49,15],[47,24],[45,17],[39,15],[33,17],[31,17],[30,17],[24,15],[18,17]];
         b.fillPoly(pts, hair.base);
-        // Swept back comb lines
-        b.symLine(22, 10, 24, 16, hair.light);
-        b.symLine(27, 9, 28, 16, hair.light);
-        // Stroke ONLY top crown arch + inner forehead hairline (no side-hair dividing line!)
-        b.strokePoly([[13,16],[16,10],[21,7],[42,7],[47,10],[50,16]], K, false);
-        b.strokePoly([[18,20],[23,17],[28,17],[31,20],[32,20],[35,17],[40,17],[45,20]], K, false);
+        for (const x of [21, 26, 31, 36, 41]) b.line(x + (x < 31 ? 1 : x > 32 ? -1 : 0), 15, x, 8, hair.dark);
+        b.symLine(23, 9, 27, 8, hair.light);
+        b.strokePoly(pts, K);
       } else if (cfg.hair === 'wave') {
         // True wavy male bangs: flowing soft S-curved waves (no jagged spikes!)
         const pts = [
@@ -3113,9 +3308,10 @@
         const dome = [[16,24],[15,15],[20,9],[31,7],[43,9],[48,15],[47,24],[44,19],[19,19]];
         b.fillPoly(dome, hair.base);
         // Crisp parallel scalp part grooves running front-to-back
+        // braids: alternating light/dark knots separated by thin scalp lines
+        for (const cx of [19, 24, 29, 34, 39, 44]) b.vline(cx, 10, 18, hair.dark);
         for (const cx of [21, 26, 31, 36, 41]) {
-          b.vline(cx, 9, 19, '#C49A6C');
-          for (let y = 10; y <= 18; y += 2) b.px(cx + 2, y, hair.light);
+          for (let y = 9; y <= 18; y++) b.px(cx + ((y % 2) ? 1 : 0), y, hair.light);
         }
         b.strokePoly([[15,15],[20,9],[31,7],[43,9],[48,15]], K, false);
         b.strokePoly([[47,24],[44,19],[19,19],[16,24]], K, false);
@@ -3123,9 +3319,9 @@
         // Thick braided dreadlocks draping across forehead & temples
         const top = [[14,27],[13,14],[19,7],[31,6],[44,7],[50,14],[49,27],[45,23],[41,25],[37,22],[32,24],[27,22],[22,25],[18,23]];
         b.fillPoly(top, hair.base);
-        for (const dx of [19, 24, 29, 34, 39, 44]) {
-          b.vline(dx, 9, 23, K);
-          for (let y = 11; y <= 21; y += 3) b.px(dx - 1, y, hair.light);
+        for (const dx of [21, 26, 31, 36, 41]) {
+          b.vline(dx, 10, 22, hair.dark);
+          for (let y = 11; y <= 21; y += 3) b.px(dx - 2, y, hair.light);
         }
         // Stroke ONLY top crown arch + lower dreadlock fringe (seamless into side dreads!)
         b.strokePoly([[13,14],[19,7],[31,6],[44,7],[50,14]], K, false);
@@ -3133,7 +3329,7 @@
       } else if (cfg.hair === 'fade') {
         // Redesigned Skin-Fade Haircut: sculpted cropped top + 3-step dotted pixel gradient along the shaved sides!
         const fxL = geo.pts[0][0];
-        const top = [[fxL,18],[fxL,11],[20,7],[43,7],[63 - fxL,11],[63 - fxL,18]];
+        const top = [[fxL,18],[fxL,13],[18,9],[24,7],[39,7],[45,9],[63 - fxL,13],[63 - fxL,18]];
         b.fillPoly(top, hair.base);
         // Crisp textured pixel highlights on top crop
         b.hline(21, 42, 9, hair.light);
@@ -3223,10 +3419,9 @@
       } else if (cfg.hair === 'fishknot') {
         // Fish-Man topknot + traditional swept forehead & bold sideburns
         // Topknot bun on crown
-        const bun = [[26,4],[37,4],[39,10],[24,10]];
-        b.fillPoly(bun, hair.base);
-        b.strokePoly(bun, K);
-        b.hline(26, 37, 9, '#F59E0B'); // Topknot tie band
+        inkBlobs(b, [[31.5, 6, 4.5]], hair.base);
+        b.hline(28, 31, 3, hair.light);
+        b.hline(27, 36, 10, '#F59E0B');
         // Swept forehead crown seamlessly merging into side locks (no vertical dividing line!)
         const top = [[14,25],[13,13],[20,9],[43,9],[50,13],[49,25],[46,18],[39,16],[31,18],[24,16],[17,18]];
         b.fillPoly(top, hair.base);
@@ -3433,6 +3628,7 @@
       }
       drawBackHair(target, cfg, hair, geo);
       drawBodyAndNeck(target, cfg, skin, outfit, geo);
+      drawMane(target, cfg, hair);
       drawEars(target, skin, geo, cfg.ears || 'human');
       drawFace(target, cfg, skin, geo);
       drawSkinScars(target, cfg, skin);
@@ -3627,6 +3823,13 @@
           drawMinkTopEars(src, testCfg, hair);
           crop = [6, 0, 52];
         }
+      } else if (catId === 'mane') {
+        const liveOutfit = OUTFIT_COLORS.find(o => o.id === cfg.outfitColor) || OUTFIT_COLORS[0];
+        drawBodyAndNeck(src, testCfg, skin, liveOutfit, geo);
+        drawMane(src, testCfg, hair);
+        drawEars(src, skin, geo, 'human');
+        drawFace(src, { ...testCfg, skinPattern: 'none' }, skin, geo);
+        crop = [0, 2, 62];
       } else if (catId === 'earring') {
         src.clear('#F8FAFC');
         if (partId === 'none') {
@@ -3901,6 +4104,7 @@
       skinPattern: 'none',
       earring: 'none',
       earringColor: 'gold',
+      mane: 'none',
       jawSize: 0,
       eyeY: 0,
       eyeGap: 0,
@@ -4019,7 +4223,7 @@
         panelColorBeard:     state.activeCategory === 'beard',
         panelColorEye:       state.activeCategory === 'eyes' || state.activeCategory === 'glasses',
         panelGlassesOpacity: state.activeCategory === 'glasses',
-        panelColorEars:      state.activeCategory === 'ears',
+        panelColorEars:      state.activeCategory === 'ears' || state.activeCategory === 'mane',
         panelColorEarring:   state.activeCategory === 'earring',
         panelColorPreset:    state.activeCategory === 'preset'
       };
@@ -4527,6 +4731,7 @@
         glasses: Math.random() < 0.72 ? 'none' : pick(PARTS.glasses),
         glassesOpacity: 40,
         ears: isMinkRoll ? pick(minkEars) : 'human',
+        mane: isMinkRoll && Math.random() < 0.7 ? pick(PARTS.mane.filter(m => m.id !== 'none')) : 'none',
         earColor: hCol,
         earring: Math.random() < (state.gender === 'female' ? 0.3 : 0.5) ? 'none' : pick(PARTS.earring),
         earringColor: pick(EARRING_COLORS),
