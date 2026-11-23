@@ -1961,48 +1961,49 @@
 
     // B = 눈썹(머리색), K = 잉크, W = 흰자, I = 홍채, P = 동공, H = 하이라이트, S/M = 피부 음영
     const PX_EYES = {
+      // 눈썹은 눈 파츠에 포함: 앞머리에 가려지지 않도록 y24~26에 두고, 주 획은 검은 잉크(K)로 그려 머리색과 무관하게 보이게 함
       px_bold: {
-        brow: { y: 23, rows: ['....BBBB...', '..BBBBBBB..', '.BB........'] },
+        brow: { y: 24, rows: ['....KKKK...', '.KKKKKKKK..'] },
         eye:  { y: 27, rows: ['...KKKKK...', '.KKKKKKKK..', '..WWHIIWWK.', '..WWIPIWW..', '...WIIIWW..', '....KKKK...'] }
       },
       px_fierce: {
-        brow: { y: 24, rows: ['BBB........', '.BBBBB.....', '...BBBBBBB.'] },
+        brow: { y: 24, rows: ['KK.........', '.KKKK......', '...KKKKKKK.'] },
         eye:  { y: 28, rows: ['.KKK.......', '..KKKKKKKK.', '..WWWIIWWK.', '...WWIIWW..', '....KKKK...'] }
       },
       px_heavylid: {
-        brow: { y: 24, rows: ['..BBBBBBB..', '...BBBBB...'] },
+        brow: { y: 25, rows: ['..KKKKKKK..', '...BBBBB...'] },
         base: { y: 27, rows: ['..SSSSSSS..'] },
         eye:  { y: 28, rows: ['.KKKKKKKKK.', '..KKKKKKK..', '..WWIIIWW..', '...WIPIW...', '....KKK....'] }
       },
       px_shock: {
-        brow: { y: 22, rows: ['....BBB....', '..BB...BB..'] },
-        base: { y: 33, rows: ['...SSSSS...'] },
-        eye:  { y: 26, rows: ['...KKKKK...', '..KWWWWWK..', '.KWWWWWWWK.', '.KWWWPWWWK.', '.KWWWPWWWK.', '..KWWWWWK..', '...KKKKK...'] }
+        brow: { y: 24, rows: ['...KKKKK...', '..KK...KK..', '.K.......K.'] },
+        base: { y: 34, rows: ['...SSSSS...'] },
+        eye:  { y: 27, rows: ['...KKKKK...', '..KWWWWWK..', '.KWWWWWWWK.', '.KWWWPWWWK.', '.KWWWPWWWK.', '..KWWWWWK..', '...KKKKK...'] }
       },
       px_lash: {
-        brow: { y: 23, rows: ['...BBBBB...', '..B........'] },
-        eye:  { y: 26, rows: ['..K.K......', '.K.KKKKK...', '..KKKKKKKK.', '..WWHIIWW..', '..WWIIIWW..', '...WIIHW...', '...KKKKK...'] }
+        brow: { y: 24, rows: ['....KKKK...', '..KKKKKKK..'] },
+        eye:  { y: 27, rows: ['..K.K......', '.K.KKKKK...', '..KKKKKKKK.', '..WWHIIWW..', '..WWIIIWW..', '...WIIHW...', '...KKKKK...'] }
       },
       px_catup: {
-        brow: { y: 23, rows: ['.BBB.......', '...BBBB....'] },
+        brow: { y: 24, rows: ['.KKK.......', '...KKKKK...'] },
         eye:  { y: 27, rows: ['KK.........', '..KKKKKK...', '..WWHIIKKK.', '...WIIIWWK.', '....KKKKK..'] }
       },
       px_sparkle: {
-        brow: { y: 23, rows: ['...BBBB....', '..B........'] },
-        eye:  { y: 26, rows: ['...KKKKK...', '..KKKKKKKK.', '..WWHHIIW..', '..WWHIPIW..', '..WWIPPIW..', '...WIIIH...', '...KKKKK...'] }
+        brow: { y: 24, rows: ['...KKKKK...', '..KKKKKKK..'] },
+        eye:  { y: 27, rows: ['...KKKKK...', '..KKKKKKKK.', '..WWHHIIW..', '..WWHIPIW..', '..WWIPPIW..', '...WIIIH...', '...KKKKK...'] }
       },
       px_happyarc: {
         noBlink: true,
-        brow: { y: 24, rows: ['..BBBBBB...'] },
+        brow: { y: 25, rows: ['...KKKKK...', '..KK...KK..'] },
         eye:  { y: 28, rows: ['...KKKKK...', '..KKKKKKK..', '.KK.....KK.'] }
       },
       px_oldsquint: {
-        brow: { y: 24, rows: ['.BBBBBBBB..', '..BBBBBBB..'] },
+        brow: { y: 25, rows: ['.KKKKKKKK..', '..BBBBBBB..'] },
         base: { y: 28, rows: ['...SSSSS...', 'S..........', '...........', 'S..........', '...SSSS....'] },
         eye:  { y: 29, rows: ['.KKKKKKKKK.', '...WIIIW...', '...KKKKK...'] }
       },
       px_shade: {
-        brow: { y: 24, rows: ['BBB........', '.BBBB......', '...BBBBB...'] },
+        brow: { y: 24, rows: ['KK.........', '.KKKK......', '...KKKKK...'] },
         base: { y: 27, rows: ['.SSSSSSSS..', '...........', '...........', '...........', '...........', '...SSSS....'] },
         eye:  { y: 28, rows: ['.KKKKKKKKK.', '..WWWIIWWK.', '...WWIIWW..', '....KKKK...'] }
       }
