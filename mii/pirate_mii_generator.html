@@ -10,39 +10,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Silkscreen&display=swap" rel="stylesheet" />
   <style>
     /* Layout: sticky "stage" (preview + save) on the left, "workbench" (tabs → parts → colors) on the right, crew sheet underneath. */
+    /* Palette: pirate black & red, gold as the single point color. One committed dark look (no light variant). */
     :root {
-      --bg: #0d1520;        /* deep-sea ink */
-      --panel: #152030;
-      --raised: #1c2a3d;
-      --line: #2a3c52;
-      --fg: #e7eef6;
-      --muted: #8ea2b8;
-      --accent: #f0b445;    /* ship brass */
-      --accent-soft: rgba(240, 180, 69, 0.16);
-      --accent-ink: #1b1305;
+      --bg: #0b0808;        /* tar black */
+      --panel: #151010;
+      --raised: #1f1616;
+      --line: #3a2322;      /* red-tinged rule */
+      --fg: #f3ece4;        /* sail canvas */
+      --muted: #a8968c;
+      --red: #b81d24;       /* jolly-roger red */
+      --red-hi: #d6262e;
+      --red-deep: #5a0f12;
+      --accent: #d9a83a;    /* doubloon gold */
+      --accent-soft: rgba(217, 168, 58, 0.14);
+      --accent-ink: #1a1206;
       --danger: #e5534b;
-      --stage: #0a111a;
-      --checker: #c9d3de;
-      --checker-bg: #eef2f6;
+      --stage: #070505;
+      --checker: #c9c1bb;
+      --checker-bg: #efe9e4;
       --font-display: 'Do Hyeon', 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
       --font-body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
       --font-pixel: 'Silkscreen', ui-monospace, 'SFMono-Regular', Menlo, monospace;
       --radius: 10px;
       color-scheme: dark;
-    }
-    @media (prefers-color-scheme: light) {
-      :root:not([data-theme="dark"]) {
-        --bg: #e9eef4; --panel: #ffffff; --raised: #f2f5f9; --line: #d3dce7;
-        --fg: #142131; --muted: #5a6b80; --accent: #b97c0c; --accent-soft: rgba(185, 124, 12, 0.13);
-        --accent-ink: #ffffff; --danger: #c93c35; --stage: #d9e1ea; --checker: #c9d3de; --checker-bg: #f7f9fb;
-        color-scheme: light;
-      }
-    }
-    :root[data-theme="light"] {
-      --bg: #e9eef4; --panel: #ffffff; --raised: #f2f5f9; --line: #d3dce7;
-      --fg: #142131; --muted: #5a6b80; --accent: #b97c0c; --accent-soft: rgba(185, 124, 12, 0.13);
-      --accent-ink: #ffffff; --danger: #c93c35; --stage: #d9e1ea; --checker: #c9d3de; --checker-bg: #f7f9fb;
-      color-scheme: light;
     }
 
     * { box-sizing: border-box; }
@@ -72,10 +62,11 @@
     .wrap { max-width: 1240px; margin: 0 auto; }
 
     /* ---------- Header ---------- */
-    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-block: 18px 14px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-block: 18px 14px; margin-bottom: 16px; border-bottom: 3px solid var(--red); box-shadow: 0 1px 0 var(--red-deep); }
     .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .brand-mark { width: 40px; height: 40px; flex: none; }
-    .brand h1 { margin: 0; font: 400 1.6rem/1.1 var(--font-display); letter-spacing: 0.01em; text-wrap: balance; }
+    .brand h1 { margin: 0; font: 400 1.7rem/1.1 var(--font-display); letter-spacing: 0.01em; text-wrap: balance; color: var(--fg); }
+    .brand h1 em { font-style: normal; color: var(--accent); }
     .brand p { margin: 2px 0 0; color: var(--muted); font-size: 0.8rem; }
     .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -89,8 +80,10 @@
     .btn:hover { border-color: var(--muted); }
     .btn:active { transform: translateY(1px); }
     .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-    .btn-primary:hover { filter: brightness(1.06); border-color: var(--accent); }
+    .btn-primary { background: var(--red); border-color: var(--red-hi); color: #fff; box-shadow: inset 0 -2px 0 var(--red-deep); }
+    .btn-primary:hover { background: var(--red-hi); border-color: var(--accent); }
+    .btn-gold { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn-gold:hover { filter: brightness(1.08); }
     .btn-quiet { background: transparent; }
     .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
     .btn svg { width: 15px; height: 15px; flex: none; }
@@ -102,7 +95,7 @@
       .stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
       .crew { grid-column: 1 / -1; }
     }
-    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-top: 2px solid var(--red-deep); border-radius: 14px; padding: 16px; min-width: 0; }
     .label { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; }
     .pixel-tag { font: 400 0.68rem/1 var(--font-pixel); color: var(--accent); letter-spacing: 0.04em; }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
@@ -112,11 +105,11 @@
     .seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--bg); border: 1px solid var(--line); border-radius: 9px; }
     .seg-btn { border: 0; background: transparent; color: var(--muted); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
     .seg-btn:hover { color: var(--fg); }
-    .seg-btn.is-active { background: var(--accent); color: var(--accent-ink); }
+    .seg-btn.is-active { background: var(--red); color: #fff; box-shadow: inset 0 0 0 1px var(--accent); }
 
     /* ---------- Stage ---------- */
     .stage .stack { gap: 16px; }
-    .canvas-well { background: var(--stage); border-radius: 12px; padding: 16px; display: grid; place-items: center; }
+    .canvas-well { background: radial-gradient(circle at 50% 40%, #2a0d0f 0%, var(--stage) 70%); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; place-items: center; }
     .canvas-frame { border-radius: 4px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
     #mainCanvas { width: min(288px, 100%); height: auto; aspect-ratio: 1; max-width: 100%; }
     #wantedCanvas { width: min(256px, 100%); height: auto; aspect-ratio: 128 / 184; max-width: 100%; filter: drop-shadow(0 10px 22px rgba(0,0,0,.4)); }
@@ -146,9 +139,9 @@
       padding: 6px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 600;
     }
     .tab:hover { color: var(--fg); border-color: var(--muted); }
-    .tab.is-active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .tab.is-active { background: var(--red); border-color: var(--accent); color: #fff; }
     .cat-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-block: 14px 10px; }
-    .cat-head h2 { margin: 0; font: 400 1.35rem/1.1 var(--font-display); }
+    .cat-head h2 { margin: 0; font: 400 1.35rem/1.1 var(--font-display); color: var(--accent); }
     .cat-head p { margin: 2px 0 0; font-size: 0.8rem; color: var(--muted); }
     .current-pill {
       flex: none; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft);
@@ -199,7 +192,7 @@
 
     /* ---------- Crew ---------- */
     .crew-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-    .crew-head h2 { margin: 0; font: 400 1.2rem/1.1 var(--font-display); }
+    .crew-head h2 { margin: 0; font: 400 1.2rem/1.1 var(--font-display); color: var(--accent); }
     .crew-head p { margin: 2px 0 0; font-size: 0.78rem; color: var(--muted); }
     .crew-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px;
@@ -211,7 +204,7 @@
     .crew-thumb:hover { outline: 2px solid var(--accent); }
     .crew-del {
       position: absolute; top: -6px; right: calc(50% - 40px); width: 20px; height: 20px; border-radius: 50%;
-      border: 0; background: var(--danger); color: #fff; font-size: 13px; line-height: 1; font-weight: 700;
+      border: 0; background: var(--red); color: #fff; font-size: 13px; line-height: 1; font-weight: 700;
       opacity: 0; transition: opacity .15s;
     }
     .crew-card:hover .crew-del, .crew-del:focus-visible { opacity: 1; }
@@ -220,7 +213,7 @@
     /* ---------- Toast ---------- */
     #toastRoot { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 50; pointer-events: none; }
     .toast {
-      background: var(--raised); border: 1px solid var(--accent); color: var(--fg);
+      background: #120c0c; border: 1px solid var(--accent); color: var(--fg);
       padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap;
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
@@ -246,15 +239,15 @@
     <header class="topbar">
       <div class="brand">
         <svg class="brand-mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
-          <rect width="16" height="16" rx="3" fill="var(--accent)"/>
-          <g fill="var(--accent-ink)">
+          <rect width="16" height="16" rx="3" fill="var(--red)"/>
+          <g fill="var(--accent)">
             <rect x="7" y="2" width="2" height="2"/><rect x="5" y="4" width="6" height="1"/>
             <rect x="7" y="5" width="2" height="7"/><rect x="3" y="9" width="1" height="2"/><rect x="12" y="9" width="1" height="2"/>
             <rect x="4" y="11" width="2" height="1"/><rect x="10" y="11" width="2" height="1"/><rect x="5" y="12" width="6" height="1"/>
           </g>
         </svg>
         <div>
-          <h1>도트 해적 Mii</h1>
+          <h1>도트 해적 <em>Mii</em></h1>
           <p>눈·코·입·머리를 골라 64×64 도트 캐릭터와 현상수배서를 만듭니다</p>
         </div>
       </div>
@@ -325,7 +318,7 @@
           <hr class="divider" />
           <div class="save-grid">
             <button id="btnDownload64" class="btn" type="button">PNG 64px</button>
-            <button id="btnDownload512" class="btn btn-primary" type="button">PNG 512px</button>
+            <button id="btnDownload512" class="btn btn-gold" type="button">PNG 512px</button>
             <button id="btnSaveCrew" class="btn btn-wide" type="button">해적단에 추가</button>
           </div>
           <p class="save-note">현상수배서 보기에서 저장하면 수배서 이미지가 저장됩니다.</p>
